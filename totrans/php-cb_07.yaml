@@ -1,507 +1,757 @@
 - en: Chapter 7\. Arrays
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第7章。数组
 - en: '*Arrays* are ordered maps—constructs that associate specific values to easily
     identified keys. These maps are effective ways to build both simple lists and
     more complex collections of objects. They’re also easy to manipulate—adding or
     removing items from an array is straightforward and supported through multiple
     functional interfaces.'
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: '*数组* 是有序映射——将特定值关联到易于识别的键的构造。这些映射是构建简单列表和更复杂的对象集合的有效方式。它们也很容易操作——向数组中添加或删除项是直接且通过多个功能接口支持的。'
 - en: Types of Arrays
+  id: totrans-2
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 数组类型
 - en: There are two forms of arrays in PHP—numeric and associative. When you define
     an array without explicitly setting keys, PHP will internally assign an integer
     index to each member of the array. Arrays are indexed starting with 0 and increase
     by steps of 1 automatically.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP中有两种形式的数组——数字和关联。当您在不明确设置键的情况下定义数组时，PHP将为数组的每个成员内部分配一个整数索引。数组从0开始索引，自动增加1步骤。
 - en: Associative arrays can have keys of either strings or integers, but generally
     use strings. String keys are effective ways to “look up” a particular value stored
     in an array.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 关联数组的键可以是字符串或整数，但通常使用字符串。字符串键是“查找”存储在数组中特定值的有效方式。
 - en: 'Arrays are implemented internally as hash tables, allowing for effective direct
     associations between keys and values. For example:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 数组在内部实现为哈希表，允许键和值之间进行有效的直接关联。例如：
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Unlike simpler hash tables, though, PHP arrays also implement an iterable interface
     allowing you to loop through all of their elements one at a time. Iteration is
     fairly obvious when keys are numeric, but even with associative arrays, the elements
     have a fixed order because they’re stored in memory. [Recipe 7.3](#iterating_through_array)
     details different ways to act on each element in both types of arrays.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 与更简单的哈希表不同，PHP数组还实现了一个可迭代接口，允许您逐个遍历它们的所有元素。当键是数字时，迭代是相当明显的，但即使是关联数组，元素也有固定的顺序，因为它们存储在内存中。
+    [Recipe 7.3](#iterating_through_array) 详细介绍了在这两种类型的数组中对每个元素执行操作的不同方法。
 - en: In many circumstances, you might also be met with objects or classes that look
     and feel like an array but are not actually arrays. In fact, any object that implements
     the [`ArrayAccess` interface](https://oreil.ly/kdN4_) can be used as an array.^([1](ch07.html#idm45875163152816))
     These more advanced implementations push the limits of what is possible with arrays
     beyond mere lists and hash tables.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 在许多情况下，您可能还会遇到看起来和感觉像数组但实际上不是数组的对象或类。事实上，任何实现了 [`ArrayAccess` 接口](https://oreil.ly/kdN4_)
+    的对象都可以被用作数组。^([1](ch07.html#idm45875163152816)) 这些更高级的实现将数组的可能性推向了超出简单列表和哈希表的极限。
 - en: Syntax
+  id: totrans-9
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 语   语法
 - en: 'PHP supports two different syntaxes for defining arrays. Those who have worked
     in PHP for some time will recognize the [`array()`](https://oreil.ly/v75i9) construct
     that allows for the literal definition of an array at runtime as follows:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP支持两种不同的语法来定义数组。那些在PHP中工作了一段时间的人会认识到 [`array()`](https://oreil.ly/v75i9) 构造，它允许在运行时字面上定义数组，如下所示：
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'An alternative and terser syntax is to use square brackets to define the array.
     The preceding example could be rewritten as follows with the same behavior:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一种更简洁的语法是使用方括号来定义数组。前述示例可以重写为以下具有相同行为的形式：
 - en: '[PRE2]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Both formats can be used to create nested arrays (where an array contains another
     array) and can be used interchangeably as follows:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 两种格式都可以用于创建嵌套数组（其中一个数组包含另一个数组），并且可以如下交替使用：
 - en: '[PRE3]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Though mixing and matching syntaxes as in the preceding example is possible,
     it is highly encouraged to remain consistent within your application and to use
     one form or the other—not both. All of the examples in this chapter will use the
     short array syntax (square brackets).
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然像前面的示例中混合和匹配语法是可能的，但强烈建议在应用程序括号）。
 - en: All arrays in PHP map from keys to values. In the preceding examples, the arrays
     merely specified values and let PHP assign keys automatically. These are considered
     *numeric* arrays as the keys will be integers, starting at 0\. More complex arrays,
     like the nested construct illustrated in [Example 7-1](#complex_associative_array),
     assign both values and keys. This is done by mapping from a key to a value with
     a two-character arrow operator (`=>`).
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP中的所有数组都将键映射到值。在上述示例中，数组仅指定了值，让PHP自动分配键。这些被视为*数值*数组，因为键将是整数，从0开始。更复杂的数组，如[示例 7-1](#complex_associative_array)中展示的嵌套结构，同时指定了值和键。这是通过使用双字符箭头操作符
+    (`=>`) 从键映射到值完成的。
 - en: Example 7-1\. Associative array with nested values
+  id: totrans-18
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-1\. 带有嵌套值的关联数组
 - en: '[PRE4]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: While not a syntactic requirement, many coding environments and integrated development
     environments (IDEs) will automatically align the arrow operators in multiline
     array literals. This makes the code easier to read and is a standard adopted by
     this book as well.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然不是语法要求，但许多编码环境和集成开发环境（IDE）会自动对齐多行数组文字中的箭头操作符。这使得代码更易读，也是本书采用的标准。
 - en: The recipes that follow illustrate various ways developers can work with arrays—both
     numeric and associative—to accomplish common tasks in PHP.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来的示例展示了开发者可以使用数组（包括数值和关联数组）完成PHP中常见任务的各种方法。
 - en: 7.1 Associating Multiple Elements per Key in an Array
+  id: totrans-22
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.1 在数组中关联多个元素与键
 - en: Problem
+  id: totrans-23
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to associate multiple items with a single array key.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 你想要将多个项目与单个数组键关联。
 - en: Solution
+  id: totrans-25
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Make each array value an array on its own—for example:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 让每个数组值都成为独立的数组，例如：
 - en: '[PRE5]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Discussion
+  id: totrans-28
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: PHP places no requirement on the type of data used for a value in an array.
     However, keys are required to be either strings or integers. In addition, it is
     a hard requirement that every key in an array be unique. If you attempt to set
     multiple values for the same key, you will overwrite existing data, as shown in
     [Example 7-2](#array_key_overwrite).
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP对数组中值的数据类型没有要求。但是，键必须是字符串或整数。此外，数组中的每个键都必须是唯一的硬性要求。如果尝试为同一键设置多个值，将会覆盖现有数据，如[示例 7-2](#array_key_overwrite)所示。
 - en: Example 7-2\. Overwriting array data by assignment
+  id: totrans-30
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-2\. 通过赋值覆盖数组数据
 - en: '[PRE6]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: As PHP only allows one value per unique key in an array, writing further data
     to that key overwrites its value in the same way that you might reassign the value
     of a variable in your application. If you do need to store multiple values in
     one key, use a nested array.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于PHP在数组中只允许一个唯一键对应一个值，写入更多数据到该键会覆盖其值，就像重新分配应用程序中变量的值一样。如果需要在一个键中存储多个值，可以使用嵌套数组。
 - en: The Solution example illustrates how *every* key could point to its own array.
     However, PHP does not require this to be true—all but one key could point to a
     scalar and just the key that needs multiple items could point to an array. In
     [Example 7-3](#array_key_array), you’ll use a nested array to store multiple items
     rather than accidentally overwriting a single value stored in a specific key.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 解决方案示例说明了*每个*键都可以指向自己的数组。然而，PHP不要求每个键都这样做——除了一个键指向多个项目的情况外，其他键可以指向标量。在[示例 7-3](#array_key_array)中，你将使用嵌套数组存储多个项目，而不是意外地覆盖特定键中存储的单个值。
 - en: Example 7-3\. Writing an array to a key
+  id: totrans-34
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-3\. 将数组写入键
 - en: '[PRE7]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: To leverage the elements of a nested array, you loop over them just as you would
     the parent array. For example, if you wanted to print all of the data stored in
     the `$basket` array from [Example 7-3](#array_key_array), you would need two loops,
     as in [Example 7-4](#printing_arrays_in_a_loop).
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 要利用嵌套数组的元素，你需要像处理父数组一样对其进行循环。例如，如果你想打印存储在`$basket`数组中的所有数据，可以使用两个循环，如[示例 7-4](#printing_arrays_in_a_loop)所示。
 - en: Example 7-4\. Accessing array data in a loop
+  id: totrans-37
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-4\. 在循环中访问数组数据
 - en: '[PRE8]'
+  id: totrans-38
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: '[![1](assets/1.png)](#co_arrays_CO1-1)'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_arrays_CO1-1)'
 - en: The parent array is associative, and you need both its keys and values.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 父数组是关联的，你需要它的键和值。
 - en: '[![2](assets/2.png)](#co_arrays_CO1-2)'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_arrays_CO1-2)'
 - en: You use one branch of logic for nested arrays, another for scalars.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 你使用一种逻辑分支处理嵌套数组，另一种处理标量。
 - en: '[![3](assets/3.png)](#co_arrays_CO1-3)'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_arrays_CO1-3)'
 - en: Since you know the nested array is numeric, ignore the keys and iterate over
     only the values.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于你知道嵌套数组是数值型的，可以忽略键，只迭代值。
 - en: See Also
+  id: totrans-45
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: '[Recipe 7.3](#iterating_through_array) for further examples of iterating through
     arrays.'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Recipe 7.3](#iterating_through_array) 中有更多关于数组迭代的例子。'
 - en: 7.2 Initializing an Array with a Range of Numbers
+  id: totrans-47
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.2 用数字范围初始化数组
 - en: Problem
+  id: totrans-48
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to build an array of consecutive integers.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望构建一个连续整数数组。
 - en: Solution
+  id: totrans-50
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use the `range()` function as follows:'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`range()`函数如下所示：
 - en: '[PRE9]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Discussion
+  id: totrans-53
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: PHP’s `range()` function automatically iterates over a given sequence, assigning
     a value to a key based on the definition of that sequence. By default, and as
     illustrated in the Solution example, the function steps through sequences one
     at a time. But this isn’t the limit of the function’s behavior—passing a third
     parameter to the function will change its step size.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP的`range()`函数会自动迭代给定的序列，并根据该序列的定义为键分配一个值。默认情况下，如解决方案示例所示，该函数一次逐步通过序列。但这并不是该函数行为的极限——向函数传递第三个参数将改变其步长。
 - en: 'You could iterate over all even integers from 2 to 100 as follows:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以按如下方式迭代从2到100的所有偶数整数：
 - en: '[PRE10]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'Likewise, you could iterate over all *odd* integers from 1 to 100 by changing
     the starting point of the sequence to 1\. For example:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样，您可以通过将序列的起始点更改为1来迭代从1到100的所有*奇数*整数。例如：
 - en: '[PRE11]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'The start and end parameters of `range()` (the first two parameters, respectively)
     can be integers, floating-point numbers, or even strings. This flexibility allows
     you to do some pretty amazing things in code. For example, rather than counting
     natural numbers (integers), you could produce an array of floating-point numbers
     as follows:'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '`range()`的起始和结束参数（分别是前两个参数）可以是整数、浮点数，甚至字符串。这种灵活性允许您在代码中做一些非常惊人的事情。例如，您可以生成一个浮点数数组，而不是计算自然数（整数）：'
 - en: '[PRE12]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: When passing string characters to `range()`, PHP will begin enumerating ASCII
     characters. You can leverage this functionality to quickly build an array representative
     of the English alphabet, as shown in [Example 7-5](#array_range_alphabet).
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 当将字符串字符传递给`range()`时，PHP将开始枚举ASCII字符。您可以利用这个功能快速构建代表英语字母表的数组，如[示例 7-5](#array_range_alphabet)所示。
 - en: Note
+  id: totrans-62
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: PHP will internally use any and all printable ASCII characters, based on their
     decimal representation, to complete a request to `range()`. This is an efficient
     way to enumerate printable characters, but you need to keep in mind where special
     characters such as `=`, `?`, and `)` fall within the ASCII table, particularly
     if your program is expecting alphanumeric values in the array.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP将根据它们的十进制表示内部使用任何和所有可打印的ASCII字符来完成对`range()`的请求。这是枚举可打印字符的高效方式，但您需要牢记特殊字符如`=`,
+    `?`和`)`在ASCII表中的位置，特别是如果您的程序期望数组中的字母数字值。
 - en: Example 7-5\. Creating an array of alphabetical characters
+  id: totrans-64
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例7-5\. 创建一个英文字母数组
 - en: '[PRE13]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: '[![1](assets/1.png)](#co_arrays_CO2-1)'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_arrays_CO2-1)'
 - en: Returns all uppercase characters from `A` through `Z`
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回从`A`到`Z`的所有大写字符
 - en: '[![2](assets/2.png)](#co_arrays_CO2-2)'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_arrays_CO2-2)'
 - en: Returns all lowercase characters from `a` through `z`
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回从`a`到`z`的所有小写字符
 - en: '[![3](assets/3.png)](#co_arrays_CO2-3)'
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_arrays_CO2-3)'
 - en: 'Returns an array of special characters: `[!, ", #, $, %, &, '', (, )]`'
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: '返回一个特殊字符数组：`[!, ", #, $, %, &, '', (, )]`'
 - en: See Also
+  id: totrans-72
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: PHP documentation on [`range()`](https://oreil.ly/qH_iW).
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP文档中关于[`range()`](https://oreil.ly/qH_iW)的介绍。
 - en: 7.3 Iterating Through Items in an Array
+  id: totrans-74
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.3 遍历数组中的项目
 - en: Problem
+  id: totrans-75
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to perform an action on every element in an array.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望对数组中的每个元素执行操作。
 - en: Solution
+  id: totrans-77
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'For numeric arrays, use `foreach` as follows:'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于数值数组，请按以下方式使用`foreach`：
 - en: '[PRE14]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'For associative arrays, use `foreach()` with optional keys as follows:'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于关联数组，请按以下方式使用`foreach()`及其可选键：
 - en: '[PRE15]'
+  id: totrans-81
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Discussion
+  id: totrans-82
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: PHP has the concept of *iterable objects* and, internally, that’s precisely
     what an array is. Other data structures can also implement iterable behavior,^([2](ch07.html#idm45875162170640))
     but *any* iterable expression can be provided to `foreach` and will return the
     items it contains one at a time in a loop.
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP具有*可迭代对象*的概念，并且在内部，数组正是如此。其他数据结构也可以实现可迭代行为，^([2](ch07.html#idm45875162170640))但*任何*可迭代表达式都可以提供给`foreach`，并将在循环中逐个返回它包含的项。
 - en: Warning
+  id: totrans-84
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: PHP does not implicitly unset the variable used within a `foreach` loop when
     you exit the loop. You can still explicitly reference the *last* value stored
     in `$value` in the Solution examples in the program outside the loop!
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 当退出循环时，PHP不会隐式地取消设置`foreach`循环中使用的变量。您仍然可以在循环外的程序中显式地引用`$value`中存储的*最后*值！
 - en: 'The most important thing to remember, though, is that `foreach` is a *language
     construct*, not a function. As a construct, it acts on a given expression and
     applies the defined loop over every item within that expression. By default, that
     loop does not modify the contents of an array. If you want to make the values
     of an array mutable, you must pass them into the loop by reference by prefixing
     the variable name with an `&` character as follows:'
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 但要记住的最重要的事情是，`foreach`是一个*语言结构*，而不是一个函数。作为结构，它对给定的表达式进行操作，并在该表达式中的每个项上应用定义的循环。默认情况下，该循环不修改数组的内容。如果要使数组的值可变，则必须通过在变量名前加上`&`字符将它们传递到循环中的引用方式，如下所示：
 - en: '[PRE16]'
+  id: totrans-87
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Warning
+  id: totrans-88
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: Versions of PHP prior to 8.0 supported an `each()` function that would maintain
     an array cursor and return the current key/value pair of the array before advancing
     that cursor. This function was deprecated in PHP 7.2 and fully removed as of the
     8.0 release, but you will likely find legacy examples of its use in books and
     online. Upgrade any occurrences of `each()` to an implementation of `foreach`
     to ensure forward compatibility of your code.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 8.0之前的版本支持`each()`函数，该函数会维护数组光标并在前进光标之前返回数组的当前键/值对。此函数在PHP 7.2中已被弃用，并在8.0版本中完全移除，但您可能会在书籍和在线资源中找到其使用的遗留示例。请将所有`each()`的出现升级为`foreach`的实现，以确保代码的向前兼容性。
 - en: 'An alternative approach to using a `foreach` loop is to create an explicit
     `for` loop over the keys of the array. Numeric arrays are easiest as their keys
     are already incrementing integers starting at 0\. Iterating over a numeric array
     is relatively straightforward as follows:'
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`for`循环显式地迭代数组的键是替代`foreach`循环的另一种方法。数值数组最简单，因为它们的键已经是从0开始的增量整数。迭代数值数组相对简单，如下所示：
 - en: '[PRE17]'
+  id: totrans-91
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Tip
+  id: totrans-92
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 提示
 - en: While it’s possible to place a call to `count()` to identify the upper bounds
     of a `for` loop directly within the expression, it’s better to store the length
     of an array outside the expression itself. Otherwise, your `count()` will be reinvoked
     on every iteration of the loop to check that you’re still in bounds. For small
     arrays, this won’t matter; as you start working with larger collections, though,
     the performance drain of repeated `count()` checks will become problematic.
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然可以调用`count()`来直接标识`for`循环的上界，但最好将数组的长度存储在表达式外部。否则，`count()`将在每次迭代循环时重新调用，以检查是否仍在范围内。对于小数组，这没有关系；但随着您开始处理更大的集合，重复调用`count()`会导致性能下降成为问题。
 - en: 'Iterating over an associative array with a `for` loop is a tiny bit different.
     Instead of iterating over the elements of the array directly, you’ll want to iterate
     over the keys of the array directly. Then use each key to extract the corresponding
     value from the array as follows:'
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`for`循环迭代关联数组略有不同。与直接迭代数组元素不同，您将直接迭代数组的键。然后，使用每个键从数组中提取相应的值，如下所示：
 - en: '[PRE18]'
+  id: totrans-95
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: See Also
+  id: totrans-96
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: PHP documentation on the [`foreach`](https://oreil.ly/lmeAe) and [`for`](https://oreil.ly/chSRT)
     language constructs.
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP关于[`foreach`](https://oreil.ly/lmeAe)和[`for`](https://oreil.ly/chSRT)语言结构的文档。
 - en: 7.4 Deleting Elements from Associative and Numeric Arrays
+  id: totrans-98
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.4 从关联和数字数组中删除元素
 - en: Problem
+  id: totrans-99
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to remove one or more elements from an array.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 您想从数组中删除一个或多个元素。
 - en: Solution
+  id: totrans-101
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Delete an element by targeting its key or numeric index directly with `unset()`:'
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过直接目标化其键或数值索引，使用`unset()`删除一个元素：
 - en: '[PRE19]'
+  id: totrans-103
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'Delete more than one element at a time by passing multiple keys or indexes
     into `unset()` as follows:'
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过将多个键或索引传递到`unset()`中一次删除多个元素，如下所示：
 - en: '[PRE20]'
+  id: totrans-105
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Discussion
+  id: totrans-106
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: In PHP, `unset()` actually destroys any reference to the memory containing the
     specified variable. In the context of this Solution, that variable is an element
     of an array, so unsetting it removes that element from the array itself. In an
     associative array, this takes the form of deleting the specified key and the value
     it represented.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 在PHP中，`unset()`实际上会销毁包含指定变量的内存引用。在此解决方案的上下文中，该变量是数组的一个元素，因此取消设置它会从数组本身中删除该元素。在关联数组中，这将导致删除指定的键及其表示的值。
 - en: In a numeric array, `unset()` does far more. It both removes the specified element
     and effectively converts the numeric array into an associative array with integer
     keys. On the one hand, this is likely the behavior you wanted in the first place,
     as demonstrated in [Example 7-6](#unset_numeric_array).
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 在数值数组中，`unset()` 的作用远不止如此。它不仅会移除指定的元素，还会将数值数组有效地转换为具有整数键的关联数组。一方面，这很可能是你一开始期望的行为，正如在[示例 7-6](#unset_numeric_array)中展示的那样。
 - en: Example 7-6\. Unsetting elements in a numeric array
+  id: totrans-109
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-6\. 在数值数组中取消元素
 - en: '[PRE21]'
+  id: totrans-110
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: '[![1](assets/1.png)](#co_arrays_CO3-1)'
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_arrays_CO3-1)'
 - en: The array by default represents all English characters from `a` through `z`,
     so this line prints `26`.
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，数组表示从*a*到*z*的所有英文字母，因此此行打印`26`。
 - en: '[![2](assets/2.png)](#co_arrays_CO3-2)'
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_arrays_CO3-2)'
 - en: The 13th letter in the alphabet is `m`. (Remember that arrays start at index
     `0`.)
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 字母表中第13个字母是*m*。（记住，数组从索引`0`开始。）
 - en: '[![3](assets/3.png)](#co_arrays_CO3-3)'
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_arrays_CO3-3)'
 - en: The 26th letter in the alphabet is `z`.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 字母表中第26个字母是*z*。
 - en: '[![4](assets/4.png)](#co_arrays_CO3-4)'
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_arrays_CO3-4)'
 - en: With the element removed, the array has decreased in size to `25`!
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 元素被移除后，数组的大小减小到了`25`！
 - en: '[![5](assets/5.png)](#co_arrays_CO3-5)'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#co_arrays_CO3-5)'
 - en: The 13th letter in the alphabet is *still* `m`.
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 字母表中第13个字母仍然是*m*。
 - en: '[![6](assets/6.png)](#co_arrays_CO3-6)'
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#co_arrays_CO3-6)'
 - en: The 26th letter in the alphabet is *still* `z`. Further, this index is still
     valid, as removing an element doesn’t re-index the array.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 字母表中第26个字母仍然是*z*。此外，这个索引仍然有效，因为移除一个元素并不会重新索引数组。
 - en: You can typically ignore the indexes of numeric arrays because they’re set by
     PHP automatically. This makes the behavior of `unset()` implicitly converting
     these indexes into numeric keys somewhat surprising. With a numeric array, attempting
@@ -509,475 +759,706 @@
     you’ve used `unset()` with the array and decreased its size, however, you will
     often end up with an array that has numeric keys greater than the size of the
     array, as was illustrated in [Example 7-6](#unset_numeric_array).
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常可以忽略数值数组的索引，因为它们由PHP自动设置。这使得`unset()`将这些索引隐式地转换为数值键的行为有些令人惊讶。对于数值数组，尝试访问大于数组长度的索引会导致错误。然而，一旦你使用了`unset()`并减小了数组的大小，你往往会得到一个具有大于数组大小的数值键的数组，正如在[示例 7-6](#unset_numeric_array)中所示。
 - en: 'If you want to return to the world of numeric arrays after removing an element,
     you can re-index the array entirely. PHP’s `array_values()` function returns a
     new, numerically indexed array that contains only the values of the specified
     array. For example:'
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您希望在移除元素后返回数值数组的世界，可以重新索引整个数组。PHP的`array_values()`函数将返回一个新的、数值索引的数组，其中仅包含指定数组的值。例如：
 - en: '[PRE22]'
+  id: totrans-125
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: '[![1](assets/1.png)](#co_arrays_CO4-1)'
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_arrays_CO4-1)'
 - en: 'The default array has numeric indexes: `[0 => first, 1 => second, 2 => third,
     3 => fourth]`.'
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认数组具有数值索引：`[0 => first, 1 => second, 2 => third, 3 => fourth]`。
 - en: '[![2](assets/2.png)](#co_arrays_CO4-2)'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_arrays_CO4-2)'
 - en: 'Unsetting an element removes it from the array but leaves the indexes (keys)
     unchanged: `[0 => first, 1 => second, 3 => fourth]`.'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 取消元素将其从数组中移除，但索引（键）保持不变：`[0 => first, 1 => second, 3 => fourth]`。
 - en: '[![3](assets/3.png)](#co_arrays_CO4-3)'
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_arrays_CO4-3)'
 - en: 'The call to `array_values()` gives you a *new* array with brand-new, properly
     incrementing numeric indexes: `[0 => first, 1 => second, 2 => fourth]`.'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用`array_values()`将为您返回一个带有全新、适当增加数值索引的*新*数组：`[0 => first, 1 => second, 2 =>
+    fourth]`。
 - en: An additional option for removing elements from an array is to use the `array_splice()`
     function.^([3](ch07.html#idm45875161556000)) This function will remove a portion
     of an array and replace it with something else.^([4](ch07.html#idm45875161553616))
     Consider [Example 7-7](#array_splice_example), where `array_splice()` is used
     to replace elements of an array with *nothing*, thus removing them.
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 从数组中移除元素的另一个选项是使用`array_splice()`函数。^([3](ch07.html#idm45875161556000)) 此函数将从数组中移除一部分并用其他内容替换。^([4](ch07.html#idm45875161553616))
+    参见[示例 7-7](#array_splice_example)，其中`array_splice()`用于用*nothing*替换数组元素，从而将它们移除。
 - en: Example 7-7\. Removing elements of an array with `array_splice()`
+  id: totrans-133
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-7\. 使用`array_splice()`移除数组元素
 - en: '[PRE23]'
+  id: totrans-134
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: '[![1](assets/1.png)](#co_arrays_CO5-1)'
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_arrays_CO5-1)'
 - en: First, remove the sun to clean up a list of planets in the solar system.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，移除太阳，以清理太阳系行星列表。
 - en: '[![2](assets/2.png)](#co_arrays_CO5-2)'
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_arrays_CO5-2)'
 - en: Once the sun is removed, the indexes of all objects shift. You still want to
     remove the asteroid belt from the list, so use its newly shifted index.
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦太阳被移除，所有物体的索引都会发生变化。你仍然想要从列表中移除小行星带，因此使用它新的移位后的索引。
 - en: '[![3](assets/3.png)](#co_arrays_CO5-3)'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_arrays_CO5-3)'
 - en: Finally, truncate the array by removing everything from Pluto to the end of
     the array.
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，通过从冥王星到数组末尾的移除操作来截断数组。
 - en: Unlike `unset()`, the modified array created by `array_splice()` does *not*
     retain the numeric indexes/keys in numeric arrays! This might be a good way to
     avoid needing an extra call to `array_values()` after removing an item from an
     array. It’s also an effective way to remove *continuous* elements from a numerically
     indexed array without needing to explicitly specify each element.
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 与 `unset()` 不同，由 `array_splice()` 创建的修改后的数组在数字数组中*不会*保留数值索引/键！这可能是在从数组中删除项后避免额外调用
+    `array_values()` 的一个好方法。这也是在无需显式指定每个元素的情况下，从数字索引数组中删除*连续*元素的有效方法。
 - en: See Also
+  id: totrans-142
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: Documentation on [`unset()`](https://oreil.ly/-ebRG), [`array_splice()`](https://oreil.ly/g-M9G),
     and [`array_values()`](https://oreil.ly/9FvTV).
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`unset()`](https://oreil.ly/-ebRG)、[`array_splice()`](https://oreil.ly/g-M9G)
+    和 [`array_values()`](https://oreil.ly/9FvTV) 的文档。'
 - en: 7.5 Changing the Size of an Array
+  id: totrans-144
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.5 改变数组的大小
 - en: Problem
+  id: totrans-145
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to increase or decrease the size of an array.
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 你想要增加或减少数组的大小。
 - en: Solution
+  id: totrans-147
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Add elements to the end of the array by using `array_push()`:'
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `array_push()` 在数组末尾添加元素：
 - en: '[PRE24]'
+  id: totrans-149
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: 'Remove elements from an array by using `array_splice()`:'
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `array_splice()` 从数组中移除元素：
 - en: '[PRE25]'
+  id: totrans-151
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: Discussion
+  id: totrans-152
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: Unlike many other languages, PHP doesn’t require you to declare the size of
     an array. Arrays are dynamic—you can add or remove data from them whenever you
     want with no real downside.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 与许多其他语言不同，PHP不要求你声明数组的大小。数组是动态的，你可以随时添加或删除其中的数据而没有实际的负面影响。
 - en: 'The first Solution example merely adds a single element to the end of an array.
     While this approach is straightforward, it’s not the most efficient. Instead,
     you can push an individual item into an array *directly* as follows:'
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一个解决方案示例仅在数组末尾添加一个单独的元素。虽然这种方法很简单直接，但并不是最高效的。相反，你可以直接将单个项推入数组中，如下所示：
 - en: '[PRE26]'
+  id: totrans-155
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: The key difference between the preceding example and the one documented in the
     Solution is that of a function call. In PHP, function calls have more overhead
     than language constructs (like assignment operators). The preceding example is
     slightly more efficient, but only if it’s used several times in an application.
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 前面的示例与解决方案文档中记录的示例之间的关键区别在于函数调用。在PHP中，函数调用比语言构造（如赋值操作符）的开销更大。前面的示例略微更高效，但仅在应用程序中多次使用时才是如此。
 - en: If you are instead adding *multiple* items to the end of an array, the `array_push()`
     function will be more efficient. It accepts and appends many items at once, thus
     avoiding multiple assignments. [Example 7-8](#array_push_multiples) illustrates
     the difference between approaches.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你要在数组末尾添加*多个*项，`array_push()` 函数将更有效。它一次接受并追加多个项，从而避免多次赋值。[示例 7-8](#array_push_multiples)展示了这两种方法之间的区别。
 - en: Example 7-8\. Appending multiple elements with `array_push()` versus assignment
+  id: totrans-158
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-8\. 使用 `array_push()` 和赋值运算符追加多个元素的比较
 - en: '[PRE27]'
+  id: totrans-159
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: 'If, rather than appending elements, you want to *prepend* them, you would use
     `array_unshift()` to place the specified items at the beginning of the array as
     follows:'
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想要在数组*前面*而不是后面添加元素，可以使用 `array_unshift()` 将指定的项放置在数组的开头，如下所示：
 - en: '[PRE28]'
+  id: totrans-161
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: Note
+  id: totrans-162
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: PHP retains the order of elements passed to `array_unshift()` when prepending
     them to the target array. The first parameter will become the first element, the
     second the second, and so on until you reach the array’s *original* first element.
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 当使用 `array_unshift()` 在目标数组的开头插入元素时，PHP会保留元素的传递顺序。第一个参数将成为第一个元素，第二个将成为第二个元素，依此类推，直到达到数组的*原始*第一个元素。
 - en: 'Remember, arrays in PHP do not have a set size and can easily be manipulated
     in different ways. All of the preceding functional examples (`array_push()`, `array_​splice()`,
     and `array_unshift()`) work well on numeric arrays and *do not change the order
     or structure* of their numerical indexes. You could just as easily add an element
     to the end of a numeric array by referencing a new index directly. For example:'
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 请记住，在PHP中，数组没有固定的大小，并且可以以不同的方式轻松操作。所有前面的功能示例（`array_push()`、`array_splice()`
+    和 `array_unshift()`）在数字数组上表现良好，并且*不会改变*它们的数值索引的顺序或结构。你可以通过直接引用新索引轻松地将元素添加到数字数组的末尾。例如：
 - en: '[PRE29]'
+  id: totrans-165
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: So long as the index your code references is continuous with the rest of the
     array, the preceding example will work flawlessly. If, however, your count is
     off and you introduce a gap in the index, you have effectively converted your
     numeric array to an associative one, just with numeric keys.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 只要你的代码引用的索引与数组的其余部分连续，前面的例子就能无缝工作。然而，如果你的计数出现偏差，并且在索引中引入了间隙，则你实际上将你的数值数组转换为关联数组，只是键值是数字。
 - en: While all of the functions used in this recipe will work with associative arrays,
     they work primarily against numeric keys and will result in strange behavior when
     used against non-numeric ones. It would be wise to use these functions *only*
     with numeric arrays and to manipulate the sizes of associative arrays directly
     based on their keys.
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然本篇食谱中使用的所有函数都适用于关联数组，但它们主要针对数值键，并且在用于非数值键时会导致奇怪的行为。建议仅在数值数组中使用这些函数，并根据其键直接操作关联数组的大小。
 - en: See Also
+  id: totrans-168
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [`array_push()`](https://oreil.ly/DhVgq), [`array_splice()`](https://oreil.ly/eLoTZ),
     and [`array_unshift()`](https://oreil.ly/BYisR).
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`array_push()`](https://oreil.ly/DhVgq)、[`array_splice()`](https://oreil.ly/eLoTZ)和[`array_unshift()`](https://oreil.ly/BYisR)的文档。'
 - en: 7.6 Appending One Array to Another
+  id: totrans-170
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.6 追加一个数组到另一个数组
 - en: Problem
+  id: totrans-171
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to combine two arrays into a single, new array.
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 您想将两个数组合并成一个新的数组。
 - en: Solution
+  id: totrans-173
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use `array_merge()` as follows:'
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`array_merge()`如下所示：
 - en: '[PRE30]'
+  id: totrans-175
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: 'In addition, you can also leverage the spread operator (`…​`) to combine arrays
     directly. Rather than a call to `array_merge()`, the preceding example then becomes
     this:'
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，您还可以利用扩展操作符（`…​`）直接合并数组。而不是调用`array_merge()`，前面的示例可以这样变为：
 - en: '[PRE31]'
+  id: totrans-177
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: The spread operator works for both numeric and associative arrays.
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: 扩展操作符适用于数值数组和关联数组。
 - en: Discussion
+  id: totrans-179
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: PHP’s `array_merge()` function is an obvious way to combine two arrays into
     one. It does, however, have slightly different behavior for numeric versus associative
     arrays.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP的`array_merge()`函数是将两个数组合并成一个的明显方法。但是，对于数值数组和关联数组，它的行为稍有不同。
 - en: Warning
+  id: totrans-181
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: Any discussion of merging arrays will inevitably use the term *combine*. Note
     that [`array_combine()`](https://oreil.ly/wcM69) is itself a function in PHP.
     However, it doesn’t merge two arrays as shown in this recipe. Instead, it creates
     a new array by using the two specified arrays—the first for the *keys* and the
     second for the *values* of the new array. It’s a useful function but is not something
     you can use for merging two arrays.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 任何关于合并数组的讨论都将不可避免地使用“合并”这个术语。请注意，[`array_combine()`](https://oreil.ly/wcM69)本身是PHP中的一个函数。然而，它不像本篇食谱中展示的那样将两个数组合并。相反，它通过使用两个指定的数组——第一个用于新数组的*键*，第二个用于新数组的*值*——来创建一个新数组。这是一个有用的函数，但不是您可以用来合并两个数组的东西。
 - en: For numeric arrays (like those in the Solution example), all elements of the
     second array are appended to those of the first array. The function ignores the
     indexes of both, and the newly produced array has continuous indexes (starting
     from `0`) as if you’d built it directly.
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于数值数组（如解决方案示例中的那些），第二个数组的所有元素都将追加到第一个数组的元素后面。该函数忽略两个数组的索引，并且新产生的数组具有连续的索引（从`0`开始），就像直接构建它一样。
 - en: For associative arrays, the keys (and values) of the second array are added
     to those of the first. If the two arrays have the same keys, the values of the
     second array will overwrite those of the first. [Example 7-9](#array_merge_associative)
     illustrates how the data in one array overwrites that of the other.
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于关联数组，第二个数组的键（和值）将添加到第一个数组的键（和值）中。如果两个数组具有相同的键，则第二个数组的值将覆盖第一个数组的值。[示例 7-9](#array_merge_associative)说明了一个数组中的数据如何覆盖另一个数组的数据。
 - en: Example 7-9\. Overwriting associative array data with `array_merge()`
+  id: totrans-185
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-9\. 使用`array_merge()`覆盖关联数组数据
 - en: '[PRE32]'
+  id: totrans-186
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: There might be cases where you want to retain the data held in duplicate keys
     when you merge two or more arrays. In those circumstances, use `array_merge_​re⁠cur⁠sive()`.
     Unlike the preceding example, this function will create an array containing the
     data defined in duplicate keys rather than overwriting one value with another.
     [Example 7-10](#array_merge_recursive) rewrites the preceding example to illustrate
     how this happens.
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 可能存在这样的情况，您希望在合并两个或多个数组时保留重复键中保存的数据。在这种情况下，请使用`array_merge_recursive()`。与前面的示例不同，此函数将创建一个包含重复键中定义的数据的数组，而不是将一个值覆盖为另一个值。[示例 7-10](#array_merge_recursive)重新编写了前面的示例，以说明这是如何发生的。
 - en: Example 7-10\. Merging arrays with duplicate keys
+  id: totrans-188
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-10\. 带有重复键的数组合并
 - en: '[PRE33]'
+  id: totrans-189
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: While the preceding examples combine only two arrays, there is no upper limit
     to the number of arrays you can merge with either `array_merge()` or `array_merge_​re⁠cur⁠sive()`.
     Keep in mind how duplicate keys are handled by both functions as you begin merging
     more than two arrays at a time to avoid potentially losing data.
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然前面的示例仅合并了两个数组，但你可以使用 `array_merge()` 或 `array_merge_recursive()` 合并任意数量的数组。在开始合并超过两个数组时，请记住这两个函数如何处理重复键，以避免潜在数据丢失。
 - en: 'A third and final way to combine two arrays into one is with the literal addition
     operator: `+`. On paper, this has the appearance of adding two arrays together.
     What it really does is add any new key from the second array to the keys of the
     first. Unlike `array_merge()`, this operation will not overwrite data. If the
     second array has keys that duplicate any in the first array, those keys are ignored,
     and the data from the first array is used.'
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: 第三种将两个数组合并为一个的方法是使用字面添加运算符 `+` ：在纸上，这看起来是将两个数组相加。但实际上它是将第二个数组中的任何新键添加到第一个数组的键中。与
+    `array_merge()` 不同的是，此操作不会覆盖数据。如果第二个数组的键与第一个数组中的任何键重复，那么这些键将被忽略，并且使用第一个数组中的数据。
 - en: This operator also works *explicitly* with array keys, meaning it’s not a good
     fit for numeric arrays. Two same-sized numeric arrays, when treated like associative
     arrays, will have the exact same keys because they have the same indexes. This
     means the second array’s data will be ignored entirely!
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 此运算符还可以*明确*与数组键一起使用，这意味着它不适合于数值数组。两个相同大小的数值数组，如果像关联数组一样处理，将具有完全相同的键，因为它们具有相同的索引。这意味着第二个数组的数据将被完全忽略！
 - en: See Also
+  id: totrans-193
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation for [`array_merge()`](https://oreil.ly/s38Xa) and [`array_merge_recursive()`](https://oreil.ly/aFQxS).
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`array_merge()`](https://oreil.ly/s38Xa) 和 [`array_merge_recursive()`](https://oreil.ly/aFQxS)
+    的文档。'
 - en: 7.7 Creating an Array from a Fragment of an Existing Array
+  id: totrans-195
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.7 从现有数组片段创建数组
 - en: Problem
+  id: totrans-196
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to select a subsection of an existing array and use it independently.
+  id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望选择现有数组的子集并将其独立使用。
 - en: Solution
+  id: totrans-198
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use `array_slice()` to select a sequence of elements from an existing array
     as follows:'
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `array_slice()` 来从现有数组中选择一系列元素，如下所示：
 - en: '[PRE34]'
+  id: totrans-200
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: Discussion
+  id: totrans-201
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The `array_slice()` function quickly extracts a continuous sequence of items
     from the given array based on a defined offset (position within the array) and
     length of elements to retrieve. Unlike `array_splice()`, it copies the sequence
     of items from the array, leaving the original array unchanged.
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: '`array_slice()` 函数根据定义的偏移量（在数组中的位置）和要检索的元素长度，快速从给定的数组中提取连续的项序列。与 `array_splice()`
+    不同的是，它复制数组中的项序列，而不改变原始数组。'
 - en: 'It’s important to understand the full function signature to appreciate the
     power of this function:'
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: 要理解完整的函数签名，以理解这个函数的强大之处非常重要：
 - en: '[PRE35]'
+  id: totrans-204
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: Only the first two parameters—the target array and the initial offset—are required.
     If the offset is positive (or `0`), the new sequence will start at that position
     from the beginning of the array. If the offset is negative, the sequence will
     start that many positions back from the *end* of the array.
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 仅需要前两个参数——目标数组和初始偏移量。如果偏移量为正数（或 `0` ），新序列将从数组的开头该位置开始。如果偏移量为负数，则序列将从数组的末尾向前偏移该数目的位置开始。
 - en: Note
+  id: totrans-206
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: The array offset is explicitly referencing the *position* within an array, not
     in terms of keys or indexes. The `array_slice()` function works on associative
     arrays as easily as it does on numeric arrays because it uses the relative positions
     of elements in the array to define a new sequence and ignores the array’s actual
     keys.
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 数组偏移明确地参考了数组内的*位置*，而不是键或索引。`array_slice()` 函数易于在关联数组上使用，就像在数值数组上一样，因为它使用数组中元素的相对位置来定义一个新序列，并忽略数组的实际键。
 - en: When you define the optional `$length` argument, this defines the maximum number
     of items in the new sequence. Note that the new sequence is limited by the number
     of items in the original array, so if the length overruns the end of the array,
     your sequence will be shorter than you expected. [Example 7-11](#slice_length_overrun)
     presents a quick example of this behavior.
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您定义可选的 `$length` 参数时，这定义了新序列中的最大项数。请注意，新序列受原始数组中项数的限制，因此如果长度超出了数组的末尾，您的序列将比预期的短。[示例 7-11](#slice_length_overrun)
+    展示了这种行为的快速示例。
 - en: Example 7-11\. Using `array_slice()` with a too-short array
+  id: totrans-209
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-11\. 使用 `array_slice()` 处理一个太短的数组
 - en: '[PRE36]'
+  id: totrans-210
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: If the length specified is *negative*, then the sequence will stop that many
     elements away from the end of the target array. If the length is not specified
     (or is `null`), then the sequence will include everything from the original offset
     through the end of the target array.
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果指定的长度为*负数*，则序列将停在目标数组末尾的指定元素之前。如果未指定长度（或为`null`），则序列将包括从原始偏移到目标数组末尾的所有内容。
 - en: The final parameter, `$preserve_keys`, tells PHP whether to reset the integer
     indexes of the slice of the array. By default, PHP will return a newly indexed
     array with integer keys starting at `0`. [Example 7-12](#array_slice_keys) shows
     how the behavior of the function differs based on this parameter.
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后一个参数`$preserve_keys`告诉PHP是否重置数组切片的整数索引。默认情况下，PHP将返回一个重新索引的数组，其整数键从`0`开始。[Example 7-12](#array_slice_keys)展示了该函数基于此参数的行为差异。
 - en: Note
+  id: totrans-213
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: The `array_slice()` function will always preserve string keys in an associative
     array regardless of the value of `$preserve_keys`.
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: '`array_slice()`函数将始终在关联数组中保留字符串键，而不管`$preserve_keys`的值如何。'
 - en: Example 7-12\. Key preservation behavior in `array_slice()`
+  id: totrans-215
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 7-12\. 在`array_slice()`中的键保留行为
 - en: '[PRE37]'
+  id: totrans-216
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: Remember, numeric arrays in PHP can be thought of as associative arrays with
     integer keys that start at `0` and increment consecutively. With that in mind,
     it’s easy to see how `array_slice()` behaves on associative arrays with both string
     and integer keys—it operates based on position rather than key, as shown in [Example 7-13](#array_slice_mixed_keys).
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 请记住，PHP中的数字数组可以被视为具有从`0`开始连续递增的整数键的关联数组。有了这个理解，很容易看出`array_slice()`在具有字符串和整数键的关联数组上的行为方式——它基于位置而不是键，正如[Example 7-13](#array_slice_mixed_keys)所示。
 - en: Example 7-13\. Using `array_slice()` on an array with mixed keys
+  id: totrans-218
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 7-13\. 对具有混合键的数组使用`array_slice()`
 - en: '[PRE38]'
+  id: totrans-219
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: 'In [Recipe 7.4](#deleting_array_elements), you were introduced to `array_splice()`
     for deleting a sequence of elements from an array. Conveniently, this function
     uses a method signature similar to that of `array_slice()`:'
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[Recipe 7.4](#deleting_array_elements)中，您已经了解了用于从数组中删除一系列元素的`array_splice()`。方便地，此函数使用与`array_slice()`类似的方法签名：
 - en: '[PRE39]'
+  id: totrans-221
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: The key difference between these functions is that one modifies the source array
     whereas the other does not. You might use `array_slice()` to work on a subset
     of a larger sequence in isolation or instead to fully separate two sequences from
     one another. In either case, the functions exhibit similar behavior and use cases.
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些函数之间的关键区别在于一个修改源数组，而另一个则不会。您可能会使用`array_slice()`在隔离的较大序列的子集上操作，或者完全将两个序列彻底分开。在任何情况下，这些函数表现出类似的行为和用例。
 - en: See Also
+  id: totrans-223
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: Documentation on [`array_slice()`](https://oreil.ly/9iBvj) and [`array_splice()`](https://oreil.ly/k-h7n).
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`array_slice()`](https://oreil.ly/9iBvj)和[`array_splice()`](https://oreil.ly/k-h7n)的文档。'
 - en: 7.8 Converting Between Arrays and Strings
+  id: totrans-225
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.8 在数组和字符串之间转换
 - en: Problem
+  id: totrans-226
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to convert a string into an array or combine the elements of an array
     into a string.
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望将字符串转换为数组或将数组元素组合成字符串。
 - en: Solution
+  id: totrans-228
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use `str_split()` to convert a string to an array:'
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`str_split()`将字符串转换为数组：
 - en: '[PRE40]'
+  id: totrans-230
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: 'Use `join()` to combine the elements of an array into a string:'
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`join()`将数组元素组合成字符串：
 - en: '[PRE41]'
+  id: totrans-232
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: Discussion
+  id: totrans-233
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The `str_split()` function is a powerful way to convert any string of characters
     into an array of like-sized chunks. By default, it will break the string into
     one-character chunks, but you can just as easily break a string into any number
@@ -985,446 +1466,669 @@
     the specified length. For example, [Example 7-14](#str_split_length) attempts
     to break a string down into five-character chunks, but note that the last chunk
     is fewer than five characters in length.
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: '`str_split()`函数是将任何字符的字符串转换为大小相同的块数组的强大方法。默认情况下，它将字符串分解为单字符块，但您也可以轻松地将字符串分解为任意数量的字符。序列中的最后一个块仅保证*最多*达到指定的长度。例如，[Example 7-14](#str_split_length)试图将字符串分解为五字符块，但请注意最后一个块的长度少于五个字符。'
 - en: Example 7-14\. Using `str_split()` with arbitrary chunk sizes
+  id: totrans-235
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 7-14\. 使用任意块大小的`str_split()`
 - en: '[PRE42]'
+  id: totrans-236
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: Warning
+  id: totrans-237
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: Remember that `str_split()` works on bytes. When you’re dealing with multibyte
     encoded strings, you will need to use [`mb_​str_​split()`](https://oreil.ly/ocQi1)
     instead.
+  id: totrans-238
   prefs: []
   type: TYPE_NORMAL
+  zh: 请记住，`str_split()`适用于字节。当处理多字节编码的字符串时，您需要使用[`mb_​str_​split()`](https://oreil.ly/ocQi1)。
 - en: In some cases, you might want to split a string into separate words rather than
     individual characters. PHP’s `explode()` function allows you to specify the separator
     on which to split things. This is handy for splitting a sentence into an array
     of its component words, as demonstrated by [Example 7-15](#split_string_into_words).
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 在某些情况下，您可能希望将字符串分割成单独的单词而不是单个字符。PHP的`explode()`函数允许您指定分隔符来分割内容。这对于将句子分割成其组成单词的数组非常方便，正如[示例
+    7-15](#split_string_into_words)所示。
 - en: Example 7-15\. Splitting a string into an array of words
+  id: totrans-240
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-15\. 将字符串拆分为单词数组
 - en: '[PRE43]'
+  id: totrans-241
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: Note
+  id: totrans-242
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: While `explode()` appears to function similarly to `str_split()`, it cannot
     explode a string with an empty delimiter (the first parameter to the function).
     If you try to pass an empty string, you will be met with a `ValueError`. If you
     want to work with an array of characters, stick with `str_split()`.
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然`explode()`似乎与`str_split()`功能类似，但它不能使用空分隔符（函数的第一个参数）来分解字符串。如果尝试传递空字符串，则会遇到`ValueError`。如果想要处理字符数组，请坚持使用`str_split()`。
 - en: Combining an array of strings into a single string requires the use of the `join()`
     function, which itself is merely an alias of `implode()`. That said, it’s far
     more powerful than just being the inverse of `str_split()`, as you can optionally
     define a separator to be placed between newly concatenated code chunks.
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: 将字符串数组合并成单个字符串需要使用`join()`函数，它本身只是`implode()`的别名。但它比`str_split()`的倒转功能强大得多，因为你可以选择定义一个分隔符，用于在新连接的代码块之间放置。
 - en: 'The separator is optional, but the long legacy of `implode()` in PHP has led
     to two somewhat unintuitive function signatures as follows:'
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 分隔符是可选的，但PHP中`implode()`的长期遗留已导致了以下两个有些不直观的函数签名：
 - en: '[PRE44]'
+  id: totrans-246
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: If you want to merely combine an array of characters into a string, you can
     do so with the equivalent methods shown in [Example 7-16](#combining_characters_into_string).
+  id: totrans-247
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果只需将字符数组合并成字符串，可以使用等效的方法，如[示例 7-16](#combining_characters_into_string)所示。
 - en: Example 7-16\. Creating a string from an array of characters
+  id: totrans-248
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-16\. 从字符数组创建字符串
 - en: '[PRE45]'
+  id: totrans-249
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: 'Because you can explicitly specify the separator—the glue used to join each
     chunk of text—there are few limits to what `implode()` allows you to do. Assume
     your array is a list of words rather than a list of characters. You can use `implode()`
     to link them together as a printable and comma-delimited list, as in the following
     example:'
+  id: totrans-250
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为您可以明确指定分隔符——用于连接每个文本块的粘合剂，所以`implode()`允许您做的事情几乎没有限制。假设您的数组是一个单词列表而不是字符列表。您可以使用`implode()`将它们连接在一起作为可打印的逗号分隔列表，如下例所示：
 - en: '[PRE46]'
+  id: totrans-251
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: See Also
+  id: totrans-252
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [`implode()`](https://oreil.ly/mpdcI), [`explode()`](https://oreil.ly/PScj_),
     and [`str_split()`](https://oreil.ly/2dTMD).
+  id: totrans-253
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`implode()`](https://oreil.ly/mpdcI)、[`explode()`](https://oreil.ly/PScj_)和[`str_split()`](https://oreil.ly/2dTMD)的文档。'
 - en: 7.9 Reversing an Array
+  id: totrans-254
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.9 反转数组
 - en: Problem
+  id: totrans-255
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to reverse the order of elements in an array.
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: 您想要反转数组中元素的顺序。
 - en: Solution
+  id: totrans-257
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方法
 - en: 'Use `array_reverse()` as follows:'
+  id: totrans-258
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`array_reverse()`如下：
 - en: '[PRE47]'
+  id: totrans-259
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: Discussion
+  id: totrans-260
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The `array_reverse()` function creates a new array where each element is in
     the reverse order of the input array. By default, this function does not preserve
     numeric keys from the source array but instead re-indexes each element. Non-numeric
     keys (in associative arrays) are left unchanged by this re-indexing; however,
     their order is still reversed as expected. [Example 7-17](#reverse_associative_array)
     demonstrates how associative arrays are reordered by `array_reverse()`.
+  id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: '`array_reverse()`函数创建一个新数组，其中每个元素是输入数组的倒序。默认情况下，此函数不保留源数组的数值键，而是重新为每个元素编制索引。非数值键（在关联数组中）通过此重新索引保持不变；然而，它们的顺序仍然按预期反转。[示例
+    7-17](#reverse_associative_array)演示了如何通过`array_reverse()`重新排序关联数组。'
 - en: Example 7-17\. Reversing associative arrays
+  id: totrans-262
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-17\. 反转关联数组
 - en: '[PRE48]'
+  id: totrans-263
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: Since associative arrays can have numeric keys to begin with, the re-indexing
     behavior might produce unexpected results. Thankfully, it can be disabled by passing
     an optional Boolean parameter as the second argument when reversing an array.
     [Example 7-18](#reversing_with_keys) shows how this indexing behavior impacts
     such arrays (and how it can be disabled).
+  id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于关联数组可能以数值键开始，重新索引行为可能会产生意外结果。幸运的是，可以通过在反转数组时传递一个可选的布尔参数作为第二个参数来禁用此行为。[示例 7-18](#reversing_with_keys)展示了这种索引行为如何影响这样的数组（以及如何禁用它）。
 - en: Example 7-18\. Reversing an associative array with numeric keys
+  id: totrans-265
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-18\. 反转具有数值键的关联数组
 - en: '[PRE49]'
+  id: totrans-266
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: '[![1](assets/1.png)](#co_arrays_CO6-1)'
+  id: totrans-267
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_arrays_CO6-1)'
 - en: The default value of the second parameter is `false`, which means numeric keys
     will not be preserved after the array is reversed.
+  id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二个参数的默认值为 `false`，这意味着在数组反转后将不保留数字键。
 - en: '[![2](assets/2.png)](#co_arrays_CO6-2)'
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_arrays_CO6-2)'
 - en: Passing `true` as a second parameter will still allow the array to reverse but
     will retain numeric keys in the new array.
+  id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: 将 `true` 作为第二个参数传递仍然允许数组反转，但会在新数组中保留数字键。
 - en: See Also
+  id: totrans-271
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: Documentation on [`array_reverse()`](https://oreil.ly/mI5eG).
+  id: totrans-272
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`array_reverse()` 的文档](https://oreil.ly/mI5eG)。'
 - en: 7.10 Sorting an Array
+  id: totrans-273
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.10 对数组进行排序
 - en: Problem
+  id: totrans-274
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to sort the elements of an array.
+  id: totrans-275
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望对数组元素进行排序。
 - en: Solution
+  id: totrans-276
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'To sort items based on default comparison rules in PHP, use `sort()` as follows:'
+  id: totrans-277
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用 PHP 中默认的比较规则对项目进行排序，请使用如下所示的 `sort()`：
 - en: '[PRE50]'
+  id: totrans-278
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE50]'
 - en: Discussion
+  id: totrans-279
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: PHP’s native sorting system is built atop Quicksort, a common and relatively
     fast sorting algorithm. By default, it uses rules defined by PHP’s comparison
     operators to determine the order of each element in the array.^([5](ch07.html#idm45875159668272))
     You can, however, sort with different rules by passing a flag as the optional
     second parameter of `sort()`. Available sorting flags are described in [Table 7-1](#sort_type_flags).
+  id: totrans-280
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 的原生排序系统建立在快速排序算法 Quicksort 的基础上，这是一种常见且相对快速的排序算法。默认情况下，它使用 PHP 比较运算符定义的规则来确定数组中每个元素的顺序。^([5](ch07.html#idm45875159668272))
+    然而，你可以通过将一个标志作为 `sort()` 的可选第二参数来使用不同的规则进行排序。可用的排序标志在 [表 7-1](#sort_type_flags)
+    中描述。
 - en: Table 7-1\. Sorting type flags
+  id: totrans-281
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 7-1\. 排序类型标志
 - en: '| Flag | Description |'
+  id: totrans-282
   prefs: []
   type: TYPE_TB
+  zh: '| Flag | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-283
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `SORT_REGULAR` | Compare items normally by using default comparison operations
     |'
+  id: totrans-284
   prefs: []
   type: TYPE_TB
+  zh: '| `SORT_REGULAR` | 使用默认的比较操作正常比较项目 |'
 - en: '| `SORT_NUMERIC` | Compare items numerically |'
+  id: totrans-285
   prefs: []
   type: TYPE_TB
+  zh: '| `SORT_NUMERIC` | 数值比较项目 |'
 - en: '| `SORT_STRING` | Compare items as strings |'
+  id: totrans-286
   prefs: []
   type: TYPE_TB
+  zh: '| `SORT_STRING` | 将项目作为字符串进行比较 |'
 - en: '| `SORT_LOCALE_STRING` | Compare items as strings by using the current system
     locale |'
+  id: totrans-287
   prefs: []
   type: TYPE_TB
+  zh: '| `SORT_LOCALE_STRING` | 使用当前系统区域设置按字符串比较项目 |'
 - en: '| `SORT_NATURAL` | Compare items by using “natural ordering” |'
+  id: totrans-288
   prefs: []
   type: TYPE_TB
+  zh: '| `SORT_NATURAL` | 使用“自然顺序”比较项目 |'
 - en: '| `SORT_FLAG_CASE` | Combine with `SORT_STRING` or `SORT_NATURAL` by using
     a bitwise OR operator to compare strings without case-sensitivity |'
+  id: totrans-289
   prefs: []
   type: TYPE_TB
+  zh: '| `SORT_FLAG_CASE` | 结合 `SORT_STRING` 或 `SORT_NATURAL` 使用位或运算符比较字符串时不区分大小写
+    |'
 - en: Sorting type flags are useful when the default sorting comparisons produce a
     sorted array that makes no sense. For example, sorting an array of integers as
     if they were strings would sort things incorrectly. Using the `SORT_NUMERIC` flag
     will ensure that integers are sorted in the correct order. [Example 7-19](#sorting_integers)
     demonstrates how the two sorting types differ.
+  id: totrans-290
   prefs: []
   type: TYPE_NORMAL
+  zh: 当默认排序比较产生不合理的排序数组时，排序类型标志非常有用。例如，将整数数组按字符串排序会导致排序错误。使用 `SORT_NUMERIC` 标志将确保整数按正确的顺序排序。[Example 7-19](#sorting_integers)
+    展示了这两种排序类型的差异。
 - en: Example 7-19\. Sorting integers with a regular versus numeric sort type
+  id: totrans-291
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-19\. 使用常规和数值排序类型对整数进行排序
 - en: '[PRE51]'
+  id: totrans-292
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE51]'
 - en: The `sort()` function ignores array keys and indexes and sorts the elements
     of the array purely by their values. Thus, attempting to use `sort()` to sort
     an associative array will destroy the keys in that array. If you want to retain
     the keys in an array while still sorting by values, use `asort()`.
+  id: totrans-293
   prefs: []
   type: TYPE_NORMAL
+  zh: '`sort()` 函数忽略数组键和索引，仅按其值对数组元素进行排序。因此，尝试使用 `sort()` 对关联数组进行排序会破坏该数组中的键。如果希望在保留数组键的同时按值排序，可以使用
+    `asort()`。'
 - en: 'To do this, invoke `asort()` exactly the same way as you do `sort()`; you can
     even use the same flags as defined in [Table 7-1](#sort_type_flags). The resulting
     array will, however, retain the same keys as before, even though elements are
     in a different order. For example:'
+  id: totrans-294
   prefs: []
   type: TYPE_NORMAL
+  zh: 要做到这一点，调用 `asort()` 的方式与 `sort()` 完全相同；甚至可以使用与 [表 7-1](#sort_type_flags) 中定义的相同标志。然而，生成的数组将保留与之前相同的键，即使元素的顺序不同。例如：
 - en: '[PRE52]'
+  id: totrans-295
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE52]'
 - en: 'Both `sort()` and `asort()` will produce arrays sorted in ascending order.
     If you want to get an array in descending order, you have two options:'
+  id: totrans-296
   prefs: []
   type: TYPE_NORMAL
+  zh: '`sort()` 和 `asort()` 都会生成按升序排序的数组。如果要按降序获取数组，有两种选择：'
 - en: Sort the array in ascending order, then reverse it as demonstrated in [Recipe
     7.9](#reversing_an_array).
+  id: totrans-297
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将数组按升序排序，然后像 [Recipe 7.9](#reversing_an_array) 中演示的那样将其反转。
 - en: Leverage `rsort()` or `arsort()` for numeric and associative arrays, respectively.
+  id: totrans-298
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 利用 `rsort()` 或 `arsort()` 对数字和关联数组进行排序。
 - en: To reduce overall code complexity, the latter option is often preferable. The
     functions have the same signatures as `sort()` and `asort()` but merely reverse
     the order in which elements will be positioned in the resulting array.
+  id: totrans-299
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了减少总体代码复杂性，通常更倾向于后一种选项。这些函数的签名与 `sort()` 和 `asort()` 相同，但仅仅颠倒了元素在结果数组中的位置顺序。
 - en: See Also
+  id: totrans-300
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [`arsort()`](https://oreil.ly/G14ve), [`asort()`](https://oreil.ly/jkl5w),
     [`rsort()`](https://oreil.ly/Z6p49), and [`sort()`](https://oreil.ly/sHWtt).
+  id: totrans-301
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`arsort()`](https://oreil.ly/G14ve)、[`asort()`](https://oreil.ly/jkl5w)、[`rsort()`](https://oreil.ly/Z6p49)和[`sort()`](https://oreil.ly/sHWtt)的文档。'
 - en: 7.11 Sorting an Array Based on a Function
+  id: totrans-302
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.11 基于函数对数组进行排序
 - en: Problem
+  id: totrans-303
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to sort an array based on a user-defined function or comparator.
+  id: totrans-304
   prefs: []
   type: TYPE_NORMAL
+  zh: 您想根据用户定义的函数或比较器对数组进行排序。
 - en: Solution
+  id: totrans-305
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use `usort()` with a custom sorting callback as follows:'
+  id: totrans-306
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `usort()` 和自定义排序回调如下所示：
 - en: '[PRE53]'
+  id: totrans-307
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE53]'
 - en: Discussion
+  id: totrans-308
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The `usort()` function leverages a user-defined function as the comparison operation
     behind its sorting algorithm. You can pass in any callable as the second parameter,
     and every element of the array will be checked through this function to determine
     its appropriate order. The Solution example references a callback by its name,
     but you could just as easily pass an anonymous function as well.
+  id: totrans-309
   prefs: []
   type: TYPE_NORMAL
+  zh: '`usort()` 函数利用用户定义的函数作为其排序算法背后的比较操作。您可以将任何可调用对象作为第二个参数传递，并通过此函数检查数组的每个元素以确定其适当的顺序。解决方案示例引用了一个回调函数的名称，但您也可以轻松地传递匿名函数。'
 - en: The Solution example further leverages PHP’s newer spaceship operator to conduct
     a complex comparison between your array elements.^([6](ch07.html#idm45875159078400))
     In this particular case, you want to sort James Bond actors first by last name,
     then by first name. The same function could be used for any collection of names.
+  id: totrans-310
   prefs: []
   type: TYPE_NORMAL
+  zh: '[解决方案示例](https://oreil.ly/TuK1L)进一步利用了PHP的新太空船操作符，对数组元素进行了复杂的比较。^([6](ch07.html#idm45875159078400))
+    在这种特定情况下，您希望首先按姓氏，然后按名字对詹姆斯·邦德的演员进行排序。同样的功能可以用于任何姓名集合。'
 - en: A more powerful example is to apply custom sorting to dates in PHP. Dates are
     relatively easy to sort as they’re part of a continuous series. But it’s possible
     to define custom behavior that breaks those expectations. [Example 7-20](#custom_sorting_datetime)
     attempts to sort an array of dates first based on the day of the week, then by
     the year, then by the month.
+  id: totrans-311
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP中应用自定义排序到日期的一个更强大的例子。日期相对容易排序，因为它们是连续系列的一部分。但可以定义打破这些预期的自定义行为。[示例 7-20](#custom_sorting_datetime)
+    尝试根据星期几、年份和月份依次对日期数组进行排序。
 - en: Example 7-20\. User-defined sorting applied to dates
+  id: totrans-312
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-20\. 应用于日期的用户定义排序
 - en: '[PRE54]'
+  id: totrans-313
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE54]'
 - en: Like many other array functions discussed in this chapter, `usort()` ignores
     array keys/indexes and re-indexes the array as part of its operation. If you need
     to retain the index or key associations of elements, use `uasort()` instead. This
     function has the same signature as `usort()` but leaves the array keys untouched
     after sorting.
+  id: totrans-314
   prefs: []
   type: TYPE_NORMAL
+  zh: 像本章讨论的许多其他数组函数一样，`usort()` 忽略数组键/索引，并在其操作中重新索引数组。如果需要保留元素的索引或键关联，请改用 `uasort()`。此函数与
+    `usort()` 具有相同的签名，但在排序后保持数组键不变。
 - en: Array keys often hold important information about the data within the array,
     so retaining them during a sorting operation can prove critical at times. In addition,
     you might want to actually sort by the keys of the array rather than by the value
     of each element. In those circumstances, leverage `uksort()`.
+  id: totrans-315
   prefs: []
   type: TYPE_NORMAL
+  zh: 数组键通常包含有关数组内数据的重要信息，因此在排序操作期间保留它们有时可能至关重要。此外，您可能实际上想按数组的键而不是每个元素的值进行排序。在这种情况下，可以利用
+    `uksort()`。
 - en: The `uksort()` function will sort an array by its keys, using a function you
     define. Like `uasort()`, it respects the keys and leaves them in place after the
     array is sorted.
+  id: totrans-316
   prefs: []
   type: TYPE_NORMAL
+  zh: '`uksort()` 函数将使用您定义的函数按键对数组进行排序。像 `uasort()` 一样，它尊重键并在数组排序后保持它们的位置。'
 - en: See Also
+  id: totrans-317
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [`usort()`](https://oreil.ly/TuK1L), [`uasort()`](https://oreil.ly/igH5E),
     and [`uksort()`](https://oreil.ly/MEyff).
+  id: totrans-318
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`usort()`](https://oreil.ly/TuK1L)、[`uasort()`](https://oreil.ly/igH5E)和[`uksort()`](https://oreil.ly/MEyff)的文档。'
 - en: 7.12 Randomizing the Elements in an Array
+  id: totrans-319
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.12 随机化数组元素
 - en: Problem
+  id: totrans-320
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to scramble the elements of your array so that their order is entirely
     random.
+  id: totrans-321
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望随机打乱数组元素的顺序，使其完全随机。
 - en: Solution
+  id: totrans-322
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use `shuffle()` as follows:'
+  id: totrans-323
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `shuffle()` 如下所示：
 - en: '[PRE55]'
+  id: totrans-324
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE55]'
 - en: Discussion
+  id: totrans-325
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The `shuffle()` function acts on an existing array that is passed into the function
     by reference. It completely ignores the keys of the array and sorts element values
     at random, updating the array in place. After shuffling, array keys are re-indexed
     starting from 0.
+  id: totrans-326
   prefs: []
   type: TYPE_NORMAL
+  zh: 函数`shuffle()`作用于传入的现有数组的引用。它完全忽略数组的键，并随机对元素值排序，以原地更新数组。洗牌后，数组键将从0重新索引。
 - en: Warning
+  id: totrans-327
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: While you won’t receive an error if you shuffle an associative array, all information
     on keys will be lost during the operation. You should only ever shuffle numeric
     arrays.
+  id: totrans-328
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然洗牌关联数组不会导致错误，但在操作期间将丢失所有关于键的信息。您应仅对数值数组执行洗牌操作。
 - en: Internally, `shuffle()` uses the [Mersenne Twister](https://oreil.ly/86yIo)
     pseudorandom number generator to identify a new, seemingly random order for each
     element in the array. This pseudorandom number generator is not suitable when
     true randomness is required (e.g., cryptography or security scenarios), but it
     is an effective way to quickly shuffle the contents of an array.
+  id: totrans-329
   prefs: []
   type: TYPE_NORMAL
+  zh: 内部使用[Mersenne Twister](https://oreil.ly/86yIo)伪随机数生成器来识别数组中每个元素的新顺序。当需要真正的随机性时（如加密或安全场景），此伪随机数生成器并不合适，但它是快速洗牌数组内容的有效方法。
 - en: See Also
+  id: totrans-330
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [`shuffle()`](https://oreil.ly/AkcpO).
+  id: totrans-331
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`shuffle()`](https://oreil.ly/AkcpO)文档'
 - en: 7.13 Applying a Function to Every Element of an Array
+  id: totrans-332
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.13 对数组的每个元素应用函数
 - en: Problem
+  id: totrans-333
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to transform an array by applying a function to modify every element
     of the array in turn.
+  id: totrans-334
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望通过将函数应用于依次修改数组的每个元素来转换数组
 - en: Solution
+  id: totrans-335
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'To modify the array in place, use `array_walk()` as follows:'
+  id: totrans-336
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在原地修改数组，请使用以下方式调用`array_walk()`：
 - en: '[PRE56]'
+  id: totrans-337
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE56]'
 - en: Discussion
+  id: totrans-338
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: Looping through collections of data is a common requirement for PHP applications.
     For example, you may want to use collections to define repeated tasks. Or you
     may want to perform a particular operation on every item in a collection, like
     squaring values, as shown in the Solution example.
+  id: totrans-339
   prefs: []
   type: TYPE_NORMAL
+  zh: 遍历数据集合是PHP应用程序的常见需求。例如，您可能希望使用集合定义重复任务。或者，您可能希望对集合中的每个项目执行特定操作，如解决方案示例中所示的平方值。
 - en: 'The `array_walk()` function is an effective way to both define the transformation
     you want applied and to apply it to the value of every element of the array. The
     callback function (the second parameter) accepts three arguments: the value and
@@ -1432,22 +2136,30 @@
     is defined during the initial invocation of `array_walk()` and is passed to every
     use of the callback. It’s an efficient way to pass a constant value to the callback,
     as shown in [Example 7-21](#array_walk_with_arg).'
+  id: totrans-340
   prefs: []
   type: TYPE_NORMAL
+  zh: 函数`array_walk()`既能定义要应用的转换，也能将其应用到数组每个元素的值上。回调函数（第二个参数）接受三个参数：数组中元素的值和键，以及可选的`$arg`参数。在初始调用`array_walk()`时定义此最终参数，并在每次回调使用时传递。这是向回调传递常量值的有效方式，正如[示例 7-21](#array_walk_with_arg)所示。
 - en: Example 7-21\. Invoking `array_walk()` with an extra argument
+  id: totrans-341
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-21\. 带额外参数调用`array_walk()`
 - en: '[PRE57]'
+  id: totrans-342
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE57]'
 - en: Using `array_walk()` to modify an array in place requires passing array values
     *by reference* into the callback (note the extra `&` in front of the argument
     name). This function could also be used to merely walk over each element in the
     array and perform some other function *without* modifying the source array. In
     fact, that’s the most common use of this function.
+  id: totrans-343
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`array_walk()`在原地修改数组需要将数组值通过引用传递给回调（请注意参数名前的额外`&`）。此函数也可用于仅遍历数组中的每个元素并执行某些其他函数，而不修改源数组。实际上，这是此函数最常见的用法。
 - en: In addition to walking over every element of an array, you can walk over the
     *leaf* nodes in a nested array by using `array_walk_recursive()`. Unlike the preceding
     examples, `array_walk_recursive()` will traverse nested arrays until it finds
@@ -1455,15 +2167,21 @@
     handily demonstrates the difference between the recursive and nonrecursive function
     calls against a nested array. Specifically, if you are dealing with a nested array,
     `array_walk()` will throw an error and fail to do anything at all.
+  id: totrans-344
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了遍历数组的每个元素外，还可以通过使用`array_walk_recursive()`遍历嵌套数组中的*叶子*节点。与前面的示例不同，`array_walk_recursive()`将在应用您指定的回调函数之前遍历嵌套数组直到找到非数组元素。[示例 7-22](#array_walk_recursive)巧妙地展示了递归和非递归函数调用在处理嵌套数组时的区别。具体来说，如果处理嵌套数组，`array_walk()`将抛出错误并完全无法操作。
 - en: Example 7-22\. Comparing `array_walk()` with `array_walk_recursive()`
+  id: totrans-345
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-22 比较 `array_walk()` 和 `array_walk_recursive()`
 - en: '[PRE58]'
+  id: totrans-346
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE58]'
 - en: 'In many situations, you might want to create a new copy of a mutated array
     without losing track of its original state. In those circumstances, `array_map()`
     might be a safer choice than `array_walk()`. Rather than modifying the source
@@ -1472,95 +2190,139 @@
     both the original and the modified arrays available for further use. The following
     example leverages the same logic as the Solution example *without* changing the
     source array:'
+  id: totrans-347
   prefs: []
   type: TYPE_NORMAL
+  zh: 在许多情况下，您可能希望创建一个经过变异的数组的新副本，同时不会丢失其原始状态的跟踪。在这些情况下，`array_map()`可能比`array_walk()`更安全。与修改源数组不同，`array_map()`使您能够对源数组中的每个元素应用函数，并返回一个全新的数组。其优点在于，您可以进一步使用原始数组和修改后的数组。以下示例利用与解决方案示例相同的逻辑，在*不*更改源数组的情况下：
 - en: '[PRE59]'
+  id: totrans-348
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE59]'
 - en: 'Here are some key differences to note between these two families of array functions:'
+  id: totrans-349
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下是需要注意的这两个数组函数家族之间的一些关键区别：
 - en: '`array_walk()` expects the array first and the callback second.'
+  id: totrans-350
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`array_walk()` 期望数组在前，回调函数在后。'
 - en: '`array_map()` expects the callback first and the array second.'
+  id: totrans-351
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`array_map()` 期望回调函数在前，数组在后。'
 - en: '`array_walk()` returns a Boolean flag, while `array_map()` returns a new array.'
+  id: totrans-352
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`array_walk()` 返回一个布尔标志，而`array_map()`返回一个新数组。'
 - en: '`array_map()` does not pass keys into the callback.'
+  id: totrans-353
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`array_map()` 不会将键传递给回调函数。'
 - en: '`array_map()` does not pass additional arguments into the callback.'
+  id: totrans-354
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`array_map()` 不会将附加参数传递给回调函数。'
 - en: There is no recursive form of `array_map()`.
+  id: totrans-355
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`array_map()` 没有递归形式。'
 - en: See Also
+  id: totrans-356
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参见
 - en: Documentation on [`array_map()`](https://oreil.ly/fzU_0), [`array_walk()`](https://oreil.ly/OTpL4),
     and [`array_walk_recursive()`](https://oreil.ly/qCt7G).
+  id: totrans-357
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`array_map()`的文档](https://oreil.ly/fzU_0)，[`array_walk()`的文档](https://oreil.ly/OTpL4)，以及[`array_walk_recursive()`的文档](https://oreil.ly/qCt7G)。'
 - en: 7.14 Reducing an Array to a Single Value
+  id: totrans-358
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.14 将数组减少为单个值
 - en: Problem
+  id: totrans-359
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to iteratively reduce a collection of values to a single value.
+  id: totrans-360
   prefs: []
   type: TYPE_NORMAL
+  zh: 您想要将一系列值迭代地减少到单个值。
 - en: Solution
+  id: totrans-361
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use `array_reduce()` with a callback as follows:'
+  id: totrans-362
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用以下回调函数`array_reduce()`：
 - en: '[PRE60]'
+  id: totrans-363
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE60]'
 - en: Discussion
+  id: totrans-364
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The `array_reduce()` function walks through every element of an array and modifies
     its own internal state to eventually arrive at a single answer. The Solution example
     walks through each element of a list of numbers and adds them all to the initial
     value of `0`, returning the final sum of all of the numbers in question.
+  id: totrans-365
   prefs: []
   type: TYPE_NORMAL
+  zh: '`array_reduce()` 函数遍历数组的每个元素，并修改其内部状态，最终得出一个单一的答案。解决方案示例遍历数字列表的每个元素，并将它们全部添加到初始值`0`，返回所讨论的所有数字的最终总和。'
 - en: The callback function accepts two parameters. The first is the value you’re
     carrying over from the last operation. The second is the value of the current
     item in the array over which you’re iterating. Whatever the callback returns will
     be passed into the callback as the `$carry` parameter for the next element in
     the array.
+  id: totrans-366
   prefs: []
   type: TYPE_NORMAL
+  zh: 回调函数接受两个参数。第一个是您从上次操作中传递过来的值。第二个是您正在迭代的数组中当前项目的值。无论回调函数返回什么，都将作为下一个数组元素的`$carry`参数传递到回调函数中。
 - en: When you first start out, you pass an optional initial value (`null` by default)
     into the callback as the `$carry` parameter. If the reduction operation you’re
     applying to the array is straightforward, you can often provide a better initial
     value, as done in the Solution example.
+  id: totrans-367
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您开始时，您可以将一个可选的初始值（默认为`null`）作为`$carry`参数传递到回调函数中。如果您正在应用于数组的减少操作是直接的，您通常可以提供更好的初始值，就像解决方案示例中所做的那样。
 - en: The biggest drawback of `array_reduce()` is that it does not handle array keys.
     In order to leverage any keys in the array as part of the reduction operation,
     you need to define your own version of the function.
+  id: totrans-368
   prefs: []
   type: TYPE_NORMAL
+  zh: '`array_reduce()` 的最大缺点是它不处理数组键。为了利用数组中的任何键作为减少操作的一部分，您需要定义自己版本的函数。'
 - en: '[Example 7-23](#associative_array_reduce) shows how you can instead iterate
     over the array returned by `array_keys()` to leverage elements’ keys and values
     in the reduction. You pass both the array and callback into the closure processed
@@ -1568,76 +2330,112 @@
     by that key and apply your custom function to it. In the main program, you are
     then free to reduce an associative array the same way you would a numeric one—except
     you have an extra argument in your callback containing each element’s key.'
+  id: totrans-369
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 7-23](#associative_array_reduce) 展示了你可以通过迭代 `array_keys()` 返回的数组来利用元素的键和值进行减少。你将数组和回调传递到由
+    `array_reduce()` 处理的闭包中，因此你可以引用该键定义的数组中的元素，并将你的自定义函数应用于它。在主程序中，你可以像减少数值数组一样减少关联数组——除了你的回调中有一个额外的参数包含每个元素的键。'
 - en: Example 7-23\. Associative alternative to `array_reduce()`
+  id: totrans-370
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-23\. `array_reduce()` 的关联替代方法
 - en: '[PRE61]'
+  id: totrans-371
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE61]'
 - en: The preceding code will return the sum of the keys of `$array` multiplied by
     their corresponding values—specifically, `1 * 10 + 2 * 10 + 3 * 5 = 45`.
+  id: totrans-372
   prefs: []
   type: TYPE_NORMAL
+  zh: 上述代码将返回 `$array` 键的总和乘以它们对应的值——具体来说，`1 * 10 + 2 * 10 + 3 * 5 = 45`。
 - en: See Also
+  id: totrans-373
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: Documentation on [`array_reduce()`](https://oreil.ly/iu_XM).
+  id: totrans-374
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`array_reduce()` 的文档](https://oreil.ly/iu_XM)。'
 - en: 7.15 Iterating over Infinite or Very Large/Expensive Arrays
+  id: totrans-375
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 7.15 迭代无限或非常大/昂贵的数组
 - en: Problem
+  id: totrans-376
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to iterate over a list of items that is too large to be held in memory
     or is too slow to generate.
+  id: totrans-377
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你希望迭代一个列表项，该列表项过大以至于无法存储在内存中或者生成速度过慢。
 - en: Solution
+  id: totrans-378
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use a generator to yield one chunk of data at a time to your program, as follows:'
+  id: totrans-379
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用生成器一次生成一个数据块到你的程序中，如下：
 - en: '[PRE62]'
+  id: totrans-380
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE62]'
 - en: Discussion
+  id: totrans-381
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: Generators are a memory-efficient way to handle large pieces of data in PHP.
     In the Solution example, a generator produces weekdays (Monday through Friday)
     in order as an infinite series. An infinite series will not fit in the memory
     available to PHP, but the generator construct allows you to build it up one piece
     at a time.
+  id: totrans-382
   prefs: []
   type: TYPE_NORMAL
+  zh: 生成器是在 PHP 中处理大量数据的内存高效方式。在解决方案示例中，生成器按顺序产生工作日（从周一到周五）作为一个无限序列。无限序列无法适应 PHP 可用的内存，但生成器结构允许你逐步构建它。
 - en: Rather than instantiate a too-large array, you generate the first piece of data
     and return it via the `yield` keyword to whomever called the generator. This freezes
     the state of the generator and yields executional control back to the main application.
     Unlike a typical function that returns data once, a generator can provide data
     multiple times so long as it is still valid.
+  id: totrans-383
   prefs: []
   type: TYPE_NORMAL
+  zh: 不同于实例化一个过大的数组，你生成数据的第一部分并通过 `yield` 关键字将其返回给调用生成器的程序。这样可以冻结生成器的状态，并将执行控制权返回给主应用程序。与一般仅返回数据一次的函数不同，生成器可以多次提供数据，只要它仍然有效。
 - en: In the Solution example, the `yield` appears inside an infinite `while` loop,
     so it will continue enumerating weekdays forever. If you wanted the generator
     to exit, you would do so using an empty `return` statement at the end (or merely
     break the loop and implicitly return).
+  id: totrans-384
   prefs: []
   type: TYPE_NORMAL
+  zh: 在解决方案示例中，`yield` 出现在一个无限的 `while` 循环中，因此它将无限枚举工作日。如果你希望生成器退出，可以在结尾使用一个空的 `return`
+    语句（或者简单地中断循环并隐式返回）。
 - en: Tip
+  id: totrans-385
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 提示
 - en: Returning data from a generator is different from a usual function call. You
     typically return data with the `yield` keyword and exit a generator with an empty
     `return` statement. However, if the generator *does* have a final return, you
@@ -1645,64 +2443,93 @@
     additional method call often sticks out as odd, so unless your generator has a
     reason to return data outside its typical `yield` operation, you should try to
     avoid it.
+  id: totrans-386
   prefs: []
   type: TYPE_NORMAL
+  zh: 从生成器返回数据与通常的函数调用不同。你通常使用 `yield` 关键字返回数据，并使用空的 `return` 语句退出生成器。然而，如果生成器确实有最终返回，你必须在生成器对象上调用
+    `::getReturn()` 来访问该数据。这种额外的方法调用通常看起来有些奇怪，因此除非你的生成器有理由在其典型的 `yield` 操作之外返回数据，否则应尽量避免这样做。
 - en: 'Since the generator can provide data forever, you can iterate over that data
     by using a standard `foreach` loop. Similarly, you could leverage a limited `for`
     loop to avoid an infinite series. The following code leverages such a limited
     loop and the Solution’s original generator:'
+  id: totrans-387
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于生成器可以无限提供数据，你可以通过使用标准的 `foreach` 循环来迭代这些数据。同样，你可以利用有限的 `for` 循环来避免无限序列。以下代码利用了这样的有限循环和解决方案的原始生成器：
 - en: '[PRE63]'
+  id: totrans-388
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE63]'
 - en: Though the generator is defined as a function, internally PHP recognizes it
     as a generator and converts it to an instance of the [`Generator` class](https://oreil.ly/R_geQ).
     This class gives you access to the `::current()` and `::next()` methods and permits
     you to step over the generated data one piece at a time.
+  id: totrans-389
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然生成器被定义为一个函数，但在PHP内部被识别为生成器并转换为[`Generator`类](https://oreil.ly/R_geQ)的实例。该类提供了`::current()`和`::next()`方法，允许您逐个访问生成的数据。
 - en: The control flow within the application passes back and forth between the main
     program and the generator’s `yield` statement. The first time you access the generator,
     it runs internally up to `yield` and then returns control (and possibly data)
     to the main application. Subsequent calls to the generator start *after* the `yield`
     keyword. Loops are required to force the generator back to the beginning in order
     to `yield` again.
+  id: totrans-390
   prefs: []
   type: TYPE_NORMAL
+  zh: 应用程序内的控制流在主程序和生成器的`yield`语句之间来回传递。第一次访问生成器时，它会在内部运行到`yield`，然后将控制（及可能的数据）返回给主应用程序。对生成器的后续调用从`yield`关键字之后开始。循环需要强制生成器从头开始以便再次`yield`。
 - en: See Also
+  id: totrans-391
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参见
 - en: Overview on [generators](https://oreil.ly/cR4-V).
+  id: totrans-392
   prefs: []
   type: TYPE_NORMAL
+  zh: 概述关于[生成器](https://oreil.ly/cR4-V)的内容。
 - en: ^([1](ch07.html#idm45875163152816-marker)) Class inheritance is discussed in
     [Chapter 8](ch08.html#chapter_classes), and object interfaces are explicitly covered
     in [Recipe 8.7](ch08.html#class_interfaces).
+  id: totrans-393
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([1](ch07.html#idm45875163152816-marker)) 类继承在[第8章](ch08.html#chapter_classes)中有详细讨论，对象接口则在[Recipe
+    8.7](ch08.html#class_interfaces)中有明确介绍。
 - en: ^([2](ch07.html#idm45875162170640-marker)) See [Recipe 7.15](#iterating_over_large_arrays)
     for examples of very large iterable data structures.
+  id: totrans-394
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([2](ch07.html#idm45875162170640-marker)) 请查看[Recipe 7.15](#iterating_over_large_arrays)，了解大型可迭代数据结构的示例。
 - en: ^([3](ch07.html#idm45875161556000-marker)) Take care not to confuse `array_splice()`
     with `array_slice()`. The two functions have vastly different uses, and the latter
     is covered in [Recipe 7.7](#slicing_arrays).
+  id: totrans-395
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([3](ch07.html#idm45875161556000-marker)) 注意不要混淆`array_splice()`和`array_slice()`。这两个函数有着完全不同的用途，后者在[#slicing_arrays](#slicing_arrays)中有详细介绍。
 - en: ^([4](ch07.html#idm45875161553616-marker)) The `array_splice()` function will
     also *return* the elements it extracted from the target array, in the event you
     need to use that data for some other operation. See [Recipe 7.7](#slicing_arrays)
     for further discussion of this behavior.
+  id: totrans-396
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([4](ch07.html#idm45875161553616-marker)) `array_splice()`函数还将从目标数组中*返回*提取的元素，以便在需要时用于其他操作。有关此行为的进一步讨论，请参阅[Recipe
+    7.7](#slicing_arrays)。
 - en: ^([5](ch07.html#idm45875159668272-marker)) Review [“Comparison Operators”](ch02.html#comparison_operators_intro)
     for further details on comparison operators and their usage.
+  id: totrans-397
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([5](ch07.html#idm45875159668272-marker)) 详细了解[“Comparison Operators”](ch02.html#comparison_operators_intro)以及比较运算符的用法。
 - en: ^([6](ch07.html#idm45875159078400-marker)) The spaceship operator is explained
     at length in [Recipe 2.4](ch02.html#spaceship_operator), which also introduces
     an example use of `usort()`.
+  id: totrans-398
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([6](ch07.html#idm45875159078400-marker)) 长篇解释了太空船操作符在[Recipe 2.4](ch02.html#spaceship_operator)中，其中还介绍了`usort()`的一个使用示例。

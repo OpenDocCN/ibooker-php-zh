@@ -1,23 +1,32 @@
 - en: Chapter 16\. Queues, Jobs, Events, Broadcasting, and the Scheduler
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第 16 章. 队列、作业、事件、广播和调度器
 - en: 'So far we’ve covered some of the most common structures that power web applications:
     databases, mail, filesystems, and more. All of these are common across a majority
     of applications and frameworks.'
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，我们已经涵盖了一些支持 Web 应用程序的最常见结构：数据库、邮件、文件系统等等。这些在大多数应用程序和框架中都很常见。
 - en: Laravel also provides facilities for some less common architecture patterns
     and application structures. In this chapter we’ll cover Laravel’s tools for implementing
     queues, queued jobs, events, and WebSocket event publishing. We’ll also cover
     Laravel’s scheduler, which makes manually edited cron schedules a thing of the
     past.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 还提供了一些不太常见的架构模式和应用程序结构的工具。在本章中，我们将介绍 Laravel 实现队列、排队作业、事件和 WebSocket
+    事件发布的工具。我们还将介绍 Laravel 的调度器，它使手动编辑的 cron 调度成为过去时。
 - en: Queues
+  id: totrans-3
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 队列
 - en: To understand what a queue is, just think about the idea of “queueing up” in
     a line at the bank. Even if there are multiple lines—​queues—​only one person
     is being served at a time from each queue, and each person will eventually reach
@@ -27,27 +36,36 @@
     the queue, be removed from the queue prematurely, or be successfully “processed”
     and then removed. Someone might even hit the front of the queue, not be able to
     be served correctly, return to the queue for a time, and then be processed again.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 要理解什么是队列，只需想象一下在银行排队的概念。即使有多条线—​队列—​每次也只有一个人从每条队列中被服务，并且每个人最终都会到达前面并被服务。在某些银行中，这是严格的先进先出策略，但在其他银行中，并不能完全保证某个时刻不会有人插队。基本上，有人可以被加入队列，被过早移出队列，或者成功“处理”然后被移除。有时候，有人可能会到达队列的前面，但无法正确地得到服务，于是又返回队列一段时间，然后再次被处理。
 - en: Queues in programming are very similar. Your application adds a “job” to a queue,
     which is a chunk of code that tells the application how to perform a particular
     behavior. Then some other separate application structure, usually a “queue worker,”
     takes the responsibility for pulling jobs off of the queue one at a time and performing
     the appropriate behavior. Queue workers can delete the jobs, return them to the
     queue with a delay, or mark them as successfully processed.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 编程中的队列非常相似。你的应用程序向队列添加一个“作业”，这是一段代码，告诉应用程序如何执行特定的行为。然后，另一个单独的应用程序结构，通常是“队列工作者”，负责逐个从队列中取出作业并执行适当的行为。队列工作者可以删除作业，延迟返回到队列，或标记为成功处理。
 - en: Laravel makes it easy to serve your queues using Redis, *beanstalkd*, Amazon
     Simple Queue Service (SQS), or a database table. You can also choose the `sync`
     driver to have the jobs run right in your application without actually being queued,
     or the `null` driver for jobs to just be discarded; these two are usually used
     in local development or testing environments.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 提供了使用 Redis、*beanstalkd*、Amazon Simple Queue Service (SQS) 或数据库表格来轻松服务队列的工具。你也可以选择
+    `sync` 驱动程序，在你的应用程序中直接运行作业而不实际排队，或者选择 `null` 驱动程序让作业被丢弃；这两者通常用于本地开发或测试环境。
 - en: Why Queues?
+  id: totrans-7
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 为什么要使用队列？
 - en: Queues make it easy to remove a costly or slow process from any synchronous
     call. The most common example is sending mail—​doing so can be slow, and you don’t
     want your users to have to wait for mail to send in response to their actions.
@@ -57,98 +75,144 @@
     to get through; rather than letting it all run at once (and potentially time out),
     you may choose to queue its individual pieces and let the queue worker process
     them one at a time.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 队列使得轻松地将昂贵或慢速的过程从任何同步调用中移除变得可能。最常见的例子是发送邮件—​这样做可能很慢，而你不希望用户在等待邮件发送响应他们的操作时被阻塞。相反，你可以触发一个“发送邮件”队列作业，让用户继续他们的日常工作。有时候，你可能不关心节省用户的时间，但你可能有像
+    cron 作业或 webhook 这样需要大量工作量的进程；与其让所有工作一次性运行（可能导致超时），你可以选择逐个将其作业加入队列，让队列工作者逐个处理。
 - en: Additionally, if you have some heavy processing that’s more than your server
     can handle, you can spin up more than one queue worker to work through your queue
     faster than your normal application server could on its own.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 另外，如果您有一些处理繁重的工作，超出了服务器的处理能力，您可以启动多个队列工作程序，以比您的正常应用服务器更快的速度处理您的队列。
 - en: Basic Queue Configuration
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 基本队列配置
 - en: Like many other Laravel features that abstract multiple providers, queues have
     their own dedicated config file (*config/queue.php*) that allows you to set up
     multiple drivers and define which will be the default. This is also where you’ll
     store your SQS, Redis, or *beanstalkd* authentication information.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像许多其他 Laravel 功能一样，它们抽象了多个提供程序，队列也有自己的专用配置文件（*config/queue.php*），允许您设置多个驱动程序，并定义默认驱动程序。这也是您将存储
+    SQS、Redis 或*beanstalkd*身份验证信息的地方。
 - en: Simple Redis Queues on Laravel Forge
+  id: totrans-12
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Laravel Forge 上的简单 Redis 队列
 - en: '[Laravel Forge](http://forge.laravel.com) is a hosting management service provided
     by Taylor Otwell, the creator of Laravel, which makes serving queues with Redis
     a breeze. Every server you create has Redis configured automatically, so if you
     visit any site’s Forge console, you can just go to the Queue tab and hit Start
     Worker and you’re ready to use Redis as your queue driver; you can leave all the
     default settings, and no other work is necessary.'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Laravel Forge](http://forge.laravel.com) 是由 Laravel 创建者 Taylor Otwell 提供的托管管理服务，使得通过
+    Redis 服务队列变得轻松。您创建的每个服务器都会自动配置 Redis，因此，如果您访问任何站点的 Forge 控制台，只需转到队列选项卡并点击“启动工作者”，您就可以准备好使用
+    Redis 作为队列驱动程序；您可以保留所有默认设置，无需进行其他工作。'
 - en: Queued Jobs
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 排队作业
 - en: Remember our bank analogy? Each person in the bank’s *queue* (line) is, in programming
     terms, a *job*. Queued jobs can, depending on the environment, take many shapes,
     like arrays of data or simple strings. In Laravel, each job is a collection of
     information containing the job name, the data payload, the number of attempts
     that have been made so far to process this job, and some other simple metadata.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 记得我们的银行类比吗？银行队列中的每个人（行）在编程术语中称为*作业*。根据环境的不同，排队的作业可以采用多种形式，如数据数组或简单字符串。在 Laravel
+    中，每个作业都是一个包含作业名称、数据有效载荷、到目前为止已尝试处理此作业的次数以及一些其他简单元数据的信息集合。
 - en: But you don’t need to worry about any of that in your interactions with Laravel.
     Laravel provides a structure called `Job`, which is intended to encapsulate a
     single task—​a behavior that your application can be commanded to do—​and allow
     it to be added to and pulled from a queue. There are also simple helpers to make
     it easy to queue Artisan commands and mail.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是在与 Laravel 的交互中，您无需担心任何这些。Laravel 提供了一个称为`Job`的结构，旨在封装单个任务—​您的应用程序可以被命令执行的行为—​并允许将其添加到队列中并从中提取。还有简单的助手函数，使排队
+    Artisan 命令和邮件变得容易。
 - en: Let’s start with an example in which every time a user changes their plan with
     your SaaS app, you want to rerun some calculations about your overall profit.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从一个示例开始，每当用户在您的 SaaS 应用程序中更改他们的计划时，您希望重新运行一些关于整体利润的计算。
 - en: Creating a job
+  id: totrans-18
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 创建一个作业
 - en: 'As always, there’s an Artisan command for that:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 像往常一样，都有一个 Artisan 命令：
 - en: '[PRE0]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Take a look at [Example 16-1](#EX1502) to see what you’ll get.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看 [示例 16-1](#EX1502) ，看看您将得到什么。
 - en: Example 16-1\. The default template for jobs in Laravel
+  id: totrans-22
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-1\. Laravel 中作业的默认模板
 - en: '[PRE1]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: As you can see, this template imports the `Dispatchable`, `InteractsWithQueue`,
     `Queueable`, and `SerializesModels` traits, and implements the `ShouldQueue` interface.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所看到的，这个模板导入了`Dispatchable`、`InteractsWithQueue`、`Queueable`和`SerializesModels`特性，并实现了`ShouldQueue`接口。
 - en: 'We also get two methods from this template: the constructor, which you’ll use
     to attach data to the job, and the `handle()` method, which is where the job’s
     logic should reside (and is also the method signature you’ll use to inject dependencies).'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还从这个模板中获得了两种方法：构造函数，您将使用它来附加数据到作业中，以及`handle()`方法，这是作业逻辑应驻留的地方（也是您将用于注入依赖项的方法签名）。
 - en: The traits and interface provide the class with the ability to be added to,
     and interact with, the queue. `Dispatchable` gives it methods to dispatch itself;
     `InteractsWithQueue` allows each job, while being handled, to control its relationship
     with the queue, including deleting or requeueing itself; `Queueable` allows you
     to specify how Laravel should push this job to the queue; and `SerializesModels`
     gives the job the ability to serialize and deserialize Eloquent models.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 特征和接口提供了向类添加到队列并与之交互的能力。`Dispatchable`为其提供了调度自身的方法；`InteractsWithQueue`允许每个作业在处理时控制其与队列的关系，包括删除或重新排队自身；`Queueable`允许您指定Laravel如何将此作业推送到队列；而`SerializesModels`使作业能够序列化和反序列化Eloquent模型。
 - en: Serializing Models
+  id: totrans-27
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 序列化模型
 - en: The `SerializesModels` trait gives jobs the ability to *serialize* (convert
     to a flatter format that can be stored in a data store like a database or queue
     system) injected models so that your job’s `handle()` method will have access
@@ -159,713 +223,1079 @@
     database by their primary key. This means that when your job runs, it will be
     pulling a fresh instance of this model, not whatever state it was in when you
     queued the job.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: '`SerializesModels`特征使作业能够*序列化*（转换为可以存储在数据库或队列系统等数据存储中的更平坦格式）注入的模型，以便您的作业的`handle()`方法可以访问它们。然而，由于可靠地序列化整个Eloquent对象太困难，该特征确保在将作业推送到队列时，仅序列化附加的Eloquent对象的主键。当作业反序列化并处理时，该特征会通过它们的主键从数据库中重新获取这些Eloquent模型。这意味着当您的作业运行时，它将从数据库中获取这个模型的最新实例，而不是您排队作业时的状态。'
 - en: Let’s fill out the methods for our sample class, as in [Example 16-2](#example_job).
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们填写我们示例类的方法，就像[示例 16-2](#example_job)那样。
 - en: Example 16-2\. An example job
+  id: totrans-30
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-2\. 一个示例作业
 - en: '[PRE2]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: We’re expecting the `User` instance to be injected when we create the job, and
     then when it’s handled, we’re typehinting a `ReportGenerator` class (which we
     presumably wrote). Laravel will read the typehint and inject that dependency automatically.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们期望在创建作业时注入`User`实例，并且在处理时，我们使用了`ReportGenerator`类的类型提示（我们可能编写了该类）。Laravel将读取类型提示并自动注入该依赖项。
 - en: Pushing a job onto a queue
+  id: totrans-33
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 将作业推送到队列
 - en: There are multiple methods by which you can dispatch a job, including some methods
     available to every controller and a global `dispatch()` helper. But the simpler
     and preferred method is calling the `dispatch()` method on the job itself, so
     that’s what we’ll do for the rest of the chapter.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 有多种方法可以调度作业，包括每个控制器都可以使用的某些方法和全局的`dispatch()`辅助程序。但更简单和首选的方法是在作业本身上调用`dispatch()`方法，这就是我们本章剩余部分要做的事情。
 - en: To dispatch your job, you can just create an instance of it and then call its
     `dispatch()` method, passing any necessary data directly into that method. Take
     a look at [Example 16-3](#dispatching_jobs) for an example.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 要调度您的作业，只需创建其实例，然后调用其`dispatch()`方法，并直接传入任何必要的数据。请查看[示例 16-3](#dispatching_jobs)了解示例。
 - en: Example 16-3\. Dispatching jobs
+  id: totrans-36
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-3\. 调度作业
 - en: '[PRE3]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'There are three settings you can control to customize exactly how you dispatch
     a job: the connection, the queue, and the delay.'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 有三个设置可以控制确切如何调度作业：连接、队列和延迟。
 - en: Customizing the connection
+  id: totrans-39
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 自定义连接
 - en: 'If you ever have multiple queue connections in place at once, you can customize
     the connection by chaining `onConnection()` after the `dispatch()` method:'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您同时存在多个队列连接，可以在`dispatch()`方法后链式调用`onConnection()`来自定义连接：
 - en: '[PRE4]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Customizing the queue
+  id: totrans-42
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 自定义队列
 - en: Within queue servers, you can specify which named queue you’re pushing a job
     onto. For example, you may differentiate your queues based on their importance,
     naming one `low` and one `high`.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 在队列服务器中，您可以指定将作业推送到哪个命名队列。例如，您可以根据其重要性区分队列，将一个命名为`low`，另一个命名为`high`。
 - en: 'You can customize which queue you’re pushing a job onto with the `onQueue()`
     method:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用`onQueue()`方法自定义要将作业推送到哪个队列：
 - en: '[PRE5]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Customizing the delay
+  id: totrans-46
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 自定义延迟
 - en: 'You can customize the amount of time your queue workers should wait before
     processing a job with the `delay()` method, which accepts either an integer representing
     the number of seconds to delay a job or a `*DateTime*`/`*Carbon*` instance:'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用 `delay()` 方法自定义队列工作者在处理作业之前应等待的时间，该方法接受一个整数（表示延迟作业的秒数）或 `*DateTime*` /
+    `*Carbon*` 实例：
 - en: '[PRE6]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Note that Amazon SQS doesn’t allow delays longer than 15 minutes.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，Amazon SQS 不允许超过 15 分钟的延迟。
 - en: Job chaining
+  id: totrans-50
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 作业链
 - en: If you need a series of jobs to run in order one after the other, you can “chain”
     them together. Each job will wait to run until the previous job completes, and
     if one job fails, the rest after it won’t run.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您需要一系列作业按顺序运行，可以将它们“链”在一起。每个作业将等待上一个作业完成后运行，如果一个作业失败，其后的作业将不会运行。
 - en: '[PRE7]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'When one of the chained jobs fails, you can execute with the `catch()` method:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 当链式作业之一失败时，您可以使用`catch()`方法执行：
 - en: '[PRE8]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Job batching
+  id: totrans-55
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 作业批处理
 - en: Job batching makes it possible to push a group of jobs onto the queue at the
     same time, inspect the status of the batch, and take an action after the batch
     is complete.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 作业批处理使得能够同时将一组作业推送到队列中，检查批处理的状态，并在批处理完成后采取行动成为可能。
 - en: 'This feature requires a database table to keep track of the jobs; as you might
     expect, there’s an Artisan command to create it:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 此功能需要一个数据库表来跟踪作业；正如您可能期望的那样，有一个 Artisan 命令来创建它：
 - en: '[PRE9]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: To mark a job as batchable, include the `Illuminate\Bus\Batchable` trait. This
     trait adds a `batch()` method to your job, which will allow you to retrieve information
     about the current batch your job is running in.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 要将作业标记为可批处理，包括 `Illuminate\Bus\Batchable` 特性。此特性将在您的作业中添加一个 `batch()` 方法，允许您检索有关当前作业批次的信息。
 - en: Take a look at [Example 16-4](#EX1605) to see how this works. In this example,
     you can see that one of the most important steps to take on a batchable job is
     to make sure it doesn’t take any action if its batch was canceled.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看 [示例 16-4](#EX1605) 了解其工作原理。在这个示例中，您可以看到可批处理作业中最重要的一步是确保如果其批处理已取消，则不执行任何操作。
 - en: Example 16-4\. Batchable job in Laravel
+  id: totrans-61
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-4\. Laravel 中的可批处理作业
 - en: '[PRE10]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Dispatching batchable jobs
+  id: totrans-63
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 调度可批处理作业
 - en: The `Bus` facade offers a method `batch()`, which allows you to dispatch a batch
     of jobs. You can also define actions to take after the batch succeeds or fails,
     using the `then()` (succeeds), `catch()` (fails), or `finally()` (succeeds or
     fails) methods.
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Bus` 门面提供了一个 `batch()` 方法，允许您调度一批作业。您还可以使用 `then()`（成功时）、`catch()`（失败时）或 `finally()`（成功或失败时）方法定义批处理成功或失败后要执行的操作。'
 - en: You can see how these can be called in [Example 16-5](#EX1606).
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以查看 [示例 16-5](#EX1606) 中如何调用它们。
 - en: Example 16-5\. Dispatching batchable jobs
+  id: totrans-66
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-5\. 调度可批处理作业
 - en: '[PRE11]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Adding jobs to batches from a job
+  id: totrans-68
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 从作业中添加作业到批次
 - en: 'If the jobs in your batch have a responsibility of adding jobs to a batch—for
     example, if you initially dispatch a few job-dispatcher type jobs—they can use
     the `add()` method on the `Batch` object returned by `batch()`:'
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的批处理作业负责向批处理中添加作业——例如，如果您最初调度了几个作业调度器类型的作业——它们可以在由`batch()`返回的`Batch`对象上使用`add()`方法：
 - en: '[PRE12]'
+  id: totrans-70
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Cancelling a batch
+  id: totrans-71
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 取消批处理
 - en: 'If a job has a reason to cancel its batch, it can:'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果作业有理由取消其批处理，则可以：
 - en: '[PRE13]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Batch failures
+  id: totrans-74
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 批处理失败
 - en: 'By default, if a single job in a batch fails, the batch will be marked as “canceled.”
     If you want to define a different behavior, you can chain `allowFailures()` when
     you dispatch the batch:'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，如果批处理中的单个作业失败，批处理将标记为“已取消”。如果您想定义不同的行为，可以在调度批处理时链式调用 `allowFailures()`：
 - en: '[PRE14]'
+  id: totrans-76
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Cleaning up the batches table
+  id: totrans-77
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 清理批次表
 - en: 'The batches table isn’t self-pruning, so you’ll want to schedule your app to
     “prune” that table:'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 批次表不会自我修剪，因此您需要计划您的应用程序定期“修剪”该表：
 - en: '[PRE15]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Running a Queue Worker
+  id: totrans-80
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 运行队列工作者
 - en: 'So what is a queue worker, and how does it work? In Laravel, it’s an Artisan
     command that runs forever (until it’s stopped manually) and takes the responsibility
     for pulling down jobs from your queue and running them:'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 那么队列工作者是什么，它是如何工作的？在 Laravel 中，它是一个运行到手动停止之前（直到手动停止）的 Artisan 命令，负责从队列中拉取作业并运行它们：
 - en: '[PRE16]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: This command starts a daemon “listening” to your queue; every time there are
     jobs on the queue, it will pull down the first job, handle it, delete it, and
     move on to the next. If at any point there are no jobs, it “sleeps” for a configurable
     amount of time before checking again to see if there are any more jobs.
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 此命令启动一个守护进程来“监听”您的队列；每当队列中有作业时，它将拉取第一个作业，处理它，然后删除它，并继续下一个。如果在任何时候队列中没有作业，它会“休眠”一段可配置的时间，然后再次检查是否有更多作业。
 - en: 'You can define how many seconds a job should be allowed to run before the queue
     listener stops it (`--timeout`), how many seconds the listener should “sleep”
     when there are no jobs left (`--sleep`), how many tries each job should be allowed
     before being deleted (`--tries`), which connection the worker should listen to
     (the first parameter after `queue:work`), and which queues it should listen to
     (`--queue=`):'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以定义作业在队列监听器停止之前允许运行的秒数（`--timeout`），当没有作业时监听器应“休眠”的秒数（`--sleep`），每个作业允许的重试次数（`--tries`），工作器应该监听的连接（`queue:work`后的第一个参数），以及它应该监听的队列（`--queue=`）：
 - en: '[PRE17]'
+  id: totrans-85
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: You can also process just a single job with `php artisan queue:work`.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以使用`php artisan queue:work`处理单个作业。
 - en: Handling Errors
+  id: totrans-87
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 处理错误
 - en: So, what happens when something goes wrong with a job that’s in the middle of
     processing?
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 那么，当处理中的作业出现问题时会发生什么？
 - en: Exceptions in handling
+  id: totrans-89
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 处理异常情况
 - en: If an exception is thrown, the queue listener will release that job back onto
     the queue. The job will be rereleased to be processed again and again until it
     is able to finish successfully or until it has reached the maximum number of attempts
     allowed by your queue listener.
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果抛出异常，队列监听器将释放该作业回到队列中。作业将被重新释放以再次处理，直到成功完成或达到队列监听器允许的最大尝试次数为止。
 - en: Limiting the number of tries
+  id: totrans-91
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 限制重试次数
 - en: The maximum number of tries is defined by the `--tries` switch passed to the
     `queue:listen` or `queue:work` Artisan command.
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 最大重试次数由传递给`queue:listen`或`queue:work` Artisan命令的`--tries`开关定义。
 - en: The Danger of Infinite Retries
+  id: totrans-93
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 无限重试的危险
 - en: If you don’t set `--tries`, or if you set it to `0`, the queue listener will
     allow infinite retries. That means if there are any circumstances in which a job
     can just *never* be completed—​for example, if it relies on a tweet that has since
     been deleted—​your app will slowly crawl to a halt as it retries forever.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您没有设置`--tries`，或者将其设置为`0`，队列监听器将允许无限重试。这意味着如果有任何情况下一个工作可能*永远*无法完成——例如，如果它依赖于一个已经被删除的推文——您的应用程序将因为无限重试而逐渐停滞。
 - en: 'The [documentation](https://oreil.ly/7BIW-) and Laravel Forge both show `3`
     as the recommended starting point for the maximum number of retries. So, in case
     of confusion, start there and adjust:'
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: '[文档](https://oreil.ly/7BIW-)和Laravel Forge都将`3`作为建议的最大重试次数的起点。因此，在困惑时，从这里开始并进行调整：'
 - en: '[PRE18]'
+  id: totrans-96
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: If at any point you’d like to check how many times a job has been attempted
     already, use the `attempts()` method on the job itself, as in [Example 16-6](#times_a_job_been_tried).
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想要随时检查作业已尝试的次数，请在作业本身使用`attempts()`方法，例如[示例 16-6](#times_a_job_been_tried)。
 - en: Example 16-6\. Checking how many times a job has already been tried
+  id: totrans-98
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-6\. 检查作业已尝试的次数
 - en: '[PRE19]'
+  id: totrans-99
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'You can also specify the maximum number of times a given job can be retried
     on the job class itself by defining a `$tries` property. When specified, this
     value will take precedence over the value set with the `--tries` switch:'
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以通过在作业类本身定义`$tries`属性来指定给定作业可以重试的最大次数。当指定时，此值将优先于使用`--tries`开关设置的值：
 - en: '[PRE20]'
+  id: totrans-101
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'You can set the `$maxExceptions` property in a job class to specify how many
     times the job can throw an exception (and therefore be retried) before it should
     be considered failed:'
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在作业类中设置`$maxExceptions`属性，以指定作业可以抛出异常（因此可以重试）多少次，然后应该被视为失败：
 - en: '[PRE21]'
+  id: totrans-103
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: 'You can also specify when a job should time out, instructing the framework
     to attempt the job any number of times within a specified timeframe. You can specify
     a `retryUntil()` method on a job and from that return a `DateTime/Carbon` instance:'
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以指定作业何时超时，指示框架在指定时间范围内尝试任意次数的作业。您可以在作业上指定`retryUntil()`方法，并从中返回一个`DateTime/Carbon`实例：
 - en: '[PRE22]'
+  id: totrans-105
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Job-based retry delay
+  id: totrans-106
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 基于作业的重试延迟
 - en: 'We can specify how long to wait before retrying a failed job by setting a `$retryAfter`
     property on the job, equivalent to the minutes to wait. For more complex calculations,
     we can instead define a `retryAfter` method, which should also return the minutes
     to wait:'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以通过在作业上设置`$retryAfter`属性来指定在重新尝试失败的作业之前等待多长时间，等效于等待的分钟数。对于更复杂的计算，我们可以定义一个`retryAfter`方法，该方法也应返回等待的分钟数：
 - en: '[PRE23]'
+  id: totrans-108
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: Job middleware
+  id: totrans-109
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 作业中间件
 - en: 'We can run jobs through middleware, just like we run our HTTP requests through
     middleware. This is a great opportunity to extract logic that guards or validates
     your jobs or the conditions they’ll run in:'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以通过中间件运行作业，就像我们通过中间件运行HTTP请求一样。这是提取保护或验证作业或它们运行条件的逻辑的好机会：
 - en: '[PRE24]'
+  id: totrans-111
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: 'To assign a middleware to a job, specify a `middleware()` method in the job
     class:'
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 要为作业分配一个中间件，指定作业类中的`middleware()`方法：
 - en: '[PRE25]'
+  id: totrans-113
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: 'You can also specify a middleware when dispatching jobs using the `through`
     method:'
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 你还可以在调度作业时使用`through`方法指定一个中间件：
 - en: '[PRE26]'
+  id: totrans-115
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: Rate limiting middleware for jobs
+  id: totrans-116
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 作业的速率限制中间件
 - en: Laravel comes out of the box with a rate limiting job middleware. To use it,
     define a rate limiter using `RateLimiter::for()` in the `boot()` method of a service
     provider, as shown in [Example 16-7](#EX1607).
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel默认带有一个作业速率限制中间件。要使用它，在服务提供者的`boot()`方法中使用`RateLimiter::for()`定义速率限制器，如[示例 16-7](#EX1607)所示。
 - en: Example 16-7\. A sample job rate limiting middleware
+  id: totrans-118
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-7\. 一个示例作业的速率限制中间件
 - en: '[PRE27]'
+  id: totrans-119
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: The syntax of the job rate limiting middleware is the same as the route rate
     limiting middleware ([“Rate Limiting”](ch10.html#route_rate_limiting)).
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 作业速率限制中间件的语法与路由速率限制中间件相同（[“速率限制”](ch10.html#route_rate_limiting)）。
 - en: Handling failed jobs
+  id: totrans-121
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 处理失败的作业
 - en: Once a job has exceeded its allowable number of retries, it’s considered a “failed”
     job. Before you do anything else—​even if all you want to do is limit the number
     of times a job can be tried—​you’ll need to create a “failed jobs” database table.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦一个作业超过了允许的重试次数，它被视为“失败”作业。在做任何其他事情之前，即使你只想限制作业的尝试次数，你也需要创建一个“失败的作业”数据库表。
 - en: 'There’s an Artisan command to create the migration (and you’ll then want to
     migrate):'
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 有一个Artisan命令来创建迁移（然后你会想要迁移）：
 - en: '[PRE28]'
+  id: totrans-124
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: Any job that has surpassed its maximum number of allowed attempts will be dumped
     there. But there are quite a few things you can do with your failed jobs.
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 任何超过允许的最大尝试次数的作业都会被倾倒在那里。但是，你可以对失败的作业做很多事情。
 - en: First, you can define a `failed()` method on the job itself, which will run
     when that job fails (see [Example 16-8](#method_when_a_job_fails)).
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，你可以在作业本身定义一个`failed()`方法，在作业失败时运行（参见[示例 16-8](#method_when_a_job_fails)）。
 - en: Example 16-8\. Defining a method to run when a job fails
+  id: totrans-127
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-8\. 定义一个作业失败时运行的方法
 - en: '[PRE29]'
+  id: totrans-128
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: Next, you can register a global handler for failed jobs. Somewhere in the application’s
     bootstrap—​if you don’t know where to put it, just put it in the `boot()` method
     of `AppServiceProvider`—place the code in [Example 16-9](#global_handler_to_handle_failed_jobs)
     to define a listener.
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，你可以注册一个全局的失败作业处理程序。在应用程序的启动过程中的任何位置，如果你不知道该放在哪里，只需将代码放在`AppServiceProvider`的`boot()`方法中，像[示例 16-9](#global_handler_to_handle_failed_jobs)一样定义一个监听器。
 - en: Example 16-9\. Registering a global handler to handle failed jobs
+  id: totrans-130
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-9\. 注册一个全局处理程序来处理失败的作业
 - en: '[PRE30]'
+  id: totrans-131
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: There is also a suite of Artisan tools for interacting with the failed jobs
     table.
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有一套用于与失败作业表交互的Artisan工具。
 - en: '`queue:failed` shows you a list of your failed jobs:'
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: '`queue:failed`显示你的失败作业列表：'
 - en: '[PRE31]'
+  id: totrans-134
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: 'The list will look something like this:'
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 列表看起来像这样：
 - en: '[PRE32]'
+  id: totrans-136
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: 'From there, you can grab the ID of any individual failed job and retry it with
     `queue:retry`:'
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，你可以获取任何单个失败作业的ID，并使用`queue:retry`重试它：
 - en: '[PRE33]'
+  id: totrans-138
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: 'If you’d rather retry all of the jobs, pass `all` instead of an ID:'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你宁愿重试所有作业，而不是传递ID，请传递`all`：
 - en: '[PRE34]'
+  id: totrans-140
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: 'You can delete an individual failed job with `queue:forget`:'
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以使用`queue:forget`删除一个单独的失败作业：
 - en: '[PRE35]'
+  id: totrans-142
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: 'You can delete all of your failed jobs over a certain age (by default, it’s
     24 hours, but you can also pass a custom number of hours using `--hours=48`):'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以删除所有超过一定时间的失败作业（默认为24小时，但也可以使用`--hours=48`传递自定义小时数）：
 - en: '[PRE36]'
+  id: totrans-144
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: 'And you can delete all of your failed jobs with `queue:flush`:'
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以使用`queue:flush`删除所有失败的作业：
 - en: '[PRE37]'
+  id: totrans-146
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: Controlling the Queue
+  id: totrans-147
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 控制队列
 - en: Sometimes, from within the handling of a job, you’ll want to add conditions
     that will potentially either release the job to be restarted later or delete the
     job forever.
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时，在作业的处理过程中，你可能希望添加条件，可能会将作业释放以后重新启动，或永久删除作业。
 - en: To release a job back onto the queue, use the `release()` method, as in [Example 16-10](#releasing_back_onto_queue).
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 要将作业释放回队列，使用`release()`方法，如[示例 16-10](#releasing_back_onto_queue)所示。
 - en: Example 16-10\. Releasing a job back onto the queue
+  id: totrans-150
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-10\. 将作业释放回队列
 - en: '[PRE38]'
+  id: totrans-151
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: If you want to delete a job during its handling, you can just `return` at any
     point, as seen in [Example 16-11](#deleting_a_job); that’s the signal to the queue
     that the job was handled appropriately and should not be returned to the queue.
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想在处理过程中删除一个作业，你可以随时使用`return`，如[示例 16-11](#deleting_a_job)所示；这是向队列发送的信号，表明作业已适当处理，不应返回到队列。
 - en: Example 16-11\. Deleting a job
+  id: totrans-153
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-11\. 删除作业
 - en: '[PRE39]'
+  id: totrans-154
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: Queues Supporting Other Functions
+  id: totrans-155
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 支持其他功能的队列
 - en: The primary use for queues is to push jobs onto them, but you can also queue
     mail using the `Mail::queue` functionality. You can learn more about this in [“Queues”](ch15.html#queued_mail).
     You can also queue Artisan commands, which we covered in [Chapter 8](ch08.html#artisan_and_tinker).
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 队列的主要用途是将作业推送到其中，但您也可以使用 `Mail::queue` 功能排队邮件。您可以在[“队列”](ch15.html#queued_mail)中了解更多信息。您还可以排队
+    Artisan 命令，我们在[第 8 章](ch08.html#artisan_and_tinker)中介绍过。
 - en: Laravel Horizon
+  id: totrans-157
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Laravel Horizon
 - en: Laravel Horizon, like some of the other tools we’ve covered (Scout, Passport,
     etc.), is a tool provided by Laravel that doesn’t come bundled with the core.
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel Horizon，就像我们涵盖过的其他一些工具（如 Scout、Passport 等），是 Laravel 提供的一个工具，不随核心捆绑。
 - en: Horizon provides insight into the status of your Redis queued jobs. You can
     see which jobs have failed, how many are queued, and how fast they’re working,
     and you can even get notifications when any of your queues are overloaded or failing.
     The Horizon dashboard is shown in [Figure 16-1](#horizon-dashboard).
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: Horizon 提供了有关您的 Redis 队列作业状态的见解。您可以看到哪些作业失败了，有多少作业在排队，以及它们的工作速度，甚至可以在任何队列超载或失败时收到通知。Horizon
+    仪表板显示在[图 16-1](#horizon-dashboard)中。
 - en: Installing and running Horizon is relatively straightforward, and the documentation
     is thorough, so if you’re interested, take a look at the [Horizon docs](https://oreil.ly/6tpkn)
     to learn how to install, configure, and deploy it.
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装和运行 Horizon 相对简单，文档也很详细，因此如果您有兴趣，请查看[Horizon 文档](https://oreil.ly/6tpkn)了解如何安装、配置和部署它。
 - en: Please note that you will need to have your queue connection set to `redis`,
     in your *.env* or the *config/queue.php* config file, in order to run Horizon.
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，您需要在您的 *.env* 或 *config/queue.php* 配置文件中将队列连接设置为 `redis`，以便运行 Horizon。
 - en: '![A screenshot of the Horizon dashboard](assets/lur3_1601.png)'
+  id: totrans-162
   prefs: []
   type: TYPE_IMG
+  zh: '![Horizon 仪表板的截图](assets/lur3_1601.png)'
 - en: Figure 16-1\. The Horizon dashboard
+  id: totrans-163
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 16-1\. Horizon 仪表板
 - en: Events
+  id: totrans-164
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 事件
 - en: 'With jobs, the calling code informs the application that it should *do something*:
     `CrunchReports` or `NotifyAdminOfNewSignup`.'
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于作业，调用代码通知应用程序应该*做些什么*：`CrunchReports` 或 `NotifyAdminOfNewSignup`。
 - en: 'With an event, the calling code instead informs the application that *something
     happened*: `UserSubscribed`, `UserSignedUp`, or `ContactWasAdded`. *Events* are
     notifications that something has taken place.'
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于事件，调用代码通知应用程序*发生了什么*：`UserSubscribed`、`UserSignedUp` 或 `ContactWasAdded`。*事件*是通知发生了某事的方式。
 - en: Some of these events may be “fired” by the framework itself. For example, Eloquent
     models fire events when they are saved, created, or deleted. But some events can
     also be manually triggered by the application’s code.
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 框架本身可能会“触发”其中一些事件。例如，当保存、创建或删除 Eloquent 模型时，会触发事件。但是，应用程序的代码也可以手动触发某些事件。
 - en: An event being fired doesn’t do anything on its own. However, you can bind *event
     listeners*, whose sole purpose is to listen for the broadcasting of specific events
     and to act in response. Any event can have anywhere from zero to many event listeners.
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 触发事件本身不会做任何事情。但是，您可以绑定*事件监听器*，它们的唯一目的是监听特定事件的广播并响应。任何事件可以有从零到多个事件监听器。
 - en: Laravel’s events are structured like the observer, or “pub/sub,” pattern. Many
     events are fired out into the application; some may never be listened for, and
     others may have a dozen listeners. The events don’t know or care.
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的事件结构类似于观察者或“发布/订阅”模式。许多事件被发送到应用程序中；有些可能从不被监听，而其他一些可能有十几个监听器。这些事件不知道也不关心。
 - en: Firing an Event
+  id: totrans-170
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 触发事件
 - en: There are three ways to fire an event. You can use the `Event` facade, inject
     the `Dispatcher`, or use the `event()` global helper, as illustrated in [Example 16-12](#fire-an-event).
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 有三种方法可以触发一个事件。您可以使用 `Event` 门面，注入 `Dispatcher`，或者使用 `event()` 全局辅助函数，如[示例 16-12](#fire-an-event)所示。
 - en: Example 16-12\. Three ways to fire an event
+  id: totrans-172
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-12\. 触发事件的三种方法
 - en: '[PRE40]'
+  id: totrans-173
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: If in doubt, I’d recommend using the global helper function.
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果不确定，我建议使用全局辅助函数。
 - en: 'To create an event to fire, use the `make:event` Artisan command:'
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 要创建要触发的事件，请使用 `make:event` Artisan 命令：
 - en: '[PRE41]'
+  id: totrans-176
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: That’ll make a file that looks something like [Example 16-13](#EX1503).
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将生成一个类似于[示例 16-13](#EX1503)的文件。
 - en: Example 16-13\. The default template for a Laravel event
+  id: totrans-178
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-13\. Laravel 事件的默认模板
 - en: '[PRE42]'
+  id: totrans-179
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: Let’s take a look at what we get here. `SerializesModels` works just like with
     jobs; it allows you to accept Eloquent models as parameters. `InteractsWithSockets`,
     `ShouldBroadcast`, and the `broadcastOn()` method provide the backing functionality
     for broadcasting events using WebSockets, which we’ll cover in a bit.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们来看看这里得到了什么。`SerializesModels` 就像作业一样工作；它允许您接受 Eloquent 模型作为参数。`InteractsWithSockets`、`ShouldBroadcast`
+    和 `broadcastOn()` 方法为使用 WebSockets 广播事件提供了支持功能，稍后我们将详细介绍。
 - en: It might seem strange that there’s no `handle()` or `fire()` method here. But
     remember, this object exists not to determine a particular action, but just to
     encapsulate some data. The first piece of data is its name; `UserSubscribed` tells
     us that a particular event happened (a user subscribed). The rest of the data
     is any data we pass into the constructor and associate with this entity.
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 或许奇怪的是这里没有 `handle()` 或 `fire()` 方法。但请记住，此对象的存在并不是为了确定特定的动作，而只是为了封装一些数据。第一个数据片段是其名称；`UserSubscribed`
+    告诉我们发生了特定事件（用户订阅）。其余数据是我们传递到构造函数并与此实体关联的任何数据。
 - en: '[Example 16-14](#injecting_data_into_event) shows what we might want to do
     with our `UserSubscribed` event.'
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 16-14](#injecting_data_into_event) 显示了我们可能希望在 `UserSubscribed` 事件中执行的操作。'
 - en: Example 16-14\. Injecting data into an event
+  id: totrans-183
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-14\. 向事件中注入数据
 - en: '[PRE43]'
+  id: totrans-184
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: 'Now we have an object that appropriately represents the event that happened:
     `$event->user` subscribed to the `$event->plan` plan. Remember, firing this event
     is as simple as `event(new UserSubscribed($user, $plan))`.'
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们有了一个恰当表示发生事件的对象：`$event->user` 订阅了 `$event->plan` 计划。记住，触发此事件就像 `event(new
+    UserSubscribed($user, $plan))` 这样简单。
 - en: Listening for an Event
+  id: totrans-186
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 监听事件
 - en: We have an event and the ability to fire it. Now let’s look at how to listen
     for it.
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们已经有一个事件及其触发能力。现在让我们看看如何监听它。
 - en: 'First, we’ll create an event listener. Let’s say we want to email the app’s
     owner every time a new user subscribes:'
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，我们将创建一个事件监听器。假设我们希望每当新用户订阅时都向应用程序所有者发送电子邮件：
 - en: '[PRE44]'
+  id: totrans-189
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: That gives us the file in [Example 16-15](#EX1504).
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 这给我们提供了 [示例 16-15](#EX1504) 文件。
 - en: Example 16-15\. The default template for a Laravel event listener
+  id: totrans-191
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-15\. Laravel 事件监听器的默认模板
 - en: '[PRE45]'
+  id: totrans-192
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: This is where the action happens—​where the `handle()` method lives. This method
     expects to be passed an event of type `UserSubscribed` and act in response to
     it.
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 这就是发生动作的地方——`handle()` 方法所在的地方。此方法期望接收一个 `UserSubscribed` 类型的事件，并对其做出响应。
 - en: So, let’s make it send an email ([Example 16-16](#sample_event_listener)).
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 所以，让我们让它发送一封电子邮件（[示例 16-16](#sample_event_listener)）。
 - en: Example 16-16\. A sample event listener
+  id: totrans-195
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-16\. 一个示例事件监听器
 - en: '[PRE46]'
+  id: totrans-196
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: 'Now, one last task: we need to set this listener to listen to the `UserSubscribed`
     event. We’ll do that in the `$listen` property of the `EventServiceProvider` class
     (see [Example 16-17](#binding_listeners_to_events)).'
+  id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，最后一项任务：我们需要设置此监听器以侦听 `UserSubscribed` 事件。我们将在 `EventServiceProvider` 类的 `$listen`
+    属性中执行此操作（参见 [示例 16-17](#binding_listeners_to_events)）。
 - en: Example 16-17\. Binding listeners to events in `EventServiceProvider`
+  id: totrans-198
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-17\. 将监听器绑定到 `EventServiceProvider` 中的事件
 - en: '[PRE47]'
+  id: totrans-199
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: As you can see, the key of each array entry is the class name of the event,
     and the value is an array of listener class names. We can add as many class names
     as we want under the `UserSubscribed` key, and they will all listen and respond
     to each `UserSubscribed` event.
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所看到的，每个数组条目的键是事件类的类名，值是监听器类名的数组。我们可以在 `UserSubscribed` 键下添加尽可能多的类名，它们都将监听并响应每个
+    `UserSubscribed` 事件。
 - en: Automatic event discovery
+  id: totrans-201
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 自动事件发现
 - en: 'You can also instruct Laravel to automatically connect events and their matching
     listeners, without having to manually bind them in `EventServiceProvider`. This
     feature, called *automatic event discovery*, is disabled by default, but can be
     enabled by setting the `shouldDiscoverEvents()` method to return `true` in the
     `EventS⁠e⁠r⁠v⁠i⁠c⁠e​P⁠r⁠o⁠v⁠i⁠d⁠e⁠r`:'
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以指示 Laravel 自动连接事件及其匹配的监听器，而无需在 `EventServiceProvider` 中手动绑定它们。此功能称为*自动事件发现*，默认情况下禁用，但可以通过在
+    `EventServiceProvider` 中设置 `shouldDiscoverEvents()` 方法返回 `true` 来启用：
 - en: '[PRE48]'
+  id: totrans-203
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: If this feature is enabled, Laravel will map events to their matching listeners
     based on the typehints in the listeners. It’ll have to match them on every request,
     which will introduce a small lag to your app, but like many slow features, you
     can cache these lookups using `php artisan event:cache` and clear the cache with
     `php artisan event:clear`.
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果启用此功能，Laravel 将根据监听器中的类型提示将事件映射到它们的匹配监听器。这将导致每个请求都要进行匹配，这会给您的应用程序引入一小段延迟，但像许多慢速功能一样，您可以使用
+    `php artisan event:cache` 缓存这些查找，并使用 `php artisan event:clear` 清除缓存。
 - en: Event subscribers
+  id: totrans-205
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 事件订阅者
 - en: There’s one more structure you can use to define the relationship between your
     events and their listeners. Laravel has a concept called an *event subscriber*,
     which is a class that contains a collection of methods that act as separate listeners
@@ -873,42 +1303,63 @@
     which event. In this case it’s easier to show than to tell, so take a look at
     [Example 16-18](#EX1501). Note that event subscribers are not a particularly commonly
     used tool.
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有一种结构可以用来定义事件和其监听器之间的关系。Laravel 中有一个称为 *事件订阅者* 的概念，它是一个包含一组方法的类，这些方法充当独立事件的监听器，并包含应该处理哪个事件的映射。在这种情况下，展示比解释更容易理解，请查看
+    [示例 16-18](#EX1501)。请注意，事件订阅者不是特别常用的工具。
 - en: Example 16-18\. A sample event subscriber
+  id: totrans-207
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-18\. 一个样例事件订阅者
 - en: '[PRE49]'
+  id: totrans-208
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: Subscribers need to define a `subscribe()` method, which is passed an instance
     of the event dispatcher. We’ll use that to pair events with their listeners, but
     in this case, those are methods on this class, instead of entire classes.
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 订阅者需要定义一个 `subscribe()` 方法，该方法传递了一个事件分发器的实例。我们将使用它将事件与它们的监听器配对，但在这种情况下，这些监听器是这个类的方法，而不是整个类。
 - en: As a refresher, any time you see an `@` inline like this, it means the class
     name is to the left of the `@` and the method name is to the right. So, in [Example 16-18](#EX1501),
     we’re defining that the `onUserSubscription()` method of this subscriber will
     listen to any `U⁠s⁠e⁠r​S⁠u⁠b⁠s⁠c⁠r⁠i⁠b⁠e⁠d` events.
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为提醒，每当你看到像 `@` 这样的内联内容时，它意味着类名在 `@` 的左边，方法名在右边。因此，在 [示例 16-18](#EX1501) 中，我们定义了该订阅者的
+    `onUserSubscription()` 方法将监听任何 `UserSubscribed` 事件。
 - en: 'There’s one last thing we need to do: in `App\Providers\EventServiceProvider`,
     we need to add our subscriber’s class name to the `$subscribe` property, as seen
     in [Example 16-19](#registering_an_event_subscriber).'
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们还需要做最后一件事情：在 `App\Providers\EventServiceProvider` 中，我们需要将我们的订阅者类名添加到 `$subscribe`
+    属性中，如 [示例 16-19](#registering_an_event_subscriber) 所示。
 - en: Example 16-19\. Registering an event subscriber
+  id: totrans-212
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-19\. 注册事件订阅者
 - en: '[PRE50]'
+  id: totrans-213
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE50]'
 - en: Broadcasting Events Over WebSockets, and Laravel Echo
+  id: totrans-214
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 通过 WebSockets 广播事件，以及 Laravel Echo
 - en: WebSocket (often called WebSockets) is a protocol, popularized by Pusher (a
     hosted WebSocket SaaS), that makes it simple to provide near real-time communication
     between web devices. Rather than relying on information passing via HTTP requests,
@@ -916,336 +1367,505 @@
     WebSockets are behind tools like the chat boxes in Gmail and Facebook, where you
     don’t have to wait for the page to reload or for Ajax requests to receive or send
     data; instead, data is both sent and received in real time.
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: WebSocket（通常称为 WebSockets）是一种协议，由 Pusher（一个托管的 WebSocket SaaS 服务）推广，它简化了在 web
+    设备之间提供几乎实时通信。与依赖通过 HTTP 请求传递信息不同，WebSockets 库打开了客户端和服务器之间的直接连接。WebSockets 背后的工具如
+    Gmail 和 Facebook 中的聊天框，您无需等待页面重新加载或 Ajax 请求接收或发送数据；相反，数据实时发送和接收。
 - en: WebSockets work best with small pieces of data passed in a pub/sub structure—​just
     like Laravel’s events. Laravel has a built-in set of tools that makes it easy
     to define that one or more of your events should be broadcast to a WebSocket server;
     it’s straightforward, for example, to have a `MessageWasReceived` event that is
     published to the notifications box of a certain user or set of users the instant
     a message arrives at your application.
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: WebSockets 最适合使用小块数据以发布/订阅结构传递，就像 Laravel 的事件一样。Laravel 内置了一套工具集，可以轻松定义一个或多个事件应广播到
+    WebSocket 服务器；例如，很容易定义一个 `MessageWasReceived` 事件，该事件在您的应用程序接收到消息时即时发布到特定用户或一组用户的通知框中。
 - en: Configuration and Setup
+  id: totrans-217
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 配置与设置
 - en: 'Take a look at *config/broadcasting.php* to find the configuration settings
     for your event broadcasting. Laravel supports three drivers for broadcasting:
     Pusher, a paid SaaS offering; Redis, for locally running WebSocket servers; and
     `log`, for local development and debugging.'
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看 *config/broadcasting.php* 可以找到事件广播的配置设置。Laravel 支持三种驱动程序用于广播：Pusher，一个付费的
+    SaaS 提供商；Redis，用于本地运行的 WebSocket 服务器；以及 `log`，用于本地开发和调试。
 - en: Queue Listeners
+  id: totrans-219
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 队列监听器
 - en: In order for event broadcasting to move quickly, Laravel pushes the instruction
     to broadcast events onto a queue. That means you’ll need to have a queue worker
     running (or use the `sync` queue driver for local development). See [“Running
     a Queue Worker”](#queue_workers) to learn how to run a queue worker.
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了使事件广播快速进行，Laravel 将广播事件的指令推送到队列上。这意味着您需要运行一个队列工作程序（或者在本地开发时使用 `sync` 队列驱动程序）。请参阅
+    [“运行队列工作程序”](#queue_workers) 以了解如何运行队列工作程序。
 - en: Laravel suggests a default delay of three seconds before the queue worker looks
     for new jobs. However, with event broadcasting, you may notice some events take
     a second or two to broadcast. To speed this up, update your queue settings to
     wait only one second before looking for new jobs.
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 建议在队列工作程序寻找新作业之前默认延迟三秒钟。然而，通过事件广播，您可能会注意到某些事件需要一两秒才能广播。为了加快速度，请将队列设置更新为在寻找新作业之前等待一秒钟。
 - en: Broadcasting an Event
+  id: totrans-222
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 广播事件
 - en: To broadcast an event, you need to mark that event as a broadcast event by having
     it implement the `Illuminate\Contracts\Broadcasting\ShouldBroadcast` interface.
     This interface requires you to add the `broadcastOn()` method, which will return
     an array of either strings or `Channel` objects, each representing a WebSocket
     channel.
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
+  zh: 要广播事件，您需要将该事件标记为广播事件，并使其实现 `Illuminate\Contracts\Broadcasting\ShouldBroadcast`
+    接口。该接口要求您添加 `broadcastOn()` 方法，该方法将返回一个字符串或 `Channel` 对象数组，每个表示一个 WebSocket 通道。
 - en: '[Example 16-20](#broadcasting_on_multiple_channels) shows our `UserSubscribed`
     event, modified to broadcast on two channels: one for the user (to confirm the
     user’s subscription) and one for admins (to notify them of a new subscription).'
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 16-20](#broadcasting_on_multiple_channels) 展示了我们的 `UserSubscribed` 事件，修改为在两个通道上进行广播：一个用于用户（确认用户的订阅），另一个用于管理员（通知他们有新的订阅）。'
 - en: Example 16-20\. An event broadcasting on multiple channels
+  id: totrans-225
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-20\. 在多个通道上进行广播的事件
 - en: '[PRE51]'
+  id: totrans-226
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE51]'
 - en: By default, any public properties of your event will be serialized as JSON and
     sent along as the data of your broadcast event. That means the data of one of
     our broadcast `UserSubscribed` events might look like [Example 16-21](#sample_broadcast_event_data).
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，事件的任何公共属性将被序列化为 JSON 并作为广播事件的数据发送。这意味着我们的广播 `UserSubscribed` 事件的数据可能类似于
+    [示例 16-21](#sample_broadcast_event_data)。
 - en: Example 16-21\. Sample broadcast event data
+  id: totrans-228
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-21\. 示例广播事件数据
 - en: '[PRE52]'
+  id: totrans-229
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE52]'
 - en: You can override this by returning an array of data from the `broadcastWith()`
     method on your event, as in [Example 16-22](#customizing_broadcast_event_data).
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过从事件的 `broadcastWith()` 方法返回数据数组来覆盖此行为，如 [示例 16-22](#customizing_broadcast_event_data)
+    所示。
 - en: Example 16-22\. Customizing the broadcast event data
+  id: totrans-231
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-22\. 自定义广播事件数据
 - en: '[PRE53]'
+  id: totrans-232
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE53]'
 - en: 'You can customize which queue your event is pushed onto by setting the `$broadcastQueue`
     property on the event class:'
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过在事件类上设置 `$broadcastQueue` 属性来自定义将事件推送到哪个队列：
 - en: '[PRE54]'
+  id: totrans-234
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE54]'
 - en: You may choose to do this so you can keep other queue items from slowing down
     your event broadcast; real-time WebSockets aren’t much fun if a long-running job
     that’s higher in the queue keeps the events from going out in time.
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能会选择这样做，以防止其他队列项目减慢事件广播的速度；如果排队中的长时间运行作业使事件无法及时发送，则实时 WebSocket 将不会很有趣。
 - en: You can also force a given event to skip the queue entirely (using the “sync”
     queue driver, which is processed by the current PHP thread), by having it implement
     the `ShouldBroadcastNow` contract ([Example 16-23](#skip-the-broadcast-queue)).
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以通过使其实现 `ShouldBroadcastNow` 合同（如 [示例 16-23](#skip-the-broadcast-queue) 所示）来强制使某个事件完全跳过队列（使用“sync”队列驱动程序，由当前
+    PHP 线程处理）。
 - en: Example 16-23\. Forcing an event to skip the broadcast queue
+  id: totrans-237
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-23\. 强制事件跳过广播队列
 - en: '[PRE55]'
+  id: totrans-238
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE55]'
 - en: 'And, finally, you can choose to customize whether a given event should be broadcast
     at all by giving it a `broadcastWhen()` methods as in [Example 16-24](#determining-when-to-broadcast):'
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，您可以选择通过为其添加 `broadcastWhen()` 方法来自定义是否应完全广播给定事件，如 [示例 16-24](#determining-when-to-broadcast)
+    所示：
 - en: Example 16-24\. Conditionally determining whether an event should be broadcast
+  id: totrans-240
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-24\. 有条件地确定是否应广播事件
 - en: '[PRE56]'
+  id: totrans-241
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE56]'
 - en: Receiving the Message
+  id: totrans-242
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 接收消息
 - en: As of this book’s publication, the most common solution Laravel developers use
     is [Pusher](https://pusher.com). Plans over a certain size cost money, but there’s
     a generous free plan. Pusher makes it incredibly easy to set up a simple WebSocket
     server, and its JavaScript SDK handles all of the authentication and channel management
     with almost no work on your part. SDKs are available for iOS, Android, and many
     more platforms, languages, and frameworks.
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 截至本书出版时，Laravel 开发者最常用的解决方案是 [Pusher](https://pusher.com)。某些规模以上的计划需要付费，但有一个慷慨的免费计划。Pusher
+    极大地简化了设置简单 WebSocket 服务器的过程，其 JavaScript SDK 几乎不需要你的任何工作即可处理所有的认证和频道管理。SDK 可用于
+    iOS、Android 和许多其他平台、语言和框架。
 - en: If you’d like to host your own Pusher-compatible WebSockets server, there are
     two great options. First, you can try a Laravel-based tool called [Laravel WebSockets](https://oreil.ly/p8fyJ).
     You can install the package into your current Laravel app (the same app you’re
     broadcasting from) or into a separate microservice.
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想要托管自己的与 Pusher 兼容的 WebSockets 服务器，有两个很好的选择。首先，你可以尝试一个基于 Laravel 的工具，名为 [Laravel
+    WebSockets](https://oreil.ly/p8fyJ)。你可以将这个包安装到你当前的 Laravel 应用程序中（与你正在广播的相同应用程序），或者安装到一个单独的微服务中。
 - en: Second, if you’re using Docker (including Sail) you can install [Soketi](https://soketi.app),
     a free Pusher replacement developed in TypeScript.
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二，如果你使用 Docker（包括 Sail），你可以安装 [Soketi](https://soketi.app)，这是一个由 TypeScript
+    开发的免费 Pusher 替代品。
 - en: If you choose to work with a server other than Pusher, you’ll follow all of
     the directions in this book as if you were working with Pusher, but your configuration
     settings will be a bit different.
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你选择与 Pusher 不同的服务器一起工作，你将按照本书中与 Pusher 工作的所有指导进行操作，但是你的配置设置将有所不同。
 - en: It’s helpful to understand how to listen to Laravel’s broadcast events without
     Echo even if you choose to use Echo in the end. But because much of the code here
     is not necessary if you use Echo, I’d recommend reading this section, and then
     reading [“Laravel Echo (the JavaScript Side)”](#echo) before you start implementing
     any of it; you can decide which way you prefer and then write your code from there.
+  id: totrans-247
   prefs: []
   type: TYPE_NORMAL
+  zh: 即使你最终选择使用 Echo，了解如何监听 Laravel 的广播事件也是有帮助的。但由于这里的大部分代码在使用 Echo 时是不必要的，我建议先阅读本节，然后再阅读
+    [“Laravel Echo (JavaScript 部分)”](#echo)，你可以决定你更喜欢哪种方式，然后从那里开始编写你的代码。
 - en: To get started, pull in Pusher’s library, get an API key from your Pusher account,
     and subscribe to any events on any channels with code like that in [Example 16-25](#basic_usage_of_pusher_JS).
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 要开始使用，引入 Pusher 的库，从你的 Pusher 帐户获取 API 密钥，并使用类似于 [示例 16-25](#basic_usage_of_pusher_JS)
+    中的代码订阅任何频道上的任何事件是很有帮助的。
 - en: Example 16-25\. Basic usage of Pusher
+  id: totrans-249
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-25\. Pusher 的基本使用
 - en: '[PRE57]'
+  id: totrans-250
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE57]'
 - en: Escaping Backslashes in JavaScript
+  id: totrans-251
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在 JavaScript 中转义反斜杠
 - en: Since `\` is a control character in JavaScript, you need to write `\\` to represent
     a backslash in your strings, which is why there are two backslashes between each
     namespace segment in [Example 16-25](#basic_usage_of_pusher_JS).
+  id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于 `\` 是 JavaScript 中的控制字符，你需要写 `\\` 来表示字符串中的反斜杠，这就是为什么在 [示例 16-25](#basic_usage_of_pusher_JS)
+    中每个命名空间段之间有两个反斜杠的原因。
 - en: To publish to Pusher from Laravel, get your Pusher key, secret, cluster, and
     app ID from your Pusher account dashboard, and then set them in your *.env* file
     under the keys `PUSHER_KEY`, `PUSHER_SECRET`, `PUSHER_APP_CLUSTER`, and `PUSHER_APP_ID`,
     respectively.
+  id: totrans-253
   prefs: []
   type: TYPE_NORMAL
+  zh: 要从 Laravel 发布到 Pusher，从你的 Pusher 帐户仪表板获取你的 Pusher 密钥、密钥、集群和应用程序 ID，然后在你的 *.env*
+    文件中分别设置它们为 `PUSHER_KEY`、`PUSHER_SECRET`、`PUSHER_APP_CLUSTER` 和 `PUSHER_APP_ID`
+    键。
 - en: If you serve your app, visit a page with the JavaScript from [Example 16-25](#basic_usage_of_pusher_JS)
     embedded in it in one window, push a broadcast event in another window or from
     your terminal, have a queue listener running or are using the `sync` driver, and
     all of your authentication information is set up correctly, you should see event
     logs popping up in your JavaScript window’s console in near real time.
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你提供你的应用程序，访问一个页面，并在其中嵌入来自 [示例 16-25](#basic_usage_of_pusher_JS) 的 JavaScript，在一个窗口中推送广播事件或从终端中进行操作，有一个队列监听器正在运行或者正在使用
+    `sync` 驱动，并且所有的认证信息都设置正确，那么你应该能够在几乎实时地在你的 JavaScript 窗口的控制台中看到事件日志弹出。
 - en: With this power, it’s now easy for you to keep your users up to date with what’s
     happening with their data any time they’re in your app. You can notify users of
     the actions of other users, of long-running processes that have just finished,
     or of your application’s responses to external actions like incoming emails or
     webhooks. The possibilities are endless.
+  id: totrans-255
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了这种能力，你现在可以轻松地在用户在你的应用中时随时更新他们的数据状态。你可以通知用户其他用户的操作，刚刚完成的长时间运行的过程，或者你的应用对外部动作（如传入的电子邮件或Webhook）的响应。可能性无限。
 - en: Requirements
+  id: totrans-256
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 要求
 - en: 'If you want to broadcast with Pusher or Redis, you’ll need to bring in these
     dependencies:'
+  id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想要使用Pusher或Redis进行广播，你需要引入以下依赖：
 - en: 'Pusher: `pusher/pusher-php-server "~3.0"`'
+  id: totrans-258
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Pusher：`pusher/pusher-php-server "~3.0"`
 - en: 'Redis: `predis/predis`'
+  id: totrans-259
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: Redis：`predis/predis`
 - en: Advanced Broadcasting Tools
+  id: totrans-260
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 高级广播工具
 - en: Laravel has a few more tools to make it possible to perform more complex interactions
     in event broadcasting. These tools, a combination of framework features and a
     JavaScript library, are called *Laravel Echo*.
+  id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel还有一些工具，可以在事件广播中执行更复杂的交互。这些工具是框架功能和JavaScript库的组合，称为*Laravel Echo*。
 - en: These framework features work best when you use Laravel Echo in your JavaScript
     frontend (which we’ll cover in [“Laravel Echo (the JavaScript Side)”](#echo)),
     but you can still enjoy some of the benefits of Echo without using the JavaScript
     components. Echo will work with both Pusher and Redis, but I’m going to use Pusher
     for any examples.
+  id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你在JavaScript前端使用Laravel Echo时，这些框架功能表现最佳（我们将在[“Laravel Echo (the JavaScript
+    Side)”](#echo)中介绍），但你仍然可以在不使用JavaScript组件的情况下享受Echo的一些好处。Echo可以与Pusher和Redis一起使用，但我将在示例中使用Pusher。
 - en: Excluding the current user from broadcast events
+  id: totrans-263
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 排除当前用户的广播事件
 - en: Every connection to Pusher is assigned a unique “socket ID” identifying that
     socket connection. And it’s easy to define that any given socket (user) should
     be excluded from receiving a specified broadcast event.
+  id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个与Pusher的连接都分配了一个唯一的“socket ID”，用于标识该套接字连接。很容易定义任何给定套接字（用户）应该被排除在接收特定广播事件之外。
 - en: This feature makes it possible to define that certain events should not be broadcast
     to the user who fired them. Let’s say every user in a team gets notified when
     other users create a task; would you want to be notified of a task you just created?
     No, and that’s why we have the `toOthers()` method.
+  id: totrans-265
   prefs: []
   type: TYPE_NORMAL
+  zh: 此功能使得可以定义某些事件不应广播给触发它们的用户。假设团队中的每个用户在其他用户创建任务时都会收到通知；你是否希望在刚创建的任务中收到通知？不，这就是我们有`toOthers()`方法的原因。
 - en: To implement this, there are two steps to follow. First, you need to set up
     your JavaScript to send a certain `POST` to `/broadcasting/socket` when your WebSocket
     connection is initialized. This attaches your `socket_id` to your Laravel session.
     Echo does this for you, but you can also do it manually—take a look at the [Echo
     source](https://oreil.ly/3Ww0U) to see how it works.
+  id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: 要实现这一点，需要按照两个步骤进行。首先，当WebSocket连接初始化时，你需要设置你的JavaScript发送到`/broadcasting/socket`的特定`POST`。这会将你的`socket_id`附加到你的Laravel会话中。Echo会为你完成这一步骤，但你也可以手动完成——查看[Echo源码](https://oreil.ly/3Ww0U)了解其工作原理。
 - en: Next, you’ll want to update every request that your JavaScript makes to have
     an `X-Socket-ID` header that contains that `socket_id`. [Example 16-26](#sending_the_socket_id)
     shows how to do that with Axios or in jQuery. Note that your event must use the
     `Illuminate\Broadcasting\InteractsWithSockets` trait in order to call the `toOthers()`
     method.
+  id: totrans-267
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，你需要更新每个JavaScript发出的请求，以包含包含`socket_id`的`X-Socket-ID`头部。[示例 16-26](#sending_the_socket_id)
+    展示了如何在Axios或jQuery中实现这一点。请注意，你的事件必须使用`Illuminate\Broadcasting\InteractsWithSockets`特性以调用`toOthers()`方法。
 - en: Example 16-26\. Sending the socket ID along with each Ajax request with Axios
     or in jQuery
+  id: totrans-268
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-26\. 使用Axios或jQuery发送每个Ajax请求时发送socket ID
 - en: '[PRE58]'
+  id: totrans-269
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE58]'
 - en: 'Once you’ve handled this, you can exclude any event from being broadcast to
     the user who triggered it by using the `broadcast()` global helper, instead of
     the `event()` global helper, and then chaining `toOthers()` after it:'
+  id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理完这些后，你可以使用`broadcast()`全局助手而不是`event()`全局助手，并在其后链式调用`toOthers()`，从而排除任何事件被广播给触发它的用户：
 - en: '[PRE59]'
+  id: totrans-271
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE59]'
 - en: The broadcast service provider
+  id: totrans-272
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 广播服务提供程序
 - en: All of the other features that Echo provides require your JavaScript to authenticate
     with the server. Take a look at `App\Providers\BroadcastServiceProvider`, where
     you’ll define how to authorize users’ access to your private and presence channels.
+  id: totrans-273
   prefs: []
   type: TYPE_NORMAL
+  zh: Echo提供的所有其他功能都需要你的JavaScript与服务器进行身份验证。查看`App\Providers\BroadcastServiceProvider`，在那里你将定义如何授权用户访问你的私有和存在通道。
 - en: The two primary actions you can take are to define the middleware that will
     be used on your broadcasting auth routes, and to define the authorization settings
     for your channels.
+  id: totrans-274
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以采取的两个主要操作是定义将在广播授权路由上使用的中间件，以及为您的通道定义授权设置。
 - en: If you’re going to use these features, you’ll need to uncomment the `App\Providers\BroadcastServiceProvider::class`
     line in *config/app.php*.
+  id: totrans-275
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您要使用这些功能，需要取消注释 *config/app.php* 中的 `App\Providers\BroadcastServiceProvider::class`
+    行。
 - en: And if you’ll be using these features *without* Laravel Echo, you’ll either
     need to manually handle sending CSRF tokens along with your authentication requests,
     or exclude `/broadcasting/auth` and `/broadcasting/socket` from CSRF protection
     by adding them to the `$except` property of the `VerifyCsrfToken` middleware.
+  id: totrans-276
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您要使用这些功能而不使用 Laravel Echo，您将需要手动处理在身份验证请求中发送 CSRF 令牌，或者通过将它们添加到 `VerifyCsrfToken`
+    中间件的 `$except` 属性中，排除 `/broadcasting/auth` 和 `/broadcasting/socket` 的 CSRF 保护。
 - en: Binding authorization definitions for WebSocket channels
+  id: totrans-277
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 绑定 WebSocket 通道的授权定义
 - en: Private and presence WebSocket channels need to be able to ping your application
     to learn whether the current user is authorized for that channel. You’ll use the
     `Broadcast::channel()` method to define the rules for this authorization in your
     *routes/channels.php* file.
+  id: totrans-278
   prefs: []
   type: TYPE_NORMAL
+  zh: 私有和存在的 WebSocket 通道需要能够 ping 您的应用程序，以了解当前用户是否对该通道授权。您将使用 `Broadcast::channel()`
+    方法在 *routes/channels.php* 文件中定义此授权的规则。
 - en: Public, Private, and Presence Channels
+  id: totrans-279
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 公共、私有和存在通道
 - en: 'There are three types of channels in WebSockets: public, private, and presence:'
+  id: totrans-280
   prefs: []
   type: TYPE_NORMAL
+  zh: WebSockets 中有三种类型的通道：公共、私有和存在：
 - en: Public channels
+  id: totrans-281
   prefs: []
   type: TYPE_NORMAL
+  zh: 公共通道
 - en: Can be subscribed to by any user, authenticated or not.
+  id: totrans-282
   prefs: []
   type: TYPE_NORMAL
+  zh: 可由任何用户订阅，无论是否经过身份验证。
 - en: Private channels
+  id: totrans-283
   prefs: []
   type: TYPE_NORMAL
+  zh: 私有通道
 - en: Require the end user’s JavaScript to authenticate against the application to
     prove that the user is both authenticated and authorized to join this channel.
+  id: totrans-284
   prefs: []
   type: TYPE_NORMAL
+  zh: 要求最终用户的 JavaScript 对应用程序进行身份验证，以证明用户既经过身份验证又被授权加入此通道。
 - en: Presence channels
+  id: totrans-285
   prefs: []
   type: TYPE_NORMAL
+  zh: 存在通道
 - en: A type of private channel, but instead of allowing for message passing, they
     simply keep track of which users join and leave the channel, and make this information
     available to the application’s frontend.
+  id: totrans-286
   prefs: []
   type: TYPE_NORMAL
+  zh: 一种私有通道类型，但不是用于消息传递，而是仅跟踪加入和离开通道的用户，并使此信息可供应用程序的前端使用。
 - en: '`Broadcast::channel()` takes two parameters: first, a string representing the
     channel(s) you want it to match, and second, a closure that defines how to authorize
     users for any channel matching that string. The closure will be passed an Eloquent
@@ -1253,55 +1873,83 @@
     segments as additional parameters. For example, a channel authorization definition
     with a string of `teams.*teamId*`, when matched against the channel `teams.5`,
     will pass its closure `$user` as the first parameter and `5` as the second parameter.'
+  id: totrans-287
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Broadcast::channel()` 接受两个参数：首先是表示要匹配的通道的字符串，其次是定义如何为匹配该字符串的任何通道授权用户的闭包。闭包将以当前用户的
+    Eloquent 模型作为其第一个参数，并将任何匹配的 *`variableNameHere`* 段作为附加参数传递。例如，具有字符串 `teams.*teamId*`
+    的通道授权定义，当与通道 `teams.5` 匹配时，将闭包 `$user` 作为第一个参数，并将 `5` 作为第二个参数传递。'
 - en: 'If you’re defining the rules for a private channel, your `Broadcast::channel()`
     closure will need to return a Boolean: is this user authorized for this channel
     or not? If you’re defining the rules for a presence channel, your closure should
     return an array of data you want available to the presence channel for any users
     that you want to show up in the channel. [Example 16-27](#defining_authorization_rules)
     illustrates defining rules for both kinds of channel.'
+  id: totrans-288
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您正在定义私有通道的规则，则您的 `Broadcast::channel()` 闭包需要返回一个布尔值：此用户是否对此通道授权？如果您正在为存在通道定义规则，则您的闭包应返回一个数据数组，您希望这些数据在任何要显示在通道中的用户中可用。[示例
+    16-27](#defining_authorization_rules) 演示了如何定义这两种通道的规则。
 - en: Example 16-27\. Defining authorization rules for private and presence WebSocket
     channels
+  id: totrans-289
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-27\. 为私有和存在的 WebSocket 通道定义授权规则
 - en: '[PRE60]'
+  id: totrans-290
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE60]'
 - en: 'You might be wondering how this information gets from your Laravel application
     to your JavaScript frontend. Pusher’s JavaScript library sends a `POST` to your
     application; by default it will hit `/pusher/auth`, but you can customize that
     (and Echo customizes it for you) to hit Laravel’s authentication route, `/broadcasting/auth`:'
+  id: totrans-291
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能想知道如何将此信息从您的 Laravel 应用程序传递到您的 JavaScript 前端。Pusher 的 JavaScript 库将向您的应用程序发送
+    `POST` 请求；默认情况下，它将命中 `/pusher/auth`，但您可以自定义它（Echo 会自动为您自定义它）以命中 Laravel 的认证路由
+    `/broadcasting/auth`：
 - en: '[PRE61]'
+  id: totrans-292
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE61]'
 - en: '[Example 16-28](#pusher_JS_for_private_and_presence_channels) shows how we
     can tweak [Example 16-25](#basic_usage_of_pusher_JS) for private and presence
     channels, *without* Echo’s frontend components.'
+  id: totrans-293
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 16-28](#pusher_JS_for_private_and_presence_channels) 展示了如何调整 [示例 16-25](#basic_usage_of_pusher_JS)
+    来处理私有和存在频道，*不使用* Echo 的前端组件。'
 - en: Example 16-28\. Basic use of Pusher for private and presence channels
+  id: totrans-294
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-28\. 使用 Pusher 处理私有和存在频道的基本用法
 - en: '[PRE62]'
+  id: totrans-295
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE62]'
 - en: We now have the ability to send WebSocket messages to users depending on whether
     they pass a given channel’s authorization rules. We can also keep track of which
     users are active in a particular group or section of the site and display relevant
     information to each user about other users in the same group.
+  id: totrans-296
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们可以根据用户是否通过给定频道的授权规则发送 WebSocket 消息。我们还可以跟踪哪些用户在站点的特定组或部分活跃，并向每个用户显示有关同一组中其他用户的相关信息。
 - en: Laravel Echo (the JavaScript Side)
+  id: totrans-297
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Laravel Echo（JavaScript 部分）
 - en: 'Laravel Echo compromises two pieces: the advanced framework features we just
     covered and a JavaScript package that takes advantage of those features and drastically
     reduces the amount of boilerplate code you need to write powerful WebSocket-based
@@ -1309,661 +1957,1024 @@
     authorization, and subscribing to private and presence channels. Echo can be used
     with the SDKs for either Pusher (for Pusher or a custom Pusher-compatible server)
     or `socket.io` (for Redis).'
+  id: totrans-298
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel Echo 包含两个部分：我们刚刚介绍过的高级框架功能，以及利用这些功能并大幅减少所需编写的样板代码的 JavaScript 包。Echo
+    JavaScript 包能够轻松处理认证、授权以及订阅私有和存在频道。Echo 可以与 Pusher SDK（适用于 Pusher 或自定义 Pusher
+    兼容服务器）或 `socket.io` 一起使用。
 - en: Bringing Echo into your project
+  id: totrans-299
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 将 Echo 引入到您的项目中
 - en: 'To use Echo in your project’s JavaScript, add it to *package.json* using `npm
     install` `--save` (be sure to bring in the appropriate Pusher or `socket.io` SDK
     as well):'
+  id: totrans-300
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在项目的 JavaScript 中使用 Echo，请使用 `npm install --save` 将其添加到 *package.json*（确保还引入适当的
+    Pusher 或 `socket.io` SDK）：
 - en: '[PRE63]'
+  id: totrans-301
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE63]'
 - en: Let’s assume you have a basic Vite file compiling your *app.js*, like in Laravel’s
     default installation setup.
+  id: totrans-302
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设您有一个基本的 Vite 文件来编译您的 *app.js*，就像在 Laravel 的默认安装设置中一样。
 - en: Laravel’s default *resources/js/app.js* structure has a great example of how
     best to initialize your Echo install. Take a look at [Example 16-29](#initializing_echo_in_appjs)
     to see how that works between that file and *resources/js/bootstrap.js*.
+  id: totrans-303
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 默认的 *resources/js/app.js* 结构提供了一个很好的示例，展示了如何最佳初始化您的 Echo 安装。看看 [示例 16-29](#initializing_echo_in_appjs)
+    来了解它在该文件和 *resources/js/bootstrap.js* 之间的工作方式。
 - en: Example 16-29\. Initializing Echo in app.js and bootstrap.js
+  id: totrans-304
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-29\. 在 app.js 和 bootstrap.js 中初始化 Echo
 - en: '[PRE64]'
+  id: totrans-305
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE64]'
 - en: '[PRE65]'
+  id: totrans-306
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE65]'
 - en: 'For CSRF protection, you’ll also need to add a `csrf-token <meta>` tag to your
     HTML template:'
+  id: totrans-307
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了 CSRF 保护，您还需要将 `csrf-token <meta>` 标签添加到 HTML 模板中：
 - en: '[PRE66]'
+  id: totrans-308
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE66]'
 - en: 'And, of course, remember to link to your compiled *app.js* in your HTML template:'
+  id: totrans-309
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，还要记得在 HTML 模板中链接到编译后的 *app.js*：
 - en: '[PRE67]'
+  id: totrans-310
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE67]'
 - en: Now we’re ready to get started.
+  id: totrans-311
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们准备开始了。
 - en: Changes to the Configuration When Using the Laravel WebSockets Server Package
+  id: totrans-312
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用 Laravel WebSockets 服务器包时的配置更改
 - en: If you’re working with a Laravel WebSockets server (using the package discussed
     earlier in [“Receiving the Message”](#websockets_servers)), the configuration
     details in [Example 16-29](#initializing_echo_in_appjs) will be a little bit different.
     See the [Laravel WebSockets package docs](https://oreil.ly/iL6Yl) for more info.
+  id: totrans-313
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您正在使用 Laravel WebSockets 服务器（使用之前讨论的包，见 [“接收消息”](#websockets_servers)），则 [示例 16-29](#initializing_echo_in_appjs)
+    中的配置细节会有些不同。有关更多信息，请参阅 [Laravel WebSockets 包文档](https://oreil.ly/iL6Yl)。
 - en: Using Echo for basic event broadcasting
+  id: totrans-314
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用 Echo 进行基本事件广播
 - en: This is nothing different from what we’ve already used Pusher for, but [Example 16-30](#listening_to_a_public_channel_with_Echo)
     is a simple code sample to show how to use Echo to listen to public channels for
     basic event information.
+  id: totrans-315
   prefs: []
   type: TYPE_NORMAL
+  zh: 这与我们已经使用 Pusher 的方式没有什么不同，但 [示例 16-30](#listening_to_a_public_channel_with_Echo)
+    是一个简单的代码示例，展示了如何使用 Echo 监听公共频道获取基本事件信息。
 - en: Example 16-30\. Listening to a public channel with Echo
+  id: totrans-316
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-30\. 使用Echo监听公共频道
 - en: '[PRE68]'
+  id: totrans-317
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE68]'
 - en: Echo provides a few methods for subscribing to various types of channels; `channel()`
     will subscribe you to a public channel. Note that when you listen to an event
     with Echo, you can ignore the full event namespace and just listen for the unique
     class name of this event.
+  id: totrans-318
   prefs: []
   type: TYPE_NORMAL
+  zh: Echo提供了几种订阅不同类型频道的方法；`channel()`将你订阅到一个公共频道。请注意，当你使用Echo监听事件时，你可以忽略完整的事件命名空间，只需监听这个事件的唯一类名即可。
 - en: We now have access to the public data that’s passed along with our event, represented
     in the `data` object. We can also chain `listen()` handlers, as in [Example 16-31](#chaining_event_listeners_in_echo).
+  id: totrans-319
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们可以访问传递给事件的公共数据，以`data`对象表示。我们也可以链式使用`listen()`处理程序，就像在[示例 16-31](#chaining_event_listeners_in_echo)中那样。
 - en: Example 16-31\. Chaining event listeners in Echo
+  id: totrans-320
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-31\. 在Echo中链式事件监听器
 - en: '[PRE69]'
+  id: totrans-321
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE69]'
 - en: Remember to Compile and Include!
+  id: totrans-322
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 记得编译和包含！
 - en: Did you try these code samples and not see anything change in your browser?
     Make sure to run `npm run dev` (if you’re running it locally) or `npm run build`
     (to build it once) to compile your code. And, if you haven’t yet, be sure to actually
     include *app.js* in your template somewhere.
+  id: totrans-323
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你尝试了这些代码示例，却没有看到浏览器中有任何变化，确保运行`npm run dev`（如果你在本地运行）或者`npm run build`（用于构建一次）来编译你的代码。而且，如果还没有的话，确保确实在你的模板中包含*app.js*。
 - en: Private channels and basic authentication
+  id: totrans-324
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 私有频道和基本认证
 - en: 'Echo also has a method for subscribing to private channels: `private()`. It
     works the same as `channel()`, but requires you to have set up channel authorization
     definitions in *routes/channel.php*, like we covered earlier. Additionally, unlike
     with the SDKs, you don’t need to put `private-` in front of your channel name.'
+  id: totrans-325
   prefs: []
   type: TYPE_NORMAL
+  zh: Echo还有一个订阅私有频道的方法：`private()`。它的工作方式与`channel()`相同，但要求你在*routes/channel.php*中设置频道授权定义，就像我们之前讨论的那样。此外，与SDK不同的是，你不需要在频道名前加上`private-`。
 - en: '[Example 16-32](#listening_to_private_channel_with_echo) shows what it looks
     like to listen to a private channel named `private-teams.5`.'
+  id: totrans-326
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 16-32](#listening_to_private_channel_with_echo)展示了如何监听名为`private-teams.5`的私有频道。'
 - en: Example 16-32\. Listening to a private channel with Echo
+  id: totrans-327
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-32\. 使用Echo监听私有频道
 - en: '[PRE70]'
+  id: totrans-328
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE70]'
 - en: Presence channels
+  id: totrans-329
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 存在频道
 - en: Echo makes it much simpler to join and listen to events in presence channels.
     This time you’ll want to use the `join()` method to bind to the channel, as in
     [Example 16-33](#listening_to_presence_channel_with_echo).
+  id: totrans-330
   prefs: []
   type: TYPE_NORMAL
+  zh: Echo使加入和监听存在频道的事件变得更简单。这次你会想要使用`join()`方法来绑定到频道，就像在[示例 16-33](#listening_to_presence_channel_with_echo)中那样。
 - en: Example 16-33\. Joining a presence channel
+  id: totrans-331
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-33\. 加入存在频道
 - en: '[PRE71]'
+  id: totrans-332
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE71]'
 - en: '`join()` subscribes to the presence channel, and `here()` allows you to define
     the behavior when the user joins and also when any other users join or leave the
     presence channel.'
+  id: totrans-333
   prefs: []
   type: TYPE_NORMAL
+  zh: '`join()`订阅存在频道，而`here()`允许你定义用户加入时以及其他用户加入或离开时的行为。'
 - en: You can think of a presence channel like a “who’s online” sidebar in a chat
     room. When you first join a presence channel, your `here()` callback will be called
     and provided a list of all the members at that time. And any time any members
     join or leave, that callback will be called again with the updated list. There’s
     no messaging happening here, but you can play sounds, update the on-page list
     of members, or do whatever else you want in response to these actions.
+  id: totrans-334
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以把存在频道想象成聊天室中的“在线用户”侧边栏。当你首次加入存在频道时，你的`here()`回调将被调用，并提供那时所有成员的列表。任何成员加入或离开时，该回调将再次被调用，带上更新后的列表。这里没有消息传递，但你可以播放声音、更新页面上的成员列表，或者根据这些动作做任何其他响应。
 - en: There are also specific methods for individual events, which you can use individually
     or chained (see [Example 16-34](#listening_for_specific_presence_events)).
+  id: totrans-335
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有特定事件的特定方法，你可以单独使用或者链式使用（参见[示例 16-34](#listening_for_specific_presence_events)）。
 - en: Example 16-34\. Listening for specific presence events
+  id: totrans-336
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-34\. 监听特定存在事件
 - en: '[PRE72]'
+  id: totrans-337
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE72]'
 - en: Excluding the current user
+  id: totrans-338
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 排除当前用户
 - en: We covered this previously in the chapter, but if you want to exclude the current
     user, you can use the `broadcast()` global helper instead of the `event()` global
     helper and then chain the `toOthers()` method after your broadcast call. But with
     Echo, the JavaScript side of this is already handled for you. It’ll just work.
+  id: totrans-339
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在本章中已经讨论过这个问题，但是如果你想排除当前用户，可以使用`broadcast()`全局助手，而不是`event()`全局助手，然后在广播调用后链式使用`toOthers()`方法。但是使用Echo时，这个JavaScript部分已经为你处理好了，它会正常工作。
 - en: As you can see, the Echo JavaScript library doesn’t do anything you couldn’t
     do on your own—​but it makes a lot of common tasks much simpler and provides a
     cleaner, more expressive syntax for common WebSocket tasks.
+  id: totrans-340
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你所见，Echo JavaScript 库并不会做任何你自己不能做的事情——但它使许多常见任务变得更简单，并为常见 WebSocket 任务提供了更干净、更表达性强的语法。
 - en: Subscribing to notifications with Echo
+  id: totrans-341
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用 Echo 订阅通知
 - en: Laravel’s notifications come with a broadcast driver out of the box that pushes
     notifications out as broadcast events. You can subscribe to these notifications
     with Echo using `Echo.notification()`, as in [Example 16-35](#subscribing_to_notification_with_Echo).
+  id: totrans-342
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的通知默认带有广播驱动程序，将通知作为广播事件推送出去。你可以使用 `Echo.notification()` 订阅这些通知，如 [Example 16-35](#subscribing_to_notification_with_Echo)
+    中所示。
 - en: Example 16-35\. Subscribing to a notification with Echo
+  id: totrans-343
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-35\. 使用 Echo 订阅通知
 - en: '[PRE73]'
+  id: totrans-344
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE73]'
 - en: Client events
+  id: totrans-345
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 客户端事件
 - en: If you’d like to send quick, performant messages between your users without
     the messages even hitting your Laravel application—​for example, to send “typing…​”
     notifications—​you can use Echo’s `whisper()` method, as shown in [Example 16-36](#bypassing-laravel-with-echo).
+  id: totrans-346
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想在不让消息甚至触及你的 Laravel 应用程序的情况下，即快速地在用户之间发送性能卓越的消息，例如发送“正在输入…”通知，你可以使用 Echo
+    的 `whisper()` 方法，如示例 [Example 16-36](#bypassing-laravel-with-echo) 所示。
 - en: Example 16-36\. Bypassing the Laravel server using Echo’s `whisper()` method
+  id: totrans-347
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-36\. 使用 Echo 的 `whisper()` 方法绕过 Laravel 服务器
 - en: '[PRE74]'
+  id: totrans-348
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE74]'
 - en: And then use `listenForWhisper()` to listen, as in [Example 16-37](#whisper-events-with-echo).
+  id: totrans-349
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后使用 `listenForWhisper()` 来监听，如 [Example 16-37](#whisper-events-with-echo) 中所示。
 - en: Example 16-37\. Listening for whisper events with Echo
+  id: totrans-350
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-37\. 使用 Echo 监听 whisper 事件
 - en: '[PRE75]'
+  id: totrans-351
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE75]'
 - en: Scheduler
+  id: totrans-352
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 调度器
 - en: If you’ve ever written a cron job before, you likely already wish for a better
     tool. Not only is the syntax onerous and frustratingly difficult to remember,
     but it’s one significant aspect of your application that can’t be stored in version
     control.
+  id: totrans-353
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你以前写过 cron 任务，你很可能已经希望有一个更好的工具。语法不仅繁琐且令人沮丧，难以记住，而且它是你的应用程序中无法存储在版本控制中的重要部分之一。
 - en: 'Laravel’s scheduler makes handling scheduled tasks simple. You’ll write your
     scheduled tasks in code, and then point one cron job at your app: once per minute,
     run `php artisan schedule:run`. Every time this Artisan command is run, Laravel
     checks your schedule definitions to find out if any scheduled tasks should run.'
+  id: totrans-354
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的调度器使处理预定任务变得简单。你会在代码中编写你的预定任务，然后指向你的应用程序一个 cron 任务：每分钟运行 `php artisan
+    schedule:run`。每次运行此 Artisan 命令时，Laravel 都会检查你的调度定义，以查看是否应该运行任何预定任务。
 - en: 'Here’s the cron job to define that command:'
+  id: totrans-355
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是定义该命令的 cron 任务：
 - en: '[PRE76]'
+  id: totrans-356
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE76]'
 - en: There are many task types you can schedule and many time frames you can use
     to schedule them.
+  id: totrans-357
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以安排许多任务类型，并使用许多时间框架来安排它们。
 - en: '*app/Console/Kernel.php* has a method named `schedule()`, which is where you’ll
     define any tasks you’d like to schedule.'
+  id: totrans-358
   prefs: []
   type: TYPE_NORMAL
+  zh: '*app/Console/Kernel.php* 中有一个名为 `schedule()` 的方法，你可以在其中定义你想要调度的任何任务。'
 - en: Available Task Types
+  id: totrans-359
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 可用的任务类型
 - en: 'First, let’s take a look at the simplest option: a closure, run every minute
     ([Example 16-38](#scheduling_closure_to_run_every_minute)). Every time the cron
     job hits the `schedule:run` command, it will call this closure.'
+  id: totrans-360
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，让我们看看最简单的选项：一个闭包，每分钟运行一次 ([Example 16-38](#scheduling_closure_to_run_every_minute))。每次
+    cron 任务执行 `schedule:run` 命令时，它都会调用此闭包。
 - en: Example 16-38\. Scheduling a closure to run once every minute
+  id: totrans-361
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-38\. 安排一个闭包每分钟运行一次
 - en: '[PRE77]'
+  id: totrans-362
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE77]'
 - en: 'There are two other types of tasks you can schedule: Artisan and shell commands.'
+  id: totrans-363
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以安排的另外两种任务类型是 Artisan 和 shell 命令。
 - en: 'You can schedule Artisan commands by passing their syntax exactly as you would
     call them from the command line:'
+  id: totrans-364
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以通过以与从命令行调用它们完全相同的语法来安排 Artisan 命令：
 - en: '[PRE78]'
+  id: totrans-365
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE78]'
 - en: 'And you can run any shell commands that you can run with PHP’s `exec()` method:'
+  id: totrans-366
   prefs: []
   type: TYPE_NORMAL
+  zh: 你还可以运行任何你可以用 PHP 的 `exec()` 方法运行的 shell 命令：
 - en: '[PRE79]'
+  id: totrans-367
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE79]'
 - en: Available Time Frames
+  id: totrans-368
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 可用的时间框架
 - en: 'The beauty of the scheduler isn’t just that you can define your tasks in code;
     it’s that you can schedule them in code, too. Laravel keeps track of time passing
     and evaluates whether it’s time for any given task to run. That’s easy with `everyMinute()`
     because the answer is always simple: run the task. But Laravel keeps the rest
     simple for you, too, even for the most complex of requests.'
+  id: totrans-369
   prefs: []
   type: TYPE_NORMAL
+  zh: 调度器的美妙之处不仅在于你可以用代码定义你的任务；同样你也可以用代码调度它们。Laravel 会跟踪时间的流逝，并评估是否到了运行任何给定任务的时间。对于
+    `everyMinute()` 来说很简单：运行任务的答案始终是简单的。但是 Laravel 也会为你保持其余的简单，即使是对于最复杂的请求也是如此。
 - en: 'Let’s take a look at your options by starting with a monstrous definition that’s
     simple in Laravel:'
+  id: totrans-370
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从一个简单的Laravel定义开始，通过看一个巨大的定义选项：
 - en: '[PRE80]'
+  id: totrans-371
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE80]'
 - en: 'Notice that we can chain times together: we can define frequency and specify
     the day of the week and the time, and of course we can do much more.'
+  id: totrans-372
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意，我们可以链接不同的时间设置：定义频率、指定星期几和时间，当然还可以做更多。
 - en: '[Table 16-1](#modifiers_for_scheduler) shows a list of potential date/time
     modifiers for use when scheduling a job.'
+  id: totrans-373
   prefs: []
   type: TYPE_NORMAL
+  zh: '[表 16-1](#modifiers_for_scheduler) 显示了调度作业时可用的潜在日期/时间修饰符列表。'
 - en: Table 16-1\. Date/time modifiers for use with the scheduler
+  id: totrans-374
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 16-1\. 用于调度的日期/时间修饰符
 - en: '| Command | Description |'
+  id: totrans-375
   prefs: []
   type: TYPE_TB
+  zh: '| Command | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-376
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `->timezone(''America/Detroit'')` | Set the time zone for schedules |'
+  id: totrans-377
   prefs: []
   type: TYPE_TB
+  zh: '| `->timezone(''America/Detroit'')` | 设置调度任务的时区 |'
 - en: '| `->cron(''* * * * * *'')` | Define the schedule using the traditional cron
     notation |'
+  id: totrans-378
   prefs: []
   type: TYPE_TB
+  zh: '| `->cron(''* * * * * *'')` | 使用传统的cron表达式定义调度时间 |'
 - en: '| `->everyMinute()` | Run every minute |'
+  id: totrans-379
   prefs: []
   type: TYPE_TB
+  zh: '| `->everyMinute()` | 每分钟运行 |'
 - en: '| `->everyTwoMinutes()` | Run every 2 minutes |'
+  id: totrans-380
   prefs: []
   type: TYPE_TB
+  zh: '| `->everyTwoMinutes()` | 每2分钟运行 |'
 - en: '| `->everyThreeMinutes()` | Run every 3 minutes |'
+  id: totrans-381
   prefs: []
   type: TYPE_TB
+  zh: '| `->everyThreeMinutes()` | 每3分钟运行 |'
 - en: '| `->everyFourMinutes()` | Run every 4 minutes |'
+  id: totrans-382
   prefs: []
   type: TYPE_TB
+  zh: '| `->everyFourMinutes()` | 每4分钟运行 |'
 - en: '| `->everyFiveMinutes()` | Run every 5 minutes |'
+  id: totrans-383
   prefs: []
   type: TYPE_TB
+  zh: '| `->everyFiveMinutes()` | 每5分钟运行 |'
 - en: '| `->everyTenMinutes()` | Run every 10 minutes |'
+  id: totrans-384
   prefs: []
   type: TYPE_TB
+  zh: '| `->everyTenMinutes()` | 每10分钟运行 |'
 - en: '| `->everyFifteenMinutes()` | Run every 15 minutes |'
+  id: totrans-385
   prefs: []
   type: TYPE_TB
+  zh: '| `->everyFifteenMinutes()` | 每15分钟运行 |'
 - en: '| `->everyThirtyMinutes()` | Run every 30 minutes |'
+  id: totrans-386
   prefs: []
   type: TYPE_TB
+  zh: '| `->everyThirtyMinutes()` | 每30分钟运行 |'
 - en: '| `->hourly()` | Run every hour |'
+  id: totrans-387
   prefs: []
   type: TYPE_TB
+  zh: '| `->hourly()` | 每小时运行 |'
 - en: '| `->hourlyAt(14)` | Run every hour at 14 minutes past |'
+  id: totrans-388
   prefs: []
   type: TYPE_TB
+  zh: '| `->hourlyAt(14)` | 每小时14分钟运行 |'
 - en: '| `->everyTwoHours()` | Run every 2 hours |'
+  id: totrans-389
   prefs: []
   type: TYPE_TB
+  zh: '| `->everyTwoHours()` | 每2小时运行 |'
 - en: '| `->everyThreeHours()` | Run every 3 hours |'
+  id: totrans-390
   prefs: []
   type: TYPE_TB
+  zh: '| `->everyThreeHours()` | 每3小时运行 |'
 - en: '| `->everyFourHours()` | Run every 4 hours |'
+  id: totrans-391
   prefs: []
   type: TYPE_TB
+  zh: '| `->everyFourHours()` | 每4小时运行 |'
 - en: '| `->everySixHours()` | Run every 6 hours |'
+  id: totrans-392
   prefs: []
   type: TYPE_TB
+  zh: '| `->everySixHours()` | 每6小时运行 |'
 - en: '| `->daily()` | Run every day at midnight |'
+  id: totrans-393
   prefs: []
   type: TYPE_TB
+  zh: '| `->daily()` | 每天午夜运行 |'
 - en: '| `->dailyAt(''14:00'')` | Run every day at 14:00 |'
+  id: totrans-394
   prefs: []
   type: TYPE_TB
+  zh: '| `->dailyAt(''14:00'')` | 每天14:00运行 |'
 - en: '| `->twiceDaily(1, 14)` | Run every day at 1:00 and 14:00 |'
+  id: totrans-395
   prefs: []
   type: TYPE_TB
+  zh: '| `->twiceDaily(1, 14)` | 每天1:00和14:00运行 |'
 - en: '| `->twiceDailyAt(1, 14, 6)` | Run every day at 1:06 and 14:06 (the third argument
     is the minutes to start) |'
+  id: totrans-396
   prefs: []
   type: TYPE_TB
+  zh: '| `->twiceDailyAt(1, 14, 6)` | 每天1:06和14:06运行（第三个参数是开始分钟数） |'
 - en: '| `->weekly()` | Run every week (midnight on Sunday) |'
+  id: totrans-397
   prefs: []
   type: TYPE_TB
+  zh: '| `->weekly()` | 每周运行（每周星期日午夜） |'
 - en: '| `->weeklyOn(5, ''10:00'')` | Run every week on Friday at 10:00 |'
+  id: totrans-398
   prefs: []
   type: TYPE_TB
+  zh: '| `->weeklyOn(5, ''10:00'')` | 每周五的10:00运行 |'
 - en: '| `->monthly()` | Run every month (midnight on the 1st) |'
+  id: totrans-399
   prefs: []
   type: TYPE_TB
+  zh: '| `->monthly()` | 每月运行（每月1日午夜） |'
 - en: '| `->monthlyOn(15, ''23:00'')` | Run every month on the 15th at 23:00 |'
+  id: totrans-400
   prefs: []
   type: TYPE_TB
+  zh: '| `->monthlyOn(15, ''23:00'')` | 每月15日的23:00运行 |'
 - en: '| `->quarterly()` | Run every quarter (midnight on the 1st of January, April,
     July, and October) |'
+  id: totrans-401
   prefs: []
   type: TYPE_TB
+  zh: '| `->quarterly()` | 每季度运行（每年1月、4月、7月和10月的午夜） |'
 - en: '| `->yearly()` | Run every year (midnight on the 1st of January) |'
+  id: totrans-402
   prefs: []
   type: TYPE_TB
+  zh: '| `->yearly()` | 每年运行（每年1月1日午夜） |'
 - en: '| `->yearlyOn(6)` | Run every year (midnight on the 1st of June) |'
+  id: totrans-403
   prefs: []
   type: TYPE_TB
+  zh: '| `->yearlyOn(6)` | 每年运行（每年6月1日午夜） |'
 - en: '| `->when(closure)` | Limit the task to when the closure returns `true` |'
+  id: totrans-404
   prefs: []
   type: TYPE_TB
+  zh: '| `->when(closure)` | 仅在闭包返回`true`时运行任务 |'
 - en: '| `->skip(closure)` | Limit the task to when the closure returns `false` |'
+  id: totrans-405
   prefs: []
   type: TYPE_TB
+  zh: '| `->skip(closure)` | 仅在闭包返回`false`时运行任务 |'
 - en: '| `->between(''8:00'', ''12:00'')` | Limit the task to between the given times
     |'
+  id: totrans-406
   prefs: []
   type: TYPE_TB
+  zh: '| `->between(''8:00'', ''12:00'')` | 仅在指定时间范围内运行任务 |'
 - en: '| `->unlessBetween(''8:00'', ''12:00'')` | Limit the task to any time except
     between the given times |'
+  id: totrans-407
   prefs: []
   type: TYPE_TB
+  zh: '| `->unlessBetween(''8:00'', ''12:00'')` | 除了指定时间范围外的任何时间都可以运行任务 |'
 - en: '| `->weekdays()` | Limit to weekdays |'
+  id: totrans-408
   prefs: []
   type: TYPE_TB
+  zh: '| `->weekdays()` | 限制为工作日 |'
 - en: '| `->sundays()` | Limit to Sundays |'
+  id: totrans-409
   prefs: []
   type: TYPE_TB
+  zh: '| `->sundays()` | 限制为星期日 |'
 - en: '| `->mondays()` | Limit to Mondays |'
+  id: totrans-410
   prefs: []
   type: TYPE_TB
+  zh: '| `->mondays()` | 限制为星期一 |'
 - en: '| `->tuesdays()` | Limit to Tuesdays |'
+  id: totrans-411
   prefs: []
   type: TYPE_TB
+  zh: '| `->tuesdays()` | 限制为星期二 |'
 - en: '| `->wednesdays()` | Limit to Wednesdays |'
+  id: totrans-412
   prefs: []
   type: TYPE_TB
+  zh: '| `->wednesdays()` | 限制为星期三 |'
 - en: '| `->thursdays()` | Limit to Thursdays |'
+  id: totrans-413
   prefs: []
   type: TYPE_TB
+  zh: '| `->thursdays()` | 限制为星期四 |'
 - en: '| `->fridays()` | Limit to Fridays |'
+  id: totrans-414
   prefs: []
   type: TYPE_TB
+  zh: '| `->fridays()` | 限制为星期五 |'
 - en: '| `->saturdays()` | Limit to Saturdays |'
+  id: totrans-415
   prefs: []
   type: TYPE_TB
+  zh: '| `->saturdays()` | 限制为星期六 |'
 - en: '| `->days([1,2])` | Limit to Sundays and Mondays |'
+  id: totrans-416
   prefs: []
   type: TYPE_TB
+  zh: '| `->days([1,2])` | 限制为星期日和星期一 |'
 - en: '| `->environments(*staging*)` | Limit to only the staging environment |'
+  id: totrans-417
   prefs: []
   type: TYPE_TB
+  zh: '| `->environments(*staging*)` | 限制为仅在演示环境运行 |'
 - en: Most of these can be chained one after another, but of course, any combinations
     that don’t make sense chained can’t be chained.
+  id: totrans-418
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数修饰符可以链式使用，但当然，任何不能合理链式使用的组合都不能链式使用。
 - en: '[Example 16-39](#sample_scheduled_events) shows a few combinations you could
     consider.'
+  id: totrans-419
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 16-39](#sample_scheduled_events) 展示了几种你可以考虑的组合。'
 - en: Example 16-39\. Some sample scheduled events
+  id: totrans-420
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-39. 一些样本调度事件
 - en: '[PRE81]'
+  id: totrans-421
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE81]'
 - en: Defining Time Zones for Scheduled Commands
+  id: totrans-422
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 为计划命令定义时区
 - en: 'You can define the time zone on a specific scheduled command using the `timezone()`
     method:'
+  id: totrans-423
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以使用`timezone()`方法在特定调度命令上定义时区：
 - en: '[PRE82]'
+  id: totrans-424
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE82]'
 - en: 'You can also set a default time zone (separate from the application time zone)
     that all of your scheduled times will be defined in, by defining the `scheduleTimezone()`
     method in `App\Console\Kernel`:'
+  id: totrans-425
   prefs: []
   type: TYPE_NORMAL
+  zh: 你也可以设置一个默认的时区（与应用程序时区分开），所有计划任务的时间都可以通过在 `App\Console\Kernel` 中定义 `scheduleTimezone()`
+    方法来定义：
 - en: '[PRE83]'
+  id: totrans-426
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE83]'
 - en: Blocking and Overlap
+  id: totrans-427
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 阻塞和重叠
 - en: 'If you want to avoid having your tasks overlap each other—​for example, if
     you have a task running every minute that may sometimes take longer than a minute
     to run—​end the schedule chain with the `withoutOverlapping()` method. This method
     skips a task if the previous instance of that task is still running:'
+  id: totrans-428
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想避免任务重叠—例如，如果一个任务每分钟运行一次，但有时可能需要超过一分钟才能运行完毕—可以用`withoutOverlapping()`方法结束调度链。这个方法会在前一个任务实例仍在运行时跳过该任务：
 - en: '[PRE84]'
+  id: totrans-429
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE84]'
 - en: Handling Task Output
+  id: totrans-430
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 处理任务输出
 - en: Sometimes the output from your scheduled task is important, whether for logging,
     notifications, or just ensuring that the task ran.
+  id: totrans-431
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时，计划任务的输出很重要，无论是用于日志记录、通知，还是仅仅确保任务运行。
 - en: 'If you want to write the returned output of a task to a file (potentially overwriting
     what is already in the file), use `sendOutputTo()`:'
+  id: totrans-432
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想将任务的返回输出写入文件（有可能覆盖文件中已有内容），可以使用`sendOutputTo()`：
 - en: '[PRE85]'
+  id: totrans-433
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE85]'
 - en: 'If you want to append it to a file instead, use `appendOutputTo()`:'
+  id: totrans-434
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想将输出追加到一个文件中，可以使用`appendOutputTo()`：
 - en: '[PRE86]'
+  id: totrans-435
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE86]'
 - en: 'And if you want to email the output to a designated recipient, write it to
     a file first and then add `emailOutputTo()`:'
+  id: totrans-436
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想将输出邮件发送给指定收件人，请先写入文件，然后添加`emailOutputTo()`：
 - en: '[PRE87]'
+  id: totrans-437
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE87]'
 - en: Make sure that your email settings are configured correctly in Laravel’s basic
     email configuration.
+  id: totrans-438
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保 Laravel 的基本电子邮件配置中正确配置了你的电子邮件设置。
 - en: Closure Scheduled Events Can’t Send Output
+  id: totrans-439
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 闭包调度事件无法发送输出
 - en: The `sendOutputTo()`, `appendOutputTo()`, and `emailOutputTo()` methods only
     work for `command()-` scheduled tasks. You can’t use them for closures, unfortunately.
+  id: totrans-440
   prefs: []
   type: TYPE_NORMAL
+  zh: '`sendOutputTo()`、`appendOutputTo()`和`emailOutputTo()`方法仅适用于`command()`调度任务。很遗憾，你不能将它们用于闭包。'
 - en: You may also want to send some output to a webhook to verify that your tasks
     ran correctly. There are a few services that provide this sort of uptime monitoring,
     most significantly [Laravel Envoyer](https://envoyer.io), a zero-downtime deployment
     service that also provides cron uptime monitoring, and [Dead Man’s Snitch](https://deadmanssnitch.com),
     a tool designed purely for monitoring cron job uptime.
+  id: totrans-441
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可能还想将一些输出发送到 Webhook 来验证任务是否正确运行。有几种服务提供这种类型的运行时间监控，最显著的是[Laravel Envoyer](https://envoyer.io)，一个零停机时间部署服务，还提供
+    cron 运行时间监控，以及[Dead Man’s Snitch](https://deadmanssnitch.com)，一个专门用于监控 cron 作业运行时间的工具。
 - en: 'These services don’t expect something to be emailed to them, but rather expect
     an HTTP “ping,” so Laravel makes that easy with `pingBefore()` and `thenPing()`:'
+  id: totrans-442
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些服务不希望有人给它们发送电子邮件，而是希望接收一个 HTTP "ping"，所以 Laravel 通过`pingBefore()`和`thenPing()`简化了这一过程：
 - en: '[PRE88]'
+  id: totrans-443
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE88]'
 - en: 'If you want to use the ping features, you’ll need to pull in Guzzle using Composer:'
+  id: totrans-444
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想使用 ping 功能，需要使用 Composer 导入 Guzzle：
 - en: '`composer require guzzlehttp/guzzle`'
+  id: totrans-445
   prefs: []
   type: TYPE_NORMAL
+  zh: '`composer require guzzlehttp/guzzle`'
 - en: Task Hooks
+  id: totrans-446
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 任务钩子
 - en: 'Speaking of running something *before* and *after* your task, there are hooks
     for that, with `before()` and `after()`:'
+  id: totrans-447
   prefs: []
   type: TYPE_NORMAL
+  zh: 谈到在任务*之前*和*之后*运行某些东西，有一些钩子可以做到，比如`before()`和`after()`：
 - en: '[PRE89]'
+  id: totrans-448
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE89]'
 - en: Running the Scheduler in Local Development
+  id: totrans-449
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在本地开发中运行调度程序
 - en: 'Since the scheduler depends on cron, it’s simpler to set up on a server than
     on your local machine. If you’d like to have the scheduler running locally, run
     the `schedule:work` Artisan command, which will invoke the scheduler every minute,
     just like a cron job:'
+  id: totrans-450
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于调度程序依赖于 cron，在服务器上设置比在本地机器上设置更简单。如果你想在本地运行调度程序，请运行`schedule:work` Artisan命令，这将每分钟调用调度程序，就像
+    cron 作业一样：
 - en: '[PRE90]'
+  id: totrans-451
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE90]'
 - en: Testing
+  id: totrans-452
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 测试
 - en: Testing queued jobs (or anything else in the queue) is easy. In *phpunit.xml*,
     which is the configuration file for your tests, the `QUEUE_DRIVER` environment
     variable is set to `sync` by default. That means your tests will run your jobs
     or other queued tasks synchronously, directly in your code, without relying on
     a queue system of any sort. You can test them just like any other code.
+  id: totrans-453
   prefs: []
   type: TYPE_NORMAL
+  zh: 测试排队作业（或队列中的任何其他内容）很容易。在 *phpunit.xml* 中（这是您测试的配置文件），`QUEUE_DRIVER` 环境变量默认设置为
+    `sync`。这意味着您的测试将同步运行作业或其他排队任务，直接在您的代码中，而无需依赖任何类型的队列系统。您可以像测试任何其他代码一样测试它们。
 - en: However, you can assert against the specific job itself, as in [Example 16-40](#verify_job_meets_criteria).
+  id: totrans-454
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，您也可以针对特定的作业进行断言，如 [示例 16-40](#verify_job_meets_criteria) 中所示。
 - en: Example 16-40\. Using a closure to verify that a dispatched job meets given
     criteria
+  id: totrans-455
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-40\. 使用闭包验证分派的作业是否符合给定条件
 - en: '[PRE91]'
+  id: totrans-456
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE91]'
 - en: There are also the `assertPushedWithChain()` and `assertPushedWithoutChain()`
     methods.
+  id: totrans-457
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有 `assertPushedWithChain()` 和 `assertPushedWithoutChain()` 方法。
 - en: '[PRE92]'
+  id: totrans-458
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE92]'
 - en: To test that an event fired, you have two options. First, you can just test
     that the behavior you expected happened, without concerning yourself with the
     event itself.
+  id: totrans-459
   prefs: []
   type: TYPE_NORMAL
+  zh: 要测试事件是否触发，您有两个选项。首先，您可以只测试您期望发生的行为，而不必关注事件本身。
 - en: Second, you can run a test against the event that was fired, as in [Example 16-41](#verify_fired_event_meets_criteria).
+  id: totrans-460
   prefs: []
   type: TYPE_NORMAL
+  zh: 其次，您可以针对触发的事件运行测试，如 [示例 16-41](#verify_fired_event_meets_criteria) 中所示。
 - en: Example 16-41\. Using a closure to verify that a fired event meets given criteria
+  id: totrans-461
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-41\. 使用闭包验证触发的事件是否符合给定条件
 - en: '[PRE93]'
+  id: totrans-462
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE93]'
 - en: Another common scenario is that you’re testing code that incidentally fires
     events, and you want to disable the event listeners during that test. You can
     disable the event system with the `withoutEvents()` method, as in [Example 16-42](#disabling_event_listeners).
+  id: totrans-463
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一个常见的场景是，您正在测试意外触发事件的代码，并且希望在测试期间禁用事件监听器。您可以使用 `withoutEvents()` 方法禁用事件系统，如
+    [示例 16-42](#disabling_event_listeners) 中所示。
 - en: Example 16-42\. Disabling event listeners during a test
+  id: totrans-464
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-42\. 在测试期间禁用事件监听器
 - en: '[PRE94]'
+  id: totrans-465
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE94]'
 - en: TL;DR
+  id: totrans-466
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: TL;DR
 - en: Queues allow you to separate chunks of your application’s code from the synchronous
     flow of user interactions out to a list of commands to be processed by a “queue
     worker.” This allows your users to resume interactions with your application while
     slower processes are handled asynchronously in the background.
+  id: totrans-467
   prefs: []
   type: TYPE_NORMAL
+  zh: 队列允许您将应用程序代码的块从用户交互的同步流中分离出来，转换为由“队列工作者”处理的命令列表。这使得您的用户可以在后台异步处理较慢的进程时恢复与您的应用程序的交互。
 - en: Jobs are classes that are structured with the intention of encapsulating a chunk
     of application behavior so that it can be pushed onto a queue.
+  id: totrans-468
   prefs: []
   type: TYPE_NORMAL
+  zh: 作业是结构良好的类，旨在封装应用程序行为的块，以便将其推送到队列中。
 - en: Laravel’s event system follows the pub/sub or observer pattern, allowing you
     to send out notifications of an event from one part of your application, and elsewhere
     bind listeners to those notifications to define what behavior should happen in
     response to them. Using WebSockets, events can also be broadcast to frontend clients.
+  id: totrans-469
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的事件系统遵循发布/订阅或观察者模式，允许您从应用程序的一部分发送事件的通知，并在其他地方绑定监听器来定义对这些事件的响应行为。使用 WebSockets，事件也可以广播到前端客户端。
 - en: Laravel’s scheduler simplifies scheduling tasks. Point an every-minute cron
     job to `php artisan` `schedule:run` and then schedule your tasks with even the
     most complex of time requirements using the scheduler, and Laravel will handle
     all the timings for you.
+  id: totrans-470
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的调度程序简化了任务的调度。将每分钟的 cron 任务指向 `php artisan schedule:run`，然后使用调度程序安排您的任务，即使是最复杂的时间要求，Laravel
+    也会为您处理所有的时间安排。

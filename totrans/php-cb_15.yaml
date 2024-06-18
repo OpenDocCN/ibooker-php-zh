@@ -1,379 +1,566 @@
 - en: Chapter 15\. Packages and Extensions
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第 15 章\. 包和扩展
 - en: PHP is a high-level language that uses dynamic typing and memory management
     to make software development easier for end users. Unfortunately, computers are
     not very good at handling high-level concepts, so any high-level system must itself
     be built atop lower-level building blocks. In the case of PHP, the entire system
     is written in and built atop C.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 是一种高级语言，采用动态类型和内存管理，使软件开发对最终用户更加简便。不幸的是，计算机并不擅长处理高级概念，因此任何高级系统都必须建立在更低级的构建块之上。在
+    PHP 的情况下，整个系统都是用 C 语言编写并建立的。
 - en: Since PHP is open source, you can download the entire source code for the language
     directly [from GitHub](https://oreil.ly/Z1_lP). Then you can build the language
     from source on your own system, make changes to it, or write your own native (C-level)
     extensions.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于 PHP 是开源的，您可以直接从 [GitHub](https://oreil.ly/Z1_lP) 下载整个语言的源代码。然后，您可以在自己的系统上从源代码构建语言，对其进行更改，或编写自己的本机（C
+    级）扩展。
 - en: 'In any environment, you’ll need various other packages available in order to
     build PHP from source. On Ubuntu Linux, these are the packages:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在任何环境中，构建 PHP 源代码所需的其他各种软件包都是必需的。在 Ubuntu Linux 上，这些软件包包括：
 - en: '`pkg-config`'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '`pkg-config`'
 - en: A Linux package for returning information about installed libraries
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于返回有关已安装库的信息的 Linux 包
 - en: '`build-essential`'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '`build-essential`'
 - en: A meta-package encompassing the GNU debugger, g++ compiler, and other tools
     for working with C/C++ projects
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 包括 GNU 调试器、g++ 编译器和其他用于处理 C/C++ 项目的工具的元包
 - en: '`autoconf`'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: '`autoconf`'
 - en: Package of macros to produce shell scripts that configure code packages
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于生成配置代码包的脚本的宏包
 - en: '`bison`'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: '`bison`'
 - en: A general-purpose parser generator
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 通用解析生成器
 - en: '`re2c`'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '`re2c`'
 - en: A regular expression compiler and open source lexer for C and C++
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于 C 和 C++ 的正则表达式编译器和开源词法分析器
 - en: '`libxml2-dev`'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: '`libxml2-dev`'
 - en: The C-level development headers required for XML processing
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于 XML 处理的 C 级开发头文件
 - en: '`libsqlite3-dev`'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: '`libsqlite3-dev`'
 - en: The C-level development headers for SQLite and related bindings
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于 SQLite 和相关绑定的 C 级开发头文件
 - en: 'You can install all of them with the following `apt` command:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用以下 `apt` 命令安装它们：
 - en: '[PRE0]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Once dependencies are available, you use the `buildconf` script to generate
     the configuration script, then `configure` itself will ready the build environment.
     [Several options](https://oreil.ly/md2qt) can be passed directly to `configure`
     to control how the environment will be set up. [Table 15-1](#php_configure_options)
     lists some of the most useful.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦依赖项可用，您可以使用 `buildconf` 脚本生成配置脚本，然后 `configure` 本身将准备好构建环境。可以直接传递到 `configure`
+    控制如何设置环境的 [多个选项](https://oreil.ly/md2qt)。[表 15-1](#php_configure_options) 列出了一些最有用的选项。
 - en: Table 15-1\. PHP `configure` options
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 15-1\. PHP `configure` 选项
 - en: '| Option flag | Description |'
+  id: totrans-22
   prefs: []
   type: TYPE_TB
+  zh: '| 选项标志 | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-23
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `--enable-debug` | Compile with debugging symbols. Useful for developing
     changes to core PHP or writing new extensions. |'
+  id: totrans-24
   prefs: []
   type: TYPE_TB
+  zh: '| `--enable-debug` | 编译时包含调试符号。对于开发核心 PHP 或编写新扩展非常有用。 |'
 - en: '| `--enable-libgcc` | Allow code to explicitly link against `libgcc`. |'
+  id: totrans-25
   prefs: []
   type: TYPE_TB
+  zh: '| `--enable-libgcc` | 允许代码显式链接到 `libgcc`。 |'
 - en: '| `--enable-php-streams` | Activate support for experimental PHP streams. |'
+  id: totrans-26
   prefs: []
   type: TYPE_TB
+  zh: '| `--enable-php-streams` | 激活对实验性 PHP 流的支持。 |'
 - en: '| `--enable-phpdbg` | Enable the interactive `phpdbg` debugger. |'
+  id: totrans-27
   prefs: []
   type: TYPE_TB
+  zh: '| `--enable-phpdbg` | 启用交互式 `phpdbg` 调试器。 |'
 - en: '| `--enable-zts` | Enable thread safety. |'
+  id: totrans-28
   prefs: []
   type: TYPE_TB
+  zh: '| `--enable-zts` | 启用线程安全性。 |'
 - en: '| `--disable-short-tags` | Disable PHP short tag support (e.g., `<?`). |'
+  id: totrans-29
   prefs: []
   type: TYPE_TB
+  zh: '| `--disable-short-tags` | 禁用 PHP 短标签支持（例如 `<?`）。 |'
 - en: 'Understanding how to build PHP itself isn’t a prerequisite for using it. In
     most environments, you can install a binary distribution directly from a standard
     package manager. On Ubuntu, for example, you can install PHP directly with the
     following:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 理解如何构建 PHP 本身并不是使用它的先决条件。在大多数环境中，您可以直接从标准软件包管理器安装二进制发行版。例如，在 Ubuntu 上，您可以直接安装
+    PHP，方法如下：
 - en: '[PRE1]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Knowing how to build PHP from source, though, is important should you ever wish
     to change the behavior of the language, include a nonbundled extension, or write
     your own native module in the future.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，了解如何从源代码构建 PHP 对于希望更改语言行为、包括非捆绑扩展或将来编写自己的本机模块的人来说是重要的。
 - en: Standard Modules
+  id: totrans-33
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 标准模块
 - en: 'By default, PHP uses its own extension system to power much of the core functionality
     of the language. In addition to core modules, various extensions are bundled directly
     with PHP.^([1](ch15.html#idm45875139704496)) These include the following:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，PHP使用其自己的扩展系统来支持语言的核心功能。除了核心模块外，各种扩展也直接捆绑在PHP中。^([1](ch15.html#idm45875139704496))
+    这些包括以下内容：
 - en: '[BCMath](https://oreil.ly/QwfUv) for arbitrary-precision mathematics'
+  id: totrans-35
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[BCMath](https://oreil.ly/QwfUv) 用于任意精度数学计算'
 - en: '[FFI](https://oreil.ly/sktWY) (Foreign Function Interface) for loading shared
     libraries and calling functions within them'
+  id: totrans-36
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[FFI](https://oreil.ly/sktWY)（外部函数接口）用于加载共享库并调用其中的函数'
 - en: '[PDO](https://oreil.ly/BEsdu) (PHP Data Objects) for abstracting various database
     interfaces'
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[PDO](https://oreil.ly/BEsdu)（PHP数据对象）用于抽象化各种数据库接口'
 - en: '[SQLite3](https://oreil.ly/Zejtz) for interacting directly with SQLite databases'
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[SQLite3](https://oreil.ly/Zejtz) 用于直接与SQLite数据库交互'
 - en: Standard modules are bundled with PHP and available for inclusion immediately
     through changes to your *php.ini* configuration. External extensions, like PDO
     support for Microsoft SQL Server, are also available but must be installed and
     activated separately. Tools like PECL, discussed in [Recipe 15.4](#native_php_extensions),
     make the installation of these modules straightforward for any environment.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 标准模块已与PHP捆绑，并可通过更改您的*php.ini*配置立即包含。外部扩展，例如对Microsoft SQL Server的PDO支持，也可用，但必须单独安装和激活。像PECL这样的工具，在[配方15.4](#native_php_extensions)中讨论，使得在任何环境中安装这些模块变得简单。
 - en: Libraries/Composer
+  id: totrans-40
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 库/Composer
 - en: 'In addition to native extensions to the language, you can leverage [Composer](https://getcomposer.org),
     the most popular dependency manager for PHP. Any PHP project can (and likely *should*)
     be defined as a Composer module by including a *composer.json* file that describes
     the project and its structure. Including such a file has two key advantages, even
     if you don’t leverage Composer to pull third-party code into your project:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了语言的本机扩展之外，您还可以利用[Composer](https://getcomposer.org)，这是PHP最流行的依赖管理器。任何PHP项目都可以（而且可能*应该*）定义为Composer模块，方法是包含一个描述项目及其结构的*composer.json*文件。即使您不利用Composer将第三方代码拉入项目中，包含这样一个文件也有两个关键优势：
 - en: You (or another developer) can include your project as a dependency of another
     project. This makes your code portable and encourages the reuse of function and
     class definitions.
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您（或其他开发人员）可以将您的项目作为另一个项目的依赖项包含进去。这使得您的代码可移植，并鼓励函数和类定义的重用。
 - en: Once your project has a *composer.json* file, you can leverage Composer’s autoloading
     features to dynamically include classes and functions within your project without
     explicitly using `require()` to load them directly.
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一旦您的项目有了*composer.json*文件，您可以利用Composer的自动加载功能在项目中动态包含类和函数，而无需直接使用`require()`来直接加载它们。
 - en: The recipes in this chapter explain how to configure your project as a Composer
     package, as well as how to leverage Composer to find and include third-party libraries.
     You’ll also learn how to find and include native extensions to the language through
     PHP Extension Community Library (PECL) and PHP Extension and Application Repository
     (PEAR).
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章中的配方解释了如何将您的项目配置为Composer包，以及如何利用Composer查找和包含第三方库。您还将学习如何通过PHP扩展社区库（PECL）和PHP扩展与应用程序库（PEAR）找到并包含语言的本机扩展。
 - en: 15.1 Defining a Composer Project
+  id: totrans-45
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 15.1 定义Composer项目
 - en: Problem
+  id: totrans-46
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to start a new project that uses Composer to dynamically load code
     and dependencies.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 您想要启动一个使用Composer动态加载代码和依赖项的新项目。
 - en: Solution
+  id: totrans-48
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use Composer’s `init` command at the command line to bootstrap a new project
     with a *composer.json* file. For example:'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 在命令行上使用Composer的`init`命令启动一个新项目，并带有一个*composer.json*文件。例如：
 - en: '[PRE2]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: After walking through the interactive prompts (requesting a description, author,
     minimum stability, etc.), you’ll be left with a well-defined *composer.json* for
     your project.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 在经过交互式提示（请求描述、作者、最小稳定性等）后，您将得到一个为您的项目定义良好的*composer.json*文件。
 - en: Discussion
+  id: totrans-52
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: 'Composer works by defining information about your project in a JSON document
     and using that information to build out additional script loaders and integrations.
     A newly initialized project won’t have much detail in this document at all. The
     *composer.json* file generated by the `init` command in the Solution example will
     initially look like the following:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: Composer 通过在 JSON 文档中定义项目信息，并利用这些信息构建额外的脚本加载器和集成来工作。新初始化的项目在这个文档中一开始并没有太多详细信息。在解决方案示例中使用
+    `init` 命令生成的 *composer.json* 文件最初看起来如下：
 - en: '[PRE3]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: This configuration file defines no dependencies, no additional scripts, and
     no autoloading. In order to be useful for something other than identifying the
     project and the license, you need to start adding to it. First, you need to define
     the autoloader to pull in your project code.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个配置文件没有定义任何依赖项、额外的脚本或自动加载。为了不仅仅用于标识项目和许可证，还需要开始添加内容。首先，需要定义自动加载器以引入项目代码。
 - en: 'For the sake of this project, use the default namespace `Cookbook` and place
     all of your code in a directory called *src/* within the project. Then, update
     your *composer.json* to map that namespace to that directory as follows:'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于这个项目，使用默认命名空间 `Cookbook` 并将所有代码放在名为 *src/* 的目录中。然后，更新你的 *composer.json* 将该命名空间映射到该目录，如下所示：
 - en: '[PRE4]'
+  id: totrans-57
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Once you’ve updated your Composer config, run `composer dumpautoload` at the
     command line to force Composer to reload the configuration and define the automated
     source mappings. Once that’s complete, Composer will have created a new *vendor/*
     directory in your project. It contains two critical components:'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 更新了 Composer 配置之后，可以在命令行上运行 `composer dumpautoload` 命令，强制 Composer 重新加载配置并定义自动化的源映射。完成后，Composer
+    将在项目中创建一个新的 *vendor/* 目录。它包含两个关键组件：
 - en: An *autoload.php* script that you’ll need to `require()` when you load your
     application
+  id: totrans-59
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个 *autoload.php* 脚本，在加载应用程序时需要 `require()` 它
 - en: A *composer* directory that contains Composer’s code loading routines to dynamically
     pull in your scripts
+  id: totrans-60
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个包含 Composer 代码加载例程的 *composer* 目录，用于动态引入你的脚本
 - en: To further illustrate how autoloading works, create two new files. First, create
     a file called *Hello.php* in the *src/* directory containing the `Hello` class
     defined in [Example 15-1](#composer_hello_class_definition).
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了进一步说明自动加载的工作原理，创建两个新文件。首先，在 *src/* 目录下创建一个名为 *Hello.php* 的文件，其中包含 [示例 15-1](#composer_hello_class_definition)
+    中定义的 `Hello` 类。
 - en: Example 15-1\. Simple class definition for Composer autoloading
+  id: totrans-62
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 15-1\. Composer 自动加载的简单类定义
 - en: '[PRE5]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Then, in the root of your project create an *app.php* file with the following
     contents to bootstrap the execution of the preceding snippet:'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，在项目的根目录创建一个 *app.php* 文件，其内容如下，用于启动前述片段的执行：
 - en: '[PRE6]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Finally, return to the command line. Since you’ve added a new class to the
     project, you need to run `composer dumpautoload` once again so Composer is aware
     of the class. Then, you can run `php app.php` to invoke the application directly
     and produce the following output:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，回到命令行。由于向项目中添加了一个新类，需要再次运行 `composer dumpautoload`，以便 Composer 知道这个类的存在。然后，可以运行
+    `php app.php` 直接调用应用程序并生成以下输出：
 - en: '[PRE7]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Any class definitions you need for your project or application can be defined
     the same way. The base `Cookbook` namespace will always be the root of the *src/*
     directory. If you want to define a nested namespace for objects, say `Cookbook\Recipes`,
     then create a similarly named directory (e.g., *Recipes/*) within *src/* so Composer
     knows where to find your class definitions when they’re used later within the
     application.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 你的项目或应用程序需要的任何类定义都可以采用同样的方式定义。基础的 `Cookbook` 命名空间将始终是 *src/* 目录的根目录。如果希望为对象定义嵌套命名空间，比如
+    `Cookbook\Recipes`，则在 *src/* 中创建一个同名目录（例如 *Recipes/*），以便 Composer 知道在应用程序中后续使用这些类定义时在哪里找到它们。
 - en: Similarly, you can leverage Composer’s `require` command to import third-party
     dependencies into your application.^([2](ch15.html#idm45875139396784)) These dependencies
     will be loaded into your application at runtime the same way your custom classes
     are.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样地，可以利用 Composer 的 `require` 命令将第三方依赖项导入应用程序。^([2](ch15.html#idm45875139396784))
+    这些依赖项将在运行时像自定义类一样加载到应用程序中。
 - en: See Also
+  id: totrans-70
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参见
 - en: Composer documentation on the [`init` command](https://oreil.ly/6J29w) and on
     [PSR-4 autoloading](https://oreil.ly/Buns1).
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于 [`init` 命令](https://oreil.ly/6J29w) 和 [PSR-4 自动加载](https://oreil.ly/Buns1)
+    的 Composer 文档。
 - en: 15.2 Finding Composer Packages
+  id: totrans-72
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 15.2 查找 Composer 包
 - en: Problem
+  id: totrans-73
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to find a library to accomplish a particular task so you don’t need
     to spend time reinventing the wheel by writing your own implementation.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 您想找到一个库来完成特定任务，这样您就不需要花时间重新发明轮子，编写自己的实现。
 - en: Solution
+  id: totrans-75
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: Use the PHP Package Repository at [Packagist](https://packagist.org) to find
     the appropriate library and use Composer to install it in your application.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 PHP 包仓库 [Packagist](https://packagist.org) 来找到适合的库，并使用 Composer 将其安装到您的应用程序中。
 - en: Discussion
+  id: totrans-77
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: Many developers find they spend the majority of their time reimplementing logic
     or systems they’ve built before. Different applications serve different purposes
     but often leverage the same basic building blocks and foundations in order to
     operate.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多开发人员发现他们花费大部分时间重新实现他们以前构建的逻辑或系统。不同的应用程序服务于不同的目的，但通常利用相同的基本构建块和基础来运行。
 - en: This is one of the key drivers behind paradigms like object-oriented programming,
     where you encapsulate the logic in your application within objects that can be
     individually manipulated, updated, or even reused. Instead of rewriting the same
     code over and over again, you encapsulate it within an object that can be reused
     within the application or even transported into your next project.^([3](ch15.html#idm45875139325680))
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是诸如面向对象编程等范式背后的关键驱动因素之一，在这些范式中，您将应用程序中的逻辑封装在可以单独操作、更新或甚至重复使用的对象中。与反复编写相同代码不同，您将其封装在一个可以在应用程序内重复使用甚至传输到下一个项目中的对象中。^([3](ch15.html#idm45875139325680))
 - en: In PHP, these reusable code components are often redistributed as standalone
     libraries that can be imported with Composer. Just as [Recipe 15.1](#composer_definition)
     demonstrated how to define a Composer project and automatically import your class
     and function definitions, the same system can be used to add third-party logic
     to your system as well.^([4](ch15.html#idm45875139321888))
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 PHP 中，这些可重用的代码组件通常作为独立的库重新分发，可以使用 Composer 导入。就像 [Recipe 15.1](#composer_definition)
+    展示了如何定义一个 Composer 项目并自动导入您的类和函数定义一样，同样的系统也可以用来将第三方逻辑添加到您的系统中。^([4](ch15.html#idm45875139321888))
 - en: First, identify the need of a particular operation or piece of logic. Assume,
     for example, your application needs to integrate with a time-based one-time password
     (TOTP) system like Google Authenticator. You’ll need a TOTP library to do so.
     To find it, navigate in your browser to [packagist.org](https://packagist.org),
     the PHP Package Repository. The home page will look somewhat like [Figure 15-1](#packagist_homepage)
     and prominently features a search bar prominently in the header.
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，确定特定操作或逻辑片段的需求。例如，假设您的应用程序需要与基于时间的一次性密码（TOTP）系统（如 Google Authenticator）集成。您需要一个
+    TOTP 库来完成这项工作。要找到它，请在浏览器中导航到 [packagist.org](https://packagist.org)，即 PHP 包仓库。主页看起来会有点像
+    [Figure 15-1](#packagist_homepage)，突出显示了标题中的搜索栏。
 - en: '![Packagist is a free distribution method for PHP packages installable via
     Composer](assets/phpc_1501.png)'
+  id: totrans-82
   prefs: []
   type: TYPE_IMG
+  zh: '![Packagist 是通过 Composer 可安装的 PHP 包的免费分发方法](assets/phpc_1501.png)'
 - en: Figure 15-1\. Packagist is a free distribution method for PHP packages installable
     via Composer
+  id: totrans-83
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 15-1\. Packagist 是通过 Composer 可安装的 PHP 包的免费分发方法
 - en: Then search for the tool you need—in this case, TOTP. You’ll be rewarded with
     a list of available projects, sorted by popularity. You can further leverage the
     package type and various tags affixed to each library to pare your search results
     down to a handful of possible libraries.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后搜索您需要的工具——在本例中是 TOTP。您将获得一个按热门程度排序的可用项目列表。您还可以利用包类型和各种标签，将搜索结果缩减到几个可能的库。
 - en: Note
+  id: totrans-85
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Popularity on Packagist is defined by both package downloads and GitHub stars.
     It’s a good way to measure how frequently a project is being used in the wild
     but is by no means the only measure you should leverage. Many developers still
@@ -382,88 +569,130 @@
     or widely used does not mean a package is secure or the right fit for your project.
     Take time to carefully review each potential library to ensure that it doesn’t
     introduce unnecessary risk into your application.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 Packagist 上，受欢迎程度由包下载量和 GitHub 星标定义。这是衡量项目在实际使用中频繁程度的一个好方法，但绝不是您应该依赖的唯一指标。许多开发人员仍然将第三方代码复制粘贴到其系统中，因此
+    Packagist 指标可能没有反映的数百万“下载”。同样，仅仅因为一个包很受欢迎或被广泛使用，并不意味着它对您的项目是安全的或合适的选择。请花时间仔细审查每个潜在的库，确保它不会为您的应用程序引入不必要的风险。
 - en: Further, if you know of a particular module author whose work you trust, you
     can search for that directly by adding their username to the search. For example,
     a search for `Eric Mann totp` will yield [a specific TOTP implementation](https://oreil.ly/7touz)
     originally created by this book’s author.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，如果你知道一个特定模块的作者，你信任他们的作品，你可以通过添加他们的用户名直接搜索。例如，搜索`Eric Mann totp`将得到由本书作者原创的特定TOTP实现。
 - en: Once you’ve identified and carefully audited available packages for extending
     your application, review [Recipe 15.3](#installing_composer_packages) for instructions
     on how to install and manage them.
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦你已经确认并仔细审查了扩展你的应用程序所需的可用包，在[Recipe 15.3](#installing_composer_packages)中查看安装和管理它们的说明。
 - en: See Also
+  id: totrans-89
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: '[Packagist.org](https://packagist.org): the PHP Package Repository.'
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Packagist.org](https://packagist.org)：PHP包仓库。'
 - en: 15.3 Installing and Updating Composer Packages
+  id: totrans-91
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 15.3 安装和更新Composer包
 - en: Problem
+  id: totrans-92
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You’ve discovered a package on Packagist you want to include in your project.
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 你已经发现了一个你想要包含在项目中的Packagist包。
 - en: Solution
+  id: totrans-94
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Install the package via Composer (assume version 1.0) as follows:'
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装包通过Composer（假设版本为1.0）如下：
 - en: '[PRE8]'
+  id: totrans-96
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Discussion
+  id: totrans-97
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: 'Composer works with two files in your local filesystem: *composer.json* and
     *composer.lock*. The first is the one you define to describe your project, autoloading,
     and license. As a concrete example, the original *composer.json* file you defined
     in [Recipe 15.1](#composer_definition) is as follows:'
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: Composer与你本地文件系统中的两个文件一起工作：*composer.json*和*composer.lock*。第一个用于描述你的项目、自动加载和许可证。具体来说，你在[Recipe
+    15.1](#composer_definition)中定义的原始*composer.json*文件如下：
 - en: '[PRE9]'
+  id: totrans-99
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'Once you run the `require` statement from the Solution example, Composer *updates*
     your *composer.json* file to add the specified vendor dependency. Your file will
     now appear as follows:'
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 运行示例解决方案中的`require`语句后，Composer会更新你的*composer.json*文件，以添加指定的供应商依赖项。你的文件现在会如下所示：
 - en: '[PRE10]'
+  id: totrans-101
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'When you `require` a package, Composer does three things:'
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你`require`一个包时，Composer会执行三件事：
 - en: It checks to make sure the package exists and grabs either the latest version
     (if no version was specified) or the version you ask for. It then updates *composer.json*
     to store the package in the `require` key.
+  id: totrans-103
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 它检查确保包存在并获取最新版本（如果未指定版本）或你请求的版本。然后更新*composer.json*以将包存储在`require`键中。
 - en: By default, Composer then downloads and installs your package in the *vendor/*
     directory within your project. It also updates the autoloader script, so the package
     will be available to other code within your project immediately.
+  id: totrans-104
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 默认情况下，Composer会下载并安装你的包到项目中的*vendor/*目录中。它还更新自动加载程序脚本，因此该包将立即对项目中的其他代码可用。
 - en: Composer also maintains a `composer.lock` file within your project that explicitly
     identifies which versions of which packages you have installed.
+  id: totrans-105
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: Composer还在你的项目中维护一个`composer.lock`文件，明确标识你安装的每个包的版本。
 - en: In the Solution example, you explicitly specified version 1.0 of a package.
     If instead you had not specified a version, Composer would fetch the latest version
     available and use that in the *composer.json* file. If 1.0 is in fact the latest
@@ -472,8 +701,11 @@
     The *composer.lock* file keeps track of the *exact* version installed so even
     if you were to delete your entire *vendor/* directory, reinstalling packages via
     `composer install` will still fetch the same versions as before.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 在解决方案示例中，你明确指定了一个版本为1.0的包。如果你没有指定版本，Composer将获取最新版本并在*composer.json*文件中使用。如果1.0确实是最新版本，Composer将使用`^1.0`作为版本指示器，这将安装可能的维护版本（如1.0.1版本）。*composer.lock*文件跟踪安装的确切版本，因此即使你删除整个*vendor/*目录，通过`composer
+    install`重新安装包时仍将获取相同的版本。
 - en: Composer will also endeavor to find the best version for your local environment.
     It does this by comparing the PHP version required for your environment (and used
     to run the tool) with those versions supported by the requested packages. Composer
@@ -482,12 +714,18 @@
     the system fail to find a compatible version to include, it will report an error
     so you can manually reconcile the version numbers listed in your *composer.json*
     file.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: Composer 还会尽力找到适合您本地环境的最佳版本。它通过比较您的环境所需的 PHP 版本（用于运行工具的版本）与请求的包支持的版本来实现这一点。Composer
+    还尝试调和通过其他地方声明的传递依赖项显式声明的任何依赖关系。如果系统未能找到兼容的版本以包含，它将报告错误，以便您手动调和 *composer.json*
+    文件中列出的版本号。
 - en: Warning
+  id: totrans-108
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: Composer follows semantic versioning in its version constraints. A requirement
     of `^1.0` will only permit maintenance versions (e.g., 1.0.1, 1.0.2) to be installed.
     A greater-than constraint (e.g., `>=1.0`) will install any stable version at or
@@ -495,203 +733,297 @@
     critical to prevent accidental import of breaking package changes introduced by
     major versions. For more background on how to define version constraints, reference
     the [Composer documentation](https://oreil.ly/gvoGC).
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: Composer 在其版本约束中遵循语义化版本。`^1.0`的要求将仅允许安装维护版本（例如，1.0.1、1.0.2）。大于等于的约束（例如，`>=1.0`）将安装任何稳定版本，版本号大于或等于1.0。跟踪您如何定义版本约束非常重要，以防止意外导入由主要版本引入的破坏性包更改。有关如何定义版本约束的更多背景信息，请参考[Composer
+    文档](https://oreil.ly/gvoGC)。
 - en: Packagist-hosted libraries with public code aren’t the only things you can include
     via Composer. In addition, you can point your system at either public or private
     projects hosted in version control systems like GitHub.
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 Packagist 托管的具有公共代码的库不是唯一可以通过 Composer 包含的东西。此外，您还可以将系统指向 GitHub 等版本控制系统中托管的公共或私有项目。
 - en: To add a GitHub repository to your project, first add a `repositories` key to
     *composer.json* so the system knows where to look. Then update your `require`
     key to pull in the project you need. Running `composer update` will then pull
     the package not from Packagist but directly from GitHub and include it in your
     project just like any other library.
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 要将 GitHub 仓库添加到您的项目中，首先在 *composer.json* 中添加一个`repositories`键，这样系统就知道从哪里查找。然后更新您的`require`键以拉取您需要的项目。运行`composer
+    update`将从 GitHub 直接拉取包并将其包含在您的项目中，就像任何其他库一样。
 - en: For example, assume you want to use a particular TOTP library but have uncovered
     a minor bug. First, fork the GitHub repository to your own account. Then, create
     a branch in GitHub to hold your changes. Finally, update *composer.json* to point
     at your custom fork and branch, as illustrated in [Example 15-2](#composer_pull_repository).
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，假设您想使用特定的 TOTP 库，但发现了一个小错误。首先，将 GitHub 仓库分叉到您自己的账户中。然后，在 GitHub 上创建一个分支来保存您的更改。最后，更新
+    *composer.json* 指向您的自定义分支和分支，如[Example 15-2](#composer_pull_repository)所示。
 - en: Example 15-2\. Use Composer to pull projects from GitHub repositories
+  id: totrans-113
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 15-2\. 使用 Composer 从 GitHub 仓库拉取项目
 - en: '[PRE11]'
+  id: totrans-114
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: '[![1](assets/1.png)](#co_packages_and_extensions_CO1-1)'
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_packages_and_extensions_CO1-1)'
 - en: Ensure that the package you want to include is one you have access to. This
     repository can either be public or private. If it’s private, then you’ll need
     to expose a GitHub personal access token as an environment variable so Composer
     has the appropriate credentials to pull in the code.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保您要包含的包是您可以访问的。此存储库可以是公共的也可以是私有的。如果是私有的，那么您将需要将 GitHub 个人访问令牌公开为环境变量，以便 Composer
+    具有拉取代码所需的适当凭据。
 - en: '[![2](assets/2.png)](#co_packages_and_extensions_CO1-2)'
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_packages_and_extensions_CO1-2)'
 - en: Once the repository is defined, add a new branch specification to your `require`
     block. Since this is not a tagged or released version, prefix your branch name
     with `dev-` so Composer knows which branch to pull in.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦定义了仓库，将一个新的分支规范添加到您的`require`块中。由于这不是标记或发布版本，请在分支名称前加上`dev-`，这样 Composer 就知道要拉取哪个分支。
 - en: '[![3](assets/3.png)](#co_packages_and_extensions_CO1-3)'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_packages_and_extensions_CO1-3)'
 - en: To include development branches in your project, you should call out the [minimum
     stability](https://oreil.ly/U9iWR) required by the project as well to avoid any
     potential issues with the inclusion.
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在项目中包含开发分支，您应该注明项目所需的[最低稳定性](https://oreil.ly/U9iWR)，以避免在包含过程中可能出现的任何问题。
 - en: Whether a library enters your project as a public package, repository, or even
     as a [hardcoded ZIP artifact](https://oreil.ly/xEpJh) is up to your development
     team. Regardless, any reusable package can be loaded via Composer with ease and
     exposed to the rest of your application.
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论库以公共包、存储库的形式进入您的项目，还是作为[硬编码的ZIP文件](https://oreil.ly/xEpJh)，都取决于您的开发团队。无论如何，任何可重复使用的包都可以轻松通过Composer加载，并向应用程序的其他部分公开。
 - en: See Also
+  id: totrans-122
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on Composer’s [`require` command](https://oreil.ly/d32oK).
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: Composer的[`require`命令](https://oreil.ly/d32oK)的文档。
 - en: 15.4 Installing Native PHP Extensions
+  id: totrans-124
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 15.4 安装本地PHP扩展
 - en: Problem
+  id: totrans-125
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to install a publicly available native extension for PHP, like the
     [APC User Cache (APCu)](https://oreil.ly/Jppw-).
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望安装PHP的一个公共可用本地扩展，比如[APC用户缓存（APCu）](https://oreil.ly/Jppw-)。
 - en: Solution
+  id: totrans-127
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Find the extension in the PECL repository and install it into the system by
     using PEAR. For example, install the APCu as follows:'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 在PECL存储库中查找扩展，并通过使用PEAR将其安装到系统中。例如，安装APCu的方法如下：
 - en: '[PRE12]'
+  id: totrans-129
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Discussion
+  id: totrans-130
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: 'The PHP community uses two pieces of technology to distribute native extensions
     to the language itself: PEAR and PECL. The primary difference between them is
     the kind of package they’re used for.'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP社区使用两种技术来向语言本身分发本地扩展：PEAR和PECL。它们之间的主要区别在于它们用于的包类型。
 - en: PEAR itself can bundle just about anything—the packages it distributes are bundled
     as gzip-compressed TAR archives that are composed of PHP code. In this way, PEAR
     is similar to Composer and can be used for managing, installing, and updating
     additional PHP libraries used within your application.^([5](ch15.html#idm45875138864368))
     PEAR packages are loaded differently than Composer ones, though, so take care
     if you choose to mix and match between the two package managers.
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: PEAR本身可以捆绑几乎任何东西——它分发的包是由PHP代码组成的gzip压缩的TAR存档。因此，PEAR类似于Composer，可用于管理、安装和更新应用程序中使用的其他PHP库。^([5](ch15.html#idm45875138864368))
+    不过，PEAR包与Composer包的加载方式有所不同，因此如果选择在两个包管理器之间混合使用，请注意。
 - en: PECL is a library of native extensions to PHP written in C, the same base language
     as PHP itself. PECL uses PEAR to handle installation and management of extensions;
     the new functionality introduced through an extension is accessed the same ways
     as functions native to the language itself.
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: PECL是用C语言编写的PHP本地扩展库，与PHP本身相同的基础语言。PECL使用PEAR来处理扩展的安装和管理；通过扩展引入的新功能可以像访问语言本身的本地函数一样访问。
 - en: In reality, many PHP packages introduced in modern versions of the language
     began as PECL extensions that could be optionally installed by developers for
     testing and initial integrations. [The sodium encryption library](https://oreil.ly/QdyfM),
     for example, began as a PECL extension before being added to the core distribution
     of PHP as of version 7.2.^([6](ch15.html#idm45875138876640))
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 实际上，现代版本的PHP中引入的许多PHP包最初是PECL扩展，开发人员可以选择安装以进行测试和初始集成。例如，[钠加密库](https://oreil.ly/QdyfM)最初作为PECL扩展引入，后来在PHP核心分发的7.2版本中被添加。^([6](ch15.html#idm45875138876640))
 - en: Certain databases (for example, [MongoDB](https://oreil.ly/Xoh5_)), distribute
     their core drivers for PHP as native PECL extensions. Various networking, security,
     multimedia, and console manipulation libraries are also available. All are written
     in highly efficient C code and, thanks to PECL and bindings against PHP, behave
     as if they were a part of the language itself.
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 某些数据库（例如[MongoDB](https://oreil.ly/Xoh5_)）将它们的核心驱动程序作为本地PECL扩展发布。还提供各种网络、安全、多媒体和控制台操作库。所有这些都是用高效的C代码编写的，并且由于PECL和与PHP的绑定，表现得就像它们是语言本身的一部分一样。
 - en: 'Unlike tools like Composer, which deliver userland PHP code, PECL delivers
     the raw C code directly to your environment. The `install` command will do the
     following:'
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 不同于像Composer这样传递用户空间PHP代码的工具，PECL直接将原始C代码交付给您的环境。`install`命令将执行以下操作：
 - en: Download the extension source
+  id: totrans-137
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 下载扩展源码
 - en: Compile the source for your system, leveraging the local environment, its configuration,
     and the system architecture to ensure compatibility
+  id: totrans-138
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 编译源代码以适应您的系统，利用本地环境、其配置和系统架构以确保兼容性
 - en: Create a compiled *.so* file for the extension within the [extension directory](https://oreil.ly/KFNg9)
     defined by your environment
+  id: totrans-139
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在由您的环境定义的[扩展目录](https://oreil.ly/KFNg9)内创建一个编译后的*.so*文件用于扩展
 - en: Tip
+  id: totrans-140
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 提示
 - en: While some extensions have appeared to be self-enabling, it’s highly likely
     you will need to modify your system’s *php.ini* file to explicitly include the
     extension. It’s a good idea to then restart your web server (Apache, NGINX, or
     similar) to ensure that PHP loads the new extension as expected.
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管一些扩展看起来是自动启用的，但很可能你需要修改你系统的*php.ini*文件来显式包含该扩展。建议随后重新启动你的Web服务器（如Apache、NGINX或类似）以确保PHP按预期加载新扩展。
 - en: 'On Linux systems, you might even want to leverage your system package manager
     to install a precompiled native extension. Installing APCu on an Ubuntu Linux
     system is usually as simple as this:'
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 在Linux系统上，你甚至可能希望利用系统的软件包管理器安装预编译的本地扩展。在Ubuntu Linux系统上安装APCu通常就像这样简单：
 - en: '[PRE13]'
+  id: totrans-143
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Whether you leverage PECL to build an extension directly or utilize a precompiled
     binary through a package manager, extending PHP is efficient and easy. These extensions
     expand the functionality of the language and make your final applications significantly
     more useful.
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论是利用PECL直接构建扩展还是通过包管理器使用预编译的二进制文件，扩展PHP都是高效且简单的。这些扩展扩展了语言的功能，使你的最终应用程序显著更加实用。
 - en: See Also
+  id: totrans-145
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参见
 - en: Documentation on the [PECL repository](https://oreil.ly/28K08) and [PEAR extension
     packaging system](https://pear.php.net).
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于[PECL仓库](https://oreil.ly/28K08)和[PEAR扩展打包系统](https://pear.php.net)的文档。
 - en: ^([1](ch15.html#idm45875139704496-marker)) A full list of bundled and external
     extensions can be found in the [PHP Manual](https://oreil.ly/SEWGK).
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([1](ch15.html#idm45875139704496-marker)) 完整的捆绑和外部扩展列表可以在[PHP手册](https://oreil.ly/SEWGK)中找到。
 - en: ^([2](ch15.html#idm45875139396784-marker)) For more on installing third-party
     libraries with Composer, see [Recipe 15.3](#installing_composer_packages).
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([2](ch15.html#idm45875139396784-marker)) 想要了解如何使用Composer安装第三方库，请参见[Recipe
+    15.3](#installing_composer_packages)。
 - en: ^([3](ch15.html#idm45875139325680-marker)) For a deeper discussion of object-oriented
     programming and code reuse, review [Chapter 8](ch08.html#chapter_classes).
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([3](ch15.html#idm45875139325680-marker)) 想要更深入地讨论面向对象编程和代码重用，请查看[第8章](ch08.html#chapter_classes)。
 - en: ^([4](ch15.html#idm45875139321888-marker)) The actual *installation* of third-party
     Composer packages will be discussed in [Recipe 15.3](#installing_composer_packages).
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([4](ch15.html#idm45875139321888-marker)) 实际上关于第三方Composer包的*安装*将在[Recipe 15.3](#installing_composer_packages)中讨论。
 - en: ^([5](ch15.html#idm45875138864368-marker)) See [Recipe 15.3](#installing_composer_packages)
     for more on installing packages via Composer.
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([5](ch15.html#idm45875138864368-marker)) 想要了解如何通过Composer安装包，请参见[Recipe 15.3](#installing_composer_packages)。
 - en: ^([6](ch15.html#idm45875138876640-marker)) The sodium extension is discussed
     at length in [Chapter 9](ch09.html#chapter_encryption).
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([6](ch15.html#idm45875138876640-marker)) 长篇讨论钠扩展将在[第9章](ch09.html#chapter_encryption)中进行。

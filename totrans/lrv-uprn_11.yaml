@@ -1,47 +1,67 @@
 - en: Chapter 11\. The Container
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第 11 章\. 容器
 - en: Laravel’s service container, or dependency injection container, sits at the
     core of almost every other feature. The container is a simple tool you can use
     to bind and resolve concrete instances of classes and interfaces, and at the same
     time, it’s a powerful and nuanced manager of a network of interrelated dependencies.
     In this chapter, you’ll learn more about what it is, how it works, and how you
     can use it.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的服务容器或依赖注入容器，位于几乎每个其他功能的核心。容器是一个简单的工具，你可以用它来绑定和解析类和接口的具体实例，同时它也是一个强大而微妙的管理器，管理着一个相互关联的依赖网络。在本章中，你将学到更多关于它是什么、如何工作以及如何使用它的知识。
 - en: Naming and the Container
+  id: totrans-2
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 命名与容器
 - en: 'You’ll notice in this book, in the documentation, and in other educational
     sources that there are quite a few names folks use for the container. These include:'
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本书、文档以及其他教育资源中，你会注意到容器有很多称呼，比如：
 - en: Application container
+  id: totrans-4
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 应用程序容器
 - en: IoC (inversion of control) container
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: IoC（控制反转）容器
 - en: Service container
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 服务容器
 - en: DI (dependency injection) container
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: DI（依赖注入）容器
 - en: All are useful and valid, but just know they’re all talking about the same thing.
     They’re all referring to the service container.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有这些都很有用且有效，但请知道它们指的是同一个东西。它们都是在指服务容器。
 - en: A Quick Introduction to Dependency Injection
+  id: totrans-9
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 依赖注入的快速介绍
 - en: Dependency injection means that, rather than being instantiated (“newed up”)
     within a class, each class’s dependencies will be *injected* in from the outside.
     This most commonly occurs with *constructor injection*, which means an object’s
@@ -49,114 +69,166 @@
     where the class exposes a method specifically for injecting a given dependency,
     and *method injection*, where one or more methods expect their dependencies to
     be injected when they’re called.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 依赖注入意味着，与其在类内部实例化（“newed up”），每个类的依赖将会从外部*注入*进来。这通常发生在*构造函数注入*中，即在创建对象时注入其依赖。但也有*设置器注入*，类公开一个专门用于注入特定依赖的方法，以及*方法注入*，其中一个或多个方法在调用时期望它们的依赖被注入。
 - en: Take a look at [Example 11-1](#EX1101) for a quick example of constructor injection,
     the most common type of dependency injection.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看 [示例 11-1](#EX1101) 以获取构造函数注入的快速示例，这是依赖注入最常见的类型之一。
 - en: Example 11-1\. Basic dependency injection
+  id: totrans-12
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-1\. 基本依赖注入
 - en: '[PRE0]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: As you can see, this `UserMailer` class expects an object of type `Mailer` to
     be injected when it’s instantiated, and its methods then refer to that instance.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你所见，这个 `UserMailer` 类期望在实例化时注入一个类型为 `Mailer` 的对象，然后其方法引用该实例。
 - en: The primary benefits of dependency injection are that it gives us the freedom
     to change what we’re injecting, to mock dependencies for testing, and to instantiate
     shared dependencies just once for shared use.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 依赖注入的主要好处在于它赋予了我们改变我们注入的自由，为测试而模拟依赖关系，并且仅为共享使用而实例化共享依赖项一次。
 - en: Dependency Injection and Laravel
+  id: totrans-16
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 依赖注入与 Laravel
 - en: As you saw in [Example 11-1](#EX1101), the most common pattern for dependency
     injection is constructor injection, or injecting the dependencies of an object
     when it’s instantiated (“constructed”).
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你在 [示例 11-1](#EX1101) 中看到的那样，依赖注入最常见的模式是构造函数注入，即在对象实例化（“构造”）时注入其依赖。
 - en: Let’s take our `UserMailer` class from [Example 11-1](#EX1101). [Example 11-2](#EX1102)
     shows what it might look like to create and use an instance of it.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从 [示例 11-1](#EX1101) 中获取我们的 `UserMailer` 类。[示例 11-2](#EX1102) 展示了如何创建和使用它的实例。
 - en: Example 11-2\. Simple manual dependency injection
+  id: totrans-19
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-2\. 简单手动依赖注入
 - en: '[PRE1]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Now let’s imagine we want our `UserMailer` class to be able to log messages,
     as well as send a notification to a Slack channel every time it sends a message.
     [Example 11-3](#EX1103) shows what this would look like. As you can see, it would
     start to get pretty unwieldy if we had to do all this work every time we wanted
     to create a new instance—​especially when you consider that we’ll have to get
     all these parameters from somewhere.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在假设我们希望我们的 `UserMailer` 类能够记录消息，并且在发送消息时每次都通知 Slack 频道。[示例 11-3](#EX1103) 展示了这将是什么样子。正如你所见，如果我们每次想要创建一个新实例都要做所有这些工作，那将变得非常难以管理—尤其是当你考虑到我们必须从某处获取所有这些参数时。
 - en: Example 11-3\. More complex manual dependency injection
+  id: totrans-22
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-3\. 更复杂的手动依赖注入
 - en: '[PRE2]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Imagine having to write that code every time you wanted a `UserMailer`. Dependency
     injection is great, but this is a mess.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 想象一下，每次想要`UserMailer`时都需要编写那些代码。依赖注入很棒，但这样做太乱了。
 - en: The app() Global Helper
+  id: totrans-25
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: '`app()` 全局助手'
 - en: 'Before we go too far into how the container actually works, let’s take a quick
     look at the simplest way to get an object out of the container: the `app()` helper.'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们深入探讨容器的实际工作方式之前，让我们快速看一下从容器中获取对象的最简单方式：`app()`助手。
 - en: 'Pass any string to that helper, whether it’s a fully qualified class name (FQCN,
     like `*App\ThingDoer*`) or a Laravel shortcut (we’ll talk about those more in
     a second), and it’ll return an instance of that class:'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 将任何字符串传递给该助手，无论是完全合格的类名（FQCN，如`*App\ThingDoer*`）还是 Laravel 的快捷方式（我们稍后会更多讨论），它都会返回该类的一个实例：
 - en: '[PRE3]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: This is the absolute simplest way to interact with the container. It creates
     an instance of this class and returns it for you, nice and easy. It’s like `new
     Logger` but, as you’ll see shortly, much better.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是与容器交互的绝对最简单的方式。它为您创建一个类的实例并返回它，非常简单易行。就像`new Logger`，但是，正如您马上会看到的，要好得多。
 - en: 'Creating the `Logger` instance as shown here seems simple enough, but you might’ve
     noticed that our `$logger` class in [Example 11-3](#EX1103) has two parameters:
     `$logPath` and `$minimumLogLevel`. How does the container know what to pass here?'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您在这里所看到的，创建`Logger`实例似乎很简单，但您可能已经注意到我们在[示例 11-3](#EX1103)中的`$logger`类有两个参数：`$logPath`和`$minimumLogLevel`。容器如何知道在这里传递什么？
 - en: 'Short answer: it doesn’t. You can use the `app()` global helper to create an
     instance of a class that has no parameters in its constructor, but at that point
     you could’ve just run `new Logger` yourself. The container shines when there’s
     some complexity in the constructor, and that’s when we need to look at how exactly
     the container can figure out how to construct classes with constructor parameters.'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 简短的回答是：它不知道。您可以使用`app()`全局助手创建一个在构造函数中没有参数的类的实例，但此时您可以自己运行`new Logger`。当构造函数有一些复杂性时，容器才会发挥作用，这时我们需要看看容器如何确切地能够构造具有构造函数参数的类。
 - en: How the Container Is Wired
+  id: totrans-32
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 容器如何连接
 - en: Before we dig further into the `Logger` class, take a look at [Example 11-4](#EX1104).
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们进一步挖掘`Logger`类之前，看看[示例 11-4](#EX1104)。
 - en: Example 11-4\. Laravel autowiring
+  id: totrans-34
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-4\. Laravel 自动装配
 - en: '[PRE4]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'This looks similar to our mailer example in [Example 11-3](#EX1103). What’s
     different is that these dependencies (`Bar` and `Baz`) are both so simple that
     the container can resolve them without any further information. The container
@@ -164,185 +236,269 @@
     and `Baz`, and then injects them into the new `Foo` instance when it’s creating
     it. This is called *autowiring*: resolving instances based on typehints without
     the developer needing to explicitly bind those classes in the container.'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 这看起来与我们邮件发送器示例中的情况类似，但不同之处在于，这些依赖项（`Bar`和`Baz`）都非常简单，容器可以在不需要进一步信息的情况下解决它们。容器读取`Foo`构造函数中的类型提示，解析`Bar`和`Baz`的实例，然后在创建`Foo`实例时将它们注入其中。这就是*自动装配*：根据类型提示解析实例，而开发者无需在容器中显式绑定这些类。
 - en: Autowiring means that, if a class has not been explicitly bound to the container
     (like `Foo`, `Bar`, or `Baz` in this context) but the container can figure out
     how to resolve it anyway, the container will resolve it. This means any class
     with no constructor dependencies (like `Bar` and `Baz`) and any class with constructor
     dependencies that the container can resolve (like `Foo`) can be resolved out of
     the container.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 自动装配意味着，如果一个类没有显式绑定到容器（比如在这个上下文中的`Foo`、`Bar`或`Baz`），但容器可以找出如何解决它，那么容器就会解决它。这意味着任何没有构造函数依赖的类（比如`Bar`和`Baz`），以及容器可以解决其构造函数依赖的类（比如`Foo`），都可以从容器中解析出来。
 - en: That leaves us needing to bind only classes that have unresolvable constructor
     parameters—​for example, our `$logger` class in [Example 11-3](#EX1103), which
     has parameters related to our log path and log level.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 这意味着我们只需要绑定那些具有无法解析的构造函数参数的类——例如，我们在[示例 11-3](#EX1103)中的`$logger`类，它具有与我们的日志路径和日志级别相关的参数。
 - en: For those, we’ll need to learn how to explicitly bind something to the container.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于这些内容，我们需要学习如何显式地将某些内容绑定到容器中。
 - en: Binding Classes to the Container
+  id: totrans-40
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 将类绑定到容器
 - en: Binding a class to Laravel’s container is essentially telling the container,
     “If a developer asks for an instance of `Logger`, here’s the code to run to instantiate
     one with the correct parameters and dependencies and then return it correctly.”
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 将一个类绑定到Laravel的容器本质上是告诉容器：“如果开发者要求`Logger`的一个实例，这里是实例化它并返回正确的参数和依赖项的代码运行方式。”
 - en: We’re teaching the container that, when someone asks for this particular string
     (which is usually the FQCN of a class), it should resolve it this way.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们教容器，当有人请求特定的字符串（通常是类的完全限定类名时），应该以这种方式解析它。
 - en: Binding to a Closure
+  id: totrans-43
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 绑定到一个闭包
 - en: So, let’s look at how to bind to the container. Note that the appropriate place
     to bind to the container is in a service provider’s `register()` method (see [Example 11-5](#EX1105)).
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，让我们看看如何绑定到容器。请注意，绑定到容器的适当位置是服务提供者的`register()`方法中（参见[示例 11-5](#EX1105)）。
 - en: Example 11-5\. Basic container binding
+  id: totrans-45
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-5\. 基本容器绑定
 - en: '[PRE5]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: There are a few important things to note in this example. First, we’re running
     `$this``->app->bind()`. `$this->app` is an instance of the container that’s always
     available on every service provider. The container’s `bind()` method is what we
     use to bind to the container.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个示例中有几个重要的事情需要注意。首先，我们运行了`$this``->app->bind()`。`$this->app`是每个服务提供者上始终可用的容器实例。容器的`bind()`方法是我们用来绑定到容器的方法。
 - en: The first parameter of `bind()` is the “key” we’re binding to. Here, we’ve used
     the FQCN of the class. The second parameter differs depending on what you’re doing,
     but essentially, it should be *something* that shows the container what to do
     to resolve an instance of that bound key.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: '`bind()`的第一个参数是我们绑定的“键”。在这里，我们使用了类的完全限定类名（FQCN）。第二个参数取决于你正在做什么，但基本上它应该是*某些东西*，用于告诉容器如何解析绑定键的实例。'
 - en: So, in this example, we’re passing a closure. And now, any time someone runs
     `app(Logger::class)`, they’ll get the result of this closure. The closure is passed
     an instance of the container itself (`$app`), so if the class you’re resolving
     has a dependency you want resolved out of the container, you can use it in your
     definition as seen in [Example 11-6](#EX11a).
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，在这个例子中，我们传递了一个闭包。现在，每当有人运行`app(Logger::class)`时，他们将得到这个闭包的结果。闭包被传递了容器本身的实例(`$app`)，所以如果你要解析的类有一个依赖项，你希望从容器中解析出来，你可以在你的定义中使用它，就像在[示例 11-6](#EX11a)中看到的那样。
 - en: Example 11-6\. Using the passed `$app` instance in a container binding
+  id: totrans-50
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-6\. 在容器绑定中使用传递的`$app`实例
 - en: '[PRE6]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Note that every time you ask for a new instance of your class, this closure
     will be run again and the new output returned.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，每次请求你的类的新实例时，这个闭包将被重新运行，并返回新的输出。
 - en: Binding to Singletons, Aliases, and Instances
+  id: totrans-53
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 绑定到单例、别名和实例
 - en: If you want the output of the binding closure to be cached so that this closure
     isn’t re-run every time you ask for an instance, that’s the singleton pattern,
     and you can run `$this->app->singleton()` to do that. [Example 11-7](#EX11b) shows
     what this looks like.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你希望绑定闭包的输出被缓存，以便不必每次请求实例时都重新运行该闭包，那就是单例模式，你可以运行`$this->app->singleton()`来实现。[示例 11-7](#EX11b)展示了这是什么样子。
 - en: Example 11-7\. Binding a singleton to the container
+  id: totrans-55
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-7\. 将单例绑定到容器
 - en: '[PRE7]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: You can also get similar behavior if you already have an instance of the object
     you want the singleton to return, as seen in [Example 11-8](#EX11c).
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你已经拥有你想让单例返回的对象实例，也可以获得类似的行为，如[示例 11-8](#EX11c)所示。
 - en: Example 11-8\. Binding an existing class instance to the container
+  id: totrans-58
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-8\. 将现有的类实例绑定到容器
 - en: '[PRE8]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Finally, if you want to alias one class to another, bind a class to a shortcut,
     or bind a shortcut to a class, you can just pass two strings, as shown in [Example 11-9](#EX11d).
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，如果你想将一个类别名为另一个类，或者将一个快捷方式绑定到一个类，你可以简单地传递两个字符串，如[示例 11-9](#EX11d)所示。
 - en: Example 11-9\. Aliasing classes and strings
+  id: totrans-61
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-9\. 类和字符串的别名
 - en: '[PRE9]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Note that these shortcuts are common in Laravel’s core; it provides a system
     of shortcuts to classes that provide core functionality, using easy-to-remember
     keys like `log`.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，这些快捷方式在Laravel的核心中很常见；它提供了一套快捷方式系统，用于提供核心功能的类，使用易于记忆的键，如`log`。
 - en: Binding a Concrete Instance to an Interface
+  id: totrans-64
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 将一个具体实例绑定到接口
 - en: Just like we can bind a class to another class, or a class to a shortcut, we
     can also bind to an interface. This is extremely powerful, because we can now
     typehint interfaces instead of class names, like in [Example 11-10](#EX1106).
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像我们可以将一个类绑定到另一个类，或者将一个类绑定到一个快捷方式一样，我们也可以绑定到一个接口。这非常强大，因为我们现在可以用接口类型提示而不是类名，就像在[示例
+    11-10](#EX1106)中那样。
 - en: Example 11-10\. Typehinting and binding to an interface
+  id: totrans-66
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-10\. 接口类型提示和绑定
 - en: '[PRE10]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: '[PRE11]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: You can now typehint `Mailer` or `Logger` interfaces all across your code, and
     then choose once in a service provider which specific mailer or logger you want
     to use everywhere. That’s inversion of control.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 您现在可以在代码的各个地方使用`Mailer`或`Logger`接口类型提示，然后在服务提供者中选择一次要在整个应用程序中使用的特定邮件发送器或记录器。这就是控制反转。
 - en: One of the key benefits you get from using this pattern is that later, if you
     choose to use a different mail provider than Mailgun, as long as you have a mailer
     class for that new provider that implements the `Mailer` interface, you can swap
     it once in your service provider and everything in the rest of your code will
     just work.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用此模式的一个关键好处是，以后，如果您决定使用不同于 Mailgun 的邮件提供程序，只要您有一个实现`Mailer`接口的新提供程序的邮件发送器类，您可以在服务提供者中进行一次更改，而其余代码将继续正常工作。
 - en: Contextual Binding
+  id: totrans-71
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 上下文绑定
 - en: Sometimes you need to change how to resolve an interface depending on the context.
     You might want to log events from one place to a local syslog and from others
     out to an external service. So, let’s tell the container to differentiate—check
     out [Example 11-11](#EX1107).
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时候，您需要根据上下文更改接口的解析方式。您可能希望从一个地方将事件日志记录到本地系统日志，而从其他地方记录到外部服务。因此，让我们告诉容器区分—查看[示例
+    11-11](#EX1107)。
 - en: Example 11-11\. Contextual binding
+  id: totrans-73
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-11\. 上下文绑定
 - en: '[PRE12]'
+  id: totrans-74
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Constructor Injection in Laravel Framework Files
+  id: totrans-75
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在 Laravel 框架文件中的构造函数注入
 - en: We’ve covered the concept of constructor injection, and we’ve looked at how
     the container makes it easy to resolve instances of a class or interface out of
     the container. You saw how easy it is to use the `app()` helper to make instances,
     and also how the container will resolve the constructor dependencies of a class
     when it’s creating it.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们已经讨论了构造函数注入的概念，并且已经看过容器如何轻松地从容器中解析类或接口的实例。您看到了使用`app()`助手来创建实例是多么简单，以及当创建类时，容器将解析其构造函数依赖项。
 - en: What we haven’t covered yet is how the container is also responsible for resolving
     many of the core operating classes of your application. For example, every controller
     is instantiated by the container. That means if you want an instance of a logger
@@ -350,224 +506,331 @@
     constructor, and when Laravel creates the controller, it will resolve it out of
     the container and that logger instance will be available to your controller. Take
     a look at [Example 11-12](#EX1108).
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们尚未涵盖的是容器还负责解析应用程序核心操作类中的许多类。例如，每个控制器都是由容器实例化的。这意味着如果您希望在控制器中获取日志记录器的实例，您可以简单地在控制器的构造函数中类型提示日志记录器类，当
+    Laravel 创建控制器时，它将从容器中解析它，并且该日志记录器实例将对您的控制器可用。看看[示例 11-12](#EX1108)。
 - en: Example 11-12\. Injecting dependencies into a controller
+  id: totrans-78
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-12\. 向控制器注入依赖项
 - en: '[PRE13]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: The container is responsible for resolving controllers, middleware, queue jobs,
     event listeners, and any other classes that are automatically generated by Laravel
     in the process of your application’s lifecycle—​so any of those classes can typehint
     dependencies in their constructors and expect them to be automatically injected.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 容器负责解析控制器、中间件、队列作业、事件侦听器以及在应用程序生命周期过程中由 Laravel 自动生成的任何其他类—​因此，这些类中的任何一个都可以在其构造函数中类型提示依赖项，并期望它们自动注入。
 - en: Method Injection
+  id: totrans-81
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 方法注入
 - en: 'There are a few places in your application where Laravel doesn’t just read
     the constructor signature: it also reads the *method* signature and will inject
     dependencies for you there as well.'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 在应用程序中有一些地方，Laravel 不仅仅读取构造函数签名：它还会读取*方法*签名，并且还会为您注入依赖项。
 - en: The most common place to use method injection is in controller methods. If you
     have a dependency you only want to use for a single controller method, you can
     inject it into just that method like in [Example 11-13](#EX1109).
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 在控制器方法中使用方法注入最常见。如果您只想在单个控制器方法中使用某个依赖项，您可以像在[示例 11-13](#EX1109)中那样，仅将其注入到该方法中。
 - en: Example 11-13\. Injecting dependencies into a controller method
+  id: totrans-84
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-13\. 向控制器方法注入依赖项
 - en: '[PRE14]'
+  id: totrans-85
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: You can do the same in the `boot()` method of service providers, and you can
     also arbitrarily call a method on any class using the container, which will allow
     for method injection there (see [Example 11-14](#EX1110)).
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以在服务提供者的`boot()`方法中做同样的事情，你也可以使用容器任意调用任何类的方法，在那里可以进行方法注入（参见[示例 11-14](#EX1110)）。
 - en: Example 11-14\. Manually calling a class method using the container’s `call()`
     method
+  id: totrans-87
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-14\. 使用容器的`call()`方法手动调用类方法
 - en: '[PRE15]'
+  id: totrans-88
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Facades and the Container
+  id: totrans-89
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 门面和容器
 - en: We’ve covered facades quite a bit so far in the book, but we haven’t actually
     talked about how they work.
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本书中，我们已经相当详细地介绍了门面，但实际上我们并没有讨论它们的工作原理。
 - en: 'Laravel’s facades are classes that provide simple access to core pieces of
     Laravel’s functionality. There are two trademark features of facades: first, they’re
     all available in the global namespace (`\Log` is an alias to `\Illuminate\Support\Facades\Log`);
     and second, they use static methods to access nonstatic resources.'
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel的门面是提供对Laravel核心功能的简单访问的类。门面有两个显著特点：首先，它们都在全局命名空间中可用（`\Log`是`\Illuminate\Support\Facades\Log`的别名）；其次，它们使用静态方法访问非静态资源。
 - en: 'Let’s take a look at the `Log` facade, since we’ve been looking at logging
     already in this chapter. In your controller or views, you could use this call:'
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看一下`Log`门面，因为在本章中我们已经在讨论日志记录。在你的控制器或视图中，你可以使用这个调用：
 - en: '[PRE16]'
+  id: totrans-93
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'Here’s what it would look like to make that same call without the facade:'
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是没有使用门面进行相同调用的情况：
 - en: '[PRE17]'
+  id: totrans-95
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: As you can see, facades translate static calls (any method call that you make
     on a class itself, using `::`, instead of on an instance) to normal method calls
     on instances.
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你所看到的，门面将静态调用（在类本身上使用`::`进行的任何方法调用，而不是在实例上进行的）转换为实例上的普通方法调用。
 - en: Importing Facade Namespaces
+  id: totrans-97
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 导入门面命名空间
 - en: 'If you’re in a namespaced class, you’ll want to be sure to import the facade
     at the top:'
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你在有命名空间的类中，你会想确保在顶部导入门面：
 - en: '[PRE18]'
+  id: totrans-99
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: How Facades Work
+  id: totrans-100
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 门面是如何工作的
 - en: Let’s take a look at the `Cache` facade and see how it actually works.
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看一下`Cache`门面，看看它实际是如何工作的。
 - en: First, open up the class `Illuminate\Support\Facades\Cache`. You’ll see something
     like [Example 11-15](#EX1111).
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，打开`Illuminate\Support\Facades\Cache`类。你会看到类似于[示例 11-15](#EX1111)的东西。
 - en: Example 11-15\. The `Cache` facade class
+  id: totrans-103
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-15\. `Cache`门面类
 - en: '[PRE19]'
+  id: totrans-104
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'Every facade has a single method: `getFacadeAccessor()`. This defines the key
     that Laravel should use to look up this facade’s backing instance from the container.'
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个门面都有一个单一的方法：`getFacadeAccessor()`。这定义了Laravel应该使用哪个键从容器中查找该门面的后备实例。
 - en: In this instance, we can see that every call to the `Cache` facade is proxied
     to be a call to an instance of the `cache` shortcut from the container. Of course,
     that’s not a real class or interface name, so we know it’s one of those shortcuts
     I mentioned earlier.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中，我们可以看到每次调用`Cache`门面都会被代理为调用容器中`cache`快捷方式的实例。当然，这不是一个真实的类或接口名称，所以我们知道它是我之前提到的那些快捷方式之一。
 - en: 'So, here’s what’s really happening:'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 所以，这里是实际发生的事情：
 - en: '[PRE20]'
+  id: totrans-108
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'There are a few ways to look up exactly what class each facade accessor points
     to, but checking the documentation is the easiest. There’s a table on the [facades
     documentation page](https://oreil.ly/IRsgc) that shows, for each facade, which
     container binding (shortcut, like `cache`) it’s connected to, and which class
     that returns. It looks like this:'
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 有几种方法可以查找每个门面访问器实际指向的类，但检查文档是最简单的。在[门面文档页面](https://oreil.ly/IRsgc)上有一张表格显示了每个门面连接到哪个容器绑定（比如`cache`这样的快捷方式），以及返回的类。它看起来像这样：
 - en: '| Facade | Class | Service container binding |'
+  id: totrans-110
   prefs: []
   type: TYPE_TB
+  zh: '| 门面 | 类 | 服务容器绑定 |'
 - en: '| --- | --- | --- |'
+  id: totrans-111
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| `App` | `Illuminate\Foundation\Application` | `app` |'
+  id: totrans-112
   prefs: []
   type: TYPE_TB
+  zh: '| `App` | `Illuminate\Foundation\Application` | `app` |'
 - en: '| …​ | …​ | …​ |'
+  id: totrans-113
   prefs: []
   type: TYPE_TB
+  zh: '| …​ | …​ | …​ |'
 - en: '| `Cache` | `Illuminate\Cache\CacheManager` | `cache` |'
+  id: totrans-114
   prefs: []
   type: TYPE_TB
+  zh: '| `Cache` | `Illuminate\Cache\CacheManager` | `cache` |'
 - en: '| …​ | …​ | …​ |'
+  id: totrans-115
   prefs: []
   type: TYPE_TB
+  zh: '| …​ | …​ | …​ |'
 - en: Now that you have this reference, you can do three things.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在你有了这个参考，你可以做三件事情。
 - en: First, you can figure out what methods are available on a facade. Just find
     its backing class and look at the definition of that class, and you’ll know that
     any of its public methods are callable on the facade.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，你可以找出门面上有哪些方法。只需找到其后备类并查看该类的定义，你就会知道其所有公共方法在门面上都是可调用的。
 - en: Second, you can figure out how to inject a facade’s backing class using dependency
     injection. If you ever want the functionality of a facade but prefer to use dependency
     injection, just typehint the facade’s backing class or get an instance of it with
     `app()` and call the same methods you would’ve called on the facade.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二，您可以找出如何使用依赖注入注入门面的后备类。如果您希望使用依赖注入而不是门面的功能，只需类型提示门面的后备类或使用`app()`获取其实例，并调用您本应在门面上调用的相同方法。
 - en: Third, you can see how to create your own facades. Create a class for the facade
     that extends `Illuminate\Support\Facades\Facade`, and give it a `getFacadeAccessor()`
     method, which returns a string. Make that string something that can be used to
     resolve your backing class out of the container—​maybe just the FQCN of the class.
     Finally, you have to register the facade by adding it to the `aliases` array in
     *config/app.php*. Done! You just made your own facade.
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 第三，您可以看到如何创建自己的门面。创建一个门面类，扩展`Illuminate\Support\Facades\Facade`，并为其添加一个`getFacadeAccessor()`方法，该方法返回一个字符串。使该字符串成为可以从容器中解析出您的后备类的东西——也许只是类的完全限定类名。最后，在*config/app.php*中的`aliases`数组中添加该门面以注册门面。完成！您刚刚创建了自己的门面。
 - en: Real-Time Facades
+  id: totrans-120
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 实时门面
 - en: Rather than creating a new class to make your class’s instance methods available
     as static methods, with *real-time facades* you can simply prefix your class’s
     FQCN with `Facades\` and use it *as if it were a facade*. [Example 11-16](#EX1114)
     illustrates how this works.
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: 与创建新类使得您的类的实例方法作为静态方法可用不同，*实时外观*允许您简单地使用`Facades\`前缀您类的完全限定类名，并*像使用门面一样*使用它。[示例 11-16](#EX1114)展示了这如何工作。
 - en: Example 11-16\. Using real-time facades
+  id: totrans-122
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-16\. 使用实时外观
 - en: '[PRE21]'
+  id: totrans-123
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: '[PRE22]'
+  id: totrans-124
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: As you can see here, the nonstatic method `burndown()` becomes accessible as
     a static method on the real-time facade, which we create by prepending the class’s
     full name with `Facades\`.
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您在这里所看到的，非静态方法`burndown()`作为实时外观的静态方法变得可访问，我们通过在类的完整名称前加上`Facades\`来创建。
 - en: Service Providers
+  id: totrans-126
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 服务提供者
 - en: We covered the basics of service providers in the previous chapter (see [“Service
     Providers”](#service_providers2)). What’s most important with regard to the container
     is that you remember to register your bindings in the `register()` method of some
     service provider somewhere.
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在前一章节中介绍了服务提供者的基础知识（参见[“服务提供者”](#service_providers2)）。关于容器最重要的是您要记住，在某个服务提供者的`register()`方法中注册您的绑定。
 - en: You can just dump loose bindings into `App\Providers\AppServiceProvider`, which
     is a bit of a catchall, but it’s generally better practice to create a unique
     service provider for each group of functionality you’re developing and bind its
     classes in its unique `register()` method.
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以将松散的绑定直接添加到`App\Providers\AppServiceProvider`中，这有点像万金油，但通常最好为您开发的每一组功能创建一个独特的服务提供者，并在其独特的`register()`方法中绑定其类。
 - en: Testing
+  id: totrans-129
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 测试
 - en: The ability to use inversion of control and dependency injection makes testing
     in Laravel extremely versatile. You can bind a different logger, for instance,
     depending on whether the app is live or under testing. Or you can change the transactional
@@ -575,63 +838,93 @@
     these swaps are actually so common that it’s even easier to make them using Laravel’s
     *.env* configuration files, but you can make similar swaps with any interfaces
     or classes you’d like.
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用控制反转和依赖注入的能力使得在Laravel中进行测试变得非常灵活。例如，您可以根据应用程序是在线还是在测试中绑定不同的日志记录器。或者，您可以将事务性电子邮件服务从Mailgun更改为本地电子邮件记录器以便轻松检查。这些交换实际上非常常见，以至于使用Laravel的*.env*配置文件更加简单，但您也可以使用任何您想要的接口或类进行类似的交换。
 - en: The easiest way to do this is to explicitly rebind classes and interfaces when
     you need them rebound, directly in the test. [Example 11-17](#EX1112) shows how.
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 最简单的方法是在测试中直接重新绑定类和接口，当您需要它们重新绑定时。[示例 11-17](#EX1112)展示了如何操作。
 - en: Example 11-17\. Overriding a binding in tests
+  id: totrans-132
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-17\. 在测试中重写绑定
 - en: '[PRE23]'
+  id: totrans-133
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: If you need certain classes or interfaces rebound globally for your tests (which
     is not a particularly common occurrence), you can do this in either the `setUp()`
     method in the test class or in the `setUp()` method in Laravel’s `TestCase` base
     test, as shown in [Example 11-18](#EX1113).
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您需要为您的测试全局重新绑定某些类或接口（这并不是特别常见的情况），您可以在测试类的`setUp()`方法中或在Laravel的`TestCase`基本测试的`setUp()`方法中进行操作，就像[示例 11-18](#EX1113)所示。
 - en: Example 11-18\. Overriding a binding for all tests
+  id: totrans-135
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-18\. 重写所有测试的绑定
 - en: '[PRE24]'
+  id: totrans-136
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: When using something like Mockery, it’s common to create a mock or spy or stub
     of a class and then rebind that to the container in place of its referent.
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 当使用类似 Mockery 这样的工具时，通常会创建一个类的模拟对象或间谍对象或存根对象，然后将其重新绑定到容器中，以取代其原有的引用。
 - en: TL;DR
+  id: totrans-138
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 简而言之
 - en: Laravel’s service container has many names, but regardless of what you call
     it, in the end its goal is to make it easy to define how to resolve certain string
     names as concrete instances. These string names are going to be the fully qualified
     class names of classes or interfaces, or shortcuts like `log`.
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的服务容器有许多名称，但无论你如何称呼它，最终它的目标都是简化定义如何将某些字符串名称解析为具体实例。这些字符串名称可以是类或接口的完全限定类名，或者像
+    `log` 这样的快捷方式。
 - en: Each binding teaches the application, given a string key (e.g., `app('log')`),
     how to resolve a concrete instance.
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个绑定都告诉应用程序，给定一个字符串键（例如，`app('log')`），如何解析出一个具体的实例。
 - en: The container is smart enough to do recursive dependency resolution, so if you
     try to resolve an instance of something that has constructor dependencies, the
     container will try to resolve those dependencies based on their typehints, then
     pass them into your class, and finally return an instance.
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 容器足够智能，可以进行递归依赖项解析。因此，如果尝试解析具有构造函数依赖项的实例，容器将尝试基于它们的类型提示解析这些依赖项，然后将它们传递给您的类，并最终返回一个实例。
 - en: There are several ways to bind to the container, but in the end, they all define
     what to return, given a particular string.
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 绑定到容器的方式有几种，但最终它们都定义了在给定特定字符串时返回什么。
 - en: Facades are simple shortcuts that make it easy to use static calls on a root
     namespace–aliased class to call nonstatic methods on classes resolved out of the
     container. Real-time facades allow you to treat any class like a facade by prepending
     its fully qualified class name with `Facades\`.
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 门面是简单的快捷方式，使得可以在根命名空间别名类上使用静态调用，以调用容器中解析出的类的非静态方法。实时门面允许您将任何类视为门面，只需在其完全限定类名之前加上
+    `Facades\` 即可。

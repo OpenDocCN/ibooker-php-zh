@@ -1,37 +1,50 @@
 - en: Chapter 9\. Databases
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第9章 数据库
 - en: PHP has support for over 20 databases, including the most popular commercial
     and open source varieties. Relational database systems such as MariaDB, MySQL,
     PostgreSQL, and Oracle are the backbone of most modern dynamic websites. In these
     are stored shopping-cart information, purchase histories, product reviews, user
     information, credit card numbers, and sometimes even web pages themselves.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP支持超过20种数据库，包括最流行的商业和开源种类。关系数据库系统，如MariaDB、MySQL、PostgreSQL和Oracle，是大多数现代动态网站的支柱。这些系统存储着购物车信息、购买历史、产品评论、用户信息、信用卡号码，有时甚至是网页本身。
 - en: This chapter covers how to access databases from PHP. We focus on the built-in
     *PHP Data Objects* (PDO) library, which lets you use the same functions to access
     any database, rather than on the myriad database-specific extensions. In this
     chapter, you’ll learn how to fetch data from the database, store data in the database,
     and handle errors. We finish with a sample application that shows how to put various
     database techniques into action.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章介绍如何从PHP访问数据库。我们重点介绍内置的*PHP Data Objects*（PDO）库，它允许你使用相同的函数访问任何数据库，而不是使用众多特定于数据库的扩展。在本章中，你将学习如何从数据库中获取数据、将数据存储到数据库中以及处理错误。最后，我们将展示一个示例应用程序，演示如何将各种数据库技术应用到实际中。
 - en: This book cannot go into all the details of creating web database applications
     with PHP. For a more in-depth look at the PHP/MySQL combination, see [*Web Database
     Applications with PHP and MySQL*, Second Edition](http://oreil.ly/web_db_apps_PHP_MySQL)
     (O’Reilly), by Hugh Williams and David Lane.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 这本书无法详尽介绍使用PHP创建Web数据库应用程序的所有细节。想深入了解PHP/MySQL组合，请参阅《*Web Database Applications
+    with PHP and MySQL*, Second Edition》（O’Reilly），作者是Hugh Williams和David Lane，链接在[这里](http://oreil.ly/web_db_apps_PHP_MySQL)。
 - en: Using PHP to Access a Database
+  id: totrans-4
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用PHP访问数据库
 - en: There are two ways to access databases from PHP. One is to use a database-specific
     extension; the other is to use the database-independent PDO library. There are
     advantages and disadvantages to each approach.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 从PHP访问数据库有两种方式。一种是使用特定于数据库的扩展，另一种是使用独立于数据库的PDO库。每种方法都有其优缺点。
 - en: If you use a database-specific extension, your code is intimately tied to the
     database you’re using. For example, the MySQL extension’s function names, parameters,
     error handling, and so on are completely different from those of the other database
@@ -39,43 +52,57 @@
     involve significant changes to your code. PDO, on the other hand, hides the database-specific
     functions from you with an abstraction layer, so moving between database systems
     can be as simple as changing one line of your program or your *php.ini* file.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你使用特定于某种数据库的扩展，你的代码将与你使用的数据库密切相关。例如，MySQL扩展的函数名称、参数、错误处理等完全不同于其他数据库扩展的函数。如果你想将数据库从MySQL迁移到PostgreSQL，将涉及对你的代码进行重大更改。而PDO则通过抽象层将数据库特定的功能隐藏，因此在不同数据库系统之间移动可能只需要修改程序中的一行代码或你的*php.ini*文件。
 - en: The portability of an abstraction layer like the PDO library comes at a price,
     however, as code that uses it is also typically a little slower than code that
     uses a native database-specific extension.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 抽象层（如PDO库）的可移植性是有代价的，因为使用它的代码通常比使用本地数据库特定扩展的代码略慢一些。
 - en: Keep in mind that an abstraction layer does absolutely nothing when it comes
     to making sure your actual SQL queries are portable. If your application uses
     any sort of nongeneric SQL, you’ll have to do significant work to convert your
     queries from one database to another. We will be looking briefly at both approaches
     to database interfaces in this chapter and then look at alternative methods to
     managing dynamic content for the web.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 请记住，抽象层在确保你的实际SQL查询可移植性方面毫无帮助。如果你的应用程序使用任何非通用SQL，你将需要大量工作将你的查询从一个数据库转换到另一个数据库。在本章中，我们将简要讨论数据库接口的两种方法，然后看看管理Web动态内容的其他方法。
 - en: Relational Databases and SQL
+  id: totrans-9
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 关系数据库和SQL
 - en: A Relational Database Management System (RDBMS) is a server that manages data
     for you. The data is structured into tables, where each table has a number of
     columns, each of which has a name and a type. For example, to keep track of science
     fiction books, we might have a “books” table that records the title (a string),
     the year of release (a number), and the author.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 关系数据库管理系统（RDBMS）是一个为您管理数据的服务器。数据被结构化成表，每个表有若干列，每列都有一个名称和类型。例如，为了跟踪科幻书籍，我们可能有一个“books”表记录标题（字符串）、发布年份（数字）和作者。
 - en: Tables are grouped together into databases, so a science fiction book database
     might have tables for time periods, authors, and villains. An RDBMS usually has
     its own user system, which controls access rights for databases (e.g., “user Fred
     can update database authors”).
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 表被组合到数据库中，所以科幻书数据库可能有用于时间段、作者和反派的表。关系数据库管理系统通常有其自己的用户系统，用于控制对数据库的访问权限（例如，“用户Fred可以更新数据库作者”）。
 - en: PHP communicates with relational databases such as MariaDB and Oracle using
     the Structured Query Language (SQL). You can use SQL to create, modify, and query
     relational databases.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP使用结构化查询语言（SQL）与关系数据库（如MariaDB和Oracle）进行通信。您可以使用SQL创建、修改和查询关系数据库。
 - en: 'The syntax for SQL is divided into two parts. The first, Data Manipulation
     Language (DML), is used to retrieve and modify data in an existing database. DML
     is remarkably compact, consisting of only four actions or verbs: `SELECT`, `INSERT`,
@@ -84,135 +111,206 @@
     DDL. The syntax for DDL is not as standardized as that for DML, but as PHP just
     sends any SQL commands you give it to the database, you can use any SQL commands
     your database supports.'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: SQL的语法分为两部分。第一部分是数据操作语言（DML），用于检索和修改现有数据库中的数据。DML非常紧凑，只有四个操作或动词：`SELECT`、`INSERT`、`UPDATE`和`DELETE`。用于创建和修改保存数据的数据库结构的SQL命令集称为数据定义语言，或DDL。DDL的语法没有像DML那样标准化，但由于PHP只是将您提供的任何SQL命令发送给数据库，您可以使用数据库支持的任何SQL命令。
 - en: Note
+  id: totrans-14
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: The SQL command file for creating this sample library database is available
     in a file called *library.sql*.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于创建此样本图书馆数据库的SQL命令文件可在名为*library.sql*的文件中找到。
 - en: 'Assuming you have a table called `books`, this SQL statement would insert a
     new row:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设您有一个名为`books`的表，这条SQL语句将插入一行新数据：
 - en: '[PRE0]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'This SQL statement inserts a new row but specifies the columns for which there
     are values:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 此SQL语句插入一行新数据，但指定了具有值的列：
 - en: '[PRE1]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'To delete all books that were published in 1979 (if any), we could use this
     SQL statement:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 要删除所有1979年出版的书籍（如果有的话），我们可以使用这条SQL语句：
 - en: '[PRE2]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'To change the year for *Roots* to 1983, use this SQL statement:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 要将*Roots*的年份更改为1983年，请使用此SQL语句：
 - en: '[PRE3]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'To fetch only the books published in the 1980s, use:'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 要仅获取1980年代出版的书籍，请使用：
 - en: '[PRE4]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'You can also specify the fields you want returned. For example:'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 你还可以指定要返回的字段。例如：
 - en: '[PRE5]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'You can issue queries that bring together information from multiple tables.
     For example, this query joins together the `book` and `author` tables to let us
     see who wrote each book:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以发出将来自多个表的信息汇总的查询。例如，此查询将`book`和`author`表连接起来，让我们看到每本书的作者是谁：
 - en: '[PRE6]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'You can even short-form (or alias) the table names like this:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 你甚至可以像这样简写（或别名）表名：
 - en: '[PRE7]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: For more on SQL, see [*SQL in a Nutshell*](http://oreil.ly/SQL_Nutshell3), Third
     Edition (O’Reilly), by Kevin Kline.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关SQL的更多信息，请参阅[*SQL in a Nutshell*](http://oreil.ly/SQL_Nutshell3)，第三版（O'Reilly），作者Kevin
+    Kline。
 - en: PHP Data Objects
+  id: totrans-33
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: PHP数据对象
 - en: 'The [PHP website](http://php.net) has this to say about PDO:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PHP网站](http://php.net)对PDO有以下介绍：'
 - en: The PHP Data Objects (PDO) extension defines a lightweight, consistent interface
     for accessing databases in PHP. Each database driver that implements the PDO interface
     can expose database-specific features as regular extension functions. Note that
     you cannot perform any database functions using the PDO extension by itself; you
     must use a database-specific PDO driver to access a database server.
+  id: totrans-35
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: PHP数据对象（PDO）扩展定义了一个轻量级、一致的接口，用于在PHP中访问数据库。每个实现PDO接口的数据库驱动程序都可以将特定于数据库的特性公开为常规扩展函数。请注意，您不能仅使用PDO扩展执行任何数据库函数；您必须使用特定于数据库的PDO驱动程序来访问数据库服务器。
 - en: 'Among its other unique features, PDO:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: PDO的其他独特功能包括：
 - en: Is a native C extension
+  id: totrans-37
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 是一个本地C扩展
 - en: Takes advantage of the latest PHP 7 internals
+  id: totrans-38
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 利用最新的PHP 7内部功能
 - en: Uses buffered reading of data from the result set
+  id: totrans-39
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用结果集的缓冲读取数据
 - en: Provides common database features as a base
+  id: totrans-40
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 作为基础提供常见的数据库功能。
 - en: Is still able to access database-specific functions
+  id: totrans-41
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 仍然能够访问特定于数据库的函数。
 - en: Can use transaction-based techniques
+  id: totrans-42
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可以使用基于事务的技术。
 - en: Can interact with LOBS (Large Objects) in the database
+  id: totrans-43
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可以与数据库中的大对象（LOBs）交互。
 - en: Can use prepared and executable SQL statements with bound parameters
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可以使用带绑定参数的准备和可执行SQL语句。
 - en: Can implement scrollable cursors
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 可以实现可滚动的游标。
 - en: Has access to `SQLSTATE` error codes and has very flexible error handling
+  id: totrans-46
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 提供了`SQLSTATE`错误代码和非常灵活的错误处理能力。
 - en: Since there are a number of features here, we will touch on only a few of them
     to illustrate just how beneficial PDO can be.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于这里涉及的功能有很多，我们只会触及其中一部分，以展示PDO可以有多么有益。
 - en: 'First, a little about PDO. It has drivers for almost all database engines in
     existence, and those drivers that PDO does not supply should be accessible through
     PDO’s generic ODBC connection. PDO is modular in that it has to have at least
@@ -221,77 +319,113 @@
     to set up the connections for the database of your choice. As an example, for
     establishing PDO on a Windows server for MySQL interaction, simply enter the following
     two lines into your *php.ini* file and restart your server:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，介绍一下PDO。它为几乎所有数据库引擎提供了驱动程序，而那些PDO未提供的驱动程序应通过PDO的通用ODBC连接进行访问。PDO是模块化的，至少需要启用两个扩展才能激活：PDO扩展本身和特定于您将进行接口的数据库的PDO扩展。请参阅[在线文档](http://ca.php.net/pdo))以设置连接到您选择的数据库的连接。例如，要在Windows服务器上为MySQL交互建立PDO，只需将以下两行代码输入到您的*php.ini*文件中，并重新启动服务器：
 - en: '[PRE8]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: The PDO library is also an object-oriented extension (as you will see in the
     code examples that follow).
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: PDO库也是面向对象的扩展（正如您将在接下来的代码示例中看到的）。
 - en: Making a connection
+  id: totrans-51
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 建立连接
 - en: 'The first requirement for PDO is to make a connection to the database in question
     and hold that connection in a connection handle variable, as in the following
     code:'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用PDO的第一个要求是连接到所讨论的数据库，并将该连接保持在连接句柄变量中，如以下代码所示：
 - en: '[PRE9]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'The `$`*dsn* stands for *data source name*, and the other two parameters are
     self-explanatory. Specifically, for a MySQL connection, you would write the following
     code:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$`*dsn*代表*数据源名称*，另外两个参数是不言自明的。特别是对于MySQL连接，您会写如下代码：'
 - en: '[PRE10]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Of course, you could (should) maintain variable-based username and password
     parameters for code reuse and flexibility reasons.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，您可以（应该）保持基于变量的用户名和密码参数，以便重用和灵活性原因。
 - en: Interacting with the database
+  id: totrans-57
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 与数据库交互
 - en: 'Once you have connected to your database engine and the database that you want
     to interact with, you can use that connection to send SQL commands to the server.
     A simple `UPDATE` statement would look like this:'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 连接到数据库引擎并与要与之交互的数据库连接后，您可以使用该连接向服务器发送SQL命令。一个简单的`UPDATE`语句看起来像这样：
 - en: '[PRE11]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: This code simply updates the books table and releases the query. This allows
     you to send simple SQL commands (e.g., `UPDATE`, `DELETE`, `INSERT`) directly
     to the database.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 此代码仅更新图书表并释放查询。这允许您直接向数据库发送简单的SQL命令（例如`UPDATE`、`DELETE`、`INSERT`）。
 - en: Using PDO and prepared statements
+  id: totrans-61
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用PDO和准备语句
 - en: 'More typically, you’ll use *prepared statements*, issuing PDO calls in stages
     or steps. Consider the following code:'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 更典型的情况是，您将使用*准备语句*，分阶段或步骤地发出PDO调用。考虑以下代码：
 - en: '[PRE12]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'In this code, we “prepare” the SQL code and then “execute” it. Next, we cycle
     through the result with the `while` code and, finally, we release the result object
     by assigning `null` to it. This may not look all that powerful in this simple
     example, but there are other features that can be used with prepared statements.
     Now, consider this code:'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这段代码中，我们首先“准备”SQL代码，然后“执行”它。接下来，我们用`while`代码循环处理结果，最后通过将`null`赋给它来释放结果对象。在这个简单的示例中，这可能看起来并不那么强大，但是有其他可以与准备语句一起使用的功能。现在，考虑下面的代码：
 - en: '[PRE13]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'Here, we prepare the SQL statement with four named placeholders: *authorid*,
     *title*, *ISBN*, and *pub_year*. In this case, these happen to be the same names
     as the columns in the database, but this is done only for clarity—the placeholder
@@ -302,22 +436,31 @@
     can also do this type of statement preparation with positional placeholders (not
     actually naming them), signified by a ?, which is the positional item to be replaced.
     Look at the following variation of the previous code:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，我们使用四个命名占位符（*authorid*、*title*、*ISBN* 和 *pub_year*）准备了 SQL 语句。在这种情况下，这些恰好是数据库中列的名称，但这只是为了清晰起见——占位符名称可以是任何对您有意义的内容。在执行调用中，我们用想要在此特定查询中使用的实际数据替换这些占位符。准备语句的一个优点是，您可以多次执行相同的
+    SQL 命令，并通过数组每次传递不同的值。您还可以使用位置占位符（实际上不命名它们），用? 表示，这是要替换的位置项。看看前一个代码的以下变化：
 - en: '[PRE14]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: This accomplishes the same thing but with less code, as the value area of the
     SQL statement does not name the elements to be replaced, and therefore the array
     in the `execute` statement needs to send in only the raw data and no names. You
     just have to be sure about the position of the data that you are sending into
     the prepared statement.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 这样做的效果是一样的，但代码更少，因为 SQL 语句的值区域不命名要替换的元素，因此在 `execute` 语句中，只需发送原始数据，而无需名称。您只需确保发送到准备语句的数据的位置。
 - en: Handling transactions
+  id: totrans-69
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 处理事务
 - en: Some RDBMSs support *transactions*, in which a series of database changes can
     be committed (all applied at once) or rolled back (discarded, with none of the
     changes applied to the database). For example, when a bank handles a money transfer,
@@ -325,107 +468,160 @@
     should happen without the other, and there should be no time lag between the two
     actions. PDO handles transactions elegantly with `try...catch` structures like
     this one in [Example 9-1](#example_nine_onedot_the_trydotdotdotcat).
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些关系型数据库管理系统支持*事务*，在事务中，一系列数据库更改可以被提交（一次性应用）或回滚（丢弃，数据库中没有应用任何更改）。例如，当银行处理资金转账时，从一个账户取款并存入另一个账户必须同时发生——两者不能单独发生，两个操作之间也不应该有时间间隔。PDO
+    使用 `try...catch` 结构优雅地处理事务，例如 [示例 9-1](#example_nine_onedot_the_trydotdotdotcat)
+    中的这个。
 - en: Example 9-1\. The try...catch code structure
+  id: totrans-71
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-1\. 使用 try...catch 代码结构
 - en: '[PRE15]'
+  id: totrans-72
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: If the entirety of the transaction can’t be completed, none of it will be, and
     an exception will be thrown.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果整个事务无法完成，那么它将不会完成，并且会抛出异常。
 - en: If you call `commit()` or `rollback()` on a database that doesn’t support transactions,
     the methods return `DB_ERROR`.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果在不支持事务的数据库上调用 `commit()` 或 `rollback()`，则这些方法将返回 `DB_ERROR`。
 - en: Note
+  id: totrans-75
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Be sure to check your underlying database product to ensure that it supports
     transactions.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 请确保检查您的底层数据库产品是否支持事务。
 - en: Debugging statements
+  id: totrans-77
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 调试语句
 - en: The PDO interface provides a method for showing details about a PDO statement,
     which can be useful for debugging if something goes wrong.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: PDO 接口提供了一种显示关于 PDO 语句的详细信息的方法，如果出现问题，这可能对调试非常有用。
 - en: '[PRE16]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'Calling the `debugDumpParams()` method on the statement object prints a variety
     of information about the call:'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用语句对象上的 `debugDumpParams()` 方法会打印有关调用的各种信息：
 - en: '[PRE17]'
+  id: totrans-81
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: The `Sent SQL` section is displayed only after the statement is executed; prior
     to that, only the `SQL` and `Params` sections are available.
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Sent SQL` 部分仅在语句执行后显示；在此之前，只有 `SQL` 和 `Params` 部分可用。'
 - en: MySQLi Object Interface
+  id: totrans-83
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: MySQLi 对象接口
 - en: The most popular database platform used with PHP is the MySQL database. If you
     look at the [MySQL website](http://www.mysql.com), you’ll discover that there
     are a few different versions of MySQL you can use. We will look at the freely
     distributable version known as the *community server*. PHP has a number of different
     interfaces to this database tool as well, so we will look at the object-oriented
     interface known as MySQLi, aka the *MySQL Improved* extension.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 最流行的数据库平台是 MySQL 数据库。如果你查看 [MySQL 网站](http://www.mysql.com)，你会发现有几个不同的 MySQL
+    版本可供使用。我们将看看自由发布版本，称为*社区服务器*。PHP 还有许多不同的接口可以访问这个数据库工具，所以我们将看看对象导向接口，称为 MySQLi，又称*MySQL
+    Improved* 扩展。
 - en: Recently, [MariaDB](http://mariadb.com) has started overtaking MySQL as the
     database of choice for PHP developers. By design, MariaDB is client language–,
     connection tool–, and binary file–compatible with MySQL; this means that you can
     install MariaDB, uninstall MySQL, and point your PHP configuration to MariaDB
     instead, and likely need no other changes.
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 最近，[MariaDB](http://mariadb.com) 开始超越 MySQL 成为 PHP 开发者首选的数据库。按设计，MariaDB 与 MySQL
+    兼容，这意味着你可以安装 MariaDB，卸载 MySQL，并将你的 PHP 配置指向 MariaDB，可能不需要其他更改。
 - en: If you are not overly familiar with OOP interfaces and concepts, be sure to
     review [Chapter 6](ch06.xhtml#objects-id00032) before you get too far into this
     section.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你对面向对象的接口和概念不是很熟悉，请确保在深入学习本节之前阅读[第 6 章](ch06.xhtml#objects-id00032)。
 - en: 'Since this object-oriented interface is built into PHP with a standard installation
     configuration (you simply activate the MySQLi extension in your PHP environment),
     all you have to do to start using it is instantiate its class, as in the following
     code:'
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于这种面向对象的接口已经内置到 PHP 的标准安装配置中（只需在 PHP 环境中激活 MySQLi 扩展），你只需实例化其类，如下面的代码所示：
 - en: '[PRE18]'
+  id: totrans-88
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'In this example, we have a database named `library`, and we will use the fictitious
     username of `petermac` and the password of `1q2w3e9i8u7y`. The actual code that
     would be used is:'
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中，我们有一个名为`library`的数据库，我们将使用虚构的用户名`petermac`和密码`1q2w3e9i8u7y`。实际使用的代码如下：
 - en: '[PRE19]'
+  id: totrans-90
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: This gives us access to the database engine itself within the PHP code; we will
     specifically access tables and other data later. Once this class is instantiated
     into the variable `$db`, we can use methods on that object to do our database
     work.
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 这样我们就可以在 PHP 代码中访问数据库引擎本身；我们将稍后特别访问表和其他数据。一旦这个类被实例化为变量`$db`，我们就可以使用该对象的方法来进行数据库工作。
 - en: 'A brief example of generating some code to insert a new book into the `library`
     database would look something like this:'
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 生成一些代码插入新书到`library`数据库的简短示例会看起来像这样：
 - en: '[PRE20]'
+  id: totrans-93
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: First, we instantiate the MySQLi class into the variable `$db`. Next, we build
     our SQL command string and save it to a variable called `$sql`. Then we call the
     query method of the class and at the same time test its return value to determine
@@ -433,12 +629,17 @@
     may not want to `echo` out to the browser at this stage, as again this is only
     an example. Last, we call the `close()` method on the class to tidy up and destroy
     the class from memory.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，我们将 MySQLi 类实例化为变量`$db`。接下来，我们构建我们的 SQL 命令字符串，并将其保存到名为`$sql`的变量中。然后我们调用类的
+    query 方法，同时测试其返回值以确定是否成功（`TRUE`），然后相应地注释到屏幕上。在这个阶段，你可能不想将内容`echo`到浏览器上，因为这只是一个例子。最后，我们在类上调用`close()`方法来清理和销毁类从内存中。
 - en: Retrieving Data for Display
+  id: totrans-95
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 检索数据以进行显示
 - en: In another area of your website, you may want to draw out a listing of your
     books and show who their authors are. We can accomplish this by employing the
     same MySQLi class and working with the result set that is generated from a `SELECT`
@@ -446,173 +647,253 @@
     we’ll look at one example of how this can be done. Notice that the result returned
     is a different object than the `$db` that we first instantiate. PHP instantiates
     the result object for you and fills it with any returned data.
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 在你网站的另一个区域，你可能希望列出你的书籍清单，并显示它们的作者是谁。我们可以通过使用相同的 MySQLi 类，并处理从`SELECT` SQL 命令生成的结果集来实现这一点。有许多方法可以在浏览器中显示信息，我们将看一个例子来展示如何实现这一点。请注意，返回的结果是一个不同的对象，而不是我们首先实例化的`$db`。PHP
+    会为你实例化结果对象，并将其填充为任何返回的数据。
 - en: '[PRE21]'
+  id: totrans-97
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Here, we are using the `query()` method call and storing the returned information
     into the variable called `$result`. Then we are using a method of the result object
     called `fetch_assoc()` to provide one row of data at a time, and we are storing
     that single row into the variable called `$row`. This continues as long as there
     are rows to process. Within that `while` loop, we are dumping content out to the
     browser window. Finally, we are closing both the result and the database objects.
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，我们使用 `query()` 方法调用，并将返回的信息存储到名为`$result`的变量中。然后我们使用结果对象的 `fetch_assoc()`
+    方法逐行提供数据，并将该单行存储到名为`$row`的变量中。只要有行要处理，这个过程就会继续。在那个`while`循环内，我们将内容输出到浏览器窗口。最后，我们关闭结果和数据库对象。
 - en: 'The output would look like this:'
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 输出如下所示：
 - en: '[PRE22]'
+  id: totrans-100
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Note
+  id: totrans-101
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: One of the most useful methods in MySQLi is `multi_query()`, which allows you
     to run multiple SQL commands in the same statement. If you want to do an `INSERT`
     and then an `UPDATE` statement based on similar data, you can do it all in one
     method call—one step.
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 在MySQLi中最有用的方法之一是`multi_query()`，它允许您在同一语句中运行多个SQL命令。如果您想基于类似数据进行`INSERT`和`UPDATE`语句，您可以在一个方法调用中完成所有操作。
 - en: We have, of course, just scratched the surface of what the MySQLi class has
     to offer. If you review its [documentation](http://www.php.net/mysqli)), you’ll
     see the extensive list of methods that are part of this class, as well as each
     result class documented within the appropriate subject area.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，我们只是浅尝辄止MySQLi类的功能。如果您查阅其[文档](http://www.php.net/mysqli)，您将看到该类别的广泛方法列表，以及适当主题领域内的每个结果类别的详细记录。
 - en: SQLite
+  id: totrans-104
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: SQLite
 - en: SQLite is a compact, highly performant (for small data sets), and—as its name
     suggests—lightweight database. SQLite is ready to go right out of the box when
     you install PHP, so if it sounds like a good fit for your database needs, be sure
     to read up on it.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: SQLite是一个紧凑、高性能（适用于小数据集）的数据库，正如其名字所示，它是轻量级的。安装PHP时，SQLite即可立即投入使用，因此如果它符合您的数据库需求，务必详细了解一下。
 - en: All the database storage in SQLite is file-based, and therefore accomplished
     without the use of a separate database engine. This can be very advantageous if
     you are trying to build an application with a small database footprint and no
     product dependencies other than PHP. All you have to do to start using SQLite
     is to reference it in your code.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: SQLite中的所有数据库存储都是基于文件的，因此无需使用单独的数据库引擎就可以完成。如果您试图构建一个数据库占用空间小且除了PHP之外没有其他产品依赖的应用程序，这可能非常有利。要开始使用SQLite，您只需在代码中引用它。
 - en: 'There is an OOP interface to SQLite, so you can instantiate an object with
     the following statement:'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: SQLite还提供了面向对象的接口，因此您可以使用以下语句实例化一个对象：
 - en: '[PRE23]'
+  id: totrans-108
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: The neat thing about this statement is that if the file is not found at the
     specified location, SQLite creates it for you. Continuing with our `library` database
     example, the command to create the authors table and insert a sample row within
     SQLite would look something like [Example 9-2](#example_nine_twodot_sqlite_library_auth).
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 这条语句的好处在于，如果找不到指定位置的文件，SQLite会为您创建它。继续使用我们的`library`数据库示例，用于在SQLite中创建作者表并插入示例行的命令可能看起来像[示例 9-2](#example_nine_twodot_sqlite_library_auth)。
 - en: Example 9-2\. SQLite library authors table
+  id: totrans-110
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例9-2\. SQLite库作者表
 - en: '[PRE24]'
+  id: totrans-111
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: Note
+  id: totrans-112
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: In SQLite, unlike MySQL, there is no `AUTO_INCREMENT` option. SQLite instead
     makes any column that is defined with `INTEGER` and `PRIMARY KEY` an automatically
     incrementing column. You can override this default behavior by providing a value
     to the column when an `INSERT` statement is executed.
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 在SQLite中，与MySQL不同，没有`AUTO_INCREMENT`选项。相反，SQLite会使任何用`INTEGER`和`PRIMARY KEY`定义的列成为自动递增列。当执行`INSERT`语句时，您可以通过为列提供值来覆盖此默认行为。
 - en: Notice that the data types are quite different from what we have seen in MySQL.
     Remember that SQLite is a trimmed-down database tool and therefore it is “lite”
     on its data types; see [Table 9-1](#data_types_available_in_sqlite) for a listing
     of the data types that it uses.
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，这些数据类型与我们在MySQL中看到的相当不同。请记住，SQLite是一个精简的数据库工具，因此它在数据类型上非常“轻量级”；请参阅[表 9-1](#data_types_available_in_sqlite)获取其使用的数据类型列表。
 - en: Table 9-1\. Data types available in SQLite
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 表9-1\. SQLite中可用的数据类型
 - en: '| Data type | Explanation |'
+  id: totrans-116
   prefs: []
   type: TYPE_TB
+  zh: '| 数据类型 | 解释 |'
 - en: '| --- | --- |'
+  id: totrans-117
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| Text | Stores data as `NULL`, `TEXT`, or `BLOB` content. If a number is supplied
     to a text field, it is converted to text before it is stored. |'
+  id: totrans-118
   prefs: []
   type: TYPE_TB
+  zh: '| 文本 | 将数据存储为`NULL`、`TEXT`或`BLOB`内容。如果将数字提供给文本字段，则在存储之前将其转换为文本。 |'
 - en: '| Numeric | Can store either integer or real data. If text data is supplied,
     SQLite attempts to convert the information to numerical format. |'
+  id: totrans-119
   prefs: []
   type: TYPE_TB
+  zh: '| 数值 | 可以存储整数或实数数据。如果提供文本数据，SQLite 尝试将信息转换为数值格式。 |'
 - en: '| Integer | Behaves the same as the numeric data type. However, if data of
     the real type is supplied, it is stored as an integer. This may affect data storage
     accuracy. |'
+  id: totrans-120
   prefs: []
   type: TYPE_TB
+  zh: '| 整数 | 表现与数值数据类型相同。但是，如果提供实数类型的数据，则将其存储为整数。这可能会影响数据存储的准确性。 |'
 - en: '| Real | Behaves the same as the numeric data type, except that it forces integer
     values into floating-point representation. |'
+  id: totrans-121
   prefs: []
   type: TYPE_TB
+  zh: '| 实数 | 表现与数值数据类型相同，但会将整数值强制转换为浮点表示。 |'
 - en: '| None | This is a catchall data type; it does not prefer one base type to
     another. Data is stored exactly as supplied. |'
+  id: totrans-122
   prefs: []
   type: TYPE_TB
+  zh: '| None | 这是一个万能的数据类型；它不偏向于任何基本类型。数据被完全按照提供的方式存储。 |'
 - en: Run the following code in [Example 9-3](#example_nine_threedot_sqlite_library_bo)
     to create the books table and insert some data into the database file.
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[示例 9-3](#example_nine_threedot_sqlite_library_bo)中运行以下代码以创建书籍表并将一些数据插入到数据库文件中。
 - en: Example 9-3\. SQLite library books table
+  id: totrans-124
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-3\. SQLite库书籍表
 - en: '[PRE25]'
+  id: totrans-125
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: Notice that we can execute multiple SQL commands at the same time. We could
     also do this with MySQLi, but you’d have to remember to use the `multi_query()`
     method; with SQLite, it’s available with the `queryExec()` method. After loading
     the database with some data, run the code in [Example 9-4](#example_nine_fourdot_sqlite_select_book).
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意，我们可以同时执行多个SQL命令。我们也可以使用MySQLi来做到这一点，但您必须记住使用`multi_query()`方法；而在SQLite中，可以使用`queryExec()`方法来实现。在加载了一些数据到数据库后，请运行[示例 9-4](#example_nine_fourdot_sqlite_select_book)中的代码。
 - en: Example 9-4\. SQLite select books
+  id: totrans-127
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-4\. SQLite选择书籍
 - en: '[PRE26]'
+  id: totrans-128
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: 'The preceding code produces the following output:'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 上述代码产生以下输出：
 - en: '[PRE27]'
+  id: totrans-130
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: SQLite can do almost as much as the “bigger” database engines—the “lite” refers
     not to its functionality but to its demand for system resources. You should always
     consider SQLite when you require a database that’s more portable and less demanding
     of resources.
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: SQLite 几乎可以做到与“更大”的数据库引擎一样多的功能——“lite”并不是指其功能，而是指其对系统资源的需求较低。当您需要一个更便携且对资源要求较少的数据库时，您应始终考虑使用SQLite。
 - en: Note
+  id: totrans-132
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: If you are just getting started with the dynamic aspect of web development,
     you can use PDO to interface with SQLite. In this way, you can start with a lightweight
     database and grow into a more robust database server like MySQL when you are ready.
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您刚开始接触Web开发的动态方面，您可以使用PDO与SQLite进行接口交互。这样，您可以从轻量级数据库开始，并在准备好时逐步转向更强大的MySQL数据库服务器。
 - en: Direct File-Level Manipulation
+  id: totrans-134
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 直接文件级别操作
 - en: PHP has many little hidden features within its vast toolset. One of these features
     (which is often overlooked) is its uncanny ability to handle complex files. Sure,
     everyone knows that PHP can open a file, but what can it really do with that file?
@@ -626,53 +907,79 @@
     of text for later retrieval. The functions we’ll discuss here are nothing out
     of the ordinary when taken individually—in fact, they’re really part of the basic
     PHP toolset everyone is probably familiar with, as you can see in [Table 9-2](#commonly_used_php_file_management_funct).
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP在其庞大的工具集中有许多隐藏的小特性。其中一个经常被忽视的特性是其处理复杂文件的不可思议能力。当然，每个人都知道PHP可以打开文件，但它究竟能做些什么呢？考虑以下示例，突显了其真正的可能性范围。本书的一位作者曾被一位“没钱”的潜在客户联系，但希望开发一个动态网络调查。当然，作者最初向客户展示了PHP与MySQLi数据库交互的奇迹。然而，在听到当地ISP的月费用后，客户问是否有其他（更便宜）的方法来完成工作。事实证明，如果您不想使用SQLite，可以使用文件来管理和操作少量文本以便稍后检索。我们将在这里讨论的功能在单独使用时并不算特别——实际上，它们确实是每个人可能都熟悉的基本PHP工具集的一部分，正如您可以在[表 9-2](#commonly_used_php_file_management_funct)中看到的那样。
 - en: Table 9-2\. Commonly used PHP file management functions
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 9-2\. 常用的PHP文件管理函数
 - en: '| Function name | Description of use |'
+  id: totrans-137
   prefs: []
   type: TYPE_TB
+  zh: '| 函数名 | 使用描述 |'
 - en: '| --- | --- |'
+  id: totrans-138
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `mkdir()` | Used to make a directory on the server. |'
+  id: totrans-139
   prefs: []
   type: TYPE_TB
+  zh: '| `mkdir()` | 用于在服务器上创建目录。 |'
 - en: '| `file_exists()` | Used to determine if a file or directory exists at the
     supplied location. |'
+  id: totrans-140
   prefs: []
   type: TYPE_TB
+  zh: '| `file_exists()` | 用于确定提供位置是否存在文件或目录。 |'
 - en: '| `fopen()` | Used to open an existing file for reading or writing (see detailed
     options for correct usage). |'
+  id: totrans-141
   prefs: []
   type: TYPE_TB
+  zh: '| `fopen()` | 用于打开现有文件以供读取或写入（请查看正确使用的详细选项）。 |'
 - en: '| `fread()` | Used to read in the contents of a file to a variable for PHP
     use. |'
+  id: totrans-142
   prefs: []
   type: TYPE_TB
+  zh: '| `fread()` | 用于将文件内容读取到PHP变量中以供使用。 |'
 - en: '| `flock()` | Used to gain an exclusive lock on a file for writing. |'
+  id: totrans-143
   prefs: []
   type: TYPE_TB
+  zh: '| `flock()` | 用于在写入时对文件获取独占锁定。 |'
 - en: '| `fwrite()` | Used to write the contents of a variable to a file. |'
+  id: totrans-144
   prefs: []
   type: TYPE_TB
+  zh: '| `fwrite()` | 用于将变量的内容写入文件。 |'
 - en: '| `filesize()` | When reading in a file, this is used to determine how many
     bytes to read in at a time. |'
+  id: totrans-145
   prefs: []
   type: TYPE_TB
+  zh: '| `filesize()` | 在读取文件时，用于确定一次读取多少字节。 |'
 - en: '| `fclose()` | Used to close the file once its usefulness has passed. |'
+  id: totrans-146
   prefs: []
   type: TYPE_TB
+  zh: '| `fclose()` | 用于一旦文件的有用性结束后关闭文件。 |'
 - en: The interesting part is in tying all the functions together to accomplish your
     objective. For example, let’s create a small web form survey that covers two pages
     of questions. Users can enter some opinions and return at a later date to finish
     the survey, picking up right where they left off. We’ll scope out the logic of
     our little application and, hopefully, you will see that its basic premise can
     be expanded to a full production-type employment.
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 有趣的部分在于将所有功能绑定在一起以实现您的目标。例如，让我们创建一个涵盖两页问题的小型网络表单调查。用户可以输入一些意见，并在以后的日期返回以完成调查，从他们离开的地方继续。我们将勾勒出我们小应用程序的逻辑，并希望您能看到它的基本前提可以扩展到完整的生产类型的使用。
 - en: The first thing that we want to do is allow users to return to this survey at
     any time to provide additional input. To do this, we need to have a unique identifier
     to differentiate one user from another. Generally, a person’s email address is
@@ -693,84 +1000,124 @@
     next survey question. [Example 9-5](#example_nine_fivedot_file_level_access) shows
     the code for the first page (the `<?php` tags are included here because there
     are places where they are turned on and off throughout the listing).
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们首先要做的是允许用户随时返回此调查并提供额外的输入。为此，我们需要一个唯一的标识符来区分每个用户。一般来说，一个人的电子邮件地址是唯一的（其他人可能知道并使用它，但这涉及网站安全和/或控制身份盗窃的问题）。为了简单起见，在这里我们假设使用电子邮件地址是诚实的，不必理会密码系统。因此，一旦我们获得了用户的电子邮件地址，我们需要将该信息存储在与其他网站访问者不同的位置。为此，我们将为服务器上的每个访问者创建一个目录文件夹（当然，这假设您可以访问并具有适当权限的服务器位置来允许文件的读写）。由于访客的电子邮件地址是相对唯一的标识符，我们将简单地使用该标识符命名新的目录位置。一旦我们创建了一个目录（测试用户是否从上一次会话返回），我们将读取任何已经存在的文件内容，并在
+    `<textarea>` 表单控件中显示它们，以便访客可以查看他或她之前写过的内容（如果有的话）。然后，在表单提交时保存访客的评论，并继续下一个调查问题。[示例 9-5](#example_nine_fivedot_file_level_access)
+    展示了第一页的代码（这里包含 `<?php` 标签，因为在列表中的某些位置它们被打开和关闭）。
 - en: Example 9-5\. File-level access
+  id: totrans-149
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-5\. 文件级访问
 - en: '[PRE28]'
+  id: totrans-150
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: '[PRE29]'
+  id: totrans-151
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: '[Figure 9-1](#survey_login_screen) shows the web page that asks the visitor
     to submit an email address.'
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 9-1](#survey_login_screen) 显示了要求访客提交电子邮件地址的网页。'
 - en: '![Survey login screen](Images/php4_0901.png)'
+  id: totrans-153
   prefs: []
   type: TYPE_IMG
+  zh: '![调查登录界面](Images/php4_0901.png)'
 - en: Figure 9-1\. Survey login screen
+  id: totrans-154
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 9-1\. 调查登录界面
 - en: As you can see, the first thing that we do is open a new session to pass the
     visitor’s information on to subsequent pages. Then we test to confirm that the
     form further down in the code has indeed been submitted and that there is something
     entered in the email address field. If this test fails, the form is simply redisplayed.
     Of course, the production version of this functionality would send out an error
     message telling the user to enter valid text.
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所见，我们首先打开一个新的会话，以便将访客的信息传递给后续页面。然后我们测试确认代码中下方的表单是否已经提交，以及电子邮件地址字段是否有输入。如果测试失败，表单将简单地重新显示。当然，此功能的生产版本会发送错误消息告知用户输入有效文本。
 - en: Once this test has passed (assuming the form has been submitted correctly) we
     create a `$folder` variable that contains the directory structure where we want
     to save the survey information and append the user’s email address to it; we also
     save the contents of this newly created variable (`$folder`) into the session
     for later use. Here we simply take the email address and use it (again, if this
     were a secure site, we would protect the data with proper security measures).
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦此测试通过（假设表单已正确提交），我们将创建一个`$folder`变量，其中包含我们要保存调查信息的目录结构，并将用户的电子邮件地址附加到其中；我们还将这个新创建的变量（`$folder`）的内容保存到会话中以供以后使用。在这里，我们只是取出电子邮件地址并使用它（再次强调，如果这是一个安全站点，我们会采取适当的安全措施保护数据）。
 - en: Next, we want to see if the directory already exists. If it does not, we create
     it with the `mkdir()` function. This function takes the argument of the path and
     the name of the directory we want to create and attempts to create it.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们要检查目录是否已经存在。如果不存在，我们使用`mkdir()`函数创建它。此函数接受路径和要创建的目录的名称作为参数，并尝试创建它。
 - en: Note
+  id: totrans-158
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: In a Linux environment, there are other options on the `mkdir()` function that
     control access levels and permissions on the newly created directory, so be sure
     to look into those options if this applies to your environment.
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 在Linux环境中，`mkdir()`函数有其他选项可以控制新创建的目录的访问级别和权限，因此如果适用于您的环境，请务必查阅这些选项。
 - en: After we verify that the directory exists, we simply direct the browser to the
     first page of the survey.
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 在验证目录存在后，我们简单地将浏览器重定向到调查的第一页。
 - en: Now that we are on the first page of the survey (see [Figure 9-2](#the_first_page_of_the_survey)),
     the form is ready for use.
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们在调查的第一页（见[图9-2](#the_first_page_of_the_survey)）上，表单已准备好使用了。
 - en: '![The first page of the survey](Images/php4_0902.png)'
+  id: totrans-162
   prefs: []
   type: TYPE_IMG
+  zh: '![调查的第一页](Images/php4_0902.png)'
 - en: Figure 9-2\. The first page of the survey
+  id: totrans-163
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图9-2\. 调查的第一页
 - en: This, however, is a dynamically generated form, as you can see in [Example 9-6](#example_nine_sixdot_file_level_accessco).
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，这是一个动态生成的表单，正如您在[示例9-6](#example_nine_sixdot_file_level_accessco)中所看到的。
 - en: Example 9-6\. File-level access, continued
+  id: totrans-165
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例9-6\. 文件级访问，继续
 - en: '[PRE30]'
+  id: totrans-166
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: 'Let’s highlight a few of the lines of code here, because this is where the
     file management and manipulation really takes place. After taking in the session
     information that we need and appending the filename to the `$filename` variable,
@@ -778,11 +1125,15 @@
     process is to display any information that may already be saved in the file and
     allow users to enter information (or alter what they have already entered). So,
     near the top of the code you see this command:'
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，让我们突出几行代码，因为这是文件管理和操作真正发生的地方。在获取所需的会话信息并将文件名追加到`$filename`变量之后，我们就可以开始处理文件了。请记住，这个过程的目的是显示可能已保存在文件中的任何信息，并允许用户输入信息（或修改已输入的信息）。因此，在代码的顶部附近，您会看到以下命令：
 - en: '[PRE31]'
+  id: totrans-168
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: 'Using the file opening function, `fopen()`, we ask PHP to provide us with a
     handle to that file and store it in the aptly named variable `$file_handle`. Notice
     that there is another parameter passed to the function here: the `a+` option.
@@ -792,11 +1143,15 @@
     does not exist, PHP will attempt to create it. Looking at the next two lines of
     code, you’ll see that the entire file is read (using the `file_get_contents()`
     function) into the `$comments` variable, and then it is closed:'
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用文件打开函数`fopen()`，我们要求PHP为我们提供一个文件句柄，并将其存储在名为`$file_handle`的变量中。请注意，此处还向函数传递了另一个参数：`a+`选项。[PHP网站](http://php.net)提供了这些选项字母的完整列表及其含义。`a+`选项使文件以读写方式打开，并将文件指针置于任何现有文件内容的末尾。如果文件不存在，PHP将尝试创建它。查看接下来的两行代码，您会看到整个文件被读取（使用`file_get_contents()`函数）到`$comments`变量中，然后关闭文件：
 - en: '[PRE32]'
+  id: totrans-170
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: 'Next, we want to see if the form portion of this program file has been executed
     and, if so, we have to save any information that was entered into the text area.
     This time, we open the same file again, but we use the `w+` option, which causes
@@ -805,11 +1160,15 @@
     the file. Essentially, we want to empty out the current contents of the file and
     replace it with a totally new volume of text. For this purpose, we employ the
     `fwrite()` function:'
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们想看看此程序文件的表单部分是否已执行，如果是，我们必须保存输入到文本区域的任何信息。这一次，我们再次打开相同的文件，但使用`w+`选项，这会导致解释器只打开文件进行写入—如果文件不存在，则创建它，如果存在，则清空它。然后，文件指针被放置在文件的开头。本质上，我们想清空文件的当前内容，并用完全新的文本内容替换它。为此，我们使用`fwrite()`函数：
 - en: '[PRE33]'
+  id: totrans-172
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: We have to be sure that this information is indeed saved into the designated
     file, so we wrap a few conditional statements around our file-writing operations
     to make sure everything will go smoothly. First, we attempt to gain an exclusive
@@ -819,33 +1178,47 @@
     since the file management is unique to the entered email address on the first
     web page form and each survey has its own folder location, so usage collisions
     should never occur unless two people happen to be using the same email address.
+  id: totrans-173
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们必须确保这些信息确实保存到指定的文件中，因此我们在文件写入操作周围包裹了几个条件语句，以确保一切顺利进行。首先，我们尝试在问题文件上获得独占锁定（使用`flock()`函数）；这将确保在我们操作文件时，没有其他进程可以访问该文件。写入完成后，我们释放文件上的锁定。这只是一种预防措施，因为文件管理是基于第一个网页表单中输入的电子邮件地址，并且每个调查都有自己的文件夹位置，因此除非两个人恰好使用相同的电子邮件地址，否则不应发生使用冲突。
 - en: As you can see, the file write function uses the `$file_handle` variable to
     add the contents of the `$question1` variable to the file. Then we simply close
     the file when we are finished with it and move on to the next page of the survey,
     as shown in [Figure 9-3](#page_two_of_the_survey).
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你所见，文件写入函数使用`$file_handle`变量将`$question1`变量的内容添加到文件中。然后当我们完成后，我们简单地关闭文件，转到调查的下一页，如[图 9-3](#page_two_of_the_survey)所示。
 - en: '![Page 2 of the survey](Images/php4_0903.png)'
+  id: totrans-175
   prefs: []
   type: TYPE_IMG
+  zh: '![调查第二页](Images/php4_0903.png)'
 - en: Figure 9-3\. Page 2 of the survey
+  id: totrans-176
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 9-3\. 调查第二页
 - en: As you can see in [Example 9-7](#example_nine_sevendot_file_level_access), the
     code for processing this file (called *question2.txt*) is identical to the previous
     one except for its name.
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你在[例子 9-7](#example_nine_sevendot_file_level_access)中所见，处理这个文件（称为*question2.txt*）的代码与前一个代码相同，除了文件名不同。
 - en: Example 9-7\. File-level access, continued
+  id: totrans-178
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 例子 9-7\. 文件级访问，续
 - en: '[PRE34]'
+  id: totrans-179
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: This kind of file processing can continue for as long as you like, and therefore
     your surveys can be as long as you like. To make it more interesting, you can
     ask multiple questions on the same page and simply give each question its own
@@ -853,8 +1226,10 @@
     and the text is stored, it is directed to a PHP file called *last_page.php*. This
     page is not included in the code samples, as it is merely a page thanking users
     for filling out the survey.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种文件处理可以持续进行，时间长短由你决定，因此你的调查可以无限延续。为了增加趣味性，你可以在同一页上询问多个问题，并简单地给每个问题分配一个独立的文件名。这里要指出的唯一独特项是，一旦提交了此页面并存储了文本，它将被重定向到一个名为*last_page.php*的PHP文件。这个页面不包含在代码示例中，因为它仅仅是感谢用户填写调查的页面。
 - en: Of course, after a few pages, with as many as five questions per page, you may
     find yourself with a large volume of individual files needing management. Fortunately,
     PHP has other file-handling functions that you can use. The `file()` function,
@@ -864,8 +1239,10 @@
     multiple pieces of information in a single file very easily. Naturally, this would
     also entail the use of the appropriate looping controls for handling the creation
     of the HTML form, as well as recording the entries into that form.
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，在几页之后，每页多达五个问题，你可能会发现自己有大量的单个文件需要管理。幸运的是，PHP还有其他文件处理函数供你使用。例如，`file()`函数是`fread()`函数的替代品，它将文件的整个内容读取到一个数组中，每行一个元素。如果你的信息格式正确——每行以换行符`\n`结尾——那么你可以非常容易地将多个信息存储在单个文件中。当然，这也需要使用适当的循环控制来处理HTML表单的创建以及记录表单中的条目。
 - en: When it comes to file handling, there are still many more options that you can
     look at on the PHP website. If you go to [“Filesystem”](app01.xhtml#filesystem),
     you will find a list of over 70 functions—including, of course, the ones discussed
@@ -875,94 +1252,136 @@
     much more. When you get right down to it, if you have enough time and desire,
     you can even write an entire web application without ever needing or using a database
     system.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 当涉及文件处理时，你还可以在PHP网站上查看更多选项。如果你访问[“文件系统”](app01.xhtml#filesystem)，你会找到一个包含超过70个函数的列表——当然，这里讨论的函数也包括在内。你可以使用`is_readable()`或`is_writable()`函数检查文件是否可读或可写。你可以检查文件权限、空闲磁盘空间或总磁盘空间，你可以删除文件、复制文件等等。归根结底，如果你有足够的时间和愿望，甚至可以编写一个完整的Web应用程序而不需要或使用数据库系统。
 - en: When the day comes, and it most likely will, that you have a client who does
     not want to pay big bucks for the use of a database engine, you will have an alternative
     approach to offer them.
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 当有一天到来，这种情况很可能会发生，即你遇到一位客户并不想花大笔钱使用数据库引擎时，你可以提供一种替代方案。
 - en: MongoDB
+  id: totrans-184
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: MongoDB
 - en: The last database type that we will look at is a NoSQL database. NoSQL databases
     are rising in popularity because they are also quite lightweight in terms of system
     resources, but more importantly, they work outside the typical SQL command structure.
     NoSQL databases are also becoming more popular with mobile devices like tablets
     and smartphones for the same two reasons.
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将要看的最后一种数据库类型是NoSQL数据库。NoSQL数据库因其在系统资源上的轻量级特性而备受青睐，更重要的是，它们不受传统SQL命令结构的限制。NoSQL数据库也因同样两个原因而在移动设备如平板电脑和智能手机中变得越来越流行。
 - en: One of the frontrunners in the NoSQL database world is known as MongoDB. We’ll
     only be touching the surface of MongoDB here, just to give you a taste of what
     is possible with its use. For more detailed coverage of this topic, please refer
     to [*MongoDB and PHP*](http://bit.ly/MongoDB_PHP) (O’Reilly) by Steve Francia.
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: NoSQL数据库世界的佼佼者之一就是MongoDB。在这里我们只会浅尝MongoDB的表面，只是为了让你体验一下它的潜力。如需更详细的内容，请参阅[《MongoDB与PHP》](http://bit.ly/MongoDB_PHP)（O’Reilly）由Steve
+    Francia编著。
 - en: The first thing to get your head around with MongoDB is that it is not a traditional
     database. It has its own setup and terminology. Getting used to how to work with
     it will take some time for the traditional SQL database user. [Table 9-3](#typical_mongodbsolidussql_equivalents)
     attempts to draw some parallels with “standard” SQL terminology.
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于MongoDB，首先要理解的是它不是传统的数据库。它有自己的设置和术语。习惯与它一起工作会花费传统SQL数据库用户一些时间。[表 9-3](#typical_mongodbsolidussql_equivalents)试图与“标准”SQL术语进行一些类比。
 - en: Table 9-3\. Typical MongoDB/SQL equivalents
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 表9-3\. 典型的MongoDB/SQL对应关系
 - en: '| Traditional SQL terms | MongoDB terms |'
+  id: totrans-189
   prefs: []
   type: TYPE_TB
+  zh: '| 传统SQL术语 | MongoDB术语 |'
 - en: '| --- | --- |'
+  id: totrans-190
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| Database | Database |'
+  id: totrans-191
   prefs: []
   type: TYPE_TB
+  zh: '| 数据库 | 数据库 |'
 - en: '| Tables | Collections |'
+  id: totrans-192
   prefs: []
   type: TYPE_TB
+  zh: '| 表格 | 集合 |'
 - en: '| Rows | Documents. No correlation, not like database “rows”; rather, think
     of arrays. |'
+  id: totrans-193
   prefs: []
   type: TYPE_TB
+  zh: '| 行 | 文档。没有关联，不像数据库的“行”；相反，可以看作是数组。 |'
 - en: There’s not an exact equivalent of a database row within the MongoDB paradigm.
     One of the best ways to think of the data within a collection is like that of
     a multidimensional array, as you’ll see shortly when we revamp our `library` database
     example.
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 在MongoDB范例中，没有确切等价的数据库行。在集合内部处理数据的最佳方式之一是将其视为多维数组，稍后我们将重新调整我们的 `library` 数据库示例时会看到。
 - en: If you just want to try MongoDB out on your own localhost (recommended for getting
     familiar with it), you can use an all-in-one tool like [Zend Server CE](http://zend.com)
     to set up a local environment with the Mongo drivers all installed. You’ll still
     have to download the server itself from the [MongoDB website](http://www.mongodb.org)
     and follow the instructions for setting up the database server engine for your
     own local environment.
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你只是想在本地主机上尝试 MongoDB（推荐用于熟悉它），你可以使用诸如[Zend Server CE](http://zend.com)之类的一体化工具来设置本地环境，并安装了Mongo驱动程序。你仍然需要从[MongoDB网站](http://www.mongodb.org)下载服务器本身，并按照说明为你自己的本地环境设置数据库服务器引擎。
 - en: One very useful web-based tool for browsing MongoDB data and manipulating the
     collections and documents is [Genghis](http://genghisapp.com). Simply download
     the project and drop it into its own folder in the localhost and call *genghis.php*.
     If the database engine is running, it will be picked up and displayed to you (see
     [Figure 9-4](#genghis_mongodb_web_interface_sample)).
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个非常有用的基于Web的工具，用于浏览MongoDB数据并操作集合和文档，是[Genghis](http://genghisapp.com)。只需下载项目并将其放入本地主机的自己文件夹中，然后调用
+    *genghis.php*。如果数据库引擎正在运行，它将被检测到并显示给你（见[图 9-4](#genghis_mongodb_web_interface_sample)）。
 - en: '![Genghis MongoDB web interface sample](Images/php4_0904.png)'
+  id: totrans-197
   prefs: []
   type: TYPE_IMG
+  zh: '![Genghis MongoDB web interface示例](Images/php4_0904.png)'
 - en: Figure 9-4\. Genghis MongoDB web interface sample
+  id: totrans-198
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 9-4\. Genghis MongoDB web interface示例
 - en: Now let’s get into some sample code. Take a look at [Example 9-8](#example_nine_eightdot_mongodb_library)
     to see the beginnings of a Mongo database taking shape.
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们来看一些示例代码。看看[示例 9-8](#example_nine_eightdot_mongodb_library)，看看Mongo数据库正在形成的开端。
 - en: Example 9-8\. MongoDB library
+  id: totrans-200
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-8\. MongoDB库
 - en: '[PRE35]'
+  id: totrans-201
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: The first line creates a new connection to the MongoDB engine, and creates an
     object interface to it as well. The next line connects to the `library` “collection”;
     if this collection does not exist, Mongo creates it for you (so there is no need
@@ -973,153 +1392,234 @@
     and the last two use the `save()` method. The only difference between these two
     methods is that `save()` will update a value if it is already in the document
     and has an existing `_id` key (more on `_id` shortly).
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一行创建了与MongoDB引擎的新连接，并创建了一个对象接口。接下来的行连接到 `library` “集合”；如果此集合不存在，Mongo将为您创建它（因此在Mongo中不需要预先创建集合）。然后，我们使用
+    `$db` 连接到 `library` 数据库创建了一个对象接口，并创建了一个集合，用于存储我们的作者数据。接下来的四组代码将文档添加到 `authors`
+    集合中，使用了两种不同的方法。前两个示例使用 `insert()` 方法，后两个示例使用 `save()` 方法。这两种方法之间唯一的区别是，`save()`
+    方法会更新已存在的文档值，如果存在 `_id` 键的话（稍后详细讨论 `_id`）。
 - en: Execute this code within a browser, and you should see the sample data shown
     in [Figure 9-5](#sample_mongo_document_data_for_authors). As you can see, an entity
     called `_id` is created with the inserted data. This is the automatic primary
     key that is assigned to all created collections. If we wanted to depend on that
     key—and there is no reason why we shouldn’t (other than its obvious complexity)—we
     wouldn’t have had to add in our own `authorid` information in the preceding code.
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: 在浏览器中执行此代码，你应该会看到[图 9-5](#sample_mongo_document_data_for_authors)中显示的样本数据。正如你所见，一个名为
+    `_id` 的实体被创建并与插入的数据关联。这是自动分配给所有创建的集合的主键。如果我们想依赖这个键——除了显而易见的复杂性外——我们不必在前面的代码中添加自己的
+    `authorid` 信息。
 - en: '![Sample Mongo document data for authors](Images/php4_0905.png)'
+  id: totrans-204
   prefs: []
   type: TYPE_IMG
+  zh: '![作者Mongo文档数据示例](Images/php4_0905.png)'
 - en: Figure 9-5\. Sample Mongo document data for authors
+  id: totrans-205
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 9-5\. 作者Mongo文档数据示例
 - en: Retrieving Data
+  id: totrans-206
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 检索数据
 - en: Once the data is stored, we can now start looking at ways in which to access
     it. [Example 9-9](#example_nine_ninedot_mongodb_data_selec) shows one option.
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 数据存储后，我们现在可以开始查看访问它的方法。[示例 9-9](#example_nine_ninedot_mongodb_data_selec) 展示了其中一种选项。
 - en: Example 9-9\. MongoDB data selection example
+  id: totrans-208
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-9\. MongoDB数据选择示例
 - en: '[PRE36]'
+  id: totrans-209
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: The first three lines of code are the same as before, since we still want to
     connect to the same database and make use of the same collection (`library`) and
     document (`authors`). After that, we use the `findone()` method, passing it an
     array containing a unique piece of data that can be used to find the information
     that we want—in this case, the `authorid` for Isaac Asimov, `4`. We store the
     returned information into an array called `$data`.
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 前三行代码与之前相同，因为我们仍然想连接到同一个数据库，并利用同一个集合（`library`）和文档（`authors`）。之后，我们使用 `findone()`
+    方法，将其传递给一个包含可用于查找我们想要的信息的唯一数据片段的数组——在本例中是Isaac Asimov的 `authorid`，即 `4`。我们将返回的信息存储到一个名为
+    `$data` 的数组中。
 - en: Note
+  id: totrans-211
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: As a good oversimplification, you can think of information within a Mongo document
     as array-based.
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为一个很好的简化，您可以将Mongo文档中的信息视为基于数组的。
 - en: Then we can use that array as we wish to display the returned data from the
     document. The following is the resulting output from the previous code. Notice
     the size of the primary key that Mongo has created.
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，我们可以根据需要使用该数组来显示文档返回的数据。以下是前面代码的结果输出。注意Mongo创建的主键大小。
 - en: '[PRE37]'
+  id: totrans-214
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: Inserting More Complex Data
+  id: totrans-215
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 插入更复杂的数据
 - en: Next we want to continue our `library` example database by adding some books
     to the document in relation to a particular author. Here is where the analogy
     of different tables within a database can collapse. Consider [Example 9-10](#example_nine_onezerodot_mongodb_simple),
     which adds four books to the `authors` document, essentially as a multidimensional
     array.
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，我们希望继续通过向文档添加一些书籍来扩展我们的 `library` 示例数据库，这些书籍与特定作者有关。这是不同数据库中不同表的类比可以崩溃的地方。考虑[示例 9-10](#example_nine_onezerodot_mongodb_simple)，它向
+    `authors` 文档添加了四本书，实质上是作为多维数组。
 - en: Example 9-10\. MongoDB simple data update/insert
+  id: totrans-217
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-10\. MongoDB简单数据更新/插入
 - en: '[PRE38]'
+  id: totrans-218
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: Here, after making the needed connections, we use the `update()` method and
     use the first element of the array (the first parameter of the `update()` method)
     as the unique lookup identifier, and a defined operator called `$set` as the second
     parameter to attach the book data to the provided key of the first parameter.
+  id: totrans-219
   prefs: []
   type: TYPE_NORMAL
+  zh: 在此之后，我们通过建立必要的连接，使用 `update()` 方法，并使用数组的第一个元素（`update()` 方法的第一个参数）作为唯一的查找标识符，并使用一个称为
+    `$set` 的定义运算符作为第二个参数，将书籍数据附加到提供的第一个参数的键上。
 - en: Note
+  id: totrans-220
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: You should research and fully understand the special operators `$set` and `$push`
     (not covered here) before using them in a production environment. See the [MongoDB
     documentation](http://bit.ly/12YY646) for more information and a full listing
     of these operators.
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: 在生产环境中使用这些特殊操作符 `$set` 和 `$push`（本文未涉及）之前，您应该进行调查并完全理解它们。请参阅[MongoDB文档](http://bit.ly/12YY646)
+    以获取更多信息和这些操作符的完整列表。
 - en: '[Example 9-11](#example_nine_oneonedot_mongodb_data_upd) provides another approach
     to accomplishing the same goal, except that we are preparing the array to be inserted
     and attached ahead of time and using the Mongo-created `_id` as the location key.'
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 9-11](#example_nine_oneonedot_mongodb_data_upd) 提供了另一种实现相同目标的方法，不同之处在于我们提前准备要插入和附加的数组，并使用Mongo创建的
+    `_id` 作为位置键。'
 - en: Example 9-11\. MongoDB data update/insert
+  id: totrans-223
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-11\. MongoDB数据更新/插入
 - en: '[PRE39]'
+  id: totrans-224
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: In both of our two previous code examples, we did not add any keys to the array
     of book data. We could do this, but it’s just as easy to allow Mongo to manage
     that data as if it were a multidimensional array. [Figure 9-6](#book_data_added_to_an_author)
     shows how the data from [Example 9-11](#example_nine_oneonedot_mongodb_data_upd)
     will look when it is displayed in Genghis.
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们之前的两个代码示例中，我们没有向书籍数据数组添加任何键。我们可以这样做，但是允许Mongo将该数据管理为多维数组同样简单。[图 9-6](#book_data_added_to_an_author)
+    显示了当在Genghis中显示来自[示例 9-11](#example_nine_oneonedot_mongodb_data_upd) 的数据时的样子。
 - en: '![Book data added to an author](Images/php4_0906.png)'
+  id: totrans-226
   prefs: []
   type: TYPE_IMG
+  zh: '![向作者添加书籍数据](Images/php4_0906.png)'
 - en: Figure 9-6\. Book data added to an author
+  id: totrans-227
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 9-6\. 向作者添加书籍数据
 - en: '[Example 9-12](#example_nine_onetwodot_mongodb_data_fin) shows a little more
     of what data is stored in our Mongo database. It adds just a few more lines of
     code to [Example 9-9](#example_nine_ninedot_mongodb_data_selec); here we are referencing
     the automatic natural keys generated in the previous code that inserted the book
     detail information.'
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 9-12](#example_nine_onetwodot_mongodb_data_fin) 展示了我们的Mongo数据库中存储的更多数据。它在[示例 9-9](#example_nine_ninedot_mongodb_data_selec)
+    的基础上再添加了几行代码；在这里，我们引用了前一段代码中插入书籍详细信息的自动生成的自然键。'
 - en: Example 9-12\. MongoDB data find and display
+  id: totrans-229
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-12\. MongoDB数据查找和显示
 - en: '[PRE40]'
+  id: totrans-230
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: 'The generated output of the preceding code looks like this (remember that arrays
     are zero-based):'
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 前面代码生成的输出如下（请记住数组是从零开始的）：
 - en: '[PRE41]'
+  id: totrans-232
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: For more information on how MongoDB can be used and manipulated within PHP,
     see the documentation on the [PHP website](https://oreil.ly/GB6iV).
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于如何在 PHP 中使用和操作 MongoDB 的更多信息，请参阅[PHP 网站上的文档](https://oreil.ly/GB6iV)。
 - en: What’s Next
+  id: totrans-234
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 接下来的内容
 - en: In the next chapter, we’ll explore various techniques for including graphics
     media within pages generated by PHP, as well as dynamically generating and manipulating
     graphics on your web server.
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: 在下一章中，我们将探讨在由 PHP 生成的页面中包含图形媒体的各种技术，以及在 Web 服务器上动态生成和操作图形的方法。

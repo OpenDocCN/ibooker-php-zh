@@ -1,22 +1,30 @@
 - en: Chapter 14\. Security
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第14章 安全
 - en: PHP is a flexible language with hooks into just about every API offered on the
     machines on which it runs. Because it was designed to be a forms-processing language
     for HTML pages, PHP makes it easy to use form data sent to a script. Convenience
     is a double-edged sword, however. The very features that allow you to quickly
     write programs in PHP can open doors for those who would break into your systems.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 是一种灵活的语言，可以连接到其运行机器上提供的几乎每个 API。因为它被设计为用于 HTML 页面的表单处理语言，PHP 使得使用发送到脚本的表单数据变得简单。然而，便利性是一把双刃剑。正是这些特性使得你能够快速编写
+    PHP 程序，但也为那些企图入侵你系统的人打开了大门。
 - en: PHP itself is neither secure nor insecure. The security of your web applications
     is entirely determined by the code you write. For example, if a script opens a
     file whose name is passed to the script as a form parameter, that script could
     be given a remote URL, an absolute pathname, or even a relative path, allowing
     it to open a file outside the site’s document root. This could expose your password
     file or other sensitive information.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 本身既不安全也不不安全。你的 Web 应用程序的安全性完全取决于你编写的代码。例如，如果脚本打开一个文件，其文件名作为表单参数传递给脚本，那么该脚本可以被赋予一个远程
+    URL、绝对路径名，甚至是相对路径，从而使其能够打开站点文档根目录之外的文件。这可能会暴露你的密码文件或其他敏感信息。
 - en: Web application security is still a relatively young and evolving discipline.
     A single chapter on security cannot sufficiently prepare you for the onslaught
     of attacks your applications are sure to receive. This chapter takes a pragmatic
@@ -24,72 +32,101 @@
     how to protect your applications from the most common and dangerous attacks. The
     chapter concludes with a list of further resources as well as a brief recap with
     a few additional tips.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: Web 应用程序安全性仍然是一个相对年轻和不断发展的学科。单独一章关于安全性不足以充分为你的应用程序抵御攻击做好准备。这一章采取务实的方法，涵盖了与安全相关的一系列主题的精选，包括如何保护你的应用程序免受最常见和最危险的攻击。该章节结尾附有进一步资源的列表以及简短的总结和一些额外的建议。
 - en: Safeguards
+  id: totrans-4
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 保护措施
 - en: One of the most fundamental things you need to understand when developing a
     secure site is that all information not generated within the application itself
     is potentially tainted, or at least suspect. This includes data from forms, files,
     and databases. There should always be protections or safeguards in place.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开发安全站点时，你需要理解的最基本的事情之一是，所有不是应用程序自身生成的信息都可能是被污染的，或者至少是可疑的。这包括来自表单、文件和数据库的数据。应始终有相应的保护措施或防护措施。
 - en: Filtering Input
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 过滤输入
 - en: When data is described as being tainted, this doesn’t necessarily mean it’s
     malicious. It means it *might be* malicious. You can’t trust the source, so you
     should inspect it to make sure it’s valid. This inspection process is called *filtering*,
     and you only want to allow valid data to enter your application.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 当数据被描述为被污染时，并不一定意味着它是恶意的。这意味着它*可能是*恶意的。你不能信任源头，因此你应该检查它以确保其有效。这个检查过程称为*过滤*，你只想允许有效的数据进入你的应用程序。
 - en: 'There are a few best practices for the filtering process:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 在过滤过程中有一些最佳实践：
 - en: Use a whitelist approach. This means you err on the side of caution and assume
     data is invalid unless you can prove it to be valid.
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用白名单方法。这意味着你在谨慎方面犯错，并假设数据是无效的，除非你能证明它是有效的。
 - en: Never correct invalid data. History has proven that attempts to correct invalid
     data often result in security vulnerabilities due to errors.
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 永远不要更正无效数据。历史已经证明，尝试更正无效数据通常会导致由于错误而产生安全漏洞。
 - en: Use a naming convention to help distinguish between filtered and tainted data.
     Filtering is useless if you can’t reliably determine whether something has been
     filtered.
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 使用命名约定有助于区分经过过滤和被污染的数据。如果无法可靠地确定是否已经过滤，则过滤就毫无意义。
 - en: 'In order to solidify these concepts, consider a simple HTML form allowing a
     user to select among three colors:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了巩固这些概念，考虑一个简单的 HTML 表单，允许用户在三种颜色中选择：
 - en: '[PRE0]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'It’s easy to appreciate the desire to trust `$_POST[''color'']` in *process.php*.
     After all, the form seemingly restricts what a user can enter. However, experienced
     developers know that HTTP requests have no restriction on the fields they contain—client-side
     validation is never sufficient by itself. There are numerous ways malicious data
     can be sent to your application, and your only defense is to trust nothing and
     filter your input:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 *process.php* 中信任 `$_POST['color']` 是很容易的。毕竟，表单看似限制了用户可以输入的内容。然而，有经验的开发者知道
+    HTTP 请求对其包含的字段没有限制 —— 仅依赖客户端验证是不足够的。恶意数据可以通过多种方式发送到你的应用程序，你唯一的防御措施是什么都不信任，并过滤你的输入：
 - en: '[PRE1]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: This example demonstrates a simple naming convention. You initialize an array
     called `$clean`. For each input field, validate the input and store the validated
     input in the array. This reduces the likelihood of tainted data being mistaken
     for filtered data, because you should always err on the side of caution and consider
     everything not stored in this array to be tainted.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个示例展示了一个简单的命名约定。你初始化一个名为 `$clean` 的数组。对于每个输入字段，验证输入并将验证后的输入存储在数组中。这样做可以减少被污染数据误认为是过滤数据的可能性，因为你总是应该谨慎行事，考虑到未存储在这个数组中的一切都可能是污染的。
 - en: 'Your filtering logic depends entirely upon the type of data you’re inspecting,
     and the more restrictive you can be, the better. For example, consider a registration
     form that asks the user to provide a desired username. Clearly, there are many
@@ -97,245 +134,360 @@
     best approach is to filter based on format. If you want to require a username
     to be alphanumeric (consisting of only alphabetic and numeric characters), your
     filtering logic can enforce this:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 你的过滤逻辑完全取决于你正在检查的数据类型，你越严格，越好。例如，考虑一个注册表单，要求用户提供一个期望的用户名。显然，有许多可能的用户名，所以先前的例子并不适用。在这些情况下，最好的方法是基于格式进行过滤。如果你希望要求用户名是字母数字的，你的过滤逻辑可以强制执行这一点：
 - en: '[PRE2]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Of course, this doesn’t ensure any particular length. Use `mb_strlen()` to
     inspect a string’s length and enforce a minimum and maximum:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，这并不能确保任何特定长度。使用 `mb_strlen()` 检查字符串的长度，并强制施加最小和最大限制：
 - en: '[PRE3]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Frequently, the characters you want to allow don’t all belong to a single group
     (such as alphanumeric), and this is where regular expressions can help. For example,
     consider the following filtering logic for a last name:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 经常情况下，你想允许的字符并不都属于单一组（比如字母数字字符），这就是正则表达式可以帮助的地方。例如，考虑以下关于姓氏的过滤逻辑：
 - en: '[PRE4]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: This filter allows only alphabetic characters, spaces, hyphens, and single quotes
     (apostrophes), and it uses a whitelist approach as described earlier. In this
     case, the whitelist is the list of valid characters.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 此过滤器仅允许字母字符、空格、连字符和单引号（撇号），并采用前面描述的白名单方法。在这种情况下，白名单是有效字符的列表。
 - en: In general, filtering is a process that ensures the integrity of your data.
     But while many web application security vulnerabilities can be prevented by filtering,
     most are due to a failure to escape data, and neither safeguard is a substitute
     for the other.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常情况下，过滤是确保数据完整性的过程。但是虽然许多 Web 应用程序安全漏洞可以通过过滤来预防，但大多数是由于未对数据进行转义，而且两者都不能取代对方。
 - en: Escaping Output Data
+  id: totrans-25
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 输出数据转义
 - en: '*Escaping* is a technique that preserves data as it enters another context.
     PHP is frequently used as a bridge between disparate data sources, and when you
     send data to a remote source, it’s your responsibility to prepare it properly
     so that it’s not misinterpreted.'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: '*转义* 是一种在数据进入另一个上下文时保持其不变的技术。PHP 经常用作不同数据源之间的桥梁，在将数据发送到远程源时，你有责任适当地准备它，以避免被误解。'
 - en: For example, `O'Reilly` is represented as `O\'Reilly` when used in an SQL query
     to be sent to a MySQL database. The backslash preserves the single quote (apostrophe)
     in the context of the SQL query. The single quote is part of the data, not part
     of the query, and the escaping guarantees this interpretation.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，当在 SQL 查询中用于发送到 MySQL 数据库时，`O'Reilly` 被表示为 `O\'Reilly`。反斜杠保留了单引号（撇号）在 SQL
+    查询语境中的含义。单引号是数据的一部分，而不是查询的一部分，转义确保了这种解释。
 - en: 'The two predominant remote sources to which PHP applications send data are
     HTTP clients (web browsers) that interpret HTML, JavaScript, and other client-side
     technologies, and databases that interpret SQL. For the former, PHP provides `html``entities()`:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP应用程序发送数据的两个主要远程来源是HTTP客户端（Web浏览器），它们解释HTML、JavaScript和其他客户端技术，以及解释SQL的数据库。对于前者，PHP提供了`html``entities()`：
 - en: '[PRE5]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: This example demonstrates the use of another naming convention. The `$html`
     array is similar to the `$clean` array, except that its purpose is to hold data
     that is safe to be used in the context of HTML.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 本例展示了另一种命名约定的使用。`$html`数组类似于`$clean`数组，但其目的是保存在HTML上下文中安全使用的数据。
 - en: 'URLs are sometimes embedded in HTML as links:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: URL有时嵌入到HTML中作为链接：
 - en: '[PRE6]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'In this particular example, `$value` exists within nested contexts. It’s within
     the query string of a URL that is embedded in HTML as a link. Because it’s alphabetic
     in this case, it’s safe to be used in both contexts. However, when the value of
     `$var` cannot be guaranteed to be safe in these contexts, it must be escaped twice:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个特定的例子中，`$value`存在于嵌套的上下文中。它位于作为HTML链接嵌入的URL的查询字符串中。由于在这种情况下是字母的，因此可以安全地在这两个上下文中使用。然而，当`$var`的值在这些上下文中不能保证安全时，必须进行两次转义：
 - en: '[PRE7]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: This ensures that the link is safe to be used in the context of HTML, and when
     it is used as a URL (such as when the user clicks the link), the URL encoding
     ensures that the value of `$var` is preserved.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 这确保链接在HTML上下文中安全使用，并且当作为URL（例如用户点击链接时）使用时，URL编码确保`$var`的值被保留。
 - en: 'For most databases, there is a native escaping function specific to the database.
     For example, the MySQL extension provides `mysqli_real_escape_string()`:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于大多数数据库，都有针对特定数据库的本地转义函数。例如，MySQL扩展提供了`mysqli_real_escape_string()`：
 - en: '[PRE8]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'An even safer alternative is to use a database abstraction library that handles
     the escaping for you. The following illustrates this concept with `PEAR::DB`:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 更安全的替代方案是使用处理转义的数据库抽象库。以下示例说明了使用`PEAR::DB`来实现这一概念：
 - en: '[PRE9]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Although this is not a complete example, it highlights the use of a placeholder
     (the question mark) in the SQL query. `PEAR::DB` properly quotes and escapes the
     data according to the requirements of your database. Take a look at [Chapter 9](ch09.xhtml#databases-id00007)
     for more in-depth coverage of placeholder techniques.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管这不是一个完整的例子，但它突显了在SQL查询中使用占位符（问号）的技术。`PEAR::DB`根据数据库的要求正确引用和转义数据。查看[第9章](ch09.xhtml#databases-id00007)以获取有关占位符技术更详细的介绍。
 - en: A more complete output-escaping solution would include context-aware escaping
     for HTML elements, HTML attributes, JavaScript, CSS, and URL content, and would
     do so in a Unicode-safe manner. [Example 14-1](#example_onefour_onedot_escaping_output)
     shows a sample class for escaping output in a variety of contexts, based on the
     [content-escaping rules](https://oreil.ly/Xpu6q) defined by the Open Web Application
     Security Project.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个更完整的输出转义解决方案应包括对HTML元素、HTML属性、JavaScript、CSS和URL内容的上下文感知转义，并且以Unicode安全的方式执行。[示例 14-1](#example_onefour_onedot_escaping_output)展示了一个根据开放式网络应用安全项目定义的[内容转义规则](https://oreil.ly/Xpu6q)，在多种情境下进行输出转义的示例类。
 - en: Example 14-1\. Escaping output for multiple contexts
+  id: totrans-42
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-1\. 多种情境下的输出转义
 - en: '[PRE10]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Security Vulnerabilities
+  id: totrans-44
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 安全漏洞
 - en: Now that we’ve explored the two primary safeguarding approaches, let’s turn
     to some of the common security vulnerabilities they seek to address.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们已经探讨了两种主要的保护方法，让我们转向它们试图解决的一些常见安全漏洞。
 - en: Cross-Site Scripting
+  id: totrans-46
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 跨站脚本攻击
 - en: Cross-site scripting (XSS) has become the most common web application security
     vulnerability, and with the rising popularity of Ajax technologies, XSS attacks
     are likely to become more advanced and to occur more frequently.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 跨站脚本攻击（XSS）已成为最常见的Web应用程序安全漏洞，随着Ajax技术的日益流行，XSS攻击可能会变得更加复杂和频繁发生。
 - en: 'The term *cross-site scripting* derives from an old exploit and is no longer
     very descriptive or accurate for most modern attacks, and this has caused some
     confusion. Simply put, your code is vulnerable whenever you output data not properly
     escaped to the output’s context. For example:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: '*跨站脚本攻击*这一术语源自一个旧的漏洞利用，对于大多数现代攻击来说已经不再非常描述性或准确，这导致了一些混淆。简单来说，每当你输出未经适当转义的数据到输出的上下文中时，你的代码就容易受到漏洞攻击。例如：'
 - en: '[PRE11]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: This is an extreme example, because `$_POST` is obviously neither filtered nor
     escaped, but it demonstrates the vulnerability.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个极端的例子，因为`$_POST`显然既没有经过过滤也没有转义，但它展示了这种漏洞。
 - en: XSS attacks are limited to only what is possible with client-side technologies.
     Historically, XSS has been used to capture a victim’s cookies by taking advantage
     of the fact that `document.cookie` contains this information.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: XSS 攻击仅限于客户端技术可以实现的范围。在历史上，XSS 已被用来通过利用`document.cookie`中包含的信息来获取受害者的 cookies。
 - en: 'In order to prevent XSS, you simply need to properly escape your output for
     the output context:'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了防止 XSS 攻击，您只需正确转义您的输出以适应输出环境：
 - en: '[PRE12]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: You should also always filter your input, which can offer a redundant safeguard
     in some cases (implementing redundant safeguards adheres to a security principle
     known as *Defense in Depth*). For example, if you inspect a username to ensure
     that it’s alphabetic and also only output the filtered username, no XSS vulnerability
     exists. Just be sure that you don’t depend upon filtering as your primary safeguard
     against XSS, because it doesn’t address the root cause of the problem.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还应始终过滤输入，这在某些情况下可以提供冗余的保护（实施冗余的保护符合被称为*深度防御*的安全原则）。例如，如果您检查用户名以确保它是字母，并且只输出经过过滤的用户名，则不会存在
+    XSS 漏洞。只需确保您不依赖过滤作为防止 XSS 的主要保护措施，因为它不解决问题的根本原因。
 - en: SQL Injection
+  id: totrans-55
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: SQL 注入
 - en: The second most common web application vulnerability is SQL injection, an attack
     very similar to XSS. The difference is that SQL injection vulnerabilities exist
     wherever you use unescaped data in an SQL query. (If these names were more consistent,
     XSS would probably be called “HTML injection.”)
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二常见的 Web 应用程序漏洞是 SQL 注入，这是一种与 XSS 非常相似的攻击。不同之处在于，SQL 注入漏洞存在于您在 SQL 查询中使用未转义数据的任何地方。（如果这些名称更一致，XSS
+    可能被称为“HTML 注入”。）
 - en: 'The following example demonstrates an SQL injection vulnerability:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下示例演示了 SQL 注入漏洞：
 - en: '[PRE13]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'The problem is that if the username is not escaped, its value can manipulate
     the format of the SQL query. Because this particular vulnerability is so common,
     many attackers try usernames such as the following when trying to log in to a
     target site:'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 问题在于，如果用户名没有被转义，其值可以操纵 SQL 查询的格式。因为这种特定的漏洞非常常见，许多攻击者尝试使用以下用户名尝试登录到目标站点：
 - en: '[PRE14]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'Attackers love this username, because it allows access to the account with
     the username `chris''` without them having to know that account’s password. After
     interpolation, the SQL query becomes:'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 攻击者喜欢使用这个用户名，因为它允许访问用户名为`chris'`的账户，而无需知道该账户的密码。在插入后，SQL 查询变成：
 - en: '[PRE15]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'Because two consecutive hyphens (`--`) indicate the beginning of an SQL comment,
     this query is identical to:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为两个连续的破折号（`--`）表示 SQL 注释的开始，所以这个查询与以下查询是相同的：
 - en: '[PRE16]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: If the code containing this snippet of code assumes a successful login when
     `$result` is nonzero, this SQL injection would allow an attacker to log in to
     any account without having to know or guess the password.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果包含此代码片段的代码假设 `$result` 非零时登录成功，则此 SQL 注入将允许攻击者登录到任何账户，而无需知道或猜测密码。
 - en: 'Safeguarding your applications against SQL injection is primarily accomplished
     by escaping output:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 主要通过转义输出来保护您的应用程序免受 SQL 注入的攻击：
 - en: '[PRE17]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: However, this only ensures that the data you escape is interpreted as data.
     You still need to filter data because characters like the percent sign (`%`) have
     a special meaning in SQL but don’t need to be escaped.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，这只是确保转义的数据被解释为数据。您仍然需要过滤数据，因为像百分号（`%`）这样的字符在 SQL 中具有特殊含义，但不需要被转义。
 - en: 'The best protection against SQL injection is the use of *bound parameters*.
     The following example demonstrates the use of bound parameters with PHP’s PDO
     extension and an Oracle database:'
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 防范 SQL 注入的最佳方法是使用*绑定参数*。以下示例演示了 PHP 的 PDO 扩展和 Oracle 数据库中绑定参数的使用：
 - en: '[PRE18]'
+  id: totrans-70
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Because bound parameters ensure that the data never enters a context where it
     can be considered anything but data (i.e., it’s never misinterpreted), no escaping
     of the username and password is necessary.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为绑定参数确保数据永远不会进入被误解的上下文（即，它永远不会被错误解释），因此不需要对用户名和密码进行转义。
 - en: Filename Vulnerabilities
+  id: totrans-72
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 文件名漏洞
 - en: 'It’s fairly easy to construct a filename that refers to something other than
     what you intended. For example, say you have a `$username` variable that contains
     the name the user wants to be called, which the user has specified through a form
@@ -343,560 +495,811 @@
     directory */usr/local/lib/greetings* so that you can output the message any time
     the user logs in to your application. The code to print the current user’s greeting
     is:'
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 构造一个指向与您预期不同的内容的文件名相当容易。例如，假设您有一个`$username`变量，其中包含用户通过表单字段指定的希望称呼的名称。现在假设您希望将每个用户的欢迎消息存储在目录*/usr/local/lib/greetings*中，以便在用户登录到您的应用程序时随时输出该消息。打印当前用户欢迎词的代码如下：
 - en: '[PRE19]'
+  id: totrans-74
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'This seems harmless enough, but what if the user chose the username `"../../../../etc/passwd"`?
     The code to include the greeting now includes this relative path instead: */etc/passwd*.
     Relative paths are a common trick used by hackers against unsuspecting scripts.'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 这看起来似乎并无大碍，但如果用户选择用户名为`"../../../../etc/passwd"`，那么现在包含欢迎语的代码将包含这个相对路径：*/etc/passwd*。相对路径是黑客常用的一种针对不经意脚本的常见技巧。
 - en: 'Another trap for the unwary programmer lies in the way that, by default, PHP
     can open remote files with the same functions that open local files. The `fopen()`
     function and anything that uses it—such as `include()` and `require()`—can be
     passed an HTTP or FTP URL as a filename, and the document identified by the URL
     will be opened. For example:'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一个对不慎编程者的陷阱在于，默认情况下，PHP可以使用与打开本地文件相同的函数来打开远程文件。`fopen()`函数及其使用的任何内容（如`include()`和`require()`）都可以将HTTP或FTP
+    URL作为文件名传递，并且将打开URL标识的文档。例如：
 - en: '[PRE20]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: If `$username` is set to *https://www.example.com/myfile*, a remote file is
     opened, not a local one.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果`$username`设置为*https://www.example.com/myfile*，将打开远程文件而不是本地文件。
 - en: 'The situation is even worse if you let the user tell you which file to `include()`:'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您允许用户告诉您要`include()`的文件，则情况将更糟：
 - en: '[PRE21]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: If the user passes a `theme` parameter of *https://www.example.com/badcode.inc*
     and your `variables_order` includes `GET` or `POST`, your PHP script will happily
     load and run the remote code. Never use parameters as filenames like this.
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果用户传递了`theme`参数为*https://www.example.com/badcode.inc*，并且您的`variables_order`包含`GET`或`POST`，您的PHP脚本将愉快地加载并运行远程代码。永远不要像这样使用参数作为文件名。
 - en: There are several solutions to the problem of checking filenames. You can disable
     remote file access, check filenames with `realpath()` and `basename()` (as described
     next), and use the `open_basedir` option to restrict filesystem access outside
     your site’s document root.
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 有几种解决方案可以解决检查文件名的问题。您可以禁用远程文件访问，使用`realpath()`和`basename()`（如下所述）检查文件名，并使用`open_basedir`选项限制在站点文档根目录之外的文件系统访问。
 - en: Check for relative paths
+  id: totrans-83
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 检查相对路径
 - en: When you need to allow the user to specify a filename in your application, you
     can use a combination of the `realpath()` and `basename()` functions to ensure
     that the filename is what it ought to be. The `realpath()` function resolves special
     markers (such as `.` and `..`). After a call to `realpath()`, the resulting path
     is a full path on which you can then use `basename()`. The `basename()` function
     returns just the filename portion of the path.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您需要允许用户在应用程序中指定文件名时，您可以使用`realpath()`和`basename()`函数的组合来确保文件名应该是什么。`realpath()`函数解析特殊标记（如`.`和`..`）。调用`realpath()`后，结果路径是一个完整的路径，然后您可以使用`basename()`函数仅返回路径的文件名部分。
 - en: 'Going back to our welcome message scenario, here’s an example of `realpath()`
     and `basename()` in action:'
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 回到我们的欢迎消息场景，这里展示了`realpath()`和`basename()`的实际应用：
 - en: '[PRE22]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: In this case, we’ve resolved `$filename` to its full path and then extracted
     just the filename. If this value doesn’t match the original value of `$filename`,
     we’ve got a bad filename that we don’t want to use.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，我们已经将`$filename`解析为其完整路径，然后仅提取文件名。如果此值与`$filename`的原始值不匹配，那么我们有一个不希望使用的坏文件名。
 - en: 'Once you have the completely bare filename, you can reconstruct what the file
     path ought to be, based on where legal files should go, and add a file extension
     based on the actual contents of the file:'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您获得了完全裸露的文件名，您可以根据合法文件的存放位置重建文件路径，并根据实际文件内容添加文件扩展名：
 - en: '[PRE23]'
+  id: totrans-89
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: Session Fixation
+  id: totrans-90
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 会话固定
 - en: A very popular attack that targets sessions is session fixation. The primary
     reason behind its popularity is that it’s the easiest method by which an attacker
     can obtain a valid session identifier. As such, it is intended as a stepping-stone
     to a session hijacking attack, in which an attacker impersonates a user by presenting
     the user’s session identifier.
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 针对会话的一个非常流行的攻击是会话固定。其流行的主要原因是这是攻击者获取有效会话标识符的最简单方法。因此，它被设计为会话劫持攻击的一个跳板。
 - en: 'Session fixation is any approach that causes a victim to use a session identifier
     chosen by an attacker. The simplest example is a link with an embedded session
     identifier:'
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 会话固定是任何导致受害者使用攻击者选择的会话标识符的方法。最简单的例子是带有嵌入式会话标识符的链接：
 - en: '[PRE24]'
+  id: totrans-93
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: A victim who clicks this link will resume the session identified as `1234`,
     and if the victim proceeds to log in, the attacker can hijack the victim’s session
     to escalate the level of privilege.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 点击此链接的受害者将恢复为标识为`1234`的会话，并且如果受害者继续登录，攻击者可以劫持受害者的会话以提升权限级别。
 - en: 'There are a few variants of this attack, including some that use cookies for
     this same purpose. Luckily, the safeguard is simple, straightforward, and consistent.
     Whenever there is a change in the level of privilege, such as when a user logs
     in, regenerate the session identifier with `session_regenerate_id()`:'
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 有几种变体的这种攻击，包括一些使用cookie来达到同样目的的攻击。幸运的是，防护措施简单、直接且一致。每当权限级别有变化时，例如用户登录时，使用`session_regenerate_id()`重新生成会话标识符：
 - en: '[PRE25]'
+  id: totrans-96
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: This effectively prevents session fixation attacks by ensuring that any user
     who logs in (or otherwise escalates the privilege level in any way) is assigned
     a fresh, random session identifier.
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过确保任何登录的用户（或以任何方式提升权限级别的用户）被分配一个新的随机会话标识符，有效地防止会话固定攻击。
 - en: File Upload Traps
+  id: totrans-98
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 文件上传陷阱
 - en: 'File uploads combine two dangers we’ve already discussed: user-modifiable data
     and the filesystem. While PHP 7 itself is secure in how it handles uploaded files,
     there are several potential traps for unwary programmers.'
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 文件上传结合了我们已经讨论过的两个危险：用户可修改的数据和文件系统。虽然PHP 7本身在处理上传文件时是安全的，但对于不谨慎的程序员来说，有几个潜在的陷阱。
 - en: Distrust browser-supplied filenames
+  id: totrans-100
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 不信任浏览器提供的文件名
 - en: 'Be careful using the filename sent by the browser. If possible, do not use
     it as the name of the file on your filesystem. It’s easy to make the browser send
     a file identified as */etc/passwd* or */home/kevin/.forward*. You can use the
     browser-supplied name for all user interaction, but generate a unique name yourself
     to actually call the file. For example:'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 谨慎使用浏览器发送的文件名。如果可能，不要将其用作文件系统上文件的名称。很容易让浏览器发送一个被标识为*/etc/passwd*或*/home/kevin/.forward*的文件。您可以将浏览器提供的名称用于所有用户交互，但实际调用文件时应自动生成一个唯一名称。例如：
 - en: '[PRE26]'
+  id: totrans-102
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: Beware of filling your filesystem
+  id: totrans-103
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 警惕文件系统被填满
 - en: Another trap is the size of uploaded files. Although you can tell the browser
     the maximum size of file to upload, this is only a recommendation and does not
     ensure your script won’t be handed a file of a larger size. Attackers can perform
     a denial-of-service attack by sending files large enough to fill up your server’s
     filesystem.
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一个陷阱是上传文件的大小。虽然您可以告诉浏览器上传文件的最大大小，但这只是建议，不能确保您的脚本不会收到更大的文件。攻击者可以通过发送足够大的文件来进行拒绝服务攻击，以填满您服务器的文件系统。
 - en: 'Set the `post_max_size` configuration option in *php.ini* to the maximum size
     (in bytes) that you want:'
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 将*php.ini*中的`post_max_size`配置选项设置为您希望的最大大小（以字节为单位）：
 - en: '[PRE27]'
+  id: totrans-106
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: PHP will ignore requests with data payloads larger than this size. The default
     10 MB is probably larger than most sites require.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP将忽略数据负载大于此大小的请求。默认的10 MB可能比大多数网站需要的要大。
 - en: Account for EGPCS settings
+  id: totrans-108
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 考虑EGPCS设置
 - en: 'The default `variables_order` (EGPCS: environment, `GET`, `POST`, cookie, server)
     processes `GET` and `POST` parameters before cookies. This makes it possible for
     the user to send a cookie that overwrites the global variable you think contains
     information on your uploaded file. To avoid being tricked like this, check that
     the given file was actually an uploaded file using the `is_uploaded_file()` function.
     For example:'
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认的`variables_order`（EGPCS：环境变量、`GET`、`POST`、cookie、服务器）在处理`GET`和`POST`参数之前处理cookie。这使得用户有可能发送一个cookie，覆盖您认为包含上传文件信息的全局变量。为了避免像这样被欺骗，检查给定的文件是否确实是一个上传文件，可以使用`is_uploaded_file()`函数。例如：
 - en: '[PRE28]'
+  id: totrans-110
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: 'PHP provides a `move_uploaded_file()` function that moves the file only if
     it was an uploaded file. This is preferable to moving the file directly with a
     system-level function or PHP’s `copy()` function. For example, the following code
     cannot be fooled by cookies:'
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP提供了`move_uploaded_file()`函数，仅在文件是上传文件时移动文件。这比直接使用系统级函数或PHP的`copy()`函数移动文件更可取。例如，以下代码不能通过Cookie欺骗：
 - en: '[PRE29]'
+  id: totrans-112
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: Unauthorized File Access
+  id: totrans-113
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 未经授权的文件访问
 - en: If only you and people you trust can log in to your web server, you don’t need
     to worry about file permissions for files used by or created by your PHP programs.
     However, most websites are hosted on an ISP’s machines, and there’s a risk that
     nontrusted users can read files that your PHP program creates. There are a number
     of techniques that you can use to deal with file permissions issues.
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果只有您和信任的人可以登录到您的Web服务器，则无需担心PHP程序使用或创建的文件的文件权限。然而，大多数网站托管在ISP的机器上，存在非信任用户可以读取您的PHP程序创建的文件的风险。有许多技术可用于处理文件权限问题。
 - en: Restrict filesystem access to a specific directory
+  id: totrans-115
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 限制文件系统访问到特定目录
 - en: 'You can set the `open_basedir` option to restrict access from your PHP scripts
     to a specific directory. If `open_basedir` is set in your *php.ini*, PHP limits
     filesystem and I/O functions so that they can operate only within that directory
     or any of its subdirectories. For example:'
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以设置`open_basedir`选项以限制PHP脚本对特定目录的访问。如果在您的*php.ini*中设置了`open_basedir`，PHP将限制文件系统和I/O函数，使其只能在该目录或其任何子目录中操作。例如：
 - en: '[PRE30]'
+  id: totrans-117
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: 'With this configuration in effect, the following function calls succeed:'
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了这个配置，以下函数调用将成功：
 - en: '[PRE31]'
+  id: totrans-119
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: 'But these generate runtime errors:'
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 但这些会生成运行时错误：
 - en: '[PRE32]'
+  id: totrans-121
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: 'Of course, one web server can run many applications, and each application typically
     stores files in its own directory. You can configure `open_basedir` on a per-virtual-host
     basis in your *httpd.conf* file like this:'
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，一个Web服务器可以运行多个应用程序，每个应用程序通常将文件存储在自己的目录中。您可以像这样在*httpd.conf*文件中为每个虚拟主机基础上配置`open_basedir`：
 - en: '[PRE33]'
+  id: totrans-123
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: 'Similarly, you can configure it per directory or per URL in *httpd.conf*:'
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似地，您可以在*httpd.conf*中按目录或URL配置它：
 - en: '[PRE34]'
+  id: totrans-125
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: The `open_basedir` directory can be set only in the *httpd.conf* file, not in
     .*htaccess* files, and you must use `php_admin_value` to set it.
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: 只能在*httpd.conf*文件中设置`open_basedir`目录，而不能在.*htaccess*文件中设置，必须使用`php_admin_value`来设置它。
 - en: Get permissions right the first time
+  id: totrans-127
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 第一次就正确地获取权限
 - en: 'Do not create a file and then change its permissions. This creates a *race
     condition*, where a lucky user can open the file once it’s created but before
     it’s locked down. Instead, use the `umask()` function to strip off unnecessary
     permissions. For example:'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 不要创建文件然后更改其权限。这会产生*竞争条件*，即幸运的用户可以在创建文件后但在锁定之前打开文件。相反，请使用`umask()`函数去除不必要的权限。例如：
 - en: '[PRE35]'
+  id: totrans-129
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: By default, the `fopen()` function attempts to create a file with permission
     0666 (`rw-rw-rw-`). Calling `umask()` first disables the group and other bits,
     leaving only 0600 (`rw-------`). Now, when `fopen()` is called, the file is created
     with those permissions.
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，`fopen()`函数尝试以0666（`rw-rw-rw-`）权限创建文件。首先调用`umask()`禁用组和其他位，只留下0600（`rw-------`）。现在，当调用`fopen()`时，文件将以这些权限创建。
 - en: Don’t use files
+  id: totrans-131
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 不要使用文件
 - en: Because all scripts running on a machine run as the same user, a file that one
     script creates can be read by another, regardless of which user wrote the script.
     All a script needs to know to read a file is the name of that file.
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为在同一台机器上运行的所有脚本都以相同的用户身份运行，所以一个脚本创建的文件可以被另一个脚本读取，而不管哪个用户编写了该脚本。一个脚本要知道如何读取文件只需要知道该文件的名称。
 - en: There is no way to change this, so the best solution is to not use files to
     store data that should be protected; the most secure place to store data is in
     a database.
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 没有办法改变这一点，所以最好的解决方案是不使用文件来存储应该受保护的数据；存储数据的最安全位置是在数据库中。
 - en: A complex workaround is to run a separate Apache daemon for each user. If you
     add a reverse proxy such as *haproxy* in front of the pool of Apache instances,
     you may be able to serve 100+ users on a single machine. Few sites do this, however,
     because the complexity and cost are much greater than those for the typical situation,
     where one Apache daemon can serve web pages for thousands of users.
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个复杂的解决方法是为每个用户运行单独的Apache守护程序。如果您在一组Apache实例前面添加一个反向代理，如*haproxy*，您可能能够在单台机器上为100多个用户提供服务。然而，很少有网站这样做，因为复杂性和成本远远高于典型情况，其中一个Apache守护进程可以为数千用户提供Web页面。
 - en: Protect session files
+  id: totrans-135
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 保护会话文件
 - en: With PHP’s built-in session support, session information is stored in files.
     Each file is named `/tmp/sess_*id*`, where *`id`* is the name of the session and
     is owned by the web server user ID, usually `nobody`.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用PHP内置的会话支持，会话信息存储在文件中。每个文件的名称是`/tmp/sess_*id*`，其中*`id`*是会话的名称，并由Web服务器用户ID（通常是`nobody`）拥有。
 - en: Because all PHP scripts run as the same user through the web server, this means
     that any PHP script hosted on a server can read any session files for any other
     PHP site. In situations where your PHP code is stored on an ISP’s server that
     is shared with other users’ PHP scripts, variables you store in your sessions
     are visible to other PHP scripts.
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为所有PHP脚本都通过Web服务器以相同的用户身份运行，这意味着服务器上托管的任何PHP脚本都可以读取其他PHP站点的任何会话文件中的变量。在存储您的PHP代码与其他用户的PHP脚本共享的ISP服务器上的情况下，您存储在会话中的变量对其他PHP脚本是可见的。
 - en: Even worse, other users on the server can create files in the session directory
     */tmp*. There’s nothing preventing attackers from creating a fake session file
     that has any variables and values they want in it. They can then have the browser
     send your script a cookie containing the name of the faked session, and your script
     will happily load the variables stored in the fake session file.
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 更糟糕的是，服务器上的其他用户可以在会话目录*/tmp*中创建文件。没有任何阻止攻击者创建具有他们想要的任何变量和值的假会话文件。然后，他们可以让浏览器发送包含伪造会话名称的cookie给您的脚本，您的脚本将愉快地加载伪造会话文件中存储的变量。
 - en: 'One workaround is to ask your service provider to configure their server to
     place your session files in your own directory. Typically, this means that your
     `VirtualHost` block in the Apache *httpd.conf* file will contain:'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 一种解决方法是要求您的服务提供商配置其服务器，将会话文件放置在您自己的目录中。通常，这意味着Apache *httpd.conf*文件中的您的`VirtualHost`块将包含：
 - en: '[PRE36]'
+  id: totrans-140
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: If you have *.htaccess* capabilities on your server and Apache is configured
     to let you override options, you can make the change yourself.
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的服务器具有`.htaccess`的功能，并且Apache已配置为允许您覆盖选项，则可以自行进行更改。
 - en: Conceal PHP libraries
+  id: totrans-142
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 隐藏PHP库
 - en: Many a hacker has learned of weaknesses by downloading include files or data
     that is stored alongside HTML and PHP files in the web server’s document root.
     To prevent this from happening to you, all you need to do is store code libraries
     and data outside the server’s document root.
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多黑客通过下载与HTML和PHP文件一起存储在Web服务器文档根目录中的包含文件或数据，了解了其弱点。为了防止这种情况发生在您身上，您只需将代码库和数据存储在服务器文档根目录之外即可。
 - en: For example, if the document root is */home/httpd/html*, everything below that
     directory can be downloaded through a URL. It is a simple matter to put your library
     code, configuration files, logfiles, and other data outside that directory (e.g.,
     in */usr/local/lib/myapp*). This doesn’t prevent other users on the web server
     from accessing those files (see [“Don’t use files”](#donapostrophet_use_files)),
     but it does prevent the files from being downloaded by remote users.
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，如果文档根目录是*/home/httpd/html*，则该目录下方的所有内容都可以通过URL下载。将您的库代码、配置文件、日志文件和其他数据放在该目录之外（例如*/usr/local/lib/myapp*）是一件简单的事情。这不会阻止Web服务器上的其他用户访问这些文件（参见[“不要使用文件”](#donapostrophet_use_files)），但它确实防止了远程用户下载这些文件。
 - en: 'If you must store these auxiliary files in your document root, you should configure
     the web server to deny requests for those files. For example, this tells Apache
     to deny requests for any file with the *.inc* extension, a common extension for
     PHP include files:'
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果必须将这些辅助文件存储在文档根目录中，您应该配置Web服务器拒绝对这些文件的请求。例如，这会告诉Apache拒绝对具有常见PHP包含文件扩展名*.inc*的任何文件的请求：
 - en: '[PRE37]'
+  id: totrans-146
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: A better and more preferred way to prevent downloading of PHP source files is
     to always use the *.php* extension.
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 防止下载PHP源文件的更好和更受欢迎的方法是始终使用*.php*扩展名。
 - en: 'If you store code libraries in a different directory from the PHP pages that
     use them, you’ll need to tell PHP where the libraries are. Either give a path
     to the code in each `include()` or `require()`, or change `include_path` in *php.ini*:'
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您将代码库存储在与使用它们的PHP页面不同的目录中，您需要告诉PHP库的位置。要么在每个`include()`或`require()`中给出代码的路径，要么更改*php.ini*中的`include_path`：
 - en: '[PRE38]'
+  id: totrans-149
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: PHP Code Issues
+  id: totrans-150
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: PHP代码问题
 - en: 'With the `eval()` function, PHP allows a script to execute arbitrary PHP code.
     Although it can be useful in a few limited cases, allowing any user-supplied data
     to go into an `eval()` call is just begging to be hacked. For instance, the following
     code is a security nightmare:'
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`eval()`函数，PHP允许脚本执行任意PHP代码。虽然在极少数情况下它可能有用，但允许任何用户提供的数据进入`eval()`调用只会引发被黑客攻击的风险。例如，以下代码是一个安全噩梦：
 - en: '[PRE39]'
+  id: totrans-152
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: 'This page takes some arbitrary PHP code from a form and runs it as part of
     the script. The running code has access to all of the global variables for, and
     runs with the same privileges as, the script. It’s not hard to see why this is
     a problem. Type this into the form:'
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 此页面从表单中获取一些任意的PHP代码，并将其作为脚本的一部分运行。运行的代码可以访问所有的全局变量，并以脚本相同的权限运行。不难理解为什么这是一个问题。在表单中输入以下内容：
 - en: '[PRE40]'
+  id: totrans-154
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: Never do this. There is no practical way to ensure such a script can ever be
     secure.
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 绝不要这样做。确保这样的脚本永远不会安全是不可能的。
 - en: 'You can globally disable particular function calls by listing them, separated
     by commas, in the `disable_functions` configuration option in *php.ini*. For example,
     you may never have need for the `system()` function, so you can disable it entirely
     with:'
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以通过在*php.ini*中的`disable_functions`配置选项中列出它们来全局禁用特定的函数调用，用逗号分隔。例如，你可能永远不需要`system()`函数，因此可以完全禁用它：
 - en: '[PRE41]'
+  id: totrans-157
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: This doesn’t make `eval()` any safer, though, as there’s no way to prevent important
     variables from being changed or built-in constructs such as `echo()` from being
     called.
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 这并不会让`eval()`更安全，因为没有办法阻止重要变量被更改，也不能防止诸如`echo()`这样的内置结构被调用。
 - en: In the case of `include`, `require`, `include_once`, and `require_once`, your
     best bet is to turn off remote file access using `allow_url_fopen`.
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 在`include`、`require`、`include_once`和`require_once`的情况下，最好的方法是使用`allow_url_fopen`关闭远程文件访问。
 - en: 'Any use of `eval()` and the `/e` option with `preg_replace()` is dangerous,
     especially if you use any user-entered data in the calls. Consider the following:'
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 在使用`preg_replace()`的`eval()`和`/e`选项时，特别是在调用中使用了任何用户输入的数据时，是很危险的。考虑以下情况：
 - en: '[PRE42]'
+  id: totrans-161
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: 'It seems pretty innocuous. However, suppose the user enters the following value:'
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 这似乎相当无害。但是，假设用户输入以下值：
 - en: '[PRE43]'
+  id: totrans-163
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: In this case, both the expected command and the one you’d rather avoid will
     be executed. The only viable solution is to never give user-supplied data to `eval()`.
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，将同时执行预期的命令和你希望避免的命令。唯一可行的解决方案是永远不要将用户提供的数据传递给`eval()`。
 - en: Shell Command Weaknesses
+  id: totrans-165
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Shell命令的弱点
 - en: 'Be very wary of using the `exec()`, `system()`, `passthru()`, and `popen()`
     functions and the backtick operator (`` ` ``) in your code. The shell is a problem
     because it recognizes special characters (e.g., semicolons to separate commands).
     For example, suppose your script contains this line:'
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 在你的代码中要非常谨慎使用`exec()`、`system()`、`passthru()`和`popen()`函数以及反引号操作符（`` ` ``）。shell是一个问题，因为它识别特殊字符（例如，分号用于分隔命令）。例如，假设你的脚本包含以下行：
 - en: '[PRE44]'
+  id: totrans-167
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: 'If the user passes the value `"/tmp;cat /etc/passwd"` as the `$directory` parameter,
     your password file is displayed because `system()` executes the following command:'
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果用户将`"/tmp;cat /etc/passwd"`作为`$directory`参数传递，因为`system()`执行以下命令，你的密码文件会被显示：
 - en: '[PRE45]'
+  id: totrans-169
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: 'In cases where you must pass user-supplied arguments to a shell command, use
     `escapeshellarg()` on the string to escape any sequences that have special meaning
     to shells:'
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 在必须将用户提供的参数传递给shell命令时，使用`escapeshellarg()`来转义字符串中具有特殊含义的序列：
 - en: '[PRE46]'
+  id: totrans-171
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: 'Now, if the user passes `"/tmp;cat /etc/passwd"`, the command that’s actually
     run is:'
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，如果用户传递`"/tmp;cat /etc/passwd"`，实际运行的命令是：
 - en: '[PRE47]'
+  id: totrans-173
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: The easiest way to avoid the shell is to do the work of whatever program you’re
     trying to call in PHP code, rather than calling out to the shell. Built-in functions
     are likely to be more secure than anything involving the shell.
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 避免使用shell的最简单方法是在PHP代码中完成你想要调用的任何程序的工作，而不是调用shell。内置函数可能比涉及shell的任何内容更安全。
 - en: Data Encryption Concerns
+  id: totrans-175
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 数据加密问题
 - en: One last topic to cover is encrypting data that you want to ensure is not viewable
     in its native form. This mostly applies to website passwords, but there are other
     examples, such as Social Security numbers (Social Insurance numbers in Canada),
     credit card numbers, and bank account numbers.
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后一个要讨论的主题是加密数据，你希望确保它不以原始形式可视化。这主要适用于网站密码，但也有其他示例，如社会保障号码（加拿大的社会保险号码）、信用卡号码和银行账号。
 - en: Check out the discussion on [the FAQ page of the PHP website](https://oreil.ly/3wh7t)
     to find the best approach for your specific data encryption needs.
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看[PHP网站的常见问题页面](https://oreil.ly/3wh7t)，找到适合您特定数据加密需求的最佳方法。
 - en: Further Resources
+  id: totrans-178
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 更多资源
 - en: 'The following resources can help you expand on this brief introduction to code
     security:'
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面的资源可以帮助您深入了解代码安全性的简要介绍：
 - en: '[*Essential PHP Security*](https://oreil.ly/PHP_Security) (O’Reilly) by Chris
     Shiflett and its [companion website](http://phpsecurity.org)'
+  id: totrans-180
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[*Essential PHP Security*](https://oreil.ly/PHP_Security)（O''Reilly）由Chris
+    Shiflett及其[伴随网站](http://phpsecurity.org)'
 - en: The [Open Web Application Security Project](https://www.owasp.org)
+  id: totrans-181
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[开放Web应用程序安全项目](https://www.owasp.org)'
 - en: Security Recap
+  id: totrans-182
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 安全回顾
 - en: 'Because security is such an important issue, we want to reiterate the main
     points of this chapter as well as provide a few additional tips:'
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于安全性是一个如此重要的问题，我们希望重申本章的主要要点，并提供一些额外的建议：
 - en: Filter input to be sure that all data you receive from remote sources is the
     data you expect. Remember, the stricter your filtering logic, the safer your application.
+  id: totrans-184
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 过滤输入以确保您从远程来源接收的所有数据都是您期望的数据。请记住，您的过滤逻辑越严格，应用程序越安全。
 - en: Escape output in a context-aware manner to be sure that your data isn’t misinterpreted
     by a remote system.
+  id: totrans-185
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 以上下文感知的方式转义输出，以确保您的数据不会被远程系统错误解释。
 - en: Always initialize your variables. This is especially important when the `register_globals`
     directive is enabled.
+  id: totrans-186
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 始终初始化您的变量。当启用`register_globals`指令时，这一点尤为重要。
 - en: Disable `register_globals`, `magic_quotes_gpc`, and `allow_url_fopen`. See the
     [PHP website](http://www.php.net) for details on these directives.
+  id: totrans-187
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 禁用`register_globals`，`magic_quotes_gpc`和`allow_url_fopen`。有关这些指令的详细信息，请参阅[PHP网站](http://www.php.net)。
 - en: Whenever you construct a filename, check the components with `basename()` and
     `realpath()`.
+  id: totrans-188
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 每当构造文件名时，请使用`basename()`和`realpath()`检查组件。
 - en: Store include files outside of the document root. It is better to not name your
     include files with the *.inc* extension. Name them with a *.php* extension, or
     some other less obvious extension.
+  id: totrans-189
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 将包含文件存储在文档根目录之外。最好不要使用*.inc*扩展名命名您的包含文件。使用*.php*扩展名或其他不太明显的扩展名更好。
 - en: Always call `session_regenerate_id()` whenever a user’s privilege level changes.
+  id: totrans-190
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 每当用户的权限级别变化时，请始终调用`session_regenerate_id()`。
 - en: Whenever you construct a filename from a user-supplied component, check the
     components with `basename()` and `realpath()`.
+  id: totrans-191
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 每当从用户提供的组件构造文件名时，请使用`basename()`和`realpath()`检查组件。
 - en: Don’t create a file and then change its permissions. Instead, set `umask()`
     so that the file is created with the correct permissions.
+  id: totrans-192
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 不要创建文件然后更改其权限。而是设置`umask()`以便以正确的权限创建文件。
 - en: Don’t use user-supplied data with `eval()`, `preg_replace()` with the `/e` option,
     or any of the system commands—`exec()`, `system()`, `popen()`, `passthru()`, and
     the backtick operator (`` ` ``).
+  id: totrans-193
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 不要使用用户提供的数据与`eval()`，带有`/e`选项的`preg_replace()`，或任何系统命令——`exec()`，`system()`，`popen()`，`passthru()`和反引号操作符（``
+    ` ``）。
 - en: What’s Next
+  id: totrans-194
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 接下来是什么
 - en: With potential vulnerabilities like these, you might be wondering why you should
     do this “web development thing” at all. There are almost daily reports of web
     security breaches at banks and investment houses with massive data loss and identity
     theft. At the very least, if you are going to become a good web developer you
     *must* always embrace security and keep in mind that it is a changing landscape.
     Don’t ever assume that you are 100% secure.
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 面对这样的潜在漏洞，您可能会想知道为什么您应该进行“Web开发”工作。银行和投资公司几乎每天都有大量数据丢失和身份盗用的网络安全漏洞报告。至少，如果您要成为一名优秀的Web开发人员，您*必须*始终重视安全，并牢记这是一个不断变化的领域。永远不要假设您的应用程序是100%安全的。
 - en: Coming in the next chapter is a discussion on application development techniques.
     This is another area where web developers can really shine and save themselves
     a lot of headaches. The use of code libraries, error handling, and performance
     tuning are among the topics we’ll cover.
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来的章节将讨论应用程序开发技术。这是另一个Web开发人员可以真正闪耀并减少头痛的领域。我们将涵盖代码库的使用、错误处理和性能调优等主题。

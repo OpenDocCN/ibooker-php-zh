@@ -1,183 +1,258 @@
 - en: Chapter 13\. Debugging and Testing
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第13章。调试和测试
 - en: Despite developers’ best efforts, no code is ever perfect. You will inevitably
     introduce a bug that impacts the production behavior of your application or causes
     an end user distress when something doesn’t operate as expected.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管开发人员尽力而为，但没有任何代码是完美的。您将不可避免地引入一个会影响应用程序生产行为或在某些操作未按预期方式运行时导致最终用户烦恼的错误。
 - en: Properly handling errors within your application is critical.^([1](ch13.html#idm45875143879696))
     However, not every error your application throws is expected—or even catchable.
     In these circumstances, you must understand how to properly *debug* your application—how
     to track down the offending line of code so it can be fixed.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 在应用程序中正确处理错误是至关重要的^([1](ch13.html#idm45875143879696))。然而，并非应用程序抛出的每个错误都是预期的或者可以捕获的。在这些情况下，您必须了解如何正确*调试*应用程序——即如何跟踪到有问题的代码行，以便进行修复。
 - en: Among the first steps any PHP engineer uses to debug their code is the `echo`
     statement. Without a formal debugger, it’s common to see development code littered
     with `echo "Here!";` statements so the team can track where things might be broken.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP工程师在调试其代码时使用的第一步之一是`echo`语句。在没有正式调试器的情况下，通常会看到开发代码中散布着`echo "Here!";`语句，以便团队可以跟踪可能出现问题的地方。
 - en: 'The Laravel framework has made similar functionality popular and easily accessible
     while working on new projects by exposing a function called [`dd()`](https://oreil.ly/N-bOz)
     (short for “dump and die”). This function is actually provided by the Symfony
     [`var-dumper`](https://oreil.ly/8pXGo) module and works effectively in both PHP’s
     native command-line interface and when leveraging an interactive debugger. The
     function itself is defined as follows:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel框架通过公开一个名为[`dd()`](https://oreil.ly/N-bOz)（简称“dump and die”）的函数，使得在新项目上工作时流行且易于访问类似的功能。此函数实际上是由Symfony
+    [`var-dumper`](https://oreil.ly/8pXGo)模块提供，并在PHP的本地命令行界面和使用交互式调试器时都能有效工作。该函数的定义如下：
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: The preceding function, when used in a Laravel application, will print the contents
     of any variable you pass it to the screen and then halt the program’s execution
     immediately. Like using `echo`, it’s not the most elegant way to debug an application.
     However, it is fast, reliable, and a common way developers will debug a system
     in a hurry.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 在Laravel应用程序中使用上述函数将打印出您传递给它的任何变量的内容，并立即停止程序的执行。与使用`echo`一样，这并不是调试应用程序的最优雅方式。然而，它快速、可靠，并且是开发人员在赶时间调试系统时常用的方式。
 - en: One of the best ways to preemptively debug your code is through unit testing.
     By breaking your code down into the smallest units of logic, you can write additional
     code that automatically tests and verifies the functionality of those units of
     logic. You then wire these tests to your integration and deployment pipeline and
     can ensure that nothing has broken in your application prior to deployment.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过单元测试是预防性调试代码的最佳方法。通过将代码分解为最小的逻辑单元，您可以编写额外的代码，自动测试和验证这些逻辑单元的功能。然后将这些测试连接到集成和部署管道中，可以确保在部署之前应用程序中没有任何问题。
 - en: The open source [PHPUnit](https://phpunit.de) project makes it simple and straightforward
     to instrument your entire application and automatically test its behavior. All
     of your tests are written in PHP, load your application’s functions and classes
     directly, and explicitly document the correct behavior of the application.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 开源项目[PHPUnit](https://phpunit.de)项目使得仪器化整个应用程序并自动测试其行为变得简单明了。所有的测试都是用PHP编写的，直接加载您应用程序的函数和类，并明确记录应用程序的正确行为。
 - en: Note
+  id: totrans-9
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: An alternative to PHPUnit is the open source [Behat](https://oreil.ly/mAWR5)
     library. Whereas PHPUnit focuses on test-driven development (TDD), Behat focuses
     on an alternative *behavior*-driven development (BDD) paradigm. Both are equally
     useful for testing your code, and your team should choose which approach to take.
     PHPUnit is a more established project, though, and will be referenced throughout
     this chapter.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: PHPUnit的一个替代品是开源[Behat](https://oreil.ly/mAWR5)库。虽然PHPUnit专注于测试驱动开发（TDD），Behat专注于另一种*行为*驱动开发（BDD）范式。两者对于测试代码同样有用，您的团队应选择采取哪种方法。然而，PHPUnit是一个更成熟的项目，并将在本章中被引用。
 - en: Hands down, the best way to debug your code is to use an interactive debugger.
     [Xdebug](https://xdebug.org) is a debugging extension for PHP that improves error
     handling, supports tracing or profiling an application’s behavior, and integrates
     with testing tools like PHPUnit to illustrate test coverage of application code.
     More importantly, Xdebug also supports interactive, step-through debugging of
     your application.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 毫无疑问，调试代码的最佳方法是使用交互式调试器。 [Xdebug](https://xdebug.org) 是 PHP 的一个调试扩展，它改善了错误处理，支持跟踪或分析应用程序的行为，并与像
+    PHPUnit 这样的测试工具集成，以展示应用程序代码的测试覆盖率。更重要的是，Xdebug 还支持交互式逐步调试您的应用程序。
 - en: Armed with Xdebug and a compatible IDE, you can place flags in your code called
     *breakpoints*. When the application is running and hits these breakpoints, it
     pauses execution and allows you to interactively inspect the state of the application.
     This means you can view all variables in scope, where they came from, and continue
     executing the program one command at a time in your hunt for bugs. It is by far
     the most powerful tool in your arsenal as a PHP developer!
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 在使用 Xdebug 和兼容的 IDE 的情况下，您可以在代码中放置称为 *断点* 的标志。当应用程序运行并命中这些断点时，它会暂停执行并允许您交互地检查应用程序的状态。这意味着您可以查看所有作用域内的变量、它们的来源，并逐条执行程序以寻找错误。作为
+    PHP 开发人员，这绝对是您武器库中最强大的工具！
 - en: The following recipes cover the basics of debugging PHP applications. You will
     learn how to set up interactive debugging, capture errors, properly test your
     code to prevent regressions, and quickly identify when and where a breaking change
     has been introduced.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下配方介绍了调试 PHP 应用程序的基础知识。您将学习如何设置交互式调试、捕获错误、正确测试代码以防止回归，并快速确定引入断裂更改的时间和位置。
 - en: 13.1 Using a Debugger Extension
+  id: totrans-14
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 13.1 使用调试器扩展
 - en: Problem
+  id: totrans-15
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to leverage a robust, external debugger to inspect and manage your
     application so you can identify, profile, and eliminate errors in business logic.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望利用强大的外部调试器来检查和管理应用程序，以便在业务逻辑中识别、分析和消除错误。
 - en: Solution
+  id: totrans-17
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Install Xdebug, an open source debugging extension for PHP. Xdebug can be installed
     directly on Linux operating systems by using the default package manager. On Ubuntu,
     for example, install Xdebug by using `apt`:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装 Xdebug，这是一个用于 PHP 的开源调试扩展。例如，在 Linux 操作系统上，可以通过使用默认的包管理器直接安装 Xdebug。例如，在
+    Ubuntu 上，可以使用 `apt` 安装 Xdebug：
 - en: '[PRE1]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'As package managers can sometimes install an outdated version of the project,
     you can also install it directly with the PECL extension manager:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于包管理器有时会安装项目的过时版本，您也可以直接使用PECL扩展管理器安装：
 - en: '[PRE2]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Once Xdebug is live on your system, it will embellish error pages for you automatically,
     presenting rich stack traces and debugging information to make it easier to identify
     errors when things go wrong.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦在您的系统上启用了 Xdebug，它将自动为您美化错误页面，并提供丰富的堆栈跟踪和调试信息，以便在出现问题时更轻松地识别错误。
 - en: Discussion
+  id: totrans-23
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: Xdebug is a powerful extension for PHP. It empowers you to fully test, profile,
     and debug your applications in effective ways the language does not support natively.
     One of the most useful features you get by default with no additional configuration
     is a vast improvement to error reporting.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: Xdebug 是一个强大的 PHP 扩展。它使您能够全面测试、分析和调试应用程序，这是语言本身不支持的。默认情况下，它带来的最有用的功能之一是大幅改进了错误报告。
 - en: 'By default, Xdebug will automatically capture any errors thrown by your application
     and expose additional information about the following:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，Xdebug 将自动捕获应用程序抛出的任何错误，并展示关于以下内容的附加信息：
 - en: The call stack (as illustrated in [Figure 13-1](#xdebug_stack_trace)), including
     both timing and memory utilization data. This helps you identify exactly when
     the program failed and where in code the function calls were occurring.
+  id: totrans-26
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 调用堆栈（如 [图 13-1](#xdebug_stack_trace) 所示），包括时间和内存使用数据。这帮助您准确地确定程序失败的时间以及函数调用发生的代码位置。
 - en: Variables from the local scope so you don’t need to guess what data was in memory
     when the error was thrown.
+  id: totrans-27
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 来自局部作用域的变量，这样您就不需要猜测错误抛出时内存中的数据。
 - en: '![Xdebug enriches and formats the information presented when errors occur](assets/phpc_1301.png)'
+  id: totrans-28
   prefs: []
   type: TYPE_IMG
+  zh: '![Xdebug 丰富并格式化错误发生时呈现的信息](assets/phpc_1301.png)'
 - en: Figure 13-1\. Xdebug enriches and formats the information presented when errors
     occur
+  id: totrans-29
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 13-1\. Xdebug 丰富并格式化错误发生时呈现的信息
 - en: Advanced integrations with tools like [Webgrind](https://oreil.ly/OXg9b) also
     allow you to dynamically profile the performance of your application. Xdebug will
     (optionally) record the execution time of every function invocation and record
     both that time and the “cost” of a function call to disk. The Webgrind application
     then presents a handy visualization to help you identify bottlenecks in your code
     to optimize the program as necessary.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 与 [Webgrind](https://oreil.ly/OXg9b) 等工具的高级集成还允许你动态地分析应用程序的性能。Xdebug 可以（可选地）记录每个函数调用的执行时间，并将该时间和函数调用的“成本”记录到磁盘上。然后，Webgrind
+    应用程序会呈现一个便捷的可视化界面，帮助你识别代码中的瓶颈，以便根据需要优化程序。
 - en: You can even pair Xdebug directly with your development environment for [step-through
     debugging](https://oreil.ly/FK9iz). By pairing your environment (e.g., [Visual
     Studio Code](https://oreil.ly/u4dZy)) with an Xdebug configuration, you can place
     breakpoints in your code and literally pause execution when the PHP interpreter
     hits those points.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 你甚至可以直接将 Xdebug 与你的开发环境配对，进行[逐步调试](https://oreil.ly/FK9iz)。通过将你的环境（例如 [Visual
+    Studio Code](https://oreil.ly/u4dZy)）与 Xdebug 配置配对，你可以在代码中设置断点，并在 PHP 解释器到达这些点时暂停执行。
 - en: Note
+  id: totrans-32
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: The [PHP Debug](https://oreil.ly/vVCVY) extension makes integration between
     Xdebug and Visual Studio Code incredibly straightforward. It adds all of the additional
     interfaces you’d expect directly to your IDE, in terms of both breakpoints and
     environment introspection. It’s also maintained directly by the Xdebug community,
     so you can be sure it’s in sync with the overall project.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PHP Debug](https://oreil.ly/vVCVY) 扩展使得 Xdebug 和 Visual Studio Code 之间的集成变得非常简单。它直接向你的
+    IDE 添加了所有你期望的额外接口，包括断点和环境内省。它也直接由 Xdebug 社区维护，所以你可以确保它与整个项目保持同步。'
 - en: While debugging in step-through mode, your application will pause on a breakpoint
     and give you direct access to all variables within the program scope. You can
     both inspect *and modify* these variables to test your environment. Further, while
@@ -185,111 +260,158 @@
     identify what might be going on. The call stack is directly exposed, so you can
     dive deep into which function or method object has led to the breakpoint and make
     changes where necessary.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 在逐步调试模式下，当应用程序到达断点时会暂停，并且你可以直接访问程序范围内的所有变量。你可以检查和*修改*这些变量以测试你的环境。此外，在断点暂停时，你可以完全访问应用程序的控制台，进一步识别可能发生的情况。调用堆栈也直接暴露出来，因此你可以深入了解导致断点的哪个函数或方法对象，并在必要时进行更改。
 - en: While in a breakpoint, you can either step through the program one line at a
     time or opt to “continue” execution either until the next breakpoint or until
     the first error thrown by the program. Breakpoints can also be disabled without
     removing them from the IDE, so you can continue execution as necessary but revisit
     particular trouble spots later on demand.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 在断点中，你可以逐行逐步执行程序，或选择“继续”执行，直到下一个断点或程序抛出的第一个错误。断点也可以在不从 IDE 中移除的情况下禁用，因此你可以根据需要继续执行，但随时回顾特定的问题点。
 - en: Warning
+  id: totrans-36
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: Xdebug is an immensely powerful development tool for any PHP development team.
     However, it has been known to add significant performance overhead to even the
     smallest application. Ensure that you are only ever enabling this extension for
     local development or in protected environments with test deployments. Never deploy
     your application to production with Xdebug installed!
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: Xdebug 是任何 PHP 开发团队的极其强大的开发工具。然而，已知即使在最小的应用程序中，它也会显著增加性能开销。确保你只在本地开发或在带有测试部署的受保护环境中启用此扩展。永远不要在生产环境中部署带有
+    Xdebug 的应用程序！
 - en: See Also
+  id: totrans-38
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation and home page for [Xdebug](https://xdebug.org).
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Xdebug](https://xdebug.org) 的文档和主页。'
 - en: 13.2 Writing a Unit Test
+  id: totrans-40
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 13.2 编写单元测试
 - en: Problem
+  id: totrans-41
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to validate the behavior of a piece of code to ensure that future refactoring
     doesn’t change the functionality of your application.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 你希望验证一段代码的行为，以确保将来的重构不会改变应用程序的功能。
 - en: Solution
+  id: totrans-43
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Write a class that extends PHPUnit’s `TestCase` and explicitly tests the behavior
     of the application. For example, if your function is intended to extract a domain
     name from an email address, you would define it as follows:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 编写一个扩展 PHPUnit 的 `TestCase` 的类，显式测试应用程序的行为。例如，如果你的函数旨在从电子邮件地址中提取域名，你可以定义如下：
 - en: '[PRE3]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Then create a class to test and validate the functionality of this code. Such
     a test would look like the following:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后创建一个类来测试和验证此代码的功能。这样的测试看起来将类似于以下示例：
 - en: '[PRE4]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Discussion
+  id: totrans-48
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The most important aspect of PHPUnit is how you organize your project. First
     of all, the project needs to leverage Composer for autoloading both your application
     code and for loading any dependencies (including PHPUnit itself).^([2](ch13.html#idm45875143583840))
     Typically, you will place your application code in a *src/* directory within the
     root of your project, and all of your test code will live in a *tests/* directory
     alongside it.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: PHPUnit最重要的一点是如何组织您的项目。首先，项目需要利用Composer来自动加载您的应用程序代码以及加载任何依赖项（包括PHPUnit本身）。^[2](ch13.html#idm45875143583840)通常，您将把应用程序代码放在项目根目录下的*src/*目录中，而所有测试代码将与之相邻，位于*tests/*目录中。
 - en: 'In the Solution example, you would place your `extractDomain()` function in
     *src/functions.php* and the `FunctionTest` class in *tests/FunctionTest.php*.
     Assuming autoloading is properly configured via Composer, you would then run the
     test using PHPUnit’s bundled command-line tool as follows:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 在解决方案示例中，您应将您的`extractDomain()`函数放置在*src/functions.php*中，将`FunctionTest`类放置在*tests/FunctionTest.php*中。假设通过Composer正确配置了自动加载，您可以使用PHPUnit捆绑的命令行工具来运行测试，如下所示：
 - en: '[PRE5]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: The preceding command will, by default, automatically identify and run every
     test class defined in your *tests/* directory via PHPUnit. To more comprehensively
     control the way PHPUnit runs, you can leverage a local configuration file to describe
     test suites, file allow lists, and configure any specific environment variables
     needed during testing.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，前述命令将通过PHPUnit自动识别和运行位于您的*tests/*目录中定义的每个测试类。为了更全面地控制PHPUnit的运行方式，您可以利用本地配置文件来描述测试套件、文件允许列表，并配置测试期间需要的任何特定环境变量。
 - en: The XML-based configuration is not often used except for complex or complicated
     projects, but the [project documentation](https://oreil.ly/Gz86n) details at length
     how to configure it. A basic *phpunit.xml* file usable with this recipe or other
     similarly simple projects would look something like [Example 13-1](#basic_phpunit_xml_config).
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 基于XML的配置通常仅用于复杂或复杂的项目，但[项目文档](https://oreil.ly/Gz86n)详细说明了如何配置它。可与此示例或其他类似简单项目一起使用的基本*phpunit.xml*文件看起来类似于[示例 13-1](#basic_phpunit_xml_config)。
 - en: Example 13-1\. Basic PHPUnit XML configuration
+  id: totrans-54
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-1\. 基本PHPUnit XML配置
 - en: '[PRE6]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Armed with the preceding *phpunit.xml* file in your project, you merely need
     to invoke PHPUnit itself to run your tests. You no longer need to specify the
     *tests/* directory, as that’s now provided by the `testsuite` definition in the
     application configuration.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 借助项目中前述的*phpunit.xml*文件，您只需调用PHPUnit本身即可运行您的测试。您不再需要指定*tests/*目录，因为这已由应用程序配置中的`testsuite`定义提供。
 - en: Similarly, you can also specify *multiple* test suites for different scenarios.
     Perhaps one set of tests is built by your development team proactively as they’re
     writing code (*unit* in the preceding example). Another set of tests might be
@@ -297,11 +419,15 @@
     The advantage of the second test suite is that you can then refactor your application
     until the tests pass (i.e., the bugs are fixed) while also ensuring that you haven’t
     modified the overall behavior of your application.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似地，您还可以为不同场景指定*多个*测试套件。也许一个测试集由开发团队主动编写代码时（在前述示例中是*unit*）构建。另一个测试集可能由质量保证（QA）团队编写，以复制用户报告的错误（*回归*）。第二个测试套件的优势在于，您可以重构应用程序直到测试通过（即修复了错误），同时确保未修改应用程序的整体行为。
 - en: You can also ensure that old bugs don’t reappear down the line!
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以确保旧的错误不会在以后出现！
 - en: In addition, you can choose which test suite runs at which time by passing the
     optional `--testsuite` flag to PHPUnit when it’s run. Most tests are going to
     be fast, meaning they can be run frequently without costing your development team
@@ -312,47 +438,65 @@
     test suite so you can test around them. The tests remain and can be used before
     a deployment but won’t slow down day-to-day development when standard tests run
     frequently.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，当运行PHPUnit时，通过传递可选的`--testsuite`标志，你可以选择在哪个时间运行哪个测试套件。大多数测试都会很快，这意味着它们可以频繁运行而不会为开发团队增加额外的时间成本。快速测试应该在开发过程中尽可能频繁地运行，以确保代码正常工作，并且没有新（或旧）的错误已经进入代码库。不过，有时候，你可能需要编写一个成本太高而不太频繁运行的测试。这些测试应该保留在单独的测试套件中，以便你可以绕过它们进行测试。这些测试保留在那里，可以在部署之前使用，但在标准测试频繁运行时不会减慢日常开发。
 - en: Function tests, like that in the Solution example, are quite simple. Object
     tests are similar in that you are instantiating an object within a test and exercising
     its methods. The hardest part, however, is simulating multiple possible inputs
     to a particular function or method. PHPUnit solves this with data providers.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 如解决方案示例中的函数测试那样，函数测试非常简单。对象测试类似于在测试中实例化对象并调用其方法。然而，最困难的部分是模拟特定函数或方法的多种可能输入。PHPUnit通过数据提供者解决了这个问题。
 - en: For a simple example, consider the `add()` function in [Example 13-2](#simple_addition_for_testing).
     This function explicitly uses loose typing to add two values (regardless of their
     types) together.
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为一个简单的例子，考虑[示例 13-2](#simple_addition_for_testing)中的`add()`函数。该函数明确使用宽松的类型来将两个值（无论其类型如何）相加。
 - en: Example 13-2\. Simple addition function
+  id: totrans-62
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-2\. 简单加法函数
 - en: '[PRE7]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Since the parameters in the preceding function can be of different types (`int`/`int`,
     `int`/`float`, `string`/`float`, etc.), you should test the various combinations
     to ensure that nothing breaks. Such a test structure would look like the class
     in [Example 13-3](#simple_addition_test).
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于前述函数中的参数可以是不同类型的（`int`/`int`，`int`/`float`，`string`/`float`等），你应该测试各种组合，以确保没有任何问题。这样的测试结构看起来像[示例 13-3](#simple_addition_test)中的类。
 - en: Example 13-3\. Simple test of PHP addition
+  id: totrans-65
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-3\. PHP 加法简单测试
 - en: '[PRE8]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: The `@dataProvider` annotation tells PHPUnit the name of a function within the
     test’s class that should be used to provide data for testing. Rather than writing
     four separate tests, you’ve now provided PHPUnit with the ability to run a single
     test four times with differing inputs and expected outputs. The end result is
     the same—four separate tests of your `add()` function—but without the need to
     explicitly write those extra tests.
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: '`@dataProvider`注解告诉PHPUnit测试类中应使用的函数的名称，该函数用于提供测试数据。现在，你不需要显式编写四个单独的测试，而是为PHPUnit提供了一次以不同输入和期望输出运行一次测试的能力。最终结果是一样的——对`add()`函数的四个单独的测试，但无需显式编写这些额外的测试。'
 - en: Given the structure of the `add()` function defined in [Example 13-2](#simple_addition_for_testing),
     you might run afoul of certain type restrictions in PHP. While it’s possible to
     pass numeric strings into the function (they’re cast to numeric values before
@@ -360,148 +504,214 @@
     user input is passed to this function, that kind of issue can and will come up.
     It’s best to protect against it by explicitly checking the input values with `is_numeric()`
     and throwing a known exception that can be caught elsewhere.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 考虑到在[示例 13-2](#simple_addition_for_testing)中定义的`add()`函数的结构，你可能会遇到PHP中某些类型限制的问题。虽然可以将数值字符串传递给函数（它们在相加之前会被转换为数值），但传递非数值数据将导致PHP警告。在将用户输入传递给该函数的情况下，这种问题可能会出现并将出现。最好通过显式使用`is_numeric()`检查输入值并抛出一个可以在其他地方捕获的已知异常来防范这种问题。
 - en: To accomplish this, first write a new test to *expect* that exception and validate
     that it’s thrown appropriately. Such a test would look like [Example 13-4](#testing_exceptions).
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了实现这一点，首先编写一个新的测试来*期望*异常，并验证它是否被适当地抛出。这样的一个测试看起来像[示例 13-4](#testing_exceptions)。
 - en: Example 13-4\. Testing the expected presence of exceptions in your code
+  id: totrans-70
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-4\. 测试代码中预期异常的存在
 - en: '[PRE9]'
+  id: totrans-71
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Warning
+  id: totrans-72
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: Writing tests before changing your code is valuable because it gives you a precise
     target to achieve while refactoring. However, this new test will fail until you
     make the changes to the application code. Take care not to commit failing tests
     to your project’s version control or you will compromise your team’s ability to
     practice continuous integration!
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 在修改代码之前编写测试非常有价值，因为它为您在重构时提供了精确的目标。然而，在您对应用程序代码进行更改之前，此新测试将失败。请注意不要将失败的测试提交到项目的版本控制中，否则将影响团队实施持续集成的能力！
 - en: 'With the preceding test in place, the test suite now fails as the function
     does not match the documented or expected behavior. Take time to add the appropriate
     `is_numeric()` checks to the function as follows:'
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 在上述测试放置后，由于函数不符合文档或预期的行为，测试套件现在失败了。请花时间将适当的 `is_numeric()` 检查添加到函数中，如下所示：
 - en: '[PRE10]'
+  id: totrans-75
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Unit tests are an effective way to document the expected and appropriate behavior
     of your application since they are executable code that also validates that the
     application is functioning properly. You can test both success *and* failure conditions
     and even go so far as to mock various dependencies within your code.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 单元测试是文档您的应用程序期望和适当行为的有效方式，因为它们是可执行代码，也验证应用程序是否正常运行。您可以测试成功 *和* 失败条件，甚至可以在代码中模拟各种依赖关系。
 - en: The PHPUnit project also provides the ability to proactively identify the percentage
     of your application code [that is covered by unit tests](https://oreil.ly/PEdVd).
     A higher percentage of coverage is not a guarantee against bugs but is a reliable
     way to ensure that bugs can be found and corrected quickly with minimal impact
     to end users.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: PHPUnit 项目还提供了主动识别应用程序代码的百分比 [通过单元测试覆盖率](https://oreil.ly/PEdVd) 的能力。更高的覆盖率百分比不能保证免受错误的影响，但是是一种可靠的方法，可以确保快速发现和纠正错误，对最终用户的影响最小。
 - en: See Also
+  id: totrans-78
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: Documentation on how to leverage [PHPUnit](https://oreil.ly/5oYv4).
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 [PHPUnit](https://oreil.ly/5oYv4) 的文档。
 - en: 13.3 Automating Unit Tests
+  id: totrans-80
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 13.3 自动化单元测试
 - en: Problem
+  id: totrans-81
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want your project’s unit tests to run frequently, without user interaction,
     before any changes to the codebase are committed to version control.
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望项目的单元测试在提交到版本控制之前，无需用户交互地频繁运行。
 - en: Solution
+  id: totrans-83
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: Leverage a Git commit hook to automatically run your unit tests *before* a commit
     is made locally. For example, the `pre-commit` hook in [Example 13-5](#simple_git_pre_commit)
     will automatically run PHPUnit every time the user runs `git commit` but before
     any data is actually written to the repository.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 利用 Git 提交钩子在本地提交之前自动运行单元测试 *之前*。例如，[示例 13-5](#simple_git_pre_commit) 中的 `pre-commit`
+    钩子将在用户运行 `git commit` 时自动运行 PHPUnit，但在实际数据写入仓库之前。
 - en: Example 13-5\. Simple Git `pre-commit` hook for PHPUnit
+  id: totrans-85
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-5\. 用于 PHPUnit 的简单 Git `pre-commit` 钩子
 - en: '[PRE11]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Discussion
+  id: totrans-87
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: Git is by far the most popular distributed version control system available
     and is also the system used by the core PHP development team. It’s open source
     and highly flexible both in how it hosts repositories and how you can customize
     workflows and project structures to fit your development cycle.
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: Git 是目前最流行的分布式版本控制系统，并且也是核心 PHP 开发团队使用的系统。它是开源的，并且在托管存储库的方式以及如何自定义工作流程和项目结构方面非常灵活，以适应您的开发周期。
 - en: Specifically, Git allows customization by way of hooks. Your hooks live in the
     *.git/hooks* directory within your project alongside other information Git uses
     to track the state of your project itself. By default, even an empty Git repository
     includes several sample hooks, as shown in [Figure 13-2](#sample_git_hooks).
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 具体而言，Git 允许通过钩子进行自定义。您的钩子位于项目中的 *.git/hooks* 目录中，与 Git 用于跟踪项目状态的其他信息一起。即使是空的
+    Git 仓库默认也包含几个示例钩子，如 [图 13-2](#sample_git_hooks) 所示。
 - en: '![Git initializes even an empty repository with sample hooks](assets/phpc_1302.png)'
+  id: totrans-90
   prefs: []
   type: TYPE_IMG
+  zh: '![Git initializes even an empty repository with sample hooks](assets/phpc_1302.png)'
 - en: Figure 13-2\. Git initializes even an empty repository with sample hooks
+  id: totrans-91
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 13-2\. Git 初始化即使是空仓库也会带有示例钩子
 - en: Each of the sample hooks is postfixed with a `.sample` extension that will disable
     it by default. If the sample hooks are ever something you do want to use, merely
     remove that extension, and the hook will run on that action.
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个示例钩子都带有 `.sample` 扩展名，以默认禁用它们。如果您希望使用示例钩子，只需删除该扩展名，钩子将在该操作上运行。
 - en: In the case of automated testing, you want the `pre-commit` hook explicitly
     and should create a file with that name containing the contents of [Example 13-5](#simple_git_pre_commit).
     With the hook in place, Git will always run this script before it commits the
     code.
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 在自动化测试的情况下，您需要显式使用 `pre-commit` 钩子，并应创建一个名为 [Example 13-5](#simple_git_pre_commit)
+    的文件，其中包含钩子的内容。使用该钩子后，Git 将始终在提交代码之前运行此脚本。
 - en: The `0` exit status at the end of the script tells Git everything is OK and
     it can continue with the commit. Should any of your unit tests fail, the `1` exit
     status will flag that something went wrong, and the commit will abort without
     modifying your repository.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 脚本末尾的`0`退出状态告诉 Git 一切正常，可以继续提交。如果您的单元测试中有任何失败，`1`退出状态将标记出现了问题，提交将在不修改您的仓库的情况下中止。
 - en: If you are absolutely sure you know what you’re doing and need to override the
     hook for any reason, you can bypass the hook by adding the `--no-verify` flag
     when committing your code.
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您绝对确定自己知道在做什么，并且出于任何原因需要覆盖钩子，您可以在提交代码时添加`--no-verify`标志来绕过钩子。
 - en: Warning
+  id: totrans-96
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: The `pre-commit` hook is run entirely on the client side and lives outside your
     code repository. Every developer will need to install the hook individually. Aside
     from team guidelines or company policy, there isn’t an effective way to enforce
     that the hook is being used (or that someone isn’t bypassing it with `--no-verify`).
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: '`pre-commit` 钩子完全在客户端运行，并且存在于您的代码库之外。每个开发者都需要单独安装该钩子。除了团队指南或公司政策外，没有有效的方法来强制使用该钩子（或者防止某人使用`--no-verify`绕过它）。'
 - en: If your team is using Git for version control, there’s a very good chance you’re
     also using GitHub to host a version of your repository. If so, you can [leverage
     GitHub Actions to run PHPUnit tests](https://oreil.ly/BmGZC) on GitHub’s server
     as part of your integration and deployment pipeline.
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的团队正在使用 Git 进行版本控制，那么很有可能您也在使用 GitHub 托管您的存储库的某个版本。如果是这样，您可以利用 GitHub Actions
+    在 GitHub 的服务器上运行 PHPUnit 测试，作为集成和部署管道的一部分。
 - en: Running tests locally helps protect against accidentally committing a *regression*
     (code that reintroduces a known bug) or other error to the repository. Running
     the same tests in the cloud provides even greater functionality as you can do
@@ -509,189 +719,285 @@
     only a single version of PHP locally, but you can run your application code and
     tests in containers on the server that are leveraging various versions of PHP
     or even different dependency versions.
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 本地运行测试有助于防止意外地将*回归*（重新引入已知错误的代码）或其他错误提交到代码库中。在云中运行相同的测试功能更强大，因为可以跨可能的配置矩阵执行测试。开发者通常只会在本地运行单个版本的
+    PHP，但您可以在服务器上的容器中运行应用程序代码和测试，并利用各种版本的 PHP 或不同的依赖版本。
 - en: 'Using GitHub Actions to run tests also provides the following benefits:'
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 GitHub Actions 运行测试还提供以下好处：
 - en: If a new developer hasn’t yet set up their Git `pre-commit` hook and commits
     broken code, the Action runner will immediately flag the commit as broken and
     prevent that developer from accidentally releasing a bug into production.
+  id: totrans-101
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果新开发者还没有设置他们的 Git `pre-commit` 钩子并提交了错误的代码，操作运行程序将立即标记该提交为错误，并防止开发者意外地发布错误到生产环境。
 - en: Using a deterministic environment in the cloud protects your team against “well,
     it worked on my machine” issues, where code works in one local environment but
     then fails in a production environment that has a different configuration.
+  id: totrans-102
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在云中使用确定性环境可以保护您的团队免受“在我的机器上可以运行”的问题影响，即代码在一个本地环境中可以工作，但在具有不同配置的生产环境中则会失败。
 - en: Your integration and deployment workflow should build new deployment artifacts
     from every commit. Wiring this build process to your tests ensures that every
     build artifact is free from known defects and is, in fact, deployable.
+  id: totrans-103
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您的集成和部署工作流程应该从每次提交中构建新的部署工件。将此构建过程与您的测试连接起来，确保每个构建工件不受已知缺陷的影响，并且确实可以部署。
 - en: See Also
+  id: totrans-104
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on customizing Git by [using hooks](https://oreil.ly/TzVOA).
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: '[使用钩子](https://oreil.ly/TzVOA)自定义 Git 的文档。'
 - en: 13.4 Using Static Code Analysis
+  id: totrans-106
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 13.4 使用静态代码分析
 - en: Problem
+  id: totrans-107
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to leverage an external tool to ensure that your code is free from
     as many errors as possible before it ever runs.
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望利用外部工具确保代码在运行之前尽可能少的错误。
 - en: Solution
+  id: totrans-109
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: Use a static code analysis tool like [PHPStan](https://phpstan.org).
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用像[PHPStan](https://phpstan.org)这样的静态代码分析工具。
 - en: Discussion
+  id: totrans-111
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: PHPStan is a static code analysis tool for PHP that helps minimize errors in
     production code by flagging them for correction long before you’ve shipped your
     application. It’s best when used with strict typing and helps your team write
     more manageable and understandable applications.^([3](ch13.html#idm45875142846176))
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: PHPStan 是一个用于 PHP 的静态代码分析工具，通过在应用程序发布之前标记错误来帮助减少生产代码中的错误。与严格类型一起使用效果最佳，有助于团队编写更易于管理和理解的应用程序。^([3](ch13.html#idm45875142846176))
 - en: 'Like many other development tools, PHPStan can be installed into your project
     via Composer with the following:'
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 像许多其他开发工具一样，PHPStan 可以通过 Composer 安装到您的项目中，方法如下：
 - en: '[PRE12]'
+  id: totrans-114
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'You can then run PHPStan against your project, analyzing both your application
     code and your tests directly. For example:'
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后可以针对您的项目运行 PHPStan，直接分析您的应用程序代码和测试。例如：
 - en: '[PRE13]'
+  id: totrans-116
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: By default, PHPStan runs at level 0, which is the absolute loosest level of
     static analysis possible. You can specify a higher level of scanning by passing
     the `--level` flag at the command line with a number greater than 0\. [Table 13-1](#phpstan_rule_levels)
     enumerates the various levels available. For well-maintained, strictly typed applications,
     a level 9 analysis is the best way to ensure quality code.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，PHPStan 运行在级别 0，这是可能的静态分析最宽松的级别。您可以通过在命令行传递`--level`标志并使用大于 0 的数字来指定更高级别的扫描。[表格
+    13-1](#phpstan_rule_levels) 列举了可用的各种级别。对于维护良好、严格类型的应用程序，级别 9 的分析是确保代码质量的最佳方法。
 - en: Table 13-1\. PHPStan rule levels
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 表格 13-1\. PHPStan 规则级别
 - en: '| Level | Description |'
+  id: totrans-119
   prefs: []
   type: TYPE_TB
+  zh: '| 级别 | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-120
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| 0 | Basic checks for unknown classes, functions, or class methods. Will also
     check number of arguments in function calls and any variables that are never defined.
     |'
+  id: totrans-121
   prefs: []
   type: TYPE_TB
+  zh: '| 0 | 对未知类、函数或类方法进行基本检查。还将检查函数调用中的参数数量以及从未定义的任何变量。 |'
 - en: '| 1 | Checks for possibly undefined variables, unknown magic methods, and dynamic
     properties retrieved through magic getters. |'
+  id: totrans-122
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | 检查可能未定义的变量、未知的魔术方法和通过魔术 getters 检索到的动态属性。 |'
 - en: '| 2 | Validates unknown methods on all expressions and validates functional
     documentation (docblocks in code). |'
+  id: totrans-123
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | 验证所有表达式上的未知方法，并验证功能文档（代码中的文档块）。 |'
 - en: '| 3 | Checks return types and property type assignment. |'
+  id: totrans-124
   prefs: []
   type: TYPE_TB
+  zh: '| 3 | 检查返回类型和属性类型分配。 |'
 - en: '| 4 | Checks for dead code (e.g., conditionals that are always false) and unreachable
     code paths. |'
+  id: totrans-125
   prefs: []
   type: TYPE_TB
+  zh: '| 4 | 检查死代码（例如，永远为 false 的条件）和无法访问的代码路径。 |'
 - en: '| 5 | Checks argument types. |'
+  id: totrans-126
   prefs: []
   type: TYPE_TB
+  zh: '| 5 | 检查参数类型。 |'
 - en: '| 6 | Reports on missing type hints. |'
+  id: totrans-127
   prefs: []
   type: TYPE_TB
+  zh: '| 6 | 报告丢失的类型提示。 |'
 - en: '| 7 | Reports partially incorrect union types.^([a](ch13.html#idm45875142772624))
     |'
+  id: totrans-128
   prefs: []
   type: TYPE_TB
+  zh: '| 7 | 报告部分不正确的联合类型。^([a](ch13.html#idm45875142772624)) |'
 - en: '| 8 | Checks for any method calls or property access on nullable types. |'
+  id: totrans-129
   prefs: []
   type: TYPE_TB
+  zh: '| 8 | 检查在可为 null 的类型上的任何方法调用或属性访问。 |'
 - en: '| 9 | Strict checks on usage of `mixed` typing. |'
+  id: totrans-130
   prefs: []
   type: TYPE_TB
+  zh: '| 9 | 对`mixed`类型的严格检查。 |'
 - en: '| ^([a](ch13.html#idm45875142772624-marker)) For examples of union types, see
     the discussion of [Example 3-9](ch03.html#type_solution_rewrite). |'
+  id: totrans-131
   prefs: []
   type: TYPE_TB
+  zh: ^([a](ch13.html#idm45875142772624-marker)) 关于联合类型的示例，请参阅[示例 3-9](ch03.html#type_solution_rewrite)的讨论。
+    |
 - en: Once you’ve run the analysis tool, you can work on updating your application
     to fix basic flaws and validation errors. You can also automate the use of static
     analysis, similarly to the way you automated testing in [Recipe 13.3](#automating_unit_tests)
     to ensure that the team is running analyses (and fixing identified errors) regularly.
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 运行分析工具后，您可以开始更新您的应用程序，以修复基本缺陷和验证错误。您还可以自动化静态分析的使用，类似于您在[食谱 13.3](#automating_unit_tests)
+    中自动化测试以确保团队定期运行分析并修复识别的错误。
 - en: See Also
+  id: totrans-133
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: The [PHPStan project home page and documentation](https://phpstan.org).
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PHPStan 项目主页和文档](https://phpstan.org)。'
 - en: 13.5 Logging Debugging Information
+  id: totrans-135
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 13.5 记录调试信息
 - en: Problem
+  id: totrans-136
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to log information about your program when things go wrong so you can
     debug any potential errors later.
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 当程序出现问题时，您希望记录关于您的程序的信息，以便稍后调试可能的错误。
 - en: Solution
+  id: totrans-138
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Leverage the open source [Monolog](https://oreil.ly/yDIM7) project to implement
     a comprehensive logging interface within your application. First install the package
     by using Composer as follows:'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 利用开源 [Monolog](https://oreil.ly/yDIM7) 项目在您的应用程序中实现全面的日志记录接口。首先通过 Composer 安装该包如下：
 - en: '[PRE14]'
+  id: totrans-140
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'Then wire the logger into your application so you can emit warnings and errors
     whenever necessary. For example:'
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后将日志记录器集成到您的应用程序中，以便在必要时发出警告和错误。例如：
 - en: '[PRE15]'
+  id: totrans-142
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Discussion
+  id: totrans-143
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The easiest way to log information from PHP is via its built-in [`error_log()`
     function](https://oreil.ly/kXYJP). This will log errors either to the server error
     log or to a flat file as configured in *php.ini*. The only problem is that the
     function explicitly logs *errors* in the application.
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 从PHP中记录信息的最简单方法是通过其内置的[`error_log()`函数](https://oreil.ly/kXYJP)。这将根据*php.ini*文件的配置，将错误记录到服务器错误日志或平面文件中。唯一的问题是该函数明确记录应用程序中的*错误*。
 - en: A result is that any content logged by `error_log()` is treated as an error
     by any system parsing the log file. This can make it difficult to disambiguate
     between true errors (e.g., user login failures) and messages logged for debugging
@@ -699,687 +1005,1010 @@
     configuration difficult, particularly when you want to turn off certain logging
     in various environments. A workaround is to wrap any calls to `error_log()` in
     a check for the current logging level as shown in [Example 13-6](#selective_logging).
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: 结果是，任何由`error_log()`记录的内容都被任何解析日志文件的系统视为错误。这使得很难区分真正的错误（例如用户登录失败）和为调试目的记录的消息。真正错误和调试语句的混合可以使得运行时配置变得困难，特别是当你希望在不同环境中关闭某些日志记录时。一种解决方法是在调用`error_log()`时包装一个对当前日志级别的检查，如示例13-6所示。
 - en: Example 13-6\. Selectively logging errors with `error_log()`
+  id: totrans-146
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-6\. 使用`error_log()`选择性记录错误
 - en: '[PRE16]'
+  id: totrans-147
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: '[![1](assets/1.png)](#co_debugging_and_testing_CO1-1)'
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_debugging_and_testing_CO1-1)'
 - en: The easiest way to enumerate logging levels is with a literal `enum` type in
     PHP.
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 在PHP中列出日志级别的最简单方法是使用字面量`enum`类型。
 - en: '[![2](assets/2.png)](#co_debugging_and_testing_CO1-2)'
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_debugging_and_testing_CO1-2)'
 - en: The log level should be retrievable from the system environment. If it’s not
     provided, then you should fall back on a sane, hardcoded default.
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 应该能从系统环境中获取日志级别。如果没有提供，则应退回到合理的硬编码默认值。
 - en: '[![3](assets/3.png)](#co_debugging_and_testing_CO1-3)'
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_debugging_and_testing_CO1-3)'
 - en: Whenever you invoke `error_log()`, you’ll need to explicitly check the current
     logging level and decide whether or not to actually emit the error.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 每当你调用`error_log()`时，都需要显式检查当前的日志级别，并决定是否实际输出错误。
 - en: The problem with [Example 13-6](#selective_logging) isn’t the use of an `enum`,
     nor is it the fact that you need to dynamically load the logging level from the
     environment. The problem is that you have to explicitly check the logging level
     prior to every invocation of `error_log()` to ensure that the program *actually
     should* emit an error. This frequent checking leads to a lot of spaghetti code
     and makes your application both less readable and more difficult to maintain.
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 13-6](#selective_logging)的问题不在于使用`enum`，也不在于需要从环境动态加载日志级别。问题在于你必须在每次调用`error_log()`之前显式检查日志级别，以确保程序*确实应该*输出错误。这种频繁检查导致大量的混乱代码，并使你的应用既难以阅读又难以维护。'
 - en: A seasoned developer will realize the perfect solution here would be to wrap
     all of the logging logic (including log level checking) in a functional interface
     to keep the application clean. That’s absolutely the right approach, and the entire
     reason the Monolog package exists!
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 有经验的开发人员会意识到，在这里包装所有日志逻辑（包括日志级别检查）到一个功能接口中，以保持应用程序的清晰。这绝对是正确的方法，也是Monolog包存在的全部原因！
 - en: Note
+  id: totrans-156
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: While Monolog is a popular PHP package for application logging, it is not the
     only package available. Monolog implements [PHP’s standard Logger interface](https://oreil.ly/76eAV);
     any package implementing the same interface can be dropped into your application
     in place of Monolog to provide similar functionality.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然Monolog是一个流行的PHP应用程序日志记录包，但并不是唯一的选择。Monolog实现了[PHP的标准Logger接口](https://oreil.ly/76eAV)；任何实现相同接口的包都可以替换Monolog，提供类似的功能。
 - en: Monolog is far more powerful than merely printing strings to an error log. It
     also supports channels, various handlers, processors, and logging levels.
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: Monolog远不止于仅仅将字符串打印到错误日志中。它还支持通道、各种处理程序、处理器和日志级别。
 - en: When instantiating a new logger, you first define a channel for that object.
     This allows you to create multiple logging instances side by side, keep their
     contents separate, and even route them to different means of output. By default,
     a logger needs more than a channel to operate, so you must also push a handler
     onto the call stack.
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 在实例化新记录器时，您首先为该对象定义一个通道。这使您可以并行创建多个日志记录实例，保持它们的内容分离，甚至将它们路由到不同的输出方式。默认情况下，记录器需要比通道更多的东西来操作，因此您还必须将处理程序推送到调用堆栈上。
 - en: '[A handler](https://oreil.ly/_1wLC) defines what Monolog should do with any
     message passed into a particular channel. It could route data to a file, store
     messages in a database, send errors via email, notify a team or channel on Slack
     of an issue, or even communicate with systems like RabbitMQ or Telegram.'
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: '[处理程序](https://oreil.ly/_1wLC) 定义 Monolog 应如何处理传入特定通道的任何消息。它可以将数据路由到文件中，将消息存储在数据库中，通过电子邮件发送错误，通知
+    Slack 上的团队或频道有问题，甚至与 RabbitMQ 或 Telegram 等系统进行通信。'
 - en: Note
+  id: totrans-161
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Monolog also supports different formatters that can be attached to various handlers.
     Each formatter defines how messages will be serialized and sent out to the defined
     handler—for example, as a one-line string, a JSON blob, or an Elasticsearch document.
     Unless you’re working with a handler that requires data in a specific format,
     you’ll likely be just fine with the default formatter.
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: Monolog 还支持不同的格式化程序，可以附加到各种处理程序上。每个格式化程序定义了消息将如何序列化并发送到定义的处理程序——例如，作为单行字符串、JSON
+    blob 或 Elasticsearch 文档。除非您使用需要特定格式数据的处理程序，否则默认的格式化程序通常就足够了。
 - en: A processor is an optional extra step that can add data to a message. For example,
     the [IntrospectionProcessor](https://oreil.ly/jp-US) will automatically add the
     line, file, class, and/or method from which the log call was made to the log itself.
     A basic Monolog setup to log to a flat file with introspection would look something
     like [Example 13-7](#monolog_configuration_with_introspection).
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理器是一个可选的额外步骤，可以向消息添加数据。例如，[IntrospectionProcessor](https://oreil.ly/jp-US)
+    将自动向日志中添加调用日志的行、文件、类和/或方法。用于带内省的基本 Monolog 设置，以将日志记录到一个平面文件中，看起来像是 [示例 13-7](#monolog_configuration_with_introspection)。
 - en: Example 13-7\. Monolog configuration with introspection
+  id: totrans-164
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-7\. 带有内省的 Monolog 配置
 - en: '[PRE17]'
+  id: totrans-165
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: The last line of [Example 13-7](#monolog_configuration_with_introspection) invokes
     your configured logger and sends a literal string through the processor to the
     handler you’ve wired in. In addition, you can optionally pass additional data
     about the execution context or the error itself in an array as an optional second
     parameter.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 13-7](#monolog_configuration_with_introspection) 的最后一行调用了您配置的记录器，并通过处理器发送一个字面字符串到您已连接的处理程序。此外，作为可选的第二个参数，您还可以选择传递关于执行上下文或错误本身的附加数据数组。'
 - en: 'Even without the additional context, if this entire code block lives in a file
     called */src/app.php*, it will produce something resembling the following in the
     application log:'
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 即使没有额外的上下文，如果整个代码块位于名为 */src/app.php* 的文件中，它将在应用程序日志中生成类似以下内容：
 - en: '[PRE18]'
+  id: totrans-168
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: All you needed to do was create a single line of text (`Something happened ...`),
     and Monolog automatically captured the event timestamp, the error level, and details
     about the call stack thanks to the registered processor. All of this information
     makes debugging and potential error correction that much easier for you and your
     development team.
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 您只需要创建一行文本（`Something happened ...`），Monolog 就会自动捕获事件时间戳、错误级别以及由于已注册的处理器而获取的调用堆栈详细信息。所有这些信息使得调试和潜在的错误修正对您和您的开发团队更加容易。
 - en: 'Monolog also abstracts away the burden of checking the error level on each
     call. Instead, you define the error level at play in two locations:'
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: Monolog 还抽象出了在每个调用上检查错误级别的负担。相反，您在两个位置定义正在进行的错误级别：
 - en: When registering a handler to the logger instance itself. Only errors of this
     error level or higher will be captured by the handler.
+  id: totrans-171
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当向记录器实例本身注册处理程序时。只有该错误级别或更高级别的错误将被处理程序捕获。
 - en: When emitting a message to the logger channel, you explicitly identify the error
     level attributed to it. For example, `::debug()` sends a message with an explicit
     error level of `Debug` assigned to it.
+  id: totrans-172
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当向记录器通道发送消息时，您明确标识分配给它的错误级别。例如，`::debug()` 发送一个带有显式错误级别 `Debug` 的消息。
 - en: Monolog supports the eight error levels listed in [Table 13-2](#monolog_error_levels),
     all illustrated by the syslog protocol described by [RFC 5424](https://oreil.ly/Jtm9k).
+  id: totrans-173
   prefs: []
   type: TYPE_NORMAL
+  zh: Monolog 支持 [表 13-2](#monolog_error_levels) 中列出的八个错误级别，所有这些错误级别都由 [RFC 5424](https://oreil.ly/Jtm9k)
+    描述的 syslog 协议进行说明。
 - en: Table 13-2\. Monolog error levels
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 表13-2\. Monolog错误级别
 - en: '| Error level | Logger method | Description |'
+  id: totrans-175
   prefs: []
   type: TYPE_TB
+  zh: '| 错误级别 | 记录器方法 | 描述 |'
 - en: '| --- | --- | --- |'
+  id: totrans-176
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| `Level::Debug` | `::debug()` | Detailed debugging information. |'
+  id: totrans-177
   prefs: []
   type: TYPE_TB
+  zh: '| `Level::Debug` | `::debug()` | 详细的调试信息。'
 - en: '| `Level::Info` | `::info()` | Normal events like SQL logs or information application
     events. |'
+  id: totrans-178
   prefs: []
   type: TYPE_TB
+  zh: '| `Level::Info` | `::info()` | 像SQL日志或信息应用事件等正常事件。'
 - en: '| `Level::Notice` | `::notice()` | Normal events that have greater significance
     than informational messages. |'
+  id: totrans-179
   prefs: []
   type: TYPE_TB
+  zh: '| `Level::Notice` | `::notice()` | 比信息消息具有更重要意义的正常事件。'
 - en: '| `Level::Warning` | `::warning()` | Application warnings that could become
     errors in the future if action is not taken. |'
+  id: totrans-180
   prefs: []
   type: TYPE_TB
+  zh: '| `Level::Warning` | `::warning()` | 如果不采取行动，可能会成为将来错误的应用程序警告。'
 - en: '| `Level::Error` | `::error()` | Application errors requiring immediate attention.
     |'
+  id: totrans-181
   prefs: []
   type: TYPE_TB
+  zh: '| `Level::Error` | `::error()` | 需要立即关注的应用程序错误。'
 - en: '| `Level::Critical` | `::critical()` | Critical conditions impacting the operation
     of the application. For example, instability or lack of availability in a key
     component. |'
+  id: totrans-182
   prefs: []
   type: TYPE_TB
+  zh: '| `Level::Critical` | `::critical()` | 影响应用程序运行的关键条件。例如，关键组件的不稳定或缺乏可用性。'
 - en: '| `Level::Alert` | `::alert()` | Immediate action is required because of a
     key system failure. In critical applications, this error level should page an
     on-call engineer. |'
+  id: totrans-183
   prefs: []
   type: TYPE_TB
+  zh: '| `Level::Alert` | `::alert()` | 由于关键系统故障需要立即采取行动。在关键应用程序中，此错误级别应该页一个值班工程师。'
 - en: '| `Level::Emergency` | `::emergency()` | The application is unusable. |'
+  id: totrans-184
   prefs: []
   type: TYPE_TB
+  zh: '| `Level::Emergency` | `::emergency()` | 应用程序无法使用。'
 - en: Through Monolog, you can intelligently wrap error messages in the appropriate
     logger method and determine when these errors are actually sent to a handler based
     on the error level used when creating the logger itself. If you instantiate a
     logger only for `Error`-level messages and above, any calls to `::debug()` will
     *not* result in a log. The ability to discretely control your log output in production
     versus development is vital to building a stable and well-logged application.
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过Monolog，您可以智能地将错误消息包装在适当的记录器方法中，并确定这些错误何时根据创建日志记录器时使用的错误级别发送到处理程序。如果仅为`Error`级别消息及以上实例化记录器，则对`::debug()`的任何调用都*不会*导致日志记录。在生产环境与开发环境中离散控制日志输出的能力对构建稳定和记录完善的应用程序至关重要。
 - en: See Also
+  id: totrans-186
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: Usage instructions for the [Monolog package](https://oreil.ly/_5wx6).
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Monolog包](https://oreil.ly/_5wx6)的使用说明。'
 - en: 13.6 Dumping Variable Contents as Strings
+  id: totrans-188
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 13.6 将变量内容转储为字符串
 - en: Problem
+  id: totrans-189
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to inspect the contents of a complex variable.
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望检查复杂变量的内容。
 - en: Solution
+  id: totrans-191
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use `var_dump()` to convert the variable into a human-readable format and print
     it to the current output stream (like the command-line console). For example:'
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`var_dump()`将变量转换为人类可读的格式并将其打印到当前输出流（例如命令行控制台）。例如：
 - en: '[PRE19]'
+  id: totrans-193
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'The preceding code will print the following to the console when run in the
     CLI:'
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 运行在CLI中时，上述代码将在控制台打印以下内容：
 - en: '[PRE20]'
+  id: totrans-195
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Discussion
+  id: totrans-196
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: Every form of data in PHP has some string representation. Objects can enumerate
     their types, fields, and methods. Arrays can enumerate their members. Scalar types
     can expose both their types and values. It’s possible for developers to get at
     the inner contents of any variable in any of three slightly different but equally
     valuable ways.
+  id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP中的每种数据形式都有一些字符串表示形式。对象可以枚举它们的类型、字段和方法。数组可以列举它们的成员。标量类型可以公开它们的类型和值。开发者可以以三种略微不同但同样有价值的方式之一访问任何变量的内部内容。
 - en: First, `var_dump()` as used in the Solution example directly prints the contents
     of a variable to the console. This string representation details the types involved,
     the names of fields, and the value of interior members directly. It’s useful as
     a quick way to inspect what lives within a variable, but it isn’t much use beyond
     that.
+  id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，`var_dump()`在解决方案示例中直接打印变量的内容到控制台。这个字符串表示详细说明了涉及的类型、字段名称以及内部成员的值。它作为快速检查变量内部内容的方式很有用，但在此之外并没有太大用处。
 - en: Warning
+  id: totrans-199
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: Take care to ensure that `var_dump()` doesn’t make its way into production.
     This function does not escape data and could render unsanitized user input to
     your application’s output, introducing a serious security vulnerability.^([4](ch13.html#idm45875142222400))
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 要注意确保`var_dump()`不要进入生产环境。此函数不会转义数据，并且可能会将未经过滤的用户输入渲染到应用程序的输出中，从而引入严重的安全漏洞。^([4](ch13.html#idm45875142222400))
 - en: 'More helpful is PHP’s `var_export()` function. By default, it also prints the
     contents of any variable passed in, except the output format is itself executable
     PHP code. The same `$info` object from the Solution example would print as follows:'
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: 更有帮助的是 PHP 的 `var_export()` 函数。默认情况下，它也会打印传递进来的任何变量的内容，但输出格式本身是可执行的 PHP 代码。来自解决方案示例的相同
+    `$info` 对象将打印如下：
 - en: '[PRE21]'
+  id: totrans-202
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Unlike `var_dump()`, `var_export()` accepts an optional second parameter that
     will instruct the function to *return* its output rather than print it to the
     screen. This results in a string literal that represents the contents of the variable
     being returned, which could then itself be stored elsewhere for future reference.
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: 与 `var_dump()` 不同，`var_export()` 接受一个可选的第二个参数，该参数指示函数*返回*其输出，而不是直接打印到屏幕上。这将产生一个字符串字面量，表示将要返回的变量内容，随后可以存储在其他地方供将来参考。
 - en: A third and final alternative is to use PHP’s `print_r()` function. Like both
     of the preceding functions, it produces a human-readable representation of the
     variable’s contents. As with `var_export()`, you can pass an optional second parameter
     to the variable to return its output rather than print it to the screen.
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 第三种最终的选择是使用 PHP 的 `print_r()` 函数。与前两个函数一样，它生成变量内容的易读表示。与 `var_export()` 一样，您可以传递可选的第二个参数来返回其输出，而不是直接打印到屏幕上。
 - en: 'Unlike both of the preceding functions, though, not all typing information
     is exposed directly by `print_r()`. For example, the same `$info` object from
     the Solution example would print as follows:'
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管 `print_r()` 不直接暴露所有类型信息，与前两个函数不同。例如，来自解决方案示例的相同 `$info` 对象将打印如下：
 - en: '[PRE22]'
+  id: totrans-206
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Each function displays a different amount of information pertaining to the variable
     in question. Which version works best for you depends on how exactly you intend
     to use the resulting information. In a debugging or logging context, the ability
     of `var_export()` and `print_r()` to return a string representation rather than
     printing directly to the console would be valuable, particularly when paired with
     a tool like Monolog as described in [Recipe 13.5](#recipe_logging).
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个函数显示与所讨论变量相关的不同信息量。哪个版本对您最有效取决于您打算如何使用生成的信息。在调试或记录上下文中，`var_export()` 和 `print_r()`
+    能够返回字符串表示而不是直接打印到控制台，特别是与类似 [第 13.5 节](#recipe_logging) 中描述的 Monolog 工具配对时将非常有价值。
 - en: If you want to export variable contents in a way to easily reimport them into
     PHP directly, the executable output of `var_export()` would serve you best. If
     you’re debugging variable contents and need deep typing and size information,
     the default output of `var_dump()` might be the most informative, even if it can’t
     be directly exported as a string.
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您希望以便于直接重新导入到 PHP 中的方式导出变量内容，`var_export()` 的可执行输出将最适合您。如果您正在调试变量内容并需要深层次的类型和大小信息，则
+    `var_dump()` 的默认输出可能是最具信息性的，即使它不能直接导出为字符串。
 - en: If you *do* need to leverage `var_dump()` and want to export its output as a
     string, you can leverage [output buffering](https://oreil.ly/2AUks) in PHP to
     do just that. Specifically, create an output buffer prior to invoking `var_dump()`,
     then store the contents of that buffer in a variable for future use, as shown
     in [Example 13-8](#output_buffering_capture).
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您*确实*需要利用 `var_dump()` 并希望将其输出作为字符串导出，您可以利用 PHP 中的 [输出缓冲](https://oreil.ly/2AUks)
+    来实现这一点。具体而言，在调用 `var_dump()` 之前创建输出缓冲区，然后将该缓冲区的内容存储在变量中以备将来使用，如 [示例 13-8](#output_buffering_capture)
+    所示。
 - en: Example 13-8\. Output buffering to capture variable contents
+  id: totrans-210
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-8\. 输出缓冲以捕获变量内容
 - en: '[PRE23]'
+  id: totrans-211
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: '[![1](assets/1.png)](#co_debugging_and_testing_CO2-1)'
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_debugging_and_testing_CO2-1)'
 - en: Create an output buffer. Any code that prints to the console after this invocation
     will be captured by the buffer.
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建输出缓冲区。此调用后打印到控制台的任何代码将被缓冲区捕获。
 - en: '[![2](assets/2.png)](#co_debugging_and_testing_CO2-2)'
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_debugging_and_testing_CO2-2)'
 - en: Dump the contents of the variable in question to the console/buffer.
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: 将相关变量的内容转储到控制台/缓冲区。
 - en: '[![3](assets/3.png)](#co_debugging_and_testing_CO2-3)'
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_debugging_and_testing_CO2-3)'
 - en: Get the contents of the buffer and delete it afterwards.
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 获取缓冲区的内容并在此之后删除它。
 - en: 'The result of the preceding example code will be a string representation of
     the dumped contents of `$info` stored in `$contents` for future reference. Proceeding
     to dump the contents of `$contents` itself would yield the following:'
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 前面示例代码的结果将是存储在 `$contents` 中用于将来参考的 `$info` 转储内容的字符串表示。继续转储 `$contents` 本身的内容将得到以下结果：
 - en: '[PRE24]'
+  id: totrans-219
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: See Also
+  id: totrans-220
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [`var_dump()`](https://oreil.ly/uYuoV), [`var_export()`](https://oreil.ly/V_vZ-),
     and [`print_r()`](https://oreil.ly/0D891).
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`var_dump()`](https://oreil.ly/uYuoV)、[`var_export()`](https://oreil.ly/V_vZ-)和[`print_r()`](https://oreil.ly/0D891)的文档。'
 - en: 13.7 Using the Built-in Web Server to Quickly Run an Application
+  id: totrans-222
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 13.7 使用内置Web服务器快速运行应用程序
 - en: Problem
+  id: totrans-223
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to launch a web application locally without configuring an actual web
     server like Apache or NGINX.
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望在本地启动Web应用程序，而无需配置实际的Web服务器，如Apache或NGINX。
 - en: Solution
+  id: totrans-225
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use PHP’s built-in web server to quickly launch a script such that it is accessible
     from a web browser. For example, if your application lives in a *public_html/*
     directory, launch the web server from that directory as follows:'
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用PHP的内置Web服务器快速启动脚本，以便可以从Web浏览器访问。例如，如果您的应用程序位于*public_html/*目录中，请从该目录启动Web服务器如下所示：
 - en: '[PRE25]'
+  id: totrans-227
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: Then visit *http://localhost:8000* in your browser to view any file (static
     HTML, images, or even executable PHP) that resides within that directory.
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后在浏览器中访问*http://localhost:8000*以查看位于该目录中的任何文件（静态HTML、图像，甚至可执行PHP）。
 - en: Discussion
+  id: totrans-229
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The PHP CLI provides a built-in web server that makes it easy to test or demonstrate
     applications or scripts in a controlled, local environment. The CLI supports both
     running PHP scripts and returning static content from the request path.
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP CLI提供了一个内置的Web服务器，可以轻松在受控的本地环境中测试或演示应用程序或脚本。CLI支持运行PHP脚本并从请求路径返回静态内容。
 - en: 'Static content could include rendered HTML files or anything from the following
     standard MIME types/extensions:'
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 静态内容可以包括渲染的HTML文件或以下标准MIME类型/扩展名中的任何内容：
 - en: '[PRE26]'
+  id: totrans-232
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: Warning
+  id: totrans-233
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: The built-in web server is intended for development and debugging purposes.
     It should not be used in a production context. For production purposes, always
     leverage a fully fledged web server in front of PHP. Either NGINX or Apache in
     front of PHP-FPM are reasonable choices.
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 内置Web服务器用于开发和调试目的。不应在生产环境中使用。出于生产目的，始终利用完整的Web服务器作为PHP的前端。NGINX或Apache在PHP-FPM前端都是合理的选择。
 - en: In addition, you can pass a particular script as a *router script* to the web
     server, resulting in PHP directing every request to that script. The advantage
     to such an approach is that it mimics the use of popular PHP frameworks that utilize
     routers. The disadvantage is that you need to manually handle routing for static
     assets.
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，您可以将特定脚本作为*路由器脚本*传递给Web服务器，使PHP将每个请求重定向到该脚本。这种方法的优点是模仿使用流行PHP框架的路由器的使用。缺点是您需要手动处理静态资源的路由。
 - en: In an Apache or NGINX environment, browser requests for images, documents, or
     other static content are served directly without invoking PHP. When leveraging
     the CLI web server, you must first check for these assets and return an explicit
     `false` in order for the development server to handle them properly.
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 在Apache或NGINX环境中，浏览器对图像、文档或其他静态内容的请求会直接提供而不调用PHP。在利用CLI Web服务器时，您必须首先检查这些资产并返回显式的`false`，以便开发服务器正确处理它们。
 - en: 'A framework router script must then check to see if you’re running in CLI mode
     and, if so, route content accordingly. For example:'
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 框架路由器脚本必须检查是否在CLI模式下运行，如果是，则相应地路由内容。例如：
 - en: '[PRE27]'
+  id: totrans-238
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: 'The preceding *router.php* file could then be used to bootstrap a local web
     server as follows:'
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 上述*router.php*文件然后可以用以下方式启动本地Web服务器：
 - en: '[PRE28]'
+  id: totrans-240
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: The development web server could be made accessible to any interface (available
     on the local network) by passing `0.0.0.0` instead of `localhost` when invoking
     it. However, remember that this server is not designed for production use and
     is not structured in a way to protect your application from abuse by bad actors.
     *Do not use this web server on a public network!*
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 当调用时，可以通过传递`0.0.0.0`而不是`localhost`使开发Web服务器可访问任何接口（在本地网络上可用）。但请记住，该服务器不适用于生产使用，并且结构不足以保护应用程序免受不良行为者的滥用。*不要在公共网络上使用此Web服务器！*
 - en: See Also
+  id: totrans-242
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on PHP’s [built-in web server](https://oreil.ly/Hm9U7).
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP的[内置Web服务器](https://oreil.ly/Hm9U7)的文档。
 - en: 13.8 Using Unit Tests to Detect Regressions in a Version-Controlled Project
     with git-bisect
+  id: totrans-244
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 13.8 使用单元测试和git-bisect在版本控制项目中检测回归
 - en: Problem
+  id: totrans-245
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to quickly identify which commit in a version-controlled application
     introduced a particular bug so you can fix it.
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望快速确定版本控制应用程序中引入特定错误的提交，以便修复它。
 - en: Solution
+  id: totrans-247
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use `git bisect` to track down the first bad commit in your source tree, as
     follows:'
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`git bisect`来跟踪源代码树中的第一个错误提交，如下所示：
 - en: Create a new branch on the project.
+  id: totrans-249
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在项目上创建一个新分支。
 - en: Write a failing unit test (a test that reproduces the bug currently but, if
     the bug were fixed, it would pass).
+  id: totrans-250
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 编写一个失败的单元测试（即当前复现 bug 的测试，但如果修复了 bug，它将通过）。
 - en: Commit that test to the new branch.
+  id: totrans-251
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 将该测试提交到新分支。
 - en: Leverage `git rebase` to move that commit that introduces your new test to an
     earlier point in the project’s history.
+  id: totrans-252
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 利用 `git rebase` 将引入新测试的提交移动到项目历史的较早位置。
 - en: Use `git bisect` from that earlier point in history to automatically run your
     unit tests on subsequent commits to find the first commit where the test failed.
+  id: totrans-253
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 从历史的较早点使用 `git bisect` 自动运行单元测试，以找到测试失败的第一个提交。
 - en: Once you rebase your project’s commit history, the hashes of all of your commits
     will change. Keep track of the *new* commit hash for your unit test so you can
     properly target `git bisect.` For example, assume this commit has a hash of `48cc8f0`
     after being moved in your commit history. In that case, as shown in [Example 13-9](#git-bisect-navigation),
     you would identify this commit as “good” and the `HEAD` (the latest commit) in
     the project as “bad.”
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦重新基础项目的提交历史，所有提交的哈希值都会更改。记住单元测试的 *新* 提交哈希，以便正确地定位 `git bisect`。例如，假设这个提交在移动后的提交历史中具有哈希值
+    `48cc8f0`。在 [示例 13-9](#git-bisect-navigation) 中显示的情况下，你将将此提交标识为“good”，并将项目中的 `HEAD`（最新提交）标识为“bad”。
 - en: Example 13-9\. Example `git bisect` navigation after rebasing a test case
+  id: totrans-255
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-9。在重新基础测试用例后的 `git bisect` 导航示例。
 - en: '[PRE29]'
+  id: totrans-256
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: '[![1](assets/1.png)](#co_debugging_and_testing_CO3-1)'
+  id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_debugging_and_testing_CO3-1)'
 - en: You must tell Git the first good commit it needs to look at.
+  id: totrans-258
   prefs: []
   type: TYPE_NORMAL
+  zh: 必须告诉 Git 它需要查看的第一个好的提交。
 - en: '[![2](assets/2.png)](#co_debugging_and_testing_CO3-2)'
+  id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_debugging_and_testing_CO3-2)'
 - en: Since you don’t know for sure where the broken commit is, pass the `HEAD` constant
     and Git will look at every commit after the good one referenced earlier.
+  id: totrans-260
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于不确定损坏的提交在哪里，传递 `HEAD` 常量，Git 将查看之前好的提交之后的每个提交。
 - en: '[![3](assets/3.png)](#co_debugging_and_testing_CO3-3)'
+  id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_debugging_and_testing_CO3-3)'
 - en: Git can run a specific command for every suspect commit. In this case, run your
     test suite. Git will continue looking at your project commit history until it
     finds the first commit where the test suite fails.
+  id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: Git 可以针对每个可疑的提交运行特定命令。在这种情况下，运行你的测试套件。Git 将继续查看项目提交历史，直到找到第一个使测试套件失败的提交。
 - en: Once Git has identified the first bad commit (e.g., `16c43d7`), use `git diff`
     to see what actually changed at that commit, as shown in [Example 13-10](#comparing_known_bad_git).
+  id: totrans-263
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦 Git 确定了第一个坏的提交（例如 `16c43d7`），使用 `git diff` 查看该提交实际更改的内容，如 [示例 13-10](#comparing_known_bad_git)
+    所示。
 - en: Example 13-10\. Comparing a known-bad Git commit
+  id: totrans-264
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-10。比较已知坏的 Git 提交。
 - en: '[PRE30]'
+  id: totrans-265
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: Once you know what’s broken, run `git bisect reset` to return your repository
     to normal operations. At this point, move back to your main branch (and possibly
     delete the test branch as well) so you can begin correcting the identified bug.
+  id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦确定了有问题的地方，运行 `git bisect reset` 将仓库恢复到正常操作。此时返回到主分支（可能也要删除测试分支），以便开始修复确定的
+    bug。
 - en: Discussion
+  id: totrans-267
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: Git’s bisect tool is a powerful way to track down and identify a bad commit
     to your project. It’s particularly useful on larger, active projects where there
     might be several commits between a known-good and known-bad state. With larger
     projects, it’s often cost prohibitive in terms of developer time to iterate through
     every commit to test its validity on an individual basis.
+  id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: Git 的 bisect 工具是追踪和识别项目中坏提交的强大方法。在较大且活跃的项目中尤其有用，因为在已知好和已知坏状态之间可能存在多个提交。对于较大的项目来说，通过逐个提交来测试其有效性在开发者时间上往往是成本高昂的。
 - en: The `git bisect` command works with a binary search approach. It finds the commit
     at the midpoint between the known-good and known-bad ones and tests that commit.
     It then moves closer to the known-good or the known-bad commits based on the output
     of that test.
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: '`git bisect` 命令采用二分搜索方法。它找到介于已知好和已知坏之间的提交中点，并测试该提交。然后根据测试输出，靠近已知好或已知坏的提交。'
 - en: By default, `git bisect` expects you to manually test each suspect commit until
     it finds the “first bad” commit. However, the `git bisect run` subcommand empowers
     you to delegate this check to an automated system like PHPUnit. If the test command
     returns a default status of `0` (or success), the commit is assumed to be good.
     This works well because PHPUnit exits with an error code of `0` when all tests
     pass.
+  id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，`git bisect`希望你手动测试每个可疑的提交，直到找到“第一个坏”提交。然而，`git bisect run`子命令使你能够将此检查委托给像
+    PHPUnit 这样的自动化系统。如果测试命令返回默认状态`0`（或成功），则假定提交是良好的。这很有效，因为当所有测试通过时，PHPUnit 会以错误代码`0`退出。
 - en: If the tests fail, PHPUnit returns an error code of `1`, which `git bisect`
     interprets as a bad commit. In this way, you can fully automate the detection
     of a bad commit over thousands of potential commits quickly and easily.
+  id: totrans-271
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果测试失败，PHPUnit 将返回错误代码`1`，而`git bisect`则会将其解释为一个不良提交。通过这种方式，你可以快速轻松地自动检测到成千上万个潜在提交中的不良提交。
 - en: In the Solution example, you first created a new branch. This is merely to keep
     your project clean so you can throw any potential test commits away once you’ve
     identified the bad commit. On this branch, you committed a single test to replicate
     a bug identified in your project. Leveraging `git log`, you can quickly visualize
     the history of your project, including this test commit, as shown in [Figure 13-3](#git_bisect_log).
+  id: totrans-272
   prefs: []
   type: TYPE_NORMAL
+  zh: 在解决方案示例中，你首先创建了一个新分支。这仅是为了保持项目清晰，以便在确定坏提交后可以丢弃任何潜在的测试提交。在这个分支上，你提交了一个单独的测试来复制在项目中发现的错误。利用`git
+    log`，你可以快速可视化项目的历史记录，包括这个测试提交，如[图 13-3](#git_bisect_log)所示。
 - en: '![Git log demonstrating a main branch and a testing branch with a single commit](assets/phpc_1303.png)'
+  id: totrans-273
   prefs: []
   type: TYPE_IMG
+  zh: '![Git 日志显示具有单个提交的主分支和测试分支](assets/phpc_1303.png)'
 - en: Figure 13-3\. Git log demonstrating a main branch and a testing branch with
     a single commit
+  id: totrans-274
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 13-3\. Git 日志显示具有单个提交的主分支和测试分支
 - en: This log is useful as it provides you with the short hash for both your test
     commit and every other commit in the project. If you know a historical commit
     that is known to be good, you can rebase your project to move the test commit
     to *just after* that known commit.
+  id: totrans-275
   prefs: []
   type: TYPE_NORMAL
+  zh: 此日志非常有用，因为它为项目中的测试提交和每个其他提交提供了短哈希。如果你知道一个已知良好的历史提交，你可以使用`git rebase`重新安排项目，将测试提交移动到*紧随*该已知提交之后。
 - en: In [Figure 13-3](#git_bisect_log), the test commit hash is `d442759`, and the
     last known “good” commit is `916161c`. To reorder your project, use `git rebase`
     interactively from the project’s initial commit (`8550717`) to move the test commit
     earlier in the project. The exact command would start as shown in [Example 13-11](#interactive_git_rebase).
+  id: totrans-276
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[图 13-3](#git_bisect_log)中，测试提交哈希是`d442759`，而最后一个已知“良好”提交是`916161c`。要重新排序项目，从项目的初始提交（`8550717`）开始，使用`git
+    rebase`交互式移动测试提交到项目的较早位置。确切的命令如[示例 13-11](#interactive_git_rebase)所示。
 - en: Example 13-11\. Interactive `git rebase` to reorder commits
+  id: totrans-277
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-11\. 交互式`git rebase`以重新排序提交
 - en: '[PRE31]'
+  id: totrans-278
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: Git will open a text editor and present the same SHA hashes for each possible
     commit. You want to retain your commit history (so keep the `pick` keywords in
     place), but move the test commit to just after the known-good commit, as shown
     in [Figure 13-4](#git_rebase_interactive).
+  id: totrans-279
   prefs: []
   type: TYPE_NORMAL
+  zh: Git 将打开一个文本编辑器，并为每个可能的提交呈现相同的 SHA 哈希。你希望保留提交历史记录（因此保留`pick`关键字不变），但将测试提交移动到已知良好提交的后面，如[图 13-4](#git_rebase_interactive)所示。
 - en: '![Interactive Git rebasing allows for modifying or reordering commits at will](assets/phpc_1304.png)'
+  id: totrans-280
   prefs: []
   type: TYPE_IMG
+  zh: '![交互式 Git 重新基础允许根据需要修改或重新排序提交](assets/phpc_1304.png)'
 - en: Figure 13-4\. Interactive Git rebasing allows for modifying or reordering commits
     at will
+  id: totrans-281
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 13-4\. 交互式 Git 重新基础允许根据需要修改或重新排序提交
 - en: Save the file, and Git will work at reconstructing your project history based
     on the moved commit. If and when there are conflicts, reconcile them locally first
     and commit the results. Then leverage `git rebase --continue` to keep moving.
     Once you’re done, your project will be restructured such that the new test case
     appears immediately after the known-good commit.
+  id: totrans-282
   prefs: []
   type: TYPE_NORMAL
+  zh: 保存文件后，Git 将根据移动的提交重建项目历史。如果有冲突，请先在本地解决冲突并提交结果。然后利用`git rebase --continue`继续移动。完成后，你的项目将重组，以使新的测试用例立即出现在已知良好提交之后。
 - en: Warning
+  id: totrans-283
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: The known-good commit will have the same commit hash, as will any commits that
     came before it. Your moved commit and all the ones that follow, however, will
     have new commit hashes applied. Take care to ensure that you’re using the correct
     commit hashes in any subsequent Git commands!
+  id: totrans-284
   prefs: []
   type: TYPE_NORMAL
+  zh: 已知的良好提交将具有相同的提交哈希，之前的所有提交也是如此。然而，移动的提交和随后的所有提交将被应用新的提交哈希。务必确保在任何后续的Git命令中使用正确的提交哈希！
 - en: Once the rebase is complete, use `git log --oneline` to again visualize your
     commit history and reference the *new* commit attributed to your unit test. Then
     you can run `git bisect` from that commit to the `HEAD` of your project as you
     did in [Example 13-9](#git-bisect-navigation). Git will run PHPunit on each suspect
     commit until it finds the first “bad” commit, producing output similar to that
     in [Figure 13-5](#git_bisect_run).
+  id: totrans-285
   prefs: []
   type: TYPE_NORMAL
+  zh: 重新基础完成后，使用`git log --oneline`再次查看你的提交历史，并参考*新*的单元测试所属的新提交。接着，你可以从那个提交开始运行`git
+    bisect`直到项目的`HEAD`，就像在[例子13-9](#git-bisect-navigation)中一样。Git将在每个可疑的提交上运行PHPunit，直到找到第一个“坏”提交，生成类似于[图13-5](#git_bisect_run)的输出。
 - en: '![Git bisect runs until it finds the first ''bad'' commit in the tree](assets/phpc_1305.png)'
+  id: totrans-286
   prefs: []
   type: TYPE_IMG
+  zh: '![Git bisect在树中找到第一个“坏”提交](assets/phpc_1305.png)'
 - en: Figure 13-5\. Git bisect runs until it finds the first “bad” commit in the tree
+  id: totrans-287
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图13-5\. Git bisect在树中找到第一个“坏”提交
 - en: Armed with knowledge of the first bad commit, you can view the diff at that
     point and see exactly where and how the bug crept into your project. At this point,
     return to the main branch and start prepping your fixes.
+  id: totrans-288
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了第一个“坏”提交的信息，你可以查看那一点的差异，准确地找出错误是如何潜入你的项目的。此时，回到主分支并开始准备你的修复。
 - en: It’s a good idea to pull in your new unit test as well.
+  id: totrans-289
   prefs: []
   type: TYPE_NORMAL
+  zh: 还是把你的新单元测试拉进来是个好主意。
 - en: Note
+  id: totrans-290
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: While you could leverage `git rebase` again to move your test commit back to
     where it belongs, the rebase operation might still leave your project history
     modified from its former state. Instead, return to `main` and create a *new* branch
     for actually fixing the bug at that point. Pull in your test commit (perhaps via
     [`git cherry-pick`](https://oreil.ly/tTFx3)) and make whatever changes are necessary.
+  id: totrans-291
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然你可以再次利用`git rebase`将你的测试提交移回原位，但是重新基础操作可能会改变项目历史的修改状态。相反，返回到`main`分支并为实际修复问题创建一个*新*分支。拉入你的测试提交（也许通过[`git
+    cherry-pick`](https://oreil.ly/tTFx3)），并进行必要的更改。
 - en: See Also
+  id: totrans-292
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: Documentation on [`git bisect`](https://oreil.ly/LXgBP).
+  id: totrans-293
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`git bisect`](https://oreil.ly/LXgBP)的文档。'
 - en: ^([1](ch13.html#idm45875143879696-marker)) For more on error handling, review
     [Chapter 12](ch12.html#chapter_errors).
+  id: totrans-294
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([1](ch13.html#idm45875143879696-marker)) 想了解更多关于错误处理的内容，请查阅[第12章](ch12.html#chapter_errors)。
 - en: ^([2](ch13.html#idm45875143583840-marker)) For more on Composer, see [Recipe
     15.1](ch15.html#composer_definition).
+  id: totrans-295
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([2](ch13.html#idm45875143583840-marker)) 关于Composer的更多信息，请参见[第15.1节](ch15.html#composer_definition)。
 - en: ^([3](ch13.html#idm45875142846176-marker)) Strict typing is discussed at length
     in [Recipe 3.4](ch03.html#argument_and_return_typing).
+  id: totrans-296
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([3](ch13.html#idm45875142846176-marker)) 关于严格类型的讨论详见[第3.4节](ch03.html#argument_and_return_typing)。
 - en: ^([4](ch13.html#idm45875142222400-marker)) For more on data sanitization, see
     [Recipe 9.1](ch09.html#recipe_sanitize_input).
+  id: totrans-297
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([4](ch13.html#idm45875142222400-marker)) 想了解更多关于数据净化的内容，请参见[第9.1节](ch09.html#recipe_sanitize_input)。

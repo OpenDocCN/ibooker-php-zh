@@ -1,396 +1,589 @@
 - en: Chapter 13\. Writing APIs
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第 13 章。编写 API
 - en: One of the most common tasks Laravel developers are given is to create an API,
     usually JSON and REST or REST-like, that allows third parties to interact with
     the Laravel application’s data.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 开发者面临的最常见任务之一是创建 API，通常是 JSON 和 REST 或类似 REST 的，允许第三方与 Laravel 应用程序的数据进行交互。
 - en: Laravel makes it incredibly easy to work with JSON, and its resource controllers
     are already structured around REST verbs and patterns. In this chapter you’ll
     learn about some basic API-writing concepts, the tools Laravel provides for writing
     APIs, and some external tools and organizational systems you’ll want to consider
     when writing your first Laravel API.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 让与 JSON 工作变得非常容易，并且它的资源控制器已经围绕 REST 动词和模式进行了结构化。在本章中，您将学习一些基本的 API 编写概念，Laravel
+    提供的编写 API 的工具，以及在编写您的第一个 Laravel API 时需要考虑的一些外部工具和组织系统。
 - en: The Basics of REST-Like JSON APIs
+  id: totrans-3
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: REST-Like JSON API 的基础知识
 - en: 'Representational state transfer (REST) is an architectural style for building
     APIs. Technically, REST is either a broad definition that could apply to almost
     the entirety of the internet or something so specific that *no one* actually uses
     it, so don’t let yourself get overwhelmed by the definition or caught in an argument
     with a pedant. When we talk about RESTful or REST-like APIs in the Laravel world,
     we’re generally talking about APIs with a few common characteristics:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 表述性状态转移（REST）是一种用于构建 API 的架构风格。技术上来说，REST 或者是一个广义定义，几乎可以适用于整个互联网，或者是一个如此具体的东西，以至于*没有人*真正使用它，所以不要让自己被定义或与书呆子争论所困扰。在
+    Laravel 的世界中，当我们谈论 RESTful 或类似 REST 的 API 时，通常是指具有以下几个共同特征的 API：
 - en: They’re structured around “resources” that can be uniquely represented by URIs,
     like `/cats` for all cats, `/cats/15` for a single cat with the ID of 15, etc.
+  id: totrans-5
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 它们围绕可由 URI 唯一表示的“资源”进行组织，比如 `/cats` 表示所有猫，`/cats/15` 表示 ID 为 15 的单个猫等。
 - en: Interactions with resources primarily take place using HTTP verbs (`GET` `/cats/15`
     versus `DELETE /cats/15`).
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 主要使用 HTTP 动词（`GET` `/cats/15` 与 `DELETE /cats/15`）与资源进行交互。
 - en: They’re stateless, meaning there’s no persistent session authentication between
     requests; each request must uniquely authenticate itself.
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 它们是无状态的，这意味着请求之间没有持久的会话身份验证；每个请求必须唯一验证自己。
 - en: They’re cacheable and consistent, meaning each request (except for a few authenticated
     user–specific requests) should return the same result regardless of who the requester
     is.
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 它们是可缓存且一致的，这意味着每个请求（除了少数特定于经过身份验证的用户的请求）无论请求者是谁，都应该返回相同的结果。
 - en: They return JSON.
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 它们返回 JSON。
 - en: The most common API pattern is to have a unique URL structure for each of your
     Eloquent models that’s exposed as an API resource and allow for users to interact
     with that resource with specific verbs and get JSON back. [Example 13-1](#Common_REST_API_endpoint_structures)
     shows a few possible examples.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 最常见的 API 模式是为每个 Eloquent 模型创建一个唯一的 URL 结构，将其公开为 API 资源，并允许用户使用特定的动词与该资源进行交互并获取
+    JSON 返回。[示例 13-1](#Common_REST_API_endpoint_structures) 展示了一些可能的示例。
 - en: Example 13-1\. Common REST API endpoint structures
+  id: totrans-11
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-1\. 常见的 REST API 端点结构
 - en: '[PRE0]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: This gives you the idea of the basic set of interactions we are likely to have
     with our APIs. Let’s dig into how to make them happen with Laravel.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 这让你了解到我们可能与 API 交互的基本集合。让我们深入了解如何通过 Laravel 实现它们。
 - en: Controller Organization and JSON Returns
+  id: totrans-14
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 控制器组织和 JSON 返回
 - en: 'Laravel’s API resource controllers are like normal resource controllers (see
     [“Resource Controllers”](ch03.html#resource_controllers)) but modified to align
     with RESTful API routes. For example, they exclude the `create()` and `edit()`
     methods, both of which are irrelevant in an API. Let’s get started there. First
     we’ll create a new controller for our resource, which we’ll route at `/api/dogs`:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的 API 资源控制器类似于普通资源控制器（参见[“资源控制器”](ch03.html#resource_controllers)），但修改为与
+    RESTful API 路由对齐。例如，它们排除了 `create()` 和 `edit()` 方法，这两者在 API 中是不相关的。让我们从这里开始。首先，我们将为我们的资源创建一个新的控制器，并将其路由到
+    `/api/dogs`：
 - en: '[PRE1]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '[Example 13-2](#generated_api_resource_controller) shows what our API resource
     controller will look like.'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 13-2](#generated_api_resource_controller) 展示了我们的 API 资源控制器的样子。'
 - en: Example 13-2\. A generated API resource controller
+  id: totrans-18
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-2\. 生成的 API 资源控制器
 - en: '[PRE2]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: The docblocks pretty much tell the story. `index()` lists all of the dogs, `show()`
     lists a single dog, `store()` stores a new dog, `update()` updates a dog, and
     `destroy()` removes a dog.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 文档块几乎讲述了整个故事。`index()` 列出所有狗，`show()` 列出单个狗，`store()` 存储新狗，`update()` 更新狗，`destroy()`
+    删除狗。
 - en: 'Let’s quickly make a model and a migration so we can work with it:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们快速制作一个模型和一个迁移，以便我们可以处理它：
 - en: '[PRE3]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Great! Now we can fill out our controller methods.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 太棒了！现在我们可以填充我们的控制器方法了。
 - en: Database Requirements for These Code Samples to Work
+  id: totrans-24
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 这些代码示例工作所需的数据库要求
 - en: If you want the code we’re writing here to actually work, you’ll want to add
     a `string()` column to the migration named `name` and another named `breed`, and
     either add those columns to the Eloquent model’s `fillable` property or just set
     the `guarded` property of that model equal to an empty array (`[]`). Later examples
     will also require columns for `weight`, `color`, and relationships for `bones`
     and `friends`.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您希望我们在这里编写的代码实际上起作用，您将希望在迁移中添加一个名为`name`的`string()`列，另一个名为`breed`，并将这些列添加到Eloquent模型的`fillable`属性，或者只是将该模型的`guarded`属性设置为空数组（`[]`）。稍后的示例还将需要`weight`、`color`的列，以及`bones`和`friends`的关系。
 - en: 'We can take advantage of a great feature of Eloquent here: if you echo an Eloquent
     results collection, it’ll automatically convert itself to JSON (using the `__toString()`
     magic method, if you’re curious). That means if you return a collection of results
     from a route, you’ll in effect be returning JSON. So, as [Example 13-3](#resource_controller_for_the_dog_entity)
     demonstrates, this will be some of the simplest code you’ll ever write.'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以利用Eloquent的一个很棒的特性：如果您输出一个Eloquent结果集合，它会自动将自己转换为JSON（使用`__toString()`魔术方法，如果您感兴趣的话）。这意味着，如果您从路由返回一个结果集合，您实际上将返回JSON。因此，正如[示例 13-3](#resource_controller_for_the_dog_entity)
+    所示，这将是您写过的一些最简单的代码。
 - en: Example 13-3\. A sample API resource controller for the `Dog` entity
+  id: totrans-27
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-3\. `Dog`实体的示例API资源控制器
 - en: '[PRE4]'
+  id: totrans-28
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Artisan’s `make:model` command also has an `--api` flag you can pass to generate
     the same API-specific controller we generated above:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: Artisan的`make:model`命令还有一个`--api`标志，您可以传递以生成与上述相同的API特定控制器：
 - en: '[PRE5]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'If you want to generate migration, seeder, factory, policy, and resource controller,
     and both store and update form requests in one command, you can use the `--all`
     flag:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想要一次性生成迁移、seeder、factory、policy、资源控制器以及存储和更新表单请求，并在一条命令中使用`--all`标志：
 - en: '[PRE6]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '[Example 13-4](#binding_the_routes_for_a_resource_controller) shows how we
     can link this up in our routes file. As you can see, we can use `Route::apiResource()`
     to automatically map all of these default methods to their appropriate routes
     and HTTP verbs.'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 13-4](#binding_the_routes_for_a_resource_controller) 展示了我们如何在路由文件中链接它。正如您所见，我们可以使用`Route::apiResource()`自动将所有这些默认方法映射到相应的路由和HTTP动词。'
 - en: Example 13-4\. Binding the routes for a resource controller
+  id: totrans-34
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-4\. 绑定资源控制器的路由
 - en: '[PRE7]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'There you have it! Your first RESTful API in Laravel. Of course, you’ll need
     much more nuance: pagination, sorting, authentication, and better-defined response
     headers. But this is the foundation of everything else.'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 就是这样！您的第一个Laravel RESTful API。当然，您需要更多的细微差别：分页、排序、认证和更好定义的响应头。但这是其他一切的基础。
 - en: Reading and Sending Headers
+  id: totrans-37
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 读取和发送标头
 - en: 'REST APIs often read, and send, noncontent information using headers. For example,
     any request to GitHub’s API will return headers detailing the current user’s rate
     limiting status:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: REST API通常使用标头读取和发送非内容信息。例如，对GitHub的任何API请求都将返回详细说明当前用户的速率限制状态的标头：
 - en: '[PRE8]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Similarly, many APIs allow developers to customize their requests using request
     headers. For example, GitHub’s API makes it easy to define which version of the
     API you’d like to use with the `Accept` header:'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样，许多API允许开发人员使用请求头自定义其请求。例如，GitHub的API使用`Accept`头很容易定义要使用的API版本：
 - en: '[PRE9]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: If you were to change `v3` to `v2`, GitHub would pass your request to version
     2 of its API instead.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您将`v3`更改为`v2`，GitHub将将您的请求传递到其API的第2版本。
 - en: Let’s learn quickly how to do both in Laravel.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们快速学习如何在Laravel中同时做这两件事。
 - en: Sending Response Headers in Laravel
+  id: totrans-44
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在Laravel中发送响应标头
 - en: We already covered this topic quite a bit in [Chapter 10](ch10.html#requests_and_responses),
     but here’s a quick refresher. Once you have a response object, you can add a header
     using `header(*$headerName*, *$headerValue*)`, as seen in [Example 13-5](#adding_a_response_header_in_Laravel).
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在[第10章](ch10.html#requests_and_responses)已经详细讨论了这个主题，但这里是一个快速的复习。一旦您有了一个响应对象，您可以使用`header(*$headerName*,
+    *$headerValue*)`添加一个标头，就像在[示例 13-5](#adding_a_response_header_in_Laravel) 中所见。
 - en: Example 13-5\. Adding a response header in Laravel
+  id: totrans-46
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-5\. 在Laravel中添加响应头
 - en: '[PRE10]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Nice and easy.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 很简单易行。
 - en: Reading Request Headers in Laravel
+  id: totrans-49
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在Laravel中读取请求标头
 - en: If you have an incoming request, it’s also simple to read any given header.
     [Example 13-6](#reading_a_request_header_in_Laravel) illustrates this.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您有一个传入请求，读取任何给定标头也很简单。[示例 13-6](https://wiki.example.org/reading_a_request_header_in_laravel)说明了这一点。
 - en: Example 13-6\. Reading a request header in Laravel
+  id: totrans-51
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: '[示例 13-6](https://wiki.example.org/reading_a_request_header_in_laravel)。在Laravel中读取请求标头'
 - en: '[PRE11]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Now that you can read incoming request headers and set headers on your API responses,
     let’s take a look at how you might want to customize your API.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您可以读取传入的请求标头并在API响应中设置标头了，让我们看看如何自定义您的API。
 - en: Eloquent Pagination
+  id: totrans-54
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Eloquent分页
 - en: Pagination is one of the first places where most APIs need to consider special
     instructions. Eloquent comes out of the box with a pagination system that hooks
     directly into the query parameters of any page request. We already covered the
     paginator component a bit in [Chapter 6](ch06.html#frontend_components), but here’s
     a quick refresher.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 分页是大多数API需要考虑特殊说明的第一个地方。Eloquent提供了一个分页系统，直接连接到任何页面请求的查询参数。我们在[第6章](ch06.html#frontend_components)中已经简要介绍了分页组件，但这里是一个快速的复习。
 - en: Any Eloquent call provides a `paginate()` method, to which you can pass the
     number of items you’d like to return per page. Eloquent then checks the URL for
     a page query parameter and, if it’s set, treats that as an indicator of where
     (how many pages) the user is in a paginated list.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 任何Eloquent调用都提供了一个`paginate()`方法，您可以在其中传递希望每页返回的项目数。然后，Eloquent会检查页面查询参数的URL，并且如果设置了，将其视为用户在分页列表中的位置（多少页）的指示器。
 - en: To make your API route ready for automated Laravel pagination, use `paginate()`
     instead of `all()` or `get()` to call your Eloquent queries in your route; something
     like [Example 13-7](#paginated_API_route).
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使您的API路由准备好自动化的Laravel分页，请在调用Eloquent查询的路由中使用`paginate()`而不是`all()`或`get()`；类似于[示例
+    13-7](https://wiki.example.org/paginated_api_route)。
 - en: Example 13-7\. A paginated API route
+  id: totrans-58
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: '[示例 13-7](https://wiki.example.org/a_paginated_api_route)。一个分页的API路由'
 - en: '[PRE12]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'We’ve defined that Eloquent should get 20 results from the database. Depending
     on what the `page` query parameter is set to, Laravel will know exactly *which*
     20 results to pull for us:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们已经定义了Eloquent应该从数据库中获取20个结果。根据`page`查询参数设置的内容，Laravel将准确知道为我们拉取哪20个结果：
 - en: '[PRE13]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Note that the `paginate()` method is also available on query builder calls,
     as seen in [Example 13-8](#using_the_paginate_method_on_a_query_builder_call).
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意，`paginate()`方法也适用于查询构建器调用，如[示例 13-8](https://wiki.example.org/using_the_paginate_method_on_a_query_builder_call)所示。
 - en: Example 13-8\. Using the `paginate()` method on a query builder call
+  id: totrans-63
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: '[示例 13-8](https://wiki.example.org/using_the_paginate_method_on_a_query_builder_call)。在查询构建器调用中使用`paginate()`方法'
 - en: '[PRE14]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'Here’s something interesting, though: this isn’t just going to return 20 results
     when you convert it to JSON. Instead, it’s going to build a response object that
     automatically passes some useful pagination-related details to the end user, *along
     with* the paginated data. [Example 13-9](#sample_output_from_a_paginated_database_call)
     shows a possible response from our call, truncated to only three records to save
     space.'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 不过，这里有一些有趣的地方：当您将其转换为JSON时，它不仅会返回20个结果。相反，它将构建一个响应对象，自动向最终用户传递一些有用的与分页相关的详细信息，并且从我们的调用中显示可能的响应，缩减为仅三条记录以节省空间。
 - en: Example 13-9\. Sample output from a paginated database call
+  id: totrans-66
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: '[示例 13-9](https://wiki.example.org/sample_output_from_a_paginated_database_call)。来自分页数据库调用的示例输出'
 - en: '[PRE15]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Sorting and Filtering
+  id: totrans-68
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 排序和过滤
 - en: Although there is a convention and some built-in tooling for pagination in Laravel,
     there isn’t any for sorting, so you have to figure that out on your own. I’ll
     give a quick code sample here, and I’ll style the query parameters similarly to
     the JSON API spec (described in the following sidebar).
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管Laravel中有关于分页的约定和一些内置工具，但没有关于排序的内容，因此您必须自己解决。我将在这里快速给出一个代码示例，并且我将类似于JSON API规范（在下面的侧边栏中描述）样式化查询参数。
 - en: Sorting Your API Results
+  id: totrans-70
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 您的API结果排序
 - en: First, let’s set up the ability to sort our results. We start in [Example 13-10](#simplest_API_sorting)
     with the ability to sort by only a single column, and in only a single direction.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，让我们设置排序结果的能力。我们从[示例 13-10](https://wiki.example.org/simplest_api_sorting)开始，只能按单列和单方向排序。
 - en: Example 13-10\. Simplest API sorting
+  id: totrans-72
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: '[示例 13-10](https://wiki.example.org/simplest_api_sorting)。最简单的API排序'
 - en: '[PRE16]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: We add the ability to invert it (e.g., `?sort=-weight`) in [Example 13-11](#single_column_API_sorting_direction_control).
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在[示例 13-11](https://wiki.example.org/single_column_api_sorting_direction_control)中添加了反转的能力（例如`?sort=-weight`）。
 - en: Example 13-11\. Single-column API sorting, with direction control
+  id: totrans-75
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: '[示例 13-11](https://wiki.example.org/single_column_api_sorting_with_direction_control)。单列API排序，带有方向控制'
 - en: '[PRE17]'
+  id: totrans-76
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Finally, we do the same for multiple columns (e.g., `?sort=name,-weight`) in
     [Example 13-12](#json_API_style_sorting).
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，在[示例 13-12](#json_API_style_sorting)中，我们也为多列（例如，`?sort=name,-weight`）执行相同操作。
 - en: Example 13-12\. JSON API–style sorting
+  id: totrans-78
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-12\. JSON API风格的排序
 - en: '[PRE18]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: As you can see, it’s not the simplest process ever, and you’ll likely want to
     build some helper tooling around the repetitive processes, but we’re building
     up the customizability of our API piece by piece using logical and simple features.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所看到的，这并不是最简单的过程，您可能希望围绕重复的过程构建一些辅助工具，但我们正在逐步构建API的可定制性，使用逻辑和简单的功能。
 - en: Filtering Your API Results
+  id: totrans-81
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 过滤您的API结果
 - en: Another common task in building APIs is filtering out all but a certain subset
     of data. For example, the client might ask for a list of the dogs that are Chihuahuas.
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 在构建API时，另一个常见任务是仅过滤出特定数据子集。例如，客户端可能会要求列出吉娃娃犬的列表。
 - en: The JSON API doesn’t give us any great ideas for syntax here, other than that
     we should use the `filter` query parameter. Let’s think along the lines of the
     sort syntax, where we’re putting everything into a single key—​maybe `?filter=breed:chihuahua`.
     You can see how to do this in [Example 13-13](#single_filter_on_API_results).
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: JSON API在这里没有为我们提供任何优秀的语法建议，除了我们应该使用`filter`查询参数。让我们沿着排序语法的思路，将所有内容放入单一键中——也许是`?filter=breed:chihuahua`。您可以在[示例 13-13](#single_filter_on_API_results)中看到如何做到这一点。
 - en: Example 13-13\. Single filter on API results
+  id: totrans-84
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-13\. API结果的单个过滤器
 - en: '[PRE19]'
+  id: totrans-85
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: Note that in [Example 13-13](#single_filter_on_API_results) we’re using the
     `request()` helper instead of injecting an instance of `$request`. Both work the
     same, but sometimes the `request()` helper can be easier when you’re working inside
     of a closure so you don’t have to pass variables in manually.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意，在[示例 13-13](#single_filter_on_API_results)中，我们使用`request()`辅助函数而不是注入`$request`实例。两者功能相同，但有时在闭包内工作时，`request()`辅助函数可能更方便，这样您就不必手动传递变量。
 - en: And, just for kicks, in [Example 13-14](#multiple_filters_on_API_results) we
     allow for multiple filters, like `?filter=breed:chihuahua,color:brown`.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 而且，仅仅是为了好玩，在[示例 13-14](#multiple_filters_on_API_results)中，我们允许多个过滤器，例如`?filter=breed:chihuahua,color:brown`。
 - en: Example 13-14\. Multiple filters on API results
+  id: totrans-88
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-14\. API结果的多个过滤器
 - en: '[PRE20]'
+  id: totrans-89
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Transforming Results
+  id: totrans-90
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 转换结果
 - en: We’ve covered how to sort and filter our result sets. But right now, we’re relying
     on Eloquent’s JSON serialization, which means we return every field on every model.
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们已经介绍了如何对结果集进行排序和过滤。但现在，我们依赖于Eloquent的JSON序列化，这意味着我们会返回每个模型的每个字段。
 - en: Eloquent provides a few convenience tools for defining which fields to show
     when you’re serializing an array. You can read more in [Chapter 5](ch05.html#database_and_eloquent),
     but the gist is that if you set a `$hidden` array property on your Eloquent class,
@@ -398,23 +591,31 @@
     You can alternatively set a `$visible` array that defines the fields that are
     allowed to be shown. You could also either overwrite or mimic the `toArray()`
     function on your model, crafting a custom output format.
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您序列化一个数组时，Eloquent提供了一些便捷工具来定义应显示哪些字段。您可以在[第5章](ch05.html#database_and_eloquent)中阅读更多内容，但其主要思想是，如果您在Eloquent类上设置了`$hidden`数组属性，则该数组中列出的任何字段都不会显示在序列化的模型输出中。您还可以设置一个`$visible`数组，定义允许显示的字段。或者您还可以覆盖或模仿模型上的`toArray()`函数，以制定自定义输出格式。
 - en: Another common pattern is to create a *transformer* for each data type. Transformers
     are helpful because they give you more control, isolate API-specific logic away
     from the model itself, and allow you to provide a more consistent API even when
     the models and their relationships change down the road.
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一个常见模式是为每种数据类型创建一个*转换器*。转换器很有帮助，因为它们让您拥有更多控制权，将与API特定逻辑隔离开来，使模型本身更一致，即使模型及其关系在未来发生变化。
 - en: There’s a fantastic but complicated package for this, [Fractal](https://oreil.ly/pso1E),
     that sets up a series of convenience structures and classes for transforming your
     data.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 有一个非常棒但复杂的软件包，[Fractal](https://oreil.ly/pso1E)，它设置了一系列方便的结构和类来转换您的数据。
 - en: API Resources
+  id: totrans-95
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: API资源
 - en: In the past, one of the first challenges we’d run into when developing APIs
     in Laravel was how to transform our data. The simplest APIs can just return Eloquent
     objects as JSON, but very quickly the needs of most APIs outgrow that structure.
@@ -422,241 +623,358 @@
     to embed other resources or do so but only optionally, or add a computed field
     or hide some fields from APIs but not other JSON output? An API-specific transformer
     is the solution.
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 在过去，当我们在Laravel中开发API时，我们遇到的第一个挑战之一是如何转换我们的数据。最简单的API可以将Eloquent对象作为JSON返回，但是大多数API很快就会超出这种结构的需求。我们应该如何将我们的Eloquent结果转换为正确的格式？如果我们想要嵌入其他资源或只在需要时这样做，或者添加计算字段或隐藏某些字段不在API中显示，但在其他JSON输出中显示呢？API特定的转换器是解决方案。
 - en: We now have access to a feature called *Eloquent API resources*, which are structures
     that define how to transform an Eloquent object (or a collection of Eloquent objects)
     of a given class to API results. For example, your `Dog` Eloquent model now has
     a `Dog` resource whose responsibility it is to translate each instance of `Dog`
     to the appropriate `Dog`-shaped API response object.
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们可以访问一个名为*Eloquent API资源*的功能，它们是定义如何将给定类的Eloquent对象（或Eloquent对象集合）转换为API结果的结构。例如，您的`Dog`
+    Eloquent模型现在有一个`Dog`资源，其责任是将每个`Dog`实例转换为相应的`Dog`形状的API响应对象。
 - en: Creating a Resource Class
+  id: totrans-98
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建一个资源类
 - en: 'Let’s walk through this `Dog` example to see what it looks like to transform
     our API output. First, use the Artisan command `make:resource` to create your
     first resource:'
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们通过这个`Dog`示例来看一下如何转换我们的API输出。首先，使用Artisan命令`make:resource`来创建您的第一个资源：
 - en: '[PRE21]'
+  id: totrans-100
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: 'This will create a new class in *app/Http/Resources/Dog.php*, which contains
     one method: `toArray()`. You can see what the file looks like in [Example 13-15](#api_resource_stub).'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将在*app/Http/Resources/Dog.php*中创建一个新的类，其中包含一个方法：`toArray()`。您可以在[Example 13-15](#api_resource_stub)中看到文件的样子。
 - en: Example 13-15\. Generated API resource
+  id: totrans-102
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 13-15\. 生成的API资源
 - en: '[PRE22]'
+  id: totrans-103
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: The `toArray()` method we’re working with here has access to two important pieces
     of data. First, it has access to the Illuminate `Request` object, so we can customize
     our response based on query parameters and headers and anything else important.
     And second, it has access to the entire Eloquent object being transformed by calling
     its properties and methods on `$this`, as you can see in [Example 13-16](#simple_dog_resource).
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在这里使用的`toArray()`方法可以访问两个重要的数据片段。首先，它可以访问Illuminate的`Request`对象，因此我们可以根据查询参数、头信息和其他重要信息来自定义我们的响应。其次，它可以通过在`$this`上调用其属性和方法来访问整个Eloquent对象，正如您在[Example
+    13-16](#simple_dog_resource)中所见。
 - en: Example 13-16\. Simple API resource for the `Dog` model
+  id: totrans-105
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 13-16\. `Dog`模型的简单API资源
 - en: '[PRE23]'
+  id: totrans-106
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: To use this new resource, you’ll want to update any API endpoint that returns
     a single `Dog` to wrap the response in your new resource, like in [Example 13-17](#using_single_dog_resource).
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用这个新资源，您需要更新返回单个`Dog`的任何API端点，以包装您的新资源响应，就像在[Example 13-17](#using_single_dog_resource)中看到的那样。
 - en: Example 13-17\. Using the simple `Dog` resource
+  id: totrans-108
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 13-17\. 使用简单的`Dog`资源
 - en: '[PRE24]'
+  id: totrans-109
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: Resource Collections
+  id: totrans-110
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 资源集合
 - en: Now, let’s talk about what happens when you have more than one of your entities
     returning from a given API endpoint. This is possible using an API resource’s
     `collection()` method, as you can see in [Example 13-18](#using_default_api_resource_collection).
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，让我们谈谈当您从给定API端点返回多个实体时会发生什么。这可以通过API资源的`collection()`方法来实现，正如您在[Example 13-18](#using_default_api_resource_collection)中所见。
 - en: Example 13-18\. Using the default API resource collection method
+  id: totrans-112
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 13-18\. 使用默认的API资源集合方法
 - en: '[PRE25]'
+  id: totrans-113
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: This method iterates over every entry that’s passed to it, transforms it with
     the `DogResource` API resource, and then returns the collection.
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 此方法遍历传递给它的每个条目，使用`DogResource` API资源进行转换，然后返回集合。
 - en: This will likely be enough for many APIs, but if you need to customize any of
     the structure or add metadata to your collection responses, you’ll want to instead
     create a custom API resource collection.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于许多API来说，这可能已经足够了，但是如果您需要自定义结构或向您的集合响应添加元数据，您可能需要创建一个自定义的API资源集合。
 - en: 'In order to do so, let’s reach for the `make:resource` Artisan command again.
     This time we’ll name it `DogCollection`, which signals to Laravel that this is
     an API resource collection, not just an API resource:'
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了做到这一点，让我们再次使用`make:resource` Artisan命令。这次我们将其命名为`DogCollection`，这表明这是一个API资源集合，而不仅仅是一个API资源：
 - en: '[PRE26]'
+  id: totrans-117
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: 'This will generate a new file very similar to the API resource file, living
     at *app/Http/Resources/DogCollection.php*, which again contains one method: `toArray()`.
     You can see what the file looks like in [Example 13-19](#api_resource_collection_stub).'
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将生成一个非常类似于 API 资源文件的新文件，位于*app/Http/Resources/DogCollection.php*，再次包含一个方法：`toArray()`。您可以在[示例 13-19](#api_resource_collection_stub)中查看文件的外观。
 - en: Example 13-19\. Generated API resource collection
+  id: totrans-119
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-19\. 生成的 API 资源集合
 - en: '[PRE27]'
+  id: totrans-120
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: Just like with the API resource, we have access to the request and the underlying
     data. But unlike with the API resource, we’re dealing with a collection of items
     instead of just one, so we will access that (already transformed) collection as
     `$this->collection`. Take a look at [Example 13-20](#api_resource_collection_example)
     for an example.
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像使用 API 资源一样，我们可以访问请求和底层数据。但与 API 资源不同的是，我们处理的是一组项目而不是单个项目，因此我们将访问（已转换的）集合作为`$this->collection`。请参阅[示例 13-20](#api_resource_collection_example)了解示例。
 - en: Example 13-20\. A simple API resource collection for the `Dog` model
+  id: totrans-122
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-20\. 用于`Dog`模型的简单 API 资源集合
 - en: '[PRE28]'
+  id: totrans-123
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: Nesting Relationships
+  id: totrans-124
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 嵌套关系
 - en: One of the more complicated aspects of any API is how relationships are nested.
     The simplest way with API resources is to add a key to your returned array that’s
     set to an API resource collection, like in [Example 13-21](#simple_included_api_relationships).
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 任何 API 的更复杂方面之一是关系如何嵌套。使用 API 资源的最简单方法是将一个键添加到返回的数组中，该键设置为 API 资源集合，就像[示例 13-21](#simple_included_api_relationships)中一样。
 - en: Example 13-21\. A simple included API relationship
+  id: totrans-126
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-21\. 简单包含的 API 关系
 - en: '[PRE29]'
+  id: totrans-127
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: Warning
+  id: totrans-128
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: 'If you try the code in [Example 13-21](#simple_included_api_relationships)
     and receive a 502 error, it’s because you haven’t loaded the “friends” relationship
     on your parent resource first. Keep reading to see how to get around that, but
     here’s how to eager load that relationship when you’re working with this resource,
     using the `with()` method:'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您尝试在[示例 13-21](#simple_included_api_relationships)中的代码并收到 502 错误，则是因为您尚未首先加载父资源上的“friends”关系。继续阅读以了解如何解决此问题，但在处理此资源时，以下是如何使用`with()`方法急加载该关系：
 - en: '[PRE30]'
+  id: totrans-130
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: You may also want this to be a conditional property; you can choose to only
     nest it if it’s asked for in the request or only if it’s already been eager loaded
     on the Eloquent object that’s passed in. Take a look at [Example 13-22](#conditional_loading_api_relationships).
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能还希望这是一个条件属性；您可以选择仅在请求中请求它或仅在已经预加载到传递给 Eloquent 对象上时才嵌套它。请参阅[示例 13-22](#conditional_loading_api_relationships)。
 - en: Example 13-22\. Conditionally loading API relationship
+  id: totrans-132
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-22\. 有条件地加载 API 关系
 - en: '[PRE31]'
+  id: totrans-133
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: Using Pagination with API Resources
+  id: totrans-134
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用分页与 API 资源
 - en: Just like you can pass a collection of Eloquent models to a resource, you can
     also pass a paginator instance. Take a look at [Example 13-23](#passing_paginators_to_api_resource_collections).
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 只需像将一组 Eloquent 模型传递给资源一样，您也可以传递一个分页器实例。请参阅[示例 13-23](#passing_paginators_to_api_resource_collections)。
 - en: Example 13-23\. Passing a paginator instance to an API resource collection
+  id: totrans-136
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-23\. 将分页器实例传递给 API 资源集合
 - en: '[PRE32]'
+  id: totrans-137
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: If you pass a paginator instance, the transformed result will have additional
     links containing pagination information (`first` page, `last` page, `prev` page,
     and `next` page) and meta-information about the entire collection.
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您传递一个分页器实例，转换后的结果将具有包含分页信息（`first`页，`last`页，`prev`页和`next`页）和有关整个集合的元信息的附加链接。
 - en: You can take a look at [Example 13-24](#sample_paginated_resource_response)
     to see what this information looks like. In this example, I’ve set the items-per-page
     count to 2 by calling `Dog::paginate(2)` so you can more easily see how the links
     work.
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以查看[示例 13-24](#sample_paginated_resource_response)以查看此信息的外观。在此示例中，我通过调用`Dog::paginate(2)`将每页项数设置为
+    2，以便更容易地查看链接的工作方式。
 - en: Example 13-24\. A sample paginated resource response with pagination links
+  id: totrans-140
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-24\. 带有分页链接的样本分页资源响应
 - en: '[PRE33]'
+  id: totrans-141
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: Conditionally Applying Attributes
+  id: totrans-142
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 有条件地应用属性
 - en: You can also specify that certain attributes in your response should only be
     applied when a particular test is satisfied, as illustrated in [Example 13-25](#EX13a).
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以指定响应中的某些属性仅在满足特定测试时应用，如[示例 13-25](#EX13a)所示。
 - en: Example 13-25\. Conditionally applying attributes
+  id: totrans-144
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-25\. 有条件地应用属性
 - en: '[PRE34]'
+  id: totrans-145
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: More Customizations for API Resources
+  id: totrans-146
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: API 资源的更多自定义
 - en: The default shape of how the `data` property is wrapped might not be how you
     like it, or you may find yourself needing to add or customize metadata for the
     responses. Take a look at the [resources docs](https://oreil.ly/LJ3Ie) for details
     on how to customize every aspect of your API responses.
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: '`data` 属性包装的默认形状可能不是你喜欢的方式，或者你可能发现自己需要为响应添加或自定义元数据。查看 [资源文档](https://oreil.ly/LJ3Ie)
+    以获取有关如何自定义 API 响应的每个方面的详细信息。'
 - en: API Authentication
+  id: totrans-148
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: API 身份验证
 - en: 'Laravel provides two primary tools for authenticating API requests: Sanctum
     (most recommended) and Passport (powerful but very complex and usually overkill).'
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 提供了两个主要工具来认证 API 请求：Sanctum（推荐使用）和 Passport（功能强大但非常复杂，通常过于复杂）。
 - en: API Authentication with Sanctum
+  id: totrans-150
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 Sanctum 进行 API 身份验证
 - en: 'Sanctum is an API authentication system for Laravel, built for two tasks: generating
     simple tokens for your power users to use to interact with your API, and allowing
     SPAs and mobile apps to latch onto your existing authentication system. It’s not
     quite as configurable as OAuth 2.0, but it’s *very close* and it comes with much
     lower cost in terms of setup and configuration.'
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: Sanctum 是 Laravel 的一个 API 身份验证系统，专为两个任务而建：为你的高级用户生成简单的令牌，以便与你的 API 交互，并允许 SPA
+    和移动应用程序依附于你现有的身份验证系统。它不像 OAuth 2.0 那样可配置，但非常接近，并且在设置和配置方面成本要低得多。
 - en: There are several ways to use Sanctum. You can allow power users to generate
     tokens for your API directly in your admin panel, similar to how many developer-focused
     SaaS services do. You can allow users to visit a special login page to receive
@@ -664,155 +982,234 @@
     And you can integrate with your SPA, which, using some of Sanctum’s special sauce,
     can hook directly into Laravel’s cookie-based authentication sessions, and you
     won’t have to manage tokens at all.
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 Sanctum 有几种方式。你可以允许高级用户在管理面板直接为你的 API 生成令牌，这与许多面向开发者的 SaaS 服务类似。你也可以允许用户访问一个特殊的登录页面直接获取令牌，这对于将移动应用程序认证到你的
+    API 是有用的。此外，你还可以与你的 SPA 集成，使用 Sanctum 的特殊功能之一，直接挂接到 Laravel 基于 cookie 的身份验证会话中，完全不需要管理令牌。
 - en: Let’s look at how to install Sanctum and then how to use it in each of these
     contexts.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看如何安装 Sanctum，然后在每个上下文中如何使用它。
 - en: Installing Sanctum
+  id: totrans-154
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 安装 Sanctum
 - en: Sanctum comes preinstalled with new Laravel projects. If your project doesn’t
     have it, you’ll need to manually install it and publish its config files.
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: Sanctum 已预安装在新的 Laravel 项目中。如果你的项目没有安装它，你需要手动安装并发布其配置文件。
 - en: '[PRE35]'
+  id: totrans-156
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: 'For any routes you want to protect with Sanctum, attach the `auth:sanctum`
     middleware:'
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于任何你想保护的使用 Sanctum 的路由，附加 `auth:sanctum` 中间件：
 - en: '[PRE36]'
+  id: totrans-158
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: Issuing Sanctum tokens manually
+  id: totrans-159
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 手动发放 Sanctum 令牌
 - en: If you want to build tooling in your application to provide tokens for your
     users to authenticate against your API, here are the steps you’ll want to take.
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想在你的应用程序中构建工具来为用户提供认证 API 的令牌，这里是你需要采取的步骤。
 - en: 'First, make sure your `User` model uses the `HasApiTokens` trait (on a new
     project, it’ll already have it):'
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先确保你的 `User` 模型使用了 `HasApiTokens` 特性（在新项目上，它已经有了）：
 - en: '[PRE37]'
+  id: totrans-162
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: 'Next, build a user interface that allows the user to generate a token. You
     could make a button in their settings page that says “Generate new token,” pops
     up a modal asking for the nickame for that token, and then posts the results to
     this form:'
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，构建一个用户界面，允许用户生成一个令牌。你可以在他们的设置页面上放置一个按钮，上面写着“生成新令牌”，弹出一个模态框询问该令牌的昵称，然后将结果发布到这个表单：
 - en: '[PRE38]'
+  id: totrans-164
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: 'You can also list out all of the tokens your user has by referencing the `tokens`
     property of a `user` object:'
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 你也可以通过引用 `user` 对象的 `tokens` 属性列出用户拥有的所有令牌：
 - en: '[PRE39]'
+  id: totrans-166
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: Sanctum token abilities
+  id: totrans-167
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Sanctum 令牌能力
 - en: A common security pattern for token-based API authentication is to allow users
     to generate tokens with only certain privileges, to minimize the potential damage
     if the token were compromised.
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 基于令牌的 API 身份验证的一种常见安全模式是，只允许用户生成具有特定特权的令牌，以减少如果令牌被 compromise 的潜在损害。
 - en: If you want to build a system for that, you can define (based on business logic
     or user preferences) which “abilities” each token has when you create it. Pass
     an array of strings to the `createToken()` method and each string will represent
     an ability that token has.
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想为此构建一个系统，你可以定义（基于业务逻辑或用户偏好）创建时每个令牌拥有的“能力”。将一个字符串数组传递给 `createToken()` 方法，每个字符串代表该令牌拥有的一个能力。
 - en: '[PRE40]'
+  id: totrans-170
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: Then, your code can check against the authenticated user’s tokens either directly
     (as in [Example 13-26](#sanctum_manually_checking_tokens)) or through middleware
     (as in [Example 13-27](#sanctum_using_middleware_to_restrict)).
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，您的代码可以直接检查已验证用户的令牌（如[Example 13-26](#sanctum_manually_checking_tokens)中所示），或通过中间件（如[Example 13-27](#sanctum_using_middleware_to_restrict)中所示）。
 - en: Example 13-26\. Manually checking a user’s access based on token abilities
+  id: totrans-172
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 13-26\. 根据令牌能力手动检查用户访问权限
 - en: '[PRE41]'
+  id: totrans-173
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: Example 13-27\. Using middleware to restrict access based on token scopes
+  id: totrans-174
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 13-27\. 使用中间件根据令牌范围限制访问
 - en: '[PRE42]'
+  id: totrans-175
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: Note
+  id: totrans-176
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: If you want to use Sanctum’s middleware checks, you’ll need to add the following
     two lines to the `middlewareAliases` property of `App\Http\Kernel`.
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您希望使用 Sanctum 的中间件检查功能，则需要将以下两行添加到`App\Http\Kernel`的`middlewareAliases`属性中。
 - en: '[PRE43]'
+  id: totrans-178
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: SPA authentication
+  id: totrans-179
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: SPA 认证
 - en: If you plan to use Sanctum to authenticate with an SPA, there are a few steps
     you’ll need to take first to set up your Laravel app and your SPA.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您计划使用 Sanctum 与 SPA 进行身份验证，则首先需要采取一些步骤来设置您的 Laravel 应用程序和您的 SPA。
 - en: Laravel app preparation
+  id: totrans-181
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: Laravel 应用准备工作
 - en: First, uncomment the `EnsureFrontendRequestsAreStateful` class on the `api`
     middleware group in *app/Http/Kernel.php*.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，在*app/Http/Kernel.php*中的`api`中间件组取消注释`EnsureFrontendRequestsAreStateful`类。
 - en: '[PRE44]'
+  id: totrans-183
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: Second, update the list of “stateful” domains in the Sanctum config. These are
     all the domains your SPA can make requests from. You can modify them directly
     in *config/sanctum.php*, or add a comma-separated list of domains to the `SANCTUM_STATEFUL_DOMAINS`
     key in your *.env* file.
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 其次，在 Sanctum 配置中更新“stateful”域的列表。这些是您的 SPA 可以发出请求的所有域。您可以直接在*config/sanctum.php*中修改它们，或者将逗号分隔的域列表添加到您的*.env*文件中的`SANCTUM_STATEFUL_DOMAINS`键。
 - en: SPA app preparation
+  id: totrans-185
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: SPA 应用准备工作
 - en: Before allowing your users to log into your app, your SPA should request Laravel
     set a CSRF cookie, which most JavaScript HTTP clients like Axios will then pass
     with every future request.
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 在允许用户登录您的应用之前，您的 SPA 应请求 Laravel 设置一个 CSRF cookie，大多数 JavaScript HTTP 客户端（如
+    Axios）将在以后的每个请求中传递它。
 - en: '[PRE45]'
+  id: totrans-187
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: You can then log in to your Laravel login route, either one you’ve created yourself
     or a route offered by an existing tool like Fortify. Future requests will remain
     authenticated via the session cookie Laravel sets for you.
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以登录到您的 Laravel 登录路由，无论是您自己创建的路由还是由类似 Fortify 的现有工具提供的路由。未来的请求将通过 Laravel 为您设置的会话
+    cookie 进行验证。
 - en: Mobile app authentication
+  id: totrans-189
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 移动应用认证
 - en: 'Here’s the workflow for allowing your mobile app users to authenticate to a
     Sanctum-based app: request the user’s email (or username) and their password in
     your mobile app. Send that, together with the name of their device (reading from
@@ -820,47 +1217,70 @@
     on the backend, which will validate their login and (assuming it’s valid) create
     and return a token, as you can see in [Example 13-28](#EX13f), which I’ve taken
     directly from the docs.'
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是允许您的移动应用用户对基于 Sanctum 的应用进行认证的工作流程：在您的移动应用中请求用户的电子邮件（或用户名）和他们的密码。将这些信息与设备的名称一起发送（从设备的操作系统中读取设备名称；例如，“Matt's
+    iPhone”），发送到您在后端自己创建的路由，该路由将验证他们的登录，并（假设登录有效）创建并返回一个令牌，正如您可以从[Example 13-28](#EX13f)直接看到的文档中获取的内容。
 - en: Example 13-28\. Route to accept mobile app logins to Sanctum-based apps
+  id: totrans-191
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 13-28\. 用于接受基于 Sanctum 的应用的移动应用登录的路由
 - en: '[PRE46]'
+  id: totrans-192
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: Future requests to the API should pass the token in the `Authorization` header
     as a `Bearer` type token.
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 未来对 API 的请求应在`Authorization`标头中传递`Bearer`类型的令牌。
 - en: Further configuration and debugging
+  id: totrans-194
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 进一步的配置和调试
 - en: If you’re having any trouble with your Sanctum install or want to customize
     any of Sanctum’s functionality, check out the [Sanctum docs](https://oreil.ly/lIpkq)
     to learn more.
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您在安装 Sanctum 方面遇到任何问题或想要自定义 Sanctum 的任何功能，请查阅[Sanctum 文档](https://oreil.ly/lIpkq)获取更多信息。
 - en: API Authentication with Laravel Passport
+  id: totrans-196
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 Laravel Passport 进行 API 身份验证
 - en: Passport (a first-party package that has to be installed, brought in via Composer)
     makes it easy to set up a full-featured OAuth 2.0 server in your application,
     complete with an API and UI components for managing clients and tokens.
+  id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: Passport（通过 Composer 引入的第一方包，必须安装）可轻松在您的应用程序中设置一个功能齐全的 OAuth 2.0 服务器，包括管理客户端和令牌的
+    API 和 UI 组件。
 - en: A brief introduction to OAuth 2.0
+  id: totrans-198
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: OAuth 2.0 简介
 - en: OAuth is by far the most common auth system used in RESTful APIs. Unfortunately,
     it’s far too complex a topic for us to cover here in depth. For further reading,
     Matt Frost has written a great book on OAuth and PHP titled *Integrating Web Services
     with OAuth and PHP* (php[architect]).
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: OAuth 是 RESTful API 中最常用的认证系统。不幸的是，这是一个过于复杂的主题，我们无法在此深入讨论。有关更多信息，请参阅 Matt Frost
+    撰写的关于 OAuth 和 PHP 的优秀书籍 *Integrating Web Services with OAuth and PHP* (php[architect])。
 - en: 'Here’s the simplest concept behind OAuth: because APIs are stateless, we can’t
     rely on the same session-based authentication that we do in normal browser-based
     viewing sessions, where the user logs in and their authenticated state is saved
@@ -868,95 +1288,142 @@
     call to an authentication endpoint and perform some form of handshake to prove
     itself. It then gets back a token that it must send along with every future request
     (via the `Authorization` header, usually) to prove its identity.'
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: OAuth 最简单的概念是：由于 API 是无状态的，我们不能依赖于正常的基于会话的身份验证方式，这种方式在普通的基于浏览器的查看会话中使用，用户登录后，其验证状态保存在会话中以供后续查看使用。相反，API
+    客户端需要向认证端点发出单个调用，并执行某种握手来证明自己的身份。然后，它将获得一个令牌，必须在以后的每个请求中（通常通过 `Authorization`
+    标头）发送以证明其身份。
 - en: There are a few different types of OAuth “grant,” which basically means that
     there are several different scenarios and types of interaction that can define
     that authentication handshake. Different projects and different sorts of end consumers
     will necessitate different grants.
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: OAuth 有几种不同的授权类型，“授权”基本上意味着有几种不同的场景和交互类型可以定义认证握手。不同的项目和不同类型的最终消费者将需要不同的授权。
 - en: Passport gives you everything needed to add a basic OAuth 2.0 authentication
     server to your Laravel application, with a simpler and powerful API and interface.
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: Passport 提供了将基本的 OAuth 2.0 认证服务器添加到您的 Laravel 应用程序中所需的一切，具有更简单和强大的 API 和界面。
 - en: Installing Passport
+  id: totrans-203
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 安装 Passport
 - en: Passport is a separate package, so your first step is to install it. I’ll sum
     up the steps here, but you can get more in-depth installation instructions in
     the [Passport docs](https://oreil.ly/N9-eD).
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: Passport 是一个独立的包，因此您的第一步是安装它。我将在这里总结步骤，但您可以在[Passport 文档](https://oreil.ly/N9-eD)中获取更详细的安装说明。
 - en: 'First, bring it in with Composer:'
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，使用 Composer 导入它：
 - en: '[PRE47]'
+  id: totrans-206
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: Passport imports a series of migrations, so run those with `php artisan migrate`
     to create the tables necessary for OAuth clients, scopes, and tokens.
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: Passport 导入了一系列迁移，因此使用 `php artisan migrate` 运行这些迁移以创建 OAuth 客户端、作用域和令牌所需的表。
 - en: Next, run the installer with `php artisan passport:install`. This will create
     encryption keys for the OAuth server (*storage/oauth-private.key* and *storage/oauth-public.key*)
     and insert OAuth clients into the database for our personal and password grant
     type tokens (which we’ll cover later).
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，使用 `php artisan passport:install` 运行安装程序。这将为 OAuth 服务器创建加密密钥（*storage/oauth-private.key*
+    和 *storage/oauth-public.key*），并在数据库中插入我们的个人和密码授权类型令牌的 OAuth 客户端（稍后将介绍）。
 - en: You’ll need to import the `Laravel\Passport\HasApiTokens` trait into your `User`
     model; this will add OAuth client- and token-related relationships to each `User`,
     as well as a few token-related helper methods.
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 您需要将 `Laravel\Passport\HasApiTokens` trait 导入到您的 `User` 模型中；这将为每个 `User` 添加与
+    OAuth 客户端和令牌相关的关系，以及一些与令牌相关的辅助方法。
 - en: Finally, add a new auth guard in *config/auth.php* named `api`; set the provider
     to `users`, and the driver to `passport`.
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，在 *config/auth.php* 中添加一个名为 `api` 的新认证守卫；将提供者设置为 `users`，驱动程序设置为 `passport`。
 - en: You now have a fully functional OAuth 2.0 server! You can create new clients
     with `php artisan passport:client`, and you have an API for managing your clients
     and tokens available under the `/oauth` route prefix.
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您已经拥有了一个完全功能的 OAuth 2.0 服务器！您可以使用 `php artisan passport:client` 创建新的客户端，并且您可以使用
+    `/oauth` 路由前缀下的 API 来管理您的客户端和令牌。
 - en: To protect a route behind your Passport auth system, add the `auth:api` middleware
     to the route or route group, as shown in [Example 13-29](#protecting_an_API_route).
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在您的 Passport 认证系统后面保护路由，请将 `auth:api` 中间件添加到路由或路由组中，如[示例 13-29](#protecting_an_API_route)所示。
 - en: Example 13-29\. Protecting an API route with the Passport auth middleware
+  id: totrans-213
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-29\. 使用 Passport 认证中间件保护 API 路由
 - en: '[PRE48]'
+  id: totrans-214
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: In order to authenticate to these protected routes, your client apps will need
     to pass a token (we’ll cover how to get one shortly) as a `Bearer` token in the
     `Authorization` header. [Example 13-30](#sample_API_request_with_a_Bearer_token)
     shows what this would look like if you were making a request using the HTTP client
     included by Laravel.
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: 要对这些受保护的路由进行身份验证，您的客户端应用程序将需要通过`Authorization`标头中的`Bearer`令牌传递令牌（我们将很快介绍如何获取）。[示例13-30](#sample_API_request_with_a_Bearer_token)展示了如果您正在使用Laravel包含的HTTP客户端进行请求，会是什么样子。
 - en: Example 13-30\. Making a sample API request with a `Bearer` token
+  id: totrans-216
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例13-30\. 使用`Bearer`令牌进行样本API请求
 - en: '[PRE49]'
+  id: totrans-217
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: Now, let’s take a closer look at how it all works.
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，让我们更详细地看看它是如何工作的。
 - en: Passport’s API
+  id: totrans-219
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Passport的API
 - en: 'Passport exposes an API in your application under the `/oauth` route prefix.
     The API provides two primary functions: first, to authorize users with OAuth 2.0
     authorization flows (`/oauth/authorize` and `/oauth/token`), and second, to allow
     users to manage their clients and tokens (the rest of the routes).'
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: Passport在您的应用程序中通过`/oauth`路由前缀公开了一个API。该API提供两个主要功能：首先，通过OAuth 2.0授权流（`/oauth/authorize`和`/oauth/token`）授权用户，其次，允许用户管理其客户端和令牌（其余路由）。
 - en: This is an important distinction, especially if you’re unfamiliar with OAuth.
     Every OAuth server needs to expose the ability for consumers to authenticate with
     your server; that’s the entire point of the service. But Passport *also* exposes
@@ -964,62 +1431,86 @@
     means you can easily build a frontend to let your users manage their information
     in your OAuth application. Passport actually comes with Vue-based manager components
     that you can either use directly or use for inspiration.
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个重要的区别，特别是如果您对OAuth不熟悉。每个OAuth服务器都需要公开允许消费者使用您的服务器进行身份验证的能力；这就是该服务的全部意义。但是Passport还公开了用于管理OAuth服务器客户端和令牌状态的API。这意味着您可以轻松构建一个前端，让用户在您的OAuth应用程序中管理其信息。Passport实际上附带了基于Vue的管理组件，您可以直接使用或作为灵感。
 - en: We’ll cover the API routes that allow you to manage clients and tokens, and
     the Vue components that Passport ships with to make that easy, but first let’s
     dig into the various ways your users can authenticate with your Passport-protected
     API.
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将介绍API路由，让您可以管理客户端和令牌，以及Passport提供的Vue组件，使其变得简单易用，但首先让我们深入了解用户可以使用Passport保护的API进行身份验证的各种方式。
 - en: Passport’s available grant types
+  id: totrans-223
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Passport可用的授权类型
 - en: Passport makes it possible for you to authenticate users in four different ways.
     Two are traditional OAuth 2.0 grants (the password grant and authorization code
     grant) and two are convenience methods that are unique to Passport (the personal
     token and synchronizer token).
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: Passport使您可以以四种不同的方式对用户进行身份验证。其中两种是传统的OAuth 2.0授权（密码授权和授权码授权），另外两种是Passport独有的便利方法（个人令牌和同步器令牌）。
 - en: Password grant
+  id: totrans-225
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 密码授权
 - en: The *password grant*, while less common than the authorization code grant, is
     much simpler. If you want users to be able to authenticate directly with your
     API using their username and password—​for example, if you have a mobile app for
     your company consuming your own API—​you can use the password grant.
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: '*密码授权*虽然比授权码授权方式更少见，但要简单得多。如果您希望用户能够直接使用其用户名和密码在您的API上进行身份验证，例如，如果您的公司为自己的API消耗具有移动应用程序，您可以使用密码授权。'
 - en: 'With the password grant type, there is just one step to getting a token: sending
     the user’s credentials to the `/oauth/token` route, like in [Example 13-31](#password_grant_type).'
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用密码授权类型，获取令牌只需一步：将用户的凭据发送到`/oauth/token`路由，就像[示例13-31](#password_grant_type)中那样。
 - en: Example 13-31\. Making a request with the password grant type
+  id: totrans-228
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例13-31\. 使用密码授权类型进行请求
 - en: '[PRE50]'
+  id: totrans-229
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE50]'
 - en: 'This route will return an `access_token`, a `refresh_token`, and two pieces
     of metadata: `token_type` and `expires_in` (discussed later in this chapter).
     You can now save those tokens to use to authenticate with the API (access token)
     and to request more tokens later (refresh token).'
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: 此路由将返回一个`access_token`，一个`refresh_token`和两个元数据：`token_type`和`expires_in`（本章后面将讨论）。您现在可以保存这些令牌以用于API进行身份验证（访问令牌）和以后请求更多令牌（刷新令牌）。
 - en: 'Note that the ID and secret we would use for the password grant type would
     be those in the `oauth_clients` database table of our Passport app in the row
     whose name matches that of our Passport grant client. You’ll also see entries
     in this table for the two clients that are generated by default when you run `passport:install`:
     “Laravel Personal Access Client” and “Laravel Password Grant Client.”'
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，我们将用于密码授权类型的ID和密钥将是我们Passport应用程序中`oauth_clients`数据库表中的那些在其名称与我们Passport授权客户端名称匹配的行中的ID和密钥。当您运行`passport:install`时，您还将在此表中看到两个默认生成的客户端条目：“Laravel个人访问客户端”和“Laravel密码授权客户端”。
 - en: Authorization code grant
+  id: totrans-232
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 授权码授权
 - en: The most common OAuth 2.0 auth workflow is also the most complex one Passport
     supports. Let’s imagine we’re developing an application that’s like Twitter but
     for sound clips; we’ll call it Tweeter. And we’ll imagine another website, a social
@@ -1027,23 +1518,32 @@
     to let people embed their Tweeter data into their SpaceBook newsfeeds. We’re going
     to install Passport in our Tweeter app so that other apps—SpaceBook, for example—can
     allow their users to authenticate with their Tweeter information.
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: 最常见的OAuth 2.0授权工作流程也是Passport支持的最复杂的工作流程。让我们想象我们正在开发一个类似Twitter但用于声音片段的应用程序；我们将其称为Tweeter。我们再想象另一个网站，一个名为SpaceBook的科幻迷社交网络。SpaceBook的开发人员希望让人们将他们的Tweeter数据嵌入到他们的SpaceBook新闻源中。我们将在我们的Tweeter应用程序中安装Passport，以便其他应用程序
+    - 例如SpaceBook - 可以允许他们的用户使用他们的Tweeter信息进行身份验证。
 - en: 'In the *authorization code grant* type, each consuming website—SpaceBook, in
     this example—needs to create a client in our Passport-enabled app. In most scenarios,
     the other sites’ admins will have user accounts at Tweeter, and we’ll build tools
     for them to create clients there. But for starters, we can just manually create
     a client for the SpaceBook admins:'
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 在*授权码授权*类型中，每个消费网站 - 例如这个例子中的SpaceBook - 需要在我们的Passport启用的应用程序中创建一个客户端。在大多数情况下，其他站点的管理员将在Tweeter拥有用户帐户，我们将为他们构建工具来在那里创建客户端。但是首先，我们可以为SpaceBook的管理员手动创建一个客户端：
 - en: '[PRE51]'
+  id: totrans-235
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE51]'
 - en: 'To answer the first question, you’ll need to know that every client needs to
     be assigned to a user in your app. Imagine user #1 is writing SpaceBook; they’ll
     be the “owner” of this client we’re creating.'
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 要回答第一个问题，您需要知道每个客户端都需要分配给您应用程序中的一个用户。假设用户#1正在编写SpaceBook；他们将是我们创建的这个客户端的“所有者”。
 - en: Once we’ve run this command, we have the ID and secret for the SpaceBook client.
     At this point, SpaceBook can use this ID and secret to build tooling that allows
     an individual SpaceBook user (who is also a Tweeter user) to get an auth token
@@ -1052,146 +1552,218 @@
     and the following examples assume SpaceBook is a Laravel app, too; they also assume
     the Spacebook’s developer created a file at *config/tweeter.php* that returns
     the ID and secret we just created.)
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦我们运行了这个命令，我们就有了SpaceBook客户端的ID和密钥。在这一点上，SpaceBook可以使用这个ID和密钥来构建工具，允许一个个体SpaceBook用户（也是Tweeter用户）从Tweeter获取授权令牌，以便当SpaceBook希望代表该用户进行API调用到Tweeter时使用。[示例 13-32](#redirecting_to_OAuth)说明了这一点。
+    （这和后面的示例假设SpaceBook也是一个Laravel应用程序；它们还假设SpaceBook的开发人员创建了一个在*config/tweeter.php*中返回我们刚刚创建的ID和密钥的文件。）
 - en: Example 13-32\. A consumer app redirecting a user to our OAuth server
+  id: totrans-238
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例13-32\. 消费者应用程序将用户重定向到我们的OAuth服务器
 - en: '[PRE52]'
+  id: totrans-239
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE52]'
 - en: 'When users hit that route in SpaceBook, they’ll now be redirected to the `/oauth/authorize`
     Passport route in our Tweeter app. At this point they’ll see a confirmation page—you
     can use the default Passport confirmation page by running this command:'
+  id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: 当用户访问SpaceBook中的该路由时，他们现在将被重定向到我们Tweeter应用中的`/oauth/authorize` Passport路由。此时他们将看到一个确认页面
+    - 您可以通过运行此命令使用默认的Passport确认页面：
 - en: '[PRE53]'
+  id: totrans-241
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE53]'
 - en: This will publish the view to *resources/views/vendor/passport/authorize.blade.php*,
     and your users will see the page shown in [Figure 13-1](#authorization_code_approval_page).
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将发布视图到*resources/views/vendor/passport/authorize.blade.php*，您的用户将看到[图13-1](#authorization_code_approval_page)中显示的页面。
 - en: '![A screenshot of the OAuth authorization code approval page](assets/lur3_1301.png)'
+  id: totrans-243
   prefs: []
   type: TYPE_IMG
+  zh: '![OAuth授权码批准页面的截图](assets/lur3_1301.png)'
 - en: Figure 13-1\. OAuth authorization code approval page
+  id: totrans-244
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图13-1\. OAuth授权码批准页面
 - en: Once a user chooses to accept or reject the authorization, Passport will redirect
     that user back to the provided `redirect_uri`. In [Example 13-32](#redirecting_to_OAuth)
     we set a `redirect_uri` of `url('tweeter/callback')`, so the user will be redirected
     back to *http://spacebook.test/tweeter/callback*.
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦用户选择接受或拒绝授权，Passport将将用户重定向回提供的`redirect_uri`。在[示例 13-32](#redirecting_to_OAuth)中，我们设置了`redirect_uri`为`url('tweeter/callback')`，因此用户将被重定向回*http://spacebook.test/tweeter/callback*。
 - en: An approval request will contain a code that our consumer app’s callback route
     can now use to get a token back from our Passport-enabled app, Tweeter. A rejection
     request will contain an error. SpaceBook’s callback route might look something
     like [Example 13-33](#authorization_callback_route).
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 批准请求将包含一个代码，我们的消费者应用程序回调路由现在可以使用它从我们的启用Passport的应用程序Tweeter获取令牌。 拒绝请求将包含一个错误。
+    SpaceBook的回调路由可能类似于[示例 13-33](#authorization_callback_route)。
 - en: Example 13-33\. The authorization callback route in the sample consuming app
+  id: totrans-247
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例13-33。示例消费应用程序中的授权回调路由
 - en: '[PRE54]'
+  id: totrans-248
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE54]'
 - en: 'What the SpaceBook developer has done here is build an HTTP request, using
     the Laravel HTTP client, to the `/oauth``/token` Passport route on Tweeter. They
     then send a `POST` request containing the authorization code they received when
     the user approved access, and Tweeter will return a JSON response containing a
     few keys:'
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: SpaceBook开发者在这里做的是使用Laravel HTTP客户端构建HTTP请求，到Tweeter的`/oauth/token` Passport路由。
+    然后，他们发送一个`POST`请求，其中包含用户批准访问时收到的授权码，Tweeter将返回一个包含几个键的JSON响应：
 - en: '`access_token`'
+  id: totrans-250
   prefs: []
   type: TYPE_NORMAL
+  zh: '`access_token`'
 - en: The token SpaceBook will want to save for this user. This token is what the
     user will use to authenticate in future requests to Tweeter (using the `Authorization`
     header).
+  id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: SpaceBook将要保存的该用户令牌。 此令牌是用户将来用于认证到Tweeter的请求时使用的。 （使用`Authorization`标头）。
 - en: '`refresh_token`'
+  id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: '`refresh_token`'
 - en: A token SpaceBook will need *if* you decide to set your tokens to expire. By
     default, Passport’s access tokens last for one year.
+  id: totrans-253
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您决定将您的令牌设置为过期，则SpaceBook将需要的令牌。 默认情况下，Passport的访问令牌有效期为一年。
 - en: '`expires_in`'
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: '`expires_in`'
 - en: The number of seconds until an `access_token` expires (needs to be refreshed).
+  id: totrans-255
   prefs: []
   type: TYPE_NORMAL
+  zh: 直到`access_token`过期的秒数（需要刷新）。
 - en: '`token_type`'
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: '`token_type`'
 - en: The type of token you’re getting back, which will be `Bearer`; this means you
     pass a header with all future requests with the name of `Authorization` and the
     value of `Bearer *YOURTOKENHERE*`.
+  id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: 您获取的令牌类型将是`Bearer`；这意味着您在未来的所有请求中传递一个带有名称为`Authorization`和值为`Bearer *YOURTOKENHERE*`的标头。
 - en: You now have all the tools you need to perform basic authorization code flows.
     We’ll cover how to build an admin panel for your clients and tokens later, but
     first, let’s take a quick look at the other grant types.
+  id: totrans-258
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您已经拥有执行基本授权代码流所需的所有工具。 我们将稍后介绍如何为客户和令牌构建管理员面板，但首先，让我们快速查看其他授权类型。
 - en: Personal access tokens
+  id: totrans-259
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 个人访问令牌
 - en: The authorization code grant is great for your users’ apps, and the password
     code grant is great for your own apps, but what if your users want to create tokens
     for themselves to test out your API or to use when they’re developing their apps?
     That’s what personal tokens are for.
+  id: totrans-260
   prefs: []
   type: TYPE_NORMAL
+  zh: 授权码授予适用于用户的应用程序，密码授予适用于您自己的应用程序，但是如果您的用户想要为自己创建令牌以测试您的API或在开发其应用程序时使用什么？ 这就是个人令牌的用途。
 - en: Creating a Personal Access Client
+  id: totrans-261
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 创建个人访问客户端
 - en: 'To create personal tokens, you need a personal access client in your database.
     Running `php artisan passport:install` will have added one already, but if you
     ever need to generate a new personal access client for any reason, you can run
     `php artisan passport:client --personal`:'
+  id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: 要创建个人令牌，您需要在数据库中拥有个人访问客户端。 运行`php artisan passport:install`将已经添加一个，但是如果出于任何原因需要生成一个新的个人访问客户端，您可以运行`php
+    artisan passport:client --personal`：
 - en: '[PRE55]'
+  id: totrans-263
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE55]'
 - en: Personal access tokens are not quite a “grant” type; there’s no OAuth-prescribed
     flow here. Rather, they’re a convenience method that Passport adds to make it
     easy to have a single client registered in your system that exists solely to facilitate
     the creation of convenience tokens for your users who are developers.
+  id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: 个人访问令牌并不是“授权”类型；这里没有OAuth规定的流程。 相反，它们是Passport添加的便捷方法，可以轻松在系统中注册一个单一客户端，该客户端仅用于便捷地为开发者用户创建便利令牌。
 - en: For example, maybe you have a user who’s developing a competitor to SpaceBook
     named RaceBook (it’s for marathon runners), and they want to toy around with the
     Tweeter API a bit to figure out how it works *before* starting to code. Does this
     developer have the facility to create tokens using the authorization code flow?
     Not yet—​they haven’t even written any code yet! That’s what personal access tokens
     are for.
+  id: totrans-265
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，也许您有一个正在开发名为RaceBook（马拉松选手专用的社交网络）的竞争对手SpaceBook的用户，他们希望在开始编码之前先玩一玩Tweeter
+    API，以弄清它的工作原理。这个开发者能够使用授权码流程创建令牌吗？还没有——他们甚至还没有写任何代码呢！这就是个人访问令牌的用途。
 - en: 'You can create personal access tokens through the JSON API, which we’ll cover
     shortly, but you can also create one for your user directly in code:'
+  id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过JSON API创建个人访问令牌，我们稍后会介绍，但您也可以直接在代码中为您的用户创建一个：
 - en: '[PRE56]'
+  id: totrans-267
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE56]'
 - en: Your users can use these tokens just as if they were tokens created with the
     authorization code grant flow. We’ll talk more about scopes in [“Passport scopes”](#passport_scopes).
+  id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: 您的用户可以像使用授权码授予流程创建的令牌一样使用这些令牌。我们将在[“护照范围”](#passport_scopes)中详细讨论作用域。
 - en: Tokens from Laravel session authentication (synchronizer tokens)
+  id: totrans-269
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: Laravel会话认证的令牌（同步令牌）
 - en: There’s one final way for your users to get tokens to access your API, and it’s
     another convenience method that Passport adds but that normal OAuth servers don’t
     provide. This method is for when your users are already authenticated because
@@ -1199,8 +1771,10 @@
     to be able to access the API. It’d be a pain to have to reauthenticate the users
     with the authorization code or password grant flow, so Laravel provides a helper
     for that.
+  id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有一种方法让您的用户获取访问API的令牌，这是Passport添加的另一种便利方法，而普通的OAuth服务器不提供。这种方法是当您的用户已经通过常规方式登录到您的Laravel应用程序，并且您希望您应用程序的JavaScript能够访问API时使用的。重新使用授权码或密码授予流程重新认证用户会很麻烦，因此Laravel提供了一个辅助方法。
 - en: If you add the `Laravel\Passport\Http\Middleware\CreateFreshApiToken` middleware
     to your `web` middleware group (in *app/Http/Kernel.php*), every response Laravel
     sends to your authenticated users will have a cookie named `laravel_token` attached
@@ -1209,223 +1783,336 @@
     requests in the `X-CSRF-TOKEN` header and also send the `X-Requested-With` header
     with any API requests you make, the API will compare your CSRF token with this
     cookie and this will authenticate your users to the API just like any other token.
+  id: totrans-271
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您将`Laravel\Passport\Http\Middleware\CreateFreshApiToken`中间件添加到您的`web`中间件组（在*app/Http/Kernel.php*中），Laravel发送给您的经过身份验证的用户的每个响应都会附带一个名为`laravel_token`的cookie。这个cookie是一个包含有关CSRF令牌编码信息的JSON
+    Web Token（JWT）。现在，如果您在JavaScript请求中使用`X-CSRF-TOKEN`标头发送正常的CSRF令牌，并且在任何您做的API请求中也发送`X-Requested-With`标头，API将会比较您的CSRF令牌与此cookie，并像处理任何其他令牌一样对您的用户进行身份验证。
 - en: The default JavaScript bootstrap setup that Laravel comes bundled with sets
     up this header for you, but if you’re using a different framework, you’ll need
     to set it up manually. [Example 13-36](#pass_tokens_with_all_Ajax_requests) shows
     how to do it with jQuery.
+  id: totrans-272
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel捆绑的默认JavaScript引导设置为您设置了这个标头，但如果您使用不同的框架，您需要手动设置它。[示例 13-36](#pass_tokens_with_all_Ajax_requests)展示了如何在jQuery中设置它。
 - en: Example 13-36\. Setting jQuery to pass Laravel’s CSRF tokens and the `X-Requested-With`
     header with all Ajax requests
+  id: totrans-273
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-36\. 设置jQuery通过所有Ajax请求传递Laravel的CSRF令牌和`X-Requested-With`标头
 - en: '[PRE57]'
+  id: totrans-274
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE57]'
 - en: If you add the `CreateFreshApiToken` middleware to your `web` middleware group
     and pass those headers with every JavaScript request, your JavaScript requests
     will be able to hit your Passport-protected API routes without worrying about
     any of the complexity of the authorization code or password grants.
+  id: totrans-275
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您将`CreateFreshApiToken`中间件添加到您的`web`中间件组，并且在每个JavaScript请求中传递这些标头，那么您的JavaScript请求将能够访问您的Passport保护的API路由，而不必担心授权码或密码授予的任何复杂性。
 - en: Passport scopes
+  id: totrans-276
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 护照作用域
 - en: If you’re familiar with OAuth, you’ve probably noticed we haven’t talked much
     about scopes yet. Everything we’ve covered so far can be customized by scope—but
     before we get into that, let’s first quickly cover what scopes are.
+  id: totrans-277
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您熟悉OAuth，您可能已经注意到我们还没有详细讨论作用域。到目前为止，我们所涵盖的所有内容都可以通过作用域进行定制——但在进一步讨论作用域之前，让我们先快速了解一下什么是作用域。
 - en: In OAuth, *scopes* are defined sets of privileges that are something other than
     “can do everything.” If you’ve ever gotten a GitHub API token before, for example,
     you might’ve noticed that some apps want access just to your name and email address,
     some want access to all of your repos, and some want access to your gists. Each
     of these is a “scope,” which allows both the user and the consumer app to define
     what access the consumer app needs to perform its job.
+  id: totrans-278
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 OAuth 中，*作用域* 是定义的一组权限，不是“可以做所有事情”。例如，如果你曾经获取过 GitHub API 令牌，你可能会注意到一些应用只想访问你的姓名和电子邮件地址，一些应用想要访问你所有的仓库，还有一些应用想要访问你的
+    Gists。这些都是“作用域”，它允许用户和消费者应用定义消费者应用需要执行其工作的访问权限。
 - en: As shown in [Example 13-37](#defining_passport_scopes), you can define the scopes
     for your application in the `boot()` method of your `AuthServiceProvider`.
+  id: totrans-279
   prefs: []
   type: TYPE_NORMAL
+  zh: 如 [示例 13-37](#defining_passport_scopes) 所示，你可以在 `AuthServiceProvider` 的 `boot()`
+    方法中定义应用的作用域。
 - en: Example 13-37\. Defining Passport scopes
+  id: totrans-280
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-37\. 定义 Passport 作用域
 - en: '[PRE58]'
+  id: totrans-281
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE58]'
 - en: Once you have your scopes defined, the consumer app can define which scopes
     it’s asking for access to. Just add a space-separated list of tokens in the `scope`
     field in the initial redirect, as shown in [Example 13-38](#requesting_authorization).
+  id: totrans-282
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦你定义了作用域，消费者应用可以定义它请求访问的作用域。只需在初始重定向中的 `scope` 字段添加一个空格分隔的令牌列表，如 [示例 13-38](#requesting_authorization)
+    所示。
 - en: Example 13-38\. Requesting authorization to access specific scopes
+  id: totrans-283
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-38\. 请求授权以访问特定作用域
 - en: '[PRE59]'
+  id: totrans-284
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE59]'
 - en: When the user tries to authorize with this app, it’ll present the list of requested
     scopes. This way, the user will know whether “SpaceBook is requesting to see your
     email address” or “SpaceBook is requesting access to post as you and delete your
     posts and message your friends.”
+  id: totrans-285
   prefs: []
   type: TYPE_NORMAL
+  zh: 当用户尝试授权此应用时，它将展示请求的作用域列表。这样，用户就会知道“SpaceBook 请求查看你的电子邮件地址”还是“SpaceBook 请求访问以你身份发布、删除你的帖子和发送消息给你的朋友”。
 - en: You can check for scope using middleware or on the `User` instance. [Example 13-39](#check_to_perform_a_given_action)
     shows how to check on the `User`.
+  id: totrans-286
   prefs: []
   type: TYPE_NORMAL
+  zh: 你   你可以使用中间件或在 `User` 实例上检查作用域。[示例 13-39](#check_to_perform_a_given_action)展示了如何在
+    `User` 上进行检查。
 - en: Example 13-39\. Checking whether the token a user authenticated with can perform
     a given action
+  id: totrans-287
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-39\. 检查用户验证的令牌是否可以执行指定的操作
 - en: '[PRE60]'
+  id: totrans-288
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE60]'
 - en: 'There are two middleware you can use for this too, `scope` and `scopes`. To
     use these in your app, add them to `$middlewareAliases` in your *app/Http/Kernel.php*
     file:'
+  id: totrans-289
   prefs: []
   type: TYPE_NORMAL
+  zh: 你也可以使用两个中间件，`scope` 和 `scopes`。在你的应用中使用它们，只需将它们添加到 *app/Http/Kernel.php* 文件中的
+    `$middlewareAliases`：
 - en: '[PRE61]'
+  id: totrans-290
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE61]'
 - en: You can now use the middleware as illustrated in [Example 13-40](#passport_Using_middleware_to_restrict).
     `scopes` requires *all* of the defined scopes to be on the user’s token in order
     for the user to access the route, while `scope` requires *at least one* of the
     defined scopes to be on the user’s token.
+  id: totrans-291
   prefs: []
   type: TYPE_NORMAL
+  zh: 你现在可以使用中间件，如 [示例 13-40](#passport_Using_middleware_to_restrict) 所示。`scopes`
+    需要用户令牌上包含*所有*定义的作用域才能访问路由，而 `scope` 只需要用户令牌上包含*至少一个*定义的作用域。
 - en: Example 13-40\. Using middleware to restrict access based on token scopes
+  id: totrans-292
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-40\. 使用中间件基于令牌作用域限制访问
 - en: '[PRE62]'
+  id: totrans-293
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE62]'
 - en: If you haven’t defined any scopes, the app will just work as if they don’t exist.
     The moment you use scopes, however, your consumer apps will have to explicitly
     define which scopes they’re requesting access with. The one exception to this
     rule is that if you’re using the password grant type, your consumer app can request
     the `*` scope, which gives the token access to everything.
+  id: totrans-294
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你没有定义任何作用域，应用将像不存在一样工作。然而，一旦你使用了作用域，你的消费者应用必须明确定义它们请求的作用域。此规则的一个例外是，如果你使用的是密码授权类型，你的消费者应用可以请求
+    `*` 作用域，这会使令牌获得对所有内容的访问权限。
 - en: Deploying Passport
+  id: totrans-295
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 部署 Passport
 - en: The first time you deploy your Passport-powered app, the Passport API won’t
     function until you generate keys for the app. This can be accomplished by running
     `php artisan passport:keys` on your production server, which will generate the
     encryption keys Passport uses to generate tokens.
+  id: totrans-296
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一次部署你的 Passport 支持的应用时，Passport API 在你为应用生成密钥之前不会起作用。这可以通过在生产服务器上运行 `php artisan
+    passport:keys` 来完成，这将生成 Passport 用于生成令牌的加密密钥。
 - en: Customizing 404 Responses
+  id: totrans-297
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 自定义 404 响应
 - en: Laravel offers customizable error-message pages for normal HTML views, but you
     can also customize the default 404 fallback response for calls with a JSON content
     type. To do so, add a `Route::fallback()` call to your API, as shown in [Example 13-41](#EX13d).
+  id: totrans-298
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 为普通 HTML 视图提供可自定义的错误消息页面，但您还可以为带有 JSON 内容类型的调用自定义默认的 404 回退响应。为此，请将
+    `Route::fallback()` 调用添加到您的 API 中，如[示例 13-41](#EX13d)所示。
 - en: Example 13-41\. Defining a fallback route
+  id: totrans-299
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-41\. 定义回退路由
 - en: '[PRE63]'
+  id: totrans-300
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE63]'
 - en: Triggering the Fallback Route
+  id: totrans-301
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 触发回退路由
 - en: If you want to customize which route is returned when Laravel catches “not found”
     exceptions, you can update the exception handler using the `respondWithRoute()`
     method, as illustrated in [Example 13-42](#EX13e).
+  id: totrans-302
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想要自定义 Laravel 捕获“未找到”异常时返回的路由，可以使用 `respondWithRoute()` 方法更新异常处理程序，如[示例 13-42](#EX13e)所示。
 - en: Example 13-42\. Calling the fallback route when “not found” exceptions are caught
+  id: totrans-303
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-42\. 当捕获“未找到”异常时调用回退路由
 - en: '[PRE64]'
+  id: totrans-304
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE64]'
 - en: Testing
+  id: totrans-305
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 测试
 - en: Fortunately, testing APIs is actually simpler than testing almost anything else
     in Laravel.
+  id: totrans-306
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，在 Laravel 中测试 API 实际上比测试几乎任何其他东西都简单。
 - en: We cover this in more depth in [Chapter 12](ch12.html#testing), but there are
     a series of methods for making assertions against JSON. Combine that capability
     with the simplicity of full-stack application tests, and you can put together
     your API tests quickly and easily. Take a look at the common API testing pattern
     in [Example 13-43](#common_API_testing_pattern).
+  id: totrans-307
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在[第 12 章](ch12.html#testing)中详细介绍了这一点，但有一系列针对 JSON 进行断言的方法。结合全栈应用程序测试的简单性，您可以快速轻松地编写
+    API 测试。查看[示例 13-43](#common_API_testing_pattern)中的常见 API 测试模式。
 - en: Example 13-43\. A common API testing pattern
+  id: totrans-308
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-43\. 常见的 API 测试模式
 - en: '[PRE65]'
+  id: totrans-309
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE65]'
 - en: Note that we’re using `WithoutMiddleware` to avoid worrying about authentication.
     You’ll want to test that separately, if at all (for more on authentication, see
     [Chapter 9](ch09.html#user_authentication_and_authorization)).
+  id: totrans-310
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，我们使用 `WithoutMiddleware` 来避免担心身份验证问题。如果需要，您可以单独进行身份验证测试（有关身份验证的更多信息，请参见[第
+    9 章](ch09.html#user_authentication_and_authorization)）。
 - en: In this test we insert two `Dog`s into the database, then visit the API route
     for listing all `Dog`s and make sure both are present in the output.
+  id: totrans-311
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个测试中，我们向数据库中插入了两只`Dog`，然后访问 API 路由以列出所有`Dog`，确保两者都出现在输出中。
 - en: You can cover all of your API routes simply and easily here, including modifying
     actions like `POST` and `PATCH`.
+  id: totrans-312
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在这里简单轻松地覆盖所有 API 路由，包括修改`POST`和`PATCH`等操作。
 - en: Testing Passport
+  id: totrans-313
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 测试 Passport
 - en: You can use the `actingAs()` method on the `Passport` facade to test your scopes.
     Take a look at [Example 13-44](#common_passport_testing) to see a common pattern
     for testing scopes in Passport.
+  id: totrans-314
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用 `Passport` 门面上的 `actingAs()` 方法来测试您的作用域。查看[示例 13-44](#common_passport_testing)以查看
+    Passport 中测试作用域的常见模式。
 - en: Example 13-44\. Testing scoped access
+  id: totrans-315
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-44\. 测试作用域访问
 - en: '[PRE66]'
+  id: totrans-316
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE66]'
 - en: TL;DR
+  id: totrans-317
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: TL;DR
 - en: Laravel is geared toward building APIs and makes it simple to work with JSON
     and RESTful APIs. There are some conventions, like for pagination, but much of
     the definition of exactly how your API will be sorted, authenticated, or whatever
     else is up to you.
+  id: totrans-318
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 专注于构建 API，并简化了与 JSON 和 RESTful API 的工作。有一些约定，如分页，但关于 API 的具体排序、身份验证或其他内容的定义大部分由您决定。
 - en: Laravel provides tools for authentication and testing, easy manipulation and
     reading of headers, and working with JSON, even automatically encoding all Eloquent
     results to JSON if they’re returned directly from a route.
+  id: totrans-319
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 提供了身份验证和测试工具，易于操作和读取头信息，并处理 JSON，甚至在直接从路由返回时自动将所有 Eloquent 结果编码为 JSON。
 - en: Laravel Passport is a separate package that makes it simple to create and manage
     an OAuth server in your Laravel apps.
+  id: totrans-320
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel Passport 是一个单独的包，使得在 Laravel 应用中创建和管理 OAuth 服务器变得简单。

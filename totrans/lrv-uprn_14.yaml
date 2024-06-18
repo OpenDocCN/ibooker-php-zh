@@ -1,549 +1,852 @@
 - en: Chapter 14\. Storage and Retrieval
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第14章 存储和检索
 - en: We looked at how to store data in relational databases in [Chapter 5](ch05.html#database_and_eloquent),
     but there’s a lot more that can be stored, both locally and remotely. In this
     chapter we’ll cover filesystem and in-memory storage, file uploads and manipulation,
     nonrelational data stores, sessions, the cache, logging, cookies, and full-text
     search.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在 [第5章](ch05.html#database_and_eloquent) 中讨论了如何在关系数据库中存储数据，但可以在本地和远程存储中存储更多数据。本章将涵盖文件系统和内存存储、文件上传和操作、非关系数据存储、会话、缓存、日志记录、Cookie
+    和全文搜索。
 - en: Local and Cloud File Managers
+  id: totrans-2
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 本地和云文件管理器
 - en: Laravel provides a series of file manipulation tools through the `Storage` facade
     and a few helper functions.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 通过 `Storage` 门面和一些辅助函数提供一系列文件操作工具。
 - en: Laravel’s filesystem access tools can connect to the local filesystem as well
     as to S3, Rackspace, and FTP. The S3 and Rackspace file drivers are provided by
     [Flysystem](https://oreil.ly/2lP4P), and it’s simple to add additional Flysystem
     providers, such as Dropbox or WebDAV, to your Laravel app.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的文件系统访问工具可以连接到本地文件系统以及 S3、Rackspace 和 FTP。S3 和 Rackspace 文件驱动程序由 [Flysystem](https://oreil.ly/2lP4P)
+    提供，并且可以简单地添加额外的 Flysystem 提供者，如 Dropbox 或 WebDAV，到您的 Laravel 应用程序中。
 - en: Configuring File Access
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 配置文件访问
 - en: The definitions for Laravel’s file manager live in *config/filesystems.php*.
     Each connection is called a “disk,” and [Example 14-1](#default_available_storage_disks)
     lists the disks that are available out of the box.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 文件管理器的定义位于 *config/filesystems.php* 中。每个连接称为“磁盘”，[示例 14-1](#default_available_storage_disks)
+    列出了开箱即用的磁盘。
 - en: Example 14-1\. Default available storage disks
+  id: totrans-7
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-1 默认可用的存储磁盘
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: The storage_path() Helper
+  id: totrans-9
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: '`storage_path()` 辅助函数'
 - en: The `storage_path()` helper used in [Example 14-1](#default_available_storage_disks)
     links to Laravel’s configured storage directory, *storage/*. Anything you pass
     to it is added to the end of the directory name, so `storage``_path(``'public')`
     will return the string `storage/public`.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 [示例 14-1](#default_available_storage_disks) 中使用的 `storage_path()` 辅助函数链接到
+    Laravel 配置的存储目录，即 *storage/*。将任何内容传递给它，都将添加到目录名称的末尾，因此 `storage_path('public')`
+    将返回字符串 `storage/public`。
 - en: The `local` disk connects to your local storage system and presumes it will
     be interacting with the *app* directory of the storage path, which is *storage/app*.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '`local` 磁盘连接到您的本地存储系统，并假定它将与存储路径的 *app* 目录进行交互，即 *storage/app*。'
 - en: 'The `public` disk is also a local disk (although you can change it if you’d
     like), which is intended for use with any files you intend to be served by your
     application. It defaults to the *storage/app/public* directory, and if you want
     to use this directory to serve files to the public, you’ll need to add a symbolic
     link (*symlink*) to somewhere within the *public/* directory. Thankfully, there’s
     an Artisan command that maps *public/storage* to serve the files from *storage/app/public*:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '`public` 磁盘也是一个本地磁盘（虽然您可以根据需要更改它），用于应用程序提供的文件。它默认为 *storage/app/public* 目录，如果您希望使用此目录向公众提供文件，则需要在
+    *public/* 目录中添加符号链接（*symlink*）。幸运的是，有一个 Artisan 命令将 *public/storage* 映射为从 *storage/app/public*
+    读取文件的服务：'
 - en: '[PRE1]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: The `s3` disk shows how Laravel connects to cloud-based file storage systems.
     If you’ve ever connected to S3 or any other cloud storage provider, this will
     be familiar; pass it your key and secret and some information defining the “folder”
     you’re working with, which in S3 is the region and the bucket.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: '`s3` 磁盘显示了 Laravel 如何连接到基于云的文件存储系统。如果您曾连接到 S3 或任何其他云存储提供者，这将很熟悉；传递您的密钥和秘密以及定义您正在使用的“文件夹”的一些信息，S3
+    中是区域和存储桶。'
 - en: Using the Storage Facade
+  id: totrans-15
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 Storage 门面
 - en: 'In *config/filesystem.php* you can set the default disk, which is what will
     be used any time you call the `Storage` facade without specifying a disk. To specify
     a disk, call `disk(''*diskname*'')` on the facade:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 *config/filesystem.php* 中，您可以设置默认磁盘，这将在未指定磁盘时使用任何时候调用 Storage 门面。要指定磁盘，请在门面上调用
+    `disk('*diskname*')`：
 - en: '[PRE2]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'The filesystems all provide the following methods:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有文件系统都提供以下方法：
 - en: '`get(''*file.jpg*'')`'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '`get(''*file.jpg*'')`'
 - en: Retrieves the file at `*file.jpg*`
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 检索 `*file.jpg*` 文件。
 - en: '`json(''*file.json*'', $flags)`'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: '`json(''*file.json*'', $flags)`'
 - en: Retrieves the file at `*file.json*` and decodes its JSON contents
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 检索 `*file.json*` 文件并解码其 JSON 内容。
 - en: '`put(''*file.jpg*'', *$contentsOrStream*)`'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '`put(''*file.jpg*'', *$contentsOrStream*)`'
 - en: Puts the given file contents to `*file.jpg*`
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 将给定的文件内容放到 `*file.jpg*`。
 - en: '`putFile(''*myDir*'', *$file*)`'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: '`putFile(''*myDir*'', *$file*)`'
 - en: Puts the contents of a provided file (in the form of an instance of either `Illuminate``\Http\File`
     or `Illuminate\Http\UploadedFile`) to the `*myDir*` directory, but with Laravel
     managing the entire streaming process and naming the file
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 将提供文件的内容（以 `Illuminate\Http\File` 或 `Illuminate\Http\UploadedFile` 实例的形式）放置到
+    `*myDir*` 目录中，但 Laravel 管理整个流程和文件命名
 - en: '`exists(''*file.jpg*'')`'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '`exists(''*file.jpg*'')`'
 - en: Returns a Boolean indicating whether `*file.jpg*` exists
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回一个布尔值，指示 `*file.jpg*` 是否存在
 - en: '`getVisibility(''*myPath*'')`'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: '`getVisibility(''*myPath*'')`'
 - en: Gets the visibility for the given path (“public” or “private”)
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 获取给定路径的可见性（“public”或“private”）
 - en: '`setVisibility(''*myPath*'')`'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: '`setVisibility(''*myPath*'')`'
 - en: Sets the visibility for the given path (“public” or “private”)
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置给定路径的可见性（“public”或“private”）
 - en: '`copy(''*file.jpg*'', ''*newfile.jpg*'')`'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '`copy(''*file.jpg*'', ''*newfile.jpg*'')`'
 - en: Copies `*file.jpg*` to `*newfile.jpg*`
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 将 `*file.jpg*` 复制到 `*newfile.jpg*`
 - en: '`move(''*file.jpg*'', ''*newfile.jpg*'')`'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: '`move(''*file.jpg*'', ''*newfile.jpg*'')`'
 - en: Moves `*file.jpg*` to `*newfile.jpg*`
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 将 `*file.jpg*` 移动到 `*newfile.jpg*`
 - en: '`prepend(''*my.log*'', ''*log text*'')`'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: '`prepend(''*my.log*'', ''*log text*'')`'
 - en: Adds the *`log text`* content at the beginning of `*my.log*`
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 `*my.log*` 的开头添加 *`log text`* 内容
 - en: '`append(''*my.log*'', ''*log text*'')`'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: '`append(''*my.log*'', ''*log text*'')`'
 - en: Adds the *`log text`* content to the end of `*my.log*`
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 `*my.log*` 的末尾添加 *`log text`* 内容
 - en: '`delete(''*file.jpg*'')`'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: '`delete(''*file.jpg*'')`'
 - en: Deletes `*file.jpg*`
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 删除 `*file.jpg*`
 - en: '`size(''*file.jpg*'')`'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: '`size(''*file.jpg*'')`'
 - en: Returns the size in bytes of `*file.jpg*`
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回 `*file.jpg*` 的字节大小
 - en: '`lastModified(''*file.jpg*'')`'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: '`lastModified(''*file.jpg*'')`'
 - en: Returns the Unix timestamp when `*file.jpg*` was last modified
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回 `*file.jpg*` 上次修改的 Unix 时间戳
 - en: '`files(''*myDir*'')`'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: '`files(''*myDir*'')`'
 - en: Returns an array of filenames in the directory `*myDir*`
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回目录 `*myDir*` 中的文件名数组
 - en: '`allFiles(''*myDir*'')`'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: '`allFiles(''*myDir*'')`'
 - en: Returns an array of filenames in the directory `*myDir*` and all its subdirectories
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回目录 `*myDir*` 及其所有子目录中的文件名数组
 - en: '`directories(''*myDir*'')`'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: '`directories(''*myDir*'')`'
 - en: Returns an array of directory names in the directory `*myDir*`
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回目录 `*myDir*` 中的目录名数组
 - en: '`allDirectories(''*myDir*'')`'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: '`allDirectories(''*myDir*'')`'
 - en: Returns an array of directory names in the directory `*myDir*` and all its subdirectories
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回目录 `*myDir*` 及其所有子目录中的目录名数组
 - en: '`makeDirectory(''*myDir*'')`'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: '`makeDirectory(''*myDir*'')`'
 - en: Creates a new directory
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个新目录
 - en: '`deleteDirectory(''*myDir*'')`'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: '`deleteDirectory(''*myDir*'')`'
 - en: Deletes `*myDir*`
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 删除 `*myDir*`
 - en: '`readStream(''*my.log*'')`'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '`readStream(''*my.log*'')`'
 - en: Gets a resource to read `*my.log*`
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 获取用于读取 `*my.log*` 的资源
 - en: '`writeStream(''*my.log*'', $resource)`'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: '`writeStream(''*my.log*'', $resource)`'
 - en: Writes a new file (`*my.log*`) using a stream
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用流写入新文件（`*my.log*`）
 - en: Injecting an Instance
+  id: totrans-63
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 注入一个实例
 - en: If you’d prefer injecting an instance instead of using the `File` facade, typehint
     or inject `Illuminate\Filesystem\Filesystem` and you’ll have all the same methods
     available to you.
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您希望注入一个实例而不是使用 `File` 门面，可以类型提示或注入 `Illuminate\Filesystem\Filesystem`，您将拥有相同的所有方法可用。
 - en: Adding Additional Flysystem Providers
+  id: totrans-65
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 添加额外的 Flysystem 提供者
 - en: If you want to add an additional Flysystem provider, you’ll need to “extend”
     Laravel’s native storage system. In a service provider somewhere—it could be the
     `boot()` method of `AppServiceProvider`, but it’d be more appropriate to create
     a unique service provider for each new binding—​use the `Storage` facade to add
     new storage systems, as seen in [Example 14-2](#add_additional_Flysytem_providers).
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想添加额外的 Flysystem 提供者，您需要“扩展” Laravel 的本机存储系统。在某个服务提供者中——可以是 `AppServiceProvider`
+    的 `boot()` 方法，但为每个新绑定创建一个唯一的服务提供者会更合适——使用 `Storage` 门面添加新的存储系统，如 [示例 14-2](#add_additional_Flysytem_providers)
+    中所示。
 - en: Example 14-2\. Adding additional Flysystem providers
+  id: totrans-67
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-2\. 添加额外的 Flysystem 提供者
 - en: '[PRE3]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Basic File Uploads and Manipulation
+  id: totrans-69
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 基本文件上传和操作
 - en: One of the more common usages for the `Storage` facade is accepting file uploads
     from your application’s users. Let’s look at a common workflow for that in [Example 14-3](#common_user_upload_work_flow).
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Storage` 门面的更常见用法之一是接受来自应用程序用户的文件上传。让我们看一下在 [示例 14-3](#common_user_upload_work_flow)
+    中的常见工作流程。'
 - en: Example 14-3\. Common user upload workflow
+  id: totrans-71
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-3\. 常见用户上传工作流程
 - en: '[PRE4]'
+  id: totrans-72
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: We `put()` to a file named *dogs/id*, and we grab our contents from the uploaded
     file. Every uploaded file is a descendant of the `SplFileInfo` class, which provides
     a `getRealPath()` method that returns the path to the file’s location. So, we
     get the temporary upload path for the user’s uploaded file, read it with `file_get_contents()`,
     and pass it into `Storage::put()`.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将`put()`到名为*dogs/id*的文件中，并且我们从上传的文件中获取我们的内容。每个上传的文件都是`SplFileInfo`类的后代，它提供了一个`getRealPath()`方法，返回文件位置的路径。因此，我们获取用户上传文件的临时上传路径，用`file_get_contents()`读取它，并传递给`Storage::put()`。
 - en: Since we have this file available to us here, we can do anything we want to
     the file before we store it—use an image manipulation package to resize it if
     it’s an image, validate it and reject it if it doesn’t meet our criteria, or whatever
     else we like.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于我们在这里可以使用此文件，我们可以在存储之前对文件进行任何操作——如果是图像，则使用图像处理包进行调整大小，验证并拒绝不符合我们标准的文件，或者其他任何操作。
 - en: If we want to upload this same file to S3 and we have our credentials stored
     in *config/filesystems.php*, we can simply adjust [Example 14-3](#common_user_upload_work_flow)
     to call `Storage::disk('s3')->put()`; we’ll now be uploading to S3\. Take a look
     at [Example 14-4](#uploads_using_intervention) to see a more complex upload example.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果我们想要将同一文件上传到S3，并且我们的凭据存储在*config/filesystems.php*中，我们可以简单地调整[示例 14-3](#common_user_upload_work_flow)以调用`Storage::disk('s3')->put()`；现在我们将上传到S3。查看[示例 14-4](#uploads_using_intervention)以查看更复杂的上传示例。
 - en: Example 14-4\. A more complex example of file uploads, using Intervention
+  id: totrans-76
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-4\. 使用Intervention的文件上传的更复杂示例
 - en: '[PRE5]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: I used an image library called [Intervention](http://image.intervention.io)
     in [Example 14-4](#uploads_using_intervention) just as an example; you can use
     any library you want. The important point is that you have the freedom to manipulate
     the files however you want before you store them.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 我在[示例 14-4](#uploads_using_intervention)中使用了一个称为[Intervention](http://image.intervention.io)的图像库，仅作为示例；您可以使用任何您想要的库。重要的是，在存储之前，您有自由对文件进行任意操作。
 - en: Using store() and storeAs() on the Uploaded File
+  id: totrans-79
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用Uploaded File的store()和storeAs()方法
 - en: You can also store an uploaded file using the file itself. Learn more in [Example 7-18](ch07.html#EX611).
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以使用文件本身存储已上传的文件。在[示例 7-18](ch07.html#EX611)中了解更多信息。
 - en: Simple File Downloads
+  id: totrans-81
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 简单文件下载
 - en: Just like `Storage` makes it easy to accept uploads from users, it also simplifies
     the task of returning files to them. Take a look at [Example 14-5](#simple_file_downloads)
     for the simplest example.
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像`Storage`简化了接受用户上传的任务一样，它也简化了将文件返回给用户的任务。查看[示例 14-5](#simple_file_downloads)以获取最简单的示例。
 - en: Example 14-5\. Simple file downloads
+  id: totrans-83
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-5\. 简单文件下载
 - en: '[PRE6]'
+  id: totrans-84
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Sessions
+  id: totrans-85
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 会话
 - en: Session storage is the primary tool we use in web applications to store state
     between page requests. Laravel’s session manager supports session drivers using
     files, cookies, a database, Memcached or Redis, DynamoDB, or in-memory arrays
     (which expire after the page request and are only good for tests).
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 会话存储是我们在Web应用程序中用于在页面请求之间存储状态的主要工具。Laravel的会话管理器支持使用文件、Cookie、数据库、Memcached或Redis、DynamoDB或内存数组作为会话驱动程序（在页面请求后过期，仅适用于测试）。
 - en: You can configure all of your session settings and drivers in *config/session.php*.
     You can choose whether or not to encrypt your session data, select which driver
     to use (`file` is the default), and specify more connection-specific details like
     the length of session storage and which files or database tables to use. Take
     a look at [the session docs](https://oreil.ly/AMp4T) to learn about specific dependencies
     and settings you need to prepare for whichever driver you choose to use.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在*config/session.php*中配置所有会话设置和驱动程序。您可以选择是否加密会话数据，选择使用哪个驱动程序（`file`是默认值），并指定更多特定于连接的详细信息，如会话存储的长度以及要使用哪些文件或数据库表。查看[会话文档](https://oreil.ly/AMp4T)以了解您需要为所选择的驱动程序准备的特定依赖关系和设置。
 - en: 'The general API of the session tools allows you to save and retrieve data based
     on individual keys: `session()->put(''*user_id*'')` and `session()->get(''*user_id*'')`,
     for example. Make sure to avoid saving anything to a `flash` session key, since
     Laravel uses that internally for flash (only available for the next page request)
     session storage.'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 会话工具的一般API允许您基于单个键保存和检索数据：例如`session()->put('*user_id*')`和`session()->get('*user_id*')`。确保避免将任何内容保存到`flash`会话键中，因为Laravel在内部使用它进行闪存（仅在下一个页面请求中可用）会话存储。
 - en: Accessing the Session
+  id: totrans-89
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 访问会话
 - en: 'The most common way to access the session is using the `Session` facade:'
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 访问会话的最常见方法是使用`Session`门面：
 - en: '[PRE7]'
+  id: totrans-91
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: But you can also use the `session()` method on any given Illuminate `Request`
     object, as in [Example 14-6](#using_the_session_method).
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是你也可以在任何给定的 Illuminate `Request` 对象上使用 `session()` 方法，就像在 [示例 14-6](#using_the_session_method)
+    中所示的那样。
 - en: Example 14-6\. Using the `session()` method on a `Request` object
+  id: totrans-93
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-6\. 在 `Request` 对象上使用 `session()` 方法
 - en: '[PRE8]'
+  id: totrans-94
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Or you can inject an instance of `Illuminate\Session\Store`, as in [Example 14-7](#injecting_the_backing_class_for_sessions).
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者你可以像在 [示例 14-7](#injecting_the_backing_class_for_sessions) 中那样，注入 `Illuminate\Session\Store`
+    的实例。
 - en: Example 14-7\. Injecting the backing class for sessions
+  id: totrans-96
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-7\. 注入会话支持类
 - en: '[PRE9]'
+  id: totrans-97
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Finally, you can use the global `session()` helper. Use it with no parameters
     to get a session instance, with a single string parameter to “get” from the session,
     or with an array to “put” to the session, as demonstrated in [Example 14-8](#using_the_global_session_helper).
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，你可以使用全局 `session()` 辅助函数。使用无参数获取会话实例，使用单个字符串参数从会话中“获取”，或者使用数组“存入”会话，如 [示例
+    14-8](#using_the_global_session_helper) 中所示。
 - en: Example 14-8\. Using the global `session()` helper
+  id: totrans-99
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-8\. 使用全局的 `session()` 辅助函数
 - en: '[PRE10]'
+  id: totrans-100
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: If you’re new to Laravel and not sure which to use, I’d recommend using the
     global helper.
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你是 Laravel 新手并不确定该使用哪个方法，我建议使用全局辅助函数。
 - en: Methods Available on Session Instances
+  id: totrans-102
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 会话实例上可用的方法
 - en: 'The two most common methods are `get()` and `put()`, but let’s take a look
     at each of the available methods and their parameters:'
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 最常见的两个方法是 `get()` 和 `put()`，但让我们来看看每个可用方法及其参数：
 - en: '`session()->get(*$key*, *$fallbackValue*)`'
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->get(*$key*, *$fallbackValue*)`'
 - en: '`get()` pulls the value of the provided key out of the session. If there is
     no value attached to that key, it will return the fallback value instead (and
     if you don’t provide a fallback, it will return `null`). The fallback value can
     be a simple value or a closure, as you can see in the following examples:'
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: '`get()` 方法从会话中获取提供的键的值。如果该键没有对应的值，它将返回备用值（如果没有提供备用值，则返回 `null`）。备用值可以是一个简单的值或一个闭包，正如下面的示例所示：'
 - en: '[PRE11]'
+  id: totrans-106
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: '`session()->put(*$key*, *$value*)`'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->put(*$key*, *$value*)`'
 - en: '`put()` stores the provided value in the session at the provided key:'
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: '`put()` 将提供的值存储在会话中的提供键下：'
 - en: '[PRE12]'
+  id: totrans-109
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: '`session()->push(*$key*, *$value*)`'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->push(*$key*, *$value*)`'
 - en: 'If any of your session values are arrays, you can use `push()` to add a value
     to the array:'
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你的会话值是数组，你可以使用 `push()` 方法向数组中添加一个值：
 - en: '[PRE13]'
+  id: totrans-112
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: '`session()->has(*$key*)`'
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->has(*$key*)`'
 - en: '`has()` checks whether there’s a value set at the provided key:'
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: '`has()` 检查是否在提供的键上设置了一个值：'
 - en: '[PRE14]'
+  id: totrans-115
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: You can also pass an array of keys, and it only returns `true` if all of the
     keys exist.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 你也可以传递一个键的数组，只有所有键存在时它才返回 `true`。
 - en: session()->has() and Null Values
+  id: totrans-117
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: '`session()->has()` 和空值'
 - en: If a session value is set but the value is `null`, `session()``->``has()` will
     return `false`.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果设置了会话值但该值为 `null`，`session()``->``has()` 将返回 `false`。
 - en: '`session()->exists(*$key*)`'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->exists(*$key*)`'
 - en: '`exists()` checks whether there’s a value set at the provided key, like `has()`,
     but unlike `has()`, it will return `true` even if the set value is `null`:'
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: '`exists()` 检查是否在提供的键上设置了一个值，类似于 `has()`，但不同的是，即使设置的值为 `null`，它也将返回 `true`：'
 - en: '[PRE15]'
+  id: totrans-121
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: '`session()->all()`'
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->all()`'
 - en: '`all()` returns an array of everything that’s in the session, including those
     values set by the framework. You’ll likely see values under keys like `_token`
     (CSRF tokens), `_previous` (previous page, for `back()` redirects), and `flash`
     (for flash storage).'
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: '`all()` 返回会话中的所有内容的数组，包括框架设置的值。你可能会在键如 `_token`（CSRF 令牌）、`_previous`（上一页，用于
+    `back()` 重定向）和 `flash`（闪存存储）下看到值。'
 - en: '`session()->only()`'
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->only()`'
 - en: '`only()` returns an array of only the specified values in the session.'
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: '`only()` 返回会话中仅指定值的数组。'
 - en: '`session()->forget(*$key*)`, `session()->flush()`'
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->forget(*$key*)`，`session()->flush()`'
 - en: '`forget()` removes a previously set session value. `flush()` removes every
     session value, even those set by the framework:'
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: '`forget()` 删除先前设置的会话值。`flush()` 删除每个会话值，即使是框架设置的值也会被删除。'
 - en: '[PRE16]'
+  id: totrans-128
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: '`session()->pull(*$key*, *$fallbackValue*)`'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->pull(*$key*, *$fallbackValue*)`'
 - en: '`pull()` is the same as `get()`, except that it deletes the value from the
     session after pulling it.'
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: '`pull()` 和 `get()` 相同，不同之处在于后者在从会话中获取值后将其删除。'
 - en: '`session()->regenerate()`'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->regenerate()`'
 - en: It’s not common, but if you need to regenerate your session ID, `regenerate()`
     is there for you.
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 并不常见，但如果你需要重新生成会话 ID，可以使用 `regenerate()` 方法。
 - en: Flash Session Storage
+  id: totrans-133
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 闪存会话存储
 - en: There are three more methods we haven’t covered yet, and they all have to do
     with something called *flash session storage*.
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有三种我们尚未介绍的方法，它们都与 *闪存会话存储* 有关。
 - en: 'One very common pattern for session storage is to set a value that you only
     want available for the next page load. For example, you might want to store a
     message like “Updated post successfully.” You could manually get that message
     and then wipe it on the next page load, but if you use this pattern a lot it can
     get wasteful. Enter flash session storage: keys that are expected to only last
     for a single page request.'
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 会话存储的一种非常常见的模式是设置一个值，你希望它仅在下一个页面加载时可用。例如，你可能想存储像“成功更新帖子。”这样的消息。你可以手动获取该消息，然后在下一个页面加载时清除它，但如果你经常使用这种模式，会变得浪费。引入闪存会话存储：预期仅在单个页面请求期间存在的键。
 - en: 'Laravel handles the work for you, and all you need to do is use `flash()` instead
     of `put()`. These are the useful methods here:'
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel会为你处理这些工作，你只需使用`flash()`而不是`put()`。以下是这里的有用方法：
 - en: '`session()->flash(*$key*, *$value*)`'
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->flash(*$key*, *$value*)`'
 - en: '`flash()` sets the session key to the provided value for just the next page
     request.'
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: '`flash()`设置会话键为提供的值，仅用于下一个页面请求。'
 - en: '`session()->reflash()`, `session()->keep(*$key*)`'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session()->reflash()`, `session()->keep(*$key*)`'
 - en: If you need the previous page’s flash session data to stick around for one more
     request, you can use `reflash()` to restore all of it for the next request or
     `keep(*$key*)` to just restore a single flash value for the next request. `keep()`
     can also accept an array of keys to reflash.
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你需要上一页的闪存会话数据保留一个更多的请求，你可以使用`reflash()`来恢复所有数据到下一个请求或`keep(*$key*)`来只恢复一个单一的闪存值到下一个请求。`keep()`也可以接受一个键的数组来刷新。
 - en: Cache
+  id: totrans-141
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 缓存
 - en: Caches are structured very similarly to sessions. You provide a key and Laravel
     stores it for you. The biggest difference is that the data in a cache is cached
     per application, and the data in a session is cached per user. That means caches
     are more commonly used for storing results from database queries, API calls, or
     other slow queries that can stand to get a little bit “stale.”
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 缓存的结构与会话非常相似。你提供一个键，Laravel为你存储它。最大的区别在于缓存中的数据是应用程序级别的，而会话中的数据是用户级别的。这意味着缓存更常用于存储来自数据库查询、API调用或其他可以稍微“过时”的缓慢查询的结果。
 - en: The cache configuration settings are available at *config/cache.php*. Just like
     with a session, you can set the specific configuration details for any of your
     drivers and also choose which will be your default. Laravel uses the `file` cache
@@ -551,1146 +854,1737 @@
     a database, or write your own cache driver. Take a look at [the cache docs](https://laravel.com/docs/cache)
     to learn about specific dependencies and settings you need to prepare for whichever
     driver you choose to use.
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 缓存配置设置可以在*config/cache.php*中找到。就像会话一样，你可以为任何驱动程序设置特定的配置详细信息，并选择哪一个将成为默认值。Laravel默认使用`file`缓存驱动程序，但你也可以使用Memcached或Redis、APC、DynamoDB或数据库，或编写自己的缓存驱动程序。查看[缓存文档](https://laravel.com/docs/cache)了解你选择使用的驱动程序需要准备的特定依赖和设置。
 - en: Accessing the Cache
+  id: totrans-144
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 访问缓存
 - en: 'Just like with sessions, there are several ways to access a cache. You can
     use the facade:'
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像会话一样，有几种访问缓存的方法。你可以使用外观：
 - en: '[PRE17]'
+  id: totrans-146
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Or you can get an instance from the container, as in [Example 14-9](#get_instance_from_container).
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者你可以从容器中获取一个实例，如[示例 14-9](#get_instance_from_container)。
 - en: Example 14-9\. Injecting an instance of the cache
+  id: totrans-148
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-9\. 注入缓存实例
 - en: '[PRE18]'
+  id: totrans-149
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: You can also use the global `cache()` helper, as in [Example 14-10](#global_cache_helper).
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 你还可以使用全局`cache()`助手，如[示例 14-10](#global_cache_helper)。
 - en: Example 14-10\. Using the global `cache()` helper
+  id: totrans-151
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-10\. 使用全局`cache()`助手
 - en: '[PRE19]'
+  id: totrans-152
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: If you’re new to Laravel and not sure which to use, I’d recommend using the
     global helper.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你是Laravel的新手，不确定该使用哪个，我建议使用全局助手。
 - en: Methods Available on Cache Instances
+  id: totrans-154
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 缓存实例上可用的方法
 - en: 'Let’s take a look at the methods you can call on a `Cache` instance:'
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看可以在`Cache`实例上调用的方法：
 - en: '`cache()->get(*$key*, *$fallbackValue*)`,'
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: '`cache()->get(*$key*, *$fallbackValue*)`,'
 - en: '`cache()->pull(*$key*, *$fallbackValue*)`'
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: '`cache()->pull(*$key*, *$fallbackValue*)`'
 - en: '`get()` makes it easy to retrieve the value for any given key. `pull()` is
     the same as `get()` except it removes the cached value after retrieving it.'
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: '`get()`使得轻松检索任何给定键的值。`pull()`与`get()`相同，只是在检索后移除缓存的值。'
 - en: '`cache()->put(*$key*, *$value*, *$secondsOrExpiration*)`'
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: '`cache()->put(*$key*, *$value*, *$secondsOrExpiration*)`'
 - en: '`put()` sets the value of the specified key for a given number of seconds.
     If you’d prefer setting an expiration date/time instead of a number of seconds,
     you can pass a Carbon object as the third parameter:'
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: '`put()` 为指定的键设置值，并在给定秒数后过期。如果你愿意设置一个到期日期/时间而不是秒数，你可以将 Carbon 对象作为第三个参数传递：'
 - en: '[PRE20]'
+  id: totrans-161
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: '`cache()->add(*$key*, *$value*)`'
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: '`cache()->add(*$key*, *$value*)`'
 - en: '`add()` is similar to `put()`, except if the value already exists, `add()`
     won’t set it. Also, the method returns a Boolean indicating whether or not the
     value was actually added:'
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: '`add()` 类似于 `put()`，但如果值已存在，`add()` 不会设置它。此外，该方法返回一个布尔值，指示值是否实际被添加：'
 - en: '[PRE21]'
+  id: totrans-164
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: '`cache()->forever(*$key*, *$value*)`'
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: '`cache()->forever(*$key*, *$value*)`'
 - en: '`forever()` saves a value to the cache for a specific key; it’s the same as
     `put()`, except the values will never expire (until they’re removed with `forget()`).'
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: '`forever()` 会将一个值永久保存在缓存中，对应特定的键；它和 `put()` 相同，除了这些值永远不会过期（直到用 `forget()` 移除它们）。'
 - en: '`cache()->has(*$key*)`'
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: '`cache()->has(*$key*)`'
 - en: '`has()` returns a Boolean indicating whether or not there’s a value at the
     provided key.'
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: '`has()` 返回一个布尔值，指示提供的键是否存在值。'
 - en: '`cache()->remember(*$key*, *$seconds*,` `*$closure*)`,'
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: '`cache()->remember(*$key*, *$seconds*,` `*$closure*)`,'
 - en: '`cache()->rememberForever(*$key*,` `*$closure*)`'
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: '`cache()->rememberForever(*$key*,` `*$closure*)`'
 - en: '`remember()` provides a single method to handle a very common flow: look up
     whether a value exists in the cache for a certain key, and if it doesn’t, get
     that value somehow, save it to the cache, and return it.'
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: '`remember()` 提供了一个单一的方法来处理非常常见的流程：查看是否存在某个键的缓存值，如果不存在，则以某种方式获取该值，保存到缓存中，并返回它。'
 - en: '`remember()` lets you provide a key to look up, the number of seconds it should
     be saved for, and a closure to define how to look it up, in case the key has no
     value set. `rememberForever()` is the same, except it doesn’t need you to set
     the number of seconds it should be saved for. Take a look at the following example
     to see a common user scenario for `remember()`:'
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: '`remember()` 允许你提供一个键来查找，应该保存的秒数以及一个闭包来定义如何查找它，以防该键没有设置值。`rememberForever()`
+    相同，只是它不需要你设置应保存的秒数。看下面的例子，了解 `remember()` 的常见用户场景：'
 - en: '[PRE22]'
+  id: totrans-173
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: '`cache()->increment(*$key*, *$amount*)`, `cache()->decrement(*$key*, *$amount*)`'
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: '`cache()->increment(*$key*, *$amount*)`, `cache()->decrement(*$key*, *$amount*)`'
 - en: '`increment()` and `decrement()` allow you to increment and decrement integer
     values in the cache. If there is no value at the given key, it’ll be treated as
     if it were `0`, and if you pass a second parameter to increment or decrement,
     it’ll increment or decrement by that amount instead of by 1.'
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: '`increment()` 和 `decrement()` 允许你在缓存中增加和减少整数值。如果给定键没有值，它将被视为 `0`，如果你向增加或减少传递第二个参数，它将按该数量增加或减少，而不是按
+    `1`。'
 - en: '`cache()->forget(*$key*)`, `cache()->flush()`'
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: '`cache()->forget(*$key*)`, `cache()->flush()`'
 - en: '`forget()` works just like `Session`’s `forget()` method: pass it a key and
     it’ll wipe that key’s value. `flush()` wipes the entire cache.'
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: '`forget()` 的工作方式与 `Session` 的 `forget()` 方法相同：传递一个键，它将清除该键的值。`flush()` 将清空整个缓存。'
 - en: Cookies
+  id: totrans-178
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Cookies
 - en: 'You might expect cookies to work the same as sessions and the cache. A facade
     and a global helper are available for these too, and our mental models of all
     three are similar: you can get or set their values in the same way.'
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可能期望 cookie 能像会话和缓存一样工作。对于这三者，我们都提供了一个外观和全局助手，而我们对它们的心理模型也是相似的：你可以以同样的方式获取或设置它们的值。
 - en: But because cookies are inherently attached to the requests and responses, you’ll
     need to interact with cookies differently. Let’s look really briefly at what makes
     cookies different.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 但由于 cookie 本质上与请求和响应相关联，你需要以不同的方式与 cookie 交互。让我们简要看看使 cookie 不同的地方。
 - en: Cookies in Laravel
+  id: totrans-181
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Laravel 中的 Cookies
 - en: Cookies can exist in three places in Laravel. They can come in via the request,
     which means the user had the cookie when they visited the page. You can read that
     with the `Cookie` facade, or you can read it off of the request object.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 Laravel 中，cookie 可以存在三个地方。它们可以通过请求进入，这意味着用户在访问页面时拥有 cookie。你可以使用 `Cookie`
+    外观或从请求对象中读取它。
 - en: They can also be sent out with a response, which means the response will instruct
     the user’s browser to save the cookie for future visits. You can do this by adding
     the cookie to your response object before returning it.
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 它们还可以与响应一起发送，这意味着响应将指示用户的浏览器保存 cookie 以备将来访问。在返回响应对象之前，你可以通过将 cookie 添加到响应对象中来实现这一点。
 - en: And last, a cookie can be *queued*. If you use the `Cookie` facade to set a
     cookie, you have put it into a “CookieJar” queue, and it will be removed and added
     to the response object by the `AddQueuedCookiesToResponse` middleware.
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，一个 cookie 可以被排队。如果您使用 `Cookie` 门面设置一个 cookie，您必须将它放入“CookieJar”队列中，并且它将由
+    `AddQueuedCookiesToResponse` 中间件从响应对象中移除并添加。
 - en: Accessing the Cookie Tools
+  id: totrans-185
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 访问 cookie 工具
 - en: 'You can get and set cookies in three places: the `Cookie` facade, the `cookie()`
     global helper, and the request and response objects.'
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在三个位置获取和设置 cookie：`Cookie` 门面、`cookie()` 全局辅助函数以及请求和响应对象。
 - en: The cookie facade
+  id: totrans-187
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: cookie 门面
 - en: 'The `Cookie` facade is the most full-featured option, allowing you to not only
     read and make cookies, but also to queue them to be added to the response. It
     provides the following methods:'
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Cookie` 门面提供了最全面的选项，不仅可以读取和创建 cookie，还可以将它们排队以添加到响应中。它提供以下方法：'
 - en: '`Cookie::get(*$key*)`'
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Cookie::get(*$key*)`'
 - en: To pull the value of a cookie that came in with the request, you can just run
     `Cookie::get('*cookie-name*')`. This is the simplest option.
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 要获取请求中带有的 cookie 值，只需运行 `Cookie::get('*cookie-name*')`。这是最简单的选择。
 - en: '`Cookie::has(*$key*)`'
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Cookie::has(*$key*)`'
 - en: You can check whether a cookie came in with the request using `Cookie::has('*cookie-name*')`,
     which returns a Boolean.
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用 `Cookie::has('*cookie-name*')` 检查请求中是否带有 cookie，该方法返回一个布尔值。
 - en: '`Cookie::make(*...params*)`'
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Cookie::make(*...params*)`'
 - en: If you want to *make* a cookie without queueing it anywhere, you can use `Cookie::make()`.
     The most likely use for this would be to make a cookie and then manually attach
     it to the response object, which we’ll cover in a bit.
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想要在任何地方制作一个 cookie 而不将其排队，可以使用 `Cookie::make()`。这样做的最可能用途是制作一个 cookie，然后手动将其附加到响应对象，我们稍后会讨论这一点。
 - en: 'Here are the parameters for `make()`, in order:'
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面是 `make()` 方法的参数顺序：
 - en: '`$name` is the name of the cookie.'
+  id: totrans-196
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$name` 是 cookie 的名称。'
 - en: '`$value` is the content of the cookie.'
+  id: totrans-197
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$value` 是 cookie 的内容。'
 - en: '`$minutes` specifies how many minutes the cookie should live.'
+  id: totrans-198
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$minutes` 指定 cookie 应该存活多少分钟。'
 - en: '`$path` is the path under which your cookie should be valid.'
+  id: totrans-199
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$path` 是 cookie 应该有效的路径。'
 - en: '`$domain` lists the domains for which your cookie should work.'
+  id: totrans-200
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$domain` 列出 cookie 应该工作的域。'
 - en: '`$secure` indicates whether the cookie should only be transmitted over a secure
     (HTTPS) connection.'
+  id: totrans-201
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$secure` 表示 cookie 是否只能通过安全的（HTTPS）连接传输。'
 - en: '`$httpOnly` indicates whether the cookie will be made accessible only through
     the HTTP protocol.'
+  id: totrans-202
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$httpOnly` 表示 cookie 是否仅通过 HTTP 协议访问。'
 - en: '`$raw` indicates whether the cookie should be sent without URL encoding.'
+  id: totrans-203
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$raw` 表示是否应无需 URL 编码地发送 cookie。'
 - en: '`$sameSite` indicates whether the cookie should be available for cross-site
     requests; options are `lax`, `strict`, or `null`.'
+  id: totrans-204
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$sameSite` 表示 cookie 是否可供跨站点请求使用；选项有 `lax`、`strict` 或 `null`。'
 - en: '`Cookie::make()`'
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Cookie::make()`'
 - en: Returns an instance of `Symfony\Component\HttpFoundation\Cookie`.
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回一个 `Symfony\Component\HttpFoundation\Cookie` 的实例。
 - en: Default Settings for Cookies
+  id: totrans-207
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: cookie 的默认设置
 - en: The `CookieJar` used by the `Cookie` facade instance reads its defaults from
     the session config. So, if you change any of the configuration values for the
     session cookie in *config/session.php*, those same defaults will be applied to
     all of your cookies that you create using the `Cookie` facade.
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Cookie` 门面实例使用的 `CookieJar` 从会话配置中读取其默认值。因此，如果您在 *config/session.php* 中更改会话
+    cookie 的任何配置值，那么您使用 `Cookie` 门面创建的所有 cookie 都将应用相同的默认值。'
 - en: '`Cookie::queue(*Cookie || params*)`'
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Cookie::queue(*Cookie || params*)`'
 - en: If you use `Cookie::make()`, you’ll still need to attach the cookie to your
     response, which we’ll cover shortly. `Cookie::queue()` has the same syntax as
     `Cookie::make()`, but it enqueues the created cookie to be automatically attached
     to the response by middleware.
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你使用 `Cookie::make()`，仍然需要将 cookie 附加到响应中，我们稍后会讨论这个问题。`Cookie::queue()` 与 `Cookie::make()`
+    的语法相同，但是它会将创建的 cookie 加入队列，由中间件自动附加到响应中。
 - en: If you’d like, you can also just pass a cookie you’ve created yourself into
     `Cookie::queue()`.
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您愿意，您也可以将您自己创建的 cookie 直接传递给 `Cookie::queue()`。
 - en: 'Here’s the simplest possible way to add a cookie to the response in Laravel:'
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是在 Laravel 中向响应添加 cookie 的最简单方法：
 - en: '[PRE23]'
+  id: totrans-213
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: When Your Queued Cookies Won’t Get Set
+  id: totrans-214
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 当您排队的 cookie 不会被设置时
 - en: Cookies can only be returned as part of a response. So, if you enqueue cookies
     with the `Cookie` facade and then your response isn’t returned correctly—for example,
     if you use PHP’s `exit()` or something halts the execution of your script—your
     cookies won’t be set.
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: Cookies 只能作为响应的一部分返回。因此，如果您使用 `Cookie` 门面添加了 cookie，然后响应未正确返回——例如，如果使用 PHP 的
+    `exit()` 或其他停止执行脚本的方法——则不会设置 cookie。
 - en: The cookie() global helper
+  id: totrans-216
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: '`cookie()` 全局辅助函数'
 - en: The `cookie()` global helper will return a `CookieJar` instance if you call
     it with no parameters. However, two of the most convenient methods on the `Cookie`
     facade—`has()` and `get()`—exist *only* on the facade, not on the `CookieJar`.
     So, in this context, I think the global helper is actually less useful than the
     other options.
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果调用 `cookie()` 时不带参数，`cookie()` 全局辅助函数将返回一个 `CookieJar` 实例。然而，`Cookie` 门面上存在的两个最方便的方法——`has()`
+    和 `get()`——仅存在于门面上，而不是 `CookieJar` 上。因此，在这种情况下，我认为全局辅助函数实际上不如其他选项有用。
 - en: 'The one task for which the `cookie()` global helper is useful is creating a
     cookie. If you pass parameters to `cookie()`, they’ll be passed directly to the
     equivalent of `Cookie::make()`, so this is the fastest way to create a cookie:'
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: '`cookie()` 全局辅助函数最有用的任务是创建一个 cookie。如果将参数传递给 `cookie()`，它们将直接传递给 `Cookie::make()`
+    的等效函数，因此这是创建 cookie 的最快方法：'
 - en: '[PRE24]'
+  id: totrans-219
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: Injecting an Instance
+  id: totrans-220
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 注入实例
 - en: You can also inject an instance of `Illuminate\Cookie\CookieJar` anywhere in
     the app, but you’ll have the same limitations discussed here.
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以在应用程序的任何地方注入一个 `Illuminate\Cookie\CookieJar` 实例，但您将面临此处讨论的相同限制。
 - en: Cookies on Request and Response objects
+  id: totrans-222
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 请求和响应对象中的 Cookies
 - en: Since cookies come in as a part of the request and are set as a part of the
     response, those Illuminate objects are the places they actually live. The `Cookie`
     facade’s `get()`, `has()`, and `queue()` methods are just proxies to interact
     with the `Request` and `Response` objects.
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于 cookie 作为请求的一部分进入，并作为响应的一部分设置，这些 Illuminate 对象实际上是它们实际存在的位置。`Cookie` 门面的
+    `get()`、`has()` 和 `queue()` 方法只是与 `Request` 和 `Response` 对象交互的代理。
 - en: So, the simplest way to interact with cookies is to pull cookies from the request
     and set them on the response.
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，与 cookie 交互的最简单方法是从请求中获取 cookie 并将其设置到响应中。
 - en: Reading cookies from Request objects
+  id: totrans-225
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 从请求对象中读取 Cookies
 - en: Once you have a copy of your `Request` object—​if you don’t know how to get
     one, just try `app('request')`—you can use the `Request` object’s `cookie()` method
     to read its cookies, as shown in [Example 14-11](#reading_cookie_from_request_object).
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您有了 `Request` 对象的副本——如果您不知道如何获取它，只需尝试 `app('request')`——您可以使用 `Request` 对象的
+    `cookie()` 方法读取其 cookie，如 [示例 14-11](#reading_cookie_from_request_object) 中所示。
 - en: Example 14-11\. Reading a cookie from a `Request` object
+  id: totrans-227
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-11\. 从 `Request` 对象中读取 cookie
 - en: '[PRE25]'
+  id: totrans-228
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: 'As you can see in this example, the `cookie()` method has two parameters: the
     cookie’s name and, optionally, the fallback value.'
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 如您在本例中所见，`cookie()` 方法有两个参数：cookie 的名称和可选的回退值。
 - en: Setting cookies on Response objects
+  id: totrans-230
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 在响应对象上设置 Cookies
 - en: When you have your `Response` object ready, you can use the `cookie()` method
     on it to add a cookie to the response, like in [Example 14-12](#setting_cookie_on_response_object).
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您的 `Response` 对象准备就绪，您可以像 [示例 14-12](#setting_cookie_on_response_object) 中那样，在其上使用
+    `cookie()` 方法向响应添加 cookie。
 - en: Example 14-12\. Setting a cookie on a `Response` object
+  id: totrans-232
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-12\. 在 `Response` 对象上设置 cookie
 - en: '[PRE26]'
+  id: totrans-233
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: If you’re new to Laravel and not sure which option to use, I’d recommend setting
     cookies on the `Request` and `Response` objects. It’s a bit more work, but will
     lead to fewer surprises if future developers don’t understand the `CookieJar`
     queue.
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您是 Laravel 的新手，并且不确定使用哪种选项，我建议您在 `Request` 和 `Response` 对象上设置 cookie。这需要更多工作，但如果未来的开发人员不理解
+    `CookieJar` 队列，会导致更少的意外。
 - en: Logging
+  id: totrans-235
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 日志记录
 - en: We’ve seen a few really brief examples of logging so far in this book when we
     were talking about other concepts like the container and facades, so let’s briefly
     look at what options you have with logging beyond just `Log::info('Message')`.
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，在本书中我们已经看到了一些关于日志的简短示例，当我们讨论其他概念如容器和门面时，让我们简要看看除了 `Log::info('Message')`
+    之外的日志选项。
 - en: The purpose of logs is to increase *discoverability*, or your ability to understand
     what’s going on at any given moment in your application.
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 日志的目的是增加*可发现性*，或者说增加您理解应用程序当前状态的能力。
 - en: Logs are short messages, sometimes with some data embedded in a human-readable
     form, that your code generates for the sake of understanding what’s happening
     during the execution of an app. Each log must be captured at a specific *level*,
     which can vary from `emergency` (something very bad happened) to `debug` (something
     of almost no significance happened).
+  id: totrans-238
   prefs: []
   type: TYPE_NORMAL
+  zh: 日志是您的代码为了理解应用程序执行过程中发生的事情而生成的短消息，有时会以人类可读的形式嵌入一些数据。每个日志必须以特定的*级别*捕获，这可以从`emergency`（发生了非常严重的事情）到`debug`（几乎没有意义的事情发生）不等。
 - en: 'Without any modifications, your app will write any log statements to a file
     located at *storage/logs/laravel.log*, and each log statement will look a little
     bit like this:'
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 没有任何修改，您的应用程序将会将任何日志语句写入到位于*storage/logs/laravel.log*的文件中，并且每个日志语句看起来都会有点像这样：
 - en: '[PRE27]'
+  id: totrans-240
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: You can see we have the date, time, environment, error level, and message all
     on one line. However, Laravel also (by default) logs any uncaught exceptions,
     and in that case you’ll see the entire stack trace inline.
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以看到我们在一行上有日期、时间、环境、错误级别和消息。但是，默认情况下，Laravel还会记录任何未捕获的异常，这种情况下您将在一行中看到整个堆栈跟踪。
 - en: We’ll cover how to log, why to log, and how to log elsewhere (for example, in
     Slack) in this following section.
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
+  zh: 在接下来的部分中，我们将介绍如何记录、为何记录以及如何在其他地方（例如Slack）记录。
 - en: When and Why to Use Logs
+  id: totrans-243
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 何时以及为何使用日志
 - en: The most common use case for logs is to act as a semidisposable record of things
     that have happened that you *may* care about later, but to which you definitively
     don’t need programmatic access. The logs are more about learning what’s going
     on in the app and less about creating structured data your app can consume.
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: 日志最常见的用例是作为一种准一次性记录的记录，记录了您后来*可能*关心的事情，但您明确不需要程序化访问的事物。日志更多地用于了解应用程序中正在发生的情况，而不是创建您的应用程序可以消费的结构化数据。
 - en: For example, if you want to have code that consumes a record of every user login
     and does something interesting with it, that’s a use case for a *logins* database
     table. However, if you have a casual interest in those logins but you’re not entirely
     certain whether you care or whether you need that information programmatically,
     you may just throw a `debug`- or `info`-level log on it and forget about it.
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，如果您希望编写代码以记录每次用户登录并对其进行有趣的处理，那么这是一个*logins*数据库表的使用案例。但是，如果您对这些登录有一种随意的兴趣，但又不确定您是否在编程上关心或需要这些信息，您可以只是在其上放置一个`debug`或`info`级别的日志并忘记它。
 - en: Logs are also common when you need to see the value of something at the moment
     it goes wrong, or at a certain time of day, or something else that means you want
     the data at a time when you’re not around. Throw a log statement in the code,
     get the data you need out of the logs, and either keep it in the code for later
     usage or just delete it again.
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您需要在发生问题时或在某个特定时间点查看某些东西的值，或者其他情况下时，日志也很常见。在代码中放置一个日志语句，从日志中获取您需要的数据，然后要么将其保留在代码中以备后用，要么再次删除它。
 - en: Writing to the Logs
+  id: totrans-247
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 写入日志
 - en: 'The simplest way to write a log entry in Laravel is to use the `Log` facade
     and use the method on that facade that matches the severity level you’d like to
     record. The levels are the same as those defined in [RFC 5424](https://oreil.ly/6ODcf):'
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 在Laravel中编写日志条目的最简单方法是使用`Log`门面，并使用该门面上与您希望记录的严重级别匹配的方法。这些级别与[RFC 5424](https://oreil.ly/6ODcf)中定义的相同：
 - en: '[PRE28]'
+  id: totrans-249
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: 'You can also, optionally, pass a second parameter that’s an array of connected
     data:'
+  id: totrans-250
   prefs: []
   type: TYPE_NORMAL
+  zh: 可选的，您还可以传递第二个参数，这是一个连接数据的数组：
 - en: '[PRE29]'
+  id: totrans-251
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: 'This additional information may be captured differently by different log destinations,
     but here’s how this looks in the default local log (although it will be just a
     single line in the log):'
+  id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: 不同的日志目标可能会以不同的方式捕获此附加信息，但是在默认的本地日志中看起来像这样（尽管它将只是日志中的一行）：
 - en: '[PRE30]'
+  id: totrans-253
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: Log Channels
+  id: totrans-254
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 日志通道
 - en: Like many other aspects of Laravel (file storage, database, mail, etc.), you
     can configure your logs to use one or more predefined log types, which you define
     in the config file. Using each type involves passing various configuration details
     to a specific log driver.
+  id: totrans-255
   prefs: []
   type: TYPE_NORMAL
+  zh: 与Laravel的许多其他方面（文件存储、数据库、邮件等）一样，您可以配置日志以使用一个或多个预定义的日志类型，这些类型在配置文件中定义。使用每种类型涉及向特定的日志驱动程序传递各种配置详细信息。
 - en: These log types are called *channels*, and out of the box you’ll have options
     for `stack`, `single`, `daily`, `slack`, `stderr`, `syslog`, and `errorlog`. Each
     channel is connected to a single driver; the available drivers are `stack`, `single`,
     `daily`, `slack`, `syslog`, `errorlog`, `monolog`, and `custom`.
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些日志类型被称为*频道*，并且您将有`stack`、`single`、`daily`、`slack`、`stderr`、`syslog`和`errorlog`等选项。每个频道连接到一个驱动程序；可用的驱动程序包括`stack`、`single`、`daily`、`slack`、`syslog`、`errorlog`、`monolog`和`custom`。
 - en: 'We’ll cover the most common channels here: `single`, `daily`, `slack`, and
     `stack`. To learn more about the drivers and the full list of channels available,
     take a look at the [logging docs](https://oreil.ly/vrJvj).'
+  id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将在这里介绍最常见的频道：`single`、`daily`、`slack`和`stack`。要了解更多有关驱动程序和可用频道的完整列表，请查看[日志文档](https://oreil.ly/vrJvj)。
 - en: The single channel
+  id: totrans-258
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 单一频道
 - en: 'The `single` channel writes every log entry to a single file, which you’ll
     define in the `path` key. You can see its default configuration in [Example 14-13](#EX14g):'
+  id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: '`single`频道将每个日志条目写入单个文件，您将在`path`键中定义它。您可以在[示例 14-13](#EX14g)中查看其默认配置：'
 - en: Example 14-13\. Default configuration for the `single` channel
+  id: totrans-260
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-13\. `single`频道的默认配置
 - en: '[PRE31]'
+  id: totrans-261
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: This means it’ll only log events at the `debug` level or higher, and it will
     write them all to a single file, *storage/logs/laravel.log*.
+  id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: 这意味着它只会记录`debug`级别或更高级别的事件，并将它们全部写入单个文件*storage/logs/laravel.log*。
 - en: The daily channel
+  id: totrans-263
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 日志频道
 - en: The `daily` channel splits out a new file for each day. You can see its default
     config in [Example 14-14](#EX14a).
+  id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: '`daily`频道每天生成一个新文件。你可以在[示例 14-14](#EX14a)中查看其默认配置。'
 - en: Example 14-14\. Default configuration for the `daily` channel
+  id: totrans-265
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-14\. `daily`频道的默认配置
 - en: '[PRE32]'
+  id: totrans-266
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: It’s similar to `single`, but we now can set how many days of logs to keep before
     they’re cleaned up, and the date will be appended to the filename we specify.
     For example, the preceding config will generate a file named *storage/logs/laravel-<yyyy-mm-dd>.log*.
+  id: totrans-267
   prefs: []
   type: TYPE_NORMAL
+  zh: 它类似于`single`，但现在我们可以设置在清理之前要保留多少天的日志，并且日期将附加到我们指定的文件名中。例如，前述配置将生成名为*storage/logs/laravel-<yyyy-mm-dd>.log*的文件。
 - en: The Slack channel
+  id: totrans-268
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: Slack频道
 - en: The `slack` channel makes it easy to send your logs (or, more likely, only certain
     logs) over to Slack.
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: '`slack`频道使得将你的日志（或更可能的是特定的日志）发送到Slack变得简单。'
 - en: It also illustrates that you’re not limited to just the handlers that come out
     of the box with Laravel. We’ll cover this in a second, but this isn’t a custom
     Slack implementation; it’s just Laravel building a log driver that connects to
     the Monolog Slack handler, and if you can use any Monolog handler, you have a
     *lot* of options available to you.
+  id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: 它还说明您不仅限于Laravel默认提供的处理程序。我们将在下一节中介绍这一点，但这不是自定义Slack实现；这只是Laravel构建一个连接到Monolog
+    Slack处理程序的日志驱动程序，如果您可以使用任何Monolog处理程序，那么您有*很多*选项可用。
 - en: The default configuration for this channel is shown in [Example 14-15](#EX14b).
+  id: totrans-271
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认配置显示在[示例 14-15](#EX14b)中。
 - en: Example 14-15\. Default configuration for the `slack` channel
+  id: totrans-272
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-15\. `slack`频道的默认配置
 - en: '[PRE33]'
+  id: totrans-273
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: The stack channel
+  id: totrans-274
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: stack频道
 - en: The `stack` channel is the channel that’s enabled by default on your application.
     Its default configuration is shown in [Example 14-16](#EX14c).
+  id: totrans-275
   prefs: []
   type: TYPE_NORMAL
+  zh: '`stack`频道是应用程序默认启用的频道。其默认配置显示在[示例 14-16](#EX14c)中。'
 - en: Example 14-16\. Default configuration for the `stack` channel
+  id: totrans-276
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-16\. `stack`频道的默认配置
 - en: '[PRE34]'
+  id: totrans-277
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: The `stack` channel allows you to send all your logs to more than one channel
     (listed in the `channels` array). So, while this is the channel that’s configured
     by default on your Laravel apps, because its `channels` array is set to `single`
     by default, in reality your app is just using the `single` log channel.
+  id: totrans-278
   prefs: []
   type: TYPE_NORMAL
+  zh: '`stack`频道允许你将所有日志发送到多个频道（列在`channels`数组中）。因此，虽然这是默认在你的Laravel应用中配置的频道，因为它的`channels`数组默认设置为`single`，实际上你的应用只是使用了`single`日志频道。'
 - en: But what if you wanted everything of the level `info` and above to go to the
     daily files, but you wanted `critical` and higher log messages to go to Slack?
     It’s easy with the `stack` driver, as [Example 14-17](#EX14d) demonstrates.
+  id: totrans-279
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是如果您希望所有`info`级别及以上的内容都进入日常文件，而`critical`及更高级别的日志消息进入Slack，使用`stack`驱动程序非常简单，正如[示例
+    14-17](#EX14d)所示。
 - en: Example 14-17\. Customizing the `stack` driver
+  id: totrans-280
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-17\. 自定义`stack`驱动器
 - en: '[PRE35]'
+  id: totrans-281
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: Writing to specific log channels
+  id: totrans-282
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 写入特定日志频道
 - en: 'There may also be times when you want to control exactly which log messages
     go where. You can do that by specifying the channel when you call the `Log` facade:'
+  id: totrans-283
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时您可能希望在调用`Log`门面时精确控制哪些日志消息应放在哪里。您可以通过指定频道来实现这一点：
 - en: '[PRE36]'
+  id: totrans-284
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: Advanced Log Configuration
+  id: totrans-285
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 高级日志配置
 - en: If you’d like to customize how each log is sent to each channel, or implement
     custom Monolog handlers, check out the [logging docs](https://oreil.ly/vrJvj)
     to learn more.
+  id: totrans-286
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想要自定义如何将每个日志发送到每个频道，或实现自定义 Monolog 处理程序，请查看 [logging docs](https://oreil.ly/vrJvj)
+    以了解更多。
 - en: Full-Text Search with Laravel Scout
+  id: totrans-287
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用 Laravel Scout 进行全文搜索
 - en: Laravel Scout is a separate package that you can bring into your Laravel apps
     to add full-text search to your Eloquent models. Scout makes it easy to index
     and search the contents of your Eloquent models; it ships with drivers for Algolia,
     Meilisearch, and databases (MySQL/PostgreSQL), but there are also community packages
     for other providers. I’ll assume you’re using Algolia.
+  id: totrans-288
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel Scout 是一个独立的包，您可以将其引入您的 Laravel 应用程序中，以为您的 Eloquent 模型添加全文搜索功能。Scout
+    可以轻松地索引和搜索您的 Eloquent 模型内容；它配备了用于 Algolia、Meilisearch 和数据库（MySQL/PostgreSQL）的驱动程序，但也有其他提供者的社区包。我假设您正在使用
+    Algolia。
 - en: Installing Scout
+  id: totrans-289
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 安装 Scout
 - en: 'First, pull in the package in any Laravel app:'
+  id: totrans-290
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，在任何 Laravel 应用程序中引入包：
 - en: '[PRE37]'
+  id: totrans-291
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: 'Next you’ll want to set up your Scout configuration. Run this command:'
+  id: totrans-292
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，您将需要设置您的 Scout 配置。运行此命令：
 - en: '[PRE38]'
+  id: totrans-293
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: and paste your Algolia credentials in *config/scout.php*.
+  id: totrans-294
   prefs: []
   type: TYPE_NORMAL
+  zh: 并将您的 Algolia 凭证粘贴到 *config/scout.php* 中。
 - en: 'Finally, install the Algolia SDK:'
+  id: totrans-295
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，安装 Algolia SDK：
 - en: '[PRE39]'
+  id: totrans-296
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: Marking Your Model for Indexing
+  id: totrans-297
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 标记您的模型以进行索引
 - en: In your model (we’ll use `Review`, for a book review, for this example), import
     the `Laravel\Scout\Searchable` trait.
+  id: totrans-298
   prefs: []
   type: TYPE_NORMAL
+  zh: 在您的模型中（我们将使用 `Review`，例如书评），导入 `Laravel\Scout\Searchable` 特性。
 - en: You can define which properties are searchable using the `toSearchableArray()`
     method (it defaults to mirroring `toArray()`), and define the name of the model’s
     index using the `searchableAs()` method (it defaults to the table name).
+  id: totrans-299
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用 `toSearchableArray()` 方法定义哪些属性可搜索（默认镜像 `toArray()`），并使用 `searchableAs()`
+    方法定义模型索引的名称（默认为表名）。
 - en: Scout subscribes to the create/delete/update events on your marked models. When
     you create, update, or delete any rows, Scout will sync those changes up to Algolia.
     It’ll either make those changes synchronously with your updates or, if you configure
     Scout to use a queue, queue the updates.
+  id: totrans-300
   prefs: []
   type: TYPE_NORMAL
+  zh: Scout 订阅您标记模型上的创建/删除/更新事件。当您创建、更新或删除任何行时，Scout 将同步这些更改到 Algolia。它将根据您的配置使用队列，将这些更改同步或异步进行队列处理。
 - en: Searching Your Index
+  id: totrans-301
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 搜索您的索引
 - en: 'Scout’s syntax is simple. For example, to find any `Review` with the word `Llew`
     in it:'
+  id: totrans-302
   prefs: []
   type: TYPE_NORMAL
+  zh: Scout 的语法很简单。例如，要查找任何包含 `Llew` 一词的 `Review`：
 - en: '[PRE40]'
+  id: totrans-303
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: 'You can also modify your queries as you would with regular Eloquent calls:'
+  id: totrans-304
   prefs: []
   type: TYPE_NORMAL
+  zh: 您也可以像使用常规的 Eloquent 调用那样修改您的查询：
 - en: '[PRE41]'
+  id: totrans-305
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: What comes back from these searches? A collection of Eloquent models, rehydrated
     from your database. The IDs are stored in Algolia, which returns a list of matched
     IDs; Scout then pulls the database records for those and returns them as Eloquent
     objects.
+  id: totrans-306
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些搜索返回什么？一组从数据库中重新生成的 Eloquent 模型。ID 存储在 Algolia 中，Algolia 返回匹配的 ID 列表；然后 Scout
+    从数据库中提取这些记录，并将它们作为 Eloquent 对象返回。
 - en: You don’t have full access to the complexity of SQL `WHERE` commands, but it
     provides a basic framework for comparison checks like you can see in the code
     samples here.
+  id: totrans-307
   prefs: []
   type: TYPE_NORMAL
+  zh: 您无法完全访问 SQL `WHERE` 命令的复杂性，但它提供了比较检查的基本框架，如此处代码示例中所示。
 - en: Queues and Scout
+  id: totrans-308
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 队列和 Scout
 - en: At this point your app will be making HTTP requests to Algolia on every request
     that modifies any database records. This can slow down your application quickly,
     which is why Scout makes it easy to push all of its actions onto a queue.
+  id: totrans-309
   prefs: []
   type: TYPE_NORMAL
+  zh: 此时，您的应用程序将在修改任何数据库记录时向 Algolia 发送 HTTP 请求。这可能会迅速减慢您的应用程序，这就是为什么 Scout 使得将其所有操作推送到队列中变得容易。
 - en: In *config/scout.php*, set `queue` to `true` so that these updates are indexed
     asynchronously. Your full-text index is now operating under “eventual consistency”;
     your database records will receive the updates immediately, and the updates to
     your search indexes will be queued and updated as fast as your queue worker allows.
+  id: totrans-310
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 *config/scout.php* 中，将 `queue` 设置为 `true`，使这些更新可以异步索引。现在，您的全文索引在“最终一致性”下运行；您的数据库记录将立即接收更新，并且搜索索引的更新将被排队并根据队列工作程序的速度快速更新。
 - en: Performing Operations Without Indexing
+  id: totrans-311
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 执行无索引操作
 - en: 'If you need to perform a set of operations and avoid triggering the indexing
     in response, wrap the operations in the `withoutSyncingToSearch()` method on your
     model:'
+  id: totrans-312
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您需要执行一组操作并避免触发响应的索引，请在您的模型上使用 `withoutSyncingToSearch()` 方法包装这些操作。
 - en: '[PRE42]'
+  id: totrans-313
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: Conditionally Indexing Models
+  id: totrans-314
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 有条件地对模型进行索引
 - en: 'Sometimes you might only want to index records if they meet a certain condition.
     You may use the `shouldBeSearchable()` method on the model class to achieve this:'
+  id: totrans-315
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时，您可能只想在满足某些条件时索引记录。您可以在模型类上使用`shouldBeSearchable()`方法来实现这一点：
 - en: '[PRE43]'
+  id: totrans-316
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: Manually Triggering Indexing via Code
+  id: totrans-317
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 通过代码手动触发索引
 - en: If you want to manually trigger indexing your model, you can do it using code
     in your app or via the command line.
+  id: totrans-318
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想手动触发对模型的索引，可以在应用程序中使用代码或通过命令行完成。
 - en: 'To manually trigger indexing from your code, add `searchable()` to the end
     of any Eloquent query and it will index all of the records that were found in
     that query:'
+  id: totrans-319
   prefs: []
   type: TYPE_NORMAL
+  zh: 要从代码中手动触发索引，请在任何 Eloquent 查询的末尾添加`searchable()`，它将索引该查询中找到的所有记录：
 - en: '[PRE44]'
+  id: totrans-320
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: You can also choose to scope the query to only those records you want to index.
     However, Scout is smart enough to insert new records and update old records, so
     you may choose to just reindex the entire contents of the model’s database table.
+  id: totrans-321
   prefs: []
   type: TYPE_NORMAL
+  zh: 你还可以选择将查询范围限制为只索引你想要的记录。但是，Scout 足够智能，可以插入新记录并更新旧记录，因此你可能选择重新索引模型数据库表的整个内容。
 - en: 'You can also run `searchable()` on relationship methods:'
+  id: totrans-322
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以在关系方法上运行`searchable()`：
 - en: '[PRE45]'
+  id: totrans-323
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: 'If you want to unindex any records with the same sort of query chaining, just
     use `unsearchable()` instead:'
+  id: totrans-324
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果要取消索引任何符合相同查询链条件的记录，只需使用`unsearchable()`即可：
 - en: '[PRE46]'
+  id: totrans-325
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: Manually Triggering Indexing via the CLI
+  id: totrans-326
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 通过 CLI 手动触发索引
 - en: 'You can also trigger indexing with an Artisan command:'
+  id: totrans-327
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以使用 Artisan 命令触发索引：
 - en: '[PRE47]'
+  id: totrans-328
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: This will chunk all of the `Review` models and index them all.
+  id: totrans-329
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将分块处理所有`Review`模型并对其进行索引。
 - en: The HTTP Client
+  id: totrans-330
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: HTTP 客户端
 - en: Laravel’s HTTP client isn’t quite a storage mechanism, but it is a retrieval
     mechanism, and to be honest, I’m not sure where else it fits in this book. Let’s
     get to it!
+  id: totrans-331
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的 HTTP 客户端并不完全是存储机制，但它是检索机制，说实话，我不确定它在这本书中还适合什么其他位置。让我们开始吧！
 - en: The HTTP client makes it possible for your Laravel app to make calls—`POST`,
     `GET`, whatever—​to external web services and APIs with a simple, clean interface.
+  id: totrans-332
   prefs: []
   type: TYPE_NORMAL
+  zh: HTTP 客户端使您的 Laravel 应用程序可以通过简单而清晰的界面调用`POST`、`GET`等方式与外部 Web 服务和 API 进行通信。
 - en: 'If you’ve ever worked with Guzzle, you understand what it can do, and you can
     also likely understand why a simple interface is worth mentioning: Guzzle is incredibly
     powerful, but also incredibly complex, and it’s become increasingly so over the
     years.'
+  id: totrans-333
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您曾经使用过 Guzzle，您会理解它可以做什么，您还可能理解为什么简单的界面值得一提：Guzzle 功能强大，但也非常复杂，多年来变得越来越复杂。
 - en: Using the HTTP Facade
+  id: totrans-334
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 HTTP Facade
 - en: Most of the time, if you’re working with the HTTP client, you’ll rely on its
     facade, calling methods like `get()` and `post()` directly on the facade. Take
     a look at [Example 14-18](#EX14f) for an example.
+  id: totrans-335
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数时候，如果您正在使用 HTTP 客户端，您将依赖于其外观，直接在外观上调用`get()`和`post()`等方法。查看[示例 14-18](#EX14f)以获取示例。
 - en: Example 14-18\. Basic usage examples of the HTTP facade
+  id: totrans-336
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-18\. HTTP Facade 的基本用法示例
 - en: '[PRE48]'
+  id: totrans-337
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: The `$response` you receive back from a call on the HTTP facade is an instance
     of `Illuminate\Http\Client\Response`, which gives you a suite of methods to inspect
     the response. You can take a look at [the docs](https://oreil.ly/N4XXS) for a
     full list, but you can also see a few common methods in [Example 14-19](#EX14h).
+  id: totrans-338
   prefs: []
   type: TYPE_NORMAL
+  zh: 从 HTTP Facade 调用返回的`$response`是`Illuminate\Http\Client\Response`的一个实例，它提供了一套方法来检查响应。您可以查看[文档](https://oreil.ly/N4XXS)获取完整列表，但也可以在[示例 14-19](#EX14h)中看到一些常见方法。
 - en: Example 14-19\. Commonly used methods on the HTTP `Client Response` object
+  id: totrans-339
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-19\. HTTP `Client Response` 对象上常用的方法
 - en: '[PRE49]'
+  id: totrans-340
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: As you can see from [Example 14-18](#EX14f), you can send data along with `POST`
     requests, but there are many other ways you can send data along with your requests.
+  id: totrans-341
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你从[示例 14-18](#EX14f)中看到的，你可以在`POST`请求中发送数据，但还有许多其他方法可以在请求中发送数据。
 - en: 'Once again, here are a few common examples, and you can see more in the docs:'
+  id: totrans-342
   prefs: []
   type: TYPE_NORMAL
+  zh: 再次，这里是一些常见示例，您可以在文档中看到更多：
 - en: '[PRE50]'
+  id: totrans-343
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE50]'
 - en: Handling Errors and Timeouts and Checking Statuses
+  id: totrans-344
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 处理错误和超时以及检查状态
 - en: By default, the HTTP client will wait 30 seconds before failing out of a request,
     and not retry it at all. But you can customize many aspects of how the client
     responds to unexpected situations.
+  id: totrans-345
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，HTTP 客户端在请求失败时将等待 30 秒，并且不会重试。但您可以自定义客户端响应意外情况的许多方面。
 - en: 'To define the timeout, chain `timeout()` and pass the number of seconds it
     should wait:'
+  id: totrans-346
   prefs: []
   type: TYPE_NORMAL
+  zh: 要定义超时时间，请链接`timeout()`并传递应等待的秒数：
 - en: '[PRE51]'
+  id: totrans-347
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE51]'
 - en: 'If you expect there to be failures with your attempts, you can define that
     the client should retry each request a given number of times, using the `retry()`
     chained method:'
+  id: totrans-348
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您期望尝试失败，您可以定义客户端应该重试每个请求的次数，使用`retry()`链式方法：
 - en: '[PRE52]'
+  id: totrans-349
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE52]'
 - en: 'Some of the other methods on the response object allow us to check whether
     the request worked and what HTTP status we got back; here are a few:'
+  id: totrans-350
   prefs: []
   type: TYPE_NORMAL
+  zh: 响应对象上的其他一些方法允许我们检查请求是否成功以及我们收到了什么HTTP状态码；以下是其中一些：
 - en: '[PRE53]'
+  id: totrans-351
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE53]'
 - en: 'You can also define a callback to be run any time there’s an error:'
+  id: totrans-352
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以定义一个回调函数，在发生错误时运行：
 - en: '[PRE54]'
+  id: totrans-353
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE54]'
 - en: Testing
+  id: totrans-354
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 测试
 - en: Testing most of these features is as simple as using them in your tests; no
     need to mock or stub. The default configuration will already work—​for example,
     take a look at *phpunit.xml* to see that your session driver and cache driver
     have been set to values appropriate for tests.
+  id: totrans-355
   prefs: []
   type: TYPE_NORMAL
+  zh: 测试大多数这些功能就像在您的测试中使用它们一样简单；无需模拟或存根。默认配置已经可以工作了—​例如，查看*phpunit.xml*，查看您的会话驱动程序和缓存驱动程序已设置为适合测试的值。
 - en: However, there are a few convenience methods and a few gotchas that you should
     know about before you attempt to test them all.
+  id: totrans-356
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，在您尝试测试它们之前，有一些方便的方法和一些需要注意的地方。
 - en: File Storage
+  id: totrans-357
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 文件存储
 - en: Testing file uploads can be a bit of a pain, but follow these steps and it will
     be clear.
+  id: totrans-358
   prefs: []
   type: TYPE_NORMAL
+  zh: 测试文件上传可能有点麻烦，但是按照这些步骤进行操作，一切将变得清晰。
 - en: Uploading fake files
+  id: totrans-359
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 上传虚假文件
 - en: First, let’s look at how to manually create an `Illuminate\Http\UploadedFile`
     object for use in our application testing ([Example 14-20](#create_fake_UploadedFile)).
+  id: totrans-360
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，让我们看看如何手动创建一个`Illuminate\Http\UploadedFile`对象，以便在我们的应用程序测试中使用（[示例 14-20](#create_fake_UploadedFile)）。
 - en: Example 14-20\. Creating a fake `UploadedFile` object for testing
+  id: totrans-361
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-20\. 创建用于测试的假`UploadedFile`对象
 - en: '[PRE55]'
+  id: totrans-362
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE55]'
 - en: We’ve created a new instance of `UploadedFile` that refers to our testing file,
     and we can now use it to test our routes.
+  id: totrans-363
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们已经创建了一个新的`UploadedFile`实例，引用我们的测试文件，现在我们可以使用它来测试我们的路由。
 - en: Returning fake files
+  id: totrans-364
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 返回虚假文件
 - en: If your route is expecting a real file to exist, sometimes the best way to make
     it testable is to make that real file actually exist. Let’s say every user must
     have a profile picture.
+  id: totrans-365
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的路由期望真实文件存在，有时使其可测试的最佳方法是使该真实文件实际存在。假设每个用户都必须有个人资料图片。
 - en: First, let’s set up the model factory for the user to use Faker to make a copy
     of the picture, as in [Example 14-21](#returning_fake_files).
+  id: totrans-366
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，让我们为用户设置模型工厂，使用Faker复制图片，如在[示例 14-21](#returning_fake_files)中所见。
 - en: Example 14-21\. Returning fake files with Faker
+  id: totrans-367
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-21\. 使用Faker返回虚假文件
 - en: '[PRE56]'
+  id: totrans-368
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE56]'
 - en: Faker’s `file()` method picks a random file from the source directory, copies
     it to the target directory, and then returns the filename. So, we’ve just picked
     a random file from the *tests/stubs/images* directory, copied it to the *storage/app*
     directory, and set its filename as the `picture` property on our `User`. At this
     point we can use a `User` in tests on routes that expect the `User` to have a
     picture, as seen in [Example 14-22](#asserting_URL_echo).
+  id: totrans-369
   prefs: []
   type: TYPE_NORMAL
+  zh: Faker的`file()`方法从源目录中选择一个随机文件，将其复制到目标目录，然后返回文件名。因此，我们刚刚从*tests/stubs/images*目录中选择了一个随机文件，将其复制到*storage/app*目录，并将其文件名设置为我们的`User`上的`picture`属性。此时，我们可以在期望`User`具有图片的路由测试中使用`User`，如[示例 14-22](#asserting_URL_echo)中所示。
 - en: Example 14-22\. Asserting that an image’s URL is echoed
+  id: totrans-370
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-22\. 断言图像的URL已回显
 - en: '[PRE57]'
+  id: totrans-371
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE57]'
 - en: Of course, in many contexts you can just generate a random string there without
     even copying a file. But if your routes check for the file’s existence or run
     any operations on the file, this is your best option.
+  id: totrans-372
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，在许多情况下，您可以只在那里生成一个随机字符串，甚至不复制文件。但是，如果您的路由检查文件是否存在或对文件运行任何操作，则这是您的最佳选择。
 - en: Session
+  id: totrans-373
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 会话
 - en: 'If you need to assert something has been set in the session, you can use some
     convenience methods Laravel makes available in every test. All of these methods
     are available in your tests on the `Illuminate\Testing\TestResponse` object:'
+  id: totrans-374
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您需要断言会话中已设置了某些内容，可以在每个测试中使用Laravel提供的一些方便方法。所有这些方法都在`Illuminate\Testing\TestResponse`对象的测试中可用：
 - en: '`assertSessionHas(*$key*, *$value = null*)`'
+  id: totrans-375
   prefs: []
   type: TYPE_NORMAL
+  zh: '`assertSessionHas(*$key*, *$value = null*)`'
 - en: 'Asserts that the session has a value for a particular key, and, if the second
     parameter is passed, that that key is a particular value:'
+  id: totrans-376
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言会话对特定键有值，并且如果传递了第二个参数，则该键具有特定值：
 - en: '[PRE58]'
+  id: totrans-377
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE58]'
 - en: '`assertSessionHasAll(*array $bindings*)`'
+  id: totrans-378
   prefs: []
   type: TYPE_NORMAL
+  zh: '`assertSessionHasAll(*array $bindings*)`'
 - en: 'If passed an array of key/value pairs, asserts that all of the keys are equal
     to all of the values. If one or more of the array entries is just a value (with
     PHP’s default numeric key), it will just be checked for existence in the session:'
+  id: totrans-379
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果传递了一个键/值对的数组，断言所有键都等于所有值。如果一个或多个数组条目只是一个值（具有 PHP 的默认数值键），则仅检查该值是否存在于会话中：
 - en: '[PRE59]'
+  id: totrans-380
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE59]'
 - en: '`assertSessionMissing(*$key*)`'
+  id: totrans-381
   prefs: []
   type: TYPE_NORMAL
+  zh: '`assertSessionMissing(*$key*)`'
 - en: Asserts that the session does *not* have a value for a particular key.
+  id: totrans-382
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言会话对于特定键*没有*值。
 - en: '`assertSessionHasErrors(*$bindings = []*, *$format = null*)`'
+  id: totrans-383
   prefs: []
   type: TYPE_NORMAL
+  zh: '`assertSessionHasErrors(*$bindings = []*, *$format = null*)`'
 - en: Asserts that the session has an `errors` value. This is the key Laravel uses
     to send errors back from validation failures.
+  id: totrans-384
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言会话具有一个`errors`值。这是 Laravel 用于从验证失败中返回错误的关键。
 - en: 'If the array contains just keys, it will check that errors are set with those
     keys:'
+  id: totrans-385
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果数组只包含键，它将检查这些键是否设置了错误：
 - en: '[PRE60]'
+  id: totrans-386
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE60]'
 - en: 'You can also pass values for those keys, and, optionally, a *`$format`*, to
     check that the messages for those errors came back the way you expected:'
+  id: totrans-387
   prefs: []
   type: TYPE_NORMAL
+  zh: 你还可以传递这些键的值，并且可选地传递一个*`$format`*，以验证这些错误消息是否按预期返回：
 - en: '[PRE61]'
+  id: totrans-388
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE61]'
 - en: Cache
+  id: totrans-389
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 缓存
 - en: 'There’s nothing special about testing your features that use the cache—​just
     do it:'
+  id: totrans-390
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于使用缓存的功能进行测试并没有什么特别的地方 —— 只需要去做：
 - en: '[PRE62]'
+  id: totrans-391
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE62]'
 - en: Laravel uses the `array` cache driver by default in your testing environment,
     which just stores your cache values in memory.
+  id: totrans-392
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 默认在您的测试环境中使用`array`缓存驱动程序，它只是将您的缓存值存储在内存中。
 - en: Cookies
+  id: totrans-393
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Cookies
 - en: What if you need to set a cookie before testing a route in your application
     tests? You can set cookies on a request using the `withCookies()` method. To learn
     more, check out [Chapter 12](ch12.html#testing).
+  id: totrans-394
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您需要在应用程序测试中测试路由之前设置 cookie 怎么办？您可以使用`withCookies()`方法在请求中设置 cookies。要了解更多，请查看[第
+    12 章](ch12.html#testing)。
 - en: Excluding Your Cookie from Encryption During Testing
+  id: totrans-395
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在测试期间排除您的 cookie 加密
 - en: 'Your cookies won’t work in your tests unless you exclude them from Laravel’s
     cookie encryption middleware. You can do this by teaching the `EncryptCookies`
     middleware to temporarily disable itself for those cookies:'
+  id: totrans-396
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你的测试中的 cookies 不起作用，除非你将它们排除在 Laravel 的 cookie 加密中间件之外。您可以通过教`EncryptCookies`中间件暂时禁用这些
+    cookies 来实现这一点：
 - en: '[PRE63]'
+  id: totrans-397
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE63]'
 - en: That means you can set a cookie and check against it with something like [Example 14-23](#running_tests_against_cookies).
+  id: totrans-398
   prefs: []
   type: TYPE_NORMAL
+  zh: 这意味着您可以设置一个 cookie，并使用类似[示例 14-23](#running_tests_against_cookies)来检查它。
 - en: Example 14-23\. Running unit tests against cookies
+  id: totrans-399
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-23\. 对 cookies 运行单元测试
 - en: '[PRE64]'
+  id: totrans-400
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE64]'
 - en: 'If you want to test that a response has a cookie set, you can use `assertCookie()`
     to test for the cookie:'
+  id: totrans-401
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想测试响应是否设置了 cookie，可以使用`assertCookie()`来检查该 cookie：
 - en: '[PRE65]'
+  id: totrans-402
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE65]'
 - en: Or you could use `assertPlainCookie()` to test for the cookie and to assert
     that it’s not encrypted.
+  id: totrans-403
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者您可以使用`assertPlainCookie()`来测试 cookie 并断言它未加密。
 - en: Log
+  id: totrans-404
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 日志
 - en: The simplest way to test that a certain log was written is by making assertions
     against the `Log` facade (learn more in [“Faking Other Facades”](ch12.html#faking_facades)).
     [Example 14-24](#EX14e) shows how this works.
+  id: totrans-405
   prefs: []
   type: TYPE_NORMAL
+  zh: 测试某个特定日志是否已写入的最简单方法是针对`Log`外观进行断言（详细了解请参阅[“模拟其他外观”](ch12.html#faking_facades)）。[示例 14-24](#EX14e)展示了这个工作原理。
 - en: Example 14-24\. Making assertions against the `Log` facade
+  id: totrans-406
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-24\. 对`Log`外观进行断言
 - en: '[PRE66]'
+  id: totrans-407
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE66]'
 - en: There’s also a package called [Log Fake](https://oreil.ly/TCBMm) that expands
     on what you can do with the facade testing shown here and allows you to write
     more customized assertions against your logs.
+  id: totrans-408
   prefs: []
   type: TYPE_NORMAL
+  zh: 也有一个名为[Log Fake](https://oreil.ly/TCBMm)的包，扩展了此处展示的外观测试可以做的事情，并允许您针对日志编写更多定制的断言。
 - en: Scout
+  id: totrans-409
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Scout
 - en: 'If you need to test code that uses Scout data, you’re probably not going to
     want your tests triggering indexing actions or reading from Scout. Simply add
     an environment variable to your *phpunit.xml* to disable Scout’s connection to
     Algolia:'
+  id: totrans-410
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您需要测试使用 Scout 数据的代码，您可能不希望您的测试触发索引操作或从 Scout 读取数据。只需向您的 *phpunit.xml* 添加一个环境变量来禁用
+    Scout 与 Algolia 的连接：
 - en: '[PRE67]'
+  id: totrans-411
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE67]'
 - en: HTTP Client
+  id: totrans-412
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: HTTP 客户端
 - en: One incredible benefit of using Laravel’s HTTP client is that it makes it possible
     to fake responses in your tests with minimal configuration.
+  id: totrans-413
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 Laravel 的 HTTP 客户端的一个不可思议的好处是，它使您能够在测试中以最小的配置来伪造响应。
 - en: The simplest option is to run `Http::fake()`, which will return an empty successful
     response from every call you make.
+  id: totrans-414
   prefs: []
   type: TYPE_NORMAL
+  zh: 最简单的选项是运行`Http::fake()`，它将为您每次调用返回一个空的成功响应。
 - en: However, you can also customize the specific responses you want to come back
     from your HTTP client calls, as you can see in [Example 14-25](#EX14i).
+  id: totrans-415
   prefs: []
   type: TYPE_NORMAL
+  zh: 不过，您还可以自定义您希望从 HTTP 客户端调用返回的具体响应，就像您在[示例 14-25](#EX14i)中看到的那样。
 - en: Example 14-25\. Customizing responses to HTTP clients by URL
+  id: totrans-416
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-25\. 通过 URL 自定义对 HTTP 客户端的响应
 - en: '[PRE68]'
+  id: totrans-417
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE68]'
 - en: If, instead, you need to define that requests made to a given endpoint (or that
     match a given endpoint pattern) follow a particular sequence, you can also define
     that, as you can see in [Example 14-26](#EX14j).
+  id: totrans-418
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果需要定义针对特定端点（或符合特定端点模式）的请求遵循特定顺序，可以如 [示例 14-26](#EX14j) 所示进行定义。
 - en: Example 14-26\. Defining a sequence of responses to a given endpoint
+  id: totrans-419
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-26\. 定义针对特定端点的响应序列
 - en: '[PRE69]'
+  id: totrans-420
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE69]'
 - en: You can also make assertions against the data your application is sending to
     particular endpoints, as in [Example 14-27](#EX14k).
+  id: totrans-421
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以对应用程序发送到特定端点的数据进行断言，如 [示例 14-27](#EX14k) 所示。
 - en: Example 14-27\. Asserting against the calls your application makes
+  id: totrans-422
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-27\. 对应用程序发出的调用进行断言
 - en: '[PRE70]'
+  id: totrans-423
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE70]'
 - en: TL;DR
+  id: totrans-424
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: TL;DR
 - en: 'Laravel provides simple interfaces to many common storage operations: filesystem
     access, sessions, cookies, the cache, and search. Each of these APIs is the same
     regardless of which provider you use, which Laravel enables by allowing multiple
     “drivers” to serve the same public interface. This makes it simple to switch providers
     depending on the environment or as the needs of the application change.'
+  id: totrans-425
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 提供了简单的接口来执行许多常见的存储操作：文件系统访问、会话、Cookie、缓存和搜索。无论您使用哪个提供者，每个 API 都是相同的，这是
+    Laravel 通过允许多个“驱动程序”提供相同公共接口实现的。这使得根据环境或应用程序需求的变化简单切换提供者成为可能。

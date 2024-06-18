@@ -1,470 +1,700 @@
 - en: Chapter 12\. Error Handling
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第12章 错误处理
 - en: The best laid plans of mice and men often go awry.
+  id: totrans-1
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 鼠辈和人类的美好计划往往会遭遇波折。
 - en: ''
+  id: totrans-2
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
 - en: adapted from Robert Burns
+  id: totrans-3
   prefs:
   - PREF_BQ
   type: TYPE_NORMAL
+  zh: 改编自罗伯特·彭斯
 - en: If you work in programming or software development, you’re probably very familiar
     with bugs and the process of debugging. You might have even spent as much time,
     if not more, tracking down bugs as you do writing code in the first place. It’s
     an unfortunate maxim of software—no matter how hard a team works to build correct
     software, there will inevitably be a failure that needs to be identified and corrected.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你从事编程或软件开发工作，你可能非常熟悉错误和调试的过程。你可能甚至花费了与编写代码同等甚至更多的时间来追踪错误。这是软件的一个不幸定律——无论一个团队多么努力地构建正确的软件，总会不可避免地出现需要识别和纠正的故障。
 - en: Luckily, PHP makes finding bugs relatively straightforward. The forgiving nature
     of the language often also renders a bug a nuisance rather than a fatal flaw.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，PHP使得查找错误相对简单。语言的宽容性通常也使得错误更像是一个讨厌而不是致命的缺陷。
 - en: The following recipes introduce the quickest and easiest way to identify and
     handle bugs in your code. They also detail how to both code and handle custom
     exceptions thrown by your code in the event of invalid data output by a third-party
     API or other incorrect system behavior.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下的技巧介绍了识别和处理代码中错误的最快最简单的方法。它们还详细说明了如何编写和处理由第三方API输出无效数据或其他不正确系统行为抛出的自定义异常。
 - en: 12.1 Finding and Fixing Parse Errors
+  id: totrans-7
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 12.1 寻找和修复解析错误
 - en: Problem
+  id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: The PHP compiler has failed to parse a script within your application; you want
     to find and correct the problem quickly.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP编译器在你的应用程序中未能解析脚本；你希望尽快找到并纠正问题。
 - en: Solution
+  id: totrans-10
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: Open the offending file in a text editor and review the line called out by the
     parser for syntax errors. If the problem isn’t immediately apparent, walk backwards
     through the code one line at a time until you find the problem and make corrections
     in the file.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 在文本编辑器中打开有问题的文件，并查看解析器标记的语法错误行。如果问题不明显，逐行向后查找代码，直到找到问题并在文件中进行修正。
 - en: Discussion
+  id: totrans-12
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: PHP is a relatively forgiving language and will often attempt to let even an
     incorrect or problematic script run to completion. In many situations, though,
     the parser cannot properly interpret a line of code to identify what should be
     done and will instead return an error.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP是一种相对宽容的语言，通常会尝试让即使是不正确或有问题的脚本运行完成。但在许多情况下，解析器无法正确解释一行代码来确定应该做什么，而是会返回一个错误。
 - en: 'As a contrived example, loop through Western states in the US:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，编写一个虚构的示例，循环遍历美国西部的州：
 - en: '[PRE0]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'This code, when run in a PHP interpreter, will throw a `Parse error` on the
     second line:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 当在PHP解释器中运行时，这段代码将在第二行抛出一个`Parse error`：
 - en: '[PRE1]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Based on this error message alone, you can zero in on the offending line. Remember
     that, though `foreach` is a language construct, it is still written similar to
     a function call with parentheses. The correct way to iterate through the array
     of states would be as follows:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 仅根据这个错误消息，你就可以准确定位到有问题的行。请记住，尽管`foreach`是一种语言结构，但它仍然类似于带有括号的函数调用。遍历数组状态的正确方法如下：
 - en: '[PRE2]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'This particular error—omitting parentheses while leveraging language constructs—is
     common among developers frequently moving between languages. The same mechanism
     in Python, for example, looks nearly the same but is syntactically correct when
     omitting the parentheses on the `foreach` call. For example:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种特定错误——在使用语言结构时省略括号——在经常在不同语言之间移动的开发人员中很常见。例如，在Python中，同样的机制看起来几乎一样，但在省略`foreach`调用的括号时是语法正确的。例如：
 - en: '[PRE3]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: The syntax of the two languages is confusingly similar. Thankfully, they are
     different enough that each language’s parser will catch these differences and
     alert you, should you make such a mistake when moving back and forth between projects.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 这两种语言的语法非常相似，这种相似性令人困惑。不过，它们之间的差异足够大，以至于每种语言的解析器都会捕捉到这些差异，并在你在项目之间切换时警告你，如果你犯了这样的错误。
 - en: Conveniently, IDEs like [Visual Studio Code](https://oreil.ly/CkzbA) automatically
     parse your script and highlight any syntax errors for you. [Figure 12-1](#vscode_parser_error)
     illustrates how this highlighting makes it relatively easy to track down and correct
     issues before your application ever runs.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，像[Visual Studio Code](https://oreil.ly/CkzbA)这样的集成开发环境会自动解析你的脚本，并为你突出显示任何语法错误。[图 12-1](#vscode_parser_error)说明了这种突出显示如何相对容易地跟踪和纠正问题，使得在你的应用程序运行之前就能发现问题。
 - en: '![Visual Studio Code identifies and highlights syntax errors before your application
     runs](assets/phpc_1201.png)'
+  id: totrans-24
   prefs: []
   type: TYPE_IMG
+  zh: '![Visual Studio Code 在应用程序运行之前识别和突出显示语法错误](assets/phpc_1201.png)'
 - en: Figure 12-1\. Visual Studio Code identifies and highlights syntax errors before
     your application runs
+  id: totrans-25
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 12-1\. 在应用程序运行之前，Visual Studio Code 将识别和突出显示语法错误
 - en: See Also
+  id: totrans-26
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: The [list of tokens](https://oreil.ly/Zw_1I), various parts of the source code,
     used by the PHP parser.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '[令牌列表](https://oreil.ly/Zw_1I)，PHP 解析器使用的源代码的各个部分。'
 - en: 12.2 Creating and Handling Custom Exceptions
+  id: totrans-28
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 12.2 创建和处理自定义异常
 - en: Problem
+  id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want your application to throw (and catch) a custom exception when things
     go wrong.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 当事情出错时，您希望您的应用程序抛出（并捕获）一个自定义异常。
 - en: Solution
+  id: totrans-31
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: Extend the base `Exception` class to introduce custom behavior, then leverage
     `try`/`catch` blocks to capture and handle exceptions.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 扩展基础 `Exception` 类以引入自定义行为，然后利用 `try`/`catch` 块来捕获和处理异常。
 - en: Discussion
+  id: totrans-33
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: PHP defines a basic [`Throwable`](https://oreil.ly/NkLuC) interface implemented
     by any kind of error or exception in the language. Internal issues are then represented
     by the [`Error`](https://oreil.ly/eFMGz) class and its descendants, while problems
     in userland are represented by the `Exception` class and its descendants.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 定义了一个基本的 [`Throwable`](https://oreil.ly/NkLuC) 接口，由语言中任何错误或异常实现。内部问题由 [`Error`](https://oreil.ly/eFMGz)
+    类及其后代表示，而用户端的问题由 `Exception` 类及其后代表示。
 - en: Generally, you will only ever be extending the `Exception` class within your
     application, but you can catch any `Throwable` implementation within a standard
     `try`/`catch` block.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常情况下，您只会在应用程序中扩展 `Exception` 类，但您可以在标准的 `try`/`catch` 块中捕获任何 `Throwable` 实现。
 - en: 'For example, assume you are implementing a division function with very precise,
     custom functionality:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，假设您正在实现一个带有非常精确自定义功能的除法函数：
 - en: Division by 0 is not allowed.
+  id: totrans-37
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 不允许被零除。
 - en: All decimal values will be rounded down.
+  id: totrans-38
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 所有的小数值将向下舍入。
 - en: The integer 42 is never valid as a numerator.
+  id: totrans-39
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 整数 42 作为分子是无效的。
 - en: The numerator must be an integer, but the denominator can also be a float.
+  id: totrans-40
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 分子必须是整数，但分母也可以是浮点数。
 - en: Such a function might leverage built-in errors like `ArithmeticError` or `DivisionByZeroError`.
     But in the preceding list of rules, the third stands out as requiring a custom
     exception. Before defining your function, you would define a custom exception
     as in [Example 12-1](#custom_hitchhiker_exception).
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 这样的函数可能利用内置错误如 `ArithmeticError` 或 `DivisionByZeroError`。但在前述规则列表中，第三个需要自定义异常的规则显著。在定义您的函数之前，您将像
+    [示例 12-1](#custom_hitchhiker_exception) 中那样定义一个自定义异常。
 - en: Example 12-1\. Simple custom exception definition
+  id: totrans-42
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-1\. 简单的自定义异常定义
 - en: '[PRE4]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Once the custom exception exists, you can `throw` it within your custom division
     function as follows:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦自定义异常存在，您可以在自定义的除法函数中使用 `throw` 来抛出它，如下所示：
 - en: '[PRE5]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Once you’ve defined your custom functionality, it’s a matter of leveraging that
     code in an application. You know the function *could* throw an error, so it’s
     important to wrap any invocation in a `try` statement and handle that error appropriately.
     [Example 12-2](#division_error_handling) will iterate through four pairs of numbers,
     attempting division on each, and handling any subsequent errors/exceptions thrown.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您定义了自定义功能，就可以在应用程序中利用该代码。您知道该函数 *可能* 会抛出错误，因此重要的是在 `try` 语句中包装任何调用，并适当处理该错误。[示例 12-2](#division_error_handling)
+    将在四对数字上迭代，尝试每个的除法，并处理任何随后抛出的错误/异常。
 - en: Example 12-2\. Handling errors in custom division
+  id: totrans-47
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-2\. 处理自定义除法中的错误
 - en: '[PRE6]'
+  id: totrans-48
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '[![1](assets/1.png)](#co_error_handling_CO1-1)'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_error_handling_CO1-1)'
 - en: If 42 is ever passed as a numerator, the `divide()` function will throw a `Hitchhi⁠ker​Exception`
     and fail to recover. Capturing this exception allows you to provide feedback either
     to the application or to the user and move on.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果 42 被作为分子传入，`divide()` 函数将抛出 `Hitchhi⁠ker​Exception` 并且无法恢复。捕获此异常允许您向应用程序或用户提供反馈，并继续执行。
 - en: '[![2](assets/2.png)](#co_error_handling_CO1-2)'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_error_handling_CO1-2)'
 - en: Any other `Error` or `Exception` thrown by the function will be caught as an
     implementation of `Throwable`. In this case, you’re throwing that error away and
     moving on.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 由函数抛出的任何其他 `Error` 或 `Exception` 都将作为 `Throwable` 的实现捕获。在这种情况下，您会丢弃该错误并继续进行。
 - en: See Also
+  id: totrans-53
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: 'Documentation on the following:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于以下的文档：
 - en: The base [`Exception` class](https://oreil.ly/2s4mN)
+  id: totrans-55
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 基础 [`Exception` 类](https://oreil.ly/2s4mN)
 - en: The list of [predefined exceptions](https://oreil.ly/TdeGN)
+  id: totrans-56
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[预定义异常列表](https://oreil.ly/TdeGN)'
 - en: Additional exceptions [as defined by the Standard PHP Library (SPL)](https://oreil.ly/GSDEg)
+  id: totrans-57
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 附加的异常[如标准PHP库（SPL）定义的](https://oreil.ly/GSDEg)
 - en: '[Creating custom exceptions through extension](https://oreil.ly/-jrVt)'
+  id: totrans-58
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[通过扩展创建自定义异常](https://oreil.ly/-jrVt)'
 - en: The [error hierarchy as of PHP 7](https://oreil.ly/KF1Zd)
+  id: totrans-59
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '[PHP 7中的错误层次结构](https://oreil.ly/KF1Zd)'
 - en: 12.3 Hiding Error Messages from End Users
+  id: totrans-60
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 12.3 隐藏最终用户的错误消息
 - en: Problem
+  id: totrans-61
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You’ve fixed all of the bugs you know of and are ready to launch your application
     in production. But you also want to prevent any new errors from being displayed
     to end users.
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 你已经修复了所有已知的错误，并准备好在生产环境中启动你的应用程序。但是你也希望防止任何新错误被显示给最终用户。
 - en: Solution
+  id: totrans-63
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'To completely suppress errors in production, set both the `error_reporting`
     and `dis⁠play_​errors` directives in *php.ini* to `Off` as follows:'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在生产环境完全抑制错误，请将*php.ini*中的`error_reporting`和`dis⁠play_​errors`指令都设置为`Off`，如下所示：
 - en: '[PRE7]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Discussion
+  id: totrans-66
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The configuration change presented in the Solution example will impact your
     entire application. Errors will be entirely suppressed and, even if they were
     to be thrown, will never be displayed to an end user. It’s considered bad practice
     to present errors or unhandled exceptions directly to users. It might also lead
     to security issues if stack traces are presented directly to end users of the
     application.
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 解决方案示例中提出的配置更改将影响你的整个应用程序。错误将完全被抑制，即使它们被抛出，也不会显示给最终用户。直接向用户显示错误或未处理的异常被认为是一种不良做法。如果堆栈跟踪直接显示给应用程序的最终用户，这可能还会导致安全问题。
 - en: However, if your application is misbehaving, nothing will be logged for the
     development team to diagnose and address.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，如果你的应用程序行为异常，开发团队将无法记录任何信息以进行诊断和处理。
 - en: For a production instance, leaving `display_errors` set to `Off` will still
     hide errors from end users, but reverting to the default `error_reporting` level
     will reliably send any errors to the logs.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于生产环境实例，将`display_errors`设置为`Off`仍将隐藏来自最终用户的错误，但是恢复到默认的`error_reporting`级别将可靠地将任何错误发送到日志中。
 - en: There might be specific pages with known errors (due to legacy code, poorly
     written dependencies, or known technical debt) that you wish to omit, though.
     In those situations you can *programmatically* set the error reporting level by
     using the `error_​reporting()` function in PHP. This function accept a new error
     reporting level and returns whatever level was previously set (the default if
     not previously configured).
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然可能有一些特定页面存在已知的错误（由于遗留代码、编写不良的依赖项或已知的技术债务），你希望在这些情况下省略它们。在这种情况下，你可以通过使用PHP中的`error_​reporting()`函数来*编程*设置错误报告级别。该函数接受一个新的错误报告级别，并返回先前设置的级别（如果之前没有配置，则使用默认级别）。
 - en: 'As a result, you can use calls to `error_reporting()` to wrap problematic blocks
     of code and prevent too-chatty errors from being presented in the logs. For example:'
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，您可以使用对`error_reporting()`的调用来包装有问题的代码块，并防止在日志中显示太多的错误信息。例如：
 - en: '[PRE8]'
+  id: totrans-72
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: '[![1](assets/1.png)](#co_error_handling_CO2-1)'
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_error_handling_CO2-1)'
 - en: Set the error level to the absolute minimum, including only fatal runtime errors
     that halt script execution.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 将错误级别设置为绝对最小值，只包括导致脚本执行停止的致命运行时错误。
 - en: '[![2](assets/2.png)](#co_error_handling_CO2-2)'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_error_handling_CO2-2)'
 - en: Return the error level to its previous state.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 将错误级别返回到其先前的状态。
 - en: The default error level is `E_ALL`, which presents all errors, warnings, and
     notices.^([1](ch12.html#idm45875144247792)) You can use integer reporting levels
     to override this, but PHP presents several named constants that represent each
     potential setting. These constants are enumerated in [Table 12-1](#error_reporting_levels).
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认错误级别是`E_ALL`，它会显示所有错误、警告和通知。^([1](ch12.html#idm45875144247792)) 您可以使用整数报告级别来覆盖这一设置，但PHP提供了几个命名常量，代表每个潜在的设置。这些常量在[表 12-1](#error_reporting_levels)中枚举。
 - en: Note
+  id: totrans-78
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Prior to PHP 8.0, the default error reporting level started with `E_ALL` and
     then explicitly removed diagnostic notices (`E_NOTICE`), strict type warnings
     (`E_STRICT`), and deprecation notices ( `E_DEPRECATED`).
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 在PHP 8.0之前，默认的错误报告级别从`E_ALL`开始，然后显式地移除了诊断通知（`E_NOTICE`）、严格类型警告（`E_STRICT`）和已弃用通知（`E_DEPRECATED`）。
 - en: Table 12-1\. Error reporting level constants
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 表12-1\. 错误报告级别常量
 - en: '| Integer value | Constant | Description |'
+  id: totrans-81
   prefs: []
   type: TYPE_TB
+  zh: '| 整数值 | 常量 | 描述 |'
 - en: '| --- | --- | --- |'
+  id: totrans-82
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| 1 | `E_ERROR` | Fatal runtime errors that result in script execution halting.
     |'
+  id: totrans-83
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | `E_ERROR` | 导致脚本执行停止的致命运行时错误。 |'
 - en: '| 2 | `E_WARNING` | Runtime warnings (nonfatal errors) that do not halt script
     execution. |'
+  id: totrans-84
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | `E_WARNING` | 运行时警告（非致命错误），不会停止脚本执行。 |'
 - en: '| 4 | `E_PARSE` | Compile-time errors generated by the parser. |'
+  id: totrans-85
   prefs: []
   type: TYPE_TB
+  zh: '| 4 | `E_PARSE` | 解析器生成的编译时错误。 |'
 - en: '| 8 | `E_NOTICE` | Runtime notices that indicate that the script encountered
     something that could indicate an error but could also happen in the normal course
     of running a script. |'
+  id: totrans-86
   prefs: []
   type: TYPE_TB
+  zh: '| 8 | `E_NOTICE` | 运行时通知，指示脚本遇到可能表明错误但也可能在正常运行脚本过程中发生的情况。 |'
 - en: '| 16 | `E_CORE_ERROR` | Fatal errors that occur during PHP’s initial startup.
     This is like `E_ERROR`, except it is generated by the core of PHP. |'
+  id: totrans-87
   prefs: []
   type: TYPE_TB
+  zh: '| 16 | `E_CORE_ERROR` | 在PHP初始启动期间发生的致命错误。这类似于`E_ERROR`，但由PHP核心生成。 |'
 - en: '| 32 | `E_CORE_WARNING` | Warnings (nonfatal errors) that occur during PHP’s
     initial startup. This is like `E_WARNING`, except it is generated by the core
     of PHP. |'
+  id: totrans-88
   prefs: []
   type: TYPE_TB
+  zh: '| 32 | `E_CORE_WARNING` | 在PHP初始启动期间发生的警告（非致命错误）。这类似于`E_WARNING`，但是由PHP核心生成。
+    |'
 - en: '| 64 | `E_COMPILE_ERROR` | Fatal compile-time errors. This is like `E_ERROR`,
     except it is generated by the Zend Scripting Engine. |'
+  id: totrans-89
   prefs: []
   type: TYPE_TB
+  zh: '| 64 | `E_COMPILE_ERROR` | 致命的编译时错误。这类似于`E_ERROR`，但由Zend脚本引擎生成。 |'
 - en: '| 128 | `E_COMPILE_​WARN⁠ING` | Compile-time warnings (nonfatal errors). This
     is like `E_WARNING`, except it is generated by the Zend Scripting Engine. |'
+  id: totrans-90
   prefs: []
   type: TYPE_TB
+  zh: '| 128 | `E_COMPILE_​WARN⁠ING` | 编译时警告（非致命错误）。这类似于`E_WARNING`，但由Zend脚本引擎生成。
+    |'
 - en: '| 256 | `E_USER_ERROR` | User-generated error messages. This is like `E_ERROR`,
     except it is generated in PHP code by using the PHP function [`trigger_error()`](https://oreil.ly/eNgVf).
     |'
+  id: totrans-91
   prefs: []
   type: TYPE_TB
+  zh: '| 256 | `E_USER_ERROR` | 用户生成的错误消息。这类似于`E_ERROR`，但通过使用PHP函数 [`trigger_error()`](https://oreil.ly/eNgVf)
+    在PHP代码中生成。 |'
 - en: '| 512 | `E_USER_WARNING` | User-generated warning messages. This is like `E_WARNING`,
     except it is generated in PHP code by using the PHP function `trigger_error()`.
     |'
+  id: totrans-92
   prefs: []
   type: TYPE_TB
+  zh: '| 512 | `E_USER_WARNING` | 用户生成的警告消息。这类似于`E_WARNING`，但通过使用PHP函数 `trigger_error()`
+    在PHP代码中生成。 |'
 - en: '| 1024 | `E_USER_NOTICE` | User-generated notice messages. This is like `E_NOTICE`,
     except it is generated in PHP code by using the PHP function `trigger_error()`.
     |'
+  id: totrans-93
   prefs: []
   type: TYPE_TB
+  zh: '| 1024 | `E_USER_NOTICE` | 用户生成的通知消息。这类似于`E_NOTICE`，但通过使用PHP函数 `trigger_error()`
+    在PHP代码中生成。 |'
 - en: '| 2048 | `E_STRICT` | Enable to have PHP suggest changes to your code which
     will ensure the best interoperability and forward compatibility of your code.
     |'
+  id: totrans-94
   prefs: []
   type: TYPE_TB
+  zh: '| 2048 | `E_STRICT` | 启用以使PHP建议更改您的代码，以确保最佳的代码互操作性和向前兼容性。 |'
 - en: '| 4096 | `E_RECOVERA⁠BLE_​ERROR` | Catchable fatal errors. A dangerous error
     occurred, but PHP is not unstable and can recover. If the error is not caught
     by a user-defined handle (see also [Recipe 12.4](#recipe_error_handler)), the
     application aborts as if it was an `E_ERROR`. |'
+  id: totrans-95
   prefs: []
   type: TYPE_TB
+  zh: '| 4096 | `E_RECOVERA⁠BLE_​ERROR` | 可捕获的致命错误。发生了一个危险错误，但PHP并不不稳定，可以恢复。如果错误未被用户定义的处理程序捕获（参见[Recipe
+    12.4](#recipe_error_handler)），则应用程序会像处理 `E_ERROR` 一样中止。 |'
 - en: '| 8192 | `E_DEPRECATED` | Runtime notices. Enable this to receive warnings
     about code that will not work in future versions. |'
+  id: totrans-96
   prefs: []
   type: TYPE_TB
+  zh: '| 8192 | `E_DEPRECATED` | 运行时通知。启用此选项以接收有关将来版本中将不起作用的代码的警告。 |'
 - en: '| 16384 | `E_USER_​DEPRE⁠CATED` | User-generated warning messages. This is
     like `E_DEPRECATED`, except it is generated in PHP code by using the PHP function
     `trigger_error()`. |'
+  id: totrans-97
   prefs: []
   type: TYPE_TB
+  zh: '| 16384 | `E_USER_​DEPRE⁠CATED` | 用户生成的警告消息。这类似于`E_DEPRECATED`，但通过使用PHP函数 `trigger_error()`
+    在PHP代码中生成。 |'
 - en: '| 32767 | `E_ALL` | All errors, warnings, and notices. |'
+  id: totrans-98
   prefs: []
   type: TYPE_TB
+  zh: '| 32767 | `E_ALL` | 所有错误、警告和通知。 |'
 - en: 'Note that you can combine error levels via binary operations, creating a bitmask.
     A simple error reporting level might include errors, warnings, and parser errors
     alone (omitting core, user errors, and notices). This level would be adequately
     set with the following:'
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意你可以通过二进制操作结合错误级别，创建一个位掩码。一个简单的错误报告级别可能包括单独的错误、警告和解析器错误（忽略核心、用户错误和通知）。以下内容将足够地设置这个级别：
 - en: '[PRE9]'
+  id: totrans-100
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: See Also
+  id: totrans-101
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [`error_reporting()`](https://oreil.ly/b4eIH), the [`error_reporting`
     directive](https://oreil.ly/t5IW2), and the [`dis⁠play_​errors` directive](https://oreil.ly/lxXNs).
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关 [`error_reporting()`](https://oreil.ly/b4eIH)、[`error_reporting` 指令](https://oreil.ly/t5IW2)
+    和 [`display_​errors` 指令](https://oreil.ly/lxXNs) 的文档。
 - en: 12.4 Using a Custom Error Handler
+  id: totrans-103
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 12.4 使用自定义错误处理程序
 - en: Problem
+  id: totrans-104
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to customize the way PHP handles and reports errors.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 您想自定义PHP处理和报告错误的方式。
 - en: Solution
+  id: totrans-106
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Define your custom handler as a callable function in PHP, then pass that function
     into `set_error_handler()` as follows:'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 在PHP中将您的自定义处理程序定义为可调用函数，然后按以下方式将该函数传递给 `set_error_handler()`：
 - en: '[PRE10]'
+  id: totrans-108
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Discussion
+  id: totrans-109
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: PHP will leverage your custom handler in most situations where an error is recoverable.
     Fatal errors, core errors, and compile-time issues (like parser errors) either
     halt or entirely prevent program execution and cannot be handled with a user function.
@@ -472,127 +702,183 @@
     and `E_COMPILE_WARNING` errors can never be caught. In addition, most `E_STRICT`
     errors in the file that invoked `set_error_handler()` cannot be caught, as the
     errors will be thrown before the custom handler is properly registered.
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP将在大多数可恢复错误的情况下利用您的自定义处理程序。致命错误、核心错误和编译时问题（如解析器错误）要么会停止要么完全阻止程序执行，并且不能通过用户函数处理。具体来说，`E_ERROR`、`E_PARSE`、`E_CORE_ERROR`、`E_CORE_WARNING`、`E_COMPILE_ERROR`和`E_COMPILE_WARNING`错误永远不能被捕获。此外，在调用`set_error_handler()`的文件中大多数`E_STRICT`错误也不能被捕获，因为这些错误会在正确注册自定义处理程序之前被抛出。
 - en: If you define a custom error handler consistent with the one presented in the
     Solution example, any catchable errors will then invoke this function and print
     data to the screen. As illustrated in [Example 12-3](#catching_runtime_errors),
     attempting to `echo` an undefined variable will cause an `E_WARNING` error.
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您定义了一个与解决方案示例中一致的自定义错误处理程序，任何可捕获的错误都将调用此函数并将数据打印到屏幕上。如在[示例 12-3](#catching_runtime_errors)中所示，尝试`echo`一个未定义的变量将会导致一个`E_WARNING`错误。
 - en: Example 12-3\. Catching recoverable runtime errors
+  id: totrans-112
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-3\. 捕获可恢复的运行时错误
 - en: '[PRE11]'
+  id: totrans-113
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'With `my_error_handler()` from the Solution example defined and registered,
     the erroneous code in [Example 12-3](#catching_runtime_errors) will print the
     following text to the screen, referencing the integer value of the `E_WARNING`
     error type:'
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用解决方案示例中定义并注册的`my_error_handler()`，在[示例 12-3](#catching_runtime_errors)中的错误代码将打印以下文本到屏幕上，引用了`E_WARNING`错误类型的整数值：
 - en: '[PRE12]'
+  id: totrans-115
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Once you’ve caught an error to handle it, if the error is something that will
     lead to instability in the application, it is your responsibility to invoke `die()`
     to halt execution. PHP won’t do this for you outside the handler and will instead
     continue processing the application as if no error had been thrown.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您捕获了一个错误以处理它，如果该错误会导致应用程序不稳定，您有责任调用`die()`来停止执行。PHP不会在处理程序外部为您执行此操作，而是会继续处理应用程序，就像没有抛出错误一样。
 - en: If, once you’ve handled errors in part of your application, you wish to restore
     the original (default) error handler, you should do so by calling `restore_error_​han⁠dler()`.
     This merely reverts your earlier error handler registration and restores whatever
     error handler was previously registered.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您在应用程序的某个部分处理错误后，希望恢复原始（默认）错误处理程序，则应通过调用`restore_error_​han⁠dler()`来执行。这仅仅是还原了您之前注册的错误处理程序，并恢复了以前注册的任何错误处理程序。
 - en: Similarly, PHP empowers you to register (and restore) custom exception handlers.
     These operate the same as custom error handlers but instead capture any exception
     thrown outside a `try`/`catch` block. Unlike error handlers, program execution
     will halt after the custom exception handler has been called.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似地，PHP允许您注册（和恢复）自定义异常处理程序。它们与自定义错误处理程序的操作相同，但不同的是它们会捕获在`try`/`catch`块之外抛出的任何异常。与错误处理程序不同的是，程序执行在调用自定义异常处理程序后将会停止。
 - en: For more on exceptions, review [Recipe 12.2](#custom_exceptions) and the documentation
     for both [`set_exception_handler()`](https://oreil.ly/_pf4H) and [`restore_exception_&#x200b;han&#x2060;dler()`](https://oreil.ly/TOEuz).
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解更多关于异常的信息，请查看[配方 12.2](#custom_exceptions)以及[`set_exception_handler()`](https://oreil.ly/_pf4H)和[`restore_exception_&#x200b;han&#x2060;dler()`](https://oreil.ly/TOEuz)的文档。
 - en: See Also
+  id: totrans-120
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [`set_error_handler()`](https://oreil.ly/IAh69) and [`restore_error_handler()`](https://oreil.ly/SlT_d).
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于[`set_error_handler()`](https://oreil.ly/IAh69)和[`restore_error_handler()`](https://oreil.ly/SlT_d)的文档。
 - en: 12.5 Logging Errors to an External Stream
+  id: totrans-122
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 12.5 记录错误到外部流
 - en: Problem
+  id: totrans-123
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to log application errors to a file or to an external source of some
     sort for future debugging.
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望将应用程序错误记录到文件或外部某种资源以便未来调试。
 - en: Solution
+  id: totrans-125
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use `error_log()` to write errors to the default log file as follows:'
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`error_log()`将错误写入默认日志文件，方法如下：
 - en: '[PRE13]'
+  id: totrans-127
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Discussion
+  id: totrans-128
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: By default, `error_log()` will log errors to whatever location is specified
     by the [`error_log` directive](https://oreil.ly/3lVPn) in *php.ini*. Often on
     Unix-style systems, this will be a file within */var/log* but can be customized
     to be anywhere within your system.
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，`error_log()`会将错误记录到由*php.ini*中的[`error_log`指令](https://oreil.ly/3lVPn)指定的位置。在类Unix系统上，通常会是*/var/log*内的文件，但可以自定义到系统中的任何位置。
 - en: 'The optional second parameter of `error_log()` allows you to route error messages
     where necessary. If the server is set up to send emails, you can specify a message
     type of `1` and provide an email address for the optional third parameter to send
     errors by email. For example:'
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: '`error_log()`的可选第二个参数允许您在必要时路由错误消息。如果服务器已设置发送电子邮件，则可以指定消息类型为`1`，并为可选的第三个参数提供电子邮件地址以通过电子邮件发送错误。例如：'
 - en: '[PRE14]'
+  id: totrans-131
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Note
+  id: totrans-132
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Under the hood, `error_log()` will use the same functionality as `mail()` to
     send errors by email. In many cases, this might be disabled for security purposes.
     Be sure to verify the functionality of any mail systems before relying on this
     functionality, particularly in a production environment.
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 在底层，`error_log()`将使用与`mail()`相同的功能来通过电子邮件发送错误。在许多情况下，出于安全目的，可能已禁用此功能。在依赖此功能之前，请务必验证任何邮件系统的功能，特别是在生产环境中。
 - en: 'Alternatively, you can specify a file *other* than the default log location
     as the destination and pass the integer `3` as the message type. Rather than writing
     to the default logs, PHP will append the message to that file directly. For example:'
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，您可以指定一个*不同*于默认日志位置的文件作为目标，并将整数`3`作为消息类型传递。PHP将消息直接追加到该文件而不是写入默认日志。例如：
 - en: '[PRE15]'
+  id: totrans-135
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: Warning
+  id: totrans-136
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: When logging directly to a file with `error_log()`, the system will *not* append
     a newline character automatically. You will be responsible for either appending
     `PHP_EOL` to any string or encoding the `\r\n` newline literals.
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 当使用`error_log()`直接记录到文件时，系统*不会*自动追加换行符。您需要负责在任何字符串后附加`PHP_EOL`或编码`\r\n`换行文字。
 - en: '[Chapter 11](ch11.html#chapter_streams) covers the file protocol at length
     as well as the other streams exposed by PHP. Remember that directly referencing
     a filepath is transparently leveraging the `file://` protocol so, in reality,
@@ -600,21 +886,32 @@
     just as easily reference any other kind of stream so long as you properly reference
     the stream protocol. The following example logs errors directly to the console’s
     standard error stream:'
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: '[第 11 章](ch11.html#chapter_streams)详细介绍了文件协议以及 PHP 公开的其他流。请记住，直接引用文件路径实际上是透明地利用了`file://`协议，因此，实际上您是在前面的代码块中将错误记录到文件*流*。只要正确引用流协议，您可以轻松地引用任何其他类型的流。以下示例直接将错误记录到控制台的标准错误流：'
 - en: '[PRE16]'
+  id: totrans-139
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: See Also
+  id: totrans-140
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [`error_log()`](https://oreil.ly/QUQRH) and [Recipe 13.5](ch13.html#recipe_logging)’s
     coverage of Monolog, a more comprehensive logging library for PHP applications.
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: '[错误日志函数(`error_log()`)](https://oreil.ly/QUQRH)的文档以及[配方 13.5](ch13.html#recipe_logging)中对
+    Monolog 的覆盖，Monolog 是用于 PHP 应用程序的更全面的日志记录库。'
 - en: ^([1](ch12.html#idm45875144247792-marker)) The default error level can be directly
     set in *php.ini* and, in many environments, might already be set to something
     other than `E_ALL`. Confirm your own environment’s configuration to be sure.
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([1](ch12.html#idm45875144247792-marker)) 默认错误级别可以直接在*php.ini*中设置，在许多环境中可能已经设置为`E_ALL`以外的某些值。确认您自己环境的配置以确保准确。

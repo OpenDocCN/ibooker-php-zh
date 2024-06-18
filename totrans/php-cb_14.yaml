@@ -1,69 +1,107 @@
 - en: Chapter 14\. Performance Tuning
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第14章 性能调优
 - en: Dynamically interpreted languages, such as PHP, are known for their flexibility
     and ease of use but not necessarily for their speed. This is partly because of
     the way their type systems work. When types are inferred at runtime, it’s impossible
     for the parser to know exactly how to perform a certain operation until it’s provided
     with data.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP等动态解释语言以其灵活性和易用性而闻名，但不一定因为它们的速度。这部分是因为它们的类型系统工作方式的原因。当类型在运行时推断时，解析器无法准确知道如何执行某个操作，直到提供了数据。
 - en: 'Consider the following, loosely typed PHP function to add two items together:'
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 考虑以下松散类型的PHP函数来将两个项目相加：
 - en: '[PRE0]'
+  id: totrans-3
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Since this function does not declare the types for the variables passed in or
     the return type, it can exhibit multiple signatures. All of the method signatures
     in [Example 14-1](#various_signatures) are equally valid ways to call the preceding
     function.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于此函数未声明传入变量的类型或返回类型，它可能表现出多个签名。在[Example 14-1](#various_signatures)中的所有方法签名都是调用前述函数的同样有效方式。
 - en: Example 14-1\. Various signatures for the same function definition
+  id: totrans-5
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 14-1\. 同一个函数定义的各种签名
 - en: '[PRE1]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '[![1](assets/1.png)](#co_performance_tuning_CO1-1)'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_performance_tuning_CO1-1)'
 - en: '`add(1, 2)` returns `int(3)`'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: '`add(1, 2)` 返回 `int(3)`'
 - en: '[![2](assets/2.png)](#co_performance_tuning_CO1-2)'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_performance_tuning_CO1-2)'
 - en: '`add(1., 2.)` returns `float(3)`'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: '`add(1., 2.)` 返回 `float(3)`'
 - en: '[![3](assets/3.png)](#co_performance_tuning_CO1-3)'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_performance_tuning_CO1-3)'
 - en: '`add(1, 2.)` returns `float(3)`'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '`add(1, 2.)` 返回 `float(3)`'
 - en: '[![4](assets/4.png)](#co_performance_tuning_CO1-4)'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_performance_tuning_CO1-4)'
 - en: '`add(1., 2)` returns `float(3)`'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: '`add(1., 2)` 返回 `float(3)`'
 - en: '[![5](assets/5.png)](#co_performance_tuning_CO1-5)'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#co_performance_tuning_CO1-5)'
 - en: '`add("1", 2)` returns `int(3)`'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: '`add("1", 2)` 返回 `int(3)`'
 - en: '[![6](assets/6.png)](#co_performance_tuning_CO1-6)'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#co_performance_tuning_CO1-6)'
 - en: '`add("1.", 2)` returns `float(3)`'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '`add("1.", 2)` 返回 `float(3)`'
 - en: The preceding example illustrates how you can write a single function and PHP
     internally needs to process it multiple ways. The language doesn’t know which
     version of the function you actually need until it sees the data you provide it,
@@ -72,19 +110,26 @@
     the processor through a dedicated virtual machine—and PHP will need to produce
     multiple versions of the same function’s opcode to handle the differing input
     and return types.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 上述示例说明了您可以编写一个单一函数，而PHP内部需要以多种方式处理它。直到它看到您提供的数据，语言才知道您实际需要函数的哪个版本，并且会在必要时内部将某些值转换为其他类型。在运行时，实际函数被编译为操作码（opcode），通过专用虚拟机在处理器上运行——PHP将需要生成同一函数的多个版本的操作码来处理不同的输入和返回类型。
 - en: Note
+  id: totrans-20
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注释
 - en: The loose typing system leveraged by PHP is one of the things that makes it
     so easy to learn but also so easy to make fatal programming mistakes. This book
     has taken care to leverage *strict typing* wherever possible to avoid these exact
     pitfalls. Review [Recipe 3.4](ch03.html#argument_and_return_typing) for more on
     using strict typing in your own code.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP利用的松散类型系统是使其易于学习但也容易出现致命编程错误的因素之一。本书已经在可能的地方利用*严格类型*来避免这些确切的陷阱。查阅[Recipe
+    3.4](ch03.html#argument_and_return_typing)了解更多关于在您自己的代码中使用严格类型的信息。
 - en: 'With a compiled language, the problem expressed here about loose typing would
     be trivial—merely compile the program to the multiple forks of opcode and move
     on. Unfortunately, PHP is more of an interpreted language; it reloads and recompiles
@@ -92,43 +137,57 @@
     performance drain of multiple code paths can be combatted with two modern features
     built into the very language itself: just-in-time (JIT) compilation and the caching
     of opcode.'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于编译语言来说，这里表达的关于松散类型的问题将是微不足道的——只需将程序编译成多个opcode的分支即可。不幸的是，PHP更像是一种解释语言；它根据应用程序的加载情况在需求时重新加载和重新编译您的脚本。幸运的是，多个代码路径的性能损耗可以通过两个现代特性来解决，这些特性内置于语言本身中：即时编译（JIT）和opcode的缓存。
 - en: Just-In-Time Compilation
+  id: totrans-23
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 即时编译
 - en: As of version 8.0, PHP [ships with a JIT compiler](https://oreil.ly/XS9gg) that
     immediately enables faster program execution and better-performing applications.
     It does this by leveraging traces of actual instructions passed to the virtual
     machine (VM) handling the script’s execution. When a particular trace is called
     frequently, PHP will automatically recognize the importance of the operation and
     gauge whether or not the code benefits from compilation.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 截至版本 8.0，PHP [配备了即时编译器（JIT compiler）](https://oreil.ly/XS9gg)，能够立即提高程序执行速度，使应用性能更佳。它通过利用传递给处理脚本执行的虚拟机（VM）的实际指令的轨迹来实现这一点。当特定轨迹频繁调用时，PHP将自动识别操作的重要性，并评估代码是否从编译中获益。
 - en: Subsequent invocations of the same code will use the compiled byte code rather
     than the dynamic script, causing a significant performance boost. Based on [metrics
     published by Zend when PHP 8.0 was released](https://oreil.ly/LpZ3w), the inclusion
     of a JIT compiler renders the PHP benchmark suite to be up to three times faster!
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 对同一段代码的后续调用将使用编译后的字节码而不是动态脚本，从而显著提升性能。基于[Zend在发布PHP 8.0时发布的度量数据](https://oreil.ly/LpZ3w)，JIT编译器的引入使得PHP基准测试套件的性能提高了最多三倍！
 - en: The point to remember is that JIT compilation primarily benefits low-level algorithms.
     This includes number crunching and raw data manipulation. Anything outside of
     CPU-intensive operations (e.g., graphics manipulation or heavy database integrations)
     won’t see nearly as much benefit to these changes. However, knowing that the JIT
     compiler exists, you can take advantage of it and use PHP in new ways.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 需要记住的一点是，JIT编译主要有利于低级算法。这包括数字计算和原始数据操作。除了CPU密集型操作（例如图形处理或大量数据库集成）外，其他任何操作对这些更改的受益都不会太大。但是，知道JIT编译器的存在，您可以利用它以及以新的方式使用PHP。
 - en: Opcode Caching
+  id: totrans-27
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 操作码缓存
 - en: Among the easiest ways to increase performance—indeed, the way the JIT compiler
     does so—is to cache expensive operations and reference the result rather than
     doing the operations again and again. Since version 5.5, PHP has shipped with
     an optional extension for caching precompiled byte code in memory called [OPcache](https://oreil.ly/wH2ue).^([1](ch14.html#idm45875141364544))
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 提高性能的最简单方法之一，事实上JIT编译器所做的方法之一，是缓存昂贵的操作并引用结果，而不是一遍又一遍地执行这些操作。自版本5.5起，PHP附带了一个可选的内存中缓存预编译字节码的扩展，称为[OPcache](https://oreil.ly/wH2ue)。^([1](ch14.html#idm45875141364544))
 - en: Remember, PHP is primarily a dynamic script interpreter and will read in your
     scripts when the program starts. If you stop and start your application frequently,
     PHP will need to recompile your script to computer-readable byte code in order
@@ -136,17 +195,23 @@
     of scripts and thus slow performance. The OPcache, however, allows you to selectively
     compile scripts to provide the byte code to PHP before the rest of the application
     runs. This removes the need for PHP to load and parse the scripts each time!
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 请记住，PHP主要是动态脚本解释器，并在程序启动时读取您的脚本。如果您频繁停止和启动应用程序，PHP将需要重新编译您的脚本以将代码转换为计算机可读的字节码，以便正确执行。频繁的停止/启动可能导致频繁重新编译脚本，从而降低性能。然而，OPcache允许您选择性地编译脚本，以在应用程序其余部分运行之前向PHP提供字节码。这样就无需每次加载和解析脚本了！
 - en: Note
+  id: totrans-30
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: The JIT compiler in PHP 8 and above can only be enabled if OPcache is also enabled
     on the server, since it uses the cache as its shared memory backend. However,
     you do not need to use the JIT compiler to use OPcache itself.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 自PHP 8及以上版本起，JIT编译器只能在服务器上启用了OPcache时才能启用，因为它使用缓存作为其共享内存后端。然而，您不需要使用JIT编译器来使用OPcache本身。
 - en: Both JIT compilation and opcode caching are low-level performance improvements
     to the language that you can easily leverage at runtime, but they’re not the end
     of the story. It’s also critical to understand how to time the execution of user-defined
@@ -154,47 +219,68 @@
     Comprehensively benchmarking the application also helps gauge performance changes
     when deploying to new environments, on new releases of the language, or with updated
     dependencies down the road.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: JIT编译和操作码缓存都是语言的低级性能改进，您可以在运行时轻松利用它们，但这并不是全部。还要了解如何计时执行用户定义的函数是至关重要的。这使得相对容易地识别业务逻辑中的瓶颈。全面对应用程序进行基准测试也有助于评估在新环境部署、语言新版本发布或后续依赖更新时的性能变化。
 - en: The following recipes describe both the timing/benchmarking of userland application
     code and how to leverage the language-level opcode cache to optimize the performance
     of your application and environment.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下示例描述了如何对用户应用程序代码进行计时/基准测试，并如何利用语言级别的操作码缓存来优化应用程序和环境的性能。
 - en: 14.1 Timing Function Execution
+  id: totrans-34
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 14.1 计时函数执行
 - en: Problem
+  id: totrans-35
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to understand how long it takes a particular function to execute in
     order to identify potential opportunities for optimization.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望了解特定函数执行所需的时间，以识别优化的潜在机会。
 - en: Solution
+  id: totrans-37
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Leverage PHP’s built-in `hrtime()` function both before and after function
     execution to determine how long the function took to run. For example:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 利用 PHP 内置的 `hrtime()` 函数在函数执行前后来确定函数运行的时间。例如：
 - en: '[PRE2]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Discussion
+  id: totrans-40
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The `hrtime()` function will return the system’s built-in high-resolution time,
     counting from an arbitrary point in time defined by the system. By default, it
     returns an array of two integers—seconds and nanoseconds, respectively. Passing
     `true` to the function will instead return the total number of nanoseconds, requiring
     you to divide by `1e+9` to convert the raw output back to human-readable seconds.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: '`hrtime()` 函数将返回系统内置的高分辨率时间，从系统定义的任意时间点开始计数。默认情况下，它返回一个包含两个整数的数组——分别是秒和纳秒。将
+    `true` 传递给函数将返回总纳秒数，需要通过 `1e+9` 进行除法运算，将原始输出转换回人类可读的秒数。'
 - en: A slightly fancier approach is to abstract the timing mechanism into a decorator
     object. As covered in [Chapter 8](ch08.html#chapter_classes), a decorator is a
     programming design pattern that allows you to extend the functionality of a single
@@ -202,497 +288,744 @@
     In this case, you want to trigger the use of `hrtime()` to time a function’s execution
     without changing the function itself. The decorator in [Example 14-2](#timed_decorator_object)
     would do exactly that.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个稍微高级的方法是将计时机制抽象为装饰器对象。如[第 8 章](ch08.html#chapter_classes)所述，装饰器是一种编程设计模式，允许您通过包装它在另一个类实现中来扩展单个函数调用（或整个类）的功能。在这种情况下，您希望触发使用
+    `hrtime()` 来计时函数的执行时间，而不改变函数本身。[示例 14-2](#timed_decorator_object)中的装饰器将完全做到这一点。
 - en: Example 14-2\. A timed decorator object for measuring function call performance
+  id: totrans-43
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-2\. 用于测量函数调用性能的定时装饰器对象
 - en: '[PRE3]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '[![1](assets/1.png)](#co_performance_tuning_CO2-1)'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_performance_tuning_CO2-1)'
 - en: The `__invoke()` magic method makes class instances callable as if they were
     functions. Using the `...` spread operator will capture any arguments passed in
     at runtime so they can be passed later to the wrapped method.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: '`__invoke()` 魔术方法使类实例可调用，就像它们是函数一样。使用 `...` 扩展运算符将捕获运行时传递的任何参数，以便稍后传递给包装方法。'
 - en: '[![2](assets/2.png)](#co_performance_tuning_CO2-2)'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_performance_tuning_CO2-2)'
 - en: The actual timing mechanism used by the decorator is the same as that in the
     Solution example.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 装饰器使用的实际计时机制与解决方案示例中使用的相同。
 - en: '[![3](assets/3.png)](#co_performance_tuning_CO2-3)'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_performance_tuning_CO2-3)'
 - en: Assuming the wrapped function is callable, PHP will call the function and pass
     all necessary arguments thanks to the `...` spread operator.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设包装函数可调用，PHP 将调用该函数并由于 `...` 扩展运算符传递所有必要的参数。
 - en: '[![4](assets/4.png)](#co_performance_tuning_CO2-4)'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_performance_tuning_CO2-4)'
 - en: This implementation of the decorator can be instantiated with a verbosity flag
     that will also print runtimes to the console.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 此装饰器的实现可以实例化为具有打印运行时间到控制台的详细标志。
 - en: '[![5](assets/5.png)](#co_performance_tuning_CO2-5)'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#co_performance_tuning_CO2-5)'
 - en: Since the wrapped function might return data, you need to ensure that the decorator
     returns that output as well.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于包装函数可能返回数据，您需要确保装饰器也返回该输出。
 - en: '[![6](assets/6.png)](#co_performance_tuning_CO2-6)'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#co_performance_tuning_CO2-6)'
 - en: As the decorated function is itself an object, you can directly expose additional
     properties and methods. In this case, the decorator keeps track of aggregate metrics
     that can be retrieved directly.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于装饰的函数本身是一个对象，您可以直接公开额外的属性和方法。在这种情况下，装饰器跟踪可以直接检索的聚合指标。
 - en: Assuming the same `doSomethingComputationallyExpensive()` function from the
     Solution example is the function you want to test, the preceding decorator can
     wrap the function and produce metrics as shown in [Example 14-3](#leveraging_decorator).
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设与解决方案示例中相同的`doSomethingComputationallyExpensive()`函数是您要测试的函数，则上述装饰器可以包装该函数并像示例
+    14-3 中显示的那样生成指标。
 - en: Example 14-3\. Leveraging a decorator to time function execution
+  id: totrans-58
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-3\. 利用装饰器计时函数执行时间
 - en: '[PRE4]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: '[![1](assets/1.png)](#co_performance_tuning_CO3-1)'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_performance_tuning_CO3-1)'
 - en: Since the decorator class implements the `__invoke()` magic method, you can
     use an instance of the class as if it were a function itself.
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于装饰器类实现了`__invoke()`魔术方法，您可以像使用函数本身一样使用类的实例。
 - en: '[![2](assets/2.png)](#co_performance_tuning_CO3-2)'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_performance_tuning_CO3-2)'
 - en: The resulting metrics array will include a count of invocations, the total runtime
     (in seconds) for all invocations, and the average runtime (in seconds) across
     all invocations.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 结果指标数组将包括调用次数计数，所有调用的总运行时间（秒），以及所有调用的平均运行时间（秒）。
 - en: 'Similarly, you can test the same wrapped function multiple times and pull aggregate
     runtime metrics from all invocations as follows:'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样地，您可以多次测试相同的包装函数，并从所有调用中获取汇总的运行时指标，如下所示：
 - en: '[PRE5]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Since the `TimerDecorator` class can wrap any callable function, you can use
     it to decorate class methods just as easily as you can native functions. The class
     in [Example 14-4](#decorator_friendly_class) defines both a static and an instance
     method, either of which can be wrapped by a decorator.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于`TimerDecorator`类可以包装任何可调用函数，您可以像使用本地函数一样轻松地用它来装饰类方法。示例 14-4 中的类定义了一个静态方法和一个实例方法，两者都可以被装饰器包装。
 - en: Example 14-4\. Simple class definition for testing decorators
+  id: totrans-67
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-4\. 用于测试装饰器的简单类定义
 - en: '[PRE6]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '[Example 14-5](#decorator_callables) shows how class methods (both static and
     instance-bound) can be referred to as callables at runtime in PHP. Anything that
     can be expressed as a callable interface can be wrapped by a decorator.'
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 14-5](#decorator_callables)展示了在 PHP 中如何在运行时将类方法（静态和实例绑定的）作为可调用对象引用。任何可以表示为可调用接口的内容都可以被装饰器包装。'
 - en: Example 14-5\. Any callable interface can be wrapped by a decorator
+  id: totrans-70
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-5\. 任何可调用接口都可以被装饰器包装
 - en: '[PRE7]'
+  id: totrans-71
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: '[![1](assets/1.png)](#co_performance_tuning_CO4-1)'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_performance_tuning_CO4-1)'
 - en: A static class method is used as a callable by passing an array of both the
     names of the class and its static method.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过传递类名和其静态方法的名称数组，可以将静态类方法用作可调用对象。
 - en: '[![2](assets/2.png)](#co_performance_tuning_CO4-2)'
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_performance_tuning_CO4-2)'
 - en: Once created, the decorated static method can be called as any other function
     would be and will produce metrics the same way.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建后，装饰的静态方法可以像调用任何其他函数一样调用，并以相同方式生成指标。
 - en: '[![3](assets/3.png)](#co_performance_tuning_CO4-3)'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_performance_tuning_CO4-3)'
 - en: A method of a class instance is used as a callable by passing an array of the
     instantiated object and the string name of the method.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过传递实例化对象和方法字符串名称的数组，可以将类实例的方法用作可调用对象。
 - en: '[![4](assets/4.png)](#co_performance_tuning_CO4-4)'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_performance_tuning_CO4-4)'
 - en: Similar to the decorated static method, a decorated instance method can then
     be called as any other function would be to populate metrics within the decorator.
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似于装饰的静态方法，装饰的实例方法可以像调用任何其他函数一样调用，以在装饰器内部填充指标。
 - en: Once you know how long a function takes to run, you can focus on optimizing
     its execution. This might involve refactoring the logic or using an alternative
     approach to defining an algorithm.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦你知道一个函数运行多长时间，你可以专注于优化其执行。这可能涉及重构逻辑或使用替代方法来定义算法。
 - en: The use of `hrtime()` originally required the [HRTime extension](https://oreil.ly/P_4Fq)
     to PHP but is now bundled as a core function by default. If you’re using a version
     of PHP older than 7.3 or a prebuilt distribution where it was explicitly omitted,
     the function itself might be missing. In that event, you can either install the
     extension yourself via PECL or leverage the similar `microtime()` function instead.^([2](ch14.html#idm45875140747200))
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`hrtime()`最初需要 PHP 的 [HRTime 扩展](https://oreil.ly/P_4Fq)，但现在已默认作为核心函数捆绑。如果您使用的是早于
+    7.3 版本的 PHP 或者显式省略了扩展的预构建分发版本，则该函数本身可能会丢失。在这种情况下，您可以通过 PECL 自行安装扩展，或者改用类似的`microtime()`函数。^([2](ch14.html#idm45875140747200))
 - en: 'Rather than counting seconds from an arbitrary point in time, `microtime()`
     returns the number of microseconds since the Unix epoch. This function can be
     used in place of `hrtime()` to gauge function execution time as follows:'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: '`microtime()` 函数不是从任意时间点开始计算秒数，而是返回自 Unix 纪元以来的微秒数。此函数可用于代替 `hrtime()` 来评估函数执行时间，如下所示：'
 - en: '[PRE8]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Regardless of whether you use `hrtime()` as in the Solution example or `microtime()`
     as in the preceding snippet, ensure that you’re consistent with the way you read
     out the resulting data. Both mechanisms return notions of time at different levels
     of precision, which could lead to confusion if you mix and match on any output
     formatting.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论您是像解决方案示例中使用 `hrtime()`，还是像上面的代码片段中使用 `microtime()`，都要确保在读取结果数据时保持一致。这两种机制返回不同精度级别的时间概念，如果在任何输出格式化中混用，可能会导致混淆。
 - en: See Also
+  id: totrans-85
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: PHP documentation on [`hrtime()`](https://oreil.ly/AjZ4H) and [`microtime()`](https://oreil.ly/r_U84).
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 文档关于 [`hrtime()`](https://oreil.ly/AjZ4H) 和 [`microtime()`](https://oreil.ly/r_U84)。
 - en: 14.2 Benchmarking the Performance of an Application
+  id: totrans-87
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 14.2 应用程序性能基准测试
 - en: Problem
+  id: totrans-88
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to benchmark the performance of your entire application so you can
     gauge changes (e.g., performance regressions) as the codebase, dependencies, and
     underlying language versions evolve.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望对整个应用程序的性能进行基准测试，以便评估代码库、依赖项和底层语言版本的变化（例如性能退化）。
 - en: Solution
+  id: totrans-90
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: Leverage an automated tool like PHPBench to instrument your code and run regular
     performance benchmarks. For example, the following class is constructed to test
     the performance of all available hashing algorithms over various string sizes.^([3](ch14.html#idm45875140682000))
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 利用像 PHPBench 这样的自动化工具来为您的代码进行仪表化，并定期进行性能基准测试。例如，下面的类被构建用来测试所有可用的哈希算法在不同字符串大小下的性能。^([3](ch14.html#idm45875140682000))
 - en: '[PRE9]'
+  id: totrans-92
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'To run the default preceding example benchmark, first clone PHPBench, then
     install Composer dependencies, and finally run the following command:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 要运行默认的前述示例基准测试，首先克隆 PHPBench，然后安装 Composer 依赖项，最后运行以下命令：
 - en: '[PRE10]'
+  id: totrans-94
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: The resulting output, once the benchmark completes, will resemble the chart
     in [Figure 14-1](#hashing_benchmark).
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦基准测试完成，生成的输出将类似于 [图 14-1](#hashing_benchmark) 中的图表。
 - en: '![Output metrics from PHPBench''s example hashing benchmark](assets/phpc_1401.png)'
+  id: totrans-96
   prefs: []
   type: TYPE_IMG
+  zh: '![PHPBench示例哈希基准测试的输出指标](assets/phpc_1401.png)'
 - en: Figure 14-1\. Output metrics from PHPBench’s example hashing benchmark
+  id: totrans-97
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 14-1\. PHPBench 示例哈希基准测试的输出指标
 - en: Discussion
+  id: totrans-98
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: PHPBench is an effective way to gauge performance benchmarks of user-defined
     code in a variety of situations. It can be used in development environments to
     judge the performance level of new code, and it can also be integrated directly
     into continuous integration environments.
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: PHPBench 是一种有效的方法，用于在各种情况下对用户定义的代码进行性能基准测试。它可以在开发环境中使用，以评估新代码的性能水平，并可以直接集成到持续集成环境中。
 - en: PHPBench’s own [GitHub Actions configuration](https://oreil.ly/D6PMf) runs a
     full benchmarking suite of the application itself with every pull request and
     change. This allows the project maintainers to ensure that the project continues
     performing as expected with each change they introduce across a broad matrix of
     supported versions of PHP.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: PHPBench 自己的 [GitHub Actions 配置](https://oreil.ly/D6PMf) 在每次拉取请求和更改时都运行应用程序的完整基准测试套件。这使项目维护者可以确保项目在支持的多个
+    PHP 版本的广泛矩阵中，每次引入更改时都能如预期地继续执行。
 - en: Any project aiming to include automated benchmarks must first start with Composer.^([4](ch14.html#idm45875140540864))
     You need to leverage Composer autoloading so PHPBench knows where to grab classes
     from, but once that’s set up, you can build your project however you want.
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 任何旨在包含自动化基准测试的项目必须首先使用 Composer。^([4](ch14.html#idm45875140540864)) 您需要利用 Composer
+    的自动加载功能，使 PHPBench 知道从哪里获取类，但一旦设置完成，您可以按照您希望的方式构建您的项目。
 - en: 'Assume you’re building a project that leverages value objects and hashing to
     protect sensitive data they store. Your initial *composer.json* file might look
     something like the following:'
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设您正在构建一个项目，利用值对象和哈希技术来保护它们存储的敏感数据。您的初始 *composer.json* 文件可能看起来像以下内容：
 - en: '[PRE11]'
+  id: totrans-103
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Naturally, your project code will live in a *src/* directory and any tests,
     benchmarking or otherwise, will live in a separate *tests/* directory. For the
     sake of benchmarking alone, you’ll want to create a dedicated *tests/Benchmark/*
     directory to keep track of both namespaces and filterable code.
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，您的项目代码将位于 *src/* 目录中，任何测试、基准测试或其他内容将位于单独的 *tests/* 目录中。仅供基准测试，您还需要创建一个专用的
+    *tests/Benchmark/* 目录来跟踪名称空间和可筛选的代码。
 - en: Your first class, the one you want to benchmark, is a value object that takes
     in an email address and can be easily manipulated as if it were a string. But
     when it dumps its contents to a debugging context, like `var_dump()` or `print_r()`,
     it automatically hashes the value.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 您的第一个类，即您想要进行基准测试的类，是一个值对象，接受电子邮件地址并且可以像处理字符串一样轻松操作。但是，当它将其内容转储到像 `var_dump()`
+    或 `print_r()` 这样的调试上下文时，它会自动对值进行哈希处理。
 - en: Warning
+  id: totrans-106
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: Email is a common enough format that even hashing the data won’t be enough to
     protect it from a truly dedicated attacker. The illustrations in this recipe are
     meant to demonstrate how data can be *obfuscated* using a hash. This should not
     be considered a comprehensive security tutorial.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 电子邮件是足够常见的格式，即使对数据进行哈希处理也不足以保护其免受真正专注的攻击者。本文中的插图旨在演示如何使用哈希对数据进行*混淆*。这不应被视为全面的安全教程。
 - en: Create the class defined in [Example 14-6](#protected_string_class) as *ProtectedString.php*
     in your new *src/* directory. This class has a lot to it—primarily several implemented
     magic methods to ensure that there is no way to *accidentally* serialize the object
     and get at its internal value. Instead, once you instantiate a `ProtectedString`
     object, the only way to get at its contents is with the `::getValue()` method.
     Anything else will return the SHA-256 hash of the contents.
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 在您的新 *src/* 目录中创建如示例 14-6 所定义的类，命名为 *ProtectedString.php*。此类包含很多内容——主要是几个实现的魔术方法，以确保没有办法*意外*序列化对象并访问其内部值。相反，一旦实例化
+    `ProtectedString` 对象，唯一访问其内容的方法是使用 `::getValue()` 方法。其他任何方法将返回内容的 SHA-256 哈希。
 - en: Example 14-6\. Protected string wrapper class definition
+  id: totrans-109
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-6\. 受保护的字符串包装类定义
 - en: '[PRE12]'
+  id: totrans-110
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: You want to validate the performance of the chosen hashing algorithm. SHA-256
     is more than reasonable, but you want to ensure that you benchmark all possible
     means of serialization for performance so that, if and when you need to change
     to a different hashing algorithm, you can ensure no performance regressions in
     the system.
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望验证所选哈希算法的性能。SHA-256 是绝对合理的选择，但是您希望通过性能对所有可能的序列化方式进行基准测试，以便在需要更改到不同哈希算法时，可以确保系统中没有性能退化。
 - en: 'To actually begin benchmarking this class, create the following *phpbench.json*
     file in the root of your project:'
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 要实际开始对此类进行基准测试，请在项目根目录创建以下 *phpbench.json* 文件：
 - en: '[PRE13]'
+  id: totrans-113
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Finally, create an actual benchmark to time the various ways a user can serialize
     a string. The benchmark defined in [Example 14-7](#protected_string_benchmark)
     should live in *tests/Benchmark/ProtectedStringBench.php*.
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，创建一个实际的基准测试来计时用户可以序列化字符串的各种方式。在 *tests/Benchmark/ProtectedStringBench.php*
+    中定义的示例 14-7 应该存在。
 - en: Example 14-7\. Benchmarking the `ProtectedString` class
+  id: totrans-115
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-7\. 对 `ProtectedString` 类进行基准测试
 - en: '[PRE14]'
+  id: totrans-116
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'Finally, you can run your benchmarks with the following shell command:'
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，您可以使用以下 shell 命令运行您的基准测试：
 - en: '[PRE15]'
+  id: totrans-118
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: This command will produce an output similar to that in [Figure 14-2](#object_serialization_benchmarks),
     detailing the memory usage and runtime for each of your serialization operations.
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 此命令将生成与 [图 14-2](#object_serialization_benchmarks) 中类似的输出，详细说明每个序列化操作的内存使用和运行时间。
 - en: '![Output of PHPBench for value object serialization with hashing.](assets/phpc_1402.png)'
+  id: totrans-120
   prefs: []
   type: TYPE_IMG
+  zh: '![PHPBench 对带哈希值对象序列化的输出。](assets/phpc_1402.png)'
 - en: Figure 14-2\. Output of PHPBench for value object serialization with hashing
+  id: totrans-121
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 14-2\. PHPBench 输出，用于带哈希值对象序列化
 - en: Every element of your application can, and should, have benchmarking built into
     it. This will drastically simplify testing the performance of your application
     in new environments—like on new server hardware or under a newly released version
     of PHP. Wherever possible, take time to wire these benchmarks into continuous
     integration runs as well to ensure that the tests are run and recorded as frequently
     as possible.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 您的应用程序的每个元素都可以且应该内置基准测试。这将大大简化在新环境（如新的服务器硬件或新发布的 PHP 版本下）中测试应用程序性能的过程。尽可能地将这些基准测试集成到持续集成运行中，并确保测试能够经常运行和记录。
 - en: See Also
+  id: totrans-123
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: Official documentation for the [PHPBench project](https://oreil.ly/4HCMc).
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: '[PHPBench项目](https://oreil.ly/4HCMc)的官方文档。'
 - en: 14.3 Accelerating an Application with an Opcode Cache
+  id: totrans-125
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 14.3 加速应用程序的Opcode缓存
 - en: Problem
+  id: totrans-126
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to leverage opcode caching in your environment to improve the overall
     performance of your application.
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 想要在你的环境中利用opcode缓存来提升应用程序的整体性能。
 - en: Solution
+  id: totrans-128
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Install the shared OPcache extension and configure it in *php.ini* for your
     environment.^([5](ch14.html#idm45875139889680)) As it’s a default extension, you
     merely need to update your configuration to enable caching. The following settings
     are generally recommended for solid performance but should be tested against your
     particular application and infrastructure:'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 在你的环境中安装共享的OPcache扩展并在*php.ini*中配置它。^([5](ch14.html#idm45875139889680)) 由于它是一个默认的扩展程序，你只需更新你的配置来启用缓存。以下设置通常建议用于良好的性能，但应根据你特定的应用程序和基础设施进行测试：
 - en: '[PRE16]'
+  id: totrans-130
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Discussion
+  id: totrans-131
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: When PHP is running, the interpreter reads your scripts and compiles your user-friendly
     PHP code into something that’s easy for the machine to understand. Unfortunately,
     since PHP isn’t a formally compiled language, it has to do this compilation every
     time a script loads. With a simple application, this isn’t that much of an issue.
     With a complex application, it can lead to slow load times and high latency for
     repeated requests.
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 当PHP运行时，解释器会读取你的脚本，并将你友好的PHP代码编译成机器易于理解的形式。不幸的是，由于PHP不是正式编译的语言，每次加载脚本时都必须进行这种编译。对于简单的应用程序，这并不是什么问题。但对于复杂的应用程序，这可能导致加载时间缓慢和重复请求的高延迟。
 - en: The easiest way to optimize an application around this particular issue is to
     cache the compiled byte code so it can be reused on subsequent requests.
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 环绕这个特定问题优化应用程序的最简单方法是缓存编译后的字节码，以便在后续请求中重复使用。
 - en: To test and verify the functionality of the opcode cache locally, you can leverage
     `-d` flags at the command line when starting a script. The `-d` flag sets an explicit
     override for a configuration value otherwise set (or left to its default) by *php.ini*.
     Specifically, the command-line flags in [Example 14-8](#webserver_no_opcache)
     will leverage the local PHP development server to run an application with OPcache
     *disabled* entirely.
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了在本地测试和验证opcode缓存的功能，你可以在启动脚本时使用命令行的`-d`标志。 `-d`标志在使用时会明确地覆盖配置值，否则会被*php.ini*设置（或保持其默认）。具体来说，[示例 14-8](#webserver_no_opcache)中的命令行标志将利用本地PHP开发服务器来完全*禁用*OPcache运行应用程序。
 - en: Example 14-8\. Launch a local PHP web server without OPcache support
+  id: totrans-135
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-8\. 启动不带OPcache支持的本地PHP Web服务器
 - en: '[PRE17]'
+  id: totrans-136
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Similarly, you can run almost exactly the same command with explicit *enabling*
     of the opcode cache to directly compare the behavior and performance of your application,
     as shown in [Example 14-9](#webserver_with_opcache).
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似地，你可以几乎使用完全相同的命令来显式*启用*opcode缓存，以直接比较你的应用程序的行为和性能，如[示例 14-9](#webserver_with_opcache)所示。
 - en: Example 14-9\. Launch a local PHP web server with OPcache support
+  id: totrans-138
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-9\. 启动带OPcache支持的本地PHP Web服务器
 - en: '[PRE18]'
+  id: totrans-139
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'To fully demonstrate how this works, take time to install a demo application
     using the open source Symfony framework. The following two commands will clone
     a demonstration application to the */demosite/* directory locally and use Composer
     to install required dependencies:'
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了全面展示其工作原理，花些时间安装一个使用开源Symfony框架的演示应用程序。以下两条命令将在本地将演示应用程序克隆到*/demosite/*目录，并使用Composer安装所需的依赖项：
 - en: '[PRE19]'
+  id: totrans-141
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: Next, use the built-in PHP web server to launch the application itself. Use
     the command from [Example 14-8](#webserver_no_opcache) to start without opcache
     support. The application will be available on port 8080 and will look something
     like [Figure 14-3](#symfony_demo).
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，使用内置的PHP Web服务器启动应用程序本身。使用[示例 14-8](#webserver_no_opcache)中的命令启动时没有opcache支持。该应用程序将在8080端口上可用，并且看起来像[图 14-3](#symfony_demo)。
 - en: '![Loading page of the default Symfony demo application.](assets/phpc_1403.png)'
+  id: totrans-143
   prefs: []
   type: TYPE_IMG
+  zh: '![Symfony演示应用程序的加载页面。](assets/phpc_1403.png)'
 - en: Figure 14-3\. Loading page of the default Symfony demo application
+  id: totrans-144
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 14-3\. Symfony演示应用程序的加载页面
 - en: The default application is running locally, using a lightweight SQLite database,
     so it should load fairly quickly. As shown in [Example 14-10](#curl_performance_test),
     you can effectively test the load time with a cURL command in your terminal.
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认应用程序在本地运行，使用轻量级的SQLite数据库，因此应该加载得相当快。正如[示例 14-10](#curl_performance_test)中所示，你可以在终端中使用cURL命令有效地测试加载时间。
 - en: Example 14-10\. Simple cURL command for gauging web application response time
+  id: totrans-146
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 14-10\. 用于测量 Web 应用响应时间的简单 cURL 命令
 - en: '[PRE20]'
+  id: totrans-147
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Without opcode caching enabled, the Symfony demo application loads with a total
     time of ~0.3677 seconds. This is remarkably fast but, again, the application is
     being run entirely within the local environment. In production with a remote database,
     it would likely be slower, but this is a solid baseline.
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果未启用 opcode 缓存，Symfony 演示应用加载总时间约为 ~0.3677 秒。这非常快速，但是请注意，该应用完全在本地环境中运行。在生产环境中，使用远程数据库可能会慢一些，但这是一个坚实的基准。
 - en: Now, stop the application and restart it *with* opcode caching enabled using
     the command defined in [Example 14-9](#webserver_with_opcache). Then rerun the
     cURL performance test from [Example 14-10](#curl_performance_test). With opcode
     caching, the application now loads with a total time of ~0.0371 seconds.
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，停止应用并启用 opcode 缓存，使用 [示例 14-9](#webserver_with_opcache) 中定义的命令重新启动。然后从 [示例
+    14-10](#curl_performance_test) 重新运行 cURL 性能测试。启用 opcode 缓存后，应用现在加载总时间约为 ~0.0371
+    秒。
 - en: This is a relatively simple, default application, but a 10 times increase in
     performance is a massive boost to system performance. The faster an application
     loads, the more customers your system can service in the same period of time!
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个相对简单的默认应用程序，但性能提升了 10 倍对系统性能来说是一个巨大的提升。应用加载得越快，您的系统在同一时间段内就能服务更多客户！
 - en: See Also
+  id: totrans-151
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: PHP documentation on the [OPcache extension](https://oreil.ly/Tb8rC).
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 扩展 [OPcache](https://oreil.ly/Tb8rC) 的文档。
 - en: ^([1](ch14.html#idm45875141364544-marker)) The newer JIT compiler released with
     PHP 8.0 uses OPcache under the hood, but you can still leverage caching *manually*
     to control the system even if JIT compilation is unavailable.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([1](ch14.html#idm45875141364544-marker)) PHP 8.0 中发布的新 JIT 编译器在底层使用了 OPcache，但即使
+    JIT 编译不可用，您仍然可以手动利用缓存来控制系统。
 - en: ^([2](ch14.html#idm45875140747200-marker)) For more on PECL and extension management,
     refer to [Recipe 15.4](ch15.html#native_php_extensions).
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([2](ch14.html#idm45875140747200-marker)) 更多关于 PECL 和扩展管理的信息，请参考 [15.4 配方](ch15.html#native_php_extensions)。
 - en: ^([3](ch14.html#idm45875140682000-marker)) This particular example is taken
     from the [example benchmarks](https://oreil.ly/zZE4X) that ship by default with
     PHPBench.
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([3](ch14.html#idm45875140682000-marker)) 此特定示例来自默认随 PHPBench 发布的 [示例基准](https://oreil.ly/zZE4X)。
 - en: ^([4](ch14.html#idm45875140540864-marker)) For more on initializing a project
     with Composer, review [Recipe 15.1](ch15.html#composer_definition).
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([4](ch14.html#idm45875140540864-marker)) 更多关于使用 Composer 初始化项目的信息，请参阅 [15.1
+    配方](ch15.html#composer_definition)。
 - en: ^([5](ch14.html#idm45875139889680-marker)) OPcache is a shared extension that
     will not exist if your PHP was compiled with the `--disable-all` flag to disable
     default extensions. In that case, you have no choice but to either recompile PHP
     with the `--enable-opcache` flag set or else install a fresh version of the PHP
     engine that was compiled with this flag set.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([5](ch14.html#idm45875139889680-marker)) OPcache 是一个共享扩展，如果您的 PHP 是使用 `--disable-all`
+    标志编译以禁用默认扩展，则此扩展不存在。在这种情况下，您只能重新编译 PHP 并设置 `--enable-opcache` 标志，或者安装一个新编译并设置了此标志的
+    PHP 引擎版本。

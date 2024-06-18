@@ -1,7 +1,9 @@
 - en: Chapter 12\. XML
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第12章《XML》
 - en: XML, the Extensible Markup Language, is a standardized data format. It looks
     a little like HTML, with tags (`<example>like this</example>`) and entities (`&amp;`).
     Unlike HTML, however, XML is designed to be easy to programmatically parse, and
@@ -9,15 +11,19 @@
     the standard data format in fields as diverse as publishing, engineering, and
     medicine. It’s used for remote procedure calls, databases, purchase orders, and
     much more.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 可扩展标记语言XML是一种标准化的数据格式。它看起来有点像HTML，使用标签（`<example>像这样</example>`）和实体（`&amp;`）。然而，与HTML不同，XML旨在易于以程序方式解析，并且有关于在XML文档中可以和不可以做的规则。XML现在是出版、工程和医学等各个领域的标准数据格式。它用于远程过程调用、数据库、采购订单等各种用途。
 - en: There are many scenarios where you might want to use XML. Because it is a common
     format for data transfer, other programs can emit XML files for you to either
     extract information from (*parse*) or display in HTML (*transform*). This chapter
     shows you how to use the XML parser bundled with PHP, as well as how to use the
     optional XSLT extension to transform XML. We also briefly cover generating XML.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 有许多情况下你可能希望使用XML。因为它是数据传输的常见格式，其他程序可以生成XML文件供您提取信息（*解析*）或在HTML中显示（*转换*）。本章将向您展示如何使用PHP捆绑的XML解析器，以及如何使用可选的XSLT扩展来转换XML。我们还简要介绍了生成XML的方法。
 - en: Recently, XML has been used in remote procedure calls (XML-RPC). A client encodes
     a function name and parameter values in XML and sends them via HTTP to a server.
     The server decodes the function name and values, decides what to do, and returns
@@ -25,83 +31,126 @@
     application components written in different languages. We’ll show you how to write
     XML-RPC servers and clients in [Chapter 16](ch16.xhtml#web_services), but for
     now let’s look at the basics of XML.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 近年来，XML已经被用于远程过程调用（XML-RPC）。客户端将函数名和参数值编码为XML，并通过HTTP发送到服务器。服务器解码函数名和数值，决定如何处理，并返回以XML编码的响应值。XML-RPC已被证明是一种有用的方法，可以集成用不同语言编写的应用程序组件。我们将在[第16章](ch16.xhtml#web_services)展示如何编写XML-RPC服务器和客户端，但现在让我们先看一下XML的基础知识。
 - en: Lightning Guide to XML
+  id: totrans-4
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 《XML简明指南》
 - en: 'Most XML consists of elements (like HTML tags), entities, and regular data.
     For example:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数XML由元素（类似HTML标签）、实体和常规数据组成。例如：
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'In HTML, you often have an open tag without a close tag. The most common example
     of this is:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在HTML中，通常会有未闭合的开放标签。最常见的例子是：
 - en: '[PRE1]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'In XML, that is illegal. XML requires that every open tag be closed. For tags
     that don’t enclose anything, such as the line break `<br>`, XML adds this syntax:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 在XML中，这是非法的。XML要求每个开放标签都有对应的闭合标签。对于不包含任何内容的标签，如换行符`<br>`，XML添加了这种语法：
 - en: '[PRE2]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'Tags can be nested but cannot overlap. For example, this is valid:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 标签可以嵌套但不能重叠。例如，这是有效的：
 - en: '[PRE3]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'This, however, is not valid, because the `<book>` and `<title>` tags overlap:'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 但这个则无效，因为`<book>`和`<title>`标签重叠：
 - en: '[PRE4]'
+  id: totrans-14
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'XML also requires that the document begin with a processing instruction that
     identifies the version of XML being used (and possibly other things, such as the
     text encoding used). For example:'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: XML还要求文档以标识正在使用的XML版本开头（可能还包括其他内容，如文本编码）。例如：
 - en: '[PRE5]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'The final requirement of a well-formed XML document is that there be only one
     element at the top level of the file. For example, this is well formed:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 符合格式良好的XML文档的最后要求是文件顶层只能有一个元素。例如，这是格式良好的：
 - en: '[PRE6]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'This is not well formed, as there are three elements at the top level of the
     file:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 这不是格式良好的，因为文件顶层有三个元素：
 - en: '[PRE7]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'XML documents generally are not completely ad hoc. The specific tags, attributes,
     and entities in an XML document, and the rules governing how they nest, compose
     the structure of the document. There are two ways to write down this structure:
     the *document type definition* (DTD) and the *schema*. DTDs and schemas are used
     to validate documents—that is, to ensure that they follow the rules for their
     type of document.'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: XML文档通常不是完全自由的。XML文档中的特定标签、属性和实体，以及它们嵌套的规则，构成了文档的结构。有两种方法来定义这种结构：*文档类型定义*（DTD）和*模式*。DTD和模式用于验证文档，即确保它们遵循其文档类型的规则。
 - en: 'Most XML documents don’t include a DTD; in these cases, the document is considered
     valid merely if it’s valid XML. Others identify the DTD as an external entity
     with a line that gives the name and location (file or URL) of the DTD:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数 XML 文档不包括 DTD；在这些情况下，文档仅在其为有效 XML 时被视为有效。其他情况下，文档通过一个指定名称和位置（文件或 URL）的外部实体来识别
+    DTD：
 - en: '[PRE8]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Sometimes it’s convenient to encapsulate one XML document in another. For example,
     an XML document representing a mail message might have an `attachment` element
     that surrounds an attached file. If the attached file is XML, it’s a nested XML
@@ -110,39 +159,60 @@
     that also has a `body` element, but this element has completely different DTD
     rules? How can you possibly validate or make sense of the document if the meaning
     of `body` changes partway through?
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时将一个 XML 文档封装在另一个 XML 文档中会很方便。例如，表示邮件消息的 XML 文档可能具有包围附加文件的 `attachment` 元素。如果附加文件是
+    XML，则它是一个嵌套的 XML 文档。如果邮件消息文档有一个 `body` 元素（消息主题），并且附加文件是一个表示解剖学的 XML 表示，该表示也具有
+    `body` 元素，但此元素具有完全不同的 DTD 规则，那么在 `body` 在文档的中途更改意义时，如何验证或理解文档呢？
 - en: This problem is solved with the use of namespaces. Namespaces let you qualify
     the XML tag—for example, `email:body` and `human:body`.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用命名空间解决了这个问题。命名空间允许您限定 XML 标签，例如 `email:body` 和 `human:body`。
 - en: There’s a lot more to XML than we have time to go into here. For a gentle introduction
     to XML, read [*Learning XML*](http://oreil.ly/Learning_XML) (O’Reilly) by Erik
     Ray. For a complete reference to XML syntax and standards, see [*XML in a Nutshell*](http://oreil.ly/XML_Nutshell)
     (O’Reilly) by Elliotte Rusty Harold and W. Scott Means.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: XML 比我们在这里讨论的还要复杂得多。要对 XML 进行简要介绍，请阅读 [*Learning XML*](http://oreil.ly/Learning_XML)（O’Reilly
+    出版）的书籍，由埃里克·雷（Erik Ray）编写。要详细了解 XML 语法和标准，请参阅 [*XML in a Nutshell*](http://oreil.ly/XML_Nutshell)（O’Reilly
+    出版）的书籍，由艾略特·拉斯蒂·哈罗德（Elliotte Rusty Harold）和 W. Scott Means 编写。
 - en: Generating XML
+  id: totrans-27
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 生成 XML
 - en: Just as PHP can be used to generate dynamic HTML, it can also be used to generate
     dynamic XML. You can generate XML for other programs to make use of based on forms,
     database queries, or anything else you can do in PHP. One application for dynamic
     XML is *Rich Site Summary* (RSS), a file format for syndicating news sites. You
     can read an article’s information from a database or from HTML files and emit
     an XML summary file based on that information.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像 PHP 可以用于生成动态 HTML 一样，它也可以用于生成动态 XML。您可以基于表单、数据库查询或其他任何 PHP 可以做的事情来为其他程序生成
+    XML。动态 XML 的一个应用是 *Rich Site Summary*（RSS），这是一个用于聚合新闻站点的文件格式。您可以从数据库或 HTML 文件中读取文章信息，并根据该信息生成
+    XML 摘要文件。
 - en: 'Generating an XML document from a PHP script is simple. Simply change the MIME
     type of the document, using the `header()` function, to `"text/xml"`. To emit
     the `<?xml ... ?>` declaration without it being interpreted as a malformed PHP
     tag, simply `echo` the line from within PHP code:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 从 PHP 脚本生成 XML 文档很简单。只需使用 `header()` 函数更改文档的 MIME 类型为 `"text/xml"`。要发出 `<?xml
+    ... ?>` 声明而不被解释为格式不正确的 PHP 标签，只需从 PHP 代码内部 `echo` 该行：
 - en: '[PRE9]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: '[Example 12-1](#example_onetwo_onedot_generating_an_xml) generates an RSS document
     using PHP. An RSS file is an XML document containing several `channel` elements,
     each of which contains some news `item` elements. Each news `item` can have a
@@ -150,25 +220,40 @@
     `item` are supported by RSS than [Example 12-1](#example_onetwo_onedot_generating_an_xml)
     creates. Just as there are no special functions for generating HTML from PHP,
     there are no special functions for generating XML. You just `echo` it!'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 12-1](#example_onetwo_onedot_generating_an_xml) 使用 PHP 生成了一个 RSS 文档。RSS
+    文件是一个 XML 文档，包含多个 `channel` 元素，每个元素包含一些新闻 `item` 元素。每个新闻 `item` 可以有一个标题、一个描述和指向文章本身的链接。RSS
+    支持的 `item` 属性比 [示例 12-1](#example_onetwo_onedot_generating_an_xml) 创建的要多。正如 PHP
+    生成 HTML 没有特殊函数一样，生成 XML 也没有特殊函数。你只需 `echo` 它！'
 - en: Example 12-1\. Generating an XML document
+  id: totrans-32
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-1\. 生成 XML 文档
 - en: '[PRE10]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'This script generates output such as the following:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 此脚本生成以下输出：
 - en: '[PRE11]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Parsing XML
+  id: totrans-36
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 解析 XML
 - en: Say you have a set of XML files, each containing information about a book, and
     you want to build an index showing the document title and its author for the collection.
     You need to parse the XML files to recognize the `title` and `author` elements
@@ -176,13 +261,20 @@
     functions such as `strtok()`, but it’s a lot more complex than it seems. In addition,
     such methods are prone to breakage even with valid XML documents. The easiest
     and quickest solution is to use one of the XML parsers that ship with PHP.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设您有一组 XML 文件，每个文件包含关于一本书的信息，并且您想构建一个索引，显示集合中每本书的文档标题及其作者。您需要解析 XML 文件以识别 `title`
+    和 `author` 元素及其内容。您可以通过正则表达式和诸如 `strtok()` 的字符串函数手动执行此操作，但实际上这比看起来要复杂得多。此外，即使是有效的
+    XML 文档，这样的方法也容易出现故障。最简单和最快的解决方案是使用 PHP 随附的 XML 解析器之一。
 - en: 'PHP includes three XML parsers: one event-driven library based on the Expat
     C library, one DOM-based library, and one for parsing simple XML documents named,
     appropriately, SimpleXML.'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 包括三个 XML 解析器：一个基于 Expat C 库的事件驱动库，一个基于 DOM 的库，以及一个用于解析简单 XML 文档的名为 SimpleXML
+    的库。
 - en: The most commonly used parser is the event-based library, which lets you parse
     but not validate XML documents. This means you can find out which XML tags are
     present and what they surround, but you can’t find out if they’re the right XML
@@ -190,131 +282,201 @@
     generally a big problem. PHP’s event-based XML parser calls various handler functions
     you provide while it reads the document as it encounters certain *events*, such
     as the beginning or end of an element.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 最常用的解析器是基于事件的库，允许解析但不验证 XML 文档。这意味着您可以了解存在哪些 XML 标签及其周围的内容，但不能确定它们是否是该类型文档正确结构中正确的
+    XML 标签。在实践中，这通常不是一个大问题。PHP 的事件驱动 XML 解析器在读取文档时调用您提供的各种处理器函数，遇到特定的 *事件*，如元素的开始或结束。
 - en: In the following sections, we discuss the handlers you can provide, the functions
     to set the handlers, and the events that trigger the calls to those handlers.
     We also provide sample functions for creating a parser to generate a map of the
     XML document in memory, tied together in a sample application that pretty-prints
     XML.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 在接下来的章节中，我们将讨论您可以提供的处理器、设置处理器的函数以及触发这些处理器调用的事件。我们还提供了用于创建解析器以在内存中生成 XML 文档映射的示例函数，这些示例函数与一个示例应用程序结合在一起，以美化
+    XML。
 - en: Element Handlers
+  id: totrans-41
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 元素处理器
 - en: 'When the parser encounters the beginning or end of an element, it calls the
     start and end element handlers. You set the handlers through the `xml_set_element_handler()`
     function:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 当解析器遇到元素的开始或结束时，将调用起始和结束元素处理器。您可以通过 `xml_set_element_handler()` 函数设置这些处理器：
 - en: '[PRE12]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: The *start_element* and *end_element* parameters are the names of the handler
     functions.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: '*start_element* 和 *end_element* 参数是处理器函数的名称。'
 - en: 'The start element handler is called when the XML parser encounters the beginning
     of an element:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 当 XML 解析器遇到元素开始时，将调用起始元素处理器：
 - en: '[PRE13]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'The start element handler is passed three parameters: a reference to the XML
     parser calling the handler, the name of the element that was opened, and an array
     containing any attributes the parser encountered for the element. The `$attribute`
     array is passed by reference for speed.'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 起始元素处理器接收三个参数：调用处理器的 XML 解析器的引用，已打开的元素的名称以及包含解析器遇到的元素任何属性的数组。`$attribute` 数组通过引用传递以提高速度。
 - en: '[Example 12-2](#example_onetwo_twodot_start_element_han) contains the code
     for a start element handler, `startElement()`. This handler simply prints the
     element name in bold and the attributes in gray.'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 12-2](#example_onetwo_twodot_start_element_han) 包含了一个起始元素处理器 `startElement()`
+    的代码。该处理器简单地以粗体打印元素名称，并以灰色显示属性。'
 - en: Example 12-2\. Start element handler
+  id: totrans-49
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-2\. 起始元素处理器
 - en: '[PRE14]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'The end element handler is called when the parser encounters the end of an
     element:'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 当解析器遇到元素结束时，将调用结束元素处理器：
 - en: '[PRE15]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'It takes two parameters: a reference to the XML parser calling the handler,
     and the name of the element that is closing.'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 它接受两个参数：调用处理器的 XML 解析器的引用，以及正在关闭的元素的名称。
 - en: '[Example 12-3](#example_onetwo_threedot_end_element_han) shows an end element
     handler that formats the element.'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 12-3](#example_onetwo_threedot_end_element_han) 展示了一个结束元素处理器，格式化该元素。'
 - en: Example 12-3\. End element handler
+  id: totrans-55
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-3\. 结束元素处理器
 - en: '[PRE16]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Character Data Handler
+  id: totrans-57
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 字符数据处理器
 - en: 'All of the text between elements (*character data*, or *CDATA* in XML terminology)
     is handled by the character data handler. The handler you set with the `xml_set_`​`character``_data_handler()`
     function is called after each block of character data:'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 在元素之间的所有文本（*字符数据*，或 XML 术语中的 *CDATA*）由字符数据处理程序处理。您使用 `xml_set_`​`character``_data_handler()`
+    函数设置的处理程序在每个字符数据块后被调用：
 - en: '[PRE17]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: 'The character data handler takes in a reference to the XML parser that triggered
     the handler and a string containing the character data itself:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 字符数据处理程序接收引发处理程序的 XML 解析器的引用和包含字符数据本身的字符串：
 - en: '[PRE18]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'Here’s a simple character data handler that simply prints the data:'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个简单的字符数据处理程序，只需打印数据：
 - en: '[PRE19]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: Processing Instructions
+  id: totrans-64
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 处理指令
 - en: 'Processing instructions are used in XML to embed scripts or other code into
     a document. PHP itself can be seen as a processing instruction and, with the `<?php
     ... ?>` tag style, follows the XML format for demarking the code. The XML parser
     calls the processing instruction handler when it encounters a processing instruction.
     Set the handler with the `xml_set_processing_instruction_handler()` function:'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理指令用于在 XML 中嵌入脚本或其他代码到文档中。PHP 本身可以看作是一个处理指令，并且使用 `<?php ... ?>` 标签样式遵循 XML
+    格式来标记代码。当 XML 解析器遇到处理指令时，会调用处理指令处理程序。使用 `xml_set_processing_instruction_handler()`
+    函数设置处理程序：
 - en: '[PRE20]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'A processing instruction looks like:'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理指令看起来像：
 - en: '[PRE21]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: 'The processing instruction handler takes in a reference to the XML parser that
     triggered the handler, the name of the target (for example, `''php''`), and the
     processing instructions:'
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理指令处理程序接收引发处理程序的 XML 解析器的引用、目标名称（例如，`'php'`）和处理指令：
 - en: '[PRE22]'
+  id: totrans-70
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: What you do with a processing instruction is up to you. One trick is to embed
     PHP code in an XML document and, as you parse that document, execute the PHP code
     with the `eval()` function. [Example 12-4](#example_onetwo_fourdot_processing_instr)
@@ -322,68 +484,99 @@
     you include the `eval()` code in them. `eval()` will run any code given to it—even
     code that destroys files or mails passwords to a cracker. In practice, executing
     arbitrary code like this is extremely dangerous.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理指令如何处理取决于您。其中一种技巧是将 PHP 代码嵌入 XML 文档中，并在解析文档时使用 `eval()` 函数执行该 PHP 代码。[示例 12-4](#example_onetwo_fourdot_processing_instr)
+    就是这样做的。当然，如果要包含 `eval()` 代码，您必须信任正在处理的文档。`eval()` 将运行提供给它的任何代码，甚至是销毁文件或将密码发送给破解者的代码。实际上，执行这种任意代码非常危险。
 - en: Example 12-4\. Processing instruction handler
+  id: totrans-72
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-4\. 处理指令处理程序
 - en: '[PRE23]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: Entity Handlers
+  id: totrans-74
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 实体处理程序
 - en: Entities in XML are placeholders. XML provides five standard entities (`&amp;`,
     `&gt;`, `&lt;`, `&quot;`, and `&apos;`), but XML documents can define their own
     entities. Most entity definitions do not trigger events, and the XML parser expands
     most entities in documents before calling the other handlers.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: XML 中的实体是占位符。XML 提供了五个标准实体（`&amp;`、`&gt;`、`&lt;`、`&quot;` 和 `&apos;`），但 XML
+    文档可以定义它们自己的实体。大多数实体定义不会触发事件，而 XML 解析器在调用其他处理程序之前会展开文档中的大多数实体。
 - en: Two types of entities, external and unparsed, have special support in PHP’s
     XML library. An *external* entity is one whose replacement text is identified
     by a filename or URL rather than explicitly given in the XML file. You can define
     a handler to be called for occurrences of external entities in character data,
     but it’s up to you to parse the contents of the file or URL yourself if that’s
     what you want.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 两种类型的实体，外部和未解析的，PHP 的 XML 库提供了特殊支持。*外部* 实体是其替换文本由文件名或 URL 标识而不是在 XML 文件中显式给出的实体。您可以定义一个处理程序，以便在字符数据中发生外部实体时调用它，但如果需要的话，您必须自行解析文件或
+    URL 的内容。
 - en: An *unparsed* entity must be accompanied by a notation declaration, and while
     you can define handlers for declarations of unparsed entities and notations, occurrences
     of unparsed entities are deleted from the text before the character data handler
     is called.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: '*未解析* 实体必须伴随有一个标记声明，虽然您可以为未解析实体和标记的声明定义处理程序，但在调用字符数据处理程序之前，文本中的未解析实体会被删除。'
 - en: External entities
+  id: totrans-78
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 外部实体
 - en: 'External entity references allow XML documents to include other XML documents.
     Typically, an external entity reference handler opens the referenced file, parses
     the file, and includes the results in the current document. Set the handler with
     `xml_set_external_entity_ref_handler()`, which takes in a reference to the XML
     parser and the name of the handler function:'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 外部实体引用允许 XML 文档包含其他 XML 文档。通常，外部实体引用处理程序会打开引用的文件，解析文件，并将结果包含在当前文档中。使用 `xml_set_external_entity_ref_handler()`
+    设置处理程序，该函数接受 XML 解析器的引用和处理程序函数的名称：
 - en: '[PRE24]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: 'The external entity reference handler takes five parameters: the parser triggering
     the handler, the entity’s name, the base Uniform Resource Identifier (URI) for
     resolving the identifier of the entity (which is currently always empty), the
     system identifier (such as the filename), and the public identifier for the entity,
     as defined in the entity’s declaration. For example:'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 外部实体引用处理程序带有五个参数：触发处理程序的解析器、实体的名称、用于解析实体标识符的基本统一资源标识符（URI）（当前始终为空）、系统标识符（例如文件名）以及实体声明中定义的实体的公共标识符。例如：
 - en: '[PRE25]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: If your external entity reference handler returns `false` (which it will if
     it returns no value), XML parsing stops with an `XML_ERROR_EXTERNAL_ENTITY_HANDLING`
     error. If it returns `true`, parsing continues.
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的外部实体引用处理程序返回 `false`（如果它不返回任何值，则会返回 `false`），XML 解析将停止，并显示 `XML_ERROR_EXTERNAL_ENTITY_HANDLING`
+    错误。如果返回 `true`，解析将继续。
 - en: '[Example 12-5](#example_onetwo_fivedot_external_entity) shows how you would
     parse externally referenced XML documents. Define two functions, `createParser()`
     and `parse()`, to do the actual work of creating and feeding the XML parser. You
@@ -391,253 +584,392 @@
     external references. Such functions are described in the section “Using the Parser”.
     The external entity reference handler simply identifies the right file to send
     to those functions.'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 12-5](#example_onetwo_fivedot_external_entity) 显示了如何解析外部引用的 XML 文档。定义两个函数
+    `createParser()` 和 `parse()` 来实际创建和传送 XML 解析器的工作。您可以同时用它们来解析顶级文档和通过外部引用包含的任何文档。这些函数在“使用解析器”部分有描述。外部实体引用处理程序只需确定正确的文件以发送到这些函数。'
 - en: Example 12-5\. External entity reference handler
+  id: totrans-85
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-5\. 外部实体引用处理程序
 - en: '[PRE26]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: Unparsed entities
+  id: totrans-87
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 未解析实体
 - en: 'An unparsed entity declaration must be accompanied by a notation declaration:'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 未解析实体声明必须与符号声明一起出现：
 - en: '[PRE27]'
+  id: totrans-89
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: 'Register a notation declaration handler with `xml_set_notation_decl_handler()`:'
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `xml_set_notation_decl_handler()` 注册符号声明处理程序：
 - en: '[PRE28]'
+  id: totrans-91
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: 'The handler will be called with five parameters:'
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理程序将带有五个参数：
 - en: '[PRE29]'
+  id: totrans-93
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: The *base* parameter is the base URI for resolving the identifier of the notation
     (which is currently always empty). Either the *system* identifier or the *public*
     identifier for the notation will be set, but not both.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: '*基本* 参数是用于解析符号标识符的基本 URI（当前始终为空）。符号的*系统*标识符或*公共*标识符将被设置，但不会同时出现。'
 - en: 'Use the `xml_set_unparsed_entity_decl_handler()` function to register an unparsed
     entity declaration:'
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `xml_set_unparsed_entity_decl_handler()` 函数注册未解析实体声明：
 - en: '[PRE30]'
+  id: totrans-96
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: 'The handler will be called with six parameters:'
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理程序将带有六个参数：
 - en: '[PRE31]'
+  id: totrans-98
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: The *notation* parameter identifies the notation declaration with which this
     unparsed entity is associated.
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: '*符号* 参数标识与此未解析实体关联的符号声明。'
 - en: Default Handler
+  id: totrans-100
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 默认处理程序
 - en: 'For any other event, such as the XML declaration and the XML document type,
     the default handler is called. Call the `xml_set_default_handler()` function to
     set the default handler:'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于其他任何事件，例如 XML 声明和 XML 文档类型，将调用默认处理程序。调用 `xml_set_default_handler()` 函数设置默认处理程序：
 - en: '[PRE32]'
+  id: totrans-102
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: 'The handler will be called with two parameters:'
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理程序将带有两个参数：
 - en: '[PRE33]'
+  id: totrans-104
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: The *text* parameter will have different values depending on the kind of event
     triggering the default handler. [Example 12-6](#example_onetwo_sixdot_default_handler)
     just prints out the given string when the default handler is called.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: '*文本* 参数将根据触发默认处理程序的事件类型具有不同的值。[示例 12-6](#example_onetwo_sixdot_default_handler)
+    在调用默认处理程序时仅打印给定的字符串。'
 - en: Example 12-6\. Default handler
+  id: totrans-106
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-6\. 默认处理程序
 - en: '[PRE34]'
+  id: totrans-107
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: Options
+  id: totrans-108
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 选项
 - en: 'The XML parser has several options you can set to control the source and target
     encodings and case folding. Use `xml_parser_set_option()` to set an option:'
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: XML 解析器有几个选项可用于控制源和目标编码以及大小写折叠。使用 `xml_parser_set_option()` 设置选项：
 - en: '[PRE35]'
+  id: totrans-110
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: 'Similarly, use `xml_parser_get_option()` to interrogate a parser about its
     options:'
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似地，使用 `xml_parser_get_option()` 查询解析器的选项：
 - en: '[PRE36]'
+  id: totrans-112
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: Character encoding
+  id: totrans-113
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 字符编码
 - en: The XML parser used by PHP supports Unicode data in a number of different character
     encodings. Internally, PHP’s strings are always encoded in UTF-8, but documents
     parsed by the XML parser can be in ISO-8859-1, US-ASCII, or UTF-8\. UTF-16 is
     not supported.
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 使用的 XML 解析器支持多种不同字符编码的 Unicode 数据。在内部，PHP 的字符串总是以 UTF-8 编码，但由 XML 解析器解析的文档可以是
+    ISO-8859-1、US-ASCII 或 UTF-8\. 不支持 UTF-16。
 - en: When creating an XML parser, you can give it an encoding format to use for the
     file to be parsed. If omitted, the source is assumed to be in ISO-8859-1\. If
     a character outside the possible range in the source encoding is encountered,
     the XML parser will return an error and immediately stop processing the document.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建 XML 解析器时，可以为其指定用于解析文件的编码格式。如果省略，则假定源文件为 ISO-8859-1\. 如果遇到源编码范围外的字符，XML 解析器将返回错误并立即停止处理文档。
 - en: The target encoding for the parser is the encoding in which the XML parser passes
     data to the handler functions; normally, this is the same as the source encoding.
     At any time during the XML parser’s lifetime, the target encoding can be changed.
     The parser demotes any characters outside the target encoding’s character range
     by replacing them with a question mark character (`?`).
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 解析器的目标编码是 XML 解析器将数据传递给处理程序函数的编码；通常与源编码相同。在 XML 解析器的生命周期中的任何时间，都可以更改目标编码。解析器通过用问号字符
+    (`?`) 替换目标编码范围外的任何字符来降级这些字符。
 - en: Use the constant `XML_OPTION_TARGET_ENCODING` to get or set the encoding of
     the text passed to callbacks. Allowable values are `"ISO-8859-1"` (the default),
     `"US-ASCII"`, and `"UTF-8"`.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用常量 `XML_OPTION_TARGET_ENCODING` 获取或设置传递给回调函数的文本编码。允许的值包括 `"ISO-8859-1"`（默认）、`"US-ASCII"`
+    和 `"UTF-8"`。
 - en: Case folding
+  id: totrans-118
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 大小写折叠
 - en: 'By default, element and attribute names in XML documents are converted to all
     uppercase. You can turn off this behavior (and get case-sensitive element names)
     by setting the `XML_OPTION_CASE_FOLDING` option to `false` with the `xml_parser​_set_option()`
     function:'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: XML 文档中的元素和属性名称默认转换为全大写。可以通过将 `xml_parser​_set_option()` 函数的 `XML_OPTION_CASE_FOLDING`
+    选项设置为 `false` 来关闭此行为（并获得区分大小写的元素名称）：
 - en: '[PRE37]'
+  id: totrans-120
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: Skipping whitespace-only
+  id: totrans-121
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 跳过仅包含空白的内容
 - en: Set the `XML_OPTION_SKIP_WHITE` option to ignore values consisting entirely
     of whitespace characters.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 将选项 `XML_OPTION_SKIP_WHITE` 设置为忽略完全由空白字符组成的值。
 - en: '[PRE38]'
+  id: totrans-123
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: Truncating tag names
+  id: totrans-124
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 截断标签名
 - en: 'When creating a parser, you can optionally have it truncate characters at the
     start of each tag name. To truncate the start of each tag by a number of characters,
     provide that value in the `XML_OPTION_SKIP_TAGSTART` option:'
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建解析器时，可以选择截断每个标签名称的开头字符。要通过 `XML_OPTION_SKIP_TAGSTART` 选项截断每个标签的起始字符数，需提供该值：
 - en: '[PRE39]'
+  id: totrans-126
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: In this case, the tag name will be truncated by four characters.
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，标签名称将被截断四个字符。
 - en: Using the Parser
+  id: totrans-128
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用解析器
 - en: To use the XML parser, create a parser with `xml_parser_create()`, set handlers
     and options on the parser, and then hand chunks of data to the parser with the
     `xml_parse()` function until either the data runs out or the parser returns an
     error. Once the processing is complete, free the parser by calling `xml_parser_free()`.
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用 XML 解析器，使用 `xml_parser_create()` 创建解析器，为解析器设置处理程序和选项，然后使用 `xml_parse()`
+    函数传递数据块给解析器，直到数据耗尽或解析器返回错误。处理完成后，通过调用 `xml_parser_free()` 释放解析器。
 - en: 'The `xml_parser_create()` function returns an XML parser:'
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 函数 `xml_parser_create()` 返回一个 XML 解析器：
 - en: '[PRE40]'
+  id: totrans-131
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: The optional *encoding* parameter specifies the text encoding (`"ISO-8859-1"`,
     `"US-ASCII"`, or `"UTF-8"`) of the file being parsed.
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 可选的 *encoding* 参数指定被解析文件的文本编码（`"ISO-8859-1"`、`"US-ASCII"` 或 `"UTF-8"`）。
 - en: 'The `xml_parse()` function returns `true` if the parse was successful and `false`
     if it was not:'
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 函数 `xml_parse()` 如果解析成功返回 `true`，失败返回 `false`：
 - en: '[PRE41]'
+  id: totrans-134
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: The *data* argument is a string of XML to process. The optional *final* parameter
     should be `true` for the last piece of data to be parsed.
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数 *data* 是要处理的 XML 字符串。可选的 *final* 参数应设为 `true`，以解析最后一段数据。
 - en: To easily deal with nested documents, write functions that create the parser
     and set its options and handlers for you. This puts the options and handler settings
     in one place, rather than duplicating them in the external entity reference handler.
     [Example 12-7](#example_onetwo_sevendot_creating_a_pars) shows such a function.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了轻松处理嵌套文档，编写创建解析器并设置其选项和处理程序的函数。这样可以将选项和处理程序设置放在一个地方，而不是在外部实体引用处理程序中重复它们。[示例 12-7](#example_onetwo_sevendot_creating_a_pars)
+    展示了这样一个函数。
 - en: Example 12-7\. Creating a parser
+  id: totrans-137
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-7\. 创建解析器
 - en: '[PRE42]'
+  id: totrans-138
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: Errors
+  id: totrans-139
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 错误
 - en: 'The `xml_parse()` function returns `true` if the parse completed successfully,
     and `false` if there was an error. If something did go wrong, use `xml_get_error_code()`
     to fetch a code identifying the error:'
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果解析完成，`xml_parse()` 函数返回 `true`，如果有错误则返回 `false`。如果出现问题，请使用 `xml_get_error_code()`
+    获取标识错误的代码：
 - en: '[PRE43]'
+  id: totrans-141
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: 'The error code corresponds to one of these error constants:'
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 错误代码对应于以下错误常量之一：
 - en: '[PRE44]'
+  id: totrans-143
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: 'The constants generally aren’t very useful. Use `xml_error_string()` to turn
     an error code into a string that you can use when you report the error:'
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些常量通常没有太大用处。使用 `xml_error_string()` 将错误代码转换为您在报告错误时可以使用的字符串：
 - en: '[PRE45]'
+  id: totrans-145
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: 'For example:'
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如：
 - en: '[PRE46]'
+  id: totrans-147
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: Methods as Handlers
+  id: totrans-148
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 方法作为处理程序
 - en: Because functions and variables are global in PHP, any component of an application
     that requires several functions and variables is a candidate for object-oriented
     design. XML parsing typically requires you to keep track of where you are in the
@@ -646,73 +978,107 @@
     must write several handler functions to manipulate the state and actually do something.
     Wrapping these functions and variables into a class enables you to keep them separate
     from the rest of your program and easily reuse the functionality later.
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为在 PHP 中函数和变量是全局的，任何需要多个函数和变量的应用组件都适合面向对象设计。XML 解析通常需要您跟踪解析过程中的位置（例如，“刚刚看到一个打开的
+    `title` 元素，因此在看到关闭的 `title` 元素之前，跟踪字符数据”）使用变量，当然您必须编写几个处理程序函数来操作状态并实际执行操作。将这些函数和变量包装到一个类中使您能够将它们与程序的其余部分分开，并在以后轻松重用功能。
 - en: 'Use the `xml_set_object()` function to register an object with a parser. After
     you do so, the XML parser looks for the handlers as methods on that object, rather
     than as global functions:'
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `xml_set_object()` 函数注册一个对象到解析器中。注册后，XML 解析器会寻找该对象上的方法作为处理程序，而不是作为全局函数：
 - en: '[PRE47]'
+  id: totrans-151
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: Sample Parsing Application
+  id: totrans-152
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 示例解析应用
 - en: Let’s develop a program to parse an XML file and display different types of
     information from it. The XML file given in [Example 12-8](#example_onetwo_eightdot_booksdotxml_fil)
     contains information on a set of books.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们开发一个程序来解析 XML 文件，并从中显示不同类型的信息。[示例 12-8](#example_onetwo_eightdot_booksdotxml_fil)
+    中提供的 XML 文件包含一组书籍的信息。
 - en: Example 12-8\. books.xml file
+  id: totrans-154
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-8\. books.xml 文件
 - en: '[PRE48]'
+  id: totrans-155
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: The PHP application parses the file and presents the user with a list of books,
     showing just the titles and authors. This menu is shown in [Figure 12-1](#book_menu).
     The titles are links to a page showing the complete information for a book. A
     page of detailed information for *Programming PHP* is shown in [Figure 12-2](#book_details).
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 应用程序解析文件并向用户显示书籍列表，仅显示标题和作者。该菜单显示在[图 12-1](#book_menu)中。标题是指向显示书籍完整信息页面的链接。《编程
+    PHP》的详细信息页面显示在[图 12-2](#book_details)中。
 - en: We define a class, `BookList`, whose constructor parses the XML file and builds
     a list of records. There are two methods on a `BookList` that generate output
     from that list of records. The `showMenu()` method generates the book menu, and
     the `showBook()` method displays detailed information on a particular book.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们定义了一个名为 `BookList` 的类，其构造函数解析 XML 文件并构建记录列表。`BookList` 上有两个方法，从记录列表生成输出。`showMenu()`
+    方法生成书籍菜单，`showBook()` 方法显示特定书籍的详细信息。
 - en: Parsing the file involves keeping track of the record, which element we’re in,
     and which elements correspond to records (`book`) and fields (`title`, `author`,
     `isbn`, and `comment`). The `$record` property holds the current record as it’s
     being built, and `$currentField` holds the name of the field we’re currently processing
     (e.g., `title`). The `$records` property is an array of all the records we’ve
     read so far.
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 解析文件涉及跟踪记录，我们所处的元素以及哪些元素对应记录（`book`）和字段（`title`、`author`、`isbn`和`comment`）。`$record`属性在构建当前记录时保存当前记录，`$currentField`保存当前处理的字段名称（例如，`title`）。`$records`属性是迄今为止读取的所有记录的数组。
 - en: '![Book menu](Images/php4_1201.png)'
+  id: totrans-159
   prefs: []
   type: TYPE_IMG
+  zh: '![书籍菜单](Images/php4_1201.png)'
 - en: Figure 12-1\. Book menu
+  id: totrans-160
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 12-1\. 书籍菜单
 - en: '![Book details](Images/php4_1202.png)'
+  id: totrans-161
   prefs: []
   type: TYPE_IMG
+  zh: '![书籍详细信息](Images/php4_1202.png)'
 - en: Figure 12-2\. Book details
+  id: totrans-162
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 12-2\. 书籍详细信息
 - en: Two associative arrays, `$fieldType` and `$endsRecord`, tell us which elements
     correspond to fields in a record and which closing element signals the end of
     a record. Values in `$fieldType` are either `1` or `2`, corresponding to a simple
     scalar field (e.g., `title`) or an array of values (e.g., `author`), respectively.
     We initialize those arrays in the constructor.
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 两个关联数组，`$fieldType` 和 `$endsRecord`，告诉我们哪些元素对应记录中的字段，以及哪个闭合元素表示记录的结束。在构造函数中初始化这些数组。
 - en: The handlers themselves are fairly straightforward. When we see the start of
     an element, we work out whether it corresponds to a field we’re interested in.
     If it is, we set the `$currentField` property to be that field name so when we
@@ -721,173 +1087,265 @@
     of the current record if `$currentField` says we’re in a field. When we see the
     end of an element, we check to see if it’s the end of a record; if so, we add
     the current record to the array of completed records.
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理程序本身相当简单。当我们看到元素的开头时，我们会确定它是否对应我们感兴趣的字段。如果是，则将 `$currentField` 属性设置为该字段名称，这样当我们看到字符数据（例如书籍的标题）时，我们就知道它是哪个字段的值。当获取字符数据时，如果
+    `$currentField` 表示我们处于字段中，则将其添加到当前记录的适当字段中。当我们看到元素的结尾时，我们检查它是否是记录的结尾；如果是，则将当前记录添加到已完成记录的数组中。
 - en: One PHP script, given in [Example 12-9](#example_onetwo_ninedot_bookparsedotphp),
     handles both the book menu and book details pages. The entries in the book menu
     link back to the menu URL with a `GET` parameter identifying the ISBN of the book
     to display.
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个 PHP 脚本，在 [示例 12-9](#example_onetwo_ninedot_bookparsedotphp) 中提供，同时处理书籍菜单和书籍详情页面。书籍菜单中的条目链接回菜单
+    URL，并带有一个 `GET` 参数，用于标识要显示的书籍的 ISBN。
 - en: Example 12-9\. bookparse.php
+  id: totrans-166
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-9\. bookparse.php
 - en: '[PRE49]'
+  id: totrans-167
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: Parsing XML with the DOM
+  id: totrans-168
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用 DOM 解析 XML
 - en: 'The DOM parser provided in PHP is much simpler to use, but what you take out
     in complexity comes back in memory usage—in spades. Instead of firing events and
     allowing you to handle the document as it is being parsed, the DOM parser takes
     an XML document and returns an entire tree of nodes and elements:'
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 提供的 DOM 解析器使用起来简单得多，但复杂性减少的同时，内存使用量却会大大增加。DOM 解析器不会触发事件并允许您在解析过程中处理文档，而是将
+    XML 文档作为输入，并返回整个节点和元素的树：
 - en: '[PRE50]'
+  id: totrans-170
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE50]'
 - en: Parsing XML with SimpleXML
+  id: totrans-171
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用 SimpleXML 解析 XML
 - en: If you’re consuming very simple XML documents, you might consider the third
     library provided by PHP, SimpleXML. SimpleXML doesn’t have the ability to generate
     documents as the DOM extension does, and isn’t as flexible or memory-efficient
     as the event-driven extension, but it makes it very easy to read, parse, and traverse
     simple XML documents.
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您要处理非常简单的 XML 文档，可以考虑 PHP 提供的第三个库 SimpleXML。SimpleXML 无法像 DOM 扩展那样生成文档，也不像事件驱动扩展那样灵活或内存高效，但它非常容易读取、解析和遍历简单的
+    XML 文档。
 - en: SimpleXML takes a file, string, or DOM document (produced using the DOM extension)
     and generates an object. Properties on that object are arrays providing access
     to elements in each node. With those arrays, you can access elements using numeric
     indices and attributes using non-numeric indices. Finally, you can use string
     conversion on any value you retrieve to get the text value of the item.
+  id: totrans-173
   prefs: []
   type: TYPE_NORMAL
+  zh: SimpleXML 接受文件、字符串或使用 DOM 扩展生成的 DOM 文档，并生成一个对象。该对象上的属性是数组，提供对每个节点中元素的访问。通过这些数组，可以使用数字索引访问元素，并使用非数字索引访问属性。最后，可以对检索到的任何值使用字符串转换，以获取项目的文本值。
 - en: 'For example, we could display all the titles of the books in our *books.xml*
     document using:'
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，我们可以使用以下方式显示 *books.xml* 文档中所有书籍的标题：
 - en: '[PRE51]'
+  id: totrans-175
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE51]'
 - en: 'Using the `children()` method on the object, you can iterate over the child
     nodes of a given node; likewise, you can use the `attributes()` method on the
     object to iterate over the attributes of the node:'
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 在对象上使用 `children()` 方法，可以迭代给定节点的子节点；同样，可以使用 `attributes()` 方法迭代节点的属性：
 - en: '[PRE52]'
+  id: totrans-177
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE52]'
 - en: 'Finally, using the `asXml()` method on the object, you can retrieve the XML
     of the document in XML format. This lets you change values in your document and
     write it back out to disk easily:'
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，使用对象上的 `asXml()` 方法，可以以 XML 格式检索文档的 XML。这使您可以轻松地更改文档中的值并将其写回到磁盘：
 - en: '[PRE53]'
+  id: totrans-179
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE53]'
 - en: Transforming XML with XSLT
+  id: totrans-180
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用 XSLT 转换 XML
 - en: Extensible Stylesheet Language Transformations (XSLT) is a language for transforming
     XML documents into different XML, HTML, or any other format. For example, many
     websites offer several formats of their content—HTML, printable HTML, and WML
     (Wireless Markup Language) are common. The easiest way to present these multiple
     views of the same information is to maintain one form of the content in XML and
     use XSLT to produce the HTML, printable HTML, and WML.
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 可扩展样式表语言转换（XSLT）是一种将 XML 文档转换为不同 XML、HTML 或任何其他格式的语言。例如，许多网站提供其内容的多种格式——HTML、可打印
+    HTML 和 WML（无线标记语言）是常见的。呈现同一信息的多个视图的最简单方法是在 XML 中维护内容的一种形式，并使用 XSLT 生成 HTML、可打印
+    HTML 和 WML。
 - en: PHP’s XSLT extension uses the Libxslt C library to provide XSLT support.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 的 XSLT 扩展使用 Libxslt C 库提供 XSLT 支持。
 - en: 'Three documents are involved in an XSLT transformation: the original XML document,
     the XSLT document containing transformation rules, and the resulting document.
     The final document doesn’t have to be in XML; in fact, it’s common to use XSLT
     to generate HTML from XML. To do an XSLT transformation in PHP, you create an
     XSLT processor, give it some input to transform, and then destroy the processor.'
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: XSLT 转换涉及三个文档：原始 XML 文档、包含转换规则的 XSLT 文档和生成的文档。最终文档不必是 XML；事实上，常见的是使用 XSLT 从
+    XML 生成 HTML。在 PHP 中进行 XSLT 转换，你创建一个 XSLT 处理器，给它一些要转换的输入，然后销毁处理器。
 - en: 'Create a processor by creating a new `XsltProcessor` object:'
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个处理器，通过创建一个新的 `XsltProcessor` 对象：
 - en: '[PRE54]'
+  id: totrans-185
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE54]'
 - en: 'Parse the XML and XSL files into DOM objects:'
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 将 XML 和 XSL 文件解析为 DOM 对象：
 - en: '[PRE55]'
+  id: totrans-187
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE55]'
 - en: 'Attach the XML rules to the object:'
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 将 XML 规则附加到对象：
 - en: '[PRE56]'
+  id: totrans-189
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE56]'
 - en: 'Process a file with the `transformToDoc()`, `transformToUri()`, or `transformToXml()`
     methods:'
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `transformToDoc()`、`transformToUri()` 或 `transformToXml()` 方法处理文件：
 - en: '[PRE57]'
+  id: totrans-191
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE57]'
 - en: Each takes the DOM object representing the XML document as a parameter.
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个都将表示 XML 文档的 DOM 对象作为参数。
 - en: '[Example 12-10](#example_onetwo_onezerodot_xml_document) is the XML document
     we’re going to transform. It is in a similar format to many of the news documents
     you find on the web.'
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 12-10](#example_onetwo_onezerodot_xml_document) 是我们将要转换的 XML 文档。它的格式与你在网上找到的许多新闻文档类似。'
 - en: Example 12-10\. XML document
+  id: totrans-194
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-10\. XML 文档
 - en: '[PRE58]'
+  id: totrans-195
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE58]'
 - en: '[Example 12-11](#example_onetwo_oneonedot_news_xsl_trans) is the XSL document
     we’ll use to transform the XML document into HTML. Each `xsl:template` element
     contains a rule for dealing with part of the input document.'
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 12-11](#example_onetwo_oneonedot_news_xsl_trans) 是我们将用来将 XML 文档转换为 HTML
+    的 XSL 文档。每个 `xsl:template` 元素包含处理输入文档一部分的规则。'
 - en: Example 12-11\. News XSL transform
+  id: totrans-197
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-11\. 新闻 XSL 转换
 - en: '[PRE59]'
+  id: totrans-198
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE59]'
 - en: '[Example 12-12](#example_onetwo_onetwodot_xsl_transforma) is the very small
     amount of code necessary to transform the XML document into an HTML document using
     the XSL stylesheet. We create a processor, run the files through it, and print
     the result.'
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 12-12](#example_onetwo_onetwodot_xsl_transforma) 是将 XML 文档使用 XSL 样式表转换为
+    HTML 文档所需的非常少量代码。我们创建一个处理器，运行文件，并打印结果。'
 - en: Example 12-12\. XSL transformation from files
+  id: totrans-200
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-12\. 文件中的 XSL 转换
 - en: '[PRE60]'
+  id: totrans-201
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE60]'
 - en: Although it doesn’t specifically discuss PHP, Doug Tidwell’s book [*XSLT*](http://oreil.ly/XSLT_2E)
     (O’Reilly) provides a detailed guide to the syntax of XSLT stylesheets.
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管没有专门讨论 PHP，但 Doug Tidwell 的书籍 [*XSLT*](http://oreil.ly/XSLT_2E)（O’Reilly）提供了
+    XSLT 样式表语法的详细指南。
 - en: What’s Next
+  id: totrans-203
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 接下来做什么
 - en: While XML remains a major format for sharing data, a simplified version of JavaScript
     data encapsulation, known as JSON, has rapidly become the de facto standard for
     simple, readable, and terse sharing of web service responses and other data. That’s
     the subject we’ll turn to in the next chapter.
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然 XML 仍然是数据共享的主要格式，但简化版的 JavaScript 数据封装——JSON，已迅速成为简单、可读且简洁的网络服务响应和其他数据的事实标准。这将是我们下一章的主题。

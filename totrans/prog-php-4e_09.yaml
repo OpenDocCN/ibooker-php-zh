@@ -1,81 +1,117 @@
 - en: Chapter 8\. Web Techniques
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第 8 章。Web 技术
 - en: PHP was designed as a web-scripting language and, although it is possible to
     use it in purely command-line and GUI scripts, the web accounts for the vast majority
     of PHP uses. A dynamic website may have forms, sessions, and sometimes redirection,
     and this chapter explains how to implement those elements in PHP. You’ll learn
     how PHP provides access to form parameters and uploaded files, how to send cookies
     and redirect the browser, how to use PHP sessions, and more.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 设计为一种 Web 脚本语言，尽管可以在纯命令行和 GUI 脚本中使用它，但 Web 占 PHP 使用的绝大多数。动态网站可能具有表单、会话，有时还会进行重定向，本章解释了如何在
+    PHP 中实现这些元素。您将学习 PHP 如何提供对表单参数和上传文件的访问，如何发送 Cookie 并重定向浏览器，如何使用 PHP 会话等等。
 - en: HTTP Basics
+  id: totrans-2
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: HTTP 基础知识
 - en: The web runs on HTTP, or Hypertext Transfer Protocol. This protocol governs
     how web browsers request files from web servers and how the servers send the files
     back. To understand the various techniques we’ll show you in this chapter, you
     need to have a basic understanding of HTTP. For a more thorough discussion of
     HTTP, see the [*HTTP Pocket Reference*](http://oreil.ly/HTTP_PocketRef) (O’Reilly)
     by Clinton Wong.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: Web 运行在 HTTP 或超文本传输协议上。该协议规定了 Web 浏览器如何从 Web 服务器请求文件以及服务器如何发送文件。为了理解本章中将向您展示的各种技术，您需要对
+    HTTP 有基本的了解。有关 HTTP 的更详细讨论，请参阅 [*HTTP Pocket Reference*](http://oreil.ly/HTTP_PocketRef)（O'Reilly）由
+    Clinton Wong 编写。
 - en: 'When a web browser requests a web page, it sends an HTTP request message to
     a web server. The request message always includes some header information, and
     it sometimes also includes a body. The web server responds with a reply message,
     which always includes header information and usually contains a body. The first
     line of an HTTP request looks like this:'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 当 Web 浏览器请求 Web 页面时，它向 Web 服务器发送 HTTP 请求消息。请求消息始终包含一些头部信息，有时还包含正文。Web 服务器以回复消息响应，该消息始终包含头部信息，并且通常包含正文。HTTP
+    请求的第一行如下所示：
 - en: '[PRE0]'
+  id: totrans-5
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: This line specifies an HTTP command, called a *method*, followed by the address
     of a document and the version of the HTTP protocol being used. In this case, the
     request is using the `GET` method to ask for the *index.html* document using HTTP
     1.1\. After this initial line, the request can contain optional header information
     that gives the server additional data about the request.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 此行指定了一个称为 *方法* 的 HTTP 命令，后跟文档的地址和正在使用的 HTTP 协议的版本。在这种情况下，请求正在使用 `GET` 方法使用 HTTP
+    1.1 请求 *index.html* 文档。在此初始行之后，请求可以包含可选的头部信息，为服务器提供有关请求的其他数据。
 - en: 'For example:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如：
 - en: '[PRE1]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: The `User-Agent` header provides information about the web browser, while the
     `Accept` header specifies the MIME types that the browser accepts. After any headers,
     the request contains a blank line to indicate the end of the header section. The
     request can also contain additional data, if that is appropriate for the method
     being used (e.g., with the `POST` method, as we’ll discuss shortly). If the request
     doesn’t contain any data, it ends with a blank line.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: '`User-Agent` 头部提供有关 Web 浏览器的信息，而 `Accept` 头部指定了浏览器接受的 MIME 类型。在任何头部之后，请求包含一个空行以指示头部部分的结束。如果请求适用于所使用的方法（例如
+    `POST` 方法，我们将很快讨论），请求还可以包含其他数据。如果请求不包含任何数据，则以空行结束。'
 - en: 'The web server receives the request, processes it, and sends a response. The
     first line of an HTTP response looks like this:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: Web 服务器接收请求，处理它，并发送响应。HTTP 响应的第一行如下所示：
 - en: '[PRE2]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'This line specifies the protocol version, a status code, and a description
     of that code. In this case, the status code is `200`, meaning that the request
     was successful (hence the description `OK`). After the status line, the response
     contains headers that give the client additional information about the response.
     For example:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 此行指定协议版本、状态码及该代码的描述。在本例中，状态码为 `200`，表示请求成功（因此描述为 `OK`）。状态行之后，响应包含头部，为客户端提供有关响应的附加信息。例如：
 - en: '[PRE3]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: The `Server` header provides information about the web server software, while
     the `Content-Type` header specifies the MIME type of the data included in the
     response. After the headers, the response contains a blank line, followed by the
     requested data if the request was successful.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Server` 头部提供有关 Web 服务器软件的信息，而 `Content-Type` 头部指定响应中包含的数据的 MIME 类型。在头部之后，如果请求成功，则响应包含一个空行，然后是请求的数据。'
 - en: The two most common HTTP methods are `GET` and `POST`. The `GET` method is designed
     for retrieving information, such as a document, an image, or the results of a
     database query, from the server. The `POST` method is meant for posting information,
@@ -85,231 +121,363 @@
     method can be used, as specified by the `method` attribute of the `form` tag.
     We’ll discuss the `GET` and `POST` methods in more detail in the section “Processing
     Forms”.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 最常见的两种 HTTP 方法是 `GET` 和 `POST`。`GET` 方法用于从服务器检索信息，例如文档、图像或数据库查询的结果。`POST` 方法用于提交信息，例如信用卡号或要存储在数据库中的信息。当用户在浏览器中键入
+    URL 或点击链接时，使用 `GET` 方法。当用户提交表单时，可以使用 `GET` 或 `POST` 方法，由 `form` 标签的 `method` 属性指定。我们将在“处理表单”章节详细讨论
+    `GET` 和 `POST` 方法。
 - en: Variables
+  id: totrans-16
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 变量
 - en: Server configuration and request information—including form parameters and cookies—are
     accessible in three different ways from your PHP scripts. Collectively, this information
     is referred to as *EGPCS* (short for *environment*, `GET`, `POST`, *cookies*,
     and *server*).
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 从 PHP 脚本中可以以三种不同的方式访问服务器配置和请求信息，这些信息总称为 *EGPCS*（环境、`GET`、`POST`、cookies 和 server）。
 - en: 'PHP creates six global arrays that contain the EGPCS information:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 创建了六个包含 EGPCS 信息的全局数组：
 - en: '`$_ENV`'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$_ENV`'
 - en: Contains the values of any environment variables, where the keys of the array
     are the names of the environment variables.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含任何环境变量的值，其中数组的键是环境变量的名称。
 - en: '`$_GET`'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$_GET`'
 - en: Contains any parameters that are part of a `GET` request, where the keys of
     the array are the names of the form parameters.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含作为 `GET` 请求一部分的任何参数，其中数组的键是表单参数的名称。
 - en: '`$_COOKIE`'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$_COOKIE`'
 - en: Contains any cookie values passed as part of the request, where the keys of
     the array are the names of the cookies.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含作为请求的一部分传递的任何 cookie 值，其中数组的键是 cookie 的名称。
 - en: '`$_POST`'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$_POST`'
 - en: Contains any parameters that are part of a `POST` request, where the keys of
     the array are the names of the form parameters.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含作为 `POST` 请求一部分的任何参数，其中数组的键是表单参数的名称。
 - en: '`$_SERVER`'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$_SERVER`'
 - en: Contains useful information about the web server, as described in the next section.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含关于 Web 服务器的有用信息，如下一节所述。
 - en: '`$_FILES`'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$_FILES`'
 - en: Contains information about any uploaded files.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含有关上传文件的信息。
 - en: These variables are not only global, but also visible from within function definitions.
     The `$_REQUEST` array is created by PHP automatically and contains the elements
     of the `$_GET`, `$_POST`, and `$_COOKIE` arrays all in one array variable.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些变量不仅是全局的，而且在函数定义内部也是可见的。`$_REQUEST` 数组由 PHP 自动创建，并包含 `$_GET`、`$_POST` 和 `$_COOKIE`
+    数组的所有元素。
 - en: Server Information
+  id: totrans-32
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 服务器信息
 - en: 'The `$_SERVER` array contains a lot of useful information from the web server,
     much of which comes from the environment variables required in the [Common Gateway
     Interface (CGI) specification](http://bit.ly/Vw912h)). Here is a complete list
     of the `$_SERVER` entries that come from CGI, including some example values:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$_SERVER` 数组包含来自 Web 服务器的许多有用信息，其中大部分来自 [公共网关接口（CGI）规范](http://bit.ly/Vw912h)
+    所需的环境变量。以下是来自 CGI 的完整 `$_SERVER` 条目列表，包括一些示例值：'
 - en: '`PHP_SELF`'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PHP_SELF`'
 - en: The name of the current script, relative to the document root (e.g., `/store/cart.php`).
     You have already seen this used in some of the sample code in earlier chapters.
     This variable is useful when creating self-referencing scripts, as we’ll see later.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 当前脚本的名称，相对于文档根目录（例如 `/store/cart.php`）。在前几章的示例代码中已经见过这个用法。当创建自引用脚本时，这个变量非常有用，稍后我们会看到。
 - en: '`SERVER_SOFTWARE`'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: '`SERVER_SOFTWARE`'
 - en: A string that identifies the server (e.g., `"Apache/1.3.33 (Unix) mod_perl/1.26
     PHP/5.0.4"`).
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 标识服务器的字符串（例如 `"Apache/1.3.33 (Unix) mod_perl/1.26 PHP/5.0.4"`）。
 - en: '`SERVER_NAME`'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: '`SERVER_NAME`'
 - en: The hostname, DNS alias, or IP address for self-referencing URLs (e.g., `www.``example.com`).
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于自引用 URL 的主机名、DNS 别名或 IP 地址（例如 `www.example.com`）。
 - en: '`GATEWAY_INTERFACE`'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: '`GATEWAY_INTERFACE`'
 - en: The version of the CGI standard being followed (e.g., `CGI/1.1`).
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 遵循的 CGI 标准版本（例如 `CGI/1.1`）。
 - en: '`SERVER_PROTOCOL`'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: '`SERVER_PROTOCOL`'
 - en: The name and revision of the request protocol (e.g., `HTTP/1.1`).
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 请求协议的名称和版本（例如 `HTTP/1.1`）。
 - en: '`SERVER_PORT`'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: '`SERVER_PORT`'
 - en: The server port number to which the request was sent (e.g., `80`).
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 请求发送到的服务器端口号（例如 `80`）。
 - en: '`REQUEST_METHOD`'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: '`REQUEST_METHOD`'
 - en: The method the client used to fetch the document (e.g., `GET`).
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 客户端用来获取文档的方法（例如，`GET`）。
 - en: '`PATH_INFO`'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PATH_INFO`'
 - en: Extra path elements given by the client (e.g., `/list/users`).
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 客户端提供的额外路径元素（例如，`/list/users`）。
 - en: '`PATH_TRANSLATED`'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PATH_TRANSLATED`'
 - en: The value of `PATH_INFO`, translated by the server into a filename (e.g., `/home/httpd/htdocs/list/users`).
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PATH_INFO` 的值，由服务器转换为文件名（例如，`/home/httpd/htdocs/list/users`）。'
 - en: '`SCRIPT_NAME`'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: '`SCRIPT_NAME`'
 - en: The URL path to the current page, which is useful for self-referencing scripts
     (e.g., `/~me/menu.php`).
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 当前页面的 URL 路径，对于自引用脚本很有用（例如，`/~me/menu.php`）。
 - en: '`QUERY_STRING`'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: '`QUERY_STRING`'
 - en: Everything after the `?` in the URL (e.g., `name=Fred+age=35`).
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 URL 中 `?` 后面的所有内容（例如，`name=Fred+age=35`）。
 - en: '`REMOTE_HOST`'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: '`REMOTE_HOST`'
 - en: The hostname of the machine that requested this page (e.g., `http://dialup-192-168-0-1.example.com`).
     If there’s no DNS for the machine, this is blank and `REMOTE_ADDR` is the only
     information given.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 请求此页面的机器的主机名（例如，`http://dialup-192-168-0-1.example.com`）。如果该机器没有 DNS，这将为空，`REMOTE_ADDR`
+    是唯一提供的信息。
 - en: '`REMOTE_ADDR`'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: '`REMOTE_ADDR`'
 - en: A string containing the IP address of the machine that requested this page (e.g.,
     `"192.168.0.250"`).
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含请求此页面的机器的 IP 地址的字符串（例如，`"192.168.0.250"`）。
 - en: '`AUTH_TYPE`'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: '`AUTH_TYPE`'
 - en: The authentication method used to protect the page, if the page is password-protected
     (e.g., `basic`).
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于保护页面的认证方法，如果页面受密码保护的话（例如，`basic`）。
 - en: '`REMOTE_USER`'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: '`REMOTE_USER`'
 - en: The username with which the client authenticated, if the page is password-protected
     (e.g., `fred`). Note that there’s no way to find out what password was used.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 客户端经过身份验证时使用的用户名，如果页面受密码保护的话（例如，`fred`）。请注意，无法找出使用的密码。
 - en: 'The Apache server also creates entries in the `$_SERVER` array for each HTTP
     header in the request. For each key, the header name is converted to uppercase,
     hyphens (`-`) are turned into underscores (`_`), and the string `"HTTP_"` is prepended.
     For example, the entry for the `User-Agent` header has the key `"HTTP_USER_AGENT"`.
     The two most common and useful headers are:'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: Apache 服务器还为请求中的每个 HTTP 头创建 `$_SERVER` 数组的条目。对于每个键，头名称转换为大写，连字符（`-`）转换为下划线（`_`），并在前面添加字符串
+    `"HTTP_"`。例如，`User-Agent` 头的条目键为 `"HTTP_USER_AGENT"`。两个最常见和有用的头部是：
 - en: '`HTTP_USER_AGENT`'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: '`HTTP_USER_AGENT`'
 - en: The string the browser used to identify itself (e.g., `"Mozilla/5.0 (Windows
     2000; U) Opera 6.0 [en]"`).
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 浏览器用来识别自身的字符串（例如，`"Mozilla/5.0 (Windows 2000; U) Opera 6.0 [en]"`）。
 - en: '`HTTP_REFERER`'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: '`HTTP_REFERER`'
 - en: The page the browser said it came from to get to the current page (e.g., `http://www.example.com/last_page.html`).
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 浏览器声称它来自以获取当前页面的页面的 URL（例如，`http://www.example.com/last_page.html`）。
 - en: Processing Forms
+  id: totrans-69
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 处理表单
 - en: It’s easy to process forms with PHP, as the form parameters are available in
     the `$_GET` and `$_POST` arrays. This section describes some tricks and techniques
     that will make it even easier.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 PHP 处理表单很容易，因为表单参数在 `$_GET` 和 `$_POST` 数组中可用。本节描述了一些技巧和技术，使处理更加容易。
 - en: Methods
+  id: totrans-71
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 方法
 - en: 'As we already discussed, there are two HTTP methods that a client can use to
     pass form data to the server: `GET` and `POST`. The method that a particular form
     uses is specified with the `method` attribute to the `form` tag. In theory, methods
     are case-insensitive in HTML, but in practice some broken browsers require the
     method name to be in all uppercase.'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如我们已经讨论过的，客户端可以使用两种 HTTP 方法将表单数据传递给服务器：`GET` 和 `POST`。特定表单使用的方法通过 `form` 标签的
+    `method` 属性指定。理论上，HTML 中方法不区分大小写，但实际上一些损坏的浏览器要求方法名必须全部大写。
 - en: 'A `GET` request encodes the form parameters in the URL in a *query string*,
     which is indicated by the text that follows the `?`:'
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: '`GET` 请求在 URL 中以 *查询字符串* 的形式编码表单参数，这由紧随 `?` 的文本指示：'
 - en: '[PRE4]'
+  id: totrans-74
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: A `POST` request passes the form parameters in the body of the HTTP request,
     leaving the URL untouched.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: '`POST` 请求通过 HTTP 请求的正文传递表单参数，保持 URL 不变。'
 - en: The most visible difference between `GET` and `POST` is the URL line. Because
     all of a form’s parameters are encoded in the URL with a `GET` request, users
     can bookmark `GET` queries. They cannot do this with `POST` requests, however.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: '`GET` 和 `POST` 最显著的区别是 URL 行。因为所有表单参数都通过 `GET` 请求编码在 URL 中，用户可以为 `GET` 查询创建书签。然而，他们不能使用
+    `POST` 请求做到这一点。'
 - en: The biggest difference between `GET` and `POST` requests, however, is far subtler.
     The HTTP specification says that `GET` requests are *idempotent*—that is, one
     `GET` request for a particular URL, including form parameters, is the same as
@@ -318,260 +486,383 @@
     many times the page is loaded. Because of idempotence, `GET` requests should be
     used only for queries such as splitting a word into smaller chunks or multiplying
     numbers, where the response page is never going to change.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，`GET` 和 `POST` 请求之间最大的区别要微妙得多。HTTP 规范指出，`GET` 请求是*幂等*的——也就是说，对于特定 URL 的一个
+    `GET` 请求，包括表单参数，与对该 URL 进行两次或更多次请求是相同的。因此，Web 浏览器可以缓存 `GET` 请求的响应页面，因为响应页面不会因页面加载的次数而改变。由于幂等性，`GET`
+    请求应该仅用于查询，例如将单词分割成较小的块或将数字相乘，响应页面永远不会改变。
 - en: '`POST` requests are not idempotent. This means that they cannot be cached,
     and the server is contacted every time the page is displayed. You’ve probably
     seen your web browser prompt you with “Repost form data?” before displaying or
     reloading certain pages. This makes `POST` requests the appropriate choice for
     queries whose response pages may change over time—for example, displaying the
     contents of a shopping cart or the current messages in a bulletin board.'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: '`POST` 请求不是幂等的。这意味着它们不能被缓存，服务器在每次显示页面时都会被联系。您可能在显示或重新加载某些页面之前看到您的 Web 浏览器提示您“重新提交表单数据？”。这使得
+    `POST` 请求成为适合查询的选择，其响应页面可能随时间变化，例如显示购物车的内容或公告板中的当前消息。'
 - en: That said, idempotence is often ignored in the real world. Browser caches are
     generally so poorly implemented, and the Reload button so easy to hit, that programmers
     tend to use `GET` and `POST` simply based on whether they want the query parameters
     shown in the URL or not. What you need to remember is that `GET` requests should
     not be used for any actions that cause a change in the server, such as placing
     an order or updating a database.
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 也就是说，幂等性在现实世界中经常被忽略。浏览器缓存通常实现得很差，而重新加载按钮很容易点击，程序员往往只是根据他们是否希望在 URL 中显示查询参数来使用
+    `GET` 和 `POST`。您需要记住的是，`GET` 请求不应该用于导致服务器更改的任何操作，例如下订单或更新数据库。
 - en: 'The type of method that was used to request a PHP page is available through
     `$_SERVER[''REQUEST_METHOD'']`. For example:'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于请求 PHP 页面的方法类型可以通过 `$_SERVER['REQUEST_METHOD']` 获得。例如：
 - en: '[PRE5]'
+  id: totrans-81
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Parameters
+  id: totrans-82
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参数
 - en: Use the `$_POST`, `$_GET`, and `$_FILES` arrays to access form parameters from
     your PHP code. The keys are the parameter names, and the values are the values
     of those parameters. Because periods are legal in HTML field names but not in
     PHP variable names, periods in field names are converted to underscores (`_`)
     in the array.
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `$_POST`、`$_GET` 和 `$_FILES` 数组从 PHP 代码中访问表单参数。键是参数名称，值是这些参数的值。因为 HTML 字段名称中允许出现句点，但
+    PHP 变量名称中不允许出现句点，所以字段名称中的句点在数组中被转换为下划线（`_`）。
 - en: '[Example 8-1](#example_eight_onedot_the_chunkify_form) shows an HTML form that
     chunkifies a string supplied by the user. The form contains two fields: one for
     the string (parameter name `word`) and one for the size of chunks to produce (parameter
     name `number`).'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 8-1](#example_eight_onedot_the_chunkify_form) 显示了一个 HTML 表单，用于将用户提供的字符串分块。表单包含两个字段：一个用于字符串（参数名
+    `word`），一个用于生成块的大小（参数名 `number`）。'
 - en: Example 8-1\. The chunkify form (chunkify.html)
+  id: totrans-85
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-1\. chunkify 表单（chunkify.html）
 - en: '[PRE6]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '[Example 8-2](#example_eight_twodot_the_chunkify_scrip) lists the PHP script,
     *chunkify.php*, to which the form in [Example 8-1](#example_eight_onedot_the_chunkify_form)
     submits. The script copies the parameter values into variables and uses them.'
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 8-2](#example_eight_twodot_the_chunkify_scrip) 列出了 PHP 脚本 *chunkify.php*，该脚本接收
+    [示例 8-1](#example_eight_onedot_the_chunkify_form) 中的表单提交的参数值。该脚本将参数值复制到变量中并使用它们。'
 - en: Example 8-2\. The chunkify script (chunkify.php)
+  id: totrans-88
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-2\. chunkify 脚本（chunkify.php）
 - en: '[PRE7]'
+  id: totrans-89
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: '[Figure 8-1](#the_chunkify_form_and_its_output) shows both the chunkify form
     and the resulting output.'
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 8-1](#the_chunkify_form_and_its_output) 显示了 chunkify 表单和生成的输出。'
 - en: '![The chunkify form and its output](Images/php4_0801.png)'
+  id: totrans-91
   prefs: []
   type: TYPE_IMG
+  zh: '![chunkify 表单及其输出](Images/php4_0801.png)'
 - en: Figure 8-1\. The chunkify form and its output
+  id: totrans-92
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 8-1\. chunkify 表单及其输出
 - en: Self-Processing Pages
+  id: totrans-93
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 自处理页面
 - en: One PHP page can be used to both generate a form and subsequently process it.
     If the page shown in [Example 8-3](#example_eight_threedot_a_self_processin) is
     requested with the `GET` method, it prints a form that accepts a Fahrenheit temperature.
     If called with the `POST` method, however, the page calculates and displays the
     corresponding Celsius temperature.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个 PHP 页面可以用来生成表单，然后处理它。如果用`GET`方法请求[示例 8-3](#example_eight_threedot_a_self_processin)中显示的页面，它将打印一个接受华氏温度的表单。然而，如果用`POST`方法调用该页面，页面将计算并显示相应的摄氏温度。
 - en: Example 8-3\. A self-processing temperature conversion page (temp.php)
+  id: totrans-95
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-3\. 自处理的温度转换页面（temp.php）
 - en: '[PRE8]'
+  id: totrans-96
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: '[Figure 8-2](#the_temperature_conversion_page_and_its) shows the temperature-conversion
     page and the resulting output.'
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 8-2](#the_temperature_conversion_page_and_its) 展示了温度转换页面及其输出。'
 - en: '![The temperature-conversion page and its output](Images/php4_0802.png)'
+  id: totrans-98
   prefs: []
   type: TYPE_IMG
+  zh: '![温度转换页面及其输出](Images/php4_0802.png)'
 - en: Figure 8-2\. The temperature-conversion page and its output
+  id: totrans-99
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 8-2\. 温度转换页面及其输出
 - en: Another way for a script to decide whether to display a form or process it is
     to see whether or not one of the parameters has been supplied. This lets you write
     a self-processing page that uses the `GET` method to submit values. [Example 8-4](#example_eight_fourdot_temperature_conve)
     shows a new version of the temperature-conversion page that submits parameters
     using a `GET` request. This page uses the presence or absence of parameters to
     determine what to do.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 脚本另一种判断是显示表单还是处理表单的方法是查看是否已提供其中一个参数。这样可以编写一个使用`GET`方法提交值的自处理页面。[示例 8-4](#example_eight_fourdot_temperature_conve)
+    展示了使用`GET`请求提交参数的温度转换页面的新版本。页面使用参数的存在或不存在来确定要执行的操作。
 - en: Example 8-4\. Temperature conversion using the GET method (temp2.php)
+  id: totrans-101
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-4\. 使用 GET 方法的温度转换（temp2.php）
 - en: '[PRE9]'
+  id: totrans-102
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: In [Example 8-4](#example_eight_fourdot_temperature_conve), we copy the form
     parameter value into `$fahrenheit`. If we weren’t given that parameter, `$fahrenheit`
     contains `NULL`, so we could use `is_null()` to test whether we should display
     the form or process the form data.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[示例 8-4](#example_eight_fourdot_temperature_conve)中，我们将表单参数值复制到`$fahrenheit`中。如果没有给出该参数，`$fahrenheit`将包含`NULL`，因此我们可以使用`is_null()`来测试我们是应该显示表单还是处理表单数据。
 - en: Sticky Forms
+  id: totrans-104
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 粘性表单
 - en: Many websites use a technique known as *sticky forms*, in which the results
     of a query are accompanied by a search form whose default values are those of
     the previous query. For instance, if you search Google for “Programming PHP,”
     the top of the results page contains another search box, which already contains
     “Programming PHP.” To refine your search to “Programming PHP from O’Reilly,” you
     can simply add the extra keywords.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多网站使用一种称为*粘性表单*的技术，查询结果显示一个搜索表单，其默认值是上一次查询的值。例如，如果在 Google 上搜索“Programming
+    PHP”，结果页面顶部将包含另一个搜索框，其中已经包含“Programming PHP”。要将搜索精确到“Programming PHP from O’Reilly”，您只需添加额外的关键词。
 - en: This sticky behavior is easy to implement. [Example 8-5](#example_eight_fivedot_temperature_conve)
     shows our temperature-conversion script from [Example 8-4](#example_eight_fourdot_temperature_conve),
     with the form made sticky. The basic technique is to use the submitted form value
     as the default value when creating the HTML field.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种粘性行为易于实现。[示例 8-5](#example_eight_fivedot_temperature_conve) 展示了我们从[示例 8-4](#example_eight_fourdot_temperature_conve)中得到的温度转换脚本，其中表单被设置为粘性。基本技术是使用提交的表单值作为创建
+    HTML 字段时的默认值。
 - en: Example 8-5\. Temperature conversion with a sticky form (sticky_form.php)
+  id: totrans-107
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-5\. 带有粘性表单的温度转换（sticky_form.php）
 - en: '[PRE10]'
+  id: totrans-108
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Multivalued Parameters
+  id: totrans-109
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 多值参数
 - en: 'HTML selection lists, created with the `select` tag, can allow multiple selections.
     To ensure that PHP recognizes the multiple values that the browser passes to a
     form-processing script, you need to use square brackets, `[]`, after the name
     of the field in the HTML form. For example:'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`select`标签创建的 HTML 选择列表可以允许多项选择。为了确保 PHP 可以识别浏览器传递给表单处理脚本的多个值，您需要在 HTML 表单字段名称后使用方括号`[]`。例如：
 - en: '[PRE11]'
+  id: totrans-111
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Now, when the user submits the form, `$_GET['languages']` contains an array
     instead of a simple string. This array contains the values that were selected
     by the user.
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 当用户提交表单时，`$_GET['languages']` 包含一个数组，而不是一个简单的字符串。这个数组包含用户选择的数值。
 - en: '[Example 8-6](#example_eight_sixdot_multiple_selection) illustrates multiple
     selections of values within an HTML selection list. The form provides the user
     with a set of personality attributes. When the user submits the form, it returns
     a (not very interesting) description of the user’s personality.'
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 8-6](#example_eight_sixdot_multiple_selection)说明了HTML选择列表中的多个值选择。该表单为用户提供了一组人物属性。用户提交表单后，返回一个（不是很有趣的）用户个性描述。'
 - en: Example 8-6\. Multiple selection values with a select box (select_array.php)
+  id: totrans-114
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-6\. 使用选择框的多选值（select_array.php）
 - en: '[PRE12]'
+  id: totrans-115
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: In [Example 8-6](#example_eight_sixdot_multiple_selection), the submit button
     has a name, `"s"`. We check for the presence of this parameter value to see whether
     we have to produce a personality description. [Figure 8-3](#multiple_selection_page_and_its_output)
     shows the multiple-selection page and the resulting output.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[示例 8-6](#example_eight_sixdot_multiple_selection)中，提交按钮的名称为`"s"`。我们检查是否存在此参数值以确定是否需要生成人物描述。[图 8-3](#multiple_selection_page_and_its_output)展示了多选页面及其结果输出。
 - en: '![Multiple-selection page and its output](Images/php4_0803.png)'
+  id: totrans-117
   prefs: []
   type: TYPE_IMG
+  zh: '![多选页面及其输出](Images/php4_0803.png)'
 - en: Figure 8-3\. Multiple-selection page and its output
+  id: totrans-118
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 8-3\. 多选页面及其输出
 - en: The same technique applies for any form field where multiple values can be returned.
     [Example 8-7](#example_eight_sevendot_multiple_selecti) shows a revised version
     of our personality form that is rewritten to use checkboxes instead of a select
     box. Notice that only the HTML has changed—the code to process the form doesn’t
     need to know whether the multiple values came from checkboxes or a select box.
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样的技术适用于任何表单字段，其中可以返回多个值。[示例 8-7](#example_eight_sevendot_multiple_selecti)展示了我们的人物表单的修订版本，改用复选框而不是选择框。请注意，只有HTML发生了变化——处理表单的代码不需要知道多个值是来自复选框还是选择框。
 - en: Example 8-7\. Multiple selection values in checkboxes (checkbox_array.php)
+  id: totrans-120
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-7\. 复选框中的多选值（checkbox_array.php）
 - en: '[PRE13]'
+  id: totrans-121
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Sticky Multivalued Parameters
+  id: totrans-122
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 粘性多值参数
 - en: 'So now you’re probably wondering, *Can I make multiple-selection form elements
     sticky?* You can, but it isn’t easy. You’ll need to check whether each possible
     value in the form was one of the submitted values. For example:'
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在你可能会想，*我能把多选表单元素设为粘性吗？* 可以，但这并不容易。你需要检查表单中的每个可能值是否是提交的值之一。例如：
 - en: '[PRE14]'
+  id: totrans-124
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: You could use this technique for each checkbox, but that’s repetitive and error-prone.
     At this point, it’s easier to write a function to generate the HTML for the possible
     values and work from a copy of the submitted parameters. [Example 8-8](#example_eight_eightdot_sticky_multivalu)
     shows a new version of the multiple-selection checkboxes, with the form made sticky.
     Although this form looks just like the one in [Example 8-7](#example_eight_sevendot_multiple_selecti),
     behind the scenes there are substantial changes to the way the form is generated.
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以为每个复选框使用这种技术，但这样做很重复且容易出错。此时，编写一个函数以生成可能值的HTML并从提交的参数副本中工作会更容易。[示例 8-8](#example_eight_eightdot_sticky_multivalu)展示了一个新版本的多选复选框，表单被设为粘性。尽管这个表单看起来与[示例 8-7](#example_eight_sevendot_multiple_selecti)中的一样，但在幕后，表单生成的方式有了实质性的变化。
 - en: Example 8-8\. Sticky multivalued checkboxes (checkbox_array2.php)
+  id: totrans-126
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-8\. 粘性多值复选框（checkbox_array2.php）
 - en: '[PRE15]'
+  id: totrans-127
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'The heart of this code is the `makeCheckboxes()` function. It takes three arguments:
     the name for the group of checkboxes, the array of on-by-default values, and the
     array that maps values to descriptions. The list of options for the checkboxes
     is in the `$personalityAttributes` array.'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 这段代码的核心是`makeCheckboxes()`函数。它接受三个参数：复选框组的名称，默认启用的值数组，以及将值映射到描述的数组。复选框的选项列表在`$personalityAttributes`数组中。
 - en: File Uploads
+  id: totrans-129
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 文件上传
 - en: To handle file uploads (supported in most modern browsers), use the `$_FILES`
     array. Using the various authentication and file upload functions, you can control
     who is allowed to upload files and what to do with those files once they’re on
     your system. Security concerns to take note of are described in [Chapter 14](ch14.xhtml#security).
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 要处理文件上传（大多数现代浏览器都支持），使用`$_FILES`数组。使用各种身份验证和文件上传函数，您可以控制谁可以上传文件以及在文件进入系统后要执行的操作。有关需要注意的安全问题，请参阅[第 14
+    章](ch14.xhtml#security)。
 - en: 'The following code displays a form that allows file uploads to the same page:'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面的代码显示了一个允许在同一页面上传文件的表单：
 - en: '[PRE16]'
+  id: totrans-132
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'The biggest problem with file uploads is the risk of getting a file that is
     too large to process. PHP has two ways of preventing this: a hard limit and a
     soft limit. The `upload_max_filesize` option in *php.ini* gives a hard upper limit
@@ -580,76 +871,117 @@
     that value as the soft upper limit. For instance, in the previous example, the
     upper limit is set to 10 KB. PHP ignores attempts to set `MAX_FILE_SIZE` to a
     value larger than `upload_max_filesize`.'
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 文件上传的最大问题是风险，即收到太大以至于无法处理的文件。PHP 有两种方式来防止这种情况发生：硬限制和软限制。*php.ini* 中的 `upload_max_filesize`
+    选项为上传文件的硬上限设定了默认值为 2 MB。如果你的表单在任何文件字段参数之前提交一个名为 `MAX_FILE_SIZE` 的参数，PHP 将使用该值作为软上限。例如，在上一个示例中，上限设置为
+    10 KB。PHP 会忽略尝试将 `MAX_FILE_SIZE` 设置为大于 `upload_max_filesize` 的值的尝试。
 - en: Also, notice that the form tag takes an `enctype` attribute with the value `"multipart/form-data"`.
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，请注意，表单标签需要一个 `enctype` 属性，其值为 `"multipart/form-data"`。
 - en: 'Each element in `$_FILES` is itself an array, giving information about the
     uploaded file. The keys are:'
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$_FILES` 中的每个元素本身都是一个数组，提供有关上传文件的信息。键包括：'
 - en: '`name`'
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: '`name`'
 - en: The name of the uploaded file as supplied by the browser. It’s difficult to
     make meaningful use of this, as the client machine may have different filename
     conventions than the web server (e.g., a file path of *D:\PHOTOS\ME.JPG* from
     a client machine running Windows would be meaningless to a web server running
     Unix).
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 浏览器提供的上传文件的名称。这很难进行有意义的使用，因为客户端机器可能具有不同的文件名约定，与运行 Unix 的 Web 服务器（例如，从运行 Windows
+    的客户端机器获取的 *D:\PHOTOS\ME.JPG* 文件路径对于 Web 服务器来说毫无意义）。
 - en: '`type`'
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: '`type`'
 - en: The MIME type of the uploaded file as guessed at by the client.
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 客户端猜测的上传文件的 MIME 类型。
 - en: '`size`'
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: '`size`'
 - en: The size of the uploaded file (in bytes). If the user attempted to upload a
     file that was too large, the size would be reported as 0.
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 上传文件的大小（以字节为单位）。如果用户尝试上传一个太大的文件，则大小将报告为 0。
 - en: '`tmp_name`'
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: '`tmp_name`'
 - en: The name of the temporary file on the server that holds the uploaded file. If
     the user attempted to upload a file that was too large, the name is given as `"none"`.
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 服务器上保存上传文件的临时文件的名称。如果用户尝试上传一个太大的文件，则名称将显示为 `"none"`。
 - en: 'The correct way to test whether a file was successfully uploaded is to use
     the function `is_uploaded_file()`, as follows:'
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 测试文件是否成功上传的正确方式是使用 `is_uploaded_file()` 函数，如下所示：
 - en: '[PRE17]'
+  id: totrans-145
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: 'Files are stored in the server’s default temporary files directory, which is
     specified in *php.ini* with the `upload_tmp_dir` option. To move a file, use the
     `move_``uploaded``_file()` function:'
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 文件存储在服务器的默认临时文件目录中，该目录在 *php.ini* 中使用 `upload_tmp_dir` 选项指定。要移动文件，请使用 `move_uploaded_file()`
+    函数：
 - en: '[PRE18]'
+  id: totrans-147
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: The call to `move_uploaded_file()` automatically checks whether it was an uploaded
     file. When a script finishes, any files uploaded to that script are deleted from
     the temporary directory.
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用 `move_uploaded_file()` 自动检查是否为上传文件。当脚本完成时，从临时目录中删除上传到该脚本的任何文件。
 - en: Form Validation
+  id: totrans-149
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 表单验证
 - en: When you allow users to input data, you typically need to validate that data
     before using it or storing it for later use. There are several strategies available
     for validating data. The first is JavaScript on the client side. However, since
     the user can choose to turn JavaScript off, or may even be using a browser that
     doesn’t support it, this cannot be the only validation you do.
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 当允许用户输入数据时，通常需要在使用或存储数据之前对其进行验证。有几种可用的验证数据的策略。首先是客户端的 JavaScript。然而，由于用户可以选择关闭
+    JavaScript，或者甚至可能使用不支持 JavaScript 的浏览器，因此这不应是你唯一的验证手段。
 - en: A more secure choice is to use PHP to do the validation. [Example 8-9](#example_eight_ninedot_form_validation_l)
     shows a self-processing page with a form. The page allows the user to input a
     media item; three of the form elements—the name, media type, and filename—are
@@ -658,37 +990,53 @@
     out are set to the values originally entered. Finally, as an additional clue to
     the user, the text of the submit button changes from “Create” to “Continue” when
     the user is correcting the form.
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 更安全的选择是使用PHP进行验证。[示例 8-9](#example_eight_ninedot_form_validation_l)展示了一个带有表单的自处理页面。页面允许用户输入媒体项目；表单的三个元素——名称、媒体类型和文件名——是必填项。如果用户忽略了其中任何一个值，页面会重新显示，并显示详细的错误信息。用户已经填写的表单字段将保留最初输入的值。最后，作为对用户的额外提示，当用户正在纠正表单时，提交按钮的文本从“Create”更改为“Continue”。
 - en: Example 8-9\. Form validation (data_validation.php)
+  id: totrans-152
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-9\. 表单验证（data_validation.php）
 - en: '[PRE19]'
+  id: totrans-153
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: In this case, the validation is simply a check that a value was supplied. We
     set `$validated` to be `true` only if `$name`, `$type`, and `$filename` are all
     nonempty. Other possible validations include checking that an email address is
     valid or checking that the supplied filename is local and exists.
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，验证仅仅是检查是否提供了一个值。只有当`$name`、`$type`和`$filename`都不为空时，我们才将`$validated`设置为`true`。其他可能的验证包括检查电子邮件地址是否有效或检查提供的文件名是否是本地存在的。
 - en: 'For example, to validate an age field to ensure that it contains a non-negative
     integer, use this code:'
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，要验证年龄字段以确保它包含非负整数，请使用以下代码：
 - en: '[PRE20]'
+  id: totrans-156
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'The call to `strspn()` finds the number of digits at the start of the string.
     In a non-negative integer, the whole string should be composed of digits, so it’s
     a valid age if the entire string is made of digits. We could also have done this
     check with a regular expression:'
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用`strspn()`函数可以找到字符串开头的数字数量。在非负整数中，整个字符串应该由数字组成，因此如果整个字符串由数字组成，则它是一个有效的年龄。我们也可以使用正则表达式进行这种检查：
 - en: '[PRE21]'
+  id: totrans-158
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: 'Validating email addresses is a nigh-impossible task. There’s no way to take
     a string and see whether it corresponds to a valid email address. However, you
     can catch typos by requiring the user to enter the email address twice (into two
@@ -697,20 +1045,28 @@
     and for bonus points you can check for domains to which you don’t want to send
     mail (e.g., *[whitehouse.gov](http://whitehouse.gov)*, or a competitor site).
     For example:'
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 验证电子邮件地址是一项几乎不可能的任务。没有办法拿到一个字符串然后判断它是否对应一个有效的电子邮件地址。但是，你可以通过要求用户在两个不同的字段中输入电子邮件地址两次来捕捉输入错误。你还可以通过要求在@符号后的某个位置输入一个句点（.），以及为了额外加分，你可以检查你不希望发送邮件到的域（例如[whitehouse.gov](http://whitehouse.gov)或竞争对手的网站）。例如：
 - en: '[PRE22]'
+  id: totrans-160
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Field validation is basically string manipulation. In this example, we’ve used
     regular expressions and string functions to ensure that the string provided by
     the user is the type of string we expect.
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 字段验证基本上是字符串处理。在本例中，我们使用了正则表达式和字符串函数来确保用户提供的字符串是我们期望的类型。
 - en: Setting Response Headers
+  id: totrans-162
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 设置响应头
 - en: As we’ve already discussed, the HTTP response that a server sends back to a
     client contains headers that identify the type of content in the body of the response,
     the server that sent the response, how many bytes are in the body, when the response
@@ -720,115 +1076,174 @@
     to send back something that’s not HTML, set the expiration time for a page, redirect
     the client’s browser, or generate a specific HTTP error, you’ll need to use the
     `header()` function.
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如我们已经讨论过的那样，服务器发送给客户端的HTTP响应包含标识响应主体内容类型、发送响应的服务器、响应主体的字节数、发送响应的时间等头部信息。PHP和Apache通常会为您处理头部信息（例如标识文档为HTML、计算HTML页面的长度等）。大多数Web应用程序通常不需要自己设置头部信息。但是，如果您想发送非HTML内容、设置页面的过期时间、重定向客户端的浏览器或生成特定的HTTP错误，则需要使用`header()`函数。
 - en: 'The only catch to setting headers is that you must do so before any of the
     body is generated. This means that all calls to `header()` (or `setcookie()`,
     if you’re setting cookies) must happen at the very top of your file, even before
     the `<html>` tag. For example:'
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置头文件的唯一注意事项是必须在生成任何正文内容之前执行。这意味着所有对 `header()`（或者如果您设置 cookies 则为 `setcookie()`）的调用都必须发生在文件的非常顶部，甚至在
+    `<html>` 标签之前。例如：
 - en: '[PRE23]'
+  id: totrans-165
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: 'Attempting to set headers after the document has started results in this warning:'
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 在文档开始后尝试设置头部会导致以下警告：
 - en: '[PRE24]'
+  id: totrans-167
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: You can instead use an output buffer; see `ob_start()`, `ob_end_flush()`, and
     related functions for more information on using output buffers.
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以使用输出缓冲区；有关更多信息，请参阅 `ob_start()`、`ob_end_flush()` 和相关函数。
 - en: Different Content Types
+  id: totrans-169
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 不同的内容类型
 - en: The `Content-Type` header identifies the type of document being returned. Ordinarily
     this is `"text/html"`, indicating an HTML document, but there are other useful
     document types. For example, `"text/plain"` forces the browser to treat the page
     as plain text. This type is like an automatic “view source,” and it is useful
     when debugging.
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Content-Type` 头部标识返回文档的类型。通常这是 `"text/html"`，表示一个 HTML 文档，但还有其他有用的文档类型。例如，`"text/plain"`
+    强制浏览器将页面视为纯文本。这种类型就像自动的“查看源代码”，在调试时非常有用。'
 - en: In [Chapter 10](ch10.xhtml#graphic) and [Chapter 11](ch11.xhtml#pdf), we’ll
     make heavy use of the `Content-Type` header as we generate documents that are
     actually graphic images and Adobe PDF files.
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 [第 10 章](ch10.xhtml#graphic) 和 [第 11 章](ch11.xhtml#pdf) 中，我们将大量使用 `Content-Type`
+    头部生成实际上是图形图像和 Adobe PDF 文件的文档。
 - en: Redirections
+  id: totrans-172
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 重定向
 - en: 'To send the browser to a new URL, known as a *redirection*, you set the `Location`
     header. Generally, you’ll also exit immediately afterward, so the script doesn’t
     bother generating and outputting the remainder of the code listing:'
+  id: totrans-173
   prefs: []
   type: TYPE_NORMAL
+  zh: 要将浏览器重定向到一个新的 URL，即*重定向*，您需要设置 `Location` 头。通常，随后会立即退出，以便脚本不会继续生成和输出代码清单的其余部分：
 - en: '[PRE25]'
+  id: totrans-174
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: When you provide a partial URL (e.g., `/elsewhere.html`), the web server handles
     this redirection internally. This is only rarely useful, as the browser generally
     won’t learn that it isn’t getting the page it requested. If there are relative
     URLs in the new document, the browser interprets those URLs as being relative
     to the requested document, rather than to the document that was ultimately sent.
     In general, you’ll want to redirect to an absolute URL.
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 当提供部分 URL（例如 `/elsewhere.html`）时，Web 服务器会在内部处理重定向。这通常很少有用，因为浏览器通常不会意识到它没有获取到请求的页面。如果新文档中有相对
+    URL，则浏览器会将这些 URL 解释为相对于请求的文档，而不是最终发送的文档。一般情况下，您会希望重定向到绝对 URL。
 - en: Expiration
+  id: totrans-176
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 过期
 - en: A server can explicitly inform the browser, and any proxy caches that might
     be between the server and browser, of a specific date and time for the document
     to expire. Proxy and browser caches can hold the document until that time or expire
     it earlier. Repeated reloads of a cached document do not contact the server. However,
     an attempt to fetch an expired document does contact the server.
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 服务器可以明确告知浏览器及可能存在于服务器与浏览器之间的任何代理缓存文档的具体过期日期和时间。代理和浏览器缓存可以在那个时间之前持有文档或者提前过期。重复加载缓存文档不会联系服务器。但尝试获取已过期文档会联系服务器。
 - en: 'To set the expiration time of a document, use the `Expires` header:'
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: 要设置文档的过期时间，请使用 `Expires` 头部：
 - en: '[PRE26]'
+  id: totrans-179
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: 'To force a document to expire three hours from the time the page was generated,
     use `time()` and `gmstrftime()` to generate the expiration date string:'
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使文档在生成页面后的三小时内过期，使用 `time()` 和 `gmstrftime()` 生成过期日期字符串：
 - en: '[PRE27]'
+  id: totrans-181
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: 'To indicate that a document “never” expires, use the time a year from now:'
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 要指示文档“永不”过期，使用一年后的时间：
 - en: '[PRE28]'
+  id: totrans-183
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: 'To mark a document as expired, use the current time or a time in the past:'
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 要标记文档已过期，使用当前时间或过去的时间：
 - en: '[PRE29]'
+  id: totrans-185
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: 'This is the best way to prevent a browser or proxy cache from storing your
     document:'
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是防止浏览器或代理缓存存储您的文档的最佳方法：
 - en: '[PRE30]'
+  id: totrans-187
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: For more information on controlling the behavior of browser and web caches,
     see Chapter 6 of [*Web Caching*](http://bit.ly/Web_Caching) (O’Reilly) by Duane
     Wessels .
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关控制浏览器和 Web 缓存行为的更多信息，请参阅 [*Web Caching*](http://bit.ly/Web_Caching)（O’Reilly
+    出版）由 Duane Wessels 的第 6 章。
 - en: Authentication
+  id: totrans-189
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 认证
 - en: HTTP authentication works through request headers and response statuses. A browser
     can send a username and password (the *credentials*) in the request headers. If
     the credentials aren’t sent or aren’t satisfactory, the server sends a “401 Unauthorized”
@@ -837,53 +1252,76 @@
     typically pops up an “Enter username and password for . . .” dialog box on the
     browser, and the page is then re-requested with the updated credentials in the
     header.
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: HTTP身份验证通过请求头和响应状态工作。浏览器可以在请求头中发送用户名和密码（*凭证*）。如果凭证未发送或不符合要求，服务器将发送“401未授权”响应，并通过`WWW-Authenticate`头标识身份验证的*领域*（例如`"Mary's`
+    `Pictures"`或`"Your Shopping Cart"`）。这通常会在浏览器上弹出一个“输入用户名和密码以 . . .”的对话框，并且页面会使用更新后的凭证重新请求。
 - en: 'To handle authentication in PHP, check the username and password (the `PHP_AUTH_USER`
     and `PHP_AUTH_PW` items of `$_SERVER`) and call `header()` to set the realm and
     send a “401 Unauthorized” response:'
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在PHP中处理身份验证，请检查用户名和密码（`$_SERVER`的`PHP_AUTH_USER`和`PHP_AUTH_PW`项），并调用`header()`设置领域并发送“401未授权”响应：
 - en: '[PRE31]'
+  id: totrans-192
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: You can do anything you want to authenticate the username and password; for
     example, you could consult a database, read a file of valid users, or consult
     a Microsoft domain server.
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用任何方法来验证用户名和密码；例如，您可以查询数据库，读取有效用户的文件，或查询Microsoft域服务器。
 - en: 'This example checks to make sure that the password is the username reversed
     (not the most secure authentication method, to be sure!):'
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 本示例检查确保密码是用户名的反向（确实不是最安全的身份验证方法！）：
 - en: '[PRE32]'
+  id: totrans-195
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: If you’re protecting more than one page, put the preceding code into a separate
     file and include it at the top of every protected page.
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您要保护多个页面，请将上述代码放入单独的文件中，并将其包含在每个受保护页面的顶部。
 - en: If your host is using the CGI version of PHP rather than an Apache module, these
     variables cannot be set and you’ll need to use some other form of authentication—for
     example, by gathering the username and password through an HTML form.
+  id: totrans-197
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的主机使用的是PHP的CGI版本而不是Apache模块，则无法设置这些变量，您需要使用其他形式的身份验证，例如通过HTML表单收集用户名和密码。
 - en: Maintaining State
+  id: totrans-198
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 维护状态
 - en: HTTP is a *stateless* protocol, which means that once a web server completes
     a client’s request for a web page, the connection between the two goes away. In
     other words, there is no way for a server to recognize that a sequence of requests
     all originate from the same client.
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: HTTP是一种*无状态*协议，这意味着一旦Web服务器完成客户端的Web页面请求，两者之间的连接就会中断。换句话说，服务器无法识别一系列请求是否来自同一个客户端。
 - en: State is useful, though. You can’t build a shopping-cart application, for example,
     if you can’t keep track of a sequence of requests from a single user. You need
     to know when a user adds items to the cart or removes them, and what’s in the
     cart when the user decides to check out.
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管如此，状态是有用的。例如，如果无法跟踪单个用户的一系列请求，就无法构建购物车应用程序。您需要知道用户何时添加或删除项目，以及用户在决定结账时购物车中有什么物品。
 - en: To get around the web’s lack of state, programmers have come up with many tricks
     to track state information between requests (also known as *session tracking*).
     One such technique is to use hidden form fields to pass around information. PHP
@@ -894,23 +1332,32 @@
     While hidden form fields work in all browsers, they work only for a sequence of
     dynamically generated forms, so they aren’t as generally useful as some other
     techniques.
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了解决网络缺乏状态的问题，程序员们想出了许多技巧来在请求之间跟踪状态信息（也称为*会话跟踪*）。其中一种技术是使用隐藏表单字段来传递信息。PHP将隐藏表单字段视为普通表单字段，因此这些值可以在`$_GET`和`$_POST`数组中使用。使用隐藏表单字段，您可以传递整个购物车的内容。但是，更常见的做法是为每个用户分配一个唯一标识符，并使用单个隐藏表单字段传递该标识符。虽然隐藏表单字段在所有浏览器中都有效，但它们仅适用于一系列动态生成的表单，因此它们不如其他一些技术那样普遍有用。
 - en: 'Another technique is URL rewriting, where every local URL on which the user
     might click is dynamically modified to include extra information. This extra information
     is often specified as a parameter in the URL. For example, if you assign every
     user a unique ID, you might include that ID in all URLs, as follows:'
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一种技术是 URL 重写，其中用户可能单击的每个本地 URL 都会动态修改以包含额外信息。这些额外信息通常作为 URL 的参数指定。例如，如果为每个用户分配一个唯一的
+    ID，可以在所有 URL 中包含该 ID，如下所示：
 - en: '[PRE33]'
+  id: totrans-203
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: If you make sure to dynamically modify all local links to include a user ID,
     you can now keep track of individual users in your application. URL rewriting
     works for all dynamically generated documents, not just forms, but actually performing
     the rewriting can be tedious.
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果确保动态修改所有本地链接以包含用户 ID，现在可以在应用程序中跟踪个别用户。URL 重写适用于所有动态生成的文档，不仅仅是表单，但实际执行重写可能很繁琐。
 - en: The third and most widespread technique for maintaining state is to use cookies.
     A *cookie* is a bit of information that the server can give to a client. On every
     subsequent request the client will give that information back to the server, thus
@@ -919,8 +1366,12 @@
     is that most browsers allow users to disable cookies. So any application that
     uses cookies for state maintenance needs to use another technique as a fallback
     mechanism. We’ll discuss cookies in more detail shortly.
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 维护状态的第三种最普遍的技术是使用**cookies**。*Cookie* 是服务器可以给客户端的一小段信息。在随后的每个请求中，客户端将该信息返回给服务器，从而标识自己。Cookies
+    对于通过浏览器重复访问时保留信息很有用，但它们也不是没有问题的。主要问题在于，大多数浏览器允许用户禁用 cookies。因此，任何使用 cookies 进行状态维护的应用程序都需要使用另一种技术作为后备机制。我们稍后将更详细地讨论
+    cookies。
 - en: The best way to maintain state with PHP is to use the built-in session-tracking
     system. This system lets you create persistent variables that are accessible from
     different pages of your application, as well as in different visits to the site
@@ -928,152 +1379,227 @@
     (or URLs) to elegantly solve most problems that require state, taking care of
     all the details for you. We’ll cover PHP’s session-tracking system in detail later
     in this chapter.
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 PHP 维护状态的最佳方式是使用内置的会话跟踪系统。此系统允许您创建可从应用程序的不同页面访问的持久变量，以及同一用户在访问站点的不同次数时也可以访问这些变量。在幕后，PHP
+    的会话跟踪机制使用 cookies（或 URLs）优雅地解决大多数需要状态的问题，并为您处理所有细节。我们稍后将在本章中详细介绍 PHP 的会话跟踪系统。
 - en: Cookies
+  id: totrans-207
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Cookies
 - en: A cookie is basically a string that contains several fields. A server can send
     one or more cookies to a browser in the headers of a response. Some of the cookie’s
     fields indicate the pages for which the browser should send the cookie as part
     of the request. The `value` field of the cookie is the payload—servers can store
     any data they like there (within limits), such as a unique code identifying the
     user, preferences, and the like.
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个 cookie 基本上是一个包含多个字段的字符串。服务器可以在响应的头部中向浏览器发送一个或多个 cookies。某些 cookie 的字段指示浏览器应将
+    cookie 作为请求的一部分发送到哪些页面。cookie 的 `value` 字段是有效载荷——服务器可以在其中存储任何喜欢的数据（在限制内），如标识用户的唯一代码、偏好等。
 - en: 'Use the `setcookie()` function to send a cookie to the browser:'
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `setcookie()` 函数将 cookie 发送到浏览器：
 - en: '[PRE34]'
+  id: totrans-210
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: 'This function creates the cookie string from the given arguments and creates
     a `Cookie` header with that string as its value. Because cookies are sent as headers
     in the response, `setcookie()` must be called before any of the body of the document
     is sent. The parameters of `setcookie()` are:'
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 此函数从给定参数创建 cookie 字符串，并创建一个 `Cookie` 头部，其值为该字符串。因为 cookies 作为响应的头部发送，所以必须在发送文档的任何主体之前调用
+    `setcookie()`。`setcookie()` 的参数包括：
 - en: '*name*'
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: '*名称*'
 - en: A unique name for a particular cookie. You can have multiple cookies with different
     names and attributes. The name must not contain whitespace or semicolons.
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 特定 cookie 的唯一名称。您可以拥有多个具有不同名称和属性的 cookies。名称不能包含空格或分号。
 - en: '*value*'
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: '*值*'
 - en: The arbitrary string value attached to this cookie. The original Netscape specification
     limited the total size of a cookie (including name, expiration date, and other
     information) to 4 KB, so while there’s no specific limit on the size of a cookie
     value, it probably can’t be much larger than 3.5 KB.
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: 此 cookie 附加的任意字符串值。最初的 Netscape 规范将 cookie 的总大小（包括名称、过期日期和其他信息）限制为 4 KB，因此虽然
+    cookie 值的大小没有具体限制，但它可能不会大于 3.5 KB。
 - en: '*expires*'
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: '*过期*'
 - en: The expiration date for this cookie. If no expiration date is specified, the
     browser saves the cookie in memory and not on disk. When the browser exits, the
     cookie disappears. The expiration date is specified as the number of seconds since
     midnight, January 1, 1970 (GMT). For example, pass `time() + 60 * 60 * 2` to expire
     the cookie in two hours’ time.
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 此cookie的过期日期。如果未指定过期日期，则浏览器将cookie保存在内存中而不是在磁盘上。当浏览器退出时，cookie消失。过期日期是自1970年1月1日午夜（GMT）以来的秒数。例如，传递`time()
+    + 60 * 60 * 2`将使cookie在两小时后过期。
 - en: '*path*'
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: '*path*'
 - en: The browser will return the cookie only for URLs below this path. The default
     is the directory in which the current page resides. For example, if */store/front/cart.php*
     sets a cookie and doesn’t specify a path, the cookie will be sent back to the
     server for all pages whose URL path starts with */store/front/*.
+  id: totrans-219
   prefs: []
   type: TYPE_NORMAL
+  zh: 浏览器只会为此路径下的URL返回cookie。默认情况下是当前页面所在的目录。例如，如果*/store/front/cart.php*设置了一个cookie，并且没有指定路径，那么该cookie将在所有URL路径以*/store/front/*开头的页面上发送回服务器。
 - en: '*domain*'
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: '*domain*'
 - en: The browser will return the cookie only for URLs within this domain. The default
     is the server hostname.
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: 浏览器只会为此域名下的URL返回cookie。默认是服务器主机名。
 - en: '*secure*'
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: '*secure*'
 - en: The browser will transmit the cookie only over *https* connections. The default
     is `false`, meaning that it’s OK to send the cookie over insecure connections.
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
+  zh: 浏览器只会在*https*连接下传输cookie。默认情况下是`false`，意味着可以在不安全的连接下发送cookie。
 - en: '*httponly*'
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: '*httponly*'
 - en: If this parameter is set to `TRUE`, the cookie will be available only via the
     HTTP protocol, and thus inaccessible via other means like JavaScript. Whether
     this allows for a more secure cookie is still up for debate, so use this parameter
     cautiously and test well.
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果将此参数设置为`TRUE`，则cookie将仅通过HTTP协议可用，因此无法通过其他方式如JavaScript访问。关于这是否能提供更安全的cookie，仍有争论，因此请谨慎使用此参数并进行充分测试。
 - en: 'The `setcookie()` function also has an alternate syntax:'
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: '`setcookie()`函数还有一种替代语法：'
 - en: '[PRE35]'
+  id: totrans-227
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: where `$options` is an array that holds the other parameters following the `$value`
     content. This saves a little on the code line length for the `setcookie()` function,
     but the `$options` array will have to be built prior to its use, so there is a
     trade-off of sorts in play.
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 其中`$options`是一个数组，保存了跟在`$value`内容后面的其他参数。这样可以稍微节省`setcookie()`函数的代码行长度，但是在使用前必须先构建好`$options`数组，因此存在一定的权衡考量。
 - en: 'When a browser sends a cookie back to the server, you can access that cookie
     through the `$_COOKIE` array. The key is the cookie name, and the value is the
     cookie’s `value` field. For instance, the following code at the top of a page
     keeps track of the number of times the page has been accessed by this client:'
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 当浏览器将cookie发送回服务器时，您可以通过`$_COOKIE`数组访问该cookie。键是cookie名称，值是cookie的`value`字段。例如，页面顶部的以下代码跟踪了客户端访问该页面的次数：
 - en: '[PRE36]'
+  id: totrans-230
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: When cookies are decoded, any periods (`.`) in a cookie’s name are turned into
     underscores. For instance, a cookie named `tip.top` is accessible as `$_COOKIE['tip_top']`.
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 解码cookie时，cookie名称中的任何句点(`.`)都会变成下划线。例如，名为`tip.top`的cookie可以通过`$_COOKIE['tip_top']`访问。
 - en: Let’s take a look at cookies in action. First, [Example 8-10](#example_eight_onezerodot_preference_sel)
     shows an HTML page that gives a range of options for background and foreground
     colors.
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看cookie的实际效果。首先，[示例 8-10](#example_eight_onezerodot_preference_sel)显示了一个HTML页面，提供了各种背景和前景颜色的选项。
 - en: Example 8-10\. Preference selection (colors.php)
+  id: totrans-233
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-10\. 偏好选择 (colors.php)
 - en: '[PRE37]'
+  id: totrans-234
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: The form in [Example 8-10](#example_eight_onezerodot_preference_sel) submits
     to the PHP script *prefs.php*, which is shown in [Example 8-11](#example_eight_oneonedot_setting_prefere).
     This script then sets cookies for the color preferences specified in the form.
     Note that the calls to `setcookie()` are made after the HTML page is started.
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 8-10](#example_eight_onezerodot_preference_sel)中的表单提交到PHP脚本*prefs.php*，如示例 8-11 所示，该脚本会为表单中指定的颜色偏好设置cookie。注意，在HTML页面启动后才调用`setcookie()`函数。'
 - en: Example 8-11\. Setting preferences with cookies (prefs.php)
+  id: totrans-236
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-11\. 使用cookie设置偏好 (prefs.php)
 - en: '[PRE38]'
+  id: totrans-237
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: The page created by [Example 8-11](#example_eight_oneonedot_setting_prefere)
     contains a link to another page, shown in [Example 8-12](#example_eight_onetwodot_using_the_color),
     that uses the color preferences by accessing the `$_COOKIE` array.
+  id: totrans-238
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 8-11](#example_eight_oneonedot_setting_prefere)生成的页面包含指向另一页的链接，如[示例 8-12](#example_eight_onetwodot_using_the_color)所示，该页面通过访问`$_COOKIE`数组使用颜色偏好。'
 - en: Example 8-12\. Using the color preferences with cookies (prefs_demo.php)
+  id: totrans-239
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-12\. 使用带有 cookie 的颜色偏好（prefs_demo.php）
 - en: '[PRE39]'
+  id: totrans-240
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: There are plenty of caveats about the use of cookies. Not all clients (browsers)
     support or accept cookies, and even if the client does support cookies, the user
     can turn them off. Furthermore, the cookie specification says that no cookie can
@@ -1085,29 +1611,42 @@
     cookies to expire quickly. Expiration times rely on the client’s clock being as
     accurate as yours. Many people do not have their system clocks set accurately,
     so you can’t rely on rapid expirations.
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于 cookie 使用有许多注意事项。并非所有客户端（浏览器）都支持或接受 cookie，即使客户端支持 cookie，用户也可以关闭它们。此外，cookie
+    规范规定单个 cookie 大小不得超过 4 KB，每个域名最多允许 20 个 cookie，并且客户端上最多可以存储 300 个 cookie。某些浏览器可能有更高的限制，但不能依赖此点。最后，你无法控制浏览器何时实际过期
+    cookie —— 如果浏览器达到容量上限并需要添加新 cookie，则可能丢弃尚未过期的 cookie。你还应注意设置快速过期的 cookie。到期时间依赖于客户端时钟与你的时钟一样准确。许多人没有准确设置系统时钟，因此不能依赖于快速过期。
 - en: Despite these limitations, cookies are very useful for retaining information
     through repeated visits by a browser.
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管存在这些限制，cookie 对于通过浏览器的重复访问保留信息非常有用。
 - en: Sessions
+  id: totrans-243
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 会话
 - en: PHP has built-in support for sessions, handling all the cookie manipulation
     for you to provide persistent variables that are accessible from different pages
     and across multiple visits to the site. Sessions allow you to easily create multipage
     forms (such as shopping carts), save user authentication information from page
     to page, and store persistent user preferences on a site.
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 内置支持会话，处理所有的 cookie 操作，以提供可以从不同页面访问并跨多次访问站点的持久变量。会话使你能够轻松创建多页面表单（如购物车）、保存用户认证信息以及在站点上存储持久用户首选项。
 - en: Each first-time visitor is issued a unique session ID. By default, the session
     ID is stored in a cookie called `PHPSESSID`. If the user’s browser does not support
     cookies or has cookies turned off, the session ID is propagated in URLs within
     the website.
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个首次访问者都会被分配一个唯一的会话 ID。默认情况下，会话 ID 存储在名为 `PHPSESSID` 的 cookie 中。如果用户的浏览器不支持
+    cookie 或已关闭 cookie，会话 ID 将通过网站内的 URL 传播。
 - en: Every session has a data store associated with it. You can *register* variables
     to be loaded from the data store when each page starts and saved back to the data
     store when the page ends. Registered variables persist between pages, and changes
@@ -1115,78 +1654,116 @@
     to your shopping cart” link can take the user to a page that adds an item to a
     registered array of items in the cart. This registered array can then be used
     on another page to display the contents of the cart.
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个会话都有一个关联的数据存储。你可以*注册*变量，以便在每个页面启动时从数据存储加载，并在页面结束时保存回数据存储。注册的变量在页面间持久存在，并且在一个页面上对变量的更改可以在其他页面上看到。例如，“将此商品加入购物车”的链接可以将用户带到一个页面，向购物车中注册的数组添加项目。然后可以在另一个页面上使用此注册的数组来显示购物车的内容。
 - en: Session basics
+  id: totrans-247
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 会话基础
 - en: Sessions start automatically when a script begins running. A new session ID
     is generated if necessary, possibly creating a cookie to be sent to the browser,
     and loads any persistent variables from the store.
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 脚本开始运行时会自动启动会话。如有必要，会生成新的会话 ID，可能创建一个要发送到浏览器的 cookie，并从存储中加载任何持久变量。
 - en: 'You can register a variable with the session by passing the name of the variable
     to the `$_SESSION[]` array. For example, here is a basic hit counter:'
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以通过将变量名称传递给 `$_SESSION[]` 数组来将变量注册到会话中。例如，这里是一个基本的点击计数器：
 - en: '[PRE40]'
+  id: totrans-250
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: The `session_start()` function loads registered variables into the associative
     array `$_SESSION`. The keys are the variables’ names (e.g., `$_SESSION['hits']`).
     If you’re curious, the `session_id()` function returns the current session ID.
+  id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: '`session_start()` 函数将注册的变量加载到关联数组 `$_SESSION` 中。键是变量的名称（例如 `$_SESSION[''hits'']`）。如果你感兴趣，`session_id()`
+    函数返回当前会话 ID。'
 - en: To end a session, call `session_destroy()`. This removes the data store for
     the current session, but it doesn’t remove the cookie from the browser cache.
     This means that, on subsequent visits to sessions-enabled pages, the user will
     have the same session ID as before the call to `session_destroy()`, but none of
     the data.
+  id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: 要结束会话，请调用 `session_destroy()`。这将删除当前会话的数据存储，但不会从浏览器缓存中删除 cookie。这意味着，在后续访问启用会话的页面时，用户将具有与调用
+    `session_destroy()` 之前相同的会话 ID，但没有数据。
 - en: '[Example 8-13](#example_eight_onethreedot_setting_prefe) shows the code from
     [Example 8-11](#example_eight_oneonedot_setting_prefere) rewritten to use sessions
     instead of manually setting cookies.'
+  id: totrans-253
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 8-13](#example_eight_onethreedot_setting_prefe) 展示了从 [示例 8-11](#example_eight_oneonedot_setting_prefere)
+    改写的代码，使用会话而不是手动设置 cookie。'
 - en: Example 8-13\. Setting preferences with sessions (prefs_session.php)
+  id: totrans-254
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-13\. 使用会话设置首选项（prefs_session.php）
 - en: '[PRE41]'
+  id: totrans-255
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: '[Example 8-14](#example_eight_onefourdot_using_preferen) shows [Example 8-12](#example_eight_onetwodot_using_the_color)
     rewritten to use sessions. Once the session is started, the `$bg` and `$fg` variables
     are created, and all the script has to do is use them.'
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 8-14](#example_eight_onefourdot_using_preferen) 展示了从 [示例 8-12](#example_eight_onetwodot_using_the_color)
+    改写为使用会话。会话启动后，创建了 `$bg` 和 `$fg` 变量，脚本只需使用它们即可。'
 - en: Example 8-14\. Using preferences from sessions (prefs_session_demo.php)
+  id: totrans-257
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-14\. 使用会话中的首选项（prefs_session_demo.php）
 - en: '[PRE42]'
+  id: totrans-258
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: To see this change, simply update the action destination in the *colors.php*
     file. By default, PHP session ID cookies expire when the browser closes. That
     is, sessions don’t persist after the browser ceases to exist. To change this,
     you’ll need to set the `session.cookie_lifetime` option in *php.ini* to the lifetime
     of the cookie in seconds.
+  id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: 要查看此更改，只需更新 *colors.php* 文件中的操作目标。默认情况下，PHP 会话 ID cookie 在浏览器关闭时过期。也就是说，会话在浏览器停止存在后不会持久保存。要更改此设置，您需要在
+    *php.ini* 中设置 `session.cookie_lifetime` 选项为 cookie 的生命周期（以秒为单位）。
 - en: Alternatives to cookies
+  id: totrans-260
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 替代方案为 cookie
 - en: 'By default, the session ID is passed from page to page in the `PHPSESSID` cookie.
     However, PHP’s session system supports two alternatives: form fields and URLs.
     Passing the session ID via hidden form fields is extremely awkward, as it forces
     you to make every link between pages to be a form’s submit button. We will not
     discuss this method further here.'
+  id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，会话 ID 通过 `PHPSESSID` cookie 从页面传递到页面。但是，PHP 的会话系统支持两种替代方案：表单字段和 URL。通过隐藏表单字段传递会话
+    ID 非常笨拙，因为它强制您将每个页面之间的每个链接都变成表单的提交按钮。我们将不在此处进一步讨论此方法。
 - en: The URL system for passing around the session ID, however, is somewhat more
     elegant. PHP can rewrite your HTML files, adding the session ID to every relative
     link. For this to work, though, PHP must be configured with the `-enable-trans-id`
@@ -1194,34 +1771,50 @@
     and rewrite every page. Busy sites may wish to stick with cookies, as they do
     not incur the slowdown caused by page rewriting. In addition, this exposes your
     session IDs, potentially allowing for man-in-the-middle attacks.
+  id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: 传递会话 ID 的 URL 系统相对更加优雅。PHP 可以重写您的 HTML 文件，将会话 ID 添加到每个相对链接中。但是，要使此功能正常工作，PHP
+    在编译时必须配置 `-enable-trans-id` 选项。这会导致性能损失，因为 PHP 必须解析和重写每个页面。繁忙的站点可能希望使用 cookie，因为它们不会因页面重写而减慢速度。此外，这会暴露您的会话
+    ID，可能导致中间人攻击。
 - en: Custom storage
+  id: totrans-263
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 自定义存储
 - en: By default, PHP stores session information in files in your server’s temporary
     directory. Each session’s variables are stored in a separate file. Every variable
     is serialized into the file in a proprietary format. You can change all of these
     values in the *php.ini* file.
+  id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，PHP 将会话信息存储在服务器临时目录中的文件中。每个会话变量存储在单独的文件中。每个变量以专有格式序列化到文件中。您可以在 *php.ini*
+    文件中更改所有这些值。
 - en: You can change the location of the session files by setting the `session.save_path`
     value in *php.ini*. If you are on a shared server with your own installation of
     PHP, set the directory to somewhere in your own directory tree, so other users
     on the same machine cannot access your session files.
+  id: totrans-265
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过在 *php.ini* 中设置 `session.save_path` 值来更改会话文件的位置。如果您在具有自己安装的 PHP 的共享服务器上，请将目录设置为您自己目录树中的某个位置，这样同一台机器上的其他用户就无法访问您的会话文件。
 - en: PHP can store session information in one of two formats in the current session
     store—either PHP’s built-in format or Web Distributed Data eXchange (WDDX). You
     can change the format by setting the `session.serialize_handler` value in your
     *php.ini* file to either `php` for the default behavior, or `wddx` for WDDX format.
+  id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 可以将会话信息存储在当前会话存储中的两种格式之一——PHP 的内置格式或 Web 分布数据交换（WDDX）格式。您可以通过在您的 *php.ini*
+    文件中设置 `session.serialize_handler` 值为 `php`（默认行为）或 `wddx`（WDDX 格式）来更改格式。
 - en: Combining Cookies and Sessions
+  id: totrans-267
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 结合 Cookies 和 Sessions
 - en: Using a combination of cookies and your own session handler, you can preserve
     state across visits. Any state that should be forgotten when a user leaves the
     site, such as which page the user is on, can be left up to PHP’s built-in sessions.
@@ -1229,52 +1822,79 @@
     be stored in a cookie. With the user ID, you can retrieve the user’s more permanent
     state (display preferences, mailing address, etc.) from a permanent store, such
     as a database.
+  id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 Cookies 和自定义的会话处理程序的组合，您可以跨访问保留状态。任何应该在用户离开站点时被遗忘的状态，例如用户正在访问的页面，可以交给 PHP
+    的内置会话处理。任何应该在用户访问之间保持的状态，例如唯一的用户 ID，可以存储在一个 Cookie 中。使用用户 ID，您可以从永久存储（如数据库）中检索用户更长期的状态（显示偏好、邮寄地址等）。
 - en: '[Example 8-15](#example_eight_onefivedot_saving_state_a) allows the user to
     select text and background colors and stores those values in a cookie. Any visits
     to the page within the next week send the color values in the cookie.'
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 8-15](#example_eight_onefivedot_saving_state_a) 允许用户选择文本和背景颜色，并将这些值存储在一个
+    Cookie 中。在接下来的一周内访问页面时，会将颜色值在 Cookie 中发送。'
 - en: Example 8-15\. Saving state across visits (save_state.php)
+  id: totrans-270
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 8-15\. 跨访问保存状态（save_state.php）
 - en: '[PRE43]'
+  id: totrans-271
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: SSL
+  id: totrans-272
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: SSL
 - en: The Secure Sockets Layer (SSL) provides a secure channel over which regular
     HTTP requests and responses can flow. PHP doesn’t specifically concern itself
     with SSL, so you cannot control the encryption in any way from PHP. An *https://*
     URL indicates a secure connection for that document, unlike an *http://* URL.
+  id: totrans-273
   prefs: []
   type: TYPE_NORMAL
+  zh: 安全套接字层（SSL）提供了一个安全的通道，使得常规的 HTTP 请求和响应可以流动。PHP 并不专门关注 SSL，因此您无法通过 PHP 控制加密方式。一个
+    *https://* 的 URL 表示该文档的连接是安全的，而不像 *http://* 的 URL。
 - en: 'The `HTTPS` entry in the `$_SERVER` array is set to `''on''` if the PHP page
     was generated in response to a request over an SSL connection. To prevent a page
     from being generated over a nonencrypted connection, simply use:'
+  id: totrans-274
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果 PHP 页面是在 SSL 连接的请求下生成的，`$_SERVER` 数组中的 `HTTPS` 条目将被设置为 `'on'`。要防止页面在非加密连接下生成，只需简单地使用：
 - en: '[PRE44]'
+  id: totrans-275
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: A common mistake is to send a form over a secure connection (e.g., *https://www.example.com/form.html*),
     but have the `action` of the `form` submit to an *http://* URL. Any form parameters
     then entered by the user are sent over an insecure connection, and a trivial packet
     sniffer can reveal them.
+  id: totrans-276
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个常见的错误是在安全连接下发送表单（例如，*https://www.example.com/form.html*），但是表单的 `action` 设置为一个
+    *http://* 的 URL。用户输入的任何表单参数都会通过不安全的连接发送，而简单的数据包嗅探器可以将其暴露出来。
 - en: What’s Next
+  id: totrans-277
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 接下来是什么
 - en: There are many tips, tricks, and gotchas in modern web development, and we hope
     that the ones this chapter has pointed out will be helpful as you build great
     sites. Coming in the next chapter is a discussion on saving data to data stores
     within PHP. We will cover most of the more commonly used approaches, like databases,
     SQL and NoSQL style, SQLite, and direct file information storage.
+  id: totrans-278
   prefs: []
   type: TYPE_NORMAL
+  zh: 在现代 Web 开发中有许多技巧和陷阱，我们希望本章所指出的内容能帮助您构建出色的网站。下一章将讨论如何将数据保存到 PHP 中的数据存储中，我们将涵盖大多数常用的方法，如数据库、SQL
+    和 NoSQL 风格、SQLite，以及直接文件信息存储。

@@ -1,14 +1,19 @@
 - en: Chapter 16\. Web Services
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第16章\. Web 服务
 - en: Historically, every time there’s been a need for two systems to communicate,
     a new protocol has been created (for example, SMTP for sending mail, POP3 for
     receiving mail, and the numerous protocols that database clients and servers use).
     The idea of web services is to remove the need to create new protocols by providing
     a standardized mechanism for remote procedure calls, based on XML and HTTP.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 历史上，每当有两个系统需要通信时，通常会创建一个新的协议（例如，用于发送邮件的SMTP，用于接收邮件的POP3，以及数据库客户端和服务器使用的众多协议）。Web
+    服务的理念是通过基于 XML 和 HTTP 的标准化远程过程调用机制，消除创建新协议的需要。
 - en: Web services make it easy to integrate heterogeneous systems. Say you’re writing
     a web interface to a library system that already exists. It has a complex system
     of database tables, and lots of business logic embedded in the program code that
@@ -18,507 +23,777 @@
     out a book to a user, see when this book is due back, see what the overdue fines
     are for this user) as a web service. Now your PHP code simply has to handle the
     web frontend; it can use the library service to do all the heavy lifting.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: Web 服务使得集成异构系统变得简单。比如说，你正在为一个已经存在的图书馆系统编写 Web 界面。它有一个复杂的数据库表系统，并且在程序代码中嵌入了大量的业务逻辑来操作这些表。而且它是用
+    C++ 编写的。你可以重新在 PHP 中实现业务逻辑，编写大量代码以正确操作表，或者你可以在 C++ 中写少量代码来将图书馆操作（例如，为用户借书、查看归还日期、查看该用户的逾期罚款）作为
+    Web 服务公开。现在，你的 PHP 代码只需处理 Web 前端；它可以使用图书馆服务来完成所有繁重的工作。
 - en: REST Clients
+  id: totrans-3
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: REST 客户端
 - en: A *RESTful web service* is a loose description of web APIs implemented using
     HTTP and the principles of Representational State Transfer (REST). It refers to
     a collection of resources, along with basic operations a client can perform on
     those resources through the API.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '*RESTful Web 服务* 是使用 HTTP 和表现层状态转移（REST）原则实现的 Web API 的宽泛描述。它指的是一组资源以及客户端可以通过
+    API 执行的基本操作。'
 - en: For example, an API might describe a collection of authors and the books to
     which those authors have contributed. The data within each object type is arbitrary.
     In this case, a *resource* is each individual author, each individual book, and
     the collections of all authors, all books, and the books to which each author
     has contributed. Each resource must have a unique identifier so calls into the
     API know what resource is being retrieved or acted upon.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，一个 API 可能描述了一组作者及其所贡献的书籍。每个对象类型内的数据是任意的。在这种情况下，*资源*是每个单独的作者、每本单独的书籍，以及所有作者、所有书籍的集合，以及每个作者所贡献的书籍。每个资源必须有一个唯一的标识符，以便
+    API 调用知道正在检索或操作哪个资源。
 - en: You might represent a simple set of classes to represent the book and author
     resources, as in [Example 16-1](#example_onesix_onedot_book_and_author_c).
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可能会用一个简单的类集合来表示书籍和作者资源，就像[示例 16-1](#example_onesix_onedot_book_and_author_c)中那样。
 - en: Example 16-1\. Book and Author classes
+  id: totrans-7
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-1\. 书籍和作者类
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Because HTTP was built with the REST architecture in mind, it provides a set
     of *verbs* that you use to interact with the API. We’ve already seen `GET` and
     `POST` verbs, which websites often use to represent “retrieve data” and “perform
     an action,” respectively. RESTful web services introduce two additional verbs,
     `PUT` and `DELETE`:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为 HTTP 是为 REST 架构而建的，它提供了一组*动词*用于与 API 进行交互。我们已经看到了 `GET` 和 `POST` 动词，通常用于代表“检索数据”和“执行操作”。RESTful
+    Web 服务引入了另外两个动词，`PUT` 和 `DELETE`：
 - en: '`GET`'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: '`GET`'
 - en: Retrieve information about a resource or collection of resources.
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 检索关于资源或资源集合的信息。
 - en: '`POST`'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '`POST`'
 - en: Create a new resource.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个新资源。
 - en: '`PUT`'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PUT`'
 - en: Update a resource with new data, or replace a collection of resources with new
     ones.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 更新资源使用新数据，或者用新资源替换一组资源。
 - en: '`DELETE`'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: '`DELETE`'
 - en: Delete a resource or a collection of resources.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 删除一个资源或一组资源。
 - en: 'For example, the `Books` and `Authors` API might consist of the following REST
     endpoints, based on the data contained within the object classes:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，`Books` 和 `Authors` API 可能包括以下基于对象类数据的 REST 端点：
 - en: '`GET /api/authors`'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '`GET /api/authors`'
 - en: Return a list of identifiers for each author in the collection.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回集合中每个作者的标识符列表。
 - en: '`POST /api/authors`'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: '`POST /api/authors`'
 - en: Given information about a new author, create a new author in the collection.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 提供关于新作者的信息，创建新作者到集合中。
 - en: '`GET /api/authors/`*`id`*'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '`GET /api/authors/`*`id`*'
 - en: Retrieve the author with identifier *`id`* from the collection and return it.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 检索集合中具有标识符*`id`*的作者并将其返回。
 - en: '`PUT /api/authors/`*`id`*'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PUT /api/authors/`*`id`*'
 - en: Given updated information about an author with identifier *`id`*, update that
     author’s information in the collection.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 针对具有标识符*`id`*的作者的更新信息，更新集合中该作者的信息。
 - en: '`DELETE /api/authors/`*`id`*'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '`DELETE /api/authors/`*`id`*'
 - en: Delete the author with identifier *`id`* from the collection.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 从集合中删除具有标识符*`id`*的作者。
 - en: '`GET /api/authors/`*`id`*`/books`'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: '`GET /api/authors/`*`id`*`/books`'
 - en: Retrieve a list of identifiers for each book to which the author with identifier
     *`id`* has contributed.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 检索具有标识符*`id`*的作者为每本书的标识符列表。
 - en: '`POST /api/authors/`*`id`*`/books`'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: '`POST /api/authors/`*`id`*`/books`'
 - en: Given information about a new book, create a new book in the collection under
     the author with identifier *`id`*.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 给定有关新书的信息，创建集合中具有标识符*`id`*的作者下的新书。
 - en: '`GET /api/books/`*`id`*'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '`GET /api/books/`*`id`*'
 - en: Retrieve the book with identifier *`id`* from the collection and return it.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 检索集合中具有标识符*`id`*的书并将其返回。
 - en: The `GET`, `POST`, `PUT`, and `DELETE` verbs provided by RESTful web services
     can be thought of as roughly equivalent to the *create*, *retrieve*, *update*,
     and *delete* (CRUD) operations typical to a database, although they can correlate
     to collections, not just entities as is typical with CRUD implementations.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: RESTful web services提供的`GET`、`POST`、`PUT`和`DELETE`动词可以被视为数据库中典型的*create*、*retrieve*、*update*和*delete*（CRUD）操作的粗略等效，尽管它们可以与集合相关联，而不仅仅是实体，这在CRUD实现中是典型的。
 - en: Responses
+  id: totrans-36
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 响应
 - en: 'In each of the preceding API endpoints, the HTTP status code is used to provide
     the result of the request. HTTP provides a long list of standard status codes:
     for example, `201 Created` would be returned when you create a resource, and `501
     Not Implemented` would be returned when you send a request to an endpoint that
     doesn’t exist.'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 在每个前述的API端点中，HTTP状态码用于提供请求的结果。HTTP提供了一长串标准状态码：例如，当您创建资源时将返回`201 Created`，当您向不存在的端点发送请求时将返回`501
+    Not Implemented`。
 - en: 'While the full list of HTTP codes is beyond the scope of this chapter, some
     common ones include:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然完整的HTTP代码列表超出了本章的范围，但一些常见的代码包括：
 - en: '`200 OK`'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: '`200 OK`'
 - en: The request was successfully completed.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 请求已成功完成。
 - en: '`201 Created`'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: '`201 Created`'
 - en: A request for creating a new resource was completed successfully.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 已成功完成创建新资源的请求。
 - en: '`400 Bad Request`'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: '`400 Bad Request`'
 - en: The request hit a valid endpoint, but was malformed and could not be completed.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 请求命中了有效的端点，但格式错误，无法完成。
 - en: '`401 Unauthorized`'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: '`401 Unauthorized`'
 - en: Along with `403 Forbidden`, represents a valid request, but one that could not
     be completed due to a lack of permissions. Typically, this response indicates
     that authorization is required but has not yet been provided.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 与`403 Forbidden`一起，表示一个有效请求，但由于缺乏权限而无法完成。通常，此响应指示需要授权但尚未提供。
 - en: '`403 Forbidden`'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: '`403 Forbidden`'
 - en: Similar to `401 Unauthorized`, this response indicates a valid request, but
     one that could not be completed due to a lack of permissions. Typically, this
     response indicates that authorization was available but that the user lacks permission
     to perform the requested action.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 与`401 Unauthorized`类似，此响应指示一个有效请求，但由于缺乏权限而无法完成。通常，此响应指示授权可用但用户缺乏执行请求操作的权限。
 - en: '`404 Not Found`'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: '`404 Not Found`'
 - en: The resource was not found (for example, attempting to delete an author with
     an ID that does not exist).
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 未找到资源（例如，尝试删除不存在ID的作者）。
 - en: '`500 Internal Server Error`'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: '`500 Internal Server Error`'
 - en: An error occurred on the server side.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 服务器端发生错误。
 - en: These codes are mere guidelines and typical responses; the exact responses provided
     by a RESTful API are detailed by the API itself.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些代码仅作为指南和典型响应；RESTful API提供的确切响应由API本身详细说明。
 - en: Retrieving Resources
+  id: totrans-54
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 检索资源
 - en: Retrieving information for a resource involves a straightforward `GET` request.
     [Example 16-2](#example_onesix_twodot_retrieving_author) uses the *curl* extension
     to format an HTTP request, set parameters on it, send the request, and get the
     returned information.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 检索资源信息涉及简单的`GET`请求。[示例 16-2](#example_onesix_twodot_retrieving_author)使用*curl*扩展来格式化HTTP请求，在其上设置参数，发送请求并获取返回的信息。
 - en: Example 16-2\. Retrieving author data
+  id: totrans-56
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-2\. 检索作者数据
 - en: '[PRE1]'
+  id: totrans-57
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: To retrieve information about an author, this script first constructs a URL
     representing the endpoint for the resource. Then, it initializes a curl resource
     and provides the constructed URL to it. Finally, the curl object is executed,
     which sends the HTTP request, waits for the response, and returns it.
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 要获取有关作者的信息，此脚本首先构造代表资源端点的URL。然后，初始化curl资源并向其提供构造的URL。最后，执行curl对象，发送HTTP请求，等待响应并返回它。
 - en: In this case, the response is JSON data, which is decoded and handed off to
     a `Factory` method of `Author` to construct an instance of the `Author` class.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，响应是JSON数据，解码后传递给`Author`的`Factory`方法以构造`Author`类的实例。
 - en: Updating Resources
+  id: totrans-60
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 更新资源
 - en: Updating an existing resource is a bit trickier than retrieving information
     about a resource. In this case, you need to use the `PUT` verb. As `PUT` was originally
     intended to handle file uploads, `PUT` requests require that you stream data to
     the remote service from a file.
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 更新现有资源比检索有关资源信息稍微复杂一些。在这种情况下，您需要使用`PUT`动词。由于`PUT`最初是用于处理文件上传的，因此`PUT`请求要求您从文件中将数据流式传输到远程服务。
 - en: Rather than creating a file on disk and streaming from it, the script in [Example 16-3](#example_onesix_threedot_updating_book_d)
     uses the `'memory'` stream provided by PHP, first filling it with the data to
     send, then rewinding it to the start of the data it just wrote, and finally pointing
     the curl object at the file.
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 该脚本不是在磁盘上创建文件并从中进行流式传输，而是在[示例 16-3](#example_onesix_threedot_updating_book_d)中使用PHP提供的`'memory'`流，首先用要发送的数据填充它，然后将其倒带到刚刚写入的数据的开头，最后将curl对象指向该文件。
 - en: Example 16-3\. Updating book data
+  id: totrans-63
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-3\. 更新书籍数据
 - en: '[PRE2]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Creating Resources
+  id: totrans-65
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建资源
 - en: To create a new resource, call the appropriate endpoint with the `POST` verb.
     The data for the request is put into the typical key-value form for `POST` requests.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 要创建新资源，请使用`POST`动词调用适当的端点。请求的数据以`POST`请求的典型键值形式放入其中。
 - en: In [Example 16-4](#example_onesix_fourdot_creating_an_auth), the `Author` API
     endpoint for creating a new author takes the information to create the new author
     as a JSON-formatted object under the key `'data'`.
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[示例 16-4](#example_onesix_fourdot_creating_an_auth)中，用于创建新作者的`Author` API端点将创建新作者的信息作为JSON格式对象，存储在`'data'`键下。
 - en: Example 16-4\. Creating an author
+  id: totrans-68
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-4\. 创建作者
 - en: '[PRE3]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: This script first constructs a new `Author` instance and encodes its values
     as a JSON-formatted string. Then, it constructs the key-value data in the appropriate
     format, provides that data to the curl object, and sends the request.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 该脚本首先构造一个新的`Author`实例，并将其值编码为JSON格式字符串。然后，它以适当的格式构造键值数据，将该数据提供给curl对象，并发送请求。
 - en: Deleting Resources
+  id: totrans-71
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 删除资源
 - en: Deleting a resource is similarly straightforward. [Example 16-5](#example_onesix_fivedot_deleting_a_book)
     creates a request, sets the verb on that request to `'DELETE'` via the `curl_setopt()`
     function, and sends it.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 删除资源同样直截了当。[示例 16-5](#example_onesix_fivedot_deleting_a_book)创建一个请求，并通过`curl_setopt()`函数将动词设置为`'DELETE'`，然后发送请求。
 - en: Example 16-5\. Deleting a book
+  id: totrans-73
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-5\. 删除书籍
 - en: '[PRE4]'
+  id: totrans-74
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: XML-RPC
+  id: totrans-75
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: XML-RPC
 - en: While less popular nowadays than REST, XML-RPC and SOAP are two older standard
     protocols used to create web services. XML-RPC is the older and simpler of the
     two, while SOAP is newer and more complex.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然如今不如REST流行，但XML-RPC和SOAP是两种用于创建Web服务的较旧的标准协议。XML-RPC是两者中更旧且更简单的，而SOAP则更新且更复杂。
 - en: PHP provides access to both SOAP and XML-RPC through the *xmlrpc* extension,
     which is based on the [xmlrpc-epi project](http://xmlrpc-epi.sourceforge.net).
     The *xmlrpc* extension is not compiled in by default, so you’ll need to add `--with-xmlrpc`
     to your `configure` line when you compile PHP.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP通过*xmlrpc*扩展提供对SOAP和XML-RPC的访问，该扩展基于[xmlrpc-epi项目](http://xmlrpc-epi.sourceforge.net)。*xmlrpc*扩展不会默认编译进PHP中，因此在编译PHP时需要添加`--with-xmlrpc`到您的`configure`行。
 - en: Servers
+  id: totrans-78
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 服务器
 - en: '[Example 16-6](#example_onesix_sixdot_multiplier_xml_rp) shows a very basic
     XML-RPC server that exposes only one function (which XML-RPC calls a “method”).
     That function, `multiply()`, multiplies two numbers and returns the result. It’s
     not a very exciting example, but it shows the basic structure of an XML-RPC server.'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 16-6](#example_onesix_sixdot_multiplier_xml_rp)展示了一个非常基础的XML-RPC服务器，仅暴露一个功能（XML-RPC称之为“方法”）。该函数`multiply()`用于两个数字相乘并返回结果。这并不是一个非常激动人心的示例，但它展示了XML-RPC服务器的基本结构。'
 - en: Example 16-6\. Multiplier XML-RPC server
+  id: totrans-80
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-6\. Multiplier XML-RPC服务器
 - en: '[PRE5]'
+  id: totrans-81
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: The *xmlrpc* extension handles the dispatch for you. That is, it works out which
     method the client was trying to call, decodes the arguments, and calls the corresponding
     PHP function. It then returns an XML response that encodes any values returned
     by the function that can be decoded by an XML-RPC client.
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: '*xmlrpc* 扩展会为您处理分派。也就是说，它会确定客户端试图调用哪个方法，解码参数，并调用相应的 PHP 函数。然后，它返回一个 XML 响应，该响应编码了函数返回的任何可以被
+    XML-RPC 客户端解码的值。'
 - en: 'Create a server with `xmlrpc_server_create()`:'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `xmlrpc_server_create()` 创建服务器：
 - en: '[PRE6]'
+  id: totrans-84
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Once you’ve created a server, expose functions through the XML-RPC dispatch
     mechanism using `xmlrpc_server_register_method()`:'
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建服务器后，通过 XML-RPC 分派机制使用 `xmlrpc_server_register_method()` 公开函数：
 - en: '[PRE7]'
+  id: totrans-86
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: The *`method`* parameter is the name the XML-RPC client knows. The *`function`*
     parameter is the PHP function implementing that XML-RPC method. In the case of
     [Example 16-6](#example_onesix_sixdot_multiplier_xml_rp), the `multiply()` XML-RPC
     client method is implemented by the `times()` function in PHP. Often a server
     will call `xmlrpc_server_register_method()` many times to expose many functions.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: '*`method`* 参数是 XML-RPC 客户端知道的名称。*`function`* 参数是实现该 XML-RPC 方法的 PHP 函数。在 [示例 16-6](#example_onesix_sixdot_multiplier_xml_rp)
+    中，`multiply()` XML-RPC 客户端方法由 PHP 中的 `times()` 函数实现。通常，服务器会多次调用 `xmlrpc_server_register_method()`
+    来公开多个函数。'
 - en: 'When you’ve registered all your methods, call `xmlrpc_server_call_method()`
     to dispatch the incoming request to the appropriate function:'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 注册了所有方法后，调用 `xmlrpc_server_call_method()` 将传入的请求分派给适当的函数：
 - en: '[PRE8]'
+  id: totrans-89
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: The *`request`* is the XML-RPC request, which is typically sent as HTTP `POST`
     data. We fetch that through the `$HTTP_RAW_POST_DATA` variable. It contains the
     name of the method to be called and parameters to that method. The parameters
     are decoded into PHP data types, and the function (`times()`, in this case) is
     called.
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: '*`request`* 是 XML-RPC 请求，通常作为 HTTP `POST` 数据发送。我们通过 `$HTTP_RAW_POST_DATA` 变量获取它。它包含要调用的方法名称及其参数。这些参数被解码为
+    PHP 数据类型，并调用函数（本例中为 `times()`）。'
 - en: 'A function exposed as an XML-RPC method takes two or three parameters:'
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 作为 XML-RPC 方法公开的函数需要接受两到三个参数：
 - en: '[PRE9]'
+  id: totrans-92
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: The *`method`* parameter contains the name of the XML-RPC method (so you can
     have one PHP function exposed under many names). The arguments to the method are
     passed in the array *`args`*, and the optional *`user_data`* parameter is whatever
     the `xmlrpc_server_call_method()` function’s *`user_data`* parameter was.
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: '*`method`* 参数包含 XML-RPC 方法的名称（因此您可以在多个名称下公开一个 PHP 函数）。方法的参数传递给数组 *`args`*，可选的
+    *`user_data`* 参数是 `xmlrpc_server_call_method()` 函数的 *`user_data`* 参数。'
 - en: 'The *`options`* parameter to `xmlrpc_server_call_method()` is an array mapping
     option names to their values. The options are:'
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: '*`options`* 参数用于 `xmlrpc_server_call_method()`，它是一个将选项名称映射到它们的值的数组。选项包括：'
 - en: '`output_type`'
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: '`output_type`'
 - en: Controls the data encoding used. Permissible values are `"php"` or `"xml"` (default).
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 控制所使用的数据编码。允许的值为 `"php"` 或 `"xml"`（默认）。
 - en: '`verbosity`'
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: '`verbosity`'
 - en: Controls how much whitespace is added to the output XML to make it readable
     to humans. Permissible values are `"no_white_space"`, `"newlines_only"`, and `"pretty"`
     (default).
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 控制添加到输出 XML 的空白量，以便使其对人类可读。允许的值为 `"no_white_space"`、`"newlines_only"` 和 `"pretty"`（默认）。
 - en: '`escaping`'
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: '`escaping`'
 - en: Controls which characters are escaped and how they are escaped. Multiple values
     may be given as a subarray. Permissible values are `"cdata"`, `"non-ascii"` (default),
     `"non-print"` (default), and `"markup"` (default).
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 控制哪些字符需要转义以及如何转义它们。可以将多个值作为子数组给出。允许的值为 `"cdata"`、`"non-ascii"`（默认）、`"non-print"`（默认）和
+    `"markup"`（默认）。
 - en: '`versioning`'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: '`versioning`'
 - en: Controls which web service system to use. Permissible values are `"simple"`,
     `"soap 1.1"`, `"xmlrpc"` (default for clients), and `"auto"` (default for servers,
     meaning “whatever format the request came in”).
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 控制要使用的 Web 服务系统。允许的值为 `"simple"`、`"soap 1.1"`、`"xmlrpc"`（客户端的默认值）和 `"auto"`（服务器的默认值，意味着“任何格式的请求”）。
 - en: '`encoding`'
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: '`encoding`'
 - en: Controls the character encoding of the data. Permissible values include any
     valid encoding identifiers, but you’ll rarely want to change it from `"iso-8859-1"`
     (the default).
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 控制数据的字符编码。允许的值包括任何有效的编码标识符，但您很少需要将其从 `"iso-8859-1"`（默认）更改。
 - en: Clients
+  id: totrans-105
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 客户端
 - en: An XML-RPC client issues an HTTP request and parses the response. The *xmlrpc*
     extension that ships with PHP can work with the XML that encodes an XML-RPC request,
     but it doesn’t know how to issue HTTP requests. For that functionality, you must
     download the [xmlrpc-epi distribution](http://xmlrpc-epi.sourceforge.net) and
     install the *sample/utils/utils.php* file. This file contains a function to perform
     the HTTP request.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: XML-RPC客户端发出HTTP请求并解析响应。随PHP一起提供的*xmlrpc*扩展可以处理编码XML-RPC请求的XML，但不知道如何发出HTTP请求。为此，您必须下载[xmlrpc-epi分发版](http://xmlrpc-epi.sourceforge.net)，并安装*sample/utils/utils.php*文件。该文件包含一个执行HTTP请求的函数。
 - en: '[Example 16-7](#example_onesix_sevendot_multiply_xml_rp) shows a client for
     the `multiply` XML-RPC service.'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 16-7](#example_onesix_sevendot_multiply_xml_rp)展示了`multiply` XML-RPC服务的客户端。'
 - en: Example 16-7\. Multiply XML-RPC client
+  id: totrans-108
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例16-7\. XML-RPC客户端乘法
 - en: '[PRE10]'
+  id: totrans-109
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'We begin by loading the XML-RPC convenience utilities library. This gives us
     the `xu_rpc_http_concise()` function, which constructs a `POST` request for us:'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们首先加载XML-RPC便捷工具库。这使我们可以使用`xu_rpc_http_concise()`函数，该函数构建了一个`POST`请求：
 - en: '[PRE11]'
+  id: totrans-111
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'The *`hash`* array contains the various attributes of the XML-RPC call as an
     associative array:'
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: '*`hash`*数组包含XML-RPC调用的各种属性，作为一个关联数组：'
 - en: '`method`'
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: '`method`'
 - en: Name of the method to call.
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 要调用的方法名称。
 - en: '`args`'
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: '`args`'
 - en: Array of arguments to the method.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 方法的参数数组。
 - en: '`host`'
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: '`host`'
 - en: Hostname of the web service offering the method.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 提供方法的Web服务的主机名。
 - en: '`url`'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: '`url`'
 - en: URL path to the web service.
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: Web服务的URL路径。
 - en: '`options`'
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: '`options`'
 - en: Associative array of options, as for the server.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 选项的关联数组，如服务器端。
 - en: '`debug`'
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: '`debug`'
 - en: If nonzero, prints debugging information (default is `0`).
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果非零，则打印调试信息（默认为`0`）。
 - en: The value returned by `xu_rpc_http_concise()` is the decoded return value from
     the called method.
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: '`xu_rpc_http_concise()`返回的值是调用方法后解码的返回值。'
 - en: There are several features of XML-RPC we haven’t covered. For example, XML-RPC’s
     data types do not always map precisely onto those of PHP, and there are ways to
     encode values as a particular data type rather than as the *xmlrpc* extension’s
     best guess. Also, there are features of the *xmlrpc* extension we haven’t covered,
     such as SOAP faults. See the [*xmlrpc* extension’s documentation](http://www.php.net)
     for the full details.
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: XML-RPC还有几个特性我们尚未涵盖。例如，XML-RPC的数据类型并不总是精确映射到PHP的数据类型，并且有一些方法可以将值编码为特定的数据类型，而不是*xmlrpc*扩展的最佳猜测。此外，我们还未涵盖*xmlrpc*扩展的一些特性，如SOAP故障。请参阅[*xmlrpc*扩展的文档](http://www.php.net)获取完整详情。
 - en: For more information on XML-RPC, see [*Programming Web Services in XML-RPC*](http://oreil.ly/Web_Services_XML-RPC)
     (O’Reilly) by Simon St. Laurent et al. See [*Programming Web Services with SOAP*](http://oreil.ly/Web_Services_SOAP)
     (O’Reilly) by James Snell et al. for more information on SOAP.
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 欲了解更多关于XML-RPC的信息，请参见[*Programming Web Services in XML-RPC*](http://oreil.ly/Web_Services_XML-RPC)（O’Reilly），作者是Simon
+    St. Laurent等人。欲了解有关SOAP的更多信息，请参见[*Programming Web Services with SOAP*](http://oreil.ly/Web_Services_SOAP)（O’Reilly），作者是James
+    Snell等人。
 - en: What’s Next
+  id: totrans-128
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 接下来是什么
 - en: 'Now that we’ve covered the majority of the syntax, features, and application
     of PHP, the next chapter explores what to do when things go wrong: how to debug
     problems that arise in your PHP applications and scripts.'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们已经涵盖了PHP的大部分语法、特性和应用，下一章将探讨当事情出错时该怎么办：如何调试PHP应用程序和脚本中出现的问题。

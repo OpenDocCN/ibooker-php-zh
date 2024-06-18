@@ -1,22 +1,30 @@
 - en: Chapter 10\. Graphics
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第10章 图形
 - en: The web is much more visual than textual; that is obvious. Images appear in
     the form of logos, buttons, photographs, charts, advertisements, and icons. Many
     of these images are static and never change, built with tools such as Photoshop.
     But many are dynamically created—from advertisements for Amazon’s referral program
     that include your name to graphs of stock performance.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 显而易见，网络比文字更具视觉效果。图像以标志、按钮、照片、图表、广告和图标的形式出现。这些图像中的许多是静态的，从未改变，是使用诸如Photoshop之类的工具构建的。但是许多图像是动态创建的——从包含您姓名的亚马逊推荐计划广告到股票表现图。
 - en: PHP supports graphics creation with the built-in GD extension library. In this
     chapter, we’ll show you how to generate images dynamically within PHP.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP支持使用内置的GD扩展库进行图形创建。在本章中，我们将向您展示如何在PHP中动态生成图像。
 - en: Embedding an Image in a Page
+  id: totrans-3
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 将图像嵌入页面
 - en: A common misconception is that there is a mixture of text and graphics flowing
     across a single HTTP request. After all, when you view a page, you see a single
     page containing such a mixture. It is important to understand that a standard
@@ -26,57 +34,85 @@
     a separate HTTP request and web server response. Thus, if you see a page that
     contains some text and two images, you know that it has taken three HTTP requests
     and corresponding responses to construct this page.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个常见的误解是在单个HTTP请求中流动的文本和图形的混合。毕竟，当您查看页面时，您会看到一个包含这种混合的页面。重要的是要理解，通过Web浏览器的一系列HTTP请求创建包含文本和图形的标准网页；每个请求都由Web服务器的响应回答。每个响应只能包含一种类型的数据，每个图像需要一个单独的HTTP请求和Web服务器响应。因此，如果您看到一个包含一些文本和两个图像的页面，您知道它已经进行了三个HTTP请求和相应的响应来构建此页面。
 - en: 'Take this HTML page, for example:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 以这个HTML页面为例：
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'The series of requests sent by the web browser for this page looks something
     like this:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: Web浏览器发送到此页面的请求序列如下所示：
 - en: '[PRE1]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'The web server sends back a response to each of these requests. The `Content-Type`
     headers in these responses look like this:'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: Web服务器对这些请求的每个响应都会返回一个响应。这些响应中的`Content-Type`头部如下所示：
 - en: '[PRE2]'
+  id: totrans-10
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'To embed a PHP-generated image in an HTML page, pretend that the PHP script
     that generates the image is actually the image. Thus, if we have *image1.php*
     and *image2.php* scripts that create images, we can modify the previous HTML to
     look like this (the image names are PHP extensions now):'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在HTML页面中嵌入由PHP生成的图像，请假设生成图像的PHP脚本实际上是图像本身。因此，如果我们有*image1.php*和*image2.php*脚本来创建图像，我们可以修改先前的HTML代码如下（现在的图像名称都是PHP扩展名）：
 - en: '[PRE3]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Instead of referring to real images on your web server, the `<img>` tags now
     refer to the PHP scripts that generate and return image data.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您不再引用Web服务器上的真实图像，而是将`<img>`标签指向生成并返回图像数据的PHP脚本。
 - en: 'Furthermore, you can pass variables to these scripts, so instead of having
     separate scripts to generate each image, you could write your `<img>` tags like
     this:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，您可以向这些脚本传递变量，因此，您可以像这样编写您的`<img>`标签，而不是使用单独的脚本来生成每个图像：
 - en: '[PRE4]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Then, inside the called PHP file *image.php*, you can access the request parameter
     `$_GET['num']` to generate the appropriate image.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，在调用的PHP文件*image.php*中，您可以访问请求参数`$_GET['num']`以生成适当的图像。
 - en: Basic Graphics Concepts
+  id: totrans-17
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 基本图形概念
 - en: An *image* is a rectangle of pixels of various colors. Colors are identified
     by their position in the *palette*, an array of colors. Each entry in the palette
     has three separate color values—one each for red, green, and blue. Each value
@@ -84,499 +120,749 @@
     known as its *RGB value*. There are also hexadecimal, or “hex” values—alphanumeric
     representations of colors that are commonly used in HTML. Some image tools, such
     as [ColorPic](https://oreil.ly/F-Z3e), will convert RGB values to hex for you.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: '*图像*是各种颜色的像素矩形。颜色通过它们在*调色板*中的位置进行标识，调色板是一个颜色数组。调色板中的每个条目都有三个单独的颜色值——分别为红色、绿色和蓝色。每个值的范围从`0`（颜色不存在）到`255`（完全强度的颜色）。这被称为其*RGB值*。还有十六进制或“hex”值——用于HTML中的颜色的字母数字表示。一些图像工具，如[ColorPic](https://oreil.ly/F-Z3e)，将为您转换RGB值为十六进制。'
 - en: Image files are rarely a straightforward dump of the pixels and the palette.
     Instead, various *file formats* (GIF, JPEG, PNG, etc.) have been created that
     attempt to compress the data somewhat to make smaller files.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 图像文件很少是像素和调色板的直接转储。相反，创建了各种*文件格式*（GIF、JPEG、PNG 等），试图对数据进行压缩以使文件更小。
 - en: Different file formats handle image *transparency*, which controls whether and
     how the background shows through the image, in different ways. Some, such as PNG,
     support an *alpha channel*, an extra value for every pixel reflecting the transparency
     at that point. Others, such as GIF, simply designate one entry in the palette
     as indicating transparency. Still others, like JPEG, don’t support transparency
     at all.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 不同的文件格式以不同方式处理图像的*透明度*，它控制背景是否以及如何显示在图像之后。例如，PNG 支持*alpha 通道*，每个像素都有一个额外值反映该点的透明度。其他格式，如
+    GIF，简单地指定调色板中的一个条目表示透明度。还有一些格式，如 JPEG，根本不支持透明度。
 - en: Rough and jagged edges, an effect known as *aliasing*, can make for unappealing
     images. *Antialiasing* involves moving or recoloring pixels at the edge of a shape
     to transition more gradually between the shape and its background. Some functions
     that draw on an image implement antialiasing.
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 粗糙和锯齿状的边缘，即*锯齿效应*，会导致图像不够吸引人。*反锯齿*涉及移动或重新着色形状边缘的像素，以便更渐变地过渡到其背景。一些绘制图像的函数实现了反锯齿功能。
 - en: With 256 possible values for each of red, green, and blue, there are 16,777,216
     possible colors for each pixel. Some file formats limit the number of colors you
     can have in a palette (e.g., GIF supports no more than 256 colors); others let
     you have as many colors as you need. The latter are known as *true color* formats,
     because 24-bit color (8 bits each for red, green, and blue) gives more hues than
     the human eye can distinguish.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个像素有 256 种可能的红、绿、蓝值，因此每个像素有 16,777,216 种可能的颜色。某些文件格式限制调色板中的颜色数量（例如，GIF 最多支持
+    256 种颜色）；其他文件格式则允许使用所需数量的颜色。后者被称为*真彩色*格式，因为 24 位色（每种颜色分别有 8 位）提供了比人眼能分辨的更多色调。
 - en: Creating and Drawing Images
+  id: totrans-23
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 创建和绘制图像
 - en: For now, let’s start with the simplest possible GD example. [Example 10-1](#example_onezero_onedot_a_black_square_o)
     is a script that generates a black-filled square. The code works with any version
     of GD that supports the PNG image format.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，让我们从最简单的可能的 GD 示例开始。[示例 10-1](#example_onezero_onedot_a_black_square_o) 是一个生成黑色填充方块的脚本。这段代码适用于任何支持
+    PNG 图像格式的 GD 版本。
 - en: Example 10-1\. A black square on a white background (black.php)
+  id: totrans-25
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-1\. 白底黑色方块（black.php）
 - en: '[PRE5]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: '[Example 10-1](#example_onezero_onedot_a_black_square_o) illustrates the basic
     steps in generating any image: creating the image, allocating colors, drawing
     the image, and then saving or sending the image. [Figure 10-1](#a_black_square_on_a_white_background)
     shows the output of [Example 10-1](#example_onezero_onedot_a_black_square_o).'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 10-1](#example_onezero_onedot_a_black_square_o) 展示了生成任何图像的基本步骤：创建图像、分配颜色、绘制图像，然后保存或发送图像。[图 10-1](#a_black_square_on_a_white_background)
+    显示了 [示例 10-1](#example_onezero_onedot_a_black_square_o) 的输出。'
 - en: '![A black square on a white background](Images/php4_1001.png)'
+  id: totrans-28
   prefs: []
   type: TYPE_IMG
+  zh: '![白底黑色方块](Images/php4_1001.png)'
 - en: Figure 10-1\. A black square on a white background
+  id: totrans-29
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-1\. 白底黑色方块
 - en: 'To see the result, simply point your browser at the *black.php* page. To embed
     this image in a web page, use:'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 要查看结果，只需将浏览器指向 *black.php* 页面。要在网页中嵌入此图像，请使用：
 - en: '[PRE6]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: The Structure of a Graphics Program
+  id: totrans-32
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 图形程序的结构
 - en: Most dynamic image-generation programs follow the same basic steps outlined
     in [Example 10-1](#example_onezero_onedot_a_black_square_o).
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数动态图像生成程序都遵循 [示例 10-1](#example_onezero_onedot_a_black_square_o) 中概述的相同基本步骤。
 - en: 'You can create a 256-color image with the `imagecreate()` function, which returns
     an image handle:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用 `imagecreate()` 函数创建一个 256 色图像，该函数返回一个图像句柄：
 - en: '[PRE7]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: All colors used in an image must be allocated with the `imagecolorallocate()`
     function. The first color allocated becomes the background color for the image:^([1](ch10.xhtml#ch10fn1))
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 图像中使用的所有颜色都必须使用 `imagecolorallocate()` 函数分配。第一个分配的颜色成为图像的背景颜色：^([1](ch10.xhtml#ch10fn1))
 - en: '[PRE8]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: The arguments are the numeric RGB (red, green, blue) components of the color.
     In [Example 10-1](#example_onezero_onedot_a_black_square_o), we wrote the color
     values in hexadecimal to bring the function call closer to the HTML color representation
     `#FFFFFF` and `#000000`.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 参数是颜色的数字 RGB（红色、绿色、蓝色）组件。在 [示例 10-1](#example_onezero_onedot_a_black_square_o)
+    中，我们用十六进制写入颜色值，以便函数调用更接近 HTML 颜色表示 `#FFFFFF` 和 `#000000`。
 - en: 'There are many drawing primitives in GD. [Example 10-1](#example_onezero_onedot_a_black_square_o)
     uses `imagefilledrectangle()`, in which you specify the dimensions of the rectangle
     by passing the coordinates of the top-left and bottom-right corners:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: GD中有许多绘图原语。[示例 10-1](#example_onezero_onedot_a_black_square_o) 使用了`imagefilledrectangle()`，其中通过传递左上角和右下角的坐标来指定矩形的尺寸：
 - en: '[PRE9]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'The next step is to send a `Content-Type` header to the browser with the appropriate
     content type for the kind of image being created. Once that is done, we call the
     appropriate output function. The `imagejpeg()`, `imagegif()`, `imagepng()`, and
     `imagewbmp()` functions create GIF, JPEG, PNG, and WBMP files from the image,
     respectively:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 下一步是向浏览器发送`Content-Type`头部，使用适当的内容类型来创建所需类型的图像。完成此操作后，我们调用相应的输出函数。`imagejpeg()`、`imagegif()`、`imagepng()`
+    和 `imagewbmp()` 函数分别用于创建GIF、JPEG、PNG和WBMP文件：
 - en: '[PRE10]'
+  id: totrans-42
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: If no *filename* is given, the image is output to the browser; otherwise, it
     creates (or overwrites) the image to the given file path. The *quality* argument
     for JPEGs is a value from `0` (worst-looking) to `100` (best-looking). The lower
     the quality, the smaller the JPEG file. The default setting is `75`.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果没有给出*filename*，则图像将输出到浏览器；否则，它将创建（或覆盖）给定路径的图像。对于JPEG，*quality*参数的取值范围为`0`（最差）到`100`（最佳）。质量越低，JPEG文件越小。默认设置为`75`。
 - en: In [Example 10-1](#example_onezero_onedot_a_black_square_o), we set the HTTP
     header immediately before calling the output-generating function `imagepng()`.
     If you set the `Content-Type` at the very start of the script, any errors that
     are generated are treated as image data and the browser displays a broken image
     icon. [Table 10-1](#content_type_values_for_image_formats) lists the image formats
     and their `Content-Type` values.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[示例 10-1](#example_onezero_onedot_a_black_square_o)中，在调用输出生成函数`imagepng()`之前立即设置HTTP头部。如果在脚本的最开始设置了`Content-Type`，则生成的任何错误都会被视为图像数据，并导致浏览器显示损坏的图像图标。[表 10-1](#content_type_values_for_image_formats)列出了各种图像格式及其`Content-Type`值。
 - en: Table 10-1\. Content-Type values for image formats
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 10-1\. 图像格式的Content-Type值
 - en: '| Format | `Content-Type` |'
+  id: totrans-46
   prefs: []
   type: TYPE_TB
+  zh: '| 格式 | `Content-Type` |'
 - en: '| --- | --- |'
+  id: totrans-47
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| GIF | `image/gif` |'
+  id: totrans-48
   prefs: []
   type: TYPE_TB
+  zh: '| GIF | `image/gif` |'
 - en: '| JPEG | `image/jpeg` |'
+  id: totrans-49
   prefs: []
   type: TYPE_TB
+  zh: '| JPEG | `image/jpeg` |'
 - en: '| PNG | `image/png` |'
+  id: totrans-50
   prefs: []
   type: TYPE_TB
+  zh: '| PNG | `image/png` |'
 - en: '| WBMP | `image/vnd.wap.wbmp` |'
+  id: totrans-51
   prefs: []
   type: TYPE_TB
+  zh: '| WBMP | `image/vnd.wap.wbmp` |'
 - en: Changing the Output Format
+  id: totrans-52
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 更改输出格式
 - en: 'As you may have deduced, generating an image stream of a different type requires
     only two changes to the script: send a different `Content-Type` and use a different
     image-generating function. [Example 10-2](#example_onezero_twodot_jpeg_version_of)
     shows [Example 10-1](#example_onezero_onedot_a_black_square_o) modified to generate
     a JPEG instead of a PNG image.'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 如你所推测的那样，生成不同类型的图像流只需对脚本进行两处更改：发送不同的`Content-Type`并使用不同的图像生成函数。[示例 10-2](#example_onezero_twodot_jpeg_version_of)
+    展示了修改后生成JPEG而非PNG图像的[示例 10-1](#example_onezero_onedot_a_black_square_o)。
 - en: Example 10-2\. JPEG version of the black square
+  id: totrans-54
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-2\. 黑色正方形的JPEG版本
 - en: '[PRE11]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Testing for Supported Image Formats
+  id: totrans-56
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 测试支持的图像格式
 - en: If you are writing code that must be portable across systems that may support
     different image formats, use the `imagetypes()` function to check which image
     types are supported. This function returns a bit field; you can use the bitwise
     AND operator (`&`) to check if a given bit is set. The constants `IMG_GIF`, `IMG_JPG`,
     `IMG_PNG`, and `IMG_WBMP` correspond to the bits for those image formats.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果编写的代码必须在可能支持不同图像格式的系统上移植，请使用`imagetypes()`函数检查支持的图像类型。此函数返回一个位字段；您可以使用位与运算符（`&`）来检查给定位是否设置。常量`IMG_GIF`、`IMG_JPG`、`IMG_PNG`
+    和 `IMG_WBMP` 对应于这些图像格式的位。
 - en: '[Example 10-3](#example_onezero_threedot_checking_for_i) generates PNG files
     if PNG is supported, JPEG files if PNG is not supported, and GIF files if neither
     PNG nor JPEG is supported.'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果支持PNG，则[示例 10-3](#example_onezero_threedot_checking_for_i)生成PNG文件；如果不支持PNG，则生成JPEG文件；如果既不支持PNG也不支持JPEG，则生成GIF文件。
 - en: Example 10-3\. Checking for image format support
+  id: totrans-59
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-3\. 检查图像格式支持情况
 - en: '[PRE12]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Reading an Existing File
+  id: totrans-61
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 读取现有文件
 - en: 'If you want to start with an existing image and then modify it, use `imagecreatefromgif()`,
     `imagecreatefromjpeg()`, or `imagecreatefrompng()`:'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果想要从现有图像开始并进行修改，可以使用`imagecreatefromgif()`、`imagecreatefromjpeg()`或`imagecreatefrompng()`：
 - en: '[PRE13]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Basic Drawing Functions
+  id: totrans-64
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 基本绘图函数
 - en: GD has functions for drawing basic points, lines, arcs, rectangles, and polygons.
     This section describes the base functions supported by GD 2.x.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: GD提供了绘制基本点、线条、弧线、矩形和多边形的函数。本节描述了GD 2.x支持的基本函数。
 - en: 'The most basic function is `imagesetpixel()`, which sets the color of a specified
     pixel:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 最基本的函数是`imagesetpixel()`，它设置指定像素的颜色：
 - en: '[PRE14]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'There are two functions for drawing lines, `imageline()` and `imagedashedline()`:'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 有两个用于绘制线条的函数，`imageline()`和`imagedashedline()`：
 - en: '[PRE15]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'There are two functions for drawing rectangles, one that simply draws the outline
     and one that fills the rectangle with the specified color:'
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 有两个用于绘制矩形的函数，一个仅绘制轮廓，另一个使用指定的颜色填充矩形：
 - en: '[PRE16]'
+  id: totrans-71
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Specify the location and size of the rectangle by passing the coordinates of
     the top-left and bottom-right corners.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 指定矩形的位置和大小，通过传递左上角和右下角的坐标。
 - en: 'You can draw arbitrary polygons with the `imagepolygon()` and `imagefilled`​`polygon()`
     functions:'
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用`imagepolygon()`和`imagefilled`​`polygon()`函数绘制任意多边形：
 - en: '[PRE17]'
+  id: totrans-74
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Both functions take an array of points. This array has two integers (the *x*
     and *y* coordinates) for each vertex on the polygon. The *number* argument is
     the number of vertices in the array (typically `count($points)/2`).
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 这两个函数接受一个点的数组。该数组对于多边形的每个顶点都有两个整数（*x*和*y*坐标）。*number*参数是数组中顶点的数量（通常为`count($points)/2`）。
 - en: 'The `imagearc()` function draws an arc (a portion of an ellipse):'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: '`imagearc()`函数绘制弧（椭圆的一部分）：'
 - en: '[PRE18]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: The ellipse is defined by its center, width, and height (height and width are
     the same for a circle). The start and end points of the arc are given as degrees
     counting counterclockwise from 3 o’clock. Draw the full ellipse with a *start*
     of `0` and an *end* of `360`.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 椭圆由其中心、宽度和高度定义（对于圆来说，高度和宽度相同）。弧的起始和结束点以度数给出，逆时针从3点开始计数。使用*start*为`0`和*end*为`360`绘制完整的椭圆。
 - en: 'There are two ways to fill in already-drawn shapes. The `imagefill()` function
     performs a flood fill, changing the color of the pixels starting at the given
     location. Any change in pixel color marks the limits of the fill. The `imagefilltoborder()`
     function lets you pass the particular color of the limits of the fill:'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 有两种方法可以填充已绘制的形状。`imagefill()`函数执行洪水填充，从给定位置开始更改像素的颜色。像素颜色的任何变化标记了填充的限制。`imagefilltoborder()`函数允许您传递填充限制的特定颜色：
 - en: '[PRE19]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'Another thing that you may want to do with your images is rotate them. This
     could be helpful if you are trying to create a web-style brochure, for example.
     The `image``rotate()` function allows you to rotate an image by an arbitrary angle:'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一件可能需要对图像做的事情是旋转它们。例如，如果您试图创建Web风格的宣传册，这可能会有所帮助。`image``rotate()`函数允许您以任意角度旋转图像：
 - en: '[PRE20]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: The code in [Example 10-4](#example_onezero_fourdot_image_rotation) shows the
     black box image from before, rotated by 45 degrees. The *background_color* option,
     used to specify the color of the uncovered area after the image is rotated, has
     been set to `1` to show the contrast of the black and white colors. [Figure 10-2](#black_box_image_rotated_fourfive_degree)
     shows the result of this code.
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 10-4](#example_onezero_fourdot_image_rotation)中的代码显示了之前的黑盒子图像，旋转了45度。*background_color*选项用于指定图像旋转后未覆盖区域的颜色，已设置为`1`以显示黑白颜色的对比。[图 10-2](#black_box_image_rotated_fourfive_degree)显示了此代码的结果。'
 - en: Example 10-4\. Image rotation example
+  id: totrans-84
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例10-4\. 图像旋转示例
 - en: '[PRE21]'
+  id: totrans-85
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: '![Black box image rotated 45 degrees](Images/php4_1002.png)'
+  id: totrans-86
   prefs: []
   type: TYPE_IMG
+  zh: '![黑盒子图像旋转45度](Images/php4_1002.png)'
 - en: Figure 10-2\. Black box image rotated 45 degrees
+  id: totrans-87
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图10-2\. 黑盒子图像旋转45度
 - en: Images with Text
+  id: totrans-88
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 带有文本的图像
 - en: Often it is necessary to add text to images. GD has built-in fonts for this
     purpose. [Example 10-5](#example_onezero_fivedot_adding_text_to) adds some text
     to our black square image.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 经常需要向图像添加文本。GD提供了内置字体以供此用途。[示例 10-5](#example_onezero_fivedot_adding_text_to)向我们的黑方形图像添加了一些文本。
 - en: Example 10-5\. Adding text to an image
+  id: totrans-90
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例10-5\. 向图像添加文本
 - en: '[PRE22]'
+  id: totrans-91
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: '[Figure 10-3](#the_black_box_image_with_added_text) shows the output of [Example 10-5](#example_onezero_fivedot_adding_text_to).'
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 10-3](#the_black_box_image_with_added_text)显示了[示例 10-5](#example_onezero_fivedot_adding_text_to)的输出。'
 - en: '![The black box image with added text](Images/php4_1003.png)'
+  id: totrans-93
   prefs: []
   type: TYPE_IMG
+  zh: '![添加文本后的黑盒子图像](Images/php4_1003.png)'
 - en: Figure 10-3\. The black box image with added text
+  id: totrans-94
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图10-3\. 添加文本后的黑盒子图像
 - en: 'The `imagestring()` function adds text to an image. Specify the top-left point
     of the text, as well as the color and the font (by GD font identifier) to use:'
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: '`imagestring()`函数向图像添加文本。指定文本的左上角点、颜色和要使用的GD字体（通过标识符）：'
 - en: '[PRE23]'
+  id: totrans-96
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: Fonts
+  id: totrans-97
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 字体
 - en: GD identifies fonts by an ID. Five fonts are built in, and you can load additional
     fonts through the `imageloadfont()` function. The five built-in fonts are shown
     in [Figure 10-4](#native_gd_fonts).
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: GD通过ID识别字体。内置五种字体，并可以通过`imageloadfont()`函数加载额外的字体。这五种内置字体显示在[图 10-4](#native_gd_fonts)中。
 - en: '![Native GD fonts](Images/php4_1004.png)'
+  id: totrans-99
   prefs: []
   type: TYPE_IMG
+  zh: '![本地GD字体](Images/php4_1004.png)'
 - en: Figure 10-4\. Native GD fonts
+  id: totrans-100
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-4\. 本地GD字体
 - en: 'Here is the code used to show you these fonts:'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里是用于显示这些字体的代码：
 - en: '[PRE24]'
+  id: totrans-102
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: You can create your own bitmap fonts and load them into GD using the `imageloadfont()`
     function. However, these fonts are binary and architecture-dependent, making them
     nonportable from machine to machine. Using TrueType fonts with the TrueType functions
     in GD provides much more flexibility.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以创建自己的位图字体，并使用`imageloadfont()`函数将它们加载到GD中。但是，这些字体是二进制的，且依赖于架构，使它们无法从一台机器移植到另一台机器。在GD中使用TrueType函数与TrueType字体提供了更大的灵活性。
 - en: TrueType Fonts
+  id: totrans-104
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: TrueType字体
 - en: 'TrueType is an outline font standard; it provides more precise control over
     the rendering of the characters. To add text in a TrueType font to an image, use
     `imagettftext()`:'
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: TrueType是一种轮廓字体标准；它提供了对字符渲染更精确的控制。要向图像中添加TrueType字体的文本，请使用`imagettftext()`：
 - en: '[PRE25]'
+  id: totrans-106
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: The *size* is measured in pixels. The *angle* is in degrees from 3 o’clock (`0`
     gives horizontal text, `90` gives vertical text going up the image, etc.). The
     *x* and *y* coordinates specify the lower-left corner of the baseline for the
     text. The text may include UTF-8^([2](ch10.xhtml#ch10fn2)) sequences of the form
     `&#234;` to print high-bit ASCII characters.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: '*大小*以像素为单位。*角度*以从3点钟开始的度数表示（`0`表示水平文本，`90`表示向上的垂直文本等）。*x* 和 *y* 坐标指定文本基线的左下角。文本可能包含UTF-8^([2](ch10.xhtml#ch10fn2))形式的`&#234;`序列，以打印高位ASCII字符。'
 - en: The font parameter is the location of the TrueType font to use for rendering
     the string. If the font does not begin with a leading `/` character, the *.ttf*
     extension is added and the font is looked up in */usr/share/fonts/truetype*.
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 字体参数是用于渲染字符串的TrueType字体的位置。如果字体不以斜杠开头，则添加*.ttf*扩展名，并在*/usr/share/fonts/truetype*中查找字体。
 - en: By default, text in a TrueType font is antialiased. This makes most fonts much
     easier to read, although very slightly blurred. Antialiasing can make very small
     text harder to read, though—small characters have fewer pixels, so the adjustments
     of antialiasing are more significant.
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，TrueType字体的文本是反锯齿的。这使大多数字体更易阅读，尽管略微模糊。但是，反锯齿可能使非常小的文本更难读——小字符具有更少的像素，因此反锯齿的调整更为显著。
 - en: You can turn off antialiasing by using a negative color index (e.g., `−4` means
     to use color index 4 without antialiasing the text).
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过使用负颜色索引（例如，`−4`表示使用颜色索引4但不反锯齿文本）关闭反锯齿。
 - en: '[Example 10-6](#example_onezero_sixdot_using_a_truetype) uses a TrueType font
     to add text to an image, searching for the font in the same location as the script,
     but still having to provide the full path to the location of the font file (included
     in the book’s code examples).'
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 10-6](#example_onezero_sixdot_using_a_truetype)使用TrueType字体向图像添加文本，搜索字体位置与脚本相同，但仍需提供字体文件位置的完整路径（包含在本书的代码示例中）。'
 - en: Example 10-6\. Using a TrueType font
+  id: totrans-112
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-6\. 使用TrueType字体
 - en: '[PRE26]'
+  id: totrans-113
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: '[Figure 10-5](#indie_flower_truetype_font) shows the output of [Example 10-6](#example_onezero_sixdot_using_a_truetype).'
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 10-5](#indie_flower_truetype_font)显示了[示例 10-6](#example_onezero_sixdot_using_a_truetype)的输出。'
 - en: '![Indie Flower TrueType font](Images/php4_1005.png)'
+  id: totrans-115
   prefs: []
   type: TYPE_IMG
+  zh: '![Indie Flower TrueType字体](Images/php4_1005.png)'
 - en: Figure 10-5\. Indie Flower TrueType font
+  id: totrans-116
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-5\. Indie Flower TrueType字体
 - en: '[Example 10-7](#example_onezero_sevendot_displaying_ver) uses `imagettftext()`
     to add vertical text to an image.'
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 10-7](#example_onezero_sevendot_displaying_ver)使用`imagettftext()`向图像添加垂直文本。'
 - en: Example 10-7\. Displaying vertical TrueType text
+  id: totrans-118
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-7\. 显示垂直TrueType文本
 - en: '[PRE27]'
+  id: totrans-119
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: '[Figure 10-6](#vertical_truetype_text) shows the output of [Example 10-7](#example_onezero_sevendot_displaying_ver).'
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 10-6](#vertical_truetype_text)显示了[示例 10-7](#example_onezero_sevendot_displaying_ver)的输出。'
 - en: '![Vertical TrueType text](Images/php4_1006.png)'
+  id: totrans-121
   prefs: []
   type: TYPE_IMG
+  zh: '![垂直TrueType文本](Images/php4_1006.png)'
 - en: Figure 10-6\. Vertical TrueType text
+  id: totrans-122
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-6\. 垂直TrueType文本
 - en: Dynamically Generated Buttons
+  id: totrans-123
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 动态生成的按钮
 - en: Creating images for buttons on the fly is one popular use for generating images
     (this topic was introduced in [Chapter 1](ch01.xhtml#introduction_to_php)). Typically,
     this involves compositing text over a preexisting background image, as shown in
     [Example 10-8](#example_onezero_eightdot_creating_a_dyn).
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 动态生成按钮图像是生成图像的一种流行用途之一（本主题在[第1章](ch01.xhtml#introduction_to_php)中介绍）。通常情况下，这涉及将文本合成到预先存在的背景图像上，如[示例 10-8](#example_onezero_eightdot_creating_a_dyn)所示。
 - en: Example 10-8\. Creating a dynamic button
+  id: totrans-125
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-8\. 创建动态按钮
 - en: '[PRE28]'
+  id: totrans-126
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: In this case, the blank button (*button.png*) is overwritten with the default
     text, as shown in [Figure 10-7](#dynamic_button_with_default_text).
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，空白按钮（*button.png*）被默认文本覆盖，如[图 10-7](#dynamic_button_with_default_text)所示。
 - en: '![Dynamic button with default text](Images/php4_1007.png)'
+  id: totrans-128
   prefs: []
   type: TYPE_IMG
+  zh: '![默认文本的动态按钮](Images/php4_1007.png)'
 - en: Figure 10-7\. Dynamic button with default text
+  id: totrans-129
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-7\. 默认文本的动态按钮
 - en: 'The script in [Example 10-8](#example_onezero_eightdot_creating_a_dyn) can
     be called from a page like this:'
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以像这样从页面调用[示例 10-8](#example_onezero_eightdot_creating_a_dyn)中的脚本：
 - en: '[PRE29]'
+  id: totrans-131
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: This HTML generates the button shown in [Figure 10-8](#button_with_generated_text_label).
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 此HTML生成了[图 10-8](#button_with_generated_text_label)中显示的按钮。
 - en: '![Button with generated text label](Images/php4_1008.png)'
+  id: totrans-133
   prefs: []
   type: TYPE_IMG
+  zh: '![带有生成文本标签的按钮](Images/php4_1008.png)'
 - en: Figure 10-8\. Button with generated text label
+  id: totrans-134
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-8\. 带有生成文本标签的按钮
 - en: 'The + character in the URL is the encoded form of a space. Spaces are illegal
     in URLs and must be encoded. Use PHP’s `urlencode()` function to encode your button
     strings. For example:'
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: URL中的+字符是空格的编码形式。空格在URL中是非法的，必须进行编码。使用PHP的`urlencode()`函数对按钮字符串进行编码。例如：
 - en: '[PRE30]'
+  id: totrans-136
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: Caching the Dynamically Generated Buttons
+  id: totrans-137
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 缓存动态生成的按钮
 - en: It is somewhat slower to generate an image than to send a static image. For
     buttons that will always look the same when called with the same text argument,
     you can implement a simple cache mechanism.
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 生成图像比发送静态图像稍慢一些。对于每次以相同文本参数调用时始终看起来相同的按钮，您可以实现一个简单的缓存机制。
 - en: '[Example 10-9](#example_onezero_ninedot_caching_dynamic) generates the button
     only when no cache file for that button is found. The `$path` variable holds a
     directory, writable by the web server user, where buttons can be cached; make
@@ -585,39 +871,57 @@
     browser. Because this script uses the text form parameter as the filename, it
     is very insecure. ([Chapter 14](ch14.xhtml#security), which covers security issues,
     explains why and how to fix it.)'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 10-9](#example_onezero_ninedot_caching_dynamic)仅在找不到该按钮的缓存文件时生成该按钮。`$path`变量保存一个目录，由Web服务器用户可写，其中按钮可以被缓存；确保它可以从运行此代码的位置访问。`filesize()`函数返回文件的大小，`readfile()`函数将文件内容发送到浏览器。因为此脚本使用文本形式参数作为文件名，所以非常不安全。([第14章](ch14.xhtml#security)，讨论安全问题，解释了如何修复它。)'
 - en: Example 10-9\. Caching dynamic buttons
+  id: totrans-140
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-9\. 缓存动态按钮
 - en: '[PRE31]'
+  id: totrans-141
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: A Faster Cache
+  id: totrans-142
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 更快的缓存
 - en: '[Example 10-9](#example_onezero_ninedot_caching_dynamic) is still not as quick
     as it could be. Using Apache directives, you can bypass the PHP script entirely
     and load the cached image directly once it is created.'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 10-9](#example_onezero_ninedot_caching_dynamic)仍不如可能的快速。使用Apache指令，您可以完全绕过PHP脚本，并在创建后直接加载缓存的图像。'
 - en: First, create a *buttons* directory somewhere under your web server’s `DocumentRoot`
     and make sure that your web server user has permissions to write to this directory.
     For example, if the `DocumentRoot` directory is */var/www/html*, create */var/www/html/buttons*.
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，在您的Web服务器的`DocumentRoot`下的某个地方创建一个*buttons*目录，并确保您的Web服务器用户有权限写入此目录。例如，如果`DocumentRoot`目录是*/var/www/html*，则创建*/var/www/html/buttons*。
 - en: 'Second, edit your Apache *httpd.conf* file and add the following block:'
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: 其次，编辑您的Apache *httpd.conf*文件，并添加以下代码块：
 - en: '[PRE32]'
+  id: totrans-146
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: This tells Apache that requests for nonexistent files in the *buttons* directory
     should be sent to your *button.php* script.
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 这告诉Apache，对于*buttons*目录中不存在的文件请求，应将其发送到您的*button.php*脚本。
 - en: Third, save [Example 10-10](#example_onezero_onezerodot_more_efficie) as *button.php*.
     This script creates new buttons, saving them to the cache and sending them to
     the browser. There are several differences from [Example 10-9](#example_onezero_ninedot_caching_dynamic),
@@ -625,30 +929,40 @@
     pages as redirections. Instead, we have to pull apart values in `$_SERVER` to
     find out which button we’re generating. While we’re at it, we delete the `'..'`
     in the filename to fix the security hole from [Example 10-9](#example_onezero_ninedot_caching_dynamic).
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 第三步，将[示例 10-10](#example_onezero_onezerodot_more_efficie)保存为*button.php*。该脚本创建新的按钮，将它们保存到缓存并发送到浏览器。与[示例 10-9](#example_onezero_ninedot_caching_dynamic)不同，这里没有`$_GET`中的表单参数，因为Apache将错误页面处理为重定向。相反，我们必须从`$_SERVER`中分析数值以确定正在生成的按钮。顺便说一句，我们删除文件名中的`'..'`以修复来自[示例 10-9](#example_onezero_ninedot_caching_dynamic)的安全漏洞。
 - en: Once *button.php* is installed, when a request comes in for something like *http://your.site/buttons/php.png*,
     the web server checks whether the *buttons/php.png* file exists. If it does not,
     the request is redirected to the *button.php* script, which creates the image
     (with the text “php”) and saves it to *buttons/php.png*. Any subsequent requests
     for this file are served up directly without a line of PHP being run.
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装*button.php*后，当像*http://your.site/buttons/php.png*这样的请求到来时，Web服务器会检查是否存在*buttons/php.png*文件。如果不存在，请求将重定向到*button.php*脚本，该脚本创建带有“php”文本的图像并保存到*buttons/php.png*中。任何对此文件的后续请求都将直接提供，而无需运行PHP代码。
 - en: Example 10-10\. More efficient caching of dynamic buttons
+  id: totrans-150
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-10\. 更高效的动态按钮缓存
 - en: '[PRE33]'
+  id: totrans-151
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: One significant drawback to the mechanism in [Example 10-10](#example_onezero_onezerodot_more_efficie)
     is that the button text cannot contain any characters that are illegal in a filename.
     Nonetheless, this is the most efficient way to cache dynamically generated images.
     If you change the look of your buttons and you need to regenerate the cached images,
     simply delete all the images in your *buttons* directory, and they will be re-created
     as they are requested.
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 10-10](#example_onezero_onezerodot_more_efficie)机制的一个显著缺点是按钮文本不能包含文件名中非法字符。尽管如此，这仍然是缓存动态生成图像的最有效方式。如果更改按钮外观并需要重新生成缓存图像，只需删除*buttons*目录中的所有图像，它们将在请求时重新创建。'
 - en: You can also take this a step further and get your *button.php* script to support
     multiple image types. Simply check `$extension` and call the appropriate `imagepng()`,
     `imagejpeg()`, or `imagegif()` function at the end of the script. You can also
@@ -656,320 +970,491 @@
     right in the URL. Because of the `parse_str()` call in the example, a URL such
     as *http://your.site/buttons/php.png?size=16* displays “php” in a font size of
     16.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 还可以进一步操作，让您的*button.php*脚本支持多种图像类型。只需检查`$extension`并在脚本末尾调用适当的`imagepng()`、`imagejpeg()`或`imagegif()`函数。还可以解析文件名并添加修改器，如颜色、大小和字体，或直接在URL中传递它们。由于示例中的`parse_str()`调用，例如*http://your.site/buttons/php.png?size=16*的URL将以16号字体大小显示“php”。
 - en: Scaling Images
+  id: totrans-154
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 缩放图像
 - en: 'There are two ways to change the size of an image. The `imagecopyresized()`
     function is fast but crude, and may produce jagged edges in your new images. The
     `imagecopyresampled()` function is slower, but uses pixel interpolation to generate
     smooth edges and give clarity to the resized image. Both functions take the same
     arguments:'
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 图像大小可以通过两种方式改变。`imagecopyresized()`函数速度快但粗糙，在新图像中可能会产生锯齿边缘。`imagecopyresampled()`函数速度较慢，但使用像素插值生成平滑边缘，并提供调整大小后图像的清晰度。这两个函数接受相同的参数：
 - en: '[PRE34]'
+  id: totrans-156
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: The *dest* and *src* parameters are image handles. The point `(`*dx*`,` *dy*`)`
     is the point in the destination image where the region will be copied. The point
     `(`*sx*`,` *sy*`)` is the upper-left corner of the source image. The *sw*, *sh*,
     *dw*, and *dh* parameters give the width and height of the copy regions in the
     source and destination.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: '*dest*和*src*参数是图像句柄。点`(`*dx*`,` *dy*`)`是目标图像中将复制区域的点。点`(`*sx*`,` *sy*`)`是源图像的左上角。*sw*、*sh*、*dw*和*dh*参数给出了源和目标中复制区域的宽度和高度。'
 - en: '[Example 10-11](#example_onezero_oneonedot_resizing_with) takes the *php.jpg*
     image shown in [Figure 10-9](#original_phpdotjpg_image) and smoothly scales it
     down to one-quarter of its size, yielding the image in [Figure 10-10](#resulting_onesolidusfour_sized_image).'
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 10-11](#example_onezero_oneonedot_resizing_with) 对 *php.jpg* 图像进行缩放，平滑地缩小为原尺寸的四分之一，得到
+    [图 10-10](#resulting_onesolidusfour_sized_image) 中的图像。'
 - en: Example 10-11\. Resizing with imagecopyresampled()
+  id: totrans-159
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-11\. 使用 `imagecopyresampled()` 进行调整大小
 - en: '[PRE35]'
+  id: totrans-160
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: '![Original php.jpg image](Images/php4_1009.png)'
+  id: totrans-161
   prefs: []
   type: TYPE_IMG
+  zh: '![原始 php.jpg 图像](Images/php4_1009.png)'
 - en: Figure 10-9\. Original php.jpg image
+  id: totrans-162
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-9\. 原始 php.jpg 图像
 - en: '![Resulting 1/4-sized image](Images/php4_1010.png)'
+  id: totrans-163
   prefs: []
   type: TYPE_IMG
+  zh: '![结果为 1/4 大小的图像](Images/php4_1010.png)'
 - en: Figure 10-10\. Resulting 1/4-sized image
+  id: totrans-164
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-10\. 结果为 1/4 大小的图像
 - en: Dividing the height and the width by 4 instead of 2 produces the output shown
     in [Figure 10-11](#resulting_onesolidusonesix_sized_image).
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 将高度和宽度除以 4 而不是 2，会产生如 [图 10-11](#resulting_onesolidusonesix_sized_image) 所示的输出。
 - en: '![Resulting 1/16-sized image](Images/php4_1011.png)'
+  id: totrans-166
   prefs: []
   type: TYPE_IMG
+  zh: '![结果为 1/16 大小的图像](Images/php4_1011.png)'
 - en: Figure 10-11\. Resulting 1/16-sized image
+  id: totrans-167
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-11\. 结果为 1/16 大小的图像
 - en: Color Handling
+  id: totrans-168
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 颜色处理
 - en: The GD library supports both 8-bit palette (256 color) images and true color
     images with alpha channel transparency.
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: GD 库支持既有 8 位调色板（256 色）图像，也支持带有 alpha 通道透明度的真彩色图像。
 - en: 'To create an 8-bit palette image, use the `imagecreate()` function. The image’s
     background is subsequently filled with the first color you allocate using `imagecolor``allocate()`:'
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 要创建一个 8 位调色板图像，使用 `imagecreate()` 函数。随后，使用 `imagecolorallocate()` 分配的第一个颜色填充图像的背景：
 - en: '[PRE36]'
+  id: totrans-171
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: 'To create a true color image with a 7-bit alpha channel, use the `imagecreatetruecolor()`
     function:'
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 要创建带有 7 位 alpha 通道的真彩色图像，请使用 `imagecreatetruecolor()` 函数：
 - en: '[PRE37]'
+  id: totrans-173
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: 'Use `imagecolorallocatealpha()` to create a color index that includes transparency:'
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `imagecolorallocatealpha()` 创建包含透明度的颜色索引：
 - en: '[PRE38]'
+  id: totrans-175
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: The *alpha* value is between 0 (opaque) and 127 (transparent).
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: '*Alpha* 值介于 0（不透明）和 127（透明）之间。'
 - en: 'While most people are used to an 8-bit (0–255) alpha channel, it is actually
     quite handy that GD’s is 7-bit (0–127). Each pixel is represented by a 32-bit
     signed integer, with the four 8-bit bytes arranged like this:'
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管大多数人习惯于 8 位（0–255）的 alpha 通道，GD 实际上使用的是很方便的 7 位（0–127）alpha 通道。每个像素由一个 32
+    位有符号整数表示，四个 8 位字节排列如下：
 - en: '[PRE39]'
+  id: totrans-178
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: For a signed integer, the leftmost bit, or the highest bit, is used to indicate
     whether the value is negative, thus leaving only 31 bits of actual information.
     PHP’s default integer value is a signed long into which we can store a single
     GD palette entry. Whether that integer is positive or negative tells us whether
     antialiasing is enabled for that palette entry.
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于有符号整数，最左边的位，或者最高位，用于指示值是否为负数，因此只留下了 31 位的实际信息。PHP 的默认整数值是有符号长整型，可以存储单个 GD
+    调色板条目。该整数是正数还是负数告诉我们该调色板条目是否启用了抗锯齿。
 - en: Unlike with palette images, with true color images the first color you allocate
     does not automatically become your background color. Instead, the image is initially
     filled with fully transparent pixels. Call `imagefilledrectangle()` to fill the
     image with any background color you want.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 与调色板图像不同，真彩色图像中的第一个颜色分配并不自动成为背景色。相反，图像最初填充了完全透明的像素。调用 `imagefilledrectangle()`
+    可以用任何背景颜色填充图像。
 - en: '[Example 10-12](#example_onezero_onetwodot_a_simple_oran) creates a true color
     image and draws a semitransparent orange ellipse on a white background.'
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 10-12](#example_onezero_onetwodot_a_simple_oran) 创建了一个真彩色图像，并在白色背景上绘制了半透明的橙色椭圆。'
 - en: Example 10-12\. A simple orange ellipse on a white background
+  id: totrans-182
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-12\. 白色背景上的简单橙色椭圆
 - en: '[PRE40]'
+  id: totrans-183
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: '[Figure 10-12](#an_orange_ellipse_on_a_white_background) shows the output of
     [Example 10-12](#example_onezero_onetwodot_a_simple_oran).'
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 10-12](#an_orange_ellipse_on_a_white_background) 展示了 [示例 10-12](#example_onezero_onetwodot_a_simple_oran)
+    的输出。'
 - en: '![An orange ellipse on a white background](Images/php4_1012.png)'
+  id: totrans-185
   prefs: []
   type: TYPE_IMG
+  zh: '![白色背景上的橙色椭圆](Images/php4_1012.png)'
 - en: Figure 10-12\. An orange ellipse on a white background
+  id: totrans-186
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-12\. 白色背景上的橙色椭圆
 - en: You can use the `imagetruecolortopalette()` function to convert a true color
     image to one with a color index (also known as a *paletted* image).
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以使用 `imagetruecolortopalette()` 函数将真彩色图像转换为带有颜色索引的图像（也称为*调色板*图像）。
 - en: Using the Alpha Channel
+  id: totrans-188
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 Alpha 通道
 - en: In [Example 10-12](#example_onezero_onetwodot_a_simple_oran), we turned off
     *alpha blending* before drawing our background and our ellipse. Alpha blending
     is a toggle that determines whether the alpha channel, if present, should be applied
     when the image is drawn. If alpha blending is off, the old pixel is replaced with
     the new pixel. If an alpha channel exists for the new pixel, it is maintained,
     but all pixel information for the original pixel being overwritten is lost.
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[示例 10-12](#example_onezero_onetwodot_a_simple_oran)中，我们在绘制背景和椭圆之前关闭了*alpha
+    混合*。Alpha 混合是一个开关，用于确定绘制图像时是否应用 alpha 通道（如果存在）。如果 alpha 混合关闭，新像素将替换旧像素。如果新像素具有
+    alpha 通道，则将其维持，但将覆盖的原始像素的所有像素信息都将丢失。
 - en: '[Example 10-13](#example_onezero_onethreedot_a_gray_rect) illustrates alpha
     blending by drawing a gray rectangle with a 50% alpha channel over an orange ellipse.'
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 10-13](#example_onezero_onethreedot_a_gray_rect)通过在橙色椭圆上绘制一个50% alpha通道的灰色矩形来说明
+    alpha 混合。'
 - en: Example 10-13\. A gray rectangle with a 50% alpha channel overlaid
+  id: totrans-191
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-13\. 50% alpha 通道的灰色矩形叠加
 - en: '[PRE41]'
+  id: totrans-192
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: '[Figure 10-13](#a_gray_rectangle_over_the_orange_ellips) shows the output of
     [Example 10-13](#example_onezero_onethreedot_a_gray_rect) (alpha blending is still
     turned off).'
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 10-13](#a_gray_rectangle_over_the_orange_ellips)展示了[示例 10-13](#example_onezero_onethreedot_a_gray_rect)的输出（alpha混合仍然关闭）。'
 - en: '![A gray rectangle over the orange ellipse](Images/php4_1013.png)'
+  id: totrans-194
   prefs: []
   type: TYPE_IMG
+  zh: '![橙色椭圆上的灰色矩形](Images/php4_1013.png)'
 - en: Figure 10-13\. A gray rectangle over the orange ellipse
+  id: totrans-195
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-13\. 橙色椭圆上的灰色矩形
 - en: If we change [Example 10-13](#example_onezero_onethreedot_a_gray_rect) to enable
     alpha blending just before the call to `image`​`filledrectangle()`, we get the
     image shown in [Figure 10-14](#image_with_alpha_blending_enabled).
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果我们在调用`image`​`filledrectangle()`之前将[示例 10-13](#example_onezero_onethreedot_a_gray_rect)修改为启用
+    alpha 混合，我们将得到图像显示在[图 10-14](#image_with_alpha_blending_enabled)中。
 - en: '![Image with alpha blending enabled](Images/php4_1014.png)'
+  id: totrans-197
   prefs: []
   type: TYPE_IMG
+  zh: '![启用了alpha混合的图像](Images/php4_1014.png)'
 - en: Figure 10-14\. Image with alpha blending enabled
+  id: totrans-198
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-14\. 启用了alpha混合的图像
 - en: Identifying Colors
+  id: totrans-199
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 颜色识别
 - en: 'To check the color index for a specific pixel in an image, use `imagecolorat()`:'
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 要检查图像中特定像素的颜色索引，可以使用`imagecolorat()`：
 - en: '[PRE42]'
+  id: totrans-201
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: 'For images with an 8-bit color palette, the function returns a color index
     that you then pass to `imagecolorsforindex()` to get the actual RGB values:'
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于使用8位色板的图像，该函数返回一个颜色索引，然后将其传递给`imagecolorsforindex()`以获取实际的RGB值：
 - en: '[PRE43]'
+  id: totrans-203
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: The array returned by `imagecolorsforindex()` has the keys `'red'`, `'green'`,
     and `'blue'`. If you call `imagecolorsforindex()` on a color from a true color
     image, the returned array also has a value for the key `'alpha'`. The values for
     these keys correspond to the 0–255 color values and the 0–127 alpha value used
     when calling `image`​`colorallocate()` and `imagecolorallocatealpha()`.
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: '`imagecolorsforindex()`返回的数组具有键`''red''`、`''green''`和`''blue''`。如果在真彩图像的颜色上调用`imagecolorsforindex()`，返回的数组还具有键`''alpha''`的值。这些键的值对应于调用`image`​`colorallocate()`和`imagecolorallocatealpha()`时使用的0到255的颜色值和0到127的
+    alpha 值。'
 - en: True Color Indexes
+  id: totrans-205
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 真彩索引
 - en: The color index returned by `imagecolorallocatealpha()` is really a 32-bit signed
     long, with the first three bytes holding the red, green, and blue values, respectively.
     The next bit indicates whether antialiasing is enabled for this color, and the
     remaining seven bits hold the transparency value.
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: '`imagecolorallocatealpha()`返回的颜色索引实际上是一个32位有符号长整数，其中前三个字节分别表示红、绿、蓝的值。接下来的一个位表示此颜色是否启用了抗锯齿，剩余的七位表示透明度值。'
 - en: 'For example:'
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如：
 - en: '[PRE44]'
+  id: totrans-208
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: This code sets `$green` to `2130771712`, which in hex is `0x7F00FF00` and in
     binary is `01111111000000001111111100000000`.
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 此代码将`$green`设置为`2130771712`，在十六进制中为`0x7F00FF00`，在二进制中为`01111111000000001111111100000000`。
 - en: 'This is equivalent to the following `imagecolorresolvealpha()` call:'
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 这等同于以下的`imagecolorresolvealpha()`调用：
 - en: '[PRE45]'
+  id: totrans-211
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: 'You can also drop the two `0` entries in this example and just make it:'
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中，你也可以去掉两个`0`条目，简化成：
 - en: '[PRE46]'
+  id: totrans-213
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: 'To deconstruct this value, you can use something like this:'
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: 要解构这个值，可以使用如下方法：
 - en: '[PRE47]'
+  id: totrans-215
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: 'Direct manipulation of color values like this is rarely necessary. One application
     is to generate a color-testing image that shows the pure shades of red, green,
     and blue. For example:'
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: 很少需要像这样直接操作颜色值。一个应用场景是生成一个颜色测试图像，显示纯红、绿和蓝的纯色。例如：
 - en: '[PRE48]'
+  id: totrans-217
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: '[Figure 10-15](#the_color_test) shows the output of the color-testing program.'
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 10-15](#the_color_test)展示了颜色测试程序的输出。'
 - en: '![The color test](Images/php4_1015.png)'
+  id: totrans-219
   prefs: []
   type: TYPE_IMG
+  zh: '![颜色测试](Images/php4_1015.png)'
 - en: Figure 10-15\. The color test
+  id: totrans-220
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-15\. 颜色测试
 - en: Obviously it will be much more colorful than what we can show you here in black
     and white print, so try this example for yourself. In this particular example,
     it is much easier to simply calculate the pixel color than to call `imagecolorallocatealpha()`
     for every color.
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: 显然，它比我们在黑白打印中展示的要更加丰富多彩，因此请自行尝试此示例。在这个特定示例中，仅计算像素颜色要比为每种颜色调用`imagecolorallocatealpha()`更容易。
 - en: Text Representation of an Image
+  id: totrans-222
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 图像的文本表示
 - en: An interesting use of the `imagecolorat()` function is to loop through each
     pixel in an image and do something with that color data. [Example 10-14](#example_onezero_onefourdot_converting_a)
     prints `#` for each pixel in the image *php-tiny.jpg* in that pixel’s color.
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
+  zh: '`imagecolorat()` 函数的一个有趣用途是循环遍历图像中的每个像素，并使用该颜色数据执行某些操作。[示例 10-14](#example_onezero_onefourdot_converting_a)
+    在*php-tiny.jpg*图像中的每个像素处打印`#`，表示该像素的颜色。'
 - en: Example 10-14\. Converting an image to text
+  id: totrans-224
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 10-14\. 将图像转换为文本
 - en: '[PRE49]'
+  id: totrans-225
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: The result is an ASCII representation of the image, as shown in [Figure 10-16](#ascii_representation_of_an_image).
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 其结果是图像的ASCII表示，如[图 10-16](#ascii_representation_of_an_image)所示。
 - en: '![ASCII representation of an image](Images/php4_1016.png)'
+  id: totrans-227
   prefs: []
   type: TYPE_IMG
+  zh: '![图像的ASCII表示](Images/php4_1016.png)'
 - en: Figure 10-16\. ASCII representation of an image
+  id: totrans-228
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 10-16\. 图像的ASCII表示
 - en: What’s Next
+  id: totrans-229
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 接下来是什么
 - en: There are many different ways to manipulate images on the fly with PHP. This
     certainly dispels the myth that PHP is useful only for generating web HTML content.
     If you have the time and desire to explore what’s possible in more depth, feel
     free to experiment with the code samples here. In the next chapter we’ll be looking
     at another myth-buster in generating dynamic PDF documents. Stay tuned!
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: 有许多不同的方式可以利用PHP在运行时处理图像。这确实打破了PHP仅用于生成Web HTML内容的神话。如果你有时间和兴趣更深入地探索可能性，请随意尝试这里的代码示例。在下一章中，我们将探讨生成动态PDF文档中的另一个神话破除者。敬请关注！
 - en: ^([1](ch10.xhtml#ch10fn1-marker)) This is true only for images with a color
     palette. True color images created using `ImageCreateTrueColor()` do not obey
     this rule.
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([1](ch10.xhtml#ch10fn1-marker)) 这仅适用于具有调色板的图像。使用`ImageCreateTrueColor()` 创建的真彩色图像不遵循此规则。
 - en: ^([2](ch10.xhtml#ch10fn2-marker)) UTF-8 is an 8-bit Unicode ([*http://www.unicode.org*](http://www.unicode.org))
     encoding scheme.
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([2](ch10.xhtml#ch10fn2-marker)) UTF-8 是一个8位Unicode编码方案（[*http://www.unicode.org*](http://www.unicode.org)）。

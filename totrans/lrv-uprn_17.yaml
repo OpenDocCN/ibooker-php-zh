@@ -1,988 +1,1540 @@
 - en: Chapter 17\. Helpers and Collections
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第17章. 辅助函数与集合
 - en: 'We’ve already covered many global functions throughout the book: these are
     little helpers that make it easier to perform common tasks, like `dispatch()`
     for jobs, `event()` for events, and `app()` for dependency resolution. We also
     talked a bit about Laravel’s collections, or arrays on steroids, in [Chapter 5](ch05.html#database_and_eloquent).'
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们已经在整本书中涵盖了许多全局函数：这些是一些小辅助函数，使执行常见任务变得更加容易，例如用于作业的`dispatch()`，用于事件的`event()`，以及用于依赖解析的`app()`。我们还在[第5章](ch05.html#database_and_eloquent)中讨论了
+    Laravel 的集合，或称为增强数组的数组。
 - en: In this chapter we’ll cover some of the more common and powerful helpers and
     some of the basics of programming with collections. Many of the “helpers” in this
     section that once were global functions are now calls on facades; `array_first()`,
     the global function, has been replaced by `Arr::first()`, the auth call. So while
     these aren’t all *technically* helpers, as they’re not all global functions anymore,
     they still have the same position in our toolbox.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 本章将涵盖一些常见且强大的辅助函数，以及使用集合进行编程的基础知识。本节中的许多“辅助函数”曾经是全局函数，现在是门面的调用；`array_first()`，全局函数，已被`Arr::first()`，授权调用所取代。因此，虽然这些在技术上并非全部是全局函数，因为它们不再是全局函数，但它们在我们的工具箱中仍然占据同样的位置。
 - en: Helpers
+  id: totrans-3
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 辅助函数
 - en: You can find a full list of the helpers Laravel offers in the [helpers docs](https://oreil.ly/vssfi),
     but we’re going to cover a few of the most useful functions here.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在[辅助文档](https://oreil.ly/vssfi)中找到 Laravel 提供的所有辅助函数的完整列表，但我们将在此处介绍一些最有用的函数。
 - en: Arrays
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 数组
 - en: 'PHP’s native array manipulation functions give us a lot of power, but sometimes
     there are standard manipulations we want to make that require unwieldy loops and
     logic checks. Laravel’s array helpers make a few common array manipulations much
     simpler:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 的本地数组操作函数为我们提供了很多能力，但有时我们希望进行的标准操作需要笨拙的循环和逻辑检查。Laravel 的数组辅助函数使一些常见的数组操作变得更加简单：
 - en: '`Arr::first(*$array, $callback, $default = null*)`'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Arr::first(*$array, $callback, $default = null*)`'
 - en: 'Returns the first array value that passes a test, defined in a callback closure.
     You can optionally set the default value as the third parameter. Here’s an example:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回通过回调闭包定义的测试的第一个数组值。您可以选择将默认值设置为第三个参数。以下是一个例子：
 - en: '[PRE0]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: '`Arr::get(*$array, $key, $default = null*)`'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Arr::get(*$array, $key, $default = null*)`'
 - en: 'Makes it easy to get values out of an array, with two added benefits: it won’t
     throw an error if you ask for a key that doesn’t exist (and you can provide defaults
     with the third parameter), and you can use dot notation to traverse nested arrays.
     For example:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 使从数组中获取值变得简单，具有两个附加好处：如果请求不存在的键，它不会抛出错误（并且您可以使用第三个参数提供默认值），并且您可以使用点表示法遍历嵌套数组。例如：
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '`Arr::has(*$array, $keys*)`'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Arr::has(*$array, $keys*)`'
 - en: 'Makes it easy to check whether an array has a particular value set using dot
     notation for traversing nested arrays. The `$keys` parameter can be a single entry
     or an array of entries, which will check whether every entry in the array exists:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用点表示法来遍历嵌套数组，轻松检查数组是否具有特定值设置。`$keys`参数可以是单个条目或条目数组，将检查数组中的每个条目是否存在：
 - en: '[PRE2]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: '`Arr::hasAny(*$array, $keys*)`'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Arr::hasAny(*$array, $keys*)`'
 - en: 'Makes it easy to check whether an array has any of the specified keys using
     dot notation for traversing nested arrays. The `$keys` parameter can be a single
     key or an array of keys, which will check whether any of the keys exists in the
     array:'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用点表示法轻松检查数组是否具有指定键之一。`$keys`参数可以是单个键或键数组，将检查数组中是否存在任何键：
 - en: '[PRE3]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '`Arr::pluck(*$array, $value, $key = null*)`'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Arr::pluck(*$array, $value, $key = null*)`'
 - en: 'Returns an array of the values corresponding to the provided key:'
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回与提供的键对应的值数组：
 - en: '[PRE4]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'If you want the returned array to be keyed by another value from the source
     array, you can pass that value’s dot-notated reference as the third parameter:'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您希望返回的数组由源数组的另一个值键入，则可以将该值的点表示法引用作为第三个参数：
 - en: '[PRE5]'
+  id: totrans-23
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: '`Arr::random(*$array, $num = null*)`'
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Arr::random(*$array, $num = null*)`'
 - en: 'Returns a random item from the provided array. If you provide a `$num` parameter,
     it will pull an array of that many results, randomly selected:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 从提供的数组中返回一个随机项。如果提供了`$num`参数，则会随机选择那么多个结果的数组：
 - en: '[PRE6]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '`Arr::join(*$array, $glue, $finalGlue = ''''*)`'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Arr::join(*$array, $glue, $finalGlue = ''''*)`'
 - en: 'Joins the items from `$array` into a string, adding `$glue` between them. If
     `$finalGlue` is provided, it is added before the last element of the array, instead
     of `$glue`:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 将`$array`中的项目连接成一个字符串，在它们之间添加`$glue`。如果提供了`$finalGlue`，它将添加到数组的最后一个元素之前，而不是`$glue`：
 - en: '[PRE7]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Strings
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 字符串
 - en: 'Just like with arrays, there are some string manipulations and checks that
     are possible with native PHP functions, but that can be cumbersome. Laravel’s
     helpers make a few common string operations faster and simpler:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像使用数组一样，使用原生 PHP 函数可以进行一些字符串操作和检查，但这可能很麻烦。Laravel 的帮助函数使一些常见的字符串操作变得更快更简单：
 - en: '`e(*$string*)`'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: '`e(*$string*)`'
 - en: 'An alias to `htmlentities`(); prepares a (often user-provided) string for safe
     echoing on an HTML page. For example:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '`htmlentities`()的别名；准备（通常是用户提供的）字符串，以便在 HTML 页面上安全地回显。例如：'
 - en: '[PRE8]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: '`str(*$string*)`'
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: '`str(*$string*)`'
 - en: 'Used for casting stringables; is an alias for `Str::of(*$string*)`:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于转换可字符串化对象；是`Str::of(*$string*)`的别名：
 - en: '[PRE9]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: '`Str::startsWith(*$haystack, $needle*)`, `Str::endsWith(*$haystack, $needle*)`,
     `Str::contains(*$haystack, $needle, $ignoreCase*)`'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Str::startsWith(*$haystack, $needle*)`，`Str::endsWith(*$haystack, $needle*)`，`Str::contains(*$haystack,
+    $needle, $ignoreCase*)`'
 - en: 'Returns a Boolean indicating whether the provided `$haystack` string starts
     with, ends with, or contains the provided `$needle` string:'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回一个布尔值，指示提供的`$haystack`字符串是否以提供的`$needle`字符串开头、结尾或包含：
 - en: '[PRE10]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: '`Str::limit(*$value, $limit = 100, $end = ''...''*)`'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Str::limit(*$value, $limit = 100, $end = ''...''*)`'
 - en: 'Limits a string to the provided number of characters. If the string’s length
     is less than the limit, just returns the string; if it’s greater, trims to the
     number of characters provided and then appends either `...` or the provided `$end`
     string. For example:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 将字符串限制为提供的字符数。如果字符串的长度小于限制，则只返回字符串；如果大于，则修剪为提供的字符数，然后附加`...`或提供的`$end`字符串。例如：
 - en: '[PRE11]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: '`Str::words(*$value, $words = 100, $end = ''...''*)`'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Str::words(*$value, $words = 100, $end = ''...''*)`'
 - en: 'Limits a string to the provided number of words. If the string’s length is
     less than the number of words, just returns the string; if it’s greater, trims
     to the number of words provided and then appends either `...` or the provided
     `$end` string. For example:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 将字符串限制为提供的单词数。如果字符串的长度小于单词数，只返回字符串；如果大于，修剪为提供的单词数，然后附加`...`或提供的`$end`字符串。例如：
 - en: '[PRE12]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: '`Str::before(*$subject, $search*)`, `Str::after(*$subject, $search*)`, `Str::beforeLast(*$subject,
     $search*)`, `Str::afterLast(*$subject, $search*)`'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Str::before(*$subject, $search*)`，`Str::after(*$subject, $search*)`，`Str::beforeLast(*$subject,
+    $search*)`，`Str::afterLast(*$subject, $search*)`'
 - en: 'Returns the subsections of a string before or after another string, or the
     last instance of another string. For example:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回一个字符串的子字符串，在另一个字符串之前或之后，或最后一个实例之后。例如：
 - en: '[PRE13]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: '`Str::is(*$pattern, $value*)`'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Str::is(*$pattern, $value*)`'
 - en: 'Returns a Boolean indicating whether or not a given string matches a given
     pattern. The pattern can be a regex pattern, or you can use asterisks to indicate
     wildcard positions:'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回一个布尔值，指示给定字符串是否与给定模式匹配。该模式可以是正则表达式模式，或者你可以使用星号表示通配符位置：
 - en: '[PRE14]'
+  id: totrans-52
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: How to Pass a Regex to Str::is()
+  id: totrans-53
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 如何将正则表达式传递给`Str::is()`
 - en: 'If you’re curious about what regex patterns are acceptable to pass to `Str::is()`,
     check out the method definition here (shortened for space) to see how it works:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想知道可以传递给`Str::is()`的正则表达式模式是什么，请查看这里的方法定义（空间有限，已简化）来了解它的工作原理：
 - en: '[PRE15]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: '`Str::isUuid(*$value*)`'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Str::isUuid(*$value*)`'
 - en: 'Determines whether the value is a valid UUID:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 确定该值是否为有效的 UUID：
 - en: '[PRE16]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: '`Str::random(*$length = n*)`'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Str::random(*$length = n*)`'
 - en: 'Returns a random string of alphanumeric mixed-case characters of the length
     specified:'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回指定长度的大小写混合字母数字随机字符串：
 - en: '[PRE17]'
+  id: totrans-61
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: '`Str::slug(*$title, $separator = ''-'', $language = ''en''*)`'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Str::slug(*$title, $separator = ''-'', $language = ''en''*)`'
 - en: 'Returns a URL-friendly slug from a string—​often used for creating a URL segment
     for a name or title:'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 从字符串中创建一个 URL 友好的 slug，通常用于为名称或标题创建 URL 段：
 - en: '[PRE18]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: '`Str::plural(*$value, $count = n*)`'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Str::plural(*$value, $count = n*)`'
 - en: 'Converts a string to its plural form. This function currently only supports
     the English language:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 将字符串转换为其复数形式。该函数目前仅支持英语语言：
 - en: '[PRE19]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: '`__(*$key, $replace = [], $locale = null*)`'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: '`__(*$key, $replace = [], $locale = null*)`'
 - en: 'Translates the given translation string or translation key using your localization
     files:'
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用你的本地化文件翻译给定的翻译字符串或翻译键：
 - en: '[PRE20]'
+  id: totrans-70
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Application Paths
+  id: totrans-71
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 应用程序路径
 - en: When you’re dealing with the filesystem, it can often be tedious to make links
     to certain directories for getting and saving files. These helpers give you quick
     access to find the fully qualified paths to some of the most important directories
     in your app.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 当处理文件系统时，通常很繁琐为获取和保存文件创建链接到某些目录。这些助手函数让你快速访问到你的应用程序中一些最重要目录的完全限定路径。
 - en: 'Note that each of these can be called with no parameters, but if a parameter
     is passed, it will be appended to the end of the normal directory string and returned
     as a whole:'
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，这些函数可以不带参数调用，但如果传递参数，它将附加到正常目录字符串的末尾并作为整体返回：
 - en: '`app_path(*$append = ''''*)`'
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: '`app_path(*$append = ''''*)`'
 - en: 'Returns the path for the *app* directory:'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回你的应用程序中*app*目录的路径：
 - en: '[PRE21]'
+  id: totrans-76
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: '`base_path(*$path = ''''*)`'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: '`base_path(*$path = ''''*)`'
 - en: 'Returns the path for the root directory of your app:'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回你的应用程序根目录的路径：
 - en: '[PRE22]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: '`config_path(*$path = ''''*)`'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: '`config_path(*$path = ''''*)`'
 - en: 'Returns the path for configuration files in your app:'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回你的应用程序中配置文件的路径：
 - en: '[PRE23]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: '`database_path(*$path = ''''*)`'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: '`database_path(*$path = ''''*)`'
 - en: 'Returns the path for database files in your app:'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回你的应用程序中数据库文件的路径：
 - en: '[PRE24]'
+  id: totrans-85
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: '`storage_path(*$path = ''''*)`'
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: '`storage_path(*$path = ''''*)`'
 - en: 'Returns the path for the *storage* directory in your app:'
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回你的应用程序中*storage*目录的路径：
 - en: '[PRE25]'
+  id: totrans-88
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: '`lang_path(*$path = ''''*)`'
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: '`lang_path(*$path = ''''*)`'
 - en: 'Returns the path for the *lang* directory in your app:'
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回你的应用程序中*lang*目录的路径：
 - en: '[PRE26]'
+  id: totrans-91
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: URLs
+  id: totrans-92
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: URLs
 - en: 'Some frontend file paths are consistent but at times annoying to type—​for
     example, paths to assets—and it’s helpful to have convenient shortcuts to them,
     which we’ll cover here. But some can actually vary as route definitions move,
     so some of these helpers are vital in making sure all of your links and assets
     work correctly:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些前端文件路径是一致的，但有时输入起来很烦人—例如，资源文件的路径—有方便的快捷方式对它们很有帮助，我们将在这里介绍。但是，一些路径实际上可能会变化，因此确保所有链接和资源正常工作的一些助手函数至关重要：
 - en: '`action(*$action*, *$parameters = []*, *$absolute = true*)`'
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: '`action(*$action*, *$parameters = []*, *$absolute = true*)`'
 - en: 'Assuming a controller method has a single URL mapped to it, returns the correct
     URL given a controller and method name pair (separated by `@`) or using tuple
     notation:'
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设控制器方法只映射到一个URL，根据控制器和方法名对（用`@`分隔）或使用元组表示法，返回正确的URL：
 - en: '[PRE27]'
+  id: totrans-96
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: 'If the controller method requires parameters, you can pass them in as the second
     parameter (as an array, if there’s more than one required parameter). You can
     key them if you want for clarity, but what matters is just that they’re in the
     right order:'
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果控制器方法需要参数，你可以将它们作为第二个参数传递（如果需要多个参数，则作为数组传递）。如果你想要清晰地标记它们，你可以给它们加上键，但重要的是它们按正确的顺序排列：
 - en: '[PRE28]'
+  id: totrans-98
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: If you pass `false` to the third parameter, your links will generate as relative
     (*/people/3*) instead of absolute (*http://myapp.com/people/3*).
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果将第三个参数传递为`false`，你的链接将生成为相对路径（*/people/3*）而不是绝对路径（*http://myapp.com/people/3*）。
 - en: '`route(*$name*, *$parameters = []*, *$absolute = true*)`'
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: '`route(*$name*, *$parameters = []*, *$absolute = true*)`'
 - en: 'If a route has a name, returns the URL for that route:'
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果路由有名称，返回该路由的URL：
 - en: '[PRE29]'
+  id: totrans-102
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: 'If the route definition requires parameters, you can pass them in as the second
     parameter (as an array if more than one parameter is required). Again, you can
     key them if you want for clarity, but what matters is just that they’re in the
     right order:'
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果路由定义需要参数，你可以将它们作为第二个参数传递（如果需要多个参数，则作为数组传递）。同样，如果你想要清晰地标记它们，你可以给它们加上键，但重要的是它们按正确的顺序排列：
 - en: '[PRE30]'
+  id: totrans-104
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: If you pass `false` to the third parameter, your links will generate as relative
     instead of absolute.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果将第三个参数传递为`false`，你的链接将生成为相对路径而不是绝对路径。
 - en: '`url(*$string*)` and `secure_url(*$string*)`'
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: '`url(*$string*)`和`secure_url(*$string*)`'
 - en: 'Given any path string, converts to a fully qualified URL. (`secure_url()` is
     the same as `url()` but forces HTTPS):'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 给定任何路径字符串，转换为完全限定的URL。(`secure_url()`与`url()`相同，但强制使用HTTPS)：
 - en: '[PRE31]'
+  id: totrans-108
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: 'If no parameters are passed, this instead gives an instance of `Illuminate``\Routing``\UrlGenerator`,
     which makes method chaining possible:'
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果没有传递参数，这将返回一个`Illuminate``\Routing``\UrlGenerator`的实例，这样就可以进行方法链式调用：
 - en: '[PRE32]'
+  id: totrans-110
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: Miscellaneous
+  id: totrans-111
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 杂项
 - en: 'There are a few other global helpers that I’d recommend getting familiar with.
     Of course, you should check out the [whole list](https://oreil.ly/vssfi), but
     the ones mentioned here are definitely worth taking a look at:'
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 有一些其他全局助手我建议你熟悉一下。当然，你应该查看[完整列表](https://oreil.ly/vssfi)，但这里提到的几个绝对值得一看：
 - en: '`abort(*$code, $message, $headers*)`, `abort_unless(*$boolean, $code, $message,
     $headers*)`, `abort_if(*$boolean, $code, $message, $headers*)`'
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: '`abort(*$code, $message, $headers*)`, `abort_unless(*$boolean, $code, $message,
+    $headers*)`, `abort_if(*$boolean, $code, $message, $headers*)`'
 - en: 'Throws HTTP exceptions. `abort()` throws the exception defined, `abort_unless()`
     throws it if the first parameter is `false`, and `abort_if()` throws it if the
     first parameter is `true`:'
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 抛出HTTP异常。`abort()`抛出定义的异常，`abort_unless()`在第一个参数为`false`时抛出异常，`abort_if()`在第一个参数为`true`时抛出异常：
 - en: '[PRE33]'
+  id: totrans-115
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: '`auth()`'
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: '`auth()`'
 - en: 'Returns an instance of the Laravel authenticator. Like the `Auth` facade, you
     can use this to get the current user, to check for login state, and more:'
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回Laravel认证器的实例。像`Auth`门面一样，您可以使用它来获取当前用户，检查登录状态等：
 - en: '[PRE34]'
+  id: totrans-118
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: '`back()`'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: '`back()`'
 - en: 'Generates a “redirect back” response, sending the user to the previous location:'
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 生成一个“重定向回上一页”的响应，将用户发送到先前的位置：
 - en: '[PRE35]'
+  id: totrans-121
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: '`collect(*$array*)`'
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: '`collect(*$array*)`'
 - en: 'Takes an array and returns the same data, converted to a collection:'
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 接受一个数组并返回相同数据，转换为集合：
 - en: '[PRE36]'
+  id: totrans-124
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: We’ll cover collections in just a bit.
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们稍后会讨论集合。
 - en: '`config(*$key*)`'
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: '`config(*$key*)`'
 - en: 'Returns the value for any dot-notated configuration item:'
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回任何点表示的配置项的值：
 - en: '[PRE37]'
+  id: totrans-128
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: '`csrf_field()`, `csrf_token()`'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: '`csrf_field()`, `csrf_token()`'
 - en: 'Returns a full HTML hidden input field (`csrf_field()`) or just the appropriate
     token value (`csrf_token()`) for adding CSRF verification to your form submission:'
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回一个完整的HTML隐藏输入字段（`csrf_field()`）或仅适当的令牌值（`csrf_token()`），用于向您的表单提交添加CSRF验证：
 - en: '[PRE38]'
+  id: totrans-131
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: '`dump(*$variable*)`, `dd(*$variable*...)`'
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: '`dump(*$variable*)`, `dd(*$variable*...)`'
 - en: 'Runs an output similar to `var_dump()` on all provided parameters; `dd()` also
     runs `exit()` to quit the application (this is used for debugging):'
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 对所有提供的参数运行类似于`var_dump()`的输出；`dd()`还会运行`exit()`来退出应用程序（这用于调试）：
 - en: '[PRE39]'
+  id: totrans-134
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: '`env(*$key*, *$default = null*)`'
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: '`env(*$key*, *$default = null*)`'
 - en: 'Returns the environment variable for the given key:'
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回给定键的环境变量：
 - en: '[PRE40]'
+  id: totrans-137
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: Remember, do not ever use `env()` outside of config files.
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 请记住，在配置文件之外绝不要使用`env()`。
 - en: '`dispatch(*$job*)`'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: '`dispatch(*$job*)`'
 - en: 'Dispatches a job:'
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 分派一个作业：
 - en: '[PRE41]'
+  id: totrans-141
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: '`event(*$event*)`'
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: '`event(*$event*)`'
 - en: 'Fires an event:'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 触发一个事件：
 - en: '[PRE42]'
+  id: totrans-144
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: '`old(*$key = null*, *$default = null*)`'
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: '`old(*$key = null*, *$default = null*)`'
 - en: 'Returns the old value (from the last user form submission) for this form key,
     if it exists:'
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回此表单键的上次用户表单提交的旧值（如果存在）：
 - en: '[PRE43]'
+  id: totrans-147
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: '`redirect(*$path*)`'
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: '`redirect(*$path*)`'
 - en: 'Returns a redirect response to the given path:'
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回到给定路径的重定向响应：
 - en: '[PRE44]'
+  id: totrans-150
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: Without parameters, this generates an instance of the `Illuminate\Routing``\Redirector`
     class.
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 没有参数时，生成`Illuminate\Routing\Redirector`类的实例。
 - en: '`response(*$content*, *$status = 200*, *$headers*)`'
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: '`response(*$content*, *$status = 200*, *$headers*)`'
 - en: 'If passed with parameters, returns a prebuilt instance of `Response`. If passed
     with no parameters, it returns an instance of the `Response` factory:'
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果传入参数，则返回预先构建的`Response`实例。如果没有参数，则返回`Response`工厂的实例：
 - en: '[PRE45]'
+  id: totrans-154
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: '`tap(*$value*, *$callback = null*)`'
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: '`tap(*$value*, *$callback = null*)`'
 - en: 'Calls the closure (the second argument), passing it the first argument, and
     then returns the first argument (instead of the output of the closure):'
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 调用闭包（第二个参数），传递第一个参数给闭包，然后返回第一个参数（而不是闭包的输出）：
 - en: '[PRE46]'
+  id: totrans-157
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: '`view(*$viewPath*)`'
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: '`view(*$viewPath*)`'
 - en: 'Returns a view instance:'
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回视图实例：
 - en: '[PRE47]'
+  id: totrans-160
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: '`fake()`'
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: '`fake()`'
 - en: 'Returns an instance of Faker:'
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回一个Faker的实例：
 - en: '[PRE48]'
+  id: totrans-163
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: Collections
+  id: totrans-164
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 集合
 - en: Collections are one of the most powerful yet underappreciated tools Laravel
     provides. We covered them a bit in [“Eloquent Collections”](ch05.html#eloquent_collections),
     but here’s a quick recap.
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 集合是Laravel提供的最强大但最不被赞赏的工具之一。我们在[“Eloquent Collections”](ch05.html#eloquent_collections)中稍作介绍，但这里快速回顾一下。
 - en: Collections are essentially arrays with superpowers. The array-traversing methods
     you normally have to pass arrays into (`array_walk()`, `array_map()`, `array_reduce()`,
     etc.), all of which have confusingly inconsistent method signatures, are available
     as consistent, clean, chainable methods on every collection. You can get a taste
     of functional programming and map, reduce, and filter your way to cleaner code.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 集合本质上是具有超能力的数组。您通常需要将数组传递给的数组遍历方法（`array_walk()`、`array_map()`、`array_reduce()`等）都可以作为每个集合上一致、清晰、可链式调用的方法使用。您可以尝试使用函数式编程，通过map、reduce和filter实现更清晰的代码。
 - en: We’ll cover some of the basics of Laravel’s collections and collection pipeline
     programming here, but for a much deeper overview, check out Adam Wathan’s book
     *Refactoring to Collections* (Gumroad).
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将在这里讨论Laravel集合和集合管道编程的基础知识，但要深入了解，请查看Adam Wathan的书《Refactoring to Collections》（Gumroad）。
 - en: The Basics
+  id: totrans-168
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 基础知识
 - en: Collections are not a new idea within Laravel. Many languages make collection-style
     programming available on arrays out of the box, but with PHP we’re not quite so
     lucky.
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 中的集合并不是一个新概念。许多语言默认支持数组的集合式编程，但在 PHP 中我们就没那么幸运了。
 - en: Using PHP’s `array*()` functions, we can take the monstrosity shown in [Example 17-1](#commonforeach)
     and turn it into the slightly less monstrous monstrosity shown in [Example 17-2](#refactoring).
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 PHP 的 `array*()` 函数，我们可以将 [示例 17-1](#commonforeach) 中显示的混乱怪物转换为稍微不那么混乱的怪物，如
+    [示例 17-2](#refactoring) 所示。
 - en: Example 17-1\. A common, but ugly, `foreach` loop
+  id: totrans-171
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 17-1\. 一个常见但丑陋的 `foreach` 循环
 - en: '[PRE49]'
+  id: totrans-172
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: Example 17-2\. Refactoring the `foreach` loop with native PHP functions
+  id: totrans-173
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 17-2\. 使用原生 PHP 函数重构 `foreach` 循环
 - en: '[PRE50]'
+  id: totrans-174
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE50]'
 - en: 'Here, we’ve gotten rid of a temporary variable (`$admins`) and converted one
     confusing `foreach` loop into two distinct actions: map and filter.'
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，我们去掉了一个临时变量（`$admins`），并将一个令人困惑的 `foreach` 循环转换为两个明确的操作：map 和 filter。
 - en: The problem is, PHP’s array manipulation functions are awful and confusing.
     Just look at this example; `array_map()` takes the closure first and the array
     second, but `array_filter()` takes the array first and the closure second. In
     addition, if we added any complexity to this, we’d have functions wrapping functions
     wrapping functions. It’s a mess.
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 问题在于，PHP 的数组操作函数令人困惑且糟糕。只需看看这个例子；`array_map()` 先接受闭包，再接受数组，但 `array_filter()`
+    先接受数组，再接受闭包。此外，如果我们增加了任何复杂性，就会有函数嵌套函数嵌套函数的情况。真是一团糟。
 - en: Laravel’s collections take the power of PHP’s array manipulation methods and
     give them a clean, fluent syntax—and they add many methods that don’t even exist
     in PHP’s array manipulation toolbox. Using the `collect()` helper method that
     turns an array into a Laravel collection, we can do what’s shown in [Example 17-3](#refactoringcoll).
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的集合将 PHP 的数组操作方法的强大之处与简洁流畅的语法结合起来，并添加了许多甚至在 PHP 的数组操作工具箱中不存在的方法。使用 `collect()`
+    辅助方法将数组转换为 Laravel 集合后，我们可以像 [示例 17-3](#refactoringcoll) 中展示的那样操作。
 - en: Example 17-3\. Refactoring the `foreach` loop with Laravel’s collections
+  id: totrans-178
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 17-3\. 使用 Laravel 集合重构 `foreach` 循环
 - en: '[PRE51]'
+  id: totrans-179
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE51]'
 - en: This isn’t the most extreme of examples. There are plenty of others where the
     reduction in lines of code and the increased simplicity would make an even stronger
     case. But this right here is *so common*.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 这并不是最极端的例子。还有很多其他例子，减少代码行数和增加简单性会更加强有力。但这种情况*非常常见*。
 - en: Look at the original example and how muddy it is. It’s not entirely clear until
     you understand the entire code sample what any given piece is there for.
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 看看原始示例及其混乱的情况。除非你完全理解整个代码样本，否则不会完全清楚任何给定部分的用途。
 - en: 'The biggest benefit collections provide, over anything else, is breaking the
     actions you’re taking to manipulate an array into simple, discrete, understandable
     tasks. You can now do something like this:'
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 集合提供的最大好处是，相比其他任何方法，它将操作数组的行为分解为简单、明确和可理解的任务。现在你可以像这样做：
 - en: '[PRE52]'
+  id: totrans-183
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE52]'
 - en: 'or something like this:'
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者像这样：
 - en: '[PRE53]'
+  id: totrans-185
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE53]'
 - en: Many of the examples we’ll look at in the rest of this chapter operate on this
     mythical `$users` collection we’ve started imagining here. Each entry in the `$users`
     array will represent a single human; they’ll likely all be array-accessible. The
     specific properties each user will have may vary a bit depending on the example.
     But any time you see this `$users` variable, know that that’s what we’re working
     with.
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章的其余部分中，我们将看到许多例子都是基于我们在这里开始想象的虚构的 `$users` 集合。`$users` 数组中的每个条目都代表一个单独的人类；它们可能都可以通过数组访问。每个用户具体的属性可能会根据示例有所不同。但是无论何时看到这个
+    `$users` 变量，都知道这是我们正在处理的内容。
 - en: A Few Collection Operations
+  id: totrans-187
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 几个集合操作
 - en: 'There’s much more you can do than what we’ve covered so far. I recommend you
     take a look at the [Laravel collections docs](https://oreil.ly/i83f4) to learn
     more about all the methods you can use, but to get you started, here are just
     a few of the core methods:'
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 比我们迄今为止涵盖的还要多得多。我建议您查看[Laravel 集合文档](https://oreil.ly/i83f4)以了解更多可用的方法，但为了帮助您入门，这里只列出了一些核心方法：
 - en: '`all()`, `toArray()`'
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: '`all()`, `toArray()`'
 - en: 'If you’d like to convert your collection to an array, you can do so with either
     `all()` or `toArray()`. `toArray()` flattens to arrays not just the collection
     but also any Eloquent objects underneath it. `all()` converts *only* the collection
     to an array; any Eloquent objects contained within the collection will be preserved
     as Eloquent objects. Here are a few examples:'
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想将集合转换为数组，可以使用`all()`或`toArray()`。`toArray()`不仅将集合转换为数组，还会将其下面的任何 Eloquent
+    对象扁平化为数组。`all()`仅将集合转换为数组；集合中包含的任何 Eloquent 对象将保持为 Eloquent 对象。以下是一些示例：
 - en: '[PRE54]'
+  id: totrans-191
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE54]'
 - en: '`filter()`, `reject()`'
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: '`filter()`, `reject()`'
 - en: 'When you want to get a subset of your original collection by checking each
     item against a closure, you’ll use `filter()` (which keeps an item if the closure
     returns `true`) or `reject()` (which keeps an item if the closure returns `false`):'
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你想通过检查每个项目是否符合闭包来获取原始集合的一个子集时，你将使用`filter()`（如果闭包返回`true`则保留项目）或`reject()`（如果闭包返回`false`则保留项目）：
 - en: '[PRE55]'
+  id: totrans-194
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE55]'
 - en: '`where()`'
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: '`where()`'
 - en: '`where()` makes it easy to provide a subset of your original collection where
     a given key is equal to a given value. Anything you can do with `where()` you
     can also do with `filter()`, but it’s a shortcut for a common scenario:'
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: '`where()`使得提供原始集合的一个子集变得容易，其中给定键等于给定值。你可以用`where()`做的任何事情也可以用`filter()`，但它是一个常见情景的快捷方式：'
 - en: '[PRE56]'
+  id: totrans-197
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE56]'
 - en: '`whereNull()`, `whereNotNull()`'
+  id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: '`whereNull()`, `whereNotNull()`'
 - en: '`whereNull()` makes it easy to provide a subset of your original collection
     where a given key is equal to `null`; `whereNotNull()` is the inverse:'
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: '`whereNull()`使得提供原始集合的一个子集变得容易，其中给定键等于`null`；`whereNotNull()`则是其反义：'
 - en: '[PRE57]'
+  id: totrans-200
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE57]'
 - en: '`first()`, `last()`'
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: '`first()`, `last()`'
 - en: If you want just a single item from your collection, you can use `first()` to
     pull from the beginning of the list or `last()` to pull from the end.
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你只想从集合中获取单个项目，可以使用`first()`来获取列表的开头或`last()`来获取列表的末尾。
 - en: If you call `first()` or `last()` with no parameters, they’ll just give you
     the first or last item in the collection, respectively. But if you pass either
     a closure, they’ll instead give you the first or last item in the collection *that
     returns `true` when passed to that closure.*
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你调用`first()`或`last()`而没有参数，它们只会分别给出集合中的第一个或最后一个项目。但如果你传递一个闭包，它们将会给出集合中首个或最后一个在该闭包中返回`true`的项目。
 - en: 'Sometimes you’ll do this because you want the actual first or last item. But
     sometimes it’s the easiest way to get one item even if you only expect there to
     be one:'
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时你会这样做是因为你想要实际的第一个或最后一个项目。但有时这是获取一个项目的最简单方法，即使你只期望有一个项目：
 - en: '[PRE58]'
+  id: totrans-205
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE58]'
 - en: You can also pass a second parameter to each method, which is the default value
     and will be provided as a fallback if the closure doesn’t provide any results.
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 你还可以向每种方法传递第二个参数，即默认值，如果闭包没有提供任何结果，将作为后备提供。
 - en: '`each()`'
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: '`each()`'
 - en: 'If you’d like to do something with each item of a collection, but it doesn’t
     include modifying the items or the collection itself, you can use `each()`:'
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想对集合的每个项目执行某些操作，但不包括修改项目或集合本身，则可以使用`each()`：
 - en: '[PRE59]'
+  id: totrans-209
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE59]'
 - en: '`map()`'
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: '`map()`'
 - en: 'If you’d like to iterate over all the items in a collection, make changes to
     them, and return a new collection with all of your changes, you’ll want to use
     `map()`:'
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想遍历集合中的所有项目，对它们进行更改，并返回带有所有更改的新集合，你应该使用`map()`：
 - en: '[PRE60]'
+  id: totrans-212
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE60]'
 - en: '`reduce()`'
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: '`reduce()`'
 - en: 'If you’d like to get a single result from your collection, like a count or
     a string, you’ll probably want to use `reduce()`. This method works by taking
     an initial value (called the *carry*) and then allowing each item in the collection
     to change that value somehow. You can define an initial value for the carry, and
     a closure that accepts the current state of the carry, and then each item as parameters:'
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想从集合中获取单个结果，如计数或字符串，你可能想使用`reduce()`。该方法通过采用初始值（称为*carry*）并允许集合中的每个项目以某种方式改变该值来工作。你可以为*carry*定义一个初始值，并接受当前*carry*状态和每个项目作为参数的闭包：
 - en: '[PRE61]'
+  id: totrans-215
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE61]'
 - en: '`pluck()`'
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: '`pluck()`'
 - en: 'If you want to pull out just the values for a given key under each item in
     a collection, you can use `pluck()`:'
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想要仅获取集合中每个项目下给定键的值，可以使用`pluck()`：
 - en: '[PRE62]'
+  id: totrans-218
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE62]'
 - en: '`chunk()`, `take()`'
+  id: totrans-219
   prefs: []
   type: TYPE_NORMAL
+  zh: '`chunk()`, `take()`'
 - en: '`chunk()` makes it easy to split your collection into groups of a predefined
     size, and `take()` pulls just the provided number of items:'
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: '`chunk()`使得将集合分割成预定义大小的组变得容易，`take()`则仅获取指定数量的项目：'
 - en: '[PRE63]'
+  id: totrans-221
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE63]'
 - en: '`takeUntil()`, `takeWhile()`'
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: '`takeUntil()`, `takeWhile()`'
 - en: '`takeUntil()` returns all items in the collection until the callback returns
     `true`. `takeWhile()` returns all items in the collection until the callback returns
     `false`. If the callback passed to `takeUntil()` never returns `true`, or if the
     callback passed to `takeWhile()` never returns `false`, the entire collection
     is returned:'
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
+  zh: '`takeUntil()` 返回集合中直到回调函数返回 `true` 的所有项目。`takeWhile()` 返回集合中直到回调函数返回 `false`
+    的所有项目。如果传递给 `takeUntil()` 的回调函数从未返回 `true`，或者传递给 `takeWhile()` 的回调函数从未返回 `false`，则返回整个集合：'
 - en: '[PRE64]'
+  id: totrans-224
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE64]'
 - en: '`groupBy()`'
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: '`groupBy()`'
 - en: 'If you want to group all of the items in your collection by the value of one
     of their properties, you can use `groupBy()`:'
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想要根据它们的某个属性值将所有项目分组到你的集合中，你可以使用 `groupBy()`：
 - en: '[PRE65]'
+  id: totrans-227
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE65]'
 - en: 'You can also pass a closure, and whatever you return from the closure will
     be what’s used to group the records:'
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 你也可以传递一个闭包，闭包返回的内容将用于分组记录：
 - en: '[PRE66]'
+  id: totrans-229
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE66]'
 - en: '`reverse()`, `shuffle()`'
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: '`reverse()`、`shuffle()`'
 - en: '`reverse()` reverses the order of the items in your collection, and `shuffle()`
     randomizes them:'
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: '`reverse()` 将你的集合中项目的顺序反转，而 `shuffle()` 将它们随机化：'
 - en: '[PRE67]'
+  id: totrans-232
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE67]'
 - en: '`skip()`'
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: '`skip()`'
 - en: '`skip()` returns a new collection without the given number of items:'
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: '`skip()` 返回一个新的集合，其中不包括指定数量的项目：'
 - en: '[PRE68]'
+  id: totrans-235
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE68]'
 - en: '`skipUntil()`'
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: '`skipUntil()`'
 - en: '`skipUntil()` skips items until the callback returns `true`. You can also pass
     in a value to `skipUntil`, and it will skip all values until the given value is
     found. If the value is never found or the callback never returns `true`, an empty
     collection is returned:'
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: '`skipUntil()` 跳过项目直到回调函数返回 `true`。你也可以传递一个值给 `skipUntil`，它将跳过所有值，直到找到给定的值。如果值从未找到或回调从未返回
+    `true`，则返回一个空集合：'
 - en: '[PRE69]'
+  id: totrans-238
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE69]'
 - en: '`skipWhile()`'
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: '`skipWhile()`'
 - en: '`skipWhile()` skips items while the callback returns `true`. If the callback
     never returns `false`, an empty collection is returned:'
+  id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: '`skipWhile()` 跳过项目直到回调函数返回 `true`。如果回调从未返回 `false`，则返回一个空集合：'
 - en: '[PRE70]'
+  id: totrans-241
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE70]'
 - en: '`sort()`, `sortBy()`, `sortByDesc()`'
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
+  zh: '`sort()`、`sortBy()`、`sortByDesc()`'
 - en: 'If your items are simple strings or integers, you can use `sort()` to sort
     them:'
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你的项目是简单的字符串或整数，你可以使用 `sort()` 来对它们进行排序：
 - en: '[PRE71]'
+  id: totrans-244
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE71]'
 - en: 'If they’re more complex, you can pass a string (representing the property)
     or a closure to `sortBy()` or `sortByDesc()` to define your sorting behavior:'
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果它们更复杂，你可以将一个字符串（表示属性）或闭包传递给 `sortBy()` 或 `sortByDesc()` 来定义你的排序行为：
 - en: '[PRE72]'
+  id: totrans-246
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE72]'
 - en: '`countBy()`'
+  id: totrans-247
   prefs: []
   type: TYPE_NORMAL
+  zh: '`countBy()`'
 - en: '`countBy` counts every occurrence of each value in a collection:'
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: '`countBy` 计算集合中每个值的每次出现：'
 - en: '[PRE73]'
+  id: totrans-249
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE73]'
 - en: Each key in the resulting collection is one of the original values; its paired
     value is the number of times that value occurred in the original collection.
+  id: totrans-250
   prefs: []
   type: TYPE_NORMAL
+  zh: 结果集合中的每个键都是原始值之一；它的配对值是该值在原始集合中出现的次数。
 - en: 'The `countBy` method also accepts a callback, which customizes the value that’s
     used to count each item in the collection:'
+  id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: '`countBy` 方法还接受一个回调函数，用于自定义用于计算集合中每个项目的值：'
 - en: '[PRE74]'
+  id: totrans-252
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE74]'
 - en: '`count()`, `isEmpty()`, `isNotEmpty()`'
+  id: totrans-253
   prefs: []
   type: TYPE_NORMAL
+  zh: '`count()`、`isEmpty()`、`isNotEmpty()`'
 - en: 'You can see how many items there are in your collection using `count()`, `isEmpty()`,
     or `isNotEmpty()` tell you whether there are items:'
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以使用 `count()`、`isEmpty()` 或 `isNotEmpty()` 来查看集合中有多少项目：
 - en: '[PRE75]'
+  id: totrans-255
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE75]'
 - en: '`avg()`, `sum()`'
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: '`avg()`、`sum()`'
 - en: 'If you’re working with a collection of numbers, `avg()` and `sum()` do what
     their method names say and don’t require any parameters:'
+  id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你正在处理一组数字的集合，`avg()` 和 `sum()` 就像它们的方法名所说的那样工作，不需要任何参数：
 - en: '[PRE76]'
+  id: totrans-258
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE76]'
 - en: 'But if you’re working with arrays, you can pass the key of the property you’d
     like to pull from each array to operate on:'
+  id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: 但如果你正在处理数组，你可以将每个数组中要提取的属性的键传递给操作：
 - en: '[PRE77]'
+  id: totrans-260
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE77]'
 - en: '`join`'
+  id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: '`join`'
 - en: '`join()` joins the collection values into a single output string, joining each
     with a provided string—like PHP’s `join()` method. You can also (optionally) customize
     the final concatenation operator:'
+  id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: '`join()` 将集合值连接为单个输出字符串，使用提供的字符串连接每个值，类似于 PHP 的 `join()` 方法。你也可以（可选地）自定义最终的连接操作符：'
 - en: '[PRE78]'
+  id: totrans-263
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE78]'
 - en: Using Collections Outside of Laravel
+  id: totrans-264
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在 Laravel 之外使用集合
 - en: Have you fallen in love with collections, and do you want to use them on your
     non-Laravel projects?
+  id: totrans-265
   prefs: []
   type: TYPE_NORMAL
+  zh: 你是否已经爱上了集合，并想在你的非 Laravel 项目中使用它们？
 - en: Just use the `composer require illuminate/collections` command and you’ll have
     the `Illuminate\S⁠u⁠p⁠p⁠o⁠r⁠t⁠\​C⁠o⁠l⁠l⁠e⁠c⁠t⁠i⁠o⁠n` class ready to use in your
     code—along with the `collect()` helper.
+  id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: 只需使用 `composer require illuminate/collections` 命令，你就可以在你的代码中准备好 `Illuminate\S⁠u⁠p⁠p⁠o⁠r⁠t⁠\​C⁠o⁠l⁠l⁠e⁠c⁠t⁠i⁠o⁠n`
+    类，以及 `collect()` 辅助函数。
 - en: TL;DR
+  id: totrans-267
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 简而言之
 - en: Laravel provides a suite of global helper functions that simplify all sorts
     of tasks. They make it easier to manipulate and inspect arrays and strings, they
     facilitate generating paths and URLs, and they provide simple access to some consistent
     and vital functionality.
+  id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 提供了一套全局助手函数，简化各种任务。它们使得操作和检查数组和字符串变得更加容易，方便生成路径和URL，并提供简单访问一些持久和关键功能。
 - en: Laravel’s collections are powerful tools that bring the possibility of collection
     pipelines to PHP.
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的集合（collections）是强大的工具，为 PHP 带来了集合管道的可能性。

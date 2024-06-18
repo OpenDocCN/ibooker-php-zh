@@ -1,22 +1,30 @@
 - en: Chapter 11\. Streams
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第11章\. 流
 - en: '*Streams* in PHP represent common interfaces to data resources that can be
     written to or read from in a linear, continuous manner. Internally, each stream
     is represented by a collection of objects referred to as *buckets*. Each bucket
     represents a chunk of data from the underlying stream, which is treated like a
     digital re-creation of an old-fashioned bucket brigade, like the one illustrated
     in [Figure 11-1](#bucket_brigade_illustration).'
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: '*PHP*中的*流*代表了可以按线性、连续方式写入或读取的数据资源的常见接口。在内部，每个流都由称为*桶*的对象集合表示。每个桶代表来自底层流的一块数据，这类似于数字重现了传统的水桶链，就像[图 11-1](#bucket_brigade_illustration)中所示的那样。'
 - en: '![Bucket brigades pass buckets of data from one to another in turn](assets/phpc_1101.png)'
+  id: totrans-2
   prefs: []
   type: TYPE_IMG
+  zh: '![水桶链将数据从一个传递到另一个](assets/phpc_1101.png)'
 - en: Figure 11-1\. Bucket brigades pass buckets of data from one to another in turn
+  id: totrans-3
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 11-1\. 水桶链将数据从一个传递到另一个
 - en: Bucket brigades were often used to transport water from a river, stream, lake,
     or well to the source of a fire. When it was impossible to use hoses to move the
     water, people would line up and pass buckets from one to another in order to fight
@@ -25,252 +33,388 @@
     of water was transported from person to person in turn until the final person
     could throw the water on the fire. This process would continue until either the
     fire was extinguished or the source ran out of water.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 水桶链经常用于将水从河流、溪流、湖泊或井中运输到火源。当无法使用软管移动水时，人们排成队，依次传递水桶以灭火。一个人在水源处装满水桶，然后将水桶传递给队列中的下一个人。排队的人不动，但水桶逐个传递，直到最后一个人能将水泼在火上。这个过程将继续，直到火被扑灭或水源耗尽。
 - en: Though you’re not using PHP to fight a fire, the internal structure of a stream
     is somewhat similar to a bucket brigade because of the way data is passed one
     chunk (bucket) at a time through whatever component of code is processing it.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管你没有使用PHP来灭火，但流的内部结构与水桶链有些相似，因为数据被逐块（桶）地通过处理它的代码组件传递。
 - en: Generators are also analogous to this pattern.^([1](ch11.html#idm45875147854464))
     Rather than loading an entire collection of data into memory all at once, generators
     provide a way to reduce it into smaller chunks and operate on one piece of data
     at a time. This enables a PHP application to operate on data that would otherwise
     exhaust system memory. Streams empower similar functionality, except working on
     continuous data rather than collections or arrays of discrete data points.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 生成器也类似于这种模式。^([1](ch11.html#idm45875147854464)) 与一次性将整个数据集加载到内存中不同，生成器提供了一种将其缩减为较小块并逐个数据块操作的方式。这使得PHP应用程序能够处理连续数据，而不是离散数据点的集合或数组。
 - en: Wrappers and Protocols
+  id: totrans-7
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 包装器和协议
 - en: In PHP, streams are implemented using *wrappers* that are registered with the
     system to operate on a specific protocol. The most common wrappers you might interact
     with are those for file access or HTTP URLs, registered as `file://` and `http://`,
     respectively. Each wrapper operates against different kinds of data, but they
     all support the same basic functionality. [Table 11-1](#php_native_protocols)
     enumerates the wrappers and protocols that are exposed natively by PHP.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 在PHP中，流是使用*包装器*实现的，这些包装器在系统中注册以操作特定协议。你可能会与最常见的包装器互动，例如文件访问或HTTP URL，分别注册为`file://`和`http://`。每个包装器针对不同类型的数据操作，但它们都支持相同的基本功能。[表 11-1](#php_native_protocols)列出了PHP本地公开的包装器和协议。
 - en: Table 11-1\. Native stream wrappers and protocols
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 11-1\. PHP本地流包装器和协议
 - en: '| Protocol | Description |'
+  id: totrans-10
   prefs: []
   type: TYPE_TB
+  zh: '| 协议 | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-11
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `file://` | Access the local filesystem |'
+  id: totrans-12
   prefs: []
   type: TYPE_TB
+  zh: '| `file://` | 访问本地文件系统 |'
 - en: '| `http://` | Access remote URLs over HTTP(S) |'
+  id: totrans-13
   prefs: []
   type: TYPE_TB
+  zh: '| `http://` | 通过HTTP(S)访问远程URL |'
 - en: '| `ftp://` | Access remote filesystems over FTP(S) |'
+  id: totrans-14
   prefs: []
   type: TYPE_TB
+  zh: '| `ftp://` | 通过FTP(S)访问远程文件系统 |'
 - en: '| `php://` | Access various local I/O streams (memory, `stdin`, `stdout`, etc.)
     |'
+  id: totrans-15
   prefs: []
   type: TYPE_TB
+  zh: '| `php://` | 访问各种本地I/O流（内存、`stdin`、`stdout`等） |'
 - en: '| `zlib://` | Compression |'
+  id: totrans-16
   prefs: []
   type: TYPE_TB
+  zh: '| `zlib://` | 压缩 |'
 - en: '| `data://` | Raw data (according to [RFC 2397](https://oreil.ly/EBJv6)) |'
+  id: totrans-17
   prefs: []
   type: TYPE_TB
+  zh: '| `data://` | 原始数据（根据[RFC 2397](https://oreil.ly/EBJv6)） |'
 - en: '| `glob://` | Find pathnames matching a pattern |'
+  id: totrans-18
   prefs: []
   type: TYPE_TB
+  zh: '| `glob://` | 查找匹配模式的路径名 |'
 - en: '| `phar://` | Manipulate PHP archives |'
+  id: totrans-19
   prefs: []
   type: TYPE_TB
+  zh: '| `phar://` | 操作PHP归档 |'
 - en: '| `ssh2://` | Connect via secure shell |'
+  id: totrans-20
   prefs: []
   type: TYPE_TB
+  zh: '| `ssh2://` | 通过安全外壳连接 |'
 - en: '| `rar://` | RAR compression |'
+  id: totrans-21
   prefs: []
   type: TYPE_TB
+  zh: '| `rar://` | RAR 压缩 |'
 - en: '| `ogg://` | Audio streams |'
+  id: totrans-22
   prefs: []
   type: TYPE_TB
+  zh: '| `ogg://` | 音频流 |'
 - en: Each wrapper produces a `stream` resource that enables you to read or write
     data in a linear fashion with the additional ability to “seek” to an arbitrary
     location within the stream. A `file://` stream, for example, allows arbitrary
     access to bytes on disk. Similarly, the `php://` protocol provides read/write
     access to various streams of bytes held in the local system memory.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个包装器产生一个 `stream` 资源，使你能够以线性方式读取或写入数据，并额外具有“寻找”到流内任意位置的能力。例如，`file://` 流允许对磁盘上的字节进行任意访问。类似地，`php://`
+    协议提供了对本地系统内存中各种字节流的读取/写入访问权限。
 - en: Filters
+  id: totrans-24
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 过滤器
 - en: PHP’s stream filters provide a construct that allows for the dynamic manipulation
     of the bytes in a stream during either read or write. A simple example would be
     to automatically convert every character in a string to either uppercase or lowercase.
     This is accomplished by creating a custom class that extends the `php_user_filter`
     class and registering that class as a filter for the compiler to use, as in [Example 11-1](#example_user_defined_filter).
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 的流过滤器提供了一种构造，允许在读取或写入期间动态操作流中的字节。一个简单的例子是自动将字符串中的每个字符转换为大写或小写。这可以通过创建一个自定义类，该类扩展了
+    `php_user_filter` 类，并将该类注册为编译器要使用的过滤器来实现，如 [示例 11-1](#example_user_defined_filter)
+    所示。
 - en: Example 11-1\. User-defined filter
+  id: totrans-26
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-1\. 用户定义的过滤器
 - en: '[PRE0]'
+  id: totrans-27
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: '[![1](assets/1.png)](#co_streams_CO1-1)'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_streams_CO1-1)'
 - en: The `$in` resource passed into the filter must first be made writable before
     you can do anything with it.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 传递给过滤器的 `$in` 资源必须首先被设置为可写状态，然后才能进行任何操作。
 - en: '[![2](assets/2.png)](#co_streams_CO1-2)'
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_streams_CO1-2)'
 - en: When consuming data, always be sure to update the `$consumed` output variable
     so PHP can keep track of how many bytes you’ve operated on.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 在使用数据时，请务必更新 `$consumed` 输出变量，以便 PHP 能够跟踪你操作了多少字节。
 - en: '[![3](assets/3.png)](#co_streams_CO1-3)'
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_streams_CO1-3)'
 - en: The `$out` resource is initially empty, and you need to write buckets to it
     in order for other filters (or just PHP itself) to continue acting on the stream.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$out` 资源最初为空，你需要向其中写入数据块，以便其他过滤器（或仅 PHP 本身）继续在流上操作。'
 - en: '[![4](assets/4.png)](#co_streams_CO1-4)'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_streams_CO1-4)'
 - en: The `PSFS_PASS_ON` flag tells PHP that the filter was successful and data is
     available in the resource defined by `$out`.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PSFS_PASS_ON` 标志告诉 PHP 过滤器成功，并且数据在 `$out` 定义的资源中可用。'
 - en: '[![5](assets/5.png)](#co_streams_CO1-5)'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#co_streams_CO1-5)'
 - en: This particular filter can act on any `str.` flag but intentionally only reads
     two filter names for converting text to uppercase or lowercase. By switching on
     the defined filter name, you can intercept and filter *just* the operations you
     want, while allowing other filters to define their own `str.` functions.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个特定过滤器可以作用于任何 `str.` 标志，但故意只读取两个过滤器名称，用于将文本转换为大写或小写。通过打开定义的过滤器名称开关，你可以拦截和过滤你想要的操作，同时允许其他过滤器定义它们自己的
+    `str.` 函数。
 - en: '[![6](assets/6.png)](#co_streams_CO1-6)'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#co_streams_CO1-6)'
 - en: Defining the filter is not enough; you must explicitly register the filter so
     PHP knows which class to instantiate when filtering a stream.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 定义过滤器是不够的；你必须显式注册过滤器，这样 PHP 才知道在过滤流时实例化哪个类。
 - en: '[![7](assets/7.png)](#co_streams_CO1-7)'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![7](assets/7.png)](#co_streams_CO1-7)'
 - en: Once the filter is defined and registered, you must either append (or prepend)
     the custom filter to the list of filters attached to the current stream resource.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦定义并注册了过滤器，你必须将自定义过滤器附加（或前置）到当前流资源的过滤器列表中。
 - en: '[![8](assets/8.png)](#co_streams_CO1-8)'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![8](assets/8.png)](#co_streams_CO1-8)'
 - en: With the filter attached, any data written to the stream will pass through the
     filter.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 带有附加过滤器后，写入流的任何数据都将通过过滤器。
 - en: '[![9](assets/9.png)](#co_streams_CO1-9)'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![9](assets/9.png)](#co_streams_CO1-9)'
 - en: Opening the file again demonstrates that your input data was indeed converted
     to uppercase. Note that `file_get_contents()` reads the entire file into memory
     rather than operating on it as a stream.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 再次打开文件表明你的输入数据确实被转换为大写。请注意，`file_get_contents()` 会将整个文件读入内存，而不是作为流进行操作。
 - en: 'Internally, any custom filter’s `filter()` method must return one of three
     flags:'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 在内部，任何自定义过滤器的 `filter()` 方法必须返回三个标志中的一个：
 - en: '`PSFS_PASS_ON`'
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PSFS_PASS_ON`'
 - en: Demonstrates that processing completed successfully and that the output bucket
     brigade (`$out`) contains data ready for the next filter
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 表明处理成功完成，并且输出桶列（`$out`）包含准备传递给下一个过滤器的数据
 - en: '`PSFS_FEED_ME`'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PSFS_FEED_ME`'
 - en: Demonstrates that the filter completed successfully, but no data was available
     to the output brigade. You must provide more data to the filter (either from the
     base stream or the filter immediately prior in the stack) to get any output
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 演示过滤器成功完成，但输出旅行队中没有可用数据。您必须从基础流或堆栈中的前一个过滤器提供更多数据才能获得任何输出。
 - en: '`PSFS_ERR_FATAL`'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PSFS_ERR_FATAL`'
 - en: Indicates that the filter experienced an error
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 指示过滤器遇到错误
 - en: 'The `onCreate()` method exposes three internal variables from the underlying
     `php_user_filter` class as if they were properties of the child class itself:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: '`onCreate()` 方法公开了底层 `php_user_filter` 类的三个内部变量，就像它们是子类自身的属性一样：'
 - en: '`::filtername`'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: '`::filtername`'
 - en: The name of the filter as specified in `stream_filter_append()` or `stream_​fil⁠ter_​pre⁠pend()`
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 如在 `stream_filter_append()` 或 `stream_​fil⁠ter_​pre⁠pend()` 中指定的过滤器名称
 - en: '`::params`'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: '`::params`'
 - en: Additional parameters passed into the filter either when appending or prepending
     it to the filter stack
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 在将其附加或预置到过滤器堆栈时，传递给过滤器的额外参数
 - en: '`::stream`'
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: '`::stream`'
 - en: The actual stream resource being filtered
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 正在被过滤的实际流资源
 - en: Stream filters are powerful ways to manipulate data as it flows into or out
     of the system. The following recipes cover various uses of streams in PHP, including
     both stream wrappers and filters.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 流过滤器是操作数据在系统中流入或流出的强大方式。以下示例涵盖了 PHP 中流的各种用法，包括流封装器和过滤器。
 - en: 11.1 Streaming Data to/from a Temporary File
+  id: totrans-61
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 11.1 流数据到/从临时文件
 - en: Problem
+  id: totrans-62
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to use a temporary file to store data used elsewhere in a program.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在程序中的其他地方使用临时文件来存储数据。
 - en: Solution
+  id: totrans-64
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'To store data, use the `php://temp` stream as if it were a file as follows:'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 要存储数据，请像操作文件一样使用 `php://temp` 流：
 - en: '[PRE1]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'To retrieve that data again, rewind the stream to the beginning and then read
     the data back out as follows:'
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 要再次检索数据，请将流倒回到开始位置，然后按以下方式再次读取数据：
 - en: '[PRE2]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Discussion
+  id: totrans-69
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: In general, PHP supports two different temporary data streams. The Solution
     example leverages the `php://temp` stream but could have just as easily used `php://memory`
     to achieve the same effect. For streams of data that fit entirely in memory, the
@@ -278,248 +422,379 @@
     store stream data. Once the stream surpasses the amount of memory available to
     the application, however, `php://temp` will instead route the data to a temporary
     file on disk.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常情况下，PHP 支持两种不同的临时数据流。解决方案示例利用了 `php://temp` 流，但同样可以使用 `php://memory` 来达到相同效果。对于完全适合内存的数据流，这两个包装器是可互换的。默认情况下，两者都将使用系统内存来存储流数据。然而，一旦流的数据超过应用程序可用内存的量，`php://temp`
+    将把数据路由到磁盘上的临时文件中。
 - en: In both cases, the data written to the stream is assumed to be ephemeral. Once
     you close the stream, this data is no longer available. Likewise, you cannot create
     a *new* stream resource that points to the same data. [Example 11-2](#temp_stream_unique)
     illustrates how PHP will leverage *different* temporary files for streams even
     when using the same stream wrapper.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这两种情况下，写入流的数据被认为是短暂的。一旦关闭流，这些数据将不再可用。同样地，你不能创建指向相同数据的*新*流资源。[示例 11-2](#temp_stream_unique)说明了
+    PHP 在使用相同流封装器时，如何为流使用*不同*的临时文件。
 - en: Example 11-2\. Temporary streams are unique
+  id: totrans-72
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-2\. 临时流是唯一的
 - en: '[PRE3]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '[![1](assets/1.png)](#co_streams_CO2-1)'
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_streams_CO2-1)'
 - en: Write a single line to the temporary stream.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 向临时流写入一行数据。
 - en: '[![2](assets/2.png)](#co_streams_CO2-2)'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_streams_CO2-2)'
 - en: Rewind the stream handle so you can reread data from it.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 将流句柄倒回，以便可以从中重新读取数据。
 - en: '[![3](assets/3.png)](#co_streams_CO2-3)'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_streams_CO2-3)'
 - en: Reading data back out of the stream prints `Hello world!` to the console.
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 从流中读取数据会在控制台上打印`Hello world!`。
 - en: '[![4](assets/4.png)](#co_streams_CO2-4)'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_streams_CO2-4)'
 - en: Creating a new stream handle creates an entirely new stream despite the identical
     protocol wrapper.
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建新的流句柄会创建一个完全新的流，尽管协议包装器相同。
 - en: '[![5](assets/5.png)](#co_streams_CO2-5)'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#co_streams_CO2-5)'
 - en: Write some unique data to this new stream.
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 向这个新流写入一些唯一的数据。
 - en: '[![6](assets/6.png)](#co_streams_CO2-6)'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#co_streams_CO2-6)'
 - en: For good measure, rewind both streams.
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了保险起见，将两个流都倒回。
 - en: '[![7](assets/7.png)](#co_streams_CO2-7)'
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![7](assets/7.png)](#co_streams_CO2-7)'
 - en: Print the second stream first to prove it’s unique. This prints `Goodnight moon`.
     to the console.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先打印第二个流来证明它是唯一的。这会在控制台上打印`Goodnight moon`。
 - en: '[![8](assets/8.png)](#co_streams_CO2-8)'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![8](assets/8.png)](#co_streams_CO2-8)'
 - en: Reprint `Hello world!` to the console to prove that the original stream still
     works as expected.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 将`Hello world!`重新打印到控制台以证明原始流仍按预期工作。
 - en: In either case, a temporary stream is useful when you need to store some data
     while running an application and don’t explicitly want to persist it to disk.
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 在任一情况下，临时流在您运行应用程序并且不明确希望将其持久存储到磁盘时非常有用。
 - en: See Also
+  id: totrans-91
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [`fopen()`](https://oreil.ly/LR8pa) and [PHP I/O stream wrappers](https://oreil.ly/6De6p).
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`fopen()`函数](https://oreil.ly/LR8pa)和[PHP I/O流包装器](https://oreil.ly/6De6p)的文档。'
 - en: 11.2 Reading from the PHP Input Stream
+  id: totrans-93
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 11.2 从PHP输入流中读取
 - en: Problem
+  id: totrans-94
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to read raw input from within PHP.
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望从 PHP 中读取原始输入。
 - en: Solution
+  id: totrans-96
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Leverage the `php://stdin` stream to read the [standard input stream (`stdin`)](https://oreil.ly/-_Bxl)
     as follows:'
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 利用`php://stdin`流来读取[标准输入流（`stdin`）](https://oreil.ly/-_Bxl)，如下所示：
 - en: '[PRE4]'
+  id: totrans-98
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Discussion
+  id: totrans-99
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: Like any other application, PHP has direct access to the input passed to it
     by commands and other upstream applications. In a console world, this might be
     another command, literal input in the terminal, or data piped in from another
     application. In a web context, though, you would instead use `php://input`+ to
     access the literal contents submitted in a web request and passed through whatever
     web server is in front of the PHP application.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 与任何其他应用程序一样，PHP 可以直接访问由命令和其他上游应用程序传递给它的输入。在控制台环境中，这可能是另一个命令，终端中的文字输入，或者是来自其他应用程序的数据管道。在Web上下文中，您可以使用`php://input`+来访问通过Web服务器传递的文字内容，并通过PHP应用程序前面的任何Web服务器访问。
 - en: Note
+  id: totrans-101
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: In command-line applications, you can also use the predefined [`STDIN` constant](https://oreil.ly/wgDpd)
     directly. PHP natively opens a stream for you, meaning you don’t need to create
     a new resource variable at all.
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 在命令行应用程序中，您还可以直接使用预定义的[`STDIN`常量](https://oreil.ly/wgDpd)。 PHP 本地为您打开一个流，这意味着您根本不需要创建新的资源变量。
 - en: A simple command-line application might take data from the input, manipulate
     that data, and then store it in a file. In [Recipe 9.5](ch09.html#storing_encrypted_data_in_a_file),
     you learned how to encrypt and decrypt files by using symmetric keys with Libsodium.
     Assuming you have an encryption key (encoded in hexadecimal) exposed as an environment
     variable, the program in [Example 11-3](#encrypting_stdin_with_libsodium) would
     use that key to encrypt any data passed in and store it in an output file.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 简单的命令行应用程序可以从输入中获取数据，处理该数据，然后将其存储到文件中。在[食谱9.5](ch09.html#storing_encrypted_data_in_a_file)中，您学习了如何使用Libsodium和对称密钥来加密和解密文件。假设您有一个加密密钥（以十六进制编码），该密钥作为环境变量公开，[示例 11-3](#encrypting_stdin_with_libsodium)中的程序将使用该密钥加密传入的任何数据并将其存储在输出文件中。
 - en: Example 11-3\. Encrypting `stdin` with Libsodium
+  id: totrans-104
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例11-3\. 使用Libsodium加密`stdin`
 - en: '[PRE5]'
+  id: totrans-105
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: '[![1](assets/1.png)](#co_streams_CO3-1)'
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_streams_CO3-1)'
 - en: Since you want to use an environment variable to house the encryption key, first
     check that this variable exists.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于您希望使用环境变量存储加密密钥，请首先检查该变量是否存在。
 - en: '[![2](assets/2.png)](#co_streams_CO3-2)'
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_streams_CO3-2)'
 - en: Also do a sanity check that the key is of the right size before using it for
     encryption.
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 在使用加密前，还应对密钥的大小进行合理性检查。
 - en: '[![3](assets/3.png)](#co_streams_CO3-3)'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_streams_CO3-3)'
 - en: In this example, read the bytes directly from `stdin`.
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 在此示例中，直接从`stdin`读取字节。
 - en: '[![4](assets/4.png)](#co_streams_CO3-4)'
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_streams_CO3-4)'
 - en: Use a dynamically named file to store the encrypted data. Note that, in practice,
     `uniqid()` uses timestamps and could be subject to race conditions and name collisions
     on highly used systems. In a real-world environment, you will want to use a more
     reliable source of randomness for a generated filename.
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用动态命名的文件存储加密数据。请注意，在实践中，`uniqid()`使用时间戳，并且在高度使用的系统上可能会出现竞态条件和名称冲突。在真实世界的环境中，您将希望使用更可靠的随机源生成文件名。
 - en: '[![5](assets/5.png)](#co_streams_CO3-5)'
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![5](assets/5.png)](#co_streams_CO3-5)'
 - en: The output could be passed back to the console but, since this encryption produces
     raw bytes, it’s safer to stream the output to a file. In this case, the filename
     will be generated dynamically based on the system clock.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 输出可以返回到控制台，但由于此加密生成原始字节，将输出流到文件更安全。在这种情况下，文件名将根据系统时钟动态生成。
 - en: '[![6](assets/6.png)](#co_streams_CO3-6)'
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![6](assets/6.png)](#co_streams_CO3-6)'
 - en: The rest of the encryption follows the same pattern as [Recipe 9.5](ch09.html#storing_encrypted_data_in_a_file).
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 其余的加密步骤与[食谱9.5](ch09.html#storing_encrypted_data_in_a_file)相同。
 - en: The preceding example enables you to pipe data from a file directly into PHP
     by using the standard input buffer. Such a piping operation might look something
     like `cat plaintext-file.txt | php encrypt.php`.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 前面的示例让您可以通过使用标准输入缓冲区将数据从文件直接传递给 PHP。这样的管道操作可能看起来像`cat plaintext-file.txt | php
+    encrypt.php`。
 - en: Given that the encryption operation will produce a file, you can reverse the
     operation with a similar script and similarly leverage `cat` to pipe the raw binary
     back into PHP, as shown in [Example 11-4](#decrypting_stdin_with_libsodium).
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 鉴于加密操作将生成一个文件，您可以通过类似的脚本反向操作，并类似地利用`cat`将原始二进制数据管道传回PHP，如[示例 11-4](#decrypting_stdin_with_libsodium)所示。
 - en: Example 11-4\. Decrypting `stdin` with Libsodium
+  id: totrans-120
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-4\. 使用Libsodium解密`stdin`
 - en: '[PRE6]'
+  id: totrans-121
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Thanks to PHP’s I/O stream wrappers, arbitrary input streams are just as easy
     to manipulate as native files on a local disk.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于PHP的I/O流包装器，任意输入流与本地磁盘上的原生文件一样易于操作。
 - en: See Also
+  id: totrans-123
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [PHP I/O stream wrappers](https://oreil.ly/wKjj9).
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP I/O流包装器的文档请参考[PHP I/O流包装器](https://oreil.ly/wKjj9)。
 - en: 11.3 Writing to the PHP Output Stream
+  id: totrans-125
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 11.3 写入PHP输出流
 - en: Problem
+  id: totrans-126
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to output data directly.
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望直接输出数据。
 - en: Solution
+  id: totrans-128
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Write to `php://output` to push data directly to the [standard output (`stdout`)
     stream](https://oreil.ly/coZ8n) as follows:'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`php://output`将数据直接推送到[标准输出（`stdout`）流](https://oreil.ly/coZ8n)如下：
 - en: '[PRE7]'
+  id: totrans-130
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Discussion
+  id: totrans-131
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: 'PHP exposes three standard I/O streams to userland code—`stdin`, `stdout`,
     and `stderr`. By default, anything you print in your application is sent to the
     standard output stream (`stdout`), which makes the following two lines of code
     functionally equivalent:'
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP向用户空间代码公开了三个标准I/O流——`stdin`、`stdout`和`stderr`。默认情况下，您在应用程序中打印的任何内容都会发送到标准输出流（`stdout`），这使得以下两行代码在功能上是等效的：
 - en: '[PRE8]'
+  id: totrans-133
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Many developers learn to use `echo` and `print` statements as simple ways to
     debug an application; adding an indicator in your code makes it easy to identify
     where exactly the compiler is failing or to emit the value of an otherwise hidden
@@ -527,420 +802,629 @@
     is common to many applications and writing to it directly (versus an implicit
     `print` statement) is a way to keep your application focused on what it needs
     to be doing.
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多开发人员学会使用`echo`和`print`语句作为调试应用程序的简单方法；在您的代码中添加指示器可以方便地确定编译器失败的确切位置或输出一个隐藏变量的值。然而，这并不是管理输出的*唯一*方法。`stdout`流是许多应用程序共有的，直接向其写入数据（而不是隐式的`print`语句）可以使您的应用程序集中在需要完成的任务上。
 - en: Similarly, once you start leveraging `php://stdout` directly to print output
     to the client, you can start leveraging the `php://stderr` stream to emit messages
     about *errors* as well. These two streams are treated differently by the operating
     system, and you can use them to segment your messaging between useful messages
     and error states.
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似地，一旦您开始直接利用`php://stdout`向客户端打印输出，您就可以开始利用`php://stderr`流来发出关于*错误*的消息。这两个流在操作系统中处理方式不同，您可以用它们来区分有用消息和错误状态之间的消息。
 - en: Note
+  id: totrans-136
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: In command-line applications, you can also use the predefined [`STDOUT` and
     `STDERR` constants](https://oreil.ly/HArEs) directly. PHP natively opens these
     streams for you, meaning you don’t need to create new resource variables at all.
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 在命令行应用程序中，您还可以直接使用预定义的[`STDOUT`和`STDERR`常量](https://oreil.ly/HArEs)。PHP本地为您打开这些流，这意味着您根本不需要创建新的资源变量。
 - en: '[Example 11-4](#decrypting_stdin_with_libsodium) allowed you to read encrypted
     data from `php://stdin`, decrypt it, and then store the decrypted content in a
     file. A more useful example would instead present that decrypted data to `php://stdout`
     (and any errors to `php://stderr`), as shown in [Example 11-5](#decrypting_stdin_with_libsodium_revamped).'
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 11-4](#decrypting_stdin_with_libsodium)允许您从`php://stdin`读取加密数据，解密后将解密内容存储到文件中。一个更有用的示例将显示解密的数据直接发送到`php://stdout`（以及任何错误到`php://stderr`），如[示例 11-5](#decrypting_stdin_with_libsodium_revamped)所示。'
 - en: Example 11-5\. Decrypting `stdin` to `stdout`
+  id: totrans-139
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-5\. 将`stdin`解密为`stdout`
 - en: '[PRE9]'
+  id: totrans-140
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: '[![1](assets/1.png)](#co_streams_CO4-1)'
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_streams_CO4-1)'
 - en: Rather than creating an intermediary file, you can write directly to the standard
     output stream.
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以直接写入标准输出流，而不是创建一个中间文件。
 - en: '[![2](assets/2.png)](#co_streams_CO4-2)'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_streams_CO4-2)'
 - en: You should also get a handle on the standard error stream while you’re at it.
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这期间，您也应该掌握标准错误流。
 - en: '[![3](assets/3.png)](#co_streams_CO4-3)'
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_streams_CO4-3)'
 - en: Rather than triggering an exception, you can write directly to the error stream.
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 而不是触发异常，您可以直接写入错误流。
 - en: See Also
+  id: totrans-147
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [PHP I/O stream wrappers](https://oreil.ly/PmXdc).
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 关于 [PHP I/O 流包装器](https://oreil.ly/PmXdc) 的文档。
 - en: 11.4 Reading from One Stream and Writing to Another
+  id: totrans-149
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 11.4 从一个流读取并写入另一个流
 - en: Problem
+  id: totrans-150
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to connect two streams, passing the bytes from one to the other.
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 想要连接两个流，将一个流的字节传递给另一个流。
 - en: Solution
+  id: totrans-152
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Use `stream_copy_to_stream()` to copy data from one stream to another as follows:'
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`stream_copy_to_stream()`从一个流复制数据到另一个流，操作如下：
 - en: '[PRE10]'
+  id: totrans-154
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: Discussion
+  id: totrans-155
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The streaming mechanisms in PHP provide for very efficient ways to work with
     rather large chunks of data. Often, you might end up using files within your PHP
     application that are too large to fit in the application’s available memory. Most
     files you might make public and send to the user directly via Apache or NGINX.
     In other cases, for example, you might want to safeguard large file downloads
     (like zip files or videos) with scripts written in PHP to validate a user’s identity.
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 中的流机制提供了处理相当大数据块的高效方式。通常，您可能会在 PHP 应用程序中使用太大而无法放入可用内存的文件。大多数文件可能会通过 Apache
+    或 NGINX 直接向用户公开并发送。另外，例如，您可能希望使用 PHP 编写的脚本保护大文件下载（如 zip 文件或视频），以验证用户的身份。
 - en: Such a scenario is possible in PHP because the system doesn’t need to keep the
     entire stream in memory but can instead write bytes to one stream as they are
     read from another stream. [Example 11-6](#copy_large_file_stdout) assumes that
     your PHP application directly authenticates a user and validates that they have
     the right to a particular file before streaming its contents.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 PHP 中可以实现这种情况，因为系统不需要将整个流保存在内存中，而是可以从一个流读取字节时立即将其写入另一个流。 [示例 11-6](#copy_large_file_stdout)
+    假设您的 PHP 应用程序直接验证用户并验证他们对特定文件的权限后，流式传输其内容。
 - en: Example 11-6\. Copy large file to `stdout` by linking streams
+  id: totrans-158
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-6\. 通过链接流将大文件复制到`stdout`
 - en: '[PRE11]'
+  id: totrans-159
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: '[![1](assets/1.png)](#co_streams_CO5-1)'
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_streams_CO5-1)'
 - en: The act of opening a stream merely gets a handle on the underlying data. No
     bytes have yet been read by the system.
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 打开流的操作仅仅是获取底层数据的句柄。系统尚未读取任何字节。
 - en: '[![2](assets/2.png)](#co_streams_CO5-2)'
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_streams_CO5-2)'
 - en: Copying a stream to another stream will copy the bytes directly without keeping
     the entire contents of either stream in memory. Remember, streams work on chunks
     similar to a bucket brigade, so only a subset of the necessary bytes are held
     in memory at any given time.
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 将一个流复制到另一个流将直接复制字节，而无需在内存中保留任一流的全部内容。请记住，流类似于一个桶链，因此在任何给定时间内只会在内存中保存必要字节的子集。
 - en: '[![3](assets/3.png)](#co_streams_CO5-3)'
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_streams_CO5-3)'
 - en: It’s important to always `exit` after copying a stream; otherwise, you might
     inadvertently append miscellaneous bytes by mistake.
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 在复制流后始终使用`exit`；否则，您可能会错误地附加杂项字节。
 - en: Similarly, it is possible to programmatically *build* a large stream and copy
     it to another stream when needed. Some web applications might need to programmatically
     build large chunks of data (very large single-page web applications, for example).
     It is possible to write these large data elements to PHP’s temporary memory stream
     and then copy the bytes back out when needed. [Example 11-7](#copying_temporary_stream_stdout)
     illustrates exactly how that would work.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似地，当需要时，可以编程方式*构建*一个大流并将其复制到另一个流中。例如，某些 Web 应用程序可能需要在需要时编程方式构建大数据块（例如非常大的单页
+    Web 应用程序）。可以将这些大数据元素写入 PHP 的临时内存流，然后在需要时复制字节。 [示例 11-7](#copying_temporary_stream_stdout)
+    具体说明了这样做的方式。
 - en: Example 11-7\. Copying a temporary stream to `stdout`
+  id: totrans-167
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-7\. 将临时流复制到`stdout`
 - en: '[PRE12]'
+  id: totrans-168
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: '[![1](assets/1.png)](#co_streams_CO6-1)'
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_streams_CO6-1)'
 - en: A temporary stream leverages a temporary file on disk. You are limited not by
     the memory available to PHP but by the available space allocated to temporary
     files by the operating system.
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 临时流利用磁盘上的临时文件。您受限于操作系统分配给临时文件的可用空间，而不是 PHP 可用的内存。
 - en: '[![2](assets/2.png)](#co_streams_CO6-2)'
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_streams_CO6-2)'
 - en: After writing the entire HTML document to a temporary file, rewind the stream
     back to the beginning in order to copy all of those bytes to `stdout`.
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 将整个 HTML 文档写入临时文件后，请将流倒回到开头，以便将所有这些字节复制到`stdout`。
 - en: '[![3](assets/3.png)](#co_streams_CO6-3)'
+  id: totrans-173
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_streams_CO6-3)'
 - en: The mechanism to copy one stream to another remains unchanged even though neither
     of these streams point to a specifically identified file on disk.
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 即使这两个流都不指向特定的磁盘文件，复制一个流到另一个的机制仍然保持不变。
 - en: '[![4](assets/4.png)](#co_streams_CO6-4)'
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_streams_CO6-4)'
 - en: Always `exit` after all bytes have been copied to the client to avoid accidental
     errors.
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 总是在所有字节都复制到客户端后才退出，以避免意外错误。
 - en: See Also
+  id: totrans-177
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [`stream_copy_to_stream()`](https://oreil.ly/Us_Yj).
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`stream_copy_to_stream()`](https://oreil.ly/Us_Yj) 的文档。'
 - en: 11.5 Composing Different Stream Handlers Together
+  id: totrans-179
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 11.5 组合不同的流处理程序在一起
 - en: Problem
+  id: totrans-180
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to combine multiple stream concepts—e.g., a wrapper and a filter—in
     one piece of code.
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望在一个代码片段中结合多个流概念，例如包装器和过滤器。
 - en: Solution
+  id: totrans-182
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: Append filters as necessary and use the appropriate wrapper protocol. [Example 11-8](#applying_multiple_fliers_stream)
     uses the `file://` protocol for local filesystem access and two additional filters
     to handle Base64-encoding and file decompression.
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据需要追加过滤器并使用适当的包装器协议。[示例 11-8](#applying_multiple_fliers_stream) 使用`file://`协议来访问本地文件系统，并使用两个额外的过滤器来处理Base64编码和文件解压缩。
 - en: Example 11-8\. Applying multiple fliers to a stream
+  id: totrans-184
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-8\. 将多个过滤器应用到流
 - en: '[PRE13]'
+  id: totrans-185
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: '[![1](assets/1.png)](#co_streams_CO7-1)'
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_streams_CO7-1)'
 - en: Assume this file exists on disk and contains the literal contents `80jNycnXUS​jPL8pJUQQA`.
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设此文件存在于磁盘上并包含字面内容`80jNycnXUS​jPL8pJUQQA`。
 - en: '[![2](assets/2.png)](#co_streams_CO7-2)'
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_streams_CO7-2)'
 - en: The first stream filter added to the stack will convert from Base64-encoded
     ASCII text to raw bytes.
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 添加到堆栈的第一个流过滤器将从Base64编码的ASCII文本转换为原始字节。
 - en: '[![3](assets/3.png)](#co_streams_CO7-3)'
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_streams_CO7-3)'
 - en: The second filter will leverage Zlib compression to inflate (or uncompress)
     the raw bytes.
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二个过滤器将利用Zlib压缩来解压（或解压缩）原始字节。
 - en: '[![4](assets/4.png)](#co_streams_CO7-4)'
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_streams_CO7-4)'
 - en: If you started with the literal contents in step 1, this will likely print `Hello,
     world!` to the console.
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您从步骤1中的字面内容开始，这很可能会在控制台打印`Hello, world!`。
 - en: Discussion
+  id: totrans-194
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: When it comes to streams, it’s helpful to think about layers. The foundation
     is always the protocol handler used to instantiate the stream. There is no explicit
     protocol in the Solution example, which means PHP will leverage the `file://`
     protocol by default. Atop that foundation is any number of layers of filters on
     the stream.
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 当涉及流时，思考层次是很有帮助的。基础始终是用于实例化流的协议处理程序。在解决方案示例中没有显式协议，这意味着PHP将默认使用`file://`协议。在这个基础之上是任意数量的流过滤器层。
 - en: 'The Solution example leverages both Zlib compression and Base64 encoding to
     compress text and encode the raw (compressed) bytes, respectively. To create such
     a compressed/encoded file, you would do the following:'
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 解决方案示例利用Zlib压缩和Base64编码来压缩文本并对原始（压缩的）字节进行编码。要创建这样的压缩/编码文件，您需要执行以下操作：
 - en: '[PRE14]'
+  id: totrans-197
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: The preceding example leverages the same protocol wrapper and filters as the
     Solution example. But note that the *order* in which they are added is reversed.
     This is because stream filters work like the layers on a jawbreaker, similar to
     the illustration in [Figure 11-2](#filter_layers_data). The protocol wrapper is
     at the core, and data flows from that core to the outside world, through each
     subsequent layer in a specific order.
+  id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: 前面的示例利用与解决方案示例相同的协议包装器和过滤器。但请注意它们添加的顺序是相反的。这是因为流过滤器的工作方式类似于豆腐花上的层次，就像[图 11-2](#filter_layers_data)
+    中的插图一样。协议包装器位于核心位置，数据从该核心流向外部世界，通过每个后续层次以特定顺序传递。
 - en: '![Data flowing into and out of PHP stream filters](assets/phpc_1102.png)'
+  id: totrans-199
   prefs: []
   type: TYPE_IMG
+  zh: '![数据进出 PHP 流过滤器](assets/phpc_1102.png)'
 - en: Figure 11-2\. Data flowing into and out of PHP stream filters
+  id: totrans-200
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 11-2\. 数据进出 PHP 流过滤器
 - en: There are several filters that you can apply to a stream already built into
     PHP. However, you can also define your *own* filter. It’s useful to encode raw
     bytes in Base64, but it’s also sometimes useful to encode/decode bytes as hexadecimal.
     Such a filter doesn’t exist natively in PHP, but you can define it yourself by
     extending the `php_​user_​fil⁠ter` class similarly to the way [Example 11-1](#example_user_defined_filter)
     did in this chapter’s introduction. Consider the class in [Example 11-9](#userland_hex_filter).
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP中已经内置了几种可以应用于流的过滤器。但是，您也可以定义*自己的*过滤器。将原始字节编码为Base64很有用，但有时将字节编码/解码为十六进制也很有用。PHP中没有这样的过滤器，但您可以通过类似于本章介绍中[示例 11-1](#example_user_defined_filter)中所做的方式扩展`php_​user_​filter`类来定义它。考虑[示例 11-9](#userland_hex_filter)中的类。
 - en: Example 11-9\. Encoding/decoding hexadecimal with a filter
+  id: totrans-202
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-9\. 使用过滤器进行十六进制编码/解码
 - en: '[PRE15]'
+  id: totrans-203
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: The class defined in [Example 11-9](#userland_hex_filter) can be used to arbitrarily
     encode to and decode from hexadecimal when applied as a filter to any arbitrary
     stream. Merely register it as you would any other filter, then apply it to whatever
     streams need to be converted.
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 在任意流应用为过滤器后，可以使用[示例 11-9](#userland_hex_filter)中定义的类来任意编码和解码十六进制。只需像注册其他过滤器一样注册它，然后将其应用于需要转换的流。
 - en: The Base64 encoding used in the Solution example could be substituted with hexadecimal
     entirely, as shown in [Example 11-10](#combining_hex_filters).
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 在解决方案示例中使用的Base64编码可以完全替换为十六进制，如[示例 11-10](#combining_hex_filters)所示。
 - en: Example 11-10\. Combining a hexadecimal stream filter with Zlib compression
+  id: totrans-206
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-10\. 结合十六进制流过滤器和Zlib压缩
 - en: '[PRE16]'
+  id: totrans-207
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: '[![1](assets/1.png)](#co_streams_CO8-1)'
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_streams_CO8-1)'
 - en: Once the filter exists, it must be registered so PHP knows how to use it. Leveraging
     a `*` wildcard during registration allows for both encoding and decoding to be
     registered at once.
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦过滤器存在，必须将其注册，以便PHP知道如何使用它。在注册过程中利用`*`通配符允许同时注册编码和解码。
 - en: '[![2](assets/2.png)](#co_streams_CO8-2)'
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_streams_CO8-2)'
 - en: The contents of *compressed.txt* will be `f348cdc9c9d75128cf2fca4951e472cfcf
     4fc9cb4ccf28d151c8cdcfcf530400` at this point.
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 此时*compressed.txt*的内容将是`f348cdc9c9d75128cf2fca4951e472cfcf 4fc9cb4ccf28d151c8cdcfcf530400`。
 - en: '[![3](assets/3.png)](#co_streams_CO8-3)'
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_streams_CO8-3)'
 - en: After decoding and decompressing, `Hello world! Goodnight, moon!` will be printed
     to the console (with a newline between the two statements).
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 解码和解压后，`Hello world! Goodnight, moon!` 将被打印到控制台（两个语句之间有换行）。
 - en: See Also
+  id: totrans-214
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Supported [protocols and wrappers](https://oreil.ly/HxKpb) and the [list of
     available filters](https://oreil.ly/IE5UR). Also, [Example 11-1](#example_user_defined_filter)
     for a user-defined stream filter.
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: 支持的[协议和包装器](https://oreil.ly/HxKpb)以及[可用过滤器的列表](https://oreil.ly/IE5UR)。另请参考用户定义的流过滤器的[示例 11-1](#example_user_defined_filter)。
 - en: 11.6 Writing a Custom Stream Wrapper
+  id: totrans-216
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 11.6 编写自定义流包装器
 - en: Problem
+  id: totrans-217
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to define your own custom stream protocol.
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 您想定义自己的自定义流协议。
 - en: Solution
+  id: totrans-219
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: Create a custom class that follows the prototype of `streamWrapper` and register
     it with PHP. For example, a `VariableStream` class could provide a stream-like
     interface to read from or write to a specific global variable, as follows:^([2](ch11.html#idm45875145524560))
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建一个遵循`streamWrapper`原型的自定义类，并将其注册到PHP中。例如，`VariableStream`类可以提供一种类似流的接口，用于读取或写入特定全局变量，如下所示：^([2](ch11.html#idm45875145524560))
 - en: '[PRE17]'
+  id: totrans-221
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: 'The preceding class would be registered and used in PHP as follows:'
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: 在PHP中，可以如下注册和使用上述类：
 - en: '[PRE18]'
+  id: totrans-223
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Discussion
+  id: totrans-224
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The `streamWrapper` construct in PHP is a prototype for a class. Unfortunately,
     it is not a class that can be extended, nor is it an interface that can be concretely
     implemented. Instead, it is a documented format that any user-defined stream protocols
     must follow.
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP中的`streamWrapper`构造函数是一个类的原型。不幸的是，它既不是可以扩展的类，也不是可以具体实现的接口。相反，它是任何用户定义的流协议必须遵循的文档格式。
 - en: While it is possible to register classes as protocol handlers following a different
     interface, it is strongly advised that any potential protocol classes implement
     all methods defined by the `streamWrapper` interface (copied from the PHP document
     as a pseudo-interface definition in [Example 11-11](#streamwrapper_interface_definition))
     in order to satisfy PHP’s expected stream behavior
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然可以将类注册为不同接口的协议处理程序，但强烈建议任何潜在的协议类实现`streamWrapper`接口中定义的所有方法（从PHP文档中复制为[示例 11-11](#streamwrapper_interface_definition)伪接口定义），以满足PHP对流行为的预期要求。
 - en: Example 11-11\. `streamWrapper` interface definition
+  id: totrans-227
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例11-11。`streamWrapper`接口定义
 - en: '[PRE19]'
+  id: totrans-228
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: Some specific functionality—e.g., `mkdir`, `rename`, `rmdir`, or `unlink`—should
     *not* be implemented at all unless the protocol has a specific use for it. Otherwise,
     the system will not provide helpful error messages to you (or developers building
     atop your library) and will behave unexpectedly.
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 某些特定功能，例如`mkdir`、`rename`、`rmdir`或`unlink`，如果协议没有特定的使用场景，应完全**不**实现。否则，系统将无法为您（或构建在您库之上的开发人员）提供有用的错误消息，并且表现会出乎意料。
 - en: While most protocols you will use day-to-day ship natively with PHP, it’s possible
     to write new protocol handlers or leverage those built by other developers.
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然大多数您日常使用的协议都与PHP原生集成，但可以编写新的协议处理程序或利用其他开发人员构建的处理程序。
 - en: It’s common to see references to cloud storage that use a proprietary protocol
     (e.g., Amazon Web Services’ `s3://`) rather than the more common `https://` or
     `file://` prefixes seen elsewhere. AWS actually publishes a [public SDK](https://oreil.ly/RVXlw)
     that uses `stream_​wrap⁠per_​register()` internally to provide an `s3://` protocol
     to other application code, empowering you to work with cloud-hosted data as easily
     as you would local files.
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 在引用使用专有协议的云存储时很常见（例如Amazon Web Services的`s3://`），而不是其他地方常见的更通用的`https://`或`file://`前缀。AWS实际上发布了一个[公共SDK](https://oreil.ly/RVXlw)，该SDK在内部使用`stream_​wrap⁠per_​register()`为其他应用程序代码提供`s3://`协议，使您能够像处理本地文件一样轻松地处理托管在云中的数据。
 - en: See Also
+  id: totrans-232
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 另请参阅
 - en: Documentation on [`streamWrapper`](https://oreil.ly/SyhD8).
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: '[`streamWrapper`](https://oreil.ly/SyhD8)文档。'
 - en: ^([1](ch11.html#idm45875147854464-marker)) For more on generators, review [Recipe
     7.15](ch07.html#iterating_over_large_arrays).
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([1](ch11.html#idm45875147854464-marker)) 欲了解更多有关生成器的信息，请参阅[Recipe 7.15](ch07.html#iterating_over_large_arrays)。
 - en: ^([2](ch11.html#idm45875145524560-marker)) The PHP Manual provides [a similarly
     named class](https://oreil.ly/b0PLM) with much broader and more complete functionality
     than is demonstrated in this Solution example.
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: ^([2](ch11.html#idm45875145524560-marker)) PHP手册提供了一个名字类似的类，其功能比本解决方案示例中演示的更广泛更完整，[点击此处查看](https://oreil.ly/b0PLM)。

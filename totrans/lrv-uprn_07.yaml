@@ -1,48 +1,71 @@
 - en: Chapter 7\. Collecting and Handling User Data
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第7章：收集和处理用户数据
 - en: 'Websites that benefit from a framework like Laravel often don’t just serve
     static content. Many deal with complex and mixed data sources, and one of the
     most common (and most complex) of these sources is user input in its myriad forms:
     URL paths, query parameters, `POST` data, and file uploads.'
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 像 Laravel 这样的框架受益于的网站通常不仅提供静态内容。许多处理复杂和混合数据源，其中最常见（也最复杂）的是各种形式的用户输入：URL 路径、查询参数、`POST`
+    数据和文件上传。
 - en: Laravel provides a collection of tools for gathering, validating, normalizing,
     and filtering user-provided data. We’ll look at those here.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 提供了一组工具，用于收集、验证、规范化和过滤用户提供的数据。我们将在这里看看这些工具。
 - en: Injecting a Request Object
+  id: totrans-3
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 注入请求对象
 - en: 'The most common tool for accessing user data in Laravel is injecting an instance
     of the `Illuminate\Http\Request` object. It offers easy access to all of the ways
     users can provide input to your site: `POST`ed form data or JSON, `GET` requests
     (query parameters), and URL segments.'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 Laravel 中访问用户数据最常见的工具是注入 `Illuminate\Http\Request` 对象的实例。它为您提供了轻松访问用户在您的站点上提供输入的所有方式：`POST`
+    表单数据或 JSON、`GET` 请求（查询参数）和 URL 段。
 - en: Other Options for Accessing Request Data
+  id: totrans-5
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 其他访问请求数据的选项
 - en: There’s also a `request()` global helper and a `Request` facade, both of which
     expose the same methods. Each of these options exposes the entire Illuminate `Request`
     object, but for now we’re only going to cover the methods that specifically relate
     to user data.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有一个 `request()` 全局助手和一个 `Request` 门面，两者都公开相同的方法。每个选项都公开了整个 Illuminate `Request`
+    对象，但现在我们只会涵盖与用户数据特别相关的方法。
 - en: 'Since we’re planning on injecting a `Request` object, let’s take a quick look
     at how to get the `$request` object we’ll be calling all these methods on:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为我们计划注入一个 `Request` 对象，让我们快速看一下如何获取我们将在其上调用所有这些方法的 `$request` 对象：
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: $request->all()
+  id: totrans-9
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '`$request->all()`'
 - en: Just like the name suggests, `$request->all()` gives you an array containing
     all of the input the user has provided, from every source. Let’s say, for some
     reason, you decided to have a form `POST` to a URL with a query parameter—for
@@ -50,250 +73,377 @@
     at [Example 7-1](#EX601) to see what you’d get from `$request->all()`. (Note that
     `$request->all()` also contains information about any files that were uploaded,
     but we’ll cover that later in the chapter.)
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像名字所暗示的那样，`$request->all()` 提供了一个包含用户从每个来源提供的所有输入的数组。假设出于某种原因，您决定让一个表单 `POST`
+    到一个带有查询参数的 URL——例如，向 *http://myapp.com/signup?utm=12345* 发送一个 `POST`。查看 [Example 7-1](#EX601)
+    来看看从 `$request->all()` 中得到了什么。(`$request->all()` 也包含有关上传的任何文件的信息，但我们将在本章后面介绍这部分内容。)
 - en: Example 7-1\. `$request->all()`
+  id: totrans-11
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 7-1\. `$request->all()`
 - en: '[PRE1]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '[PRE2]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: $request->except() and ->only()
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: $request->except() 和 ->only()
 - en: '`$request->except()` provides the same output as `$request->all()`, but you
     can choose one or more fields to exclude—for example, `_token`. You can pass it
     either a string or an array of strings.'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$request->except()` 提供与 `$request->all()` 相同的输出，但您可以选择排除一个或多个字段——例如 `_token`。您可以将其传递为字符串或字符串数组。'
 - en: '[Example 7-2](#EX602) shows what it looks like when we use `$request->except()`
     on the same form as in [Example 7-1](#EX601).'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Example 7-2](#EX602) 显示了在我们使用 `$request->except()` 在 [Example 7-1](#EX601)
+    中相同表单时的情况。'
 - en: Example 7-2\. `$request->except()`
+  id: totrans-17
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 7-2\. `$request->except()`
 - en: '[PRE3]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '`$request->only()` is the inverse of `$request->except()`, as you can see in
     [Example 7-3](#EX603).'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$request->only()` 是 `$request->except()` 的反义词，如您在 [Example 7-3](#EX603) 中所见。'
 - en: Example 7-3\. `$request->only()`
+  id: totrans-20
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 7-3\. `$request->only()`
 - en: '[PRE4]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: $request->has() and ->missing()
+  id: totrans-22
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: $request->has() 和 ->missing()
 - en: With `$request->has()` you can detect whether a particular piece of user input
     is available to you, regardless of whether the input actually has a value in it.
     Check out [Example 7-4](#EX604) for an analytics example with our `utm` query
     string parameter from the previous examples.
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `$request->has()`，您可以检测特定的用户输入是否可用，而不管输入中是否实际包含值。查看 [Example 7-4](#EX604)
+    来查看前面示例中我们的 `utm` 查询字符串参数的分析示例。
 - en: Example 7-4\. `$request->has()`
+  id: totrans-24
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 7-4\. `$request->has()`
 - en: '[PRE5]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: '`$request->missing()` is its inverse.'
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$request->missing()` 是它的反义词。'
 - en: $request->whenHas()
+  id: totrans-27
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: $request->whenHas()
 - en: With `$request->whenHas()`, you can define the behavior when the request either
     does or doesn’t have a field provided. The first closure parameter is returned
     when the field exists, and the second is returned when it doesn’t.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `$request->whenHas()`，您可以定义当请求提供了字段或未提供字段时的行为。第一个闭包参数在字段存在时返回，第二个在字段不存在时返回。
 - en: See [Example 7-5](#EX624) for an example with our `utm` query string parameter.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看带有`utm`查询字符串参数的[示例 7-5](#EX624)。
 - en: Example 7-5\. `$request->whenHas()`
+  id: totrans-30
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-5\. `$request->whenHas()`
 - en: '[PRE6]'
+  id: totrans-31
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: $request->filled()
+  id: totrans-32
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '`$request->filled()`'
 - en: Using the `$request->filled()` method, it is possible to check if a particular
     field is present and filled in the request. `filled()` is the same as `has()`,
     except it also requires there to be an actual value present in the field. In [Example 7-6](#EX625)
     you can see an example of how to use this method.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`$request->filled()`方法，可以检查请求中是否存在并填充了特定字段。`filled()`与`has()`相同，但它还要求字段中实际存在值。在[示例 7-6](#EX625)中，您可以看到如何使用此方法的示例。
 - en: Example 7-6\. `$request->filled()`
+  id: totrans-34
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-6\. `$request->filled()`
 - en: '[PRE7]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: $request->whenFilled()
+  id: totrans-36
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '`$request->whenFilled()`'
 - en: Much like with the `whenHas()` method, the `$request->whenFilled()` method allows
     you to define the values either when the field is filled or when it isn’t. The
     first closure parameter runs when the field is filled, the second when it is not.
     See [Example 7-7](#EX626) for an example of how to use this method.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 与`whenHas()`方法类似，`$request->whenFilled()`方法允许您在字段填充或未填充时定义值。第一个闭包参数在字段填充时运行，第二个在未填充时运行。请参阅[示例 7-7](#EX626)了解如何使用此方法的示例。
 - en: Example 7-7\. `$request->whenFilled()`
+  id: totrans-38
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-7\. `$request->whenFilled()`
 - en: '[PRE8]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: $request->mergeIfMissing()
+  id: totrans-40
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '`$request->mergeIfMissing()`'
 - en: With the `mergeIfMissing()` method you can add a field to the request when it
     is not present and while defining its value. This can be useful, for example,
     when a field comes from a checkbox, as it is only present when checked. You can
     see [Example 7-8](#EX627) for an implementation.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`mergeIfMissing()`方法，您可以在请求中添加字段，当字段不存在时定义其值。例如，当字段来自复选框时，只有在选中时才存在。您可以在[示例 7-8](#EX627)中看到一个实现。
 - en: Example 7-8\. `$request->mergeIfMissing()`
+  id: totrans-42
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-8\. `$request->mergeIfMissing()`
 - en: '[PRE9]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: $request->input()
+  id: totrans-44
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '`$request->input()`'
 - en: Whereas `$request->all()`, `$request->except()`, and `$request->only()` operate
     on the full array of input provided by the user, `$request->input()` allows you
     to get the value of just a single field. [Example 7-9](#EX605) provides an example.
     Note that the second parameter is the default value, so if the user hasn’t passed
     in a value, you can have a sensible (and nonbreaking) fallback.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 而`$request->all()`、`$request->except()`和`$request->only()`操作于用户提供的完整输入数组上，`$request->input()`允许您仅获取单个字段的值。[示例 7-9](#EX605)提供了一个例子。注意第二个参数是默认值，所以如果用户没有传递值，您可以有一个合理（且不会中断流程）的回退。
 - en: Example 7-9\. `$request->input()`
+  id: totrans-46
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-9\. `$request->input()`
 - en: '[PRE10]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: $request->method() and ->isMethod()
+  id: totrans-48
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '`$request->method()` 和 `->isMethod()`'
 - en: '`$request->method()` returns the HTTP verb for the request, and `$⁠r⁠e⁠q⁠u⁠e⁠s⁠t​\-⁠>⁠i⁠s⁠M⁠e⁠t⁠h⁠o⁠d⁠(⁠)`
     checks whether it matches the specified verb. [Example 7-10](#EX622) illustrates
     their use.'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$request->method()`返回请求的HTTP动词，`$request->isMethod()`检查它是否与指定的动词匹配。[示例 7-10](#EX622)说明了它们的用法。'
 - en: Example 7-10\. `$request->method()` and `$request->isMethod()`
+  id: totrans-50
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-10\. `$request->method()` 和 `$request->isMethod()`
 - en: '[PRE11]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: $request->integer(), ->float(), ->string(), and ->enum()
+  id: totrans-52
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '`$request->integer()`、`->float()`、`->string()`和`->enum()`'
 - en: These methods cast the inputs directly into integers, floats, strings, or enums
     when you use each method respectively. See [Example 7-11](#EX628) for usage examples.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您分别使用这些方法时，它们将直接将输入转换为整数、浮点数、字符串或枚举。查看[示例 7-11](#EX628)获取使用示例。
 - en: Example 7-11\. `$request->integer()`, `$request->float()`, `$request->string()`,
     and `$request->enum()`
+  id: totrans-54
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-11\. `$request->integer()`、`$request->float()`、`$request->string()`和`$request->enum()`
 - en: '[PRE12]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: $request->dump() and ->dd()
+  id: totrans-56
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '`$request->dump()` 和 `->dd()`'
 - en: '`$request->dump()` and `$request->dd()` are helper methods for dumping the
     request. For both, you can dump the whole request by not passing any parameters
     or dump only selected fields by passing an array. `$request->dump()` dumps and
     then continues, while `$request->dd()` dumps and then stops execution of the script.
     [Example 7-12](#EX629) illustrates their use.'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$request->dump()` 和 `$request->dd()` 是用于展示请求的辅助方法。对于两者，您可以通过不传递任何参数来展示整个请求，或者通过传递数组来展示选择的字段。`$request->dump()`展示后继续执行，而`$request->dd()`展示后停止脚本的执行。[示例 7-12](#EX629)展示了它们的用法。'
 - en: Example 7-12\. `$request->dump()` and `$request->dd()`
+  id: totrans-58
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-12\. `$request->dump()` 和 `$request->dd()`
 - en: '[PRE13]'
+  id: totrans-59
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Array Input
+  id: totrans-60
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 数组输入
 - en: Laravel also provides convenience helpers for accessing data from array input.
     Just use the “dot” notation to indicate the steps of digging into the array structure,
     like in [Example 7-13](#EX606).
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel还提供了方便的帮助程序，用于访问来自用户提供的数组输入的数据。只需使用“点”符号来指示进入数组结构，例如在[示例 7-13](#EX606)中。
 - en: Example 7-13\. Dot notation to access array values in user data
+  id: totrans-62
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-13\. 用于访问用户数据中数组值的点符号表示法
 - en: '[PRE14]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: '[PRE15]'
+  id: totrans-64
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: JSON Input (and $request->json())
+  id: totrans-65
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: JSON 输入（和 `$request->json()`）
 - en: 'So far we’ve covered input from query strings (`GET`) and form submissions
     (`POST`). But there’s another form of user input that’s becoming more common with
     the advent of JavaScript SPAs: the JSON request. It’s essentially just a `POST`
     request with the body set to JSON instead of a traditional form `POST`.'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，我们已经涵盖了从查询字符串（`GET`）和表单提交（`POST`）获取输入的内容。但是随着 JavaScript SPA 的出现，还有一种更常见的用户输入形式：JSON
+    请求。它本质上只是一个 `POST` 请求，但其主体设置为 JSON，而不是传统的表单 `POST`。
 - en: Let’s take a look at what it might look like to submit some JSON to a Laravel
     route, and how to use `$request->input()` to pull out that data ([Example 7-14](#EX607)).
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看一下向 Laravel 路由提交 JSON 的情况以及如何使用 `$request->input()` 提取数据（参见 [示例 7-14](#EX607)）。
 - en: Example 7-14\. Getting data from JSON with `$request->input()`
+  id: totrans-68
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-14\. 使用 `$request->input()` 从 JSON 中获取数据
 - en: '[PRE16]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: '[PRE17]'
+  id: totrans-70
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Since `$request->input()` is smart enough to pull user data from `GET`, `POST`,
     or JSON, you may wonder why Laravel even offers `$request->json()`. There are
     two reasons you might prefer `$request->json()`. First, you might want to just
@@ -301,237 +451,354 @@
     expecting the data to come from. And second, if the `POST` doesn’t have the correct
     `application/json` headers, `$request->input()` won’t pick it up as JSON, but
     `$request->json()` will.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于 `$request->input()` 足够智能，可以从 `GET`、`POST` 或 JSON 中提取用户数据，你可能会想知道为什么 Laravel
+    还提供 `$request->json()`。你可能更喜欢 `$request->json()` 的两个原因。首先，你可能希望对项目中其他程序员更明确地表明你期望数据来自何处。其次，如果
+    `POST` 没有正确的 `application/json` 头部，`$request->input()` 将无法将其识别为 JSON，但 `$request->json()`
+    可以。
 - en: Route Data
+  id: totrans-72
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 路由数据
 - en: It might not be the first thing you think of when you imagine “user data,” but
     the URL is just as much user data as anything else in this chapter.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你想象“用户数据”时，URL 可能不是你首先想到的，但是在本章中，URL 与其他任何内容一样都是用户数据。
 - en: 'There are two primary ways you’ll get data from the URL: via `Request` objects
     and via route parameters.'
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 从 URL 获取数据的两种主要方式是通过 `Request` 对象和路由参数。
 - en: From Request
+  id: totrans-75
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 来自请求
 - en: Injected `Request` objects (and the `Request` facade and the `request()` helper)
     have several methods available to represent the state of the current page’s URL,
     but right now, let’s focus on getting information about the URL segments.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 注入的 `Request` 对象（以及 `Request` 外观和 `request()` 助手）有几种方法可用于表示当前页面 URL 的状态，但现在让我们专注于获取关于
+    URL 片段的信息。
 - en: 'Each group of characters after the domain in a URL is called a *segment*. So,
     *[*http://www.myapp.com/users/15*](http://www.myapp.com/users/15)* has two segments:
     *users* and *15*.'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: URL 中域名后的每组字符称为 *片段*。因此，[*http://www.myapp.com/users/15*](http://www.myapp.com/users/15)
+    具有两个片段：*users* 和 *15*。
 - en: 'As you can probably guess, we have two methods available to us: `$request``->segments()`
     returns an array of all segments, and `$request⁠->​s⁠e⁠g⁠m⁠e⁠n⁠t⁠(*$segmentId*)`
     allows us to get the value of a single segment. Note that segments are returned
     on a 1-based index, so in the preceding example, `$request⁠->​s⁠e⁠g⁠m⁠e⁠n⁠t⁠(1)`
     would return *users*.'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你可能猜到的，我们有两种可用的方法：`$request->segments()` 返回所有片段的数组，并且 `$request->segment($segmentId)`
+    允许我们获取单个片段的值。请注意，片段是基于 1 的索引返回的，因此在上面的示例中，`$request->segment(1)` 将返回 *users*。
 - en: '`Request` objects, the `Request` facade, and the `request()` global helper
     provide quite a few more methods to help us get data out of the URL. To learn
     more, check out [Chapter 10](ch10.html#requests_and_responses).'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Request` 对象、`Request` 外观和 `request()` 全局助手提供了更多方法来帮助我们从 URL 中获取数据。要了解更多，请参阅
+    [第 10 章](ch10.html#requests_and_responses)。'
 - en: From Route Parameters
+  id: totrans-80
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 来自路由参数
 - en: The other primary way we get data about the URL is from route parameters, which
     are injected into the controller method or closure that is serving a current route,
     as shown in [Example 7-15](#EX608).
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 获取关于 URL 的另一种主要方法是从路由参数中获取，这些参数被注入到正在服务当前路由的控制器方法或闭包中，如 [示例 7-15](#EX608) 所示。
 - en: Example 7-15\. Getting URL details from route parameters
+  id: totrans-82
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-15\. 从路由参数获取 URL 详细信息
 - en: '[PRE18]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: To learn more about routes and route binding, check out [Chapter 3](ch03.html#routing).
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解更多关于路由和路由绑定的信息，请参阅 [第 3 章](ch03.html#routing)。
 - en: Uploaded Files
+  id: totrans-85
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 上传的文件
 - en: We’ve talked about different ways to interact with users’ text input, but there’s
     also the matter of file uploads to consider. `Request` objects provide access
     to any uploaded files using the `$request->file()` method, which takes the file’s
     input name as a parameter and returns an instance of `Symfony\Component\HttpFoundation\File\UploadedFile`.
     Let’s walk through an example. First, our form, in [Example 7-16](#EX609).
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们已经讨论了与用户文本输入的不同交互方式，但还有要考虑的文件上传问题。`Request`对象使用`$request->file()`方法提供对任何上传文件的访问，该方法以文件的输入名称作为参数，并返回`Symfony\Component\HttpFoundation\File\UploadedFile`的实例。让我们通过一个示例来说明。首先，我们的表单在[示例 7-16](#EX609)中。
 - en: Example 7-16\. A form to upload files
+  id: totrans-87
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-16\. 用于上传文件的表单
 - en: '[PRE19]'
+  id: totrans-88
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: Now let’s take a look at what we get from running `$request->all()`, as shown
     in [Example 7-17](#EX610). Note that `$request->input('profile_picture')` will
     return `null`; we need to use `$request->file('profile_picture')` instead.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们看看运行`$request->all()`后我们得到什么，如[示例 7-17](#EX610)所示。请注意，`$request->input('profile_picture')`将返回`null`；我们需要使用`$request->file('profile_picture')`。
 - en: Example 7-17\. The output from submitting the form in [Example 7-16](#EX609)
+  id: totrans-90
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-17\. 提交表单后的输出在[示例 7-16](#EX609)中
 - en: '[PRE20]'
+  id: totrans-91
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: Laravel also offers file-specific validation rules, allowing you to require
     file uploads to match certain mime types, file sizes or lengths, and more. Take
     a look at the [validation docs](https://oreil.ly/bamub) to learn more.
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel还提供了文件特定的验证规则，允许您要求文件上传匹配特定的mime类型、文件大小或长度等。查看[验证文档](https://oreil.ly/bamub)以了解更多信息。
 - en: 'Symfony’s `UploadedFile` class extends PHP’s native `SplFileInfo` with methods
     allowing you to easily inspect and manipulate the file. This list isn’t exhaustive,
     but it gives you a taste of what you can do:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: Symfony的`UploadedFile`类通过允许您轻松检查和操作文件的方法扩展了PHP的本机`SplFileInfo`。这个列表并不详尽，但它让您体验到了您可以做什么的一部分：
 - en: '`guessExtension()`'
+  id: totrans-94
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`guessExtension()`'
 - en: '`getMimeType()`'
+  id: totrans-95
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`getMimeType()`'
 - en: '`store(*$path*, *$storageDisk = default disk*)`'
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`store(*$path*, *$storageDisk = default disk*)`'
 - en: '`storeAs(*$path*, *$newName*, *$storageDisk = default disk*)`'
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`storeAs(*$path*, *$newName*, *$storageDisk = default disk*)`'
 - en: '`storePublicly(*$path*, *$storageDisk = default disk*)`'
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`storePublicly(*$path*, *$storageDisk = default disk*)`'
 - en: '`storePubliclyAs(*$path*, *$newName*, *$storageDisk = default disk*)`'
+  id: totrans-99
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`storePubliclyAs(*$path*, *$newName*, *$storageDisk = default disk*)`'
 - en: '`move(*$directory*, *$newName = null*)`'
+  id: totrans-100
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`move(*$directory*, *$newName = null*)`'
 - en: '`getClientOriginalName()`'
+  id: totrans-101
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`getClientOriginalName()`'
 - en: '`getClientOriginalExtension()`'
+  id: totrans-102
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`getClientOriginalExtension()`'
 - en: '`getClientMimeType()`'
+  id: totrans-103
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`getClientMimeType()`'
 - en: '`guessClientExtension()`'
+  id: totrans-104
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`guessClientExtension()`'
 - en: '`getClientSize()`'
+  id: totrans-105
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`getClientSize()`'
 - en: '`getError()`'
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`getError()`'
 - en: '`isValid()`'
+  id: totrans-107
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`isValid()`'
 - en: 'As you can see, most of the methods have to do with getting information about
     the uploaded file, but there’s one that you’ll likely use more than all the others:
     `store()`, which takes the file that was uploaded with the request and stores
     it in a specified directory on your server. Its first parameter is the destination
     directory, and the optional second parameter is the storage disk (`s3`, `local`,
     etc.) to use to store the file. You can see a common workflow in [Example 7-18](#EX611).'
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 如您所见，大多数方法与获取上传文件的信息有关，但有一个您可能比其他所有方法都更常用：`store()`，它接受通过请求上传的文件，并将其存储在服务器上指定的目录中。它的第一个参数是目标目录，可选的第二个参数是要用于存储文件的存储磁盘（`s3`，`local`等）。您可以在[示例 7-18](#EX611)中看到一个常见的工作流程。
 - en: Example 7-18\. Common file upload workflow
+  id: totrans-109
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-18\. 常见文件上传工作流程
 - en: '[PRE21]'
+  id: totrans-110
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: If you need to specify the filename, you can use `storeAs()` instead of `store()`.
     The first parameter is still the path; the second is the filename, and the optional
     third parameter is the storage disk to use.
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果需要指定文件名，您可以使用`storeAs()`代替`store()`。第一个参数仍然是路径；第二个是文件名，可选的第三个参数是要使用的存储磁盘。
 - en: Proper Form Encoding for File Uploads
+  id: totrans-112
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 文件上传的正确表单编码
 - en: 'If you get `null` when you try to get the contents of a file from your request,
     you might’ve forgotten to set the encoding type on your form. Make sure to add
     the attribute `enctype="multipart/form-data"` on your form:'
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果在尝试从请求中获取文件的内容时得到`null`，可能是您忘记在表单上设置编码类型。确保在表单上添加属性 `enctype="multipart/form-data"`：
 - en: '[PRE22]'
+  id: totrans-114
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Validation
+  id: totrans-115
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 验证
 - en: 'Laravel has quite a few ways you can validate incoming data. We’ll cover form
     requests in the next section, so that leaves us with two primary options: validating
     manually or using the `validate()` method on the `Request` object. Let’s start
     with the simpler, and more common, `validate()`.'
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel有很多方法可以验证传入的数据。我们将在下一节中讨论表单请求，因此我们现在有两个主要选项：手动验证或在`Request`对象上使用`validate()`方法。让我们从更简单、更常见的`validate()`方法开始。
 - en: validate() on the Request Object
+  id: totrans-117
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在请求对象上进行验证()
 - en: The `Request` object has a `validate()` method that provides a convenient shortcut
     for the most common validation workflow. Take a look at [Example 7-19](#EX612).
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Request` 对象有一个 `validate()` 方法，提供了最常见的验证工作流的便捷方式。 请参阅[示例 7-19](#EX612)。'
 - en: Example 7-19\. Basic usage of request validation
+  id: totrans-119
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-19. 请求验证的基本用法
 - en: '[PRE23]'
+  id: totrans-120
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: '[PRE24]'
+  id: totrans-121
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: We only have four lines of code running our validation here, but they’re doing
     a lot.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在这里只有四行代码运行我们的验证，但它们确实做了很多事情。
 - en: First, we explicitly define the fields we expect and apply rules (here separated
     by the pipe character, `|`) to each individually.
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，我们明确定义我们期望的字段，并分别应用规则（这里用管道字符`|`分隔）。
 - en: Next, the `validate()` method checks the incoming data from `$request` and determines
     whether or not it is valid.
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，`validate()`方法检查来自`$request`的传入数据，并确定其是否有效。
 - en: If the data is valid, the `validate()` method ends and we can move on with the
     controller method, saving the data or whatever else.
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果数据有效，则`validate()`方法结束，我们可以继续使用控制器方法保存数据或其他操作。
 - en: But if the data isn’t valid, it throws a `ValidationException`. This contains
     instructions to the router about how to handle this exception. If the request
     is from JavaScript (or if it’s requesting JSON as a response), the exception will
@@ -539,271 +806,414 @@
     will return a redirect to the previous page, together with all of the user input
     and the validation errors—​perfect for repopulating a failed form and showing
     some errors.
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，如果数据无效，则会抛出`ValidationException`。 这包含有关如何处理此异常的路由器指令。 如果请求来自 JavaScript（或者请求
+    JSON 作为响应），则异常将创建一个包含验证错误的 JSON 响应。 如果不是，则异常将返回一个重定向到前一页的页面，以及所有用户输入和验证错误，非常适合重新填充失败的表单并显示一些错误。
 - en: More on Laravel’s Validation Rules
+  id: totrans-127
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 更多关于 Laravel 验证规则的信息
 - en: 'In our examples here (like in the docs) we’re using the “pipe” syntax: `''*fieldname*'':
     ''*rule*|*otherRule*|*anotherRule*''`. But you can also use the array syntax to
     do the same thing: `''*fieldname*'': [''*rule*'', ''*otherRule*'', ''*anotherRule*'']`.'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: '在我们这里的示例中（就像文档中一样），我们使用“管道”语法：`''*fieldname*'': ''*rule*|*otherRule*|*anotherRule*''`。
+    但是，您也可以使用数组语法来执行相同的操作：`''*fieldname*'': [''*rule*'', ''*otherRule*'', ''*anotherRule*'']`。'
 - en: 'Additionally, you can validate nested properties. This matters if you use HTML’s
     array syntax, which allows you to, for example, have multiple “users” on an HTML
     form, each with an associated name. Here’s how you validate that:'
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，您还可以验证嵌套属性。 如果您使用 HTML 的数组语法，这就很重要，该语法允许您例如，在 HTML 表单上具有多个“用户”，每个用户都有一个关联的名称。
+    以下是验证方法：
 - en: '[PRE25]'
+  id: totrans-130
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: 'We don’t have enough space to cover every possible validation rule here, but
     here are a few of the most common rules and their functions:'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们没有足够的空间来涵盖这里的每一个可能的验证规则，但以下是一些最常见规则及其功能：
 - en: Require the field
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 要求字段
 - en: '`required`; `required_if:*anotherField,equalToThisValue*`;'
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: '`required`; `required_if:*anotherField,equalToThisValue*`;'
 - en: '`required_unless:*anotherField,equalToThisValue*`'
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: '`required_unless:*anotherField,equalToThisValue*`'
 - en: Exclude the field from the request output
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 排除请求输出中的字段
 - en: '`exclude_if:*anotherField,equalToThisValue*`;'
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: '`exclude_if:*anotherField,equalToThisValue*`;'
 - en: '`exclude_unless:*anotherField,equalToThisValue*`'
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: '`exclude_unless:*anotherField,equalToThisValue*`'
 - en: Field must contain certain types of characters
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 字段必须包含某些类型的字符
 - en: '`alpha`; `alpha_dash`; `alpha_num`; `numeric`; `integer`'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: '`alpha`; `alpha_dash`; `alpha_num`; `numeric`; `integer`'
 - en: Field must contain certain patterns
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 字段必须包含特定的模式
 - en: '`email`; `active_url`; `ip`'
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: '`email`; `active_url`; `ip`'
 - en: Dates
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 日期
 - en: '`after:*date*`; `before:*date*` (`*date*` can be any valid string that `strtotime()`
     can handle)'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: '`after:*date*`; `before:*date*`（`*date*`可以是`strtotime()`可以处理的任何有效字符串）'
 - en: Numbers
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 数字
 - en: '`between:*min*`,`*max*`; `min:*num*`; `max:*num*`; `size:*num*` (`size` tests
     against length for strings, value for integers, `count` for arrays, or size in
     KB for files.)'
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: '`between:*min*`,`*max*`; `min:*num*`; `max:*num*`; `size:*num*`（`size`测试字符串长度、整数值、数组计数或文件大小（KB））'
 - en: Image dimensions
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 图像尺寸
 - en: '`dimensions:min_width=*XXX*`; can also use and/or combine with `max_width`,
     `min_height`, `max_height`, `width`, `height`, and `ratio`'
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: '`dimensions:min_width=*XXX*`; 也可以与`max_width`、`min_height`、`max_height`、`width`、`height`和`ratio`结合使用'
 - en: Databases
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 数据库
 - en: '`exists:*tableName*`; `unique:*tableName*` (expects to look in the same table
     column as the field name; see the [validation docs](https://oreil.ly/JmbQC) for
     how to customize)'
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: '`exists:*tableName*`; `unique:*tableName*`（期望在与字段名相同的表列中查找；请查看[验证文档](https://oreil.ly/JmbQC)以了解如何自定义）'
 - en: 'You can also specify the Eloquent model instead of the table name in the database
     validation rules:'
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以在数据库验证规则中指定 Eloquent 模型，而不是表名：
 - en: '[PRE26]'
+  id: totrans-151
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: Manual Validation
+  id: totrans-152
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 手动验证
 - en: If you are not working in a controller, or if for some other reason the previously
     described flow is not a good fit, you can manually create a `Validator` instance
     using the `Validator` facade and check for success or failure like in [Example 7-20](#EX613).
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您不在控制器中工作，或者由于某些其他原因，先前描述的流程不适合，您可以使用`Validator`门面手动创建`Validator`实例，并像[示例
+    7-20](#EX613)中那样检查成功或失败。
 - en: Example 7-20\. Manual validation
+  id: totrans-154
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-20\. 手动验证
 - en: '[PRE27]'
+  id: totrans-155
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: As you can see, we create an instance of a validator by passing it our input
     as the first parameter and the validation rules as the second parameter. The validator
     exposes a `fails()` method that we can check against and can be passed into the
     `withErrors()` method of the redirect.
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 如您所见，我们通过将输入作为第一个参数和验证规则作为第二个参数传递来创建验证器的实例。验证器公开了一个`fails()`方法，我们可以进行检查，并可以将其传递给重定向的`withErrors()`方法。
 - en: Using Validated Data
+  id: totrans-157
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用验证数据
 - en: 'Once you’ve validated your data, you can pull it from the request in a way
     that ensures you’re only working with validated data. There are two main options:
     `validated()` and `safe()`. You can run these methods either on the `$request`
     object, or, if you created a manual validator, the `$validator` instance.'
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 在验证数据后，您可以从请求中提取数据，确保只使用验证过的数据。有两个主要选项：`validated()`和`safe()`。您可以在`$request`对象上运行这些方法，或者如果您创建了手动验证器，则在`$validator`实例上运行。
 - en: The `validated()` method returns an array of all of the data that’s been validated,
     as shown in [Example 7-21](#validated_data_validated).
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: '`validated()`方法返回已验证数据的数组，如[示例 7-21](#validated_data_validated)所示。'
 - en: Example 7-21\. Getting validated data with `validated()`
+  id: totrans-160
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-21\. 使用`validated()`获取验证数据
 - en: '[PRE28]'
+  id: totrans-161
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: The `safe()` method, on the other hand, returns an object that gives you access
     to `all()`, `only()`, and `except()` methods, as you can see in [Example 7-22](#validated_data_safe).
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一方面，`safe()`方法返回一个对象，该对象使您可以访问`all()`、`only()`和`except()`方法，正如您在[示例 7-22](#validated_data_safe)中所看到的。
 - en: Example 7-22\. Getting validated data with `safe()`
+  id: totrans-163
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-22\. 使用`safe()`获取验证数据
 - en: '[PRE29]'
+  id: totrans-164
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: Custom Rule Objects
+  id: totrans-165
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 自定义规则对象
 - en: If the validation rule you need doesn’t exist in Laravel, you can create your
     own. To create a custom rule, run `php artisan make:rule *RuleName*` and then
     edit that file in *app/Rules/{RuleName}.php*.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果Laravel中不存在您需要的验证规则，您可以创建自己的规则。要创建自定义规则，请运行`php artisan make:rule *RuleName*`，然后编辑位于*app/Rules/{RuleName}.php*中的文件。
 - en: You’ll get the method `validate()` in your rule class out of the box. The `validate()`
     method should accept an attribute name as the first parameter, the user-provided
     value as the second, and the third a closure that you’ll when the validation fails;
     you can use `:attribute` as a placeholder in your message for the attribute name.
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 您将获得默认提供的`validate()`方法。`validate()`方法应接受属性名称作为第一个参数，用户提供的值作为第二个参数，并在验证失败时接受一个闭包；您可以在消息中使用`:attribute`作为属性名称的占位符。
 - en: Take a look at [Example 7-23](#EX621) as an example.
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 请查看[示例 7-23](#EX621)作为示例。
 - en: Example 7-23\. A sample custom rule
+  id: totrans-169
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-23\. 示例自定义规则
 - en: '[PRE30]'
+  id: totrans-170
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: 'To use this rule, just pass an instance of the rule object to your validator:'
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用此规则，只需将规则对象的实例传递给您的验证器：
 - en: '[PRE31]'
+  id: totrans-172
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: Displaying Validation Error Messages
+  id: totrans-173
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 显示验证错误消息
 - en: We’ve already covered much of this in [Chapter 6](ch06.html#frontend_components),
     but here’s a quick refresher on how to display errors from validation.
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们已经在[第6章](ch06.html#frontend_components)中详细介绍了这一点，但这里是如何从验证中显示错误的快速复习。
 - en: The `validate()` method on requests (and the `withErrors()` method on redirects
     that it relies on) flashes any errors to the session. These errors are made available
     to the view you’re being redirected to in the `$errors` variable. And remember
     that as a part of Laravel’s magic, that `$errors` variable will be available every
     time you load the view, even if it’s just empty, so you don’t have to check if
     it exists with `isset()`.
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 请求上的`validate()`方法（以及它依赖的重定向的`withErrors()`方法）将任何错误闪存到会话中。这些错误可以在您重定向到的视图中通过`$errors`变量访问。请记住，作为Laravel魔术的一部分，即使是空的，每次加载视图时`$errors`变量也会可用，因此您不必使用`isset()`来检查其是否存在。
 - en: That means you can do something like [Example 7-24](#EX614) on every page.
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 这意味着您可以在每个页面上执行类似[示例 7-24](#EX614)的操作。
 - en: Example 7-24\. Echo validation errors
+  id: totrans-177
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-24\. 回显验证错误
 - en: '[PRE32]'
+  id: totrans-178
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: You can also conditionally echo a single field’s error message. For this you’ll
     use the `@error` Blade directive to check for whether there’s an error on a given
     field.
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以有条件地回显单个字段的错误消息。为此，您将使用`@error` Blade指令来检查给定字段是否存在错误。
 - en: '[PRE33]'
+  id: totrans-180
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: Form Requests
+  id: totrans-181
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 表单请求
 - en: As you build out your applications, you might start noticing some patterns in
     your controller methods. There are certain patterns that are repeated—​for example,
     input validation, user authentication and authorization, and possible redirects.
     If you find yourself wanting a structure to normalize and extract these common
     behaviors out of your controller methods, you may be interested in Laravel’s form
     requests.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 在构建应用程序时，您可能会注意到控制器方法中出现了一些模式。有些模式是重复的——例如，输入验证、用户身份验证和授权以及可能的重定向。如果您希望有一种结构来规范化和提取这些常见行为，以便从控制器方法中提取出来，您可能会对
+    Laravel 的表单请求感兴趣。
 - en: A form request is a custom request class that is intended to map to the submission
     of a form, and the request takes the responsibility for validating the request,
     authorizing the user, and optionally redirecting the user upon a failed validation.
     Each form request will usually, but not always, explicitly map to a single HTTP
     request—for example, “Create Comment.”
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 表单请求是一个自定义的请求类，旨在映射到表单的提交，请求负责验证请求、授权用户，并在验证失败时可选择重定向用户。每个表单请求通常但并非总是显式映射到单个
+    HTTP 请求，例如，“创建评论”。
 - en: Creating a Form Request
+  id: totrans-184
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建表单请求
 - en: 'You can create a new form request from the command line:'
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过命令行创建一个新的表单请求：
 - en: '[PRE34]'
+  id: totrans-186
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: You now have a form request object available at *app/Http/Requests/Create**Comment**Request.php*.
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在你可以在 *app/Http/Requests/Create**Comment**Request.php* 中使用表单请求对象。
 - en: Every form request class provides either one or two public methods. The first
     is `rules()`, which needs to return an array of validation rules for this request.
     The second (optional) method is `authorize()`; if this returns `true`, the user
     is authorized to perform this request, and if `false`, the user is rejected. Take
     a look at [Example 7-25](#EX615) to see a sample form request.
+  id: totrans-188
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个表单请求类都提供一个或两个公共方法。第一个是 `rules()`，它需要返回此请求的验证规则数组。第二个（可选）方法是 `authorize()`；如果返回
+    `true`，则用户被授权执行此请求，如果返回 `false`，则用户被拒绝。查看 [示例 7-25](#EX615) 以查看一个表单请求的样本。
 - en: Example 7-25\. Sample form request
+  id: totrans-189
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-25\. 样本表单请求
 - en: '[PRE35]'
+  id: totrans-190
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: The `rules()` section of [Example 7-25](#EX615) is pretty self-explanatory,
     but let’s look at `authorize()` briefly.
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 7-25](#EX615) 的 `rules()` 部分非常简单明了，但让我们简要了解一下 `authorize()`。'
 - en: 'We’re grabbing the segment from the route named `blogPost`. That’s implying
     the route definition for this route probably looks a bit like this: ``Route::post(''blogPosts/*`blogPost`*'',
     function () *`{ // Do stuff }`*)``. As you can see, we named the route parameter
     `blogPost`, which makes it accessible in our `Request` using `$⁠t⁠h⁠i⁠s​-⁠>⁠r⁠o⁠u⁠t⁠e⁠(''blogPost'')`.'
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们正在从名为 `blogPost` 的路由中获取段落。这暗示了该路由的定义可能看起来像这样：``Route::post('blogPosts/*`blogPost`*',
+    function () *`{ // Do stuff }`*)``。正如您所见，我们将路由参数命名为 `blogPost`，这使得它可以在我们的 `Request`
+    中通过 `$⁠t⁠h⁠i⁠s​-⁠>⁠r⁠o⁠u⁠t⁠e⁠('blogPost')` 访问。
 - en: We then look at whether the user is logged in and, if so, whether any blog posts
     exist with that identifier that are owned by the currently logged-in user. You’ve
     already learned some easier ways to check ownership in [Chapter 5](ch05.html#database_and_eloquent),
@@ -811,202 +1221,302 @@
     this has shortly, but the important thing to know is that returning `true` means
     the user is authorized to perform the specified action (in this case, creating
     a comment), and `false` means the user is not authorized.
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后我们检查用户是否已登录，如果是，则查看是否存在以该标识符标记的任何博客文章，这些文章是当前登录用户拥有的。您已经学会了一些更简单的方法来检查所有权，例如
+    [第5章](ch05.html#database_and_eloquent) 中的方法，但我们在这里保持更加明确以保持清洁。我们将很快讨论这样做的影响，但重要的是要知道，返回
+    `true` 表示用户被授权执行指定的操作（在本例中是创建评论），而 `false` 表示用户未被授权。
 - en: Using a Form Request
+  id: totrans-194
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用表单请求
 - en: Now that we’ve created a form request object, how do we use it? It’s a little
     bit of Laravel magic. Any route (closure or controller method) that typehints
     a form request as one of its parameters will benefit from the definition of that
     form request.
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们已经创建了一个表单请求对象，那么我们如何使用它呢？这是 Laravel 的一点魔法。任何路由（闭包或控制器方法），如果将表单请求作为其参数类型提示，将从该表单请求的定义中受益。
 - en: Let’s try it out, in [Example 7-26](#EX616).
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们试试，在 [示例 7-26](#EX616) 中。
 - en: Example 7-26\. Using a form request
+  id: totrans-197
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-26\. 使用表单请求
 - en: '[PRE36]'
+  id: totrans-198
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: You might be wondering where we call the form request, but Laravel does it for
     us. It validates the user input and authorizes the request. If the input is invalid,
     it’ll act just like the `Request` object’s `validate()` method, redirecting the
     user to the previous page with their input preserved and with the appropriate
     error messages passed along. And if the user is not authorized, Laravel will return
     a “403 Forbidden” error and not execute the route code.
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可能想知道我们何时调用表单请求，但 Laravel 会为我们执行这一步骤。它验证用户输入并授权请求。如果输入无效，它会像 `Request` 对象的
+    `validate()` 方法一样操作，重定向用户到前一页并保留其输入，同时传递适当的错误消息。如果用户未经授权，则 Laravel 将返回“403 禁止访问”错误并不执行路由代码。
 - en: Eloquent Model Mass Assignment
+  id: totrans-200
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Eloquent 模型大规模赋值
 - en: Until now, we’ve been looking at validating at the controller level, which is
     absolutely the best place to start. But you can also filter the incoming data
     at the model level.
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，我们一直在控制器级别进行验证，这绝对是开始的最佳位置。但您也可以在模型级别过滤传入的数据。
 - en: It’s a common (but not recommended) pattern to pass the entirety of a form’s
     input directly to a database model. In Laravel, that might look like [Example 7-27](#EX617).
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 将表单的整体输入直接传递给数据库模型是一种常见（但不推荐）的模式。在 Laravel 中，可能看起来像 [Example 7-27](#EX617)。
 - en: Example 7-27\. Passing the entirety of a form to an Eloquent model
+  id: totrans-203
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-27\. 将表单的整体内容传递给 Eloquent 模型
 - en: '[PRE37]'
+  id: totrans-204
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: We’re assuming here that the end user is kind and not malicious, and has kept
     only the fields we want them to edit—maybe the post `title` or `body`.
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们在这里假设最终用户是善良的，而非恶意的，并且仅保留了我们希望他们编辑的字段——也许是帖子的 `title` 或 `body`。
 - en: But what if our end user can guess, or discern, that we have an `author_id`
     field on that `posts` table? What if they used their browser tools to add an `author_id`
     field and set the ID to be someone else’s ID, and impersonated the other person
     by creating fake blog posts attributed to them?
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，如果我们的最终用户能够猜测或识别出我们在 `posts` 表中有一个 `author_id` 字段，该怎么办呢？如果他们使用浏览器工具添加了一个
+    `author_id` 字段，并将 ID 设置为别人的 ID，然后冒充其他人创建假的博客文章呢？
 - en: Eloquent has a concept called “mass assignment” that allows you to either define
     a list of fields that should be fillable (using the model’s `$fillable` property)
     or a list of fields that shouldn’t be fillable (using the model’s `$guarded` property)
     by passing them in an array to `create()` or `update()`. See [“Mass assignment”](ch05.html#mass_assignment)
     for more information.
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: Eloquent 有一个称为“大规模赋值”的概念，允许您通过将数组传递给 `create()` 或 `update()` 方法，要么定义应填充的字段列表（使用模型的
+    `$fillable` 属性），要么定义不应填充的字段列表（使用模型的 `$guarded` 属性）。有关更多信息，请参阅[“大规模赋值”](ch05.html#mass_assignment)。
 - en: In our example, we might want to fill out the model like in [Example 7-28](#EX618)
     to keep our app safe.
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们的示例中，我们可能想要像 [Example 7-28](#EX618) 中那样填充模型，以确保我们的应用程序安全。
 - en: Example 7-28\. Guarding an Eloquent model from mischievous mass assignment
+  id: totrans-209
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-28\. 保护 Eloquent 模型免受恶意的大规模赋值攻击
 - en: '[PRE38]'
+  id: totrans-210
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: By setting `author_id` to `guarded`, we ensure that malicious users will no
     longer be able to override the value of this field by manually adding it to the
     contents of a form that they’re sending to our app.
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过将 `author_id` 设置为 `guarded`，我们确保恶意用户将无法通过将其手动添加到发送给我们应用程序的表单内容中，覆盖此字段的值。
 - en: Double Protection Using $request->only()
+  id: totrans-212
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 双重保护使用 `$request->only()`
 - en: 'While it’s important to do a good job of protecting our models from mass assignment,
     it’s also worth being careful on the assigning end. Rather than using `$request->all()`,
     consider using `$request->``only()` so you can specify which fields you’d like
     to pass into your model:'
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管我们需要保护我们的模型免受大规模赋值的攻击，但在赋值端也值得小心。与其使用 `$request->all()`，不如考虑使用 `$request->only()`，这样您可以指定要传递到模型中的字段：
 - en: '[PRE39]'
+  id: totrans-214
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: '{{ Versus {!!'
+  id: totrans-215
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: '{{ 与 {!!'
 - en: Any time you display content on a web page that was created by a user, you need
     to guard against malicious input, such as script injection.
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: 每当在网页上显示由用户创建的内容时，您都需要防范恶意输入，例如脚本注入。
 - en: Let’s say you allow your users to write blog posts on your site. You probably
     don’t want them to be able to inject malicious JavaScript that will run in your
     unsuspecting visitors’ browsers, right? So, you’ll want to escape any user input
     that you show on the page to avoid this.
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设您允许用户在您的网站上撰写博客文章。您可能不希望他们能够注入恶意的 JavaScript 代码，从而在您的访客浏览器中运行，对吗？因此，您需要转义任何显示在页面上的用户输入，以避免这种情况发生。
 - en: Thankfully, this is almost entirely covered for you. If you use Laravel’s Blade
     templating engine, the default “echo” syntax (`{{ *$stuffToEcho* }}`) runs the
     output through `htmlentities()` (PHP’s best way of making user content safe to
     echo) automatically. You actually have to do *extra* work to avoid escaping the
     output, by using the `{!! *$stuffToEcho* !!}` syntax.
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，这几乎完全为您覆盖了。如果您使用 Laravel 的 Blade 模板引擎，默认的“echo”语法（`{{ *$stuffToEcho* }}`）会自动通过
+    `htmlentities()`（PHP 最佳的安全输出用户内容的方式）运行输出。实际上，您需要*额外*的工作来避免转义输出，方法是使用 `{!! *$stuffToEcho*
+    !!}` 语法。
 - en: Testing
+  id: totrans-219
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 测试
 - en: If you’re interested in testing your interactions with user input, you’re probably
     most interested in simulating valid and invalid user input and ensuring that if
     the input is invalid the user is redirected, and if the input is valid it ends
     up in the proper place (e.g., the database).
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您对测试用户输入交互感兴趣，您可能最关心的是模拟有效和无效的用户输入，并确保如果输入无效，则用户被重定向，如果输入有效，则进入正确的位置（例如数据库）。
 - en: Laravel’s application testing framework makes this simple.
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel 的应用程序测试框架使得这变得简单。
 - en: Laravel Dusk for Testing User Interactions
+  id: totrans-222
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Laravel Dusk 用于测试用户交互
 - en: These tests are testing the HTTP layer of your application, but not the actual
     form fields and interactions. If you want to test specific user interactions on
     the page and with your forms, you’ll want to pull in Laravel’s Dusk testing package.
+  id: totrans-223
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些测试测试的是您应用程序的 HTTP 层，但并非实际的表单字段和交互。如果您想要测试页面上特定的用户交互及其与您的表单的交互，您将需要引入 Laravel
+    的 Dusk 测试包。
 - en: Check out [“Testing with Dusk”](ch12.html#dusk_testing) to learn how to install
     and use Dusk in your tests.
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看 [“使用 Dusk 进行测试”](ch12.html#dusk_testing) 了解如何在您的测试中安装和使用 Dusk。
 - en: Let’s start with an invalid route that we expect to be rejected, as in [Example 7-29](#EX619).
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从一个无效的路由开始，我们预期会被拒绝，就像 [示例 7-29](#EX619) 中一样。
 - en: Example 7-29\. Testing that invalid input is rejected
+  id: totrans-226
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-29\. 测试无效输入是否被拒绝
 - en: '[PRE40]'
+  id: totrans-227
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: Here we assert that after invalid input the user is redirected, with errors
     attached. You can see we’re using a few custom PHPUnit assertions that Laravel
     adds here.
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，我们断言在无效输入后，用户会被重定向，并附加错误信息。您可以看到我们在这里使用了一些 Laravel 添加的自定义 PHPUnit 断言。
 - en: So, how do we test our route’s success? Check out [Example 7-30](#EX620).
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 那么，我们如何测试我们路由的成功？请查看 [示例 7-30](#EX620)。
 - en: Example 7-30\. Testing that valid input is processed
+  id: totrans-230
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 7-30\. 测试处理有效输入
 - en: '[PRE41]'
+  id: totrans-231
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: Note that if you’re testing something using the database, you’ll need to learn
     more about database migrations and transactions. More on that in [Chapter 12](ch12.html#testing).
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，如果您正在使用数据库进行测试，您需要了解更多关于数据库迁移和事务的知识。关于这方面的更多内容请参见 [第 12 章](ch12.html#testing)。
 - en: TL;DR
+  id: totrans-233
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 简而言之
 - en: 'There are a lot of ways to get the same data: using the `Request` facade, using
     the `request()` global helper, and injecting an instance of `Illuminate\Http\Request`.
     Each exposes the ability to get all input, some input, or specific pieces of data,
     and there can be some special considerations for files and JSON input.'
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 有很多方法可以获取相同的数据：使用 `Request` 门面、使用 `request()` 全局助手函数以及注入 `Illuminate\Http\Request`
+    实例。每个都提供了获取所有输入、部分输入或特定数据片段的能力，并且对于文件和 JSON 输入可能存在一些特殊考虑。
 - en: URL path segments are also a possible source of user input, and they’re also
     accessible via the request tools.
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: URL 路径段也是用户输入的一个可能来源，并且它们也可以通过请求工具访问。
 - en: Validation can be performed manually with `Validator::make()`, or automatically
     using the `validate()` request method or form requests. Each automatic tool, upon
     failed validation, redirects the user to the previous page with all old input
     stored and errors passed along.
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以使用 `Validator::make()` 手动执行验证，也可以使用 `validate()` 请求方法或表单请求自动执行验证。每个自动工具在验证失败时都会将用户重定向到上一页，并传递所有旧输入和错误信息。
 - en: Views and Eloquent models also need to be protected from nefarious user input.
     You can protect Blade views by using the double curly brace syntax (`{{ }}`),
     which escapes user input. You can protect models by only passing specific fields
     into bulk methods using `$request->only()` and by defining the mass assignment
     rules on the model itself.
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 视图和 Eloquent 模型也需要保护免受恶意用户输入的影响。您可以通过使用双花括号语法（`{{ }}`）来转义用户输入来保护 Blade 视图。您可以通过仅将特定字段传递给模型的批量方法（使用
+    `$request->only()`）并在模型本身上定义批量赋值规则来保护模型。

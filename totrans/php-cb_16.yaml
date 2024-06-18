@@ -1,226 +1,323 @@
 - en: Chapter 16\. Databases
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第16章 数据库
 - en: Modern software applications, particularly on the web, use state in order to
     function. *State* is a way to represent the current condition of the application
     for a specific request—who is logged in, what page they’re on, any preferences
     they’ve configured.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 现代软件应用程序，特别是在Web上，使用状态以便正常运行。*状态*是表示应用程序当前状态的一种方式，针对特定请求——谁登录了、他们在哪个页面上、任何他们配置的偏好等等。
 - en: Typically, code is written to be more or less stateless. It will function the
     same way regardless of the state of the user’s session (which is what makes system
     behavior predictable within an application for multiple users). When a web application
     is deployed, it’s done so again in a stateless manner.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常，代码是编写为基本上是无状态的。无论用户会话的状态如何，它都会以相同的方式运行（这就是使系统行为对于多个用户在应用程序中可预测的原因）。Web应用程序部署时，也是以无状态方式进行的。
 - en: But state is vital for keeping track of user activity and evolving the way the
     application behaves for the user as they continue to interact with it. In order
     for an otherwise stateless piece of code to be aware of state, it must retrieve
     that state from somewhere.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是状态对于跟踪用户活动并根据用户继续与其交互的方式演变应用程序行为至关重要。为了使本来无状态的代码能够意识到状态，必须从某处检索该状态。
 - en: 'Typically, this is done through the use of a database. Databases are efficient
     ways to store structured data. There are generally four kinds of databases you
     will work with in PHP: relational databases, key-value stores, graph databases,
     and document databases.'
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常，这是通过使用数据库来完成的。数据库是存储结构化数据的高效方式。在PHP中，您通常会使用四种类型的数据库：关系数据库、键-值存储、图形数据库和文档数据库。
 - en: 16.1 Relational Databases
+  id: totrans-5
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 16.1 关系数据库
 - en: A *relational database* breaks data down into objects and their relationships
     with one another. A particular entry—like a book—is represented as a row in a
     table, with columns containing data about books. These columns might include a
     title, ISBN, and subject. The key thing to remember about relational databases
     is that different data types reside in different tables.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '*关系数据库*将数据分解为对象及其相互关系。特定条目——比如一本书——被表示为表中的一行，其中的列包含有关书籍的数据。这些列可能包括标题、ISBN和主题等。关于关系数据库的关键是要记住不同的数据类型存储在不同的表中。'
 - en: While one column in a `book` table could be an author’s name, it’s more likely
     you’ll have an entirely separate `author` table. This table would contain the
     author’s name, perhaps their biography, and an email address. Both tables would
     then have separate `ID` columns, and the `book` table might have an `author_id`
     column referencing the `author` table. [Figure 16-1](#relational_db) depicts the
     relations between tables in this form of database.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 在`book`表中，一列可能是作者的名字，但更可能会有一个完全独立的`author`表。这个表会包含作者的姓名，也许还有他们的传记和邮箱地址。然后这两个表会有各自的`ID`列，而`book`表可能会有一个`author_id`列，用来引用`author`表。[图 16-1](#relational_db)展示了这种数据库中表之间的关系。
 - en: '![Relational databases are defined by tables and references between the items
     in each](assets/phpc_1601.png)'
+  id: totrans-8
   prefs: []
   type: TYPE_IMG
+  zh: '![关系数据库通过表和每个条目之间的引用来定义](assets/phpc_1601.png)'
 - en: Figure 16-1\. Relational databases are defined by tables and references between
     the items in each
+  id: totrans-9
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 16-1 关系数据库通过表和每个条目之间的引用来定义
 - en: Examples of relational databases include [MySQL](https://www.mysql.com) and
     [SQLite](https://oreil.ly/5s4ps).
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 关系数据库的例子包括[MySQL](https://www.mysql.com)和[SQLite](https://oreil.ly/5s4ps)。
 - en: 16.2 Key-Value Stores
+  id: totrans-11
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 16.2 键-值存储
 - en: A *key-value store* is far simpler than a relational database—it’s effectively
     a single table that maps one identifier (the key) to some stored value. Many applications
     leverage key-value stores as simple cache utilities, keeping track of primitive
     values in an efficient, often in-memory lookup system.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: '*键-值存储*比关系数据库简单得多——实际上就是一个将一个标识符（键）映射到某个存储值的单表。许多应用程序使用键-值存储作为简单的缓存工具，在高效的、通常是内存中的查找系统中跟踪原始值。'
 - en: As in relational databases, the data stored in a key-value system can be typed.
     If you’re working with numeric data, most key-value systems expose additional
     functionality to manipulate that data directly—for example, you can increment
     integer values without needing to first read the underlying data. [Figure 16-2](#kv_store)
     demonstrates the one-to-one relationships between keys and values in such a data
     store.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 与关系数据库一样，存储在键-值系统中的数据可以进行类型化。如果你处理的是数字数据，大多数键-值系统会公开额外的功能来直接操作这些数据，例如，你可以在不需要先读取底层数据的情况下递增整数值。[图16-2](#kv_store)展示了这种数据存储中键和值之间的一对一关系。
 - en: '![Key-value stores are structured as lookups between discrete identifiers mapped
     to optionally typed values](assets/phpc_1602.png)'
+  id: totrans-14
   prefs: []
   type: TYPE_IMG
+  zh: '![键值存储被结构化为在离散标识符之间的查找，映射到可选类型的值](assets/phpc_1602.png)'
 - en: Figure 16-2\. Key-value stores are structured as lookups between discrete identifiers
     mapped to optionally typed values
+  id: totrans-15
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图16-2\. 键值存储被结构化为在离散标识符之间的查找，映射到可选类型的值
 - en: Examples of key-value stores include [Redis](https://redis.io) and [Amazon DynamoDB](https://oreil.ly/BYCIM).
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 键值存储的示例包括[Redis](https://redis.io)和[Amazon DynamoDB](https://oreil.ly/BYCIM)。
 - en: 16.3 Graph Databases
+  id: totrans-17
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 16.3 图数据库
 - en: Rather than focusing on structuring the data itself, graph databases focus on
     modeling the relationships (called *edges*) between data. Data elements are encapsulated
     by nodes, and the edges between the nodes link them together and provide semantic
     context about the data in the system.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 与专注于数据本身结构不同，图数据库专注于建模数据之间的关系（称为*边*）。数据元素由节点封装，节点之间的边将它们连接在一起，并为系统中的数据提供语义上下文。
 - en: Because of the high priority placed on relationships between data, graph databases
     are well-suited for visualizations like [Figure 16-3](#graph_db), illustrating
     the edges and nodes within such a structure. They also provide highly efficient
     queries on data relationships, making them solid choices for highly interconnected
     data.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于对数据之间关系的高度重视，图数据库非常适合进行诸如[图16-3](#graph_db)所示的可视化，展示这种结构中的边和节点。它们还提供了对数据关系高效查询的功能，使其成为高度互连数据的可靠选择。
 - en: '![Graph databases prioritize and illustrate the relationships (edges) between
     data (nodes)](assets/phpc_1603.png)'
+  id: totrans-20
   prefs: []
   type: TYPE_IMG
+  zh: '![图数据库优先考虑并说明数据（节点）之间的关系（边）](assets/phpc_1603.png)'
 - en: Figure 16-3\. Graph databases prioritize and illustrate the relationships (edges)
     between data (nodes)
+  id: totrans-21
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图16-3\. 图数据库优先考虑并说明数据（节点）之间的关系（边）。
 - en: Examples of graph databases include [Neo4j](https://neo4j.com) and [Amazon Neptune](https://oreil.ly/8Uezn).
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 图数据库的示例包括[Neo4j](https://neo4j.com)和[Amazon Neptune](https://oreil.ly/8Uezn)。
 - en: 16.4 Document Databases
+  id: totrans-23
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 16.4 文档数据库
 - en: It’s also possible to store data specifically as an unstructured or semistructured
     *document*. A document could be a well-structured piece of data (like a literal
     XML document) or a free-form blob of bytes (like a PDF).
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 也可以将数据专门存储为非结构化或半结构化的*文档*。文档可以是结构良好的数据片段（如字面XML文档）或自由形式的字节块（如PDF）。
 - en: 'The key difference between a document store and the other database types covered
     in this chapter is structure—*document stores* are typically unstructured and
     leverage a dynamic schema to reference data. They’re incredibly useful in some
     situations, but far more nuanced in their use. For a deep dive into the document-based
     methodology, read [*MongoDB: The Definitive Guide*](https://oreil.ly/psrH8) by
     Shannon Bradshaw et al. (O’Reilly).'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 文档存储与本章介绍的其他数据库类型之间的关键区别是结构—*文档存储*通常是非结构化的，并利用动态模式引用数据。在某些情况下，它们非常有用，但在使用上更加微妙。要深入了解基于文档的方法论，请阅读Shannon
+    Bradshaw等人编写的[*MongoDB权威指南*](https://oreil.ly/psrH8)（O’Reilly）。
 - en: The following recipes focus primarily on relational databases and how to use
     them with PHP. You’ll learn how to connect to both local and remote databases,
     how to leverage fixed data during testing, and even how to use a more sophisticated
     object-relational mapping (ORM) library with your data.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下的示例主要关注关系数据库及其在PHP中的使用。您将学习如何连接本地和远程数据库，如何在测试期间利用固定数据，甚至如何使用更复杂的对象关系映射（ORM）库处理您的数据。
 - en: 16.5 Connecting to an SQLite Database
+  id: totrans-27
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 16.5 连接到SQLite数据库
 - en: Problem
+  id: totrans-28
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to use a local copy of an SQLite database to store application data.
     Your application needs to open and close the database appropriately.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望使用SQLite数据库的本地副本来存储应用程序数据。您的应用程序需要适当地打开和关闭数据库。
 - en: Solution
+  id: totrans-30
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Open and close the database as needed using the base `SQLite` class. For efficiency,
     you can extend the base class with your own constructor and destructor as follows:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据需要使用基础 `SQLite` 类来打开和关闭数据库。为了效率，可以通过以下方式扩展基础类，自定义构造函数和析构函数：
 - en: '[PRE0]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Then use your new class to open a database, run some queries, and automatically
     close the connection when you’re finished. For example:'
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，使用你的新类来打开数据库，运行一些查询，并在完成时自动关闭连接。例如：
 - en: '[PRE1]'
+  id: totrans-34
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Discussion
+  id: totrans-35
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: SQLite is a fast, entirely self-contained database engine that stores all of
     its data in a single file on disk. PHP ships with an extension (enabled by default
     in most distributions) that directly interfaces with this database, giving you
     the power to create, write to, and read from databases at will.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: SQLite 是一个快速完全自包含的数据库引擎，将其所有数据存储在单个磁盘文件中。PHP 自带一个扩展（在大多数发行版中默认启用），可以直接与该数据库进行接口，让你能够随意创建、写入和读取数据库。
 - en: The `open()` method will, by default, create a database file if one does not
     already exist at the specified path. This behavior can be changed by changing
     the flags passed in as the second parameter of the method call. By default, PHP
     will pass `SQLITE3_​OPEN_​READWRITE | SQLITE3_OPEN_CREATE`, which will open the
     database for reading *and* writing as well as create it if it doesn’t already
     exist.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，`open()` 方法将会在指定路径下创建一个数据库文件（如果不存在）。此行为可以通过传递给方法调用的第二个参数中的标志来更改。默认情况下，PHP
+    将传递 `SQLITE3_​OPEN_​READWRITE | SQLITE3_OPEN_CREATE`，这将打开数据库以进行读取 *和* 写入，并在不存在时创建它。
 - en: Three flags are available, as listed in [Table 16-1](#sqlite_open_flags).
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Table 16-1](#sqlite_open_flags) 列出了三个可用的标志。'
 - en: Table 16-1\. Optional flags available for opening an SQLite database
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 16-1\. 用于打开 SQLite 数据库的可选标志
 - en: '| Flag | Description |'
+  id: totrans-40
   prefs: []
   type: TYPE_TB
+  zh: '| 标志 | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-41
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `SQLITE3_OPEN_READONLY` | Open a database exclusively for reading |'
+  id: totrans-42
   prefs: []
   type: TYPE_TB
+  zh: '| `SQLITE3_OPEN_READONLY` | 仅打开一个数据库用于读取操作 |'
 - en: '| `SQLITE3_OPEN_READWRITE` | Open a database for both reading and writing |'
+  id: totrans-43
   prefs: []
   type: TYPE_TB
+  zh: '| `SQLITE3_OPEN_READWRITE` | 打开一个数据库用于读写操作 |'
 - en: '| `SQLITE3_OPEN_CREATE` | Create the database if it does not exist |'
+  id: totrans-44
   prefs: []
   type: TYPE_TB
+  zh: '| `SQLITE3_OPEN_CREATE` | 如果不存在则创建数据库 |'
 - en: The Solution example includes a class that transparently opens an SQLite database
     at a particular path, creating one if it doesn’t already exist. Given that the
     class extends the base SQLite class, you can then use it in place of a standard
     SQLite instance to create tables, insert data, and query that data directly. The
     class destructor automatically closes the database connection once the instance
     moves out of scope.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 解决方案示例包括一个类，透明地在特定路径上打开一个 SQLite 数据库，如果不存在则创建一个。由于该类扩展了基础的 SQLite 类，因此可以在不同于标准
+    SQLite 实例的地方使用它来创建表、插入数据并直接查询该数据。类析构函数在实例移出作用域时自动关闭数据库连接。
 - en: Note
+  id: totrans-46
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Typically, closing an SQLite connection isn’t explicitly required, as PHP will
     automatically close the connection when the program exits. If, however, there’s
     a chance that the application (or thread) might continue running, it’s a good
@@ -228,64 +325,96 @@
     won’t impact a local, file-based data connection that much, it’s a critical component
     of working with remote relational databases like MySQL. Being consistent in your
     database management is a good habit to build.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常情况下，不需要显式关闭 SQLite 连接，因为 PHP 将在程序退出时自动关闭连接。但是，如果应用程序（或线程）可能会继续运行，建议关闭连接以释放系统资源。尽管这不会对本地基于文件的数据连接产生太大影响，但对于像
+    MySQL 这样的远程关系数据库来说，这是一个关键的组成部分。在数据库管理中保持一致性是一个良好的习惯。
 - en: The SQLite database is represented by a binary file on disk at the path specified.
     If you have a development environment like [Visual Studio Code](https://oreil.ly/k_LBl),
     you can use purpose-built extensions like [SQLite Viewer](https://oreil.ly/QzF0J)
     to connect to and visualize your local database as well. Having more than one
     way to view the schema and data housed within a database is a quick and effective
     means to validate that your code is doing what you think it’s doing.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: SQLite 数据库在指定路径上以二进制文件的形式存在于磁盘上。如果你使用像 [Visual Studio Code](https://oreil.ly/k_LBl)
+    这样的开发环境，你可以使用专门的扩展如 [SQLite Viewer](https://oreil.ly/QzF0J) 来连接和可视化你的本地数据库。拥有多种查看数据库模式和数据的方式是验证你的代码是否按照预期工作的快速有效方法。
 - en: See Also
+  id: totrans-49
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: PHP documentation for [the SQLite3 database extension](https://oreil.ly/kMU8Y).
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP 关于 [SQLite3 数据库扩展](https://oreil.ly/kMU8Y) 的文档。
 - en: 16.6 Using PDO to Connect to an External Database Provider
+  id: totrans-51
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 16.6 使用 PDO 连接到外部数据库提供者
 - en: Problem
+  id: totrans-52
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to use PDO as an abstraction layer to connect to and query a remote
     MySQL database.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望使用PDO作为抽象层连接并查询远程MySQL数据库。
 - en: Solution
+  id: totrans-54
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'First, define a class extending the core `PDO` definition that handles creating
     and closing connections as follows:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，定义一个扩展核心`PDO`定义的类，处理创建和关闭连接，如下所示：
 - en: '[PRE2]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'The configuration file for the preceding class needs to be in INI format. For
     example:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 前述类的配置文件需要采用INI格式。例如：
 - en: '[PRE3]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'Once the file is configured, you can query the database directly by using the
     abstractions provided by PDO as follows:'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置文件一旦配置完成，您可以通过PDO提供的抽象直接查询数据库，如下所示：
 - en: '[PRE4]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Discussion
+  id: totrans-61
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The Solution example leverages the same table structure and data as previously
     used by [Recipe 16.5](#recipe_sqlite), except that it uses the MySQL database
     engine. [MySQL](https://www.mysql.com) is a popular, free, open source database
@@ -295,36 +424,49 @@
     maintainers ship the MySQL extension with PHP by default, making it even easier
     to connect to the system and saving you from having to install new drivers by
     yourself.
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 解决方案示例利用与[Recipe 16.5](#recipe_sqlite)相同的表结构和数据，只是它使用了MySQL数据库引擎。[MySQL](https://www.mysql.com)是一个由Oracle维护的流行的免费开源数据库引擎。据维护者称，它支持许多流行的Web应用程序，包括像Facebook、Netflix和Uber这样的大型平台。事实上，MySQL如此普及，以至于许多系统维护者默认在PHP中包含MySQL扩展，使连接系统变得更加简单，免去了自己安装新驱动程序的麻烦。
 - en: Note
+  id: totrans-63
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Unlike the Solution example from [Recipe 16.5](#recipe_sqlite), PHP has no method
     to explicitly close the connection when using PDO. Instead, set the value of your
     database handle (`$db` in the Solution example) to `null` to take the object out
     of scope and trigger PHP to close the connection.
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 与[Recipe 16.5](#recipe_sqlite)中的解决方案示例不同，PHP没有明确关闭PDO连接的方法。相反，将数据库句柄（例如解决方案示例中的`$db`）的值设置为`null`，使对象超出范围并触发PHP关闭连接。
 - en: In the Solution example, you first defined a class to wrap PDO itself and abstract
     the connection to a MySQL database. This isn’t required, but as with [Recipe 16.5](#recipe_sqlite)
     it’s is a good way to get used to maintaining clean data connections. Once the
     connection is established, you can create a table, insert data, and read that
     data back efficiently.
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 在解决方案示例中，首先定义了一个类来包装PDO本身，并抽象连接到MySQL数据库。虽然这不是必需的，但就像[Recipe 16.5](#recipe_sqlite)一样，这是一个保持数据连接清洁的好方法。一旦建立了连接，您可以高效地创建表格、插入数据并读取数据。
 - en: Warning
+  id: totrans-66
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: The Solution example assumes the `cookbook` schema already existed within the
     database to which you were connecting. Unless you’ve already created that schema
     directly, this implicit connection will fail with a `PDOException` complaining
     about an unknown database. It is critical that you create the schema *first* within
     the MySQL database before you try to manipulate it.
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 解决方案示例假设在连接到的数据库中已经存在`cookbook`模式。除非您已经直接创建了该模式，否则这种隐式连接将失败，并显示`PDOException`
+    complaining about an unknown database。在尝试操作之前，您必须在MySQL数据库中*首先*创建该模式至关重要。
 - en: 'Unlike SQLite, MySQL databases require a totally separate application to house
     the database and broker the connection to your application. Often this application
     will run on an entirely different server, and your application will connect over
@@ -333,105 +475,156 @@
     The following one-line command will create a local MySQL database within a Docker
     container, listening on the default port of 3306 and allowing connections by a
     `root` user with the password of `toor`:'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 与SQLite不同，MySQL数据库需要一个完全独立的应用程序来托管数据库并连接到您的应用程序。通常，此应用程序将在完全不同的服务器上运行，并且您的应用程序将通过TCP连接到指定端口（通常是3306）。对于本地开发和测试，仅需使用[Docker](https://www.docker.com)在应用程序旁边创建一个本地MySQL数据库就足够了。以下一行命令将在Docker容器内创建一个本地MySQL数据库，监听默认端口3306，并允许通过`root`用户和密码`toor`进行连接：
 - en: '[PRE5]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Note
+  id: totrans-70
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Whether using MySQL within Docker locally or in a production environment, the
     [official container image](https://oreil.ly/4btCa) details various configuration
     settings that can be used to customize and secure the environment.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论是在本地使用Docker中的MySQL还是在生产环境中使用MySQL，[官方容器镜像](https://oreil.ly/4btCa)详细介绍了各种可用于自定义和安全环境的配置设置。
 - en: When the container first starts, it will not have any schemas available to query
     (meaning the rest of the Solution example is not yet usable). To create a default
     `cookbook` schema, you need to connect to the database and create the schema.
     In [Example 16-1](#using_mysql_cli), the `$` character indicates shell commands,
     and the `mysql>` prompt indicates a command run within the database itself.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 当容器首次启动时，不会有任何可用于查询的模式（这意味着示例解决方案的其余部分尚不可用）。要创建一个默认的`cookbook`模式，需要连接到数据库并创建模式。在[示例 16-1](#using_mysql_cli)中，`$`字符表示shell命令，`mysql>`提示表示在数据库本身内运行的命令。
 - en: Example 16-1\. Using the MySQL CLI to create a database schema
+  id: totrans-73
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-1\. 使用MySQL CLI创建数据库模式
 - en: '[PRE6]'
+  id: totrans-74
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '[![1](assets/1.png)](#co_databases_CO1-1)'
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_databases_CO1-1)'
 - en: The Docker container is exposing MySQL over TCP to the local environment, which
     requires you to specify a local host by IP address. Failing to do so defaults
     to MySQL attempting to connect over a Unix socket, which will fail in this case.
     You must also pass both the username and password in order to connect.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: Docker容器在本地环境通过TCP暴露MySQL，这需要您指定一个本地主机IP地址。如果未这样做，默认情况下MySQL会尝试通过Unix套接字连接，但在这种情况下会失败。您还必须传递用户名和密码以便连接。
 - en: '[![2](assets/2.png)](#co_databases_CO1-2)'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_databases_CO1-2)'
 - en: Once connected to the database engine, you can create a new schema within it.
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 连接到数据库引擎后，可以在其中创建新的模式。
 - en: '[![3](assets/3.png)](#co_databases_CO1-3)'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_databases_CO1-3)'
 - en: To disconnect from MySQL, merely type `exit` or `quit` and press the Enter key.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 要断开MySQL连接，只需输入`exit`或`quit`并按Enter键。
 - en: If you don’t have the MySQL command line installed, you can also leverage Docker
     to connect to the running database container and use *its* command-line interface
     instead. [Example 16-2](#docker_hosted_cli) illustrates how to leverage a Docker
     container to wrap the MySQL CLI while creating a database schema.
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您没有安装MySQL命令行，还可以利用Docker连接到运行的数据库容器并使用*其*命令行界面。[示例 16-2](#docker_hosted_cli)展示了如何利用Docker容器封装MySQL
+    CLI来创建数据库模式。
 - en: Example 16-2\. Using a Docker-hosted MySQL CLI to create a database schema
+  id: totrans-82
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-2\. 使用托管在Docker中的MySQL CLI创建数据库模式
 - en: '[PRE7]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: '[![1](assets/1.png)](#co_databases_CO2-1)'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![1](assets/1.png)](#co_databases_CO2-1)'
 - en: Since MySQL is already running locally as a container named `db`, you can execute
     a command within the container interactively by referencing the same name. Docker’s
     `i` and `t` flags indicate you want to execute a command in an interactive terminal
     session. The `bash` command is what you explicitly want to execute; the result
     is that you are given an interactive terminal session *within the container* as
     if you’d connected to it directly.
+  id: totrans-85
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于MySQL已作为名为`db`的容器在本地运行，您可以通过引用相同的名称在容器内部交互地执行命令。Docker的`i`和`t`标志指示您希望在交互式终端会话中执行命令。`bash`命令是您明确要执行的命令；其结果是您像直接连接到其中一样在容器内部获得了一个交互式终端会话。
 - en: '[![2](assets/2.png)](#co_databases_CO2-2)'
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![2](assets/2.png)](#co_databases_CO2-2)'
 - en: Connecting to the database within the container is as simple as using the MySQL
     CLI. You don’t need to reference a hostname as, within the container, you can
     connect directly to the exposed Unix socket.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 在容器内部连接到数据库就像使用MySQL CLI一样简单。您无需引用主机名，因为在容器内部，可以直接连接到公开的Unix套接字。
 - en: '[![3](assets/3.png)](#co_databases_CO2-3)'
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![3](assets/3.png)](#co_databases_CO2-3)'
 - en: Creating a table and exiting out of the MySQL CLI is exactly the same as in
     the previous example.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建表并退出MySQL CLI的过程与前面的示例完全相同。
 - en: '[![4](assets/4.png)](#co_databases_CO2-4)'
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: '[![4](assets/4.png)](#co_databases_CO2-4)'
 - en: Once you’ve exited out of the CLI, you still need to exit out of the interactive
     `bash` session within the Docker container to return to your main terminal.
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 退出CLI后，仍然需要退出Docker容器中的交互式`bash`会话，以返回到主终端。
 - en: 'There are two primary advantages of using PDO to connect to a database instead
     of a direct functional interface to the drivers:'
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用PDO连接数据库而不是直接使用驱动程序的主要优点有两个：
 - en: The PDO interfaces are the same for every database technology. While you might
     need to refactor specific queries to fit one database engine or another (compare
     the `CREATE TABLE` syntax of this Solution to that in [Recipe 16.5](#recipe_sqlite)),
@@ -439,9 +632,12 @@
     or query processing. PDO is a data-access abstraction layer, giving you the same
     mode of access and management regardless of the database you happen to be using
     within your application.
+  id: totrans-93
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: PDO 接口在每种数据库技术中都是相同的。虽然您可能需要重构特定查询以适应一个或另一个数据库引擎（比较这个解决方案中的 `CREATE TABLE` 语法与
+    [Recipe 16.5](#recipe_sqlite) 中的语法），但无需重构围绕连接、语句执行或查询处理的 PHP 代码。PDO 是一个数据访问抽象层，无论您在应用程序中使用的数据库是什么，都能提供相同的访问和管理方式。
 - en: PDO supports the use of *persistent connections* by passing a truthy value to
     the `PDO::ATTR_PERSISTENT` key as an option when opening a connection. A persistent
     connection will be opened *and remain open* even after the `PDO` instance goes
@@ -451,231 +647,336 @@
     applications, where opening multiple, redundant connections would otherwise harm
     the database itself. (For more on persistent database connections, review [the
     PHP Manual’s comprehensive documentation](https://oreil.ly/_nHH-).)
+  id: totrans-94
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: PDO 支持通过在打开连接时将一个真值传递给 `PDO::ATTR_PERSISTENT` 键作为选项来使用*持久连接*。持久连接将在 `PDO` 实例超出范围并且脚本执行完成后仍然保持打开状态。当
+    PHP 尝试重新打开连接时，系统将查找现有的连接并在存在时重用它。这有助于提高长时间运行的多租户应用程序的性能，否则打开多个冗余连接将对数据库本身造成伤害。（有关持久数据库连接的更多信息，请参阅
+    [PHP 手册的全面文档](https://oreil.ly/_nHH-)。）
 - en: Beyond these two advantages, PDO also supports the concept of prepared statements,
     which help reduce the risk of malicious SQL injection. For more on prepared statements,
     review [Recipe 16.7](#recipe_pdo_sanitization).
+  id: totrans-95
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了这两个优点之外，PDO 还支持准备语句的概念，有助于减少恶意 SQL 注入的风险。有关准备语句的更多信息，请参阅 [Recipe 16.7](#recipe_pdo_sanitization)。
 - en: See Also
+  id: totrans-96
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Full documentation on the [PDO extension](https://oreil.ly/_6%E2%80%94%E2%80%8BV).
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关 [PDO 扩展的完整文档](https://oreil.ly/_6%E2%80%94%E2%80%8BV)。
 - en: 16.7 Sanitizing User Input for a Database Query
+  id: totrans-98
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 16.7 为数据库查询净化用户输入
 - en: Problem
+  id: totrans-99
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to pass user input into a database query but don’t fully trust the
     user input to not be malicious.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望将用户输入传递到数据库查询中，但不完全信任用户输入不会有恶意行为。
 - en: Solution
+  id: totrans-101
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: 'Leverage prepared statements in PDO to automatically sanitize user input before
     it passes into the query as follows:'
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 PDO 中利用准备语句自动清理用户输入之前将其传递到查询中如下：
 - en: '[PRE8]'
+  id: totrans-103
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Discussion
+  id: totrans-104
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The concept of sanitizing user input was discussed earlier as part of [Recipe
     9.1](ch09.html#recipe_sanitize_input), which used explicit filters to sanitize/validate
     potentially untrusted input. While that approach is quite effective, it’s also
     easy for developers to forget to include a sanitization filter on user input down
     the road when making updates. As a result, it’s far safer to explicitly prepare
     queries for execution to prevent malicious SQL injection.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 清理用户输入的概念在早期作为 [Recipe 9.1](ch09.html#recipe_sanitize_input) 的一部分进行了讨论，该部分使用显式过滤器清理/验证潜在的不受信任的输入。虽然这种方法非常有效，但在未来更新时开发人员很容易忘记在用户输入时包含清理过滤器。因此，显式准备查询以防止恶意
+    SQL 注入是更安全的做法。
 - en: 'Consider a query used to look up user data to display profile information.
     Such a query might leverage user email addresses as indexes to distinguish one
     user from another in an attempt to only display the current user’s information.
     For example:'
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 考虑一个用于查找用户数据以显示个人资料信息的查询。这样的查询可能利用用户电子邮件地址作为索引，以区分试图仅显示当前用户信息的另一个用户。例如：
 - en: '[PRE9]'
+  id: totrans-107
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: In PHP, you’ll want to pass in the current user’s email address so the query
     operates effectively. A naive approach using PDO might look something like [Example 16-3](#query_with_interpolation).
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 PHP 中，您需要传递当前用户的电子邮件地址，以便查询有效运行。使用 PDO 的一个天真的方法可能看起来像 [Example 16-3](#query_with_interpolation)。
 - en: Example 16-3\. Simple query with string interpolation
+  id: totrans-109
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 16-3\. 使用字符串插值的简单查询
 - en: '[PRE10]'
+  id: totrans-110
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: If the user is only submitting their own username (say, `eric@phpcookbook.local`),
     then this query will return the appropriate data for that user. There’s no guarantee
     the end user is trustworthy, though, and they might submit a malicious statement
     instead in the hopes of *injecting* an arbitrary statement into your database
     engine. Knowing how the submitted email address is interpolated into the SQL statement,
     an attacker could submit `' OR 1=1;--` instead.
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果用户只提交他们自己的用户名（例如，`eric@phpcookbook.local`），那么这个查询将返回该用户的相应数据。不过，不能保证最终用户是可信的，他们可能会提交一个恶意语句，希望将任意语句*注入*到您的数据库引擎中。了解提交的电子邮件地址如何插入到
+    SQL 语句中，攻击者可以提交 `' OR 1=1;--` 替代。
 - en: This string will complete the quotes (`WHERE email = ''`), add a composite Boolean
     statement that matches *any* result (`OR 1=1`), and explicitly comment out any
     additional characters that follow. The result is that your query will return the
     data for *all* users rather than the single user who made the request.
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个字符串将完成引号（`WHERE email = ''`），添加一个复合布尔语句来匹配*任何*结果（`OR 1=1`），并明确注释掉后续的任何字符。其结果是，您的查询将返回*所有*用户的数据，而不是仅仅是发出请求的单个用户。
 - en: Similarly, malicious users could use the same approach to inject arbitrary `INSERT`
     statements (writing new data) where you expected only to read information. They
     could also illicitly update existing data, delete fields, or otherwise corrupt
     the reliability of your data store.
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样，恶意用户可以使用相同的方法来注入任意的`INSERT`语句（写入新数据），而您只期望读取信息。他们还可以非法更新现有数据，删除字段，或者以其他方式损害数据存储的可靠性。
 - en: SQL injection is incredibly dangerous. It’s also remarkably common in the software
     world—so much so that injection is recognized as the [third most commonly encountered
     application security risk by the Open Worldwide Application Security Project (OWASP)
     Top Ten project](https://oreil.ly/Cveyu).
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: SQL 注入非常危险。它在软件世界中也是异常常见的——以至于注入被公认为是开放全球应用安全项目（OWASP）十大安全风险中的第三位[最常遇到的应用安全风险](https://oreil.ly/Cveyu)。
 - en: Luckily, in PHP, injection is also easy to thwart!
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，在 PHP 中，防止注入也很容易！
 - en: The Solution example introduces PDO’s *prepared statements* interface. Rather
     than interpolating a string with user-provided data, you insert named placeholders
     into the query. These placeholders should be prefixed with a single colon and
     can be any valid name you can imagine. When the query is run against the database,
     PDO will replace these placeholders with literal values passed in at runtime.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 解决方案示例介绍了 PDO 的*预处理语句*接口。与使用用户提供数据插入字符串不同，您在查询中插入命名占位符。这些占位符应以单个冒号开头，并且可以是您能想象到的任何有效名称。当查询运行到数据库时，PDO
+    将这些占位符替换为运行时传递的字面值。
 - en: Note
+  id: totrans-117
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: It is also possible to use the question mark character as a placeholder and
     pass values into the prepared statement based on their position within a simple
     array. However, the position of elements is easy to confuse during later refactoring,
     and using this simpler approach is highly inadvisable. Take care to always use
     named parameters when preparing statements to avoid confusion and to future-proof
     your code.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 也可以使用问号字符作为占位符，并根据它们在简单数组中的位置传递值到准备好的语句。然而，在以后的重构过程中很容易混淆元素的位置，因此高度不建议使用这种简单的方法。请务必始终在准备语句时使用命名参数，以避免混淆并未来保护您的代码。
 - en: Prepared statements work with both data manipulation statements (insert, update,
     delete) and arbitrary queries. Using prepared statements, the simple query from
     [Example 16-3](#query_with_interpolation) could be rewritten as [Example 16-4](#query_with_preparation).
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 预处理语句适用于数据操作语句（插入、更新、删除）和任意查询。使用预处理语句，可以将 [示例 16-3](#query_with_interpolation)
+    中的简单查询重写为 [示例 16-4](#query_with_preparation)。
 - en: Example 16-4\. Simple query with prepared statements
+  id: totrans-120
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-4\. 使用预处理语句的简单查询
 - en: '[PRE11]'
+  id: totrans-121
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: This code leverages PDO to automatically escape user input and pass the value
     as a literal one to the database engine. If the user had in fact submitted their
     email address, the query would function as expected and return the anticipated
     result.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 此代码利用 PDO 自动转义用户输入，并将该值作为字面值传递给数据库引擎。如果用户确实提交了他们的电子邮件地址，查询将如预期般运行并返回预期的结果。
 - en: If the user instead submitted a malicious payload (e.g., `' OR 1=1;--`, as previously
     discussed), the statement preparation will explicitly escape the passed quote
     characters before passing them to the database. This would have the result of
     looking for an email address that exactly matches the malicious payload (and does
     not exist), yielding zero results of user data.
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果用户提交恶意有效负载（例如，`' OR 1=1;--`，如前所述），语句准备将明确转义传递给数据库的引号字符。这将导致查找一个完全匹配恶意有效负载的电子邮件地址（并且不存在），从而产生零用户数据的结果。
 - en: See Also
+  id: totrans-124
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on PDO’s [`prepare()` method](https://oreil.ly/q3DCh).
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 有关 PDO 的[`prepare()`方法的文档](https://oreil.ly/q3DCh)。
 - en: 16.8 Mocking Data for Integration Testing with a Database
+  id: totrans-126
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 16.8 模拟数据用于集成测试与数据库
 - en: Problem
+  id: totrans-127
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to leverage a database for production storage but mock that database
     interface when running automated tests against your application.
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 你希望在生产环境中利用数据库进行存储，但在运行自动化测试时模拟该数据库接口。
 - en: Solution
+  id: totrans-129
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: Use the repository pattern as an abstraction between your business logic and
     database persistence. For example, define a repository interface as shown in [Example 16-5](#data_repository_interface).
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用存储库模式作为业务逻辑与数据库持久性之间的抽象。例如，定义一个存储库接口，如[示例 16-5](#data_repository_interface)所示。
 - en: Example 16-5\. Data repository interface definition
+  id: totrans-131
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-5\. 数据存储库接口定义
 - en: '[PRE12]'
+  id: totrans-132
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Then, use the preceding interface to define a concrete database implementation
     (leveraging something like PDO). Use the same interface to define a mock implementation
     that returns predictable, static data rather than live data from a remote system.
     See [Example 16-6](#repository_interface_implementation).
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，使用上述接口定义具体的数据库实现（例如利用 PDO）。同时使用相同的接口定义模拟实现，返回可预测的静态数据而不是远程系统的实时数据。参见[示例 16-6](#repository_interface_implementation)。
 - en: Example 16-6\. Repository interface implementation with mock data
+  id: totrans-134
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-6\. 带有模拟数据的存储库接口实现
 - en: '[PRE13]'
+  id: totrans-135
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Discussion
+  id: totrans-136
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The Solution example introduces a simple way to separate your business logic
     from your data layer via an abstraction. By leveraging a data *repository* to
     wrap the database layer, you can ship multiple implementations of the same interface.
     In a production application, your actual repository might look something like
     [Example 16-7](#repository_implementation).
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 解决方案示例介绍了一种通过抽象来将业务逻辑与数据层分离的简单方法。通过利用数据*存储库*来包装数据库层，你可以发布同一接口的多个实现。在生产应用中，你的实际存储库可能看起来类似于[示例 16-7](#repository_implementation)。
 - en: Example 16-7\. Concrete database implementation of a repository interface
+  id: totrans-138
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-7\. 存储库接口的具体数据库实现
 - en: '[PRE14]'
+  id: totrans-139
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: '[Example 16-7](#repository_implementation) implements the same interface as
     the mock repository from the Solution example, except it connects to a live MySQL
     database and manipulates data in that separate system. In reality, your production
     code will use *this* implementation rather than the mock instance. But when running
     under test, you can easily swap the `DatabaseRepository` for a `MockRepository`
     instance so long as your business logic is expecting a class that implements `BookRepository`.'
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 16-7](#repository_implementation)实现与解决方案示例中的模拟存储库相同的接口，但连接到实时 MySQL 数据库并在该独立系统中操作数据。实际情况下，你的生产代码将使用*此*实现而不是模拟实例。但在测试运行时，只要你的业务逻辑期望实现`BookRepository`接口的类，你可以轻松地将`DatabaseRepository`替换为`MockRepository`实例。'
 - en: 'Assume you’re working with the [Symfony framework](https://symfony.com). Your
     application will be built upon controllers that leverage dependency injection
     to handle external integrations. For a library API that manages multiple books,
     you might define a `BookController` that looks something like the following:'
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设你正在使用[Symfony 框架](https://symfony.com)。你的应用将建立在控制器之上，利用依赖注入处理外部集成。例如，对于管理多本书的库
+    API，你可能会定义一个`BookController`，大致如下：
 - en: '[PRE15]'
+  id: totrans-142
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: The beauty of the preceding code is that the controller doesn’t care whether
     you pass it an instance of `MockRepository` or one of `DataRepository`. Both classes
     implement the same `BookRepository` interface and expose a `getByID()` method
@@ -683,92 +984,138 @@
     that with one, your application will reach out to a remote database to retrieve
     (and potentially) manipulate data, while the other uses a static, completely deterministic
     set of fake data.
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 前面代码的优点在于控制器不关心您是传递 `MockRepository` 实例还是 `DataRepository` 实例。这两个类都实现了相同的 `BookRepository`
+    接口，并公开了具有相同签名的 `getByID()` 方法。对于业务逻辑来说，功能是相同的 —— 除了一个会让您的应用程序访问远程数据库以检索（和可能操纵）数据，而另一个则使用一组静态、完全确定性的虚假数据。
 - en: Note
+  id: totrans-144
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: The default data abstraction layer that ships with Symfony is called [Doctrine](https://oreil.ly/JvdG_)
     and leverages the repository pattern by default. Doctrine provides a rich abstraction
     layer across multiple SQL dialects, including MySQL, without the need to manually
     wire queries via PDO. It also ships with a command-line utility that automatically
     writes the PHP code for both stored objects (called *entities*) and repositories
     for you!
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: Symfony 默认的数据抽象层称为 [Doctrine](https://oreil.ly/JvdG_)，并默认使用仓储模式。Doctrine 提供了一个丰富的抽象层，支持多个
+    SQL 方言，包括 MySQL，无需通过 PDO 手动连接查询。它还附带了一个命令行实用程序，可以自动为您编写存储对象（称为 *entities*）和仓储的
+    PHP 代码！
 - en: When it comes to writing tests, the deterministic and fake data is superior
     because it will always be the same and means your tests will be very reliable.
     It also means you won’t accidentally overwrite data in a real database if someone
     makes a minor configuration error locally.
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 在编写测试时，确定性和虚假数据是优越的，因为它们始终保持一致，这意味着您的测试非常可靠。这也意味着，如果有人在本地做了轻微的配置错误，您不会意外地覆盖真实数据库中的数据。
 - en: An added advantage will be the speed at which your tests run. Mocked data interfaces
     remove the need to send data between your application and an independent database,
     significantly shortening the latency of any data-related function calls. That
     said, you will likely still want to flesh out a separate integration test suite
     to exercise those remote integrations, and you will require a real database to
     make that separate test suite usable.
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个额外的优势是您的测试运行速度会更快。模拟数据接口消除了在应用程序和独立数据库之间发送数据的需求，显著缩短了与任何数据相关功能调用的延迟。尽管如此，您可能仍希望完善一个单独的集成测试套件来测试那些远程集成，并且您将需要一个真实的数据库来使这个独立的测试套件可用。
 - en: See Also
+  id: totrans-148
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Review [Recipe 8.7](ch08.html#class_interfaces) for more on classes, interfaces,
     and inheritance. See the Symfony documentation for more on [controllers](https://oreil.ly/ucip3)
     and [dependency injection](https://oreil.ly/WYpxe).
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看 [Recipe 8.7](ch08.html#class_interfaces) 以获取有关类、接口和继承的更多信息。查看 Symfony 文档以获取有关
+    [controllers](https://oreil.ly/ucip3) 和 [dependency injection](https://oreil.ly/WYpxe)
+    的更多信息。
 - en: 16.9 Querying an SQL Database with the Eloquent ORM
+  id: totrans-150
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 16.9 使用 Eloquent ORM 查询 SQL 数据库
 - en: Problem
+  id: totrans-151
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 问题
 - en: You want to manage your database schema and the data it contains without hand-writing
     SQL.
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: 您希望管理数据库架构及其包含的数据，而不是手动编写 SQL。
 - en: Solution
+  id: totrans-153
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 解决方案
 - en: Use Laravel’s default ORM, Eloquent, to define your data objects and schema
     dynamically, as shown in [Example 16-8](#eloquent_table_definition).
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 Laravel 默认的 ORM，Eloquent，动态定义您的数据对象和架构，如 [Example 16-8](#eloquent_table_definition)
+    所示。
 - en: Example 16-8\. Table definition for use with Laravel
+  id: totrans-155
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-8\. Laravel 使用的表定义
 - en: '[PRE16]'
+  id: totrans-156
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: This code can be used to dynamically create a table to house books, regardless
     of the type of SQL used with Eloquent. Once the table exists, data within it can
     be modeled by Eloquent using the following class [Example 16-9](#eloquent_model_definition).
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 该代码可用于动态创建一个用于存储书籍的表，无论使用何种 SQL 与 Eloquent 结合使用。一旦表存在，Eloquent 可以使用以下类来对其中的数据进行建模
+    [Example 16-9](#eloquent_model_definition)。
 - en: Example 16-9\. Eloquent model definition
+  id: totrans-158
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 16-9\. Eloquent 模型定义
 - en: '[PRE17]'
+  id: totrans-159
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Discussion
+  id: totrans-160
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 讨论
 - en: The Doctrine ORM, mentioned briefly in [Recipe 16.8](#recipe_data_mocking),
     leverages the repository pattern to map objects stored in a database to their
     representation in business logic. This works well with the Symfony framework,
     but is merely one approach to modeling data in a real-world application.
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: Doctrine ORM 在 [Recipe 16.8](#recipe_data_mocking) 中简要提到，利用仓储模式将存储在数据库中的对象映射到业务逻辑中的表示形式。这在
+    Symfony 框架中很有效，但只是在实际应用程序中建模数据的一种方法。
 - en: The open source Laravel framework, which itself is built atop Symfony and other
     components, instead uses the [Eloquent ORM](https://oreil.ly/x7lcI) to model data.
     Unlike Doctrine, Eloquent is based on the active record design pattern in which
@@ -776,12 +1123,17 @@
     represent that table. Rather than creating/reading/updating/deleting models through
     a separate repository, the modeled objects present their own methods for direct
     manipulation.
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 开源 Laravel 框架本身是建立在 Symfony 和其他组件之上，而是使用[Eloquent ORM](https://oreil.ly/x7lcI)来建模数据。与Doctrine不同，Eloquent
+    基于活动记录设计模式，其中数据库中的表直接与用于表示该表的对应模型相关联。与通过单独的存储库创建/读取/更新/删除模型不同，建模对象通过其自身的方法进行直接操作。
 - en: Tip
+  id: totrans-163
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: Tip
 - en: Some development teams can be quite opinionated about the design patterns they
     do and do not accept in a project. Despite the popularity of the Laravel framework,
     many developers consider the active record approach to data modeling to be an
@@ -789,83 +1141,121 @@
     development team is on the same page regarding the abstractions you leverage in
     your project, as mixing multiple data access patterns can be confusing and will
     lead to serious maintenance woes down the line.
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 有些开发团队对项目中接受的设计模式可能有很强的意见。尽管 Laravel 框架很流行，但许多开发者认为活动记录方法在数据建模中是*反模式*，即应该避免的方法。请务必确保您的开发团队在您项目中使用的抽象方面达成一致，因为混合多种数据访问模式可能会令人困惑，并且会导致严重的维护问题。
 - en: The model classes exposed by Eloquent are quite simple, as demonstrated by the
     terse illustration in the Solution example. However, they are quite dynamic—the
     actual properties of the model don’t need to be directly defined within the model
     class itself. Instead, Eloquent automatically reads and parses any columns and
     data types from the underlying table and adds these as properties to the model
     class when it’s instantiated.
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 由 Eloquent 公开的模型类非常简单，如解决方案示例中简洁的示例所示。但它们非常动态——模型类本身不需要直接定义模型的实际属性。相反，Eloquent
+    在实例化模型类时会自动从底层表中读取和解析任何列和数据类型，并将这些添加为模型类的属性。
 - en: 'The table in [Example 16-8](#eloquent_table_definition), for example, defines
     three columns:'
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，[Example 16-8](#eloquent_table_definition)中的表定义了三列：
 - en: An integer ID
+  id: totrans-167
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个整数 ID
 - en: A string title
+  id: totrans-168
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个字符串标题
 - en: A string author name
+  id: totrans-169
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 一个字符串作者名字
 - en: 'When Eloquent reads this data directly, it effectively creates objects in PHP
     that look something like the following:'
+  id: totrans-170
   prefs: []
   type: TYPE_NORMAL
+  zh: 当 Eloquent 直接读取这些数据时，它会在 PHP 中有效地创建对象，看起来类似于以下内容：
 - en: '[PRE18]'
+  id: totrans-171
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: The *actual* class will present various additional methods, like `save()`, but
     otherwise contains a direct representation of the data as it appears within your
     SQL table. To create a new record in the database, rather than editing SQL directly,
     you would merely create a new object and save it as shown in [Example 16-10](#create_object_eloquent).
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: '*实际*类将提供各种其他方法，如`save()`，但其余部分包含数据在 SQL 表中的直接表示。要在数据库中创建新记录，而不是直接编辑 SQL，您只需创建一个新对象并保存，如[Example 16-10](#create_object_eloquent)所示。'
 - en: Example 16-10\. Creating a database object with Eloquent
+  id: totrans-173
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 16-10\. 使用 Eloquent 创建数据库对象
 - en: '[PRE19]'
+  id: totrans-174
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'Updating data is similarly simple: use Eloquent to retrieve the object you
     wish to change, make your changes in PHP, and then invoke the object’s `save()`
     method to persist your updates directly. [Example 16-11](#update_in_place_eloquent)
     updates objects in a database to replace one value in a particular field with
     another.'
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 更新数据同样简单：使用 Eloquent 检索要更改的对象，在 PHP 中进行更改，然后调用对象的`save()`方法直接持久化更新。[Example 16-11](#update_in_place_eloquent)演示了在数据库中更新对象以将特定字段中的一个值替换为另一个值。
 - en: Example 16-11\. Updating an element in place with Eloquent
+  id: totrans-176
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 16-11\. 使用 Eloquent 在原地更新元素
 - en: '[PRE20]'
+  id: totrans-177
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: The key advantage of using Eloquent is that you can work with your data objects
     as if they were native PHP objects without needing to write, manage, or maintain
     SQL statements by hand. The even more powerful feature of an ORM is that it handles
     escaping user input for you, meaning that the extra steps introduced in [Recipe
     16.7](#recipe_pdo_sanitization) are no longer necessary.
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 Eloquent 的主要优势在于，您可以像操作本机 PHP 对象一样处理数据对象，而无需手动编写、管理或维护 SQL 语句。ORM 的更强大特性是，它会帮助您转义用户输入，这意味着不再需要像[Recipe
+    16.7](#recipe_pdo_sanitization)中介绍的额外步骤。
 - en: Although directly leveraging SQL connections (with or without PDO) is a quick
     and effective way to start working with a database, the sheer power of a fully
     featured ORM will make your application easier to work with. This is true both
     in terms of initial development and when it comes time to refactor.
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然直接利用 SQL 连接（带或不带 PDO）是开始与数据库工作的快速有效方式，但全功能 ORM 的强大功能将使您的应用程序更易于处理。这一点在初始开发和重构时都是如此。
 - en: See Also
+  id: totrans-180
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 参见
 - en: Documentation on [Eloquent ORM](https://oreil.ly/4J-Jz).
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Eloquent ORM](https://oreil.ly/4J-Jz) 的文档。'

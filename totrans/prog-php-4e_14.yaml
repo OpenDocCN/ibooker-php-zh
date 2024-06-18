@@ -1,215 +1,330 @@
 - en: Chapter 13\. JSON
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第13章\. JSON
 - en: Similar to XML, JavaScript Object Notation (JSON) was designed as a standardized
     data-interchange format. However, unlike XML, JSON is extremely lightweight and
     human-readable. While it takes many syntax cues from JavaScript, JSON is designed
     to be language-independent.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似于XML，JavaScript对象表示法（JSON）被设计为一种标准化的数据交换格式。但是，与XML不同，JSON非常轻量级且易于人阅读。虽然它从JavaScript中借鉴了许多语法提示，但JSON设计为与语言无关。
 - en: 'JSON is built on two structures: collections of name/value pairs called *objects*
     (equivalent to PHP’s associative arrays) and ordered lists of values called *arrays*
     (equivalent to PHP’s indexed arrays). Each value can be one of a number of types:
     an object, an array, a string, a number, the Boolean values `TRUE` or `FALSE`,
     or `NULL` (indicating a lack of a value).'
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: JSON基于两种结构构建：名/值对的集合称为*对象*（相当于PHP的关联数组）和值的有序列表称为*数组*（相当于PHP的索引数组）。每个值可以是多种类型之一：对象、数组、字符串、数字、布尔值`TRUE`或`FALSE`，或者`NULL`（表示缺少值）。
 - en: Using JSON
+  id: totrans-3
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用JSON
 - en: The *json* extension, included by default in PHP installations, natively supports
     converting data to JSON format from PHP variables and vice versa.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '*json*扩展在PHP安装中默认包含，本地支持将数据从PHP变量转换为JSON格式，反之亦然。'
 - en: 'To get a JSON representation of a PHP variable, use `json_encode()`:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 要获取PHP变量的JSON表示形式，请使用`json_encode()`：
 - en: '[PRE0]'
+  id: totrans-6
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'Similarly, if you have a string containing JSON data, you can turn it into
     a PHP variable using `json_decode()`:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似地，如果有包含JSON数据的字符串，可以使用`json_decode()`将其转换为PHP变量：
 - en: '[PRE1]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: If the string is invalid JSON, or if the string is not encoded in UTF-8 format,
     a single `NULL` value is returned instead.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果字符串是无效的JSON，或者字符串不是以UTF-8格式编码，那么将返回一个`NULL`值。
 - en: 'The value types in JSON are converted to PHP equivalents as follows:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: JSON中的值类型转换为PHP等效值如下：
 - en: '`object`'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: '`object`'
 - en: An associative array containing the object’s key-value pairs. Each value is
     converted into its PHP equivalent as well.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含对象键值对的关联数组。每个值也被转换为其PHP等效值。
 - en: '`array`'
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: '`array`'
 - en: An indexed array containing the contained values, each converted into its PHP
     equivalent as well.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 包含包含的值的索引数组，每个值也被转换为其PHP等效值。
 - en: '`string`'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: '`string`'
 - en: Converts directly into a PHP string.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 直接转换为PHP字符串。
 - en: '`number`'
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: '`number`'
 - en: Returns a number. If the value is too large to be represented by PHP’s number
     value, it returns `NULL`, unless `json_decode()` is called with the `JSON_BIGINT​_AS_STRING`
     (in which case, a string is returned).
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回一个数字。如果值过大而无法由PHP的数字值表示，则返回`NULL`，除非使用`json_decode()`调用`JSON_BIGINT​_AS_STRING`（此时将返回一个字符串）。
 - en: '`boolean`'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '`boolean`'
 - en: The Boolean `true` value is converted to `TRUE`; the Boolean `false` value is
     converted to `FALSE`.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 布尔值`true`转换为`TRUE`；布尔值`false`转换为`FALSE`。
 - en: '`null`'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: '`null`'
 - en: The `null` value, and any value that cannot be decoded, is converted to `NULL`.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: '`null`值以及无法解码的任何值都被转换为`NULL`。'
 - en: Serializing PHP Objects
+  id: totrans-23
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 序列化PHP对象
 - en: Despite the similar names, there is no direct translation between PHP objects
     and JSON objects—what JSON calls an “object” is really an associative array. To
     convert JSON data into an instance of a PHP object class, you must write code
     to do so based on the format returned by the API.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管名称相似，PHP对象与JSON对象之间没有直接转换——JSON称之为“对象”的东西实际上是一个关联数组。要将JSON数据转换为PHP对象类的实例，必须编写基于API返回格式的代码来执行此操作。
 - en: However, the `JsonSerializable` interface allows you to convert objects *into*
     JSON data however you like. If an object class does not implement the interface,
     `json_encode()` simply creates a JSON object containing keys and values corresponding
     to the object’s data members.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，`JsonSerializable`接口允许您根据您的喜好将对象转换为JSON数据。如果对象类未实现该接口，`json_encode()`简单地创建一个JSON对象，其中包含与对象数据成员对应的键和值。
 - en: Otherwise, `json_encode()` calls the `jsonSerialize()` method on the class and
     uses that to serialize the object’s data.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 否则，`json_encode()`调用类的`jsonSerialize()`方法并使用其序列化对象数据。
 - en: '[Example 13-1](#example_onethree_onedot_book_and_author) adds the `JsonSerializable`
     interface to the `Book` and `Author` classes.'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 13-1](#example_onethree_onedot_book_and_author)将`JsonSerializable`接口添加到`Book`和`Author`类中。'
 - en: Example 13-1\. Book and Author JSON serialization
+  id: totrans-28
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-1\. 书籍和作者的JSON序列化
 - en: '[PRE2]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Creating a PHP object from JSON data requires you to write code to perform the
     translation.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 从JSON数据创建PHP对象需要编写代码执行转换。
 - en: '[Example 13-2](#example_onethree_twodot_book_and_author) shows a class implementing
     factory-style transformation of JSON data into `Book` and `Author` instances into
     PHP objects.'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 13-2](#example_onethree_twodot_book_and_author) 展示了一个类，实现了将 JSON 数据转换为`Book`和`Author`实例成为
+    PHP 对象的工厂式转换。'
 - en: Example 13-2\. Book and Author JSON serialization by factory
+  id: totrans-32
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-2\. 通过工厂对 Book 和 Author 进行 JSON 序列化
 - en: '[PRE3]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: Options
+  id: totrans-34
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 选项
 - en: The JSON parser functions have several options you can set to control the conversion
     process.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: JSON 解析器函数有多个选项可设置以控制转换过程。
 - en: 'For `json_decode()`, the most common options include:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于`json_decode()`，最常见的选项包括：
 - en: '`JSON_BIGINT_AS_STRING`'
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: '`JSON_BIGINT_AS_STRING`'
 - en: When decoding a number that is too large to be represented as a PHP number type,
     returns that value as a string instead.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 当解码一个过大无法表示为 PHP 数字类型的数字时，返回该值作为字符串。
 - en: '`JSON_OBJECT_AS_ARRAY`'
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: '`JSON_OBJECT_AS_ARRAY`'
 - en: Decodes JSON objects as PHP arrays.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 将 JSON 对象解码为 PHP 数组。
 - en: 'For `json_encode()`, the most common options include:'
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于`json_encode()`，最常见的选项包括：
 - en: '`JSON_FORCE_OBJECT`'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: '`JSON_FORCE_OBJECT`'
 - en: Encodes indexed arrays from the PHP values as JSON objects instead of JSON arrays.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 将 PHP 值的索引数组编码为 JSON 对象，而不是 JSON 数组。
 - en: '`JSON_NUMERIC_CHECK`'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: '`JSON_NUMERIC_CHECK`'
 - en: Encodes strings that represent number values as JSON numbers, rather than as
     JSON strings. In practice, you’re better off converting manually, so you’re aware
     of what the types are.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 将表示数字值的字符串编码为 JSON 数字，而不是 JSON 字符串。在实践中，最好手动转换，这样你可以清楚知道类型是什么。
 - en: '`JSON_PRETTY_PRINT`'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: '`JSON_PRETTY_PRINT`'
 - en: Uses whitespace to format the returned data to something more human-readable.
     Not strictly necessary, but makes debugging simpler.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用空白符将返回的数据格式化为更易读的形式。虽然不是必需的，但可以简化调试。
 - en: 'Finally, the following options can be used for both `json_encode()` and `json_decode()`:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，以下选项可用于`json_encode()`和`json_decode()`：
 - en: '`JSON_INVALID_UTF8_IGNORE`'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: '`JSON_INVALID_UTF8_IGNORE`'
 - en: Ignores invalid UTF-8 characters. If `JSON_INVALID_UTF8_SUBSTITUTE` is also
     set, replaces them; otherwise, drops them in the resulting string.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 忽略无效的 UTF-8 字符。如果还设置了`JSON_INVALID_UTF8_SUBSTITUTE`，则替换它们；否则，在结果字符串中删除它们。
 - en: '`JSON_INVALID_UTF8_SUBSTITUTE`'
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: '`JSON_INVALID_UTF8_SUBSTITUTE`'
 - en: Replaces invalid UTF-8 characters with `\0xfffd` (the Unicode character `'REPLACEMENT
     CHARACTER'`).
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 用`\0xfffd`（Unicode 字符`'REPLACEMENT CHARACTER'`）替换无效的 UTF-8 字符。
 - en: '`JSON_THROW_ON_ERROR`'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: '`JSON_THROW_ON_ERROR`'
 - en: Throws an error instead of populating the global last error state when an error
     occurs.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 当发生错误时，抛出错误而不是填充全局最后错误状态。
 - en: What’s Next
+  id: totrans-55
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 接下来是什么
 - en: When you’re writing PHP, one of the most important things to consider is the
     security of your code, from how well the code can absorb and deflect attacks to
     how you keep your own and your users’ data safe. The next chapter provides guidance
     and best practices to help you avert security-related disasters.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 在编写 PHP 时，考虑的最重要的事情之一是代码的安全性，从代码吸收和防御攻击的能力到如何保护你自己和用户的数据。下一章提供了指导和最佳实践，帮助你避免与安全相关的灾难。

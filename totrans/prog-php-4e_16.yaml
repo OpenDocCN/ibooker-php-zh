@@ -1,40 +1,54 @@
 - en: Chapter 15\. Application Techniques
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第15章 应用技术
 - en: By now, you should have a solid understanding of the details of the PHP language
     and its use in a variety of common situations. Now we’re going to show you some
     techniques you may find useful in your PHP applications, such as code libraries,
     templating systems, efficient output handling, error handling, and performance
     tuning.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，你应该对PHP语言的细节及其在各种常见情况下的使用有了扎实的理解。现在我们将向你展示一些在PHP应用中可能会有用的技术，比如代码库、模板系统、高效的输出处理、错误处理和性能调优。
 - en: Code Libraries
+  id: totrans-2
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 代码库
 - en: As you’ve seen, PHP ships with numerous extension libraries that combine useful
     functionality into distinct packages that you can access from your scripts. We
     covered using the GD, FPDF, and Libxslt extension libraries in Chapters [10](ch10.xhtml#graphic),
     [11](ch11.xhtml#pdf), and [12](ch12.xhtml#xml), respectively.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你所见，PHP附带了许多扩展库，将有用的功能组合成不同的包，你可以从你的脚本中访问。我们在第[10章](ch10.xhtml#graphic)、[11章](ch11.xhtml#pdf)和[12章](ch12.xhtml#xml)中介绍了如何使用GD、FPDF和Libxslt扩展库。
 - en: In addition to using the extensions that ship with PHP, you can create libraries
     of your own code that you can use in more than one part of your website. The general
     technique is to store a collection of related functions in a PHP file. Then, when
     you need to use that functionality in a page, you can use `require_once()` to
     insert the contents of the file into your current script.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 除了使用PHP附带的扩展之外，你还可以创建自己的代码库，可以在网站的多个部分中使用。一般的技术是将一组相关函数存储在一个PHP文件中。然后，当你需要在页面中使用该功能时，你可以使用`require_once()`将文件的内容插入到当前脚本中。
 - en: Note
+  id: totrans-5
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Note that there are three other inclusion type functions that can also be employed.
     They are `require()`, `include_once()`, and `include()`. [Chapter 2](ch02.xhtml#language_basics)
     discusses these functions in detail.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，还有三种其他包含类型函数也可以使用。它们是`require()`、`include_once()`和`include()`。[第2章](ch02.xhtml#language_basics)详细讨论了这些函数。
 - en: 'For example, say you have a collection of functions that help create HTML form
     elements in valid HTML: one function in your collection creates a text field or
     a `text​area` (depending on how many characters you set as the maximum), another
@@ -42,8 +56,10 @@
     than copying the code into many pages—which is tedious, leads to errors, and makes
     it difficult to fix any bugs found in the functions—creating a function library
     is the sensible choice.'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 举个例子，假设你有一组函数，可以帮助创建有效的HTML表单元素：你的集合中的一个函数创建一个文本字段或一个`text​area`（取决于你设置的最大字符数），另一个函数创建一系列弹出窗口，用于设置日期和时间，等等。与其将代码复制到许多页面中（这样做很繁琐，容易出错，并且使得难以修复函数中发现的任何错误），创建一个函数库是明智的选择。
 - en: When you are combining functions into a code library, be careful to maintain
     a balance between grouping related functions and including functions that are
     not often used. When you include a code library in a page, all of the functions
@@ -51,12 +67,16 @@
     but not parsing a function is even faster. At the same time, you don’t want to
     split your functions across too many libraries, causing you to have to include
     lots of files in each page, because file access is slow.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你将函数组合成一个代码库时，要注意在将相关函数分组和包含不经常使用的函数之间保持平衡。当你在页面中包含一个代码库时，无论你是否使用所有函数，该库中的所有函数都会被解析。PHP的解析器很快，但不解析函数会更快。同时，你不希望将函数分散到太多的库中，导致你需要在每个页面中包含大量文件，因为文件访问速度很慢。
 - en: Templating Systems
+  id: totrans-9
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 模板系统
 - en: A *templating system* provides a way of separating the code in a web page from
     the layout of that page. In larger projects, templates can be used to allow designers
     to deal exclusively with designing web pages and programmers to deal (more or
@@ -66,16 +86,22 @@
     using the appropriate markers for different kinds of dynamic content that are
     needed. The programmer, on the other hand, is responsible for creating the code
     that generates the dynamic content for the markers.
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: '*模板系统* 提供了一种将网页中的代码与页面布局分离的方法。在较大的项目中，模板可以用于允许设计师专门处理设计网页，程序员则专门（或多或少地）处理编程工作。模板系统的基本思想是，网页本身包含特殊的标记，这些标记将被动态内容替换。网页设计师可以创建页面的HTML并简单地关注布局，使用不同种类动态内容所需的适当标记。另一方面，程序员负责创建生成标记动态内容的代码。'
 - en: 'To make this more concrete, let’s look at a simple example. Consider the following
     web page, which asks the user to supply a name and then, if a name is provided,
     thanks the user:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了更具体，让我们看一个简单的例子。考虑以下网页，询问用户提供一个名称，然后如果提供了名称，感谢用户：
 - en: '[PRE0]'
+  id: totrans-12
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: The placement of the different PHP elements within various layout tags, such
     as the `font` and `table` elements, is better left to a designer, especially as
     the page gets more complex. Using a templating system, we can split this page
@@ -85,42 +111,64 @@
     new HTML template page for our simple form, which is stored in the file *user.template*.
     It uses the `{DESTINATION}` marker to indicate the script that should process
     the form.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 将不同的PHP元素放置在各种布局标记中，如`font`和`table`元素，最好由设计师处理，特别是当页面变得更复杂时。使用模板系统，我们可以将此页面拆分为多个文件，其中一些包含PHP代码，另一些包含布局。然后，HTML页面将包含特殊的标记，用于放置动态内容。[示例
+    15-1](#example_onefive_onedot_html_template_fo) 展示了我们简单表单的新HTML模板页面，存储在名为 *user.template*
+    的文件中。它使用`{DESTINATION}`标记来指示应处理表单的脚本。
 - en: Example 15-1\. HTML template for user input form
+  id: totrans-14
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 15-1\. 用户输入表单的HTML模板
 - en: '[PRE1]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: '[Example 15-2](#example_onefive_twodot_html_template_fo) shows the template
     for the thank-you page, called *thankyou.template*, which is displayed after the
     user has filled out the form. This page uses the `{NAME}` marker to include the
     value of the user’s name.'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 15-2](#example_onefive_twodot_html_template_fo) 展示了感谢页面的模板，名为 *thankyou.template*，用户填写表单后显示。此页面使用`{NAME}`标记来包含用户名称的值。'
 - en: Example 15-2\. HTML template for thank-you page
+  id: totrans-17
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 15-2\. 感谢页面的HTML模板
 - en: '[PRE2]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Now we need a script that can process these template pages, filling in the appropriate
     information for the various markers. [Example 15-3](#example_onefive_threedot_template_scrip)
     shows the PHP script that uses these templates (one for before the user has given
     us information and one for after). The PHP code uses the `fillTemplate()` function
     to join our values and the template files. This file is called *form_template.php*.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们需要一个脚本来处理这些模板页面，填写各种标记的适当信息。[示例 15-3](#example_onefive_threedot_template_scrip)
+    展示了使用这些模板的PHP脚本（一个用于用户尚未提供信息之前，另一个用于之后）。PHP代码使用 `fillTemplate()` 函数将我们的值和模板文件连接起来。该文件名为
+    *form_template.php*。
 - en: Example 15-3\. Template script
+  id: totrans-20
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 15-3\. 模板脚本
 - en: '[PRE3]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '[Example 15-4](#example_onefive_fourdot_the_filltemplat) shows the `fillTemplate()`
     function used by the script in [Example 15-3](#example_onefive_threedot_template_scrip).
     The function takes a template filename (relative to a directory named *templates*
@@ -129,22 +177,32 @@
     values are `delete`, which deletes the marker; `comment`, which replaces the marker
     with a comment noting that the value is missing; or anything else, which just
     leaves the marker alone. This file is called *func_template.php.*'
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 15-4](#example_onefive_fourdot_the_filltemplat) 展示了由[示例 15-3](#example_onefive_threedot_template_scrip)中的脚本使用的
+    `fillTemplate()` 函数。该函数接受模板文件名（相对于位于文档根目录中名为 *templates* 的目录），值数组以及可选指令，指示如果找到未给出值的标记该如何处理。可能的值有
+    `delete`，删除标记；`comment`，将标记替换为注释，指出值缺失；或其他任何内容，保留标记不变。该文件名为 *func_template.php*。'
 - en: Example 15-4\. The fillTemplate() function
+  id: totrans-23
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 15-4\. `fillTemplate()` 函数
 - en: '[PRE4]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: Clearly, this example of a templating system is somewhat contrived. But if you
     think of a large PHP application that displays hundreds of news articles, you
     can imagine how a templating system that used markers such as `{HEADLINE}`, `{BYLINE}`,
     and `{ARTICLE}` might be useful, as it would allow designers to create the layout
     for article pages without needing to worry about the actual content.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 显然，这个模板系统的示例有些牵强。但是如果您想象一个显示数百篇新闻文章的大型PHP应用程序，您可以想象使用像`{HEADLINE}`、`{BYLINE}`和`{ARTICLE}`这样的标记的模板系统可能会很有用，因为它允许设计人员创建文章页面的布局，而无需担心实际内容。
 - en: While templates may reduce the amount of PHP code that designers have to see,
     there is a performance trade-off, as every request incurs the cost of building
     a page from the template. Performing pattern matches on every outgoing page can
@@ -153,58 +211,83 @@
     hit by turning the template into straight PHP code and caching it. Instead of
     doing the template replacement on every request, it does it only when the template
     file is changed.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然模板可能减少了设计人员需要查看的PHP代码量，但性能有所折衷，因为每个请求都会产生从模板构建页面的成本。在每个传出页面上执行模式匹配可能会大大减慢流行网站的速度。Andrei
+    Zmievski的[Smarty](http://www.smarty.net)是一个高效的模板系统，通过将模板转换为直接的PHP代码并进行缓存，避免了大部分性能损失。它不是在每个请求上进行模板替换，而是在模板文件更改时才进行。
 - en: Handling Output
+  id: totrans-27
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 处理输出
 - en: PHP is all about displaying output in the web browser. Accordingly, there are
     a few different techniques that you can use to handle output more efficiently
     or conveniently.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP主要是关于在Web浏览器中显示输出。因此，您可以使用几种不同的技术来更高效或更方便地处理输出。
 - en: Output Buffering
+  id: totrans-29
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 输出缓冲
 - en: By default, PHP sends the results of `echo` and similar commands to the browser
     after each command is executed. Alternately, you can use PHP’s output buffering
     functions to gather the information that would normally be sent to the browser
     into a buffer and send it later (or kill it entirely). This allows you to specify
     the content length of your output after it is generated, capture the output of
     a function, or discard the output of a built-in function.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，PHP在执行每个命令后将`echo`和类似命令的结果发送到浏览器。或者，您可以使用PHP的输出缓冲函数将通常发送到浏览器的信息收集到缓冲区，并稍后发送（或完全丢弃）。这样可以在生成输出后指定输出的内容长度，捕获函数的输出，或者丢弃内置函数的输出。
 - en: 'You turn on output buffering with the `ob_start()` function:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`ob_start()`函数可以开启输出缓冲：
 - en: '[PRE5]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: The optional *`callback`* parameter is the name of a function that postprocesses
     the output. If specified, this function is passed the collected output when the
     buffer is flushed, and it should return a string of output to send to the browser.
     You can use this, for instance, to turn all occurrences of *http://www.yoursite.com*
     to *http://www.mysite.com*.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 可选的*`callback`*参数是后处理输出的函数名称。如果指定了这个参数，当缓冲区刷新时，将传递收集到的输出给该函数，并且它应该返回一个字符串输出以发送到浏览器。例如，您可以使用这个功能将所有*http://www.yoursite.com*的出现替换为*http://www.mysite.com*。
 - en: 'While output buffering is enabled, all output is stored in an internal buffer.
     To get the current length and contents of the buffer, use `ob_get_length()` and
     `ob_get_``contents()`:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 当启用输出缓冲时，所有输出都存储在内部缓冲区中。要获取当前缓冲区的长度和内容，请使用`ob_get_length()`和`ob_get_``contents()`：
 - en: '[PRE6]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: If buffering isn’t enabled, these functions return `false`.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果未启用缓冲，则这些函数将返回`false`。
 - en: There are two ways to throw away the data in the buffer. The `ob_clean()` function
     erases the output buffer but does not turn off buffering for subsequent output.
     The `ob_end_clean()` function erases the output buffer and ends output buffering.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 有两种方法可以丢弃缓冲区中的数据。`ob_clean()`函数擦除输出缓冲区但不关闭后续输出的缓冲。`ob_end_clean()`函数擦除输出缓冲区并结束输出缓冲。
 - en: There are three ways to send the collected output to the browser (this action
     is known as *flushing* the buffer). The `ob_flush()` function sends the output
     data to the web server and clears the buffer, but doesn’t terminate output buffering.
@@ -213,85 +296,127 @@
     function sends the output data to the web server and ends output buffering. In
     all cases, if you specified a callback with `ob_start()`, that function is called
     to decide exactly what gets sent to the server.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 有三种方法将收集的输出发送到浏览器（这个动作称为*flushing*缓冲区）。`ob_flush()`函数将输出数据发送到Web服务器并清空缓冲区，但不终止输出缓冲。`flush()`函数不仅刷新和清空输出缓冲区，还尝试立即将数据发送到浏览器。`ob_end_flush()`函数将输出数据发送到Web服务器并结束输出缓冲。在所有情况下，如果你在`ob_start()`中指定了回调函数，该函数将被调用以决定确切发送到服务器的内容。
 - en: If your script ends with output buffering still enabled—that is, if you haven’t
     called `ob_end_flush()` or `ob_end_clean()`—PHP calls `ob_end_flush()` for you.
+  id: totrans-39
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你的脚本在输出缓冲仍然启用的情况下结束——也就是说，你没有调用`ob_end_flush()`或`ob_end_clean()`——PHP会自动调用`ob_end_flush()`。
 - en: 'The following code collects the output of the `phpinfo()` function and uses
     it to determine whether you have the GD graphics module installed:'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 以下代码收集`phpinfo()`函数的输出并用于确定你是否安装了GD图形模块：
 - en: '[PRE7]'
+  id: totrans-41
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'Of course, a quicker and simpler approach to check if a certain extension is
     available is to pick a function that you know the extension provides and check
     if it exists. For the GD extension, you might do:'
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，检查某个特定扩展是否可用的更快、更简单的方法是选择一个你知道该扩展提供的函数，并检查它是否存在。对于GD扩展，你可以这样做：
 - en: '[PRE8]'
+  id: totrans-43
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'To change all references in a document from *http://www.yoursite.com* to *http://www.mysite.com*,
     simply wrap the page like this:'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在文档中将所有引用从*http://www.yoursite.com*更改为*http://www.mysite.com*，只需像这样包装页面：
 - en: '[PRE9]'
+  id: totrans-45
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: '[PRE10]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: '[PRE11]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'Another way to do this is with a callback. Here, the `rewrite()` callback changes
     the text of the page:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一种方法是使用回调函数。在这里，`rewrite()`回调修改页面的文本：
 - en: '[PRE12]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: '[PRE13]'
+  id: totrans-50
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: '[PRE14]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Output Compression
+  id: totrans-52
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 输出压缩
 - en: 'Recent browsers support compressing the text of web pages; the server sends
     compressed text and the browser decompresses it. To automatically compress your
     web page, wrap it like this:'
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 现代浏览器支持压缩网页文本；服务器发送压缩文本，浏览器解压缩它。为了自动压缩你的网页，可以像这样包装它：
 - en: '[PRE15]'
+  id: totrans-54
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: The built-in `ob_gzhandler()` function can be used as the callback for a call
     to `ob_start()`. It compresses the buffered page according to the `Accept-Encoding`
     header sent by the browser. Possible compression techniques are *gzip*, *deflate*,
     or none.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 内置的`ob_gzhandler()`函数可以作为调用`ob_start()`的回调函数使用。它根据浏览器发送的`Accept-Encoding`头部压缩缓冲页面。可能的压缩技术包括*gzip*、*deflate*或无压缩。
 - en: It rarely makes sense to compress short pages, as the time for compression and
     decompression exceeds the time it would take to simply send the uncompressed text.
     It does make sense to compress large (greater than 5 KB) web pages, however.
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 压缩短页面很少有意义，因为压缩和解压缩所需的时间超过了直接发送未压缩文本所需的时间。然而，压缩大于5 KB的大页面是有意义的。
 - en: Instead of adding the `ob_start()` call to the top of every page, you can set
     the `output_handler` option in your *php.ini* file to a callback to be made on
     every page. For compression, this is `ob_gzhandler`.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 不必在每个页面顶部添加`ob_start()`调用，你可以在你的*php.ini*文件中设置`output_handler`选项为一个在每个页面上调用的回调函数。对于压缩，这是`ob_gzhandler`。
 - en: Performance Tuning
+  id: totrans-58
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 性能调优
 - en: Before thinking much about performance tuning, take the time to get your code
     working properly. Once you have sound working code, you can locate the slower
     sections, or *bottlenecks*. If you try to optimize your code while writing it,
@@ -299,13 +424,17 @@
     takes more time to write. If you spend that time on a section of code that isn’t
     actually causing a problem, that’s time wasted, especially down the road when
     you need to maintain that code and you can no longer read it.
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 在考虑性能调优之前，先花时间确保你的代码能正常工作。一旦你有了可靠的工作代码，你可以定位较慢的部分，或者*瓶颈*。如果在编写代码时尝试优化代码，你会发现优化后的代码往往更难阅读，并且通常需要更多的时间编写。如果你花时间在一个实际上并不造成问题的代码部分上，那么这段时间就浪费了，特别是在未来需要维护该代码时，而你无法再阅读它时。
 - en: 'Once you get your code working, you may find that it needs some optimization.
     Optimizing code tends to fall within one of two areas: shortening execution times
     and reducing memory requirements.'
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您的代码运行正常，您可能会发现它需要进行一些优化。优化代码通常涉及两个方面：缩短执行时间和减少内存需求。
 - en: Before you begin optimization, ask yourself whether you need to optimize at
     all. Too many programmers have wasted hours wondering whether a complex series
     of string function calls are faster or slower than a single Perl regular expression,
@@ -316,8 +445,10 @@
     between prompt delivery and server overload. With a possible long wait on your
     site, you can bet that your web visitors won’t take long to decide to look elsewhere
     for their information.
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始优化之前，请问自己是否真的需要进行优化。太多程序员浪费了时间，纠结于一系列复杂的字符串函数调用是否比单个Perl正则表达式快还是慢，而这些代码所在的页面每五分钟只会被查看一次。只有当页面加载时间长到用户感觉它很慢时，才需要进行优化。通常这是一个非常受欢迎的网站的症状——如果页面请求非常频繁，生成页面所需的时间可能会决定及时交付与服务器超载之间的差异。在您的网站上可能需要等待很长时间时，您可以打赌您的访客不会花费太长时间决定在其他地方寻找信息。
 - en: Once you’ve decided that your page needs optimization (this can best be done
     with some end user testing and observation), you can move on to working out exactly
     what is slow. You can use the techniques in the section “Profiling” to time the
@@ -328,47 +459,65 @@
     accounts for only 0.25 seconds of the total time. Identify the biggest time-wasting
     blocks of code and focus on them. Time the page and the pieces you’re optimizing
     to make sure your changes are having a positive, and not a negative, effect.
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您确定您的页面需要优化（最好通过一些最终用户测试和观察来完成此操作），您可以继续确切地确定哪些部分较慢。您可以使用“分析”部分的技术来计时页面的各个子程序或逻辑单元。这将让您了解哪些部分生成页面所需的时间最长——这些部分是您应该集中优化工作的地方。如果一个页面需要5秒钟来生成，通过优化仅占总时间0.25秒的函数，您永远无法将其减少到2秒钟。确定浪费时间最多的代码块并集中关注它们。计时页面和正在优化的部分，以确保您的更改产生积极而非负面的效果。
 - en: Finally, know when to quit. Sometimes there is an absolute limit for the speed
     at which you can get something to run. In these circumstances, the only way to
     get better performance is to throw new hardware at the problem. The solution might
     turn out to be faster machines or more web servers with a reverse-proxy cache
     in front of them.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，要知道何时停止。有时候，您能够让某物运行的速度有一个绝对的极限。在这些情况下，提高性能的唯一方法可能是通过引入新硬件来解决问题。解决方案可能会是更快的机器或在它们前面使用反向代理缓存的更多Web服务器。
 - en: Benchmarking
+  id: totrans-64
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 基准测试
 - en: 'If you’re using Apache, you can use the Apache benchmarking utility, `ab`,
     to do high-level performance testing. To use it, run:'
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您正在使用Apache，可以使用Apache基准测试实用工具`ab`进行高级性能测试。要使用它，请运行：
 - en: '[PRE16]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: This command tests the speed of the PHP script *info.php* 1,000 times, with
     10 concurrent requests running at any given time. The benchmarking tool returns
     various information about the test, including the slowest, fastest, and average
     load times. You can compare those values to a static HTML page to see how quickly
     your script performs.
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 此命令将以10个并发请求的形式对PHP脚本*info.php*进行1,000次速度测试。基准测试工具会返回关于测试的各种信息，包括最慢、最快和平均加载时间。您可以将这些值与静态HTML页面进行比较，看看您的脚本执行速度有多快。
 - en: 'For example, here’s the output from 1,000 fetches of a page that simply calls
     `phpinfo()`:'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，这是对简单调用`phpinfo()`页面进行1,000次获取的输出：
 - en: '[PRE17]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: If your PHP script uses sessions, the results you get from `ab` will not be
     representative of the real-world performance of the scripts. Since a session is
     locked across a request, results from the concurrent requests run by `ab` will
     be extremely poor. However, in normal usage, a session is typically associated
     with a single user, who isn’t likely to make concurrent requests.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的PHP脚本使用会话，则从`ab`获得的结果将无法代表脚本的真实世界性能。由于会话在请求之间被锁定，`ab`运行的并发请求的结果将非常糟糕。然而，在正常使用中，会话通常与单个用户关联，该用户不太可能发起并发请求。
 - en: Using `ab` tells you the overall speed of your page but gives you no information
     on the speed of individual functions of blocks of code within the page. Use `ab`
     to test changes you make to your code as you attempt to improve its speed. We
@@ -376,26 +525,36 @@
     these microbenchmarks don’t matter if the overall page is still slow to load and
     run. The ultimate proof that your performance optimizations have been successful
     comes from the numbers that `ab` reports.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`ab`告诉您页面的总体速度，但不提供页面内单个功能或代码块的速度信息。在尝试提高代码速度时，请使用`ab`来测试您所做的更改。我们将在下一部分向您展示如何计时页面的各个部分，但如果整体页面仍然加载和运行缓慢，这些微基准测试并不重要。您的性能优化是否成功的最终证据来自`ab`报告的数字。
 - en: Profiling
+  id: totrans-72
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 分析
 - en: PHP does not have a built-in profiler, but there are some techniques you can
     use to investigate code that you think has performance issues. One technique is
     to call the `microtime()` function to get an accurate representation of the amount
     of time that elapses. You can surround the code you’re profiling with calls to
     `microtime()` and use the values it returns to calculate how long the code took.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP没有内置的分析器，但是有一些技术可以用来调查您认为存在性能问题的代码。一种技术是调用`microtime()`函数来获取经过的时间的准确表示。您可以在要进行分析的代码周围调用`microtime()`，并使用它返回的值计算代码执行所花费的时间。
 - en: 'For instance, here’s some code you can use to find out just how long it takes
     to produce the `phpinfo()` output:'
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，这是一些代码，您可以使用它来查找生成`phpinfo()`输出所需的时间：
 - en: '[PRE18]'
+  id: totrans-75
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Reload this page several times, and you’ll see the number fluctuate slightly.
     Reload it often enough, and you’ll see it fluctuate quite a lot. The danger of
     timing a single run of a piece of code is that you may not get a representative
@@ -403,124 +562,178 @@
     removed the source file from its cache. The best way to get an accurate representation
     of the time it takes to do something is to time repeated runs and look at the
     average of those times.
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 多次重新加载此页面，您将看到数字略有波动。如果经常重新加载，您将看到波动非常大。仅计时代码的单次运行存在风险，可能无法获得代表性的机器负载——服务器可能在用户启动*emacs*时分页，或者已从其缓存中删除源文件。获得准确的执行时间表示的最佳方法是计时重复运行并查看这些时间的平均值。
 - en: 'The `Benchmark` class available in PEAR makes it easy to repeatedly time sections
     of your script. Here is a simple example that shows how you can use it:'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: PEAR中可用的`Benchmark`类使得重复计时脚本的各个部分变得容易。以下是一个简单示例，展示了如何使用它：
 - en: '[PRE19]'
+  id: totrans-78
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'The output from this program is:'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 此程序的输出是：
 - en: '[PRE20]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: That is, it took 1.0006979703903 seconds to get to Marker 1, which is set right
     after our `sleep(1)` call, so it is what you would expect. It took just over two
     seconds to get from Marker 1 to the end, and the entire script took just over
     three seconds to run. You can add as many markers as you like and thereby time
     various parts of your script.
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 换句话说，到达标记1花了1.0006979703903秒，该标记紧跟我们的`sleep(1)`调用之后，这是您可以预期的。从标记1到结束花了稍微超过两秒，整个脚本运行时间略超过三秒。您可以添加任意多的标记，从而计时脚本的各个部分。
 - en: Optimizing Execution Time
+  id: totrans-82
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 优化执行时间
 - en: 'Here are some tips for shortening the execution times of your scripts:'
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里有一些缩短脚本执行时间的技巧：
 - en: Avoid `printf()` when `echo` is all you need.
+  id: totrans-84
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当只需`echo`时，避免使用`printf()`。
 - en: 'Avoid recomputing values inside a loop, as PHP’s parser does not remove loop
     invariants. For example, don’t do this if the size of $array doesn’t change:'
+  id: totrans-85
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 避免在循环内重新计算值，因为PHP的解析器不会删除循环不变量。例如，如果$array的大小不变，请不要这样做：
 - en: '[PRE21]'
+  id: totrans-86
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: 'Instead, do this:'
+  id: totrans-87
   prefs:
   - PREF_IND
   type: TYPE_NORMAL
+  zh: 相反，请这样做：
 - en: '[PRE22]'
+  id: totrans-88
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Include only files that you need. Split included files to include only functions
     that you are sure will be used together. Although the code may be a bit more difficult
     to maintain, parsing code you don’t use is expensive.
+  id: totrans-89
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 只包含你需要的文件。拆分包含的文件，只包含你确定会一起使用的函数。虽然代码可能更难维护，但解析不使用的代码是昂贵的。
 - en: If you are using a database, use persistent database connections—setting up
     and tearing down database connections can be slow.
+  id: totrans-90
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 如果你正在使用数据库，请使用持久性数据库连接——建立和断开数据库连接可能会很慢。
 - en: Don’t use a regular expression when a simple string-manipulation function will
     do the job. For example, to turn one character into another in a string, use `str_replace()`,
     not `preg_replace()`.
+  id: totrans-91
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在做简单的字符串操作时，不要使用正则表达式。例如，将一个字符转换为另一个字符的字符串操作，应该使用`str_replace()`而不是`preg_replace()`。
 - en: Optimizing Memory Requirements
+  id: totrans-92
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 优化内存需求
 - en: 'Here are some techniques for reducing the memory requirements of your scripts:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里有一些减少脚本内存需求的技术：
 - en: 'Use numbers instead of strings whenever possible:'
+  id: totrans-94
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 尽可能使用数字而不是字符串：
 - en: '[PRE23]'
+  id: totrans-95
   prefs:
   - PREF_IND
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: When you’re done with a large string, set the variable holding the string to
     an empty string. This frees up the memory to be reused.
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当您使用完一个大字符串后，请将持有该字符串的变量设置为空字符串。这样可以释放内存以便重新使用。
 - en: Only include or require files that you need. Use `include_once()` and `require_once()`
     instead of `include()` and `require()`.
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 只包含或需要你需要的文件。使用`include_once()`和`require_once()`而不是`include()`和`require()`。
 - en: Release MySQL or other database result sets as soon as you are done with them.
     There is no benefit to keeping result sets in memory beyond their use.
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 在完成对MySQL或其他数据库的使用后尽快释放结果集。保持结果集在内存中超出其用途并无益处。
 - en: Reverse Proxies and Replication
+  id: totrans-99
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 反向代理和复制
 - en: Adding hardware is often the quickest route to better performance. It’s better
     to benchmark your software first, though, as it’s generally cheaper to fix software
     than to buy new hardware. Three common solutions to the problem of scaling traffic
     are reverse-proxy caches, load-balancing servers, and database replication.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 添加硬件通常是改善性能的最快途径。不过，最好先对软件进行基准测试，因为通常修复软件比购买新硬件便宜。解决流量扩展问题的三种常见方法是反向代理缓存、负载均衡服务器和数据库复制。
 - en: Reverse-proxy caches
+  id: totrans-101
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 反向代理缓存
 - en: A *reverse proxy* is a program that sits in front of your web server and handles
     all connections from client browsers. Proxies are optimized to serve up static
     files quickly, and despite appearances and implementation, most dynamic sites
     can be cached for short periods of time without loss of service. Normally, you’ll
     run the proxy on a separate machine from your web server.
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: '*反向代理*是一个程序，位于您的Web服务器前面，处理来自客户端浏览器的所有连接。代理被优化以快速提供静态文件，尽管外表和实施方式不同，大多数动态站点可以在短时间内进行缓存，而不会丢失服务。通常情况下，您会在一个单独的机器上运行代理。'
 - en: Take, for example, a busy site whose front page is hit 50 times per second.
     If this first page is built from two database queries and the database changes
     as often as twice a minute, you can avoid 5,994 database queries per minute by
@@ -528,79 +741,110 @@
     30 seconds. The worst-case scenario is that there will be a 30-second delay from
     database update to a user seeing this new data. For most applications that’s not
     a very long delay, and it gives significant performance benefits.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 举个例子，一个繁忙的站点每秒首页被访问50次。如果这个首页由两个数据库查询构建，并且数据库每分钟变化两次，你可以通过使用`Cache-Control`头告诉反向代理缓存页面30秒来避免每分钟5994次数据库查询。最坏情况是从数据库更新到用户看到新数据会有30秒的延迟。对于大多数应用程序来说，这不是一个很长的延迟，并且带来显著的性能优势。
 - en: Proxy caches can even intelligently cache content that is personalized or tailored
     to the browser type, accepted language, or similar feature. The typical solution
     is to send a `Vary` header telling the cache exactly which request parameters
     affect the caching.
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 代理缓存甚至可以智能缓存根据浏览器类型、接受的语言或类似功能个性化或定制的内容。典型的解决方案是发送`Vary`头告诉缓存确切影响缓存的请求参数。
 - en: There are hardware proxy caches available, but there are also very good software
     implementations. For a high-quality and extremely flexible open source proxy cache,
     have a look at [Squid](http://www.squid-cache.org). See the book [*Web Caching*](http://oreil.ly/Web_Caching)
     (O’Reilly) by Duane Wessels for more information on proxy caches and how to tune
     a website to work with one.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 有硬件代理缓存可用，但也有非常好的软件实现。对于一个高质量且极其灵活的开源代理缓存，请参考[Squid](http://www.squid-cache.org)。有关代理缓存及如何调整网站以与其配合的更多信息，请参阅
+    Duane Wessels 的书籍 [*Web Caching*](http://oreil.ly/Web_Caching)（O'Reilly）。
 - en: Load balancing and redirection
+  id: totrans-106
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 负载均衡和重定向
 - en: One way to boost performance is to spread the load over a number of machines.
     A *load-balancing system* does this by either evenly distributing the load or
     sending incoming requests to the least-loaded machine. A *redirector* is a program
     that rewrites incoming URLs, allowing fine-grained control over the distribution
     of requests to individual server machines.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 提升性能的一种方法是将负载分布到多台机器上。*负载均衡系统*可以通过均匀分布负载或将传入请求发送到负载最轻的机器来实现这一点。*重定向器*是一种重写传入URL的程序，允许对请求分布到各个服务器进行精细控制。
 - en: Again, there are hardware HTTP redirectors and load balancers, but redirection
     and load balancing can also be done effectively in software. By adding redirection
     logic to Squid through a tool like [SquidGuard](http://www.squidguard.org), you
     can improve performance in a number of ways.
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 同样，有硬件HTTP重定向器和负载均衡器，但重定向和负载均衡也可以通过软件有效实现。通过像[SquidGuard](http://www.squidguard.org)这样的工具将重定向逻辑添加到Squid中，可以通过多种方式提高性能。
 - en: MySQL replication
+  id: totrans-109
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: MySQL 复制
 - en: Sometimes the database server is the bottleneck—many simultaneous queries can
     bog down a database server, resulting in sluggish performance. Replication is
     one of the best solutions. Take everything that happens to one database and quickly
     bring one or more other databases in sync, so you end up with multiple identical
     databases. This lets you spread your queries across many database servers instead
     of loading down only one.
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时数据库服务器是瓶颈——许多同时查询可能会使数据库服务器陷入困境，导致性能下降。复制是最佳解决方案之一。将发生在一个数据库中的所有内容迅速同步到一个或多个其他数据库中，从而获得多个相同的数据库。这使您可以在多个数据库服务器上分散查询，而不是仅在一个服务器上负载。
 - en: The most effective model is to use one-way replication, where you have a single
     master database that gets replicated to a number of slave databases. Database
     writes go to the master server, and database reads are load-balanced across multiple
     slave databases. This technique is aimed at architectures that do a lot more reads
     than writes. Most web applications fit this scenario nicely.
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 最有效的模型是使用单向复制，在这种模式下，您有一个单一的主数据库，将其复制到多个从数据库中。数据库写操作发送到主服务器，数据库读取在多个从服务器之间进行负载均衡。这种技术旨在适用于读取操作远远多于写操作的架构。大多数Web应用程序很适合这种场景。
 - en: '[Figure 15-1](#database_replication_relationship) shows the relationship between
     the master and slave databases during replication.'
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 15-1](#database_replication_relationship) 展示了复制过程中主数据库和从数据库之间的关系。'
 - en: '![Database replication relationship](Images/php4_1502.png)'
+  id: totrans-113
   prefs: []
   type: TYPE_IMG
+  zh: '![数据库复制关系](Images/php4_1502.png)'
 - en: Figure 15-1\. Database replication relationship
+  id: totrans-114
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 15-1\. 数据库复制关系
 - en: Many databases support replication, including MySQL, PostgreSQL, and Oracle.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多数据库支持复制，包括 MySQL、PostgreSQL 和 Oracle。
 - en: Putting it all together
+  id: totrans-116
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 将所有内容整合在一起
 - en: For a really high-powered architecture, pull all these concepts together into
     a configuration like the one shown in [Figure 15-2](#putting_it_all_together).
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于一个真正强大的架构，将所有这些概念集成到像 [图 15-2](#putting_it_all_together) 中显示的配置中。
 - en: Using five separate machines—one for the reverse proxy and redirector, three
     web servers, and one master database server—this architecture can handle a huge
     number of requests. The exact number depends only on the two bottlenecks—the single
@@ -608,27 +852,41 @@
     or both of these could be split across multiple servers as well, but as it is,
     if your application is somewhat cacheable and heavy on database reads, this is
     a nice approach.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用五台单独的机器——一个用于反向代理和重定向器，三个Web服务器和一个主数据库服务器——这种架构可以处理大量请求。确切的数字仅取决于两个瓶颈——单个的Squid代理和单个的主数据库服务器。稍加创意，这两者中的任何一个或两者都可以分配到多台服务器上，但目前，如果您的应用程序在某种程度上可缓存并且数据库读取量大，这是一个不错的方法。
 - en: '![Putting it all together](Images/php4_1503.png)'
+  id: totrans-119
   prefs: []
   type: TYPE_IMG
+  zh: '![将所有内容整合在一起](Images/php4_1503.png)'
 - en: Figure 15-2\. Putting it all together
+  id: totrans-120
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 15-2\. 将所有内容整合在一起
 - en: Each Apache server gets its own read-only MySQL database, so all read requests
     from your PHP scripts go over a Unix-domain local socket to a dedicated MySQL
     instance. You can add as many of these Apache/PHP/MySQL servers as you need under
     this framework. Any database writes from your PHP applications will go over a
     Transmission Control Protocol (TCP) socket to the master MySQL server.
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个 Apache 服务器都有自己的只读 MySQL 数据库，因此来自 PHP 脚本的所有读请求都通过 Unix 域本地套接字传输到专用的 MySQL
+    实例。您可以根据需要在此框架下添加任意多个这样的 Apache/PHP/MySQL 服务器。来自您的 PHP 应用程序的任何数据库写入都将通过传输控制协议（TCP）套接字传输到主
+    MySQL 服务器。
 - en: What’s Next
+  id: totrans-122
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 接下来的步骤
 - en: In the next chapter, we’ll dive deeper into using PHP to develop and deploy
     web services.
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 在接下来的章节中，我们将深入探讨使用 PHP 开发和部署 Web 服务。

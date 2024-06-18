@@ -1,18 +1,24 @@
 - en: Chapter 12\. Testing
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第12章 测试
 - en: Most developers know that testing your code is a good thing. We’re supposed
     to do it. We likely have an idea of why it’s good, and we might’ve even read some
     tutorials about how it’s supposed to work.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数开发者知道测试代码是一件好事。我们应该这样做。我们可能已经知道为什么这样做是好的，并且我们可能甚至已经阅读了一些关于如何进行测试的教程。
 - en: But the gap between knowing *why* you should test and knowing *how* to test
     is wide. Thankfully, tools like PHPUnit, Mockery, and PHPSpec provide an incredible
     number of options for testing in PHP—but it can still be pretty overwhelming to
     get everything set up.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，了解*为什么*要测试和知道*如何*测试之间的差距很大。幸运的是，诸如PHPUnit、Mockery和PHPSpec之类的工具为PHP提供了大量测试选项，但是要设置好这一切可能仍然会让人感到很困扰。
 - en: Out of the box, Laravel comes with baked-in integrations to PHPUnit (unit testing),
     Mockery (mocking), and Faker (creating fake data for seeding and testing). It
     also provides its own simple and powerful suite of application testing tools,
@@ -21,643 +27,957 @@
     framework called Dusk that can even interact with your JavaScript applications
     and test against them. In case this hasn’t made it clear, we’re going to cover
     a lot of ground in this chapter.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel自带与PHPUnit（单元测试）、Mockery（模拟）和Faker（生成虚假数据以进行种子和测试）的集成。此外，它还提供了自己简单而强大的应用程序测试工具套件，允许你“爬行”你的站点URI、提交表单、检查HTTP状态码，并针对JSON进行验证和断言。它还提供了一个强大的前端测试框架Dusk，甚至可以与你的JavaScript应用程序进行交互并对其进行测试。如果这还不清楚，我们将在本章节中详细介绍。
 - en: To make it easy for you to get started, Laravel’s testing setup comes with sample
     application tests that can run successfully the moment you create a new app. That
     means you don’t have to spend any time configuring your testing environment, and
     that’s one less barrier to writing your tests.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了让你轻松上手，Laravel的测试设置包含可以在创建新应用程序时立即成功运行的示例应用程序测试。这意味着你不需要花时间配置你的测试环境，这就是写你的测试时的一个少了的障碍。
 - en: Testing Basics
+  id: totrans-5
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 测试基础知识
 - en: 'Tests in Laravel live in the *tests* folder. There are two files in the root:
     *TestCase.php*, which is the base root test that all of your tests will extend,
     and *CreatesApplication.php*, a trait (imported by *TestCase.php*) that allows
     any class to boot a sample Laravel application for testing.'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel的测试位于*tests*文件夹中。根目录中有两个文件：*TestCase.php*，这是所有你的测试将扩展的基本根测试，以及*CreatesApplication.php*，一个trait（由*TestCase.php*导入），允许任何类启动一个用于测试的示例Laravel应用程序。
 - en: Laravel test Command
+  id: totrans-7
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Laravel测试命令
 - en: 'Laravel has an Artisan command for running your tests: `php artisan test`.
     It’s a wrapper around the `./vendor/bin/phpunit` command, which will additionally
     show more output for each test.'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel有一个Artisan命令用于运行你的测试：`php artisan test`。它是`./vendor/bin/phpunit`命令的包装器，它将为每个测试显示更多输出。
 - en: 'There are also two subfolders: *Features*, for tests that cover the interaction
     between multiple units, and *Unit*, for tests that are intended to cover just
     one unit of your code (class, module, function, etc.). Each of these folders contains
     an *ExampleTest.php* file, each of which has a single sample test inside it, ready
     to run.'
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有两个子文件夹：*Features*，用于覆盖多个单元之间交互的测试，以及*Unit*，用于只覆盖你代码的一个单元（类、模块、函数等）的测试。这些文件夹中的每一个都包含一个*ExampleTest.php*文件，其中每个文件中都有一个准备好运行的单个样本测试。
 - en: 'The `ExampleTest` in your *Unit* directory contains one simple assertion: `$this``->``assertTrue(true)`.
     Anything in your unit tests is likely to be relatively simple PHPUnit syntax (asserting
     that values are equal or different, looking for entries in arrays, checking Booleans,
     etc.), so there’s not much to learn there.'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 在你的*Unit*目录中的`ExampleTest`包含一个简单的断言：`$this``->``assertTrue(true)`。你的单元测试中的任何内容可能都是相对简单的PHPUnit语法（断言值相等或不同，查找数组中的条目，检查布尔值等），所以在这里没有太多需要学习的内容。
 - en: The Basics of PHPUnit Assertions
+  id: totrans-11
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: PHPUnit断言基础知识
 - en: 'In PHPUnit, most of our assertions will be run on the `$this` object with this
     syntax:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 在PHPUnit中，我们的大多数断言将在`$this`对象上使用这种语法运行：
 - en: '[PRE0]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'So, for example, if we’re asserting that two variables should be equal, we’ll
     pass it first our expected result, and second the actual outcome of the object
     or system we’re testing:'
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，例如，如果我们断言两个变量应该相等，我们将首先传入我们预期的结果，然后传入对象或系统实际结果的第二个值进行测试：
 - en: '[PRE1]'
+  id: totrans-15
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: As you can see in [Example 12-1](#EX1201), the `ExampleTest` in the *Feature*
     directory makes a simulated HTTP request to the page at the root path of your
     application and checks that its HTTP status is 200 (successful). If it is, it’ll
     pass; if not, it’ll fail. Unlike your average PHPUnit test, we’re running these
     assertions on the `TestResponse` object that’s returned when we make test HTTP
     calls.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你在[示例12-1](#EX1201)中看到的那样，*Feature*目录中的`ExampleTest`模拟了对应用程序根路径的页面的 HTTP 请求，并检查其
+    HTTP 状态是200（成功）。如果是，它将通过；如果不是，它将失败。不同于普通的 PHPUnit 测试，我们在对测试 HTTP 调用时返回的`TestResponse`对象上进行这些断言。
 - en: Example 12-1\. tests/Feature/ExampleTest.php
+  id: totrans-17
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例12-1. tests/Feature/ExampleTest.php
 - en: '[PRE2]'
+  id: totrans-18
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: To run the tests, run `php artisan test` on the command line from the root folder
     of your application. You should see something like the output in [Example 12-2](#EX1202).
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 运行测试时，在应用程序根目录的命令行上运行`php artisan test`。你应该看到类似[示例12-2](#EX1202)的输出。
 - en: Example 12-2\. Sample `ExampleTest` output
+  id: totrans-20
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例12-2. 示例`ExampleTest`输出
 - en: '[PRE3]'
+  id: totrans-21
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: You just ran your first Laravel application test! Those two checkmarks indicate
     that you have two passing tests. As you can see, you’re set up out of the box
     not only with a functioning PHPUnit instance, but also a full-fledged application
     testing suite that can make mock HTTP calls and test your application’s responses.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 你刚刚运行了你的第一个 Laravel 应用程序测试！两个勾号表示你有两个通过的测试。正如你看到的，你不但已默认配置了一个功能完备的 PHPUnit 实例，还配置了一个完整的应用程序测试套件，可以进行模拟
+    HTTP 调用并测试应用程序的响应。
 - en: In case you’re not familiar with PHPUnit, let’s take a look at what it’s like
     to have a test fail. Instead of modifying the previous test, we’ll make our own.
     Run `php artisan make:test FailingTest`. This will create the file *tests/Feature/FailingTest.php*;
     you can modify its `testExample()` method to look like [Example 12-3](#EX1203).
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你对 PHPUnit不太熟悉，让我们看看一个测试失败时的情形。我们将不修改之前的测试，而是自己创建一个。运行`php artisan make:test
+    FailingTest`。这将创建文件*tests/Feature/FailingTest.php*；你可以修改其`testExample()`方法，使其看起来像[示例12-3](#EX1203)。
 - en: Example 12-3\. tests/Feature/FailingTest.php, edited to fail
+  id: totrans-24
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例12-3. 修改后的tests/Feature/FailingTest.php
 - en: '[PRE4]'
+  id: totrans-25
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: As you can see, it’s the same as the test we ran previously, but we’re now testing
     against the wrong status. Let’s run PHPUnit again.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 如你所见，它与我们之前运行的测试相同，但我们现在正在测试错误的状态。让我们再次运行 PHPUnit。
 - en: Generating Unit Tests
+  id: totrans-27
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 生成单元测试
 - en: 'If you want your test to be generated in the `Unit` directory instead of the
     `Feature` directory, pass the `--unit` flag:'
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您   如果你希望测试生成到`Unit`目录而不是`Feature`目录，请传递`--unit`标志：
 - en: '[PRE5]'
+  id: totrans-29
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Whoops! This time the output will probably look a bit like [Example 12-4](#EX1204).
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 哎呀！这次的输出看起来可能像是[示例12-4](#EX1204)那样。
 - en: Example 12-4\. Sample failing test output
+  id: totrans-31
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例12-4. 示例失败测试输出
 - en: '[PRE6]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: Let’s break this down. Last time there were two passing tests, but this time
     one failed and two passed.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们分解一下。上次有两个通过的测试，但这次有一个失败，两个通过。
 - en: Then, for each error, we see the test name (here, `Test\Feature\FailingTest
     > example`), the error message (“Expected status code...”), and a partial stack
     trace, so we can see the line where the failure occurred.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，对于每个错误，我们看到测试名称（在这里是`Test\Feature\FailingTest > example`），错误消息（“期望状态代码...”），以及部分堆栈跟踪，因此我们可以看到错误发生的行。
 - en: Now that we’ve run both a passing test and a failing test, it’s time for you
     to learn more about Laravel’s testing environment.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们已经运行了通过的测试和失败的测试，是时候了解更多关于Laravel的测试环境了。
 - en: Naming Tests
+  id: totrans-36
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 命名测试
 - en: By default, Laravel’s testing system will run any file in the *tests* directory
     whose name ends with the word *Test*. That’s why *tests/ExampleTest.php* was run
     by default.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，Laravel的测试系统会运行任何位于名为*tests*目录的文件，其名称以*Test*结尾。那就是为什么*tests/ExampleTest.php*会被默认运行。
 - en: If you’re not familiar with PHPUnit, you might not know that only the methods
     in your tests with names that start with the word `test` will be run—or methods
     with a `@test` documentation block, or *docblock*. See [Example 12-5](#EX1205)
     for which methods will and won’t run.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你不熟悉 PHPUnit，你可能不知道只有以`test`为前缀的测试方法或带有`@test`文档块的方法或*docblock*才会运行。请参阅[示例12-5](#EX1205)，了解哪些方法会运行和不会运行。
 - en: Example 12-5\. Naming PHPUnit methods
+  id: totrans-39
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例12-5. 命名 PHPUnit 方法
 - en: '[PRE7]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: The Testing Environment
+  id: totrans-41
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 测试环境
 - en: Any time a Laravel application is running, it has a current “environment” name
     that represents the environment it’s running in. This name may be set to `local`,
     `staging`, `production`, or anything else you want. You can retrieve this by running
     `app()->environment()`, or you can run `if (app()->``environment('local'))` or
     something similar to test whether the current environment matches the passed name.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 当Laravel应用程序正在运行时，它有一个当前的“环境”名称，表示它正在运行的环境。你可以通过运行`app()->environment()`来检索这个名称，或者你可以运行`if
+    (app()->environment('local'))`或类似的内容来测试当前环境是否与传递的名称匹配。
 - en: When you run tests, Laravel automatically sets the environment to `testing`.
     This means you can test for `if (app()->environment('testing'))` to enable or
     disable certain behaviors in the testing environment.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你运行测试时，Laravel会自动将环境设置为`testing`。这意味着你可以测试`if (app()->environment('testing'))`来启用或禁用测试环境中的某些行为。
 - en: Additionally, Laravel doesn’t load the normal environment variables from *.env*
     for testing. If you want to set any environment variables for your tests, edit
     *phpunit.xml* and, in the `<php>` section, add a new `<env>` for each environment
     variable you want to pass in—for example, `<env name="DB_CONNECTION" value="sqlite"/>`.
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: 另外，Laravel在测试时不会加载来自*.env*的普通环境变量。如果你想为你的测试设置任何环境变量，请编辑*phpunit.xml*，在`<php>`部分为每个想要传递的环境变量添加一个新的`<env>`，例如，`<env
+    name="DB_CONNECTION" value="sqlite"/>`。
 - en: The Testing Traits
+  id: totrans-45
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 测试特性
 - en: Before we get into the methods you can use for testing, you need to know about
     the four testing traits you can pull into any test class.
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们讨论可以用于测试的方法之前，你需要了解可以引入任何测试类的四个测试特性。
 - en: RefreshDatabase
+  id: totrans-47
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: RefreshDatabase
 - en: '`Illuminate\Foundation\Testing\RefreshDatabase` is imported at the top of every
     newly generated test file, and it’s the most commonly used database migration
     trait.'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Illuminate\Foundation\Testing\RefreshDatabase`被导入到每个新生成的测试文件的顶部，是最常用的数据库迁移特性。'
 - en: The point of this, and the other database traits, is to ensure your database
     tables are correctly migrated at the start of each test.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个和其他数据库特性的目的是确保你的数据库表在每个测试开始时正确迁移。
 - en: '`RefreshDatabase` takes two steps to do this. First, it runs your migrations
     on your test database *once* at the beginning of each test run (when you run `phpunit`,
     not for each individual test method). And second, it wraps each individual test
     method in a database transaction and rolls back the transaction at the end of
     the test.'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '`RefreshDatabase`执行两个步骤来实现这一点。首先，在每次测试运行开始时（当你运行`phpunit`时，而不是每个单独的测试方法），它会在你的测试数据库上运行你的迁移*一次*。其次，它会将每个单独的测试方法包装在一个数据库事务中，并在测试结束时回滚事务。'
 - en: That means you have your database migrated for your tests and cleared out fresh
     after each test runs, without having to run your migrations again before every
     test—making this the fastest possible option. When in doubt, stick with this.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 这意味着你为你的测试迁移了数据库，并且在每次测试运行后清除，而不需要在每个测试之前再次运行你的迁移——这是最快的选项。当你犹豫不决时，坚持使用这个选项。
 - en: DatabaseMigrations
+  id: totrans-52
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: DatabaseMigrations
 - en: If you import the `Illuminate\Foundation\Testing\DatabaseMigrations` trait instead
     of the `RefreshDatabase` trait, it will run your entire set of database migrations
     fresh before each test. Laravel makes this happen by running `php artisan migrate:fresh`
     in the `setUp()` method before every test runs.
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你导入`Illuminate\Foundation\Testing\DatabaseMigrations` trait而不是`RefreshDatabase`
+    trait，在每次测试之前将会重新运行整个数据库迁移集。Laravel通过在每次测试运行前的`setUp()`方法中运行`php artisan migrate:fresh`来实现这一点。
 - en: DatabaseTransactions
+  id: totrans-54
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: DatabaseTransactions
 - en: On the other hand, `Illuminate\Foundation\Testing\DatabaseTransactions` expects
     your database to be properly migrated before your tests start. It wraps every
     test in a database transaction, which it rolls back at the end of each test. This
     means that, at the end of each test, your database will be returned to the exact
     same state it was in prior to the test.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一方面，`Illuminate\Foundation\Testing\DatabaseTransactions`期望你的数据库在测试开始之前已经正确迁移。它会将每个测试包装在一个数据库事务中，并在每个测试结束时回滚该事务。这意味着，在每次测试结束时，你的数据库将恢复到测试之前的确切状态。
 - en: WithoutMiddleware
+  id: totrans-56
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: WithoutMiddleware
 - en: If you import `Illuminate\Foundation\Testing\WithoutMiddleware` into your test
     class, it will disable all middleware for any test in that class. This means you
     won’t have to worry about the authentication middleware, or CSRF protection, or
     anything else that might be useful in the real application but distracting in
     a test.
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你在测试类中导入`Illuminate\Foundation\Testing\WithoutMiddleware`，它将为该类中的任何测试禁用所有中间件。这意味着你不需要担心身份验证中间件、CSRF
+    保护或任何在真实应用中可能有用但在测试中会分散注意力的内容。
 - en: If you’d like to disable middleware for just a single method instead of the
     entire test class, call `$this->withoutMiddleware()` at the top of the method
     for that test.
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想要仅为单个方法而不是整个测试类禁用中间件，请在该测试方法的顶部调用`$this->withoutMiddleware()`。
 - en: Simple Unit Tests
+  id: totrans-59
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 简单单元测试
 - en: With simple unit tests, you almost don’t need any of these traits. You *may*
     reach for database access or inject something out of the container, but it’s very
     likely that unit tests in your applications won’t rely on the framework very much.
     Take a look at [Example 12-6](#simple_unit_test) for an example of what a simple
     test might look like.
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于简单的单元测试，你几乎不需要这些特性。你*可能*需要访问数据库或从容器中注入一些内容，但很可能你的应用程序中的单元测试并不会过多依赖框架。参考[示例 12-6](#simple_unit_test)来了解一个简单测试可能的样子。
 - en: Example 12-6\. A simple unit test
+  id: totrans-61
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-6\. 一个简单单元测试
 - en: '[PRE8]'
+  id: totrans-62
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Obviously, this example is a bit contrived. But you can see here that we’re
     testing a single class (`GeometryCalculator`) and its single method (`area()`),
     and we’re doing so without worrying about the entire Laravel application.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 显然，这个示例有点牵强。但你可以看到，我们在这里测试了一个单一类（`GeometryCalculator`）及其单一方法（`area()`），而且我们这样做时并不担心整个
+    Laravel 应用程序。
 - en: Some unit tests might be testing something that technically is connected to
     the framework—​for example, Eloquent models—​but you can still test them without
     worrying about the framework. For example, in [Example 12-7](#complex_unit_test),
     we use `Package::make()` instead of `Package::create()` so the object is created
     and evaluated in memory without ever hitting the database.
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些单元测试可能会测试一些技术上与框架连接的内容，例如 Eloquent 模型，但你仍然可以在不担心框架的情况下进行测试。例如，在[示例 12-7](#complex_unit_test)中，我们使用`Package::make()`而不是`Package::create()`，这样对象将在内存中创建和评估，而不会真正触及数据库。
 - en: Example 12-7\. A more complicated unit test
+  id: totrans-65
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-7\. 一个更复杂的单元测试
 - en: '[PRE9]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Some people may call this an integration or feature test, since this “unit”
     will likely touch the database in actual usage and it’s connected to the entire
     Eloquent codebase. The most important point is that you can have simple tests
     that test a single class or method, even when the objects under test are framework-connected.
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些人可能会将这称为集成或特性测试，因为这个“单元”在实际使用中可能会触及数据库，并且它连接到整个 Eloquent 代码库。最重要的是，你可以编写简单的测试来测试一个单一类或方法，即使被测试的对象与框架连接。
 - en: All of this said, it’s still going to be more likely that your tests—​especially
     as you first get started—​are broader and more at the “application” level. Accordingly,
     for the rest of the chapter we’re going to dig deeper into application testing.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管如此，你的测试——尤其是在开始时——更可能是更广泛和更“应用程序”级别的。因此，在本章的其余部分中，我们将更深入地探讨应用程序测试。
 - en: 'Application Testing: How It Works'
+  id: totrans-69
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 应用程序测试：工作原理
 - en: In [“Testing Basics”](#testing_basics) we saw that, with a few lines of code,
     we can “request” URIs in our application and actually check the status of the
     response. But how can PHPUnit request pages as if it were a browser?
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[“测试基础”](#testing_basics)中，我们看到，通过几行代码，我们可以“请求”应用程序中的 URI，并实际检查响应的状态。但是 PHPUnit
+    如何能够请求页面，就像它是一个浏览器一样？
 - en: Any application tests should extend the `TestCase` class (*tests/TestCase.php*)
     that’s included with Laravel by default. Your application’s `TestCase` class will
     extend the abstract `Illuminate\Foundation\Testing\TestCase` class, which brings
     in quite a few goodies.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 任何应用程序测试都应该扩展默认包含在 Laravel 中的`TestCase`类（*tests/TestCase.php*）。你的应用程序的`TestCase`类将扩展抽象的`Illuminate\Foundation\Testing\TestCase`类，它带来了许多好处。
 - en: The first thing the two `TestCase` classes (yours and its abstract parent) do
     is handle booting the Illuminate application instance for you, so you have a fully
     bootstrapped application available. They also “refresh” the application between
     each test, which means they’re not *entirely* recreating the application between
     tests but rather making sure you don’t have any data lingering.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 两个`TestCase`类（您的类和其抽象父类）的第一件事是为您处理Illuminate应用程序实例的引导，因此您可以使用一个完全引导的应用程序实例。它们还在每个测试之间“刷新”应用程序，这意味着它们在测试之间不完全重新创建应用程序，而是确保没有任何残留数据。
 - en: The parent `TestCase` also sets up a system of hooks that allow callbacks to
     be run before and after the application is created, and imports a series of traits
     that provide you with methods for interacting with every aspect of your application.
     These traits include `InteractsWithContainer`, `MakesHttpRequests`, and `InteractsWithConsole`,
     and they bring in a broad variety of custom assertions and testing methods.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 父`TestCase`还设置了一个钩子系统，允许在创建应用程序之前和之后运行回调，并导入了一系列提供与应用程序的每个方面交互方法的特性。这些特性包括`InteractsWithContainer`、`MakesHttpRequests`和`InteractsWithConsole`，它们引入了各种自定义断言和测试方法。
 - en: As a result, your application tests have access to a fully bootstrapped application
     instance and application-test-minded custom assertions, with a series of simple
     and powerful wrappers around each to make them easy to use.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，您的应用程序测试可以访问一个完全引导的应用程序实例和应用程序测试相关的自定义断言，以及一系列简单而强大的包装器，使它们易于使用。
 - en: That means you can write `$this->get('/')->assertStatus(200)` and know that
     your application is actually behaving as if it were responding to a normal HTTP
     request, and that the response is being fully generated and then checked as a
     browser would check it. It’s pretty powerful stuff, considering how little work
     you had to do to get it running.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 这意味着你可以编写`$this->get('/')->assertStatus(200)`，确保你的应用程序实际上表现得像响应正常的HTTP请求一样，并且完全生成并检查响应，就像浏览器检查一样。考虑到你要做的工作很少，这是非常强大的功能。
 - en: HTTP Tests
+  id: totrans-76
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: HTTP测试
 - en: Let’s take a look at our options for writing HTTP-based tests. You’ve already
     seen `$this->get('/')`, but let’s dive deeper into how you can use that call,
     how you can assert against its results, and what other HTTP calls you can make.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们来看看编写基于HTTP的测试的选项。您已经看到了`$this->get('/')`，但让我们更深入地了解如何使用该调用，如何断言其结果以及您可以进行的其他HTTP调用。
 - en: Testing Basic Pages with $this->get() and Other HTTP Calls
+  id: totrans-78
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 `$this->get()` 和其他HTTP调用测试基本页面
 - en: At the very basic level, Laravel’s HTTP testing allows you to make simple HTTP
     requests (`GET`, `POST`, etc.) and then make simple assertions about their impact
     or response.
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 在最基本的层面上，Laravel的HTTP测试允许您进行简单的HTTP请求（`GET`、`POST`等），然后对它们的影响或响应进行简单的断言。
 - en: 'There are more tools we’ll cover later ([“Testing with Dusk”](#dusk_testing))
     that allow for more complex page interactions and assertions, but let’s start
     at the base level. Here are the calls you can make:'
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们稍后会介绍更多工具（[“使用Dusk进行测试”](#dusk_testing)），这些工具允许进行更复杂的页面交互和断言，但让我们从基础开始。以下是您可以进行的调用：
 - en: '`$this->get(*$uri, $headers = []*)`'
+  id: totrans-81
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->get(*$uri, $headers = []*)`'
 - en: '`$this->post(*$uri, $data = [], $headers = []*)`'
+  id: totrans-82
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->post(*$uri, $data = [], $headers = []*)`'
 - en: '`$this->put(*$uri, $data = [], $headers = []*)`'
+  id: totrans-83
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->put(*$uri, $data = [], $headers = []*)`'
 - en: '`$this->patch(*$uri, $data = [], $headers = []*)`'
+  id: totrans-84
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->patch(*$uri, $data = [], $headers = []*)`'
 - en: '`$this->delete(*$uri, $data = [], $headers = []*)`'
+  id: totrans-85
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->delete(*$uri, $data = [], $headers = []*)`'
 - en: '`$this->option(*$uri, $data = [], $headers = []*)`'
+  id: totrans-86
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->option(*$uri, $data = [], $headers = []*)`'
 - en: These methods are the basis of the HTTP testing framework. Each takes at least
     a URI (usually relative) and headers, and all but `get()` also allow for passing
     data along with the request.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些方法是HTTP测试框架的基础。每个方法至少需要一个URI（通常是相对路径）和头部，除了`get()`方法外，其他方法还允许传递数据。
 - en: And, importantly, each returns a `$response` object that represents the HTTP
     response. This response object is almost exactly the same as an Illuminate `Response`
     object, the same thing we return out of our controllers. However, it’s actually
     an instance of `Illuminate\Testing\TestResponse`, which wraps a normal `Response`
     with some assertions for testing.
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 并且，每个方法返回一个`$response`对象，代表HTTP响应。这个响应对象几乎与Illuminate `Response`对象相同，我们在控制器中返回相同的对象。然而，它实际上是`Illuminate\Testing\TestResponse`的实例，它用一些断言来进行测试。
 - en: Take a look at [Example 12-8](#simple_post_test) to see a common usage of `post()`
     and a common response assertion.
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看 [示例 12-8](#simple_post_test) 来查看 `post()` 的常见用法和常见响应断言。
 - en: Example 12-8\. A simple use of `post()` in testing
+  id: totrans-90
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-8\. 测试中使用 `post()` 的简单用法
 - en: '[PRE10]'
+  id: totrans-91
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: In most examples like [Example 12-8](#simple_post_test), you’ll also test that
     the record exists in the database and shows up on the index page, and maybe that
     it doesn’t test successfully unless you define the package author and are logged
     in. But don’t worry, we’ll get to all of that. For now, you can make calls to
     your application routes with many different verbs and make assertions against
     both the response and the state of your application afterward. Great!
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 在大多数类似 [示例 12-8](#simple_post_test) 的示例中，您还将测试记录是否存在于数据库中，并显示在索引页面上，除非您定义了包的作者并且已登录。但不用担心，我们将会涉及到所有这些内容。现在，您可以使用多种不同的动词调用您的应用程序路由，并对响应及应用程序状态进行断言。很棒！
 - en: Testing JSON APIs with $this->getJson() and Other JSON HTTP Calls
+  id: totrans-93
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 `$this->getJson()` 和其他 JSON HTTP 调用来测试 JSON API
 - en: 'You can also do all of the same sorts of HTTP tests with your JSON APIs. There
     are convenience methods for that, too:'
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以使用 JSON API 进行相同类型的所有 HTTP 测试。这也有方便的方法来进行：
 - en: '`$this->getJson(*$uri, $headers = []*)`'
+  id: totrans-95
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->getJson(*$uri, $headers = []*)`'
 - en: '`$this->postJson(*$uri, $data = [], $headers = []*)`'
+  id: totrans-96
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->postJson(*$uri, $data = [], $headers = []*)`'
 - en: '`$this->putJson(*$uri, $data = [], $headers = []*)`'
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->putJson(*$uri, $data = [], $headers = []*)`'
 - en: '`$this->patchJson(*$uri, $data = [], $headers = []*)`'
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->patchJson(*$uri, $data = [], $headers = []*)`'
 - en: '`$this->deleteJson(*$uri, $data = [], $headers = []*)`'
+  id: totrans-99
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->deleteJson(*$uri, $data = [], $headers = []*)`'
 - en: '`$this->optionJson(*$uri, $data = [], $headers = []*)`'
+  id: totrans-100
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`$this->optionJson(*$uri, $data = [], $headers = []*)`'
 - en: These methods work just the same as the normal HTTP call methods, except they
     also add JSON-specific `Accept`, `CONTENT_LENGTH`, and `CONTENT_TYPE` headers.
     Take a look at [Example 12-9](#simple_json_api_test) to see an example.
+  id: totrans-101
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些方法的工作方式与普通的 HTTP 调用方法完全相同，但它们还会添加特定于 JSON 的 `Accept`、`CONTENT_LENGTH` 和 `CONTENT_TYPE`
+    头部。查看 [示例 12-9](#simple_json_api_test) 来查看一个示例。
 - en: Example 12-9\. A simple use of `postJson()` in testing
+  id: totrans-102
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-9\. 测试中使用 `postJson()` 的简单用法
 - en: '[PRE11]'
+  id: totrans-103
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Assertions Against $response
+  id: totrans-104
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 对 $response 的断言
 - en: 'There are more than 50 assertions available on the `$response` object, so I’ll
     refer you to the [testing docs](https://oreil.ly/CXk24) for details on all of
     them. Let’s look at a few of the most important and most common ones:'
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 `$response` 对象上有超过 50 个断言可用，因此我会指引您查阅 [测试文档](https://oreil.ly/CXk24) 以获取所有详情。让我们看一些最重要和最常见的断言：
 - en: '`$response->assertOk()`'
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertOk()`'
 - en: 'Asserts that the response’s status code is 200:'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言响应的状态码为 200：
 - en: '[PRE12]'
+  id: totrans-108
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: '`$response->assertSuccessful()`'
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertSuccessful()`'
 - en: 'Although `assertOk()` asserts that the code is exactly 200, `assertSuccessful()`
     checks if the code is anything in the 200 group:'
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管 `assertOk()` 断言代码确切为 200，`assertSuccessful()` 则检查代码是否属于 200 组中的任意值：
 - en: '[PRE13]'
+  id: totrans-111
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: '`$response->assertUnauthorized()`'
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertUnauthorized()`'
 - en: 'Asserts that the response’s status code is 401:'
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言响应的状态码为 401：
 - en: '[PRE14]'
+  id: totrans-114
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: '`$response->assertForbidden()`'
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertForbidden()`'
 - en: 'Asserts that the response’s status code is 403:'
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言响应的状态码为 403：
 - en: '[PRE15]'
+  id: totrans-117
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: '`$response->assertNotFound()`'
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertNotFound()`'
 - en: 'Asserts that the response’s status code is 404:'
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言响应的状态码为 404：
 - en: '[PRE16]'
+  id: totrans-120
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: '`$response->assertStatus(*$status*)`'
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertStatus(*$status*)`'
 - en: 'Asserts that the response’s status code is equal to the provided `*$status*`:'
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言响应的状态码等于提供的 `*$status*`：
 - en: '[PRE17]'
+  id: totrans-123
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: '`$response->assertSee(*$text*)`, `$response->assertDontSee(*$text*)`'
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertSee(*$text*)`, `$response->assertDontSee(*$text*)`'
 - en: 'Asserts that the response contains (or doesn’t contain) the provided `*$text*`:'
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言响应包含（或不包含）提供的 `*$text*`：
 - en: '[PRE18]'
+  id: totrans-126
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: '`$response->assertJson(*array $json*)`'
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertJson(*array $json*)`'
 - en: 'Asserts that the passed array is represented (in JSON format) in the returned
     JSON:'
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言传递的数组在返回的 JSON 中以 JSON 格式表示：
 - en: '[PRE19]'
+  id: totrans-129
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: '`$response->assertViewHas(*$key, $value = null*)`'
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertViewHas(*$key, $value = null*)`'
 - en: 'Asserts that the view on the visited page had a piece of data available at
     `*$key*`, and optionally checks that the value of that variable was `*$value*`:'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言访问页面上的视图在 `*$key*` 处有可用数据，并可选择检查该变量的值是否为 `*$value*`：
 - en: '[PRE20]'
+  id: totrans-132
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: '`$response->assertSessionHas(*$key, $value = null*)`'
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertSessionHas(*$key, $value = null*)`'
 - en: 'Asserts that the session has data set at `*$key*`, and optionally checks that
     the value of that data is `*$value*`:'
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言会话中设置了数据在 `*$key*`，并可选择检查该数据的值是否为 `*$value*`：
 - en: '[PRE21]'
+  id: totrans-135
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: '`$response->assertSessionHasInput(*$key, $value = null*)`'
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertSessionHasInput(*$key, $value = null*)`'
 - en: 'Asserts that the given keys and values are flashed in the session array input.
     This is helpful when testing whether the validation error returns the correct
     old values:'
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言给定的键和值已在会话数组输入中闪存。在测试验证错误是否返回正确的旧值时，这很有帮助：
 - en: '[PRE22]'
+  id: totrans-138
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: '`$response->assertSessionHasErrors()`'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertSessionHasErrors()`'
 - en: 'With no parameters, asserts that there’s at least one error set in Laravel’s
     special `errors` session container. Its first parameter can be an array of key/value
     pairs that define the errors that should be set and its second parameter can be
     the string format that the checked errors should be formatted against, as demonstrated
     here:'
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: 没有参数时，断言 Laravel 的特殊`errors`会话容器中至少设置了一个错误。它的第一个参数可以是定义应设置的错误的键/值对数组，第二个参数可以是应检查的错误应格式化的字符串格式，正如此处所示：
 - en: '[PRE23]'
+  id: totrans-141
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: If you’re working with named error bags, you can pass the error bag name as
     the third parameter.
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您正在使用命名错误包，请将错误包名称作为第三个参数传递。
 - en: '`$response->assertCookie(*$name, $value = null*)`'
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertCookie(*$name, $value = null*)`'
 - en: 'Asserts that the response contains a cookie with name `*$name*`, and optionally
     checks that its value is `*$value*`:'
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言响应包含名称为`*$name*`的 cookie，并可选地检查其值是否为`*$value*`：
 - en: '[PRE24]'
+  id: totrans-145
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: '`$response->assertCookieExpired(*$name*)`'
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertCookieExpired(*$name*)`'
 - en: 'Asserts that the response contains a cookie with name `*$name*` and that it
     is expired:'
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言响应包含名称为`*$name*`的 cookie，并且它已过期：
 - en: '[PRE25]'
+  id: totrans-148
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: '`$response->assertCookieNotExpired(*$name*)`'
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertCookieNotExpired(*$name*)`'
 - en: 'Asserts that the response contains a cookie with name `*$name*` and that it
     is not expired:'
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言响应包含名称为`*$name*`的 cookie，并且它未过期：
 - en: '[PRE26]'
+  id: totrans-151
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: '`$response->assertRedirect(*$uri*)`'
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$response->assertRedirect(*$uri*)`'
 - en: 'Asserts that the requested route returns a redirect to the given URI:'
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 断言请求的路由返回重定向到指定的 URI：
 - en: '[PRE27]'
+  id: totrans-154
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: For each of these assertions, you can assume that there are many related assertions
     I haven’t listed here. For example, in addition to `assertSessionHasErrors()`
     there are also `assertSessionHasNoErrors()` and `assertSessionHasErrorsIn()` assertions;
@@ -665,197 +985,298 @@
     `assertJsonPath()`, `assertJsonMissing()`, `assertJsonMissingExact()`, `assertJsonStructure()`,
     and `assertJsonValidationErrors()` assertions. Again, take a look at the docs
     and make yourself familiar with the whole list.
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于这些断言的每一个，您可以假设有许多相关的断言我没有在此列出。例如，除了`assertSessionHasErrors()`之外，还有`assertSessionHasNoErrors()`和`assertSessionHasErrorsIn()`断言；除了`assertJson()`之外，还有`assertJsonCount()`、`assertJsonFragment()`、`assertJsonPath()`、`assertJsonMissing()`、`assertJsonMissingExact()`、`assertJsonStructure()`和`assertJsonValidationErrors()`断言。再次，查看文档并熟悉整个列表。
 - en: Authenticating Responses
+  id: totrans-156
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 验证响应
 - en: One piece of your application it’s common to test with application tests is
     authentication and authorization. Most of the time, your needs will be met with
     the `actingAs()` chainable method, which takes a user (or other `Authenticatable`
     object, depending on how your system is set up), as you can see in [Example 12-10](#basic_auth_in_testing).
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 您的应用程序中的一个常见测试部分是身份验证和授权。大多数情况下，您的需求可以通过`actingAs()`链式方法满足，该方法接受一个用户（或其他`Authenticatable`对象，具体取决于系统设置），正如您在[示例 12-10](#basic_auth_in_testing)中所见。
 - en: Example 12-10\. Basic auth in testing
+  id: totrans-158
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-10\. 测试中的基本身份验证
 - en: '[PRE28]'
+  id: totrans-159
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: Using Factory States for Authorization
+  id: totrans-160
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用工厂状态进行授权
 - en: It’s common to use model factories (discussed in [“Model Factories”](ch05.html#model_factories))
     in testing, and model factory states make tasks like creating users with different
     access levels simple.
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 在测试中使用模型工厂（在[“模型工厂”](ch05.html#model_factories)中讨论），模型工厂状态使得像创建具有不同访问级别的用户这样的任务变得简单。
 - en: A Few Other Customizations to Your HTTP Tests
+  id: totrans-162
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 对 HTTP 测试的一些其他自定义
 - en: 'If you’d like to set session variables on your requests, you can also chain
     `withSession()`:'
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您希望在请求中设置会话变量，还可以链式调用`withSession()`：
 - en: '[PRE29]'
+  id: totrans-164
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: 'If you’d prefer to set your request headers fluently, you can chain `withHeaders()`:'
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您希望流畅地设置请求标头，请链式调用`withHeaders()`：
 - en: '[PRE30]'
+  id: totrans-166
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: Handling Exceptions in Application Tests
+  id: totrans-167
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在应用程序测试中处理异常
 - en: Usually, an exception that’s thrown inside your application when you’re making
     HTTP calls will be captured by Laravel’s exception handler and processed as it
     would be in a normal application. So, the test and route in [Example 12-11](#swallowed_exception)
     would still pass, since the exception would never bubble up the whole way to our
     test.
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常，当您在应用程序中进行 HTTP 调用时抛出异常，将会被 Laravel 的异常处理程序捕获并处理，就像在普通应用程序中一样。因此，[示例 12-11](#swallowed_exception)
+    中的测试和路由仍将通过，因为异常永远不会完全冒泡到我们的测试中。
 - en: Example 12-11\. An exception that will be captured by Laravel’s exception handler
     and result in a passing test
+  id: totrans-169
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-11\. 会被 Laravel 异常处理器捕获并导致测试通过的异常
 - en: '[PRE31]'
+  id: totrans-170
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: In a lot of cases, this might make sense; maybe you’re expecting a validation
     exception, and you want it to be caught like it would normally be by the framework.
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 在很多情况下，这可能是有意义的；也许你期望一个验证异常，并且希望像框架通常情况下一样被捕获。
 - en: But if you want to temporarily disable the exception handler, that’s an option;
     just run `$this->withoutExceptionHandling()`, as shown in [Example 12-12](#EX12a).
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是如果你想临时禁用异常处理，也有一个选项；只需运行 `$this->withoutExceptionHandling()`，就像 [示例 12-12](#EX12a)
+    中展示的那样。
 - en: Example 12-12\. Temporarily disabling exception handling in a single test
+  id: totrans-173
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-12\. 在单个测试中临时禁用异常处理
 - en: '[PRE32]'
+  id: totrans-174
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: And if for some reason you need to turn it back on (maybe you turned it off
     in `setUp()` but want it back on for just one test), you can run `$this``->``withExceptionHandling()`.
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果由于某种原因你需要重新启用异常处理（也许你在 `setUp()` 中关闭了它，但只想在一个测试中重新启用），你可以运行 `$this->withExceptionHandling()`。
 - en: Debugging Responses
+  id: totrans-176
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 调试响应
 - en: 'You can easily dump out the headers with `dumpHeaders()` or the body with `dump()`
     or `dd()`:'
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以轻松地使用 `dumpHeaders()` 打印出头信息，或者使用 `dump()` 或 `dd()` 打印出主体：
 - en: '[PRE33]'
+  id: totrans-178
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: 'You can also easily dump all or only the specified keys on the session:'
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 你还可以轻松地将会话中的所有或仅指定键转储出来：
 - en: '[PRE34]'
+  id: totrans-180
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: Database Tests
+  id: totrans-181
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 数据库测试
 - en: Often, the effect we want to test for after our tests have run is in the database.
     Imagine you want to test that the “create package” page works correctly. What’s
     the best way? Make an HTTP call to the “store package” endpoint and then assert
     that that package exists in the database. It’s easier and safer than inspecting
     the resulting “list packages” page.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 往往，我们在测试运行后想要测试的效果在数据库中。想象一下，你想要测试“创建包”页面是否正确工作。最好的方法是什么？对“存储包”端点进行 HTTP 调用，然后断言该包在数据库中存在。这比检查生成的“列出包”页面更容易且更安全。
 - en: We have four primary assertions for the database, and two Eloquent-specific
     assertions.
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们有四个主要的数据库断言方法和两个特定于 Eloquent 的断言方法。
 - en: Asserting Against the Database
+  id: totrans-184
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 针对数据库的断言
 - en: For direct assertions agains the database, we have `$this->assertDatabaseHas()`
     and `$this->assertDatabaseMissing()`, and `$this->assertDeleted()` and `$this->assertSoftDeleted()`.
     For both, pass the table name as the first parameter, the data you’re looking
     for as the second, and, optionally, the specific database connection you want
     to test as the third.
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于直接针对数据库的断言，我们有 `$this->assertDatabaseHas()` 和 `$this->assertDatabaseMissing()`，还有
+    `$this->assertDeleted()` 和 `$this->assertSoftDeleted()`。对于这些方法，将表名作为第一个参数传递，你要查找的数据作为第二个参数，以及可选的指定数据库连接作为第三个参数。
 - en: Take a look at [Example 12-13](#example_database_tests) to see how you might
     use them.
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 参考 [示例 12-13](#example_database_tests) 了解如何使用它们。
 - en: Example 12-13\. Sample database tests
+  id: totrans-187
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-13\. 示例数据库测试
 - en: '[PRE35]'
+  id: totrans-188
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: As you can see, the second parameter of `assertDatabaseHas()` is structured
     like a SQL `WHERE` statement—you pass a key and a value (or multiple keys and
     values), and then Laravel looks for any records in the specified database table
     that match your key(s) and value(s).
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你所见，`assertDatabaseHas()` 的第二个参数结构类似于 SQL 的 `WHERE` 语句 —— 你传递一个键和一个值（或多个键和值），然后
+    Laravel 查找与你的键和值匹配的指定数据库表中的任何记录。
 - en: As you’d expect, `assertDatabaseMissing()` is the inverse.
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 如你所料，`assertDatabaseMissing()` 则是其反向操作。
 - en: Asserting Against Eloquent Models
+  id: totrans-191
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 针对 Eloquent 模型的断言
 - en: 'While `assertDatabaseHas()` and `assertDatabaseMissing()` allow you to identify
     rows by passing keys and values, Laravel also provides convenience methods for
     directly asserting that a given Eloquent record does or does not exist: `assertModelExists()`
     and `assertModelMissing()`, as you can see in [Example 12-14](#database_tests_assert_against_models).'
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 当使用 `assertDatabaseHas()` 和 `assertDatabaseMissing()` 时，你可以通过传递键和值来识别行，而 Laravel
+    也提供了方便的方法直接断言给定的 Eloquent 记录是否存在或不存在：`assertModelExists()` 和 `assertModelMissing()`，正如你在
+    [示例 12-14](#database_tests_assert_against_models) 中所看到的。
 - en: Example 12-14\. Assert against model existence
+  id: totrans-193
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-14\. 断言模型存在
 - en: '[PRE36]'
+  id: totrans-194
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: Using Model Factories in Tests
+  id: totrans-195
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在测试中使用模型工厂
 - en: Model factories are amazing tools that make it easy to seed randomized, well-structured
     database data for testing (or other purposes). You’ve already seen them in use
     in several examples in this chapter, and we’ve already covered them in depth,
     so check out [“Model Factories”](ch05.html#model_factories) to learn more.
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 模型工厂是一种令人惊奇的工具，它能够轻松地为测试（或其他目的）种子填充随机化、结构良好的数据库数据。你已经在本章的几个示例中看到它们的使用，我们也已经对其进行了深入的讨论，因此请查看
+    [“模型工厂”](ch05.html#model_factories) 以了解更多信息。
 - en: Seeding in Tests
+  id: totrans-197
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在测试中进行种子填充
 - en: If you use seeds in your application, you can run the equivalent of `php artisan
     db:seed` by running `$this->seed()` in your test.
+  id: totrans-198
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您的应用程序使用种子数据，您可以通过在测试中运行 `$this->seed()` 来运行相当于 `php artisan db:seed` 的操作。
 - en: 'You can also pass a seeder class name to just seed that one class:'
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以将种子器类名称传递给仅种子化该类：
 - en: '[PRE37]'
+  id: totrans-200
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: Testing Other Laravel Systems
+  id: totrans-201
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 测试其他 Laravel 系统
 - en: When testing Laravel systems, you’ll often want to pause their true function
     for the duration of the testing and instead write tests against what has happened
     to those systems. You can do this by “faking” different facades, such as `Event`,
@@ -863,12 +1284,18 @@
     but first, let’s look at some examples. All of the following features in Laravel
     have their own set of assertions you can make after faking them, but you can also
     just choose to fake them to restrict their effects.
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 在测试 Laravel 系统时，通常希望在测试期间暂停其真实功能，而是针对这些系统已发生的情况编写测试。您可以通过“伪造”不同的外观来实现这一点，例如
+    `Event`、`Mail` 和 `Notification`。我们将在 [“模拟”](#intro_to_mocking) 中详细讨论伪造的内容，但首先让我们看一些示例。在
+    Laravel 中，所有这些特性在伪造后都有自己的一套断言，但您也可以选择仅仅伪造它们以限制其影响。
 - en: Event Fakes
+  id: totrans-203
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 事件伪造
 - en: 'Let’s use event fakes as our first example of how Laravel makes it possible
     to mock its internal systems. There are likely going to be times when you want
     to fake events just for the sake of suppressing their actions. For example, suppose
@@ -880,1089 +1307,1658 @@
     else. This is one reason for faking certain aspects of Laravel in our tests: to
     pause the default behavior and instead make assertions against the system we’re
     testing.'
+  id: totrans-204
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们以事件伪造作为 Laravel 如何使模拟其内部系统成为可能的第一个示例。可能会有时候您希望仅仅为了抑制它们的行为而伪造事件。例如，假设您的应用程序在每次新用户注册时都向
+    Slack 推送通知。当这种情况发生时，您会发出“用户注册”事件，并且有一个监听器通知 Slack 频道有用户注册。您不希望每次运行测试时这些通知都发送到
+    Slack，但您可能希望断言事件是否已发送，或者监听器是否已触发，或其他某些内容。这是在测试中伪造 Laravel 某些方面的原因之一：暂停默认行为，而是针对正在测试的系统进行断言。
 - en: Let’s take a look at how to suppress these events by calling the `fake()` method
     on `Illuminate\Support\Facades\Event`, as shown in [Example 12-15](#suppressing_events_with_no_assertions).
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看如何通过在 `Illuminate\Support\Facades\Event` 上调用 `fake()` 方法来抑制这些事件，就像在 [示例 12-15](#suppressing_events_with_no_assertions)
+    中展示的那样。
 - en: Example 12-15\. Suppressing events without adding assertions
+  id: totrans-206
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-15\. 抑制事件而不添加断言
 - en: '[PRE38]'
+  id: totrans-207
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: 'Once we’ve run the `fake()` method, we can also call special assertions on
     the `Event` facade: namely, `assertDispatched()` and `assertNotDispatched()`.
     Take a look at [Example 12-16](#event_assertions) to see them in use.'
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦我们运行了 `fake()` 方法，我们还可以在 `Event` 外观上调用特殊的断言：即 `assertDispatched()` 和 `assertNotDispatched()`。请查看
+    [示例 12-16](#event_assertions) 来查看它们的使用方法。
 - en: Example 12-16\. Making assertions against events
+  id: totrans-209
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-16\. 对事件进行断言
 - en: '[PRE39]'
+  id: totrans-210
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: Note that the (optional) closure we passed to `assertDispatched()` means we’re
     not just asserting that the event was dispatched, but also that the dispatched
     event contains certain data.
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，我们传递给 `assertDispatched()` 的（可选）闭包意味着我们不仅仅是断言事件是否已被分派，而且断言已分派的事件是否包含某些数据。
 - en: Event::fake() Disables Eloquent Model Events
+  id: totrans-212
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Event::fake() 禁用了 Eloquent 模型事件
 - en: '`Event::fake()` also disables Eloquent model events. So if you have any important
     code, for example, in a model’s `creating` event, make sure to create your models
     (through your factories or however else) *before* calling `Event::fake()`.'
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Event::fake()` 同时还会禁用 Eloquent 模型事件。因此，如果您的代码中有任何重要的代码，例如在模型的 `creating` 事件中，请确保在调用
+    `Event::fake()` 之前创建您的模型（通过工厂或其他方式）。'
 - en: Bus and Queue Fakes
+  id: totrans-214
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: Bus 和 Queue 的伪造
 - en: The `Bus` facade, which represents how Laravel dispatches jobs, works just like
     `Event`. You can run `fake()` on it to disable the impact of your jobs, and after
     faking it you can run `assertDispatched()` or `assertNotDispatched()`.
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Bus` 外观代表 Laravel 如何调度作业，其工作方式与 `Event` 相似。您可以在其上运行 `fake()` 来禁用作业的影响，并在伪造后运行
+    `assertDispatched()` 或 `assertNotDispatched()`。'
 - en: The `Queue` facade represents how Laravel dispatches jobs when they’re pushed
     up to queues. Its available methods are `assertedPushed()`, `assertPushedOn()`,
     and `assertNotPushed()`.
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: '`Queue`外观表示 Laravel 在将作业推送到队列时如何调度作业。它的可用方法有`assertedPushed()`、`assertPushedOn()`
+    和 `assertNotPushed()`。'
 - en: Take a look at [Example 12-17](#job_fakes) to see how to use both.
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看 [示例 12-17](#job_fakes) 以了解如何同时使用两者。
 - en: Example 12-17\. Faking jobs and queued jobs
+  id: totrans-218
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-17\. 伪造作业和排队作业
 - en: '[PRE40]'
+  id: totrans-219
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: Mail Fakes
+  id: totrans-220
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 邮件虚拟
 - en: 'The `Mail` facade, when faked, offers four methods: `assertSent()`, `assertNotSent()`,
     `assertQueued()`, and `assertNotQueued()`. Use the `Queued` methods when your
     mail is queued and the `Sent` methods when it’s not.'
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: 当伪造`Mail`外观时，提供四种方法：`assertSent()`、`assertNotSent()`、`assertQueued()` 和 `assertNotQueued()`。当你的邮件在队列中时，请使用`Queued`方法；当它不在队列中时，请使用`Sent`方法。
 - en: Just like with `assertDispatched()`, the first parameter will be the name of
     the mailable and the second parameter can be empty, the number of times the mailable
     has been sent, or a closure testing that the mailable has the right data in it.
     Take a look at [Example 12-18](#mail_fakes) to see a few of these methods in action.
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: 就像使用`assertDispatched()`一样，第一个参数将是可发送邮件的名称，第二个参数可以为空，或者是可发送邮件的次数，或者是一个测试可发送邮件是否包含正确数据的闭包。查看
+    [示例 12-18](#mail_fakes) 以看到这些方法的几个示例。
 - en: Example 12-18\. Making assertions against mail
+  id: totrans-223
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-18\. 对邮件进行断言
 - en: '[PRE41]'
+  id: totrans-224
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: All of the messages checking for recipients (`hasTo()`, `hasCc()`, and `hasBcc()`)
     can take either a single email address or an array or collection of addresses.
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有检查收件人（`hasTo()`、`hasCc()` 和 `hasBcc()`）的消息可以接受单个电子邮件地址或电子邮件地址数组或集合。
 - en: Notification Fakes
+  id: totrans-226
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 通知虚拟
 - en: 'The `Notification` facade, when faked, offers two methods: `assertSentTo()`
     and `assertNothingSent()`.'
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: 当伪造`Notification`外观时，提供两种方法：`assertSentTo()` 和 `assertNothingSent()`。
 - en: Unlike with the `Mail` facade, you’re not going to test who the notification
     was sent to manually in a closure. Rather, the assertion itself requires the first
     parameter be either a single notifiable object or an array or collection of them.
     Only after you’ve passed in the desired notification target can you test anything
     about the notification itself.
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 与`Mail`外观不同的是，你不需要在闭包中手动测试通知发送给谁。相反，断言本身要求第一个参数是单个可通知对象或其数组或集合。只有在传入所需的通知目标后，你才能测试通知本身的任何内容。
 - en: The second parameter is the class name for the notification, and the (optional)
     third parameter can be a closure defining more expectations about the notification.
     Take a look at [Example 12-19](#notification_fakes) to learn more.
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 第二个参数是通知的类名，第三个参数（可选）可以是定义通知更多期望的闭包。查看 [示例 12-19](#notification_fakes) 以了解更多信息。
 - en: Example 12-19\. Notification fakes
+  id: totrans-230
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-19\. 通知虚拟
 - en: '[PRE42]'
+  id: totrans-231
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: You may also find yourself wanting to assert that your channel selection is
     working—​that notifications are sent via the right channels. You can test that
     as well, as you can see in [Example 12-20](#testing_notification_channels).
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可能还想要断言你的渠道选择是否有效——即通过正确的渠道发送通知。你也可以进行这方面的测试，正如你可以在 [示例 12-20](#testing_notification_channels)
+    中看到的那样。
 - en: Example 12-20\. Testing notification channels
+  id: totrans-233
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-20\. 测试通知渠道
 - en: '[PRE43]'
+  id: totrans-234
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: Storage Fakes
+  id: totrans-235
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 存储虚拟
 - en: Testing files can be extraordinarily complex. Many traditional methods require
     you to actually move files around in your test directories, and formatting the
     form input and output can be very complicated.
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 测试文件可能会非常复杂。许多传统方法要求你实际在测试目录中移动文件，并且格式化表单输入和输出可能非常复杂。
 - en: Thankfully, if you use Laravel’s `Storage` facade, it’s infinitely simpler to
     test file uploads and other storage-related items, as [Example 12-21](#storage_fakes)
     demonstrates.
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，如果你使用 Laravel 的`Storage`外观，测试文件上传和其他与存储相关的项目就会简单得多，正如 [示例 12-21](#storage_fakes)
+    所演示的那样。
 - en: Example 12-21\. Testing storage and file uploads with storage fakes
+  id: totrans-238
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-21\. 使用存储虚拟测试存储和文件上传
 - en: '[PRE44]'
+  id: totrans-239
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: Working with Time in Tests
+  id: totrans-240
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在测试中处理时间
 - en: It’s common that, when we test sections of our application that interact with
     time, we want to test how these sections behave differently as time passes.
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们测试应用程序的各个部分与时间交互时，通常希望测试这些部分随时间推移的行为不同。
 - en: In our tests, we can use `$this->travel()` to “travel” through time as the test
     progresses. We can travel forward and backward relative to the current time, travel
     to specific moments, or freeze the passage of time, allowing us to test how components
     behave once the time they’re checking looks different.
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
+  zh: 在我们的测试中，我们可以使用`$this->travel()`来在测试进行过程中“旅行”时间。我们可以相对于当前时间向前或向后旅行，旅行到特定时刻，或者冻结时间的流逝，这样可以测试组件在时间看起来不同的情况下的行为。
 - en: Take a look at [Example 12-22](#EX1213) to see how you might want to use this
     feature, or [the docs](https://oreil.ly/1PNzc) to learn more about all the ways
     you can interact with time.
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 看看[示例 12-22](#EX1213)以了解您可能希望如何使用此功能，或者查看[文档](https://oreil.ly/1PNzc)以了解更多与时间交互的所有方式。
 - en: Example 12-22\. Changing the time in a test
+  id: totrans-244
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-22\. 改变测试中的时间
 - en: '[PRE45]'
+  id: totrans-245
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: You can also provide a closure to each of these time-traveling methods; if you
     do, the test’s time is only modified for the duration of the closure, allowing
     you to more directly connect your traveling and the resulting tests, as you can
     see in [Example 12-23](#EX1215).
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以为每个这些时间旅行方法提供一个闭包；如果这样做，测试的时间只在闭包的持续时间内被修改，允许您更直接地连接您的旅行和结果测试，正如您在[示例 12-23](#EX1215)中所看到的。
 - en: Example 12-23\. Changing the time in a test using closures
+  id: totrans-247
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-23\. 使用闭包在测试中改变时间
 - en: '[PRE46]'
+  id: totrans-248
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: Mocking
+  id: totrans-249
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 模拟
 - en: Mocks (and their brethren, spies and stubs and dummies and fakes and any number
     of other tools) are common in testing. We saw some examples of fakes in the previous
     section. I won’t go into too much detail here, but it’s unlikely you can thoroughly
     test an application of any size without mocking at least one thing or another.
+  id: totrans-250
   prefs: []
   type: TYPE_NORMAL
+  zh: 在测试中，模拟（及其同类，如间谍、存根、虚拟和伪造以及其他各种工具）是很常见的。我们在前一节中看到了一些伪造的示例。我不会在这里详细展开，但是在任何规模的应用程序中，要彻底测试一个应用程序几乎不可能不模拟至少一些东西。
 - en: So, lets take a quick look at mocking in Laravel and how to use Mockery, the
     mocking library.
+  id: totrans-251
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，让我们快速浏览一下在Laravel中如何进行模拟以及如何使用Mockery，这个模拟库。
 - en: A Quick Introduction to Mocking
+  id: totrans-252
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 关于模拟的简短介绍
 - en: Essentially, mocks and other similar tools make it possible to create an object
     that in some way mimics a real class, but for testing purposes isn’t the real
     class. Sometimes this is done because the real class is too difficult to instantiate
     just to inject it into a test, or maybe because the real class communicates with
     an external service.
+  id: totrans-253
   prefs: []
   type: TYPE_NORMAL
+  zh: 本质上，模拟和其他类似工具使得可以创建一个在某种程度上模仿真实类的对象，但是出于测试目的并非真实类。有时候这样做是因为实际类太难实例化以便将其注入到测试中，或者可能是因为实际类与外部服务通信。
 - en: As you can probably tell from the examples that follow, Laravel encourages working
     with the real application as much as possible—which means avoiding too much dependence
     on mocks. But they have their place, which is why Laravel includes Mockery, a
     mocking library, out of the box, and is why many of its core services offer faking
     utilities.
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: 从接下来的示例中您可能可以看出，Laravel鼓励尽可能地与真实应用程序一起工作——这意味着避免过多依赖于模拟。但它们确实有其用处，这就是为什么Laravel内置了Mockery，一个模拟库，并且为其核心服务提供了伪造工具的原因。
 - en: A Quick Introduction to Mockery
+  id: totrans-255
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 关于Mockery的简短介绍
 - en: Mockery allows you to quickly and easily create mocks from any PHP class in
     your application. Imagine you have a class that depends on a Slack client, but
     you don’t want the calls to actually go out to Slack. Mockery makes it simple
     to create a fake Slack client to use in your tests, like you can see in [Example 12-24](#EX1206).
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: Mockery允许您快速轻松地从应用程序中的任何PHP类创建模拟。想象一下，您有一个依赖于Slack客户端的类，但是您不希望调用实际发送到Slack。Mockery使得创建一个用于测试的假Slack客户端变得简单，就像您在[示例 12-24](#EX1206)中所看到的。
 - en: Example 12-24\. Using Mockery in Laravel
+  id: totrans-257
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-24\. 在Laravel中使用Mockery
 - en: '[PRE47]'
+  id: totrans-258
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: 'There are a lot of elements at work here, but if you look at them one by one,
     they make sense. We have a class named `Notifier` that we’re testing. It has a
     dependency named `SlackClient` that does something that we don’t want it to do
     when we’re running our tests: it sends actual Slack notifications. So we’re going
     to mock it.'
+  id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里有很多因素在起作用，但如果您逐一查看它们，它们是有道理的。我们有一个名为`Notifier`的类，我们正在测试它。它有一个名为`SlackClient`的依赖项，在我们运行测试时，我们不希望它执行某些操作：发送实际的Slack通知。因此，我们将对其进行模拟。
 - en: 'We use Mockery to get a mock of our `SlackClient` class. If we don’t care about
     what happens to that class—​if it should simply exist to keep our tests from throwing
     errors—​we can just use `shouldIgnoreMissing()`:'
+  id: totrans-260
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们使用Mockery来获取我们的`SlackClient`类的模拟。如果我们不关心该类发生什么——如果它只是存在以防止我们的测试抛出错误——我们可以简单地使用`shouldIgnoreMissing()`：
 - en: '[PRE48]'
+  id: totrans-261
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: No matter what `Notifier` calls on `$slackMock`, it’ll just accept it and return
     `null`.
+  id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论`Notifier`在`$slackMock`上调用什么，它都会接受并返回`null`。
 - en: But take a look at `test_notifier_notifies_admins()`. At this point, it doesn’t
     actually *test* anything.
+  id: totrans-263
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是看一下`test_notifier_notifies_admins()`。到这一点为止，它实际上并不*测试*任何东西。
 - en: We could just keep `shouldIgnoreMissing()` and then write some assertions below
     it. That’s usually what we do with `shouldIgnoreMissing()`, which makes this object
     a “fake” or a “stub.”
+  id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以只保留`shouldIgnoreMissing()`，然后在其下写一些断言。通常我们对`shouldIgnoreMissing()`这样做，这使得这个对象成为一个“伪造”或“存根”。
 - en: But what if we want to actually assert that a call was made to the `send()`
     method of `SlackClient`? That’s when we drop `shouldIgnoreMissing()` and reach
     for the other `should*` methods ([Example 12-25](#EX1207)).
+  id: totrans-265
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是如果我们想要实际断言`SlackClient`的`send()`方法是否被调用了呢？这时我们放弃了`shouldIgnoreMissing()`，转而使用其他的`should*`方法（[示例 12-25](#EX1207)）。
 - en: Example 12-25\. Using the `shouldReceive()` method on a Mockery mock
+  id: totrans-266
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-25\. 使用Mockery模拟的`shouldReceive()`方法
 - en: '[PRE49]'
+  id: totrans-267
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: '`shouldReceive(''send'')->once()` is the same as saying “assert that `$slackMock`
     will have its `send()` method called once and only once.” So, we’re now asserting
     that `Notifier`, when we call `notifyAdmins()`, makes a single call to the `send()`
     method on `SlackClient`.'
+  id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: '`shouldReceive(''send'')->once()`等同于说“断言`$slackMock`的`send()`方法将被调用一次且仅一次。”
+    因此，我们现在断言`Notifier`在调用`notifyAdmins()`时，会在`SlackClient`上的`send()`方法上做一次调用。'
 - en: 'We could also use something like `shouldReceive(''send'')->times(3)` or `shouldReceive(''send'')->never()`.
     We can define what parameter we expect to be passed along with that `send()` call
     using `with()`, and we can define what to return with `andReturn()`:'
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们也可以使用诸如`shouldReceive('send')->times(3)`或`shouldReceive('send')->never()`之类的方法。我们可以使用`with()`定义我们期望随`send()`调用传递的参数，并使用`andReturn()`定义返回值：
 - en: '[PRE50]'
+  id: totrans-270
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE50]'
 - en: What if we wanted to use the IoC container to resolve our instance of the `Notifier`?
     This might be useful if `Notifier` had several other dependencies that we didn’t
     need to mock.
+  id: totrans-271
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果我们想要使用IoC容器来解析我们的`Notifier`实例会怎么样？如果`Notifier`有几个其他依赖项我们不需要模拟，这可能会很有用。
 - en: We can do that! We just use the `instance()` method on the container, as in
     [Example 12-26](#EX1208), to tell Laravel to provide an instance of our mock to
     any classes that request it (which, in this example, will be `Notifier`).
+  id: totrans-272
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们可以这样做！只需在容器上使用`instance()`方法，就像在[示例 12-26](#EX1208)中一样，告诉Laravel为请求它的任何类提供我们模拟的实例（在本例中将是`Notifier`）。
 - en: Example 12-26\. Binding a Mockery instance to the container
+  id: totrans-273
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-26\. 将Mockery实例绑定到容器
 - en: '[PRE51]'
+  id: totrans-274
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE51]'
 - en: 'There’s also a convenient shortcut to create and bind a Mockery instance to
     the container ([Example 12-27](#EX1211)):'
+  id: totrans-275
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有一个便捷的快捷方式，可以创建并绑定一个Mockery实例到容器中（[示例 12-27](#EX1211)）：
 - en: Example 12-27\. Binding Mockery instances to the container more easily
+  id: totrans-276
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-27\. 更轻松地将Mockery实例绑定到容器
 - en: '[PRE52]'
+  id: totrans-277
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE52]'
 - en: 'There’s a lot more you can do with Mockery: you can use spies, partial spies,
     and much more. Going deeper into how to use Mockery is outside the scope of this
     book, but I encourage you to learn more about the library and how it works by
     reading the [Mockery docs](https://oreil.ly/EBulp).'
+  id: totrans-278
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用Mockery还有很多事情可以做：你可以使用间谍，部分间谍，等等。深入探讨如何使用Mockery超出了本书的范围，但我鼓励你通过阅读[Mockery文档](https://oreil.ly/EBulp)来更多地了解这个库及其工作原理。
 - en: Faking Other Facades
+  id: totrans-279
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 伪造其他外观
 - en: 'There’s one other clever thing you can do with Mockery: you can use Mockery
     methods (e.g., `shouldReceive()`) on any facades in your app.'
+  id: totrans-280
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用Mockery还有一个聪明的事情：您可以在应用程序中的任何外观上使用Mockery方法（例如`shouldReceive()`）。
 - en: Imagine we have a controller method that uses a facade that’s not one of the
     fakeable systems we’ve already covered; we want to test that controller method
     and assert that a certain facade call was made.
+  id: totrans-281
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设我们有一个控制器方法，使用了一个不是我们已经覆盖过的可伪造系统的外观；我们想要测试该控制器方法，并断言某个外观调用确实被执行。
 - en: 'Thankfully, it’s simple: we can run our Mockery-style methods on the facade,
     as you can see in [Example 12-28](#EX1209).'
+  id: totrans-282
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，这很简单：我们可以在外观上运行我们Mockery风格的方法，正如你在[示例 12-28](#EX1209)中所见。
 - en: Example 12-28\. Mocking a facade
+  id: totrans-283
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-28\. 模拟外观
 - en: '[PRE53]'
+  id: totrans-284
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE53]'
 - en: As you can see, you can use methods like `shouldReceive()` on the facades, just
     like you do on a `Mockery` object.
+  id: totrans-285
   prefs: []
   type: TYPE_NORMAL
+  zh: 如您所见，您可以在外观上使用像`shouldReceive()`这样的方法，就像在`Mockery`对象上一样。
 - en: You can also use your facades as spies, which means you can set your assertions
     at the end and use `shouldHaveReceived()` instead of `should``Receive()`. [Example 12-29](#EX1210)
     illustrates this.
+  id: totrans-286
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以将您的外观用作间谍，这意味着您可以在最后设置您的断言，并使用`shouldHaveReceived()`而不是`shouldReceive()`。[示例 12-29](#EX1210)说明了这一点。
 - en: Example 12-29\. Facade spies
+  id: totrans-287
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-29\. 外观间谍
 - en: '[PRE54]'
+  id: totrans-288
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE54]'
 - en: You can also partially mock facades, as you can see in [Example 12-30](#partial_mock_facades).
+  id: totrans-289
   prefs: []
   type: TYPE_NORMAL
+  zh: 你还可以部分模拟外观，就像你在 [示例 12-30](#partial_mock_facades) 中看到的那样。
 - en: Example 12-30\. Partially mocking facades
+  id: totrans-290
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-30\. 部分模拟外观
 - en: '[PRE55]'
+  id: totrans-291
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE55]'
 - en: Testing Artisan Commands
+  id: totrans-292
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 测试 Artisan 命令
 - en: 'We’ve covered a lot in this chapter, but we’re almost done! We have just three
     more pieces of Laravel’s testing arsenal to cover: Artisan, parallel testing,
     and the browser.'
+  id: totrans-293
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本章中，我们已经涵盖了很多内容，但我们快要完成了！我们还有 Laravel 测试工具的三个要点要讲解：Artisan、并行测试和浏览器测试。
 - en: The best way to test Artisan commands is to call them with `$this->artisan(*$commandName*,
     *$parameters*)` and then test their impact, like in [Example 12-31](#simple_artisan_test).
+  id: totrans-294
   prefs: []
   type: TYPE_NORMAL
+  zh: 测试 Artisan 命令的最佳方式是使用 `$this->artisan(*$commandName*, *$parameters*)` 来调用它们，然后测试它们的影响，就像在
+    [示例 12-31](#simple_artisan_test) 中所示。
 - en: Example 12-31\. Simple Artisan tests
+  id: totrans-295
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-31\. 简单的 Artisan 测试
 - en: '[PRE56]'
+  id: totrans-296
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE56]'
 - en: You can make assertions against the response code you get from Artisan, as you
     can see in [Example 12-32](#manually_asserting_artisan_exit_codes).
+  id: totrans-297
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以对来自 Artisan 的响应代码进行断言，就像在 [示例 12-32](#manually_asserting_artisan_exit_codes)
+    中看到的那样。
 - en: Example 12-32\. Manually asserting Artisan exit codes
+  id: totrans-298
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-32\. 手动断言 Artisan 退出码
 - en: '[PRE57]'
+  id: totrans-299
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE57]'
 - en: 'You can also chain three methods onto your `$this->artisan()` call: `expectsQuestion()`,
     `expectsOutput()`, and `assertExitCode()`. The `expects`* methods will work on
     any of the interactive prompts, including `confirm()` and `anticipate()`, and
     the `assertExitCode()` method is a shortcut to what we saw in [Example 12-32](#manually_asserting_artisan_exit_codes).'
+  id: totrans-300
   prefs: []
   type: TYPE_NORMAL
+  zh: 你还可以在 `$this->artisan()` 调用上链式调用三个方法：`expectsQuestion()`、`expectsOutput()` 和
+    `assertExitCode()`。`expects`* 方法可以处理任何交互提示，包括 `confirm()` 和 `anticipate()`，而 `assertExitCode()`
+    方法是 [示例 12-32](#manually_asserting_artisan_exit_codes) 中所见的快捷方式。
 - en: Take a look at [Example 12-33](#basic_artisan_expects) to see how it works.
+  id: totrans-301
   prefs: []
   type: TYPE_NORMAL
+  zh: 看看 [示例 12-33](#basic_artisan_expects) 来了解它的工作原理。
 - en: Example 12-33\. Basic Artisan “expects” tests
+  id: totrans-302
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-33\. 基本的 Artisan “expects” 测试
 - en: '[PRE58]'
+  id: totrans-303
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE58]'
 - en: '[PRE59]'
+  id: totrans-304
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE59]'
 - en: As you can see, the first parameter of `expectsQuestion()` is the text we’re
     expecting to see from the question, and the second parameter is the text we’re
     answering with. `expectsOutput()` just tests that the passed string is returned.
+  id: totrans-305
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你所见，`expectsQuestion()` 的第一个参数是我们期望从问题中看到的文本，第二个参数是我们的答案文本。`expectsOutput()`
+    只是测试返回的字符串是否正确。
 - en: Parallel Testing
+  id: totrans-306
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 并行测试
 - en: By default, tests in Laravel run in a single thread. The more tests you have,
     and the more complex they are, the longer your test suite can take to run, and
     this can have a significant impact on how likely your team is to run your test
     suite.
+  id: totrans-307
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，Laravel 中的测试在单线程中运行。测试越多，且越复杂，你的测试套件运行时间就越长，这可能会显著影响团队运行测试套件的可能性。
 - en: 'If you want to speed up your test suite, you can run your tests in parallel.
     You’ll need to install a dependency called `paratest`:'
+  id: totrans-308
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你想加快测试套件的运行速度，你可以并行运行你的测试。你需要安装一个叫做 `paratest` 的依赖：
 - en: '[PRE60]'
+  id: totrans-309
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE60]'
 - en: Once you’ve installed `paratest`, you can run your tests in parallel using the
     `--parallel` flag, as you can see in [Example 12-34](#parallel_testing).
+  id: totrans-310
   prefs: []
   type: TYPE_NORMAL
+  zh: 安装了 `paratest` 后，你可以使用 `--parallel` 标志并行运行你的测试，就像在 [示例 12-34](#parallel_testing)
+    中看到的那样。
 - en: Example 12-34\. Running tests in parallel
+  id: totrans-311
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-34\. 并行运行测试
 - en: '[PRE61]'
+  id: totrans-312
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE61]'
 - en: Browser Tests
+  id: totrans-313
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 浏览器测试
 - en: 'We’ve made it to browser tests! These allow you to actually interact with the
     DOM of your pages: in browser tests you can click buttons, fill out and submit
     forms, and even interact with JavaScript.'
+  id: totrans-314
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们已经到了浏览器测试！这使得你可以实际与页面的 DOM 进行交互：在浏览器测试中，你可以点击按钮、填写并提交表单，甚至与 JavaScript 交互。
 - en: Choosing a Tool
+  id: totrans-315
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 选择工具
 - en: For browser testing for non-SPAs, I recommend you use Dusk. If you’re working
     with SPAs or some JavaScript-heavy applications, they may work better with frontend
     test suites, which are out of the scope of this book.
+  id: totrans-316
   prefs: []
   type: TYPE_NORMAL
+  zh: 对于非单页面应用的浏览器测试，我建议你使用 Dusk。如果你正在处理单页面应用或一些 JavaScript 重的应用程序，它们可能更适合使用前端测试套件，这超出了本书的范围。
 - en: Testing with Dusk
+  id: totrans-317
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 Dusk 进行测试
 - en: 'Dusk is a Laravel tool (installable as a Composer package) that makes it easy
     to direct an embedded instance of Google Chrome (called ChromeDriver) to interact
     with your app. Dusk’s API is simple, and it’s easy to write code to interact with
     it by hand. Take a look:'
+  id: totrans-318
   prefs: []
   type: TYPE_NORMAL
+  zh: Dusk 是 Laravel 的一个工具（可安装为 Composer 包），它可以轻松地将嵌入式 Google Chrome 实例（称为 ChromeDriver）指向你的应用程序进行交互。Dusk
+    的 API 简单易用，你可以轻松编写手动与其交互的代码。看一看：
 - en: '[PRE62]'
+  id: totrans-319
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE62]'
 - en: With Dusk, there’s an actual browser spinning up your entire application and
     interacting with it. That means you can have complex interactions with your JavaScript
     and get screenshots of failure states—but it also means everything’s a bit slower
     and it’s more prone to failure than Laravel’s base application testing suite.
+  id: totrans-320
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 Dusk，实际上有一个浏览器启动您的整个应用程序并与之交互。这意味着您可以与您的 JavaScript 进行复杂的交互，并获取失败状态的截图——但这也意味着一切都会慢一些，并且比
+    Laravel 的基本应用程序测试套件更容易出现故障。
 - en: Personally, I’ve found that Dusk is most useful as a regression testing suite,
     and it works better than something like Selenium. Rather than using it for any
     sort of test-driven development, I use it to assert that the user experience hasn’t
     broken (“regressed”) as the app continues to develop. Think of this more like
     writing tests about your user interface after the interface is built.
+  id: totrans-321
   prefs: []
   type: TYPE_NORMAL
+  zh: 就个人而言，我发现 Dusk 最有用作回归测试套件，并且它比像 Selenium 这样的工具更有效。我不是用它来进行任何类型的测试驱动开发，而是用它来断言用户体验在应用程序继续开发过程中没有“退化”。可以将其视为在界面构建完成后编写有关用户界面的测试。
 - en: The [Dusk docs](https://oreil.ly/ZqNtP) are robust, so I’m not going to go into
     great depth here, but I want to show you the basics of working with Dusk.
+  id: totrans-322
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Dusk 文档](https://oreil.ly/ZqNtP) 非常丰富，因此我在这里不会深入讨论，但我想向您展示如何使用 Dusk 的基础知识。'
 - en: Installing Dusk
+  id: totrans-323
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 安装 Dusk
 - en: 'To install Dusk, run these two commands:'
+  id: totrans-324
   prefs: []
   type: TYPE_NORMAL
+  zh: 要安装 Dusk，请运行以下两个命令：
 - en: '[PRE63]'
+  id: totrans-325
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE63]'
 - en: Then edit your *.env* file to set your `APP_URL` variable to the same URL you
     use to view your site in your local browser; something like `http://mysite.test`.
+  id: totrans-326
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后编辑您的 *.env* 文件，将 `APP_URL` 变量设置为与您本地浏览器查看站点相同的 URL；例如 `http://mysite.test`。
 - en: To run your Dusk tests, just run `php artisan dusk`. You can pass in all the
     same parameters you’re used to from PHPUnit (e.g., `php artisan dusk -⁠-⁠f⁠i⁠l⁠t⁠e⁠r​=⁠m⁠y⁠_⁠b⁠e⁠s⁠t⁠_⁠t⁠e⁠s⁠t`).
+  id: totrans-327
   prefs: []
   type: TYPE_NORMAL
+  zh: 要运行您的 Dusk 测试，只需运行 `php artisan dusk`。您可以传递从 PHPUnit 中习惯的所有相同参数（例如，`php artisan
+    dusk --filter=my_best_test`）。
 - en: Writing Dusk tests
+  id: totrans-328
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 编写 Dusk 测试
 - en: 'To generate a new Dusk test, use a command like the following:'
+  id: totrans-329
   prefs: []
   type: TYPE_NORMAL
+  zh: 要生成新的 Dusk 测试，请使用以下命令：
 - en: '[PRE64]'
+  id: totrans-330
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE64]'
 - en: This test will be placed in *tests/Browser/RatingTest.php*.
+  id: totrans-331
   prefs: []
   type: TYPE_NORMAL
+  zh: 此测试将放置在 *tests/Browser/RatingTest.php* 中。
 - en: Customizing Dusk Environment Variables
+  id: totrans-332
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 自定义 Dusk 环境变量
 - en: You can customize the environment variables for Dusk by creating a new file
     named *.env.dusk.local* (and you can replace *.local* if you’re working in a different
     environment, like “staging”).
+  id: totrans-333
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过创建一个名为 *.env.dusk.local* 的新文件来自定义 Dusk 的环境变量（如果您在不同的环境中工作，如“staging”，则可以替换
+    *.local*）。
 - en: To write your Dusk tests, imagine that you’re directing one or more web browsers
     to visit your application and take certain actions. That’s what the syntax will
     look like, as you can see in [Example 12-35](#first_dusk_test).
+  id: totrans-334
   prefs: []
   type: TYPE_NORMAL
+  zh: 要编写您的 Dusk 测试，请想象您正在指导一个或多个 Web 浏览器访问您的应用程序并执行某些操作。这就是语法的样子，正如您可以在 [示例 12-35](#first_dusk_test)
+    中看到的那样。
 - en: Example 12-35\. A simple Dusk test
+  id: totrans-335
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-35\. 一个简单的 Dusk 测试
 - en: '[PRE65]'
+  id: totrans-336
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE65]'
 - en: '`$this->browse()` creates a browser, which you pass into a closure; then, within
     the closure, you instruct the browser which actions to take.'
+  id: totrans-337
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$this->browse()` 创建一个浏览器，您将其传递给一个闭包；然后，在闭包内，您指示浏览器执行哪些操作。'
 - en: It’s important to note that—unlike Laravel’s other application testing tools,
     which mimic the behavior of your forms—Dusk is actually spinning up a browser,
     sending events to the browser to type those words, and then sending an event to
     the browser to press that button. This is a real browser and Dusk is fully driving
     it.
+  id: totrans-338
   prefs: []
   type: TYPE_NORMAL
+  zh: 需要注意的是——与 Laravel 的其他应用程序测试工具不同，这些工具模仿您的表单行为——Dusk 实际上正在启动浏览器，并向浏览器发送事件以输入这些文字，然后发送事件以按下该按钮。这是一个真实的浏览器，Dusk
+    完全驱动它。
 - en: You can also “ask” for more than one browser by adding parameters to the closure,
     which allows you to test how multiple users might interact with the website (for
     example, with a chat system). Take a look at [Example 12-36](#multiple_dusk_browsers),
     from the docs.
+  id: totrans-339
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以通过向闭包添加参数“请求”更多浏览器，这样可以测试多个用户如何与网站交互（例如，使用聊天系统）。请参阅文档中的 [示例 12-36](#multiple_dusk_browsers)。
 - en: Example 12-36\. Multiple Dusk browsers
+  id: totrans-340
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-36\. 多个 Dusk 浏览器
 - en: '[PRE66]'
+  id: totrans-341
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE66]'
 - en: There’s a huge suite of actions and assertions available that we won’t cover
     here (check the docs), but let’s look at a few of the other tools Dusk provides.
+  id: totrans-342
   prefs: []
   type: TYPE_NORMAL
+  zh: 这里有大量的操作和断言可用，我们在此不会详细介绍（请查看文档），但让我们看看 Dusk 提供的其他一些工具。
 - en: Authentication and databases
+  id: totrans-343
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 身份验证和数据库
 - en: 'As you can see in [Example 12-36](#multiple_dusk_browsers), the syntax for
     authentication is a little different from the rest of the Laravel application
     testing: `$browser->loginAs(*$user*)`.'
+  id: totrans-344
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您在[示例12-36](#multiple_dusk_browsers)中所见，身份验证的语法与Laravel应用测试的其余部分有所不同：`$browser->loginAs(*$user*)`。
 - en: Avoid the RefreshDatabase trait with Dusk
+  id: totrans-345
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 避免与Dusk一起使用RefreshDatabase特性
 - en: Don’t use the `RefreshDatabase` trait with Dusk! Use the `DatabaseMigrations`
     trait instead; transactions, which `RefreshDatabase` uses, don’t persist across
     requests.
+  id: totrans-346
   prefs: []
   type: TYPE_NORMAL
+  zh: 不要与Dusk一起使用`RefreshDatabase`特性！改用`DatabaseMigrations`特性；`RefreshDatabase`使用的事务在请求间不会持久化。
 - en: Interactions with the page
+  id: totrans-347
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 与页面的交互
 - en: If you’ve ever written jQuery, interacting with the page using Dusk will come
     naturally. Take a look at [Example 12-37](#selecting_dusk_elements) to see the
     common patterns for selecting items with Dusk.
+  id: totrans-348
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您曾经编写过jQuery，则使用Dusk与页面进行交互会非常自然。查看[示例12-37](#selecting_dusk_elements)以了解使用Dusk选择项目的常见模式。
 - en: Example 12-37\. Selecting items with Dusk
+  id: totrans-349
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例12-37。使用Dusk选择项目
 - en: '[PRE67]'
+  id: totrans-350
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE67]'
 - en: '[PRE68]'
+  id: totrans-351
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE68]'
 - en: As you can see, adding the `dusk` attribute to your page elements allows you
     to reference them directly in a way that won’t change when the display or layout
     of the page changes later; when any method asks for a selector, pass in the `@`
     sign and then the content of your `dusk` attribute.
+  id: totrans-352
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您可以看到的那样，将`dusk`属性添加到您的页面元素中允许您以一种不会在以后显示或布局更改时改变的方式直接引用它们；当任何方法要求选择器时，请传递`@`符号，然后是您的`dusk`属性的内容。
 - en: Let’s take a look at a few of the methods you can call on `$browser`.
+  id: totrans-353
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们来看看您可以在`$browser`上调用的一些方法。
 - en: 'To work with text and attribute values, use these methods:'
+  id: totrans-354
   prefs: []
   type: TYPE_NORMAL
+  zh: 要处理文本和属性值，请使用以下方法：
 - en: '`value(*$selector, $value = null*)`'
+  id: totrans-355
   prefs: []
   type: TYPE_NORMAL
+  zh: '`value(*$selector, $value = null*)`'
 - en: Returns the value of any text input if only one parameter is passed; sets the
     value of an input if a second parameter is passed.
+  id: totrans-356
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果只传递一个参数，则返回任何文本输入的值；如果传递第二个参数，则设置输入的值。
 - en: '`text(*$selector*)`'
+  id: totrans-357
   prefs: []
   type: TYPE_NORMAL
+  zh: '`text(*$selector*)`'
 - en: Gets the text content of a nonfillable item like a `<div>` or a `<span>`.
+  id: totrans-358
   prefs: []
   type: TYPE_NORMAL
+  zh: 获取非填充项（如`<div>`或`<span>`）的文本内容。
 - en: '`attribute(*$selector, $attributeName*)`'
+  id: totrans-359
   prefs: []
   type: TYPE_NORMAL
+  zh: '`attribute(*$selector, $attributeName*)`'
 - en: Returns the value of a particular attribute on the element matching `*$selector*`.
+  id: totrans-360
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回与匹配`*$selector*`的元素上的特定属性的值。
 - en: 'Methods for working with forms and files include the following:'
+  id: totrans-361
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于处理表单和文件的方法包括以下内容：
 - en: '`type(*$selector, $valueToType*)`'
+  id: totrans-362
   prefs: []
   type: TYPE_NORMAL
+  zh: '`type(*$selector, $valueToType*)`'
 - en: Similar to `value()`, but actually types the characters rather than directly
     setting the value.
+  id: totrans-363
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似于`value()`，但实际上输入字符而不是直接设置值。
 - en: Dusk’s Selector matching order
+  id: totrans-364
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Dusk的选择器匹配顺序
 - en: With methods like `type()` that target inputs, Dusk will start by trying to
     match a Dusk or CSS selector, and then will look for an input with the provided
     name, and finally will try to find a `<textarea>` with the provided name.
+  id: totrans-365
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用诸如`type()`之类的方法来定位输入时，Dusk将首先尝试匹配一个Dusk或CSS选择器，然后将查找具有提供的名称的输入，最后将尝试查找具有提供的名称的`<textarea>`。
 - en: '`select(*$selector, $optionValue*)`'
+  id: totrans-366
   prefs: []
   type: TYPE_NORMAL
+  zh: '`select(*$selector, $optionValue*)`'
 - en: Selects the option with the value of `*$optionValue*` in a drop-down selectable
     by `*$selector*`.
+  id: totrans-367
   prefs: []
   type: TYPE_NORMAL
+  zh: 在可由`*$selector*`选择的下拉选择中选择值为`*$optionValue*`的选项。
 - en: '`check(*$selector*)`, `uncheck(*$selector*)`'
+  id: totrans-368
   prefs: []
   type: TYPE_NORMAL
+  zh: '`check(*$selector*)`、`uncheck(*$selector*)`'
 - en: Checks or unchecks a checkbox selectable by `*$selector*`.
+  id: totrans-369
   prefs: []
   type: TYPE_NORMAL
+  zh: 检查或取消检查由`*$selector*`选择的复选框。
 - en: '`radio(*$selector, $optionValue*)`'
+  id: totrans-370
   prefs: []
   type: TYPE_NORMAL
+  zh: '`radio(*$selector, $optionValue*)`'
 - en: Selects the option with the value of `*$optionValue*` in a radio group selectable
     by `*$selector*`.
+  id: totrans-371
   prefs: []
   type: TYPE_NORMAL
+  zh: 在可由`*$selector*`选择的单选组中选择值为`*$optionValue*`的选项。
 - en: '`attach(*$selector, $filePath*)`'
+  id: totrans-372
   prefs: []
   type: TYPE_NORMAL
+  zh: '`attach(*$selector, $filePath*)`'
 - en: Attaches a file at `*$filePath*` to the file input selectable by `*$selector*`.
+  id: totrans-373
   prefs: []
   type: TYPE_NORMAL
+  zh: 将文件附加到由`*$selector*`选择的文件输入中的`*$filePath*`。
 - en: 'The methods for keyboard and mouse input are:'
+  id: totrans-374
   prefs: []
   type: TYPE_NORMAL
+  zh: 用于键盘和鼠标输入的方法有：
 - en: '`clickLink(*$selector*)`'
+  id: totrans-375
   prefs: []
   type: TYPE_NORMAL
+  zh: '`clickLink(*$selector*)`'
 - en: Follows a text link to its target.
+  id: totrans-376
   prefs: []
   type: TYPE_NORMAL
+  zh: 跟随文本链接到其目标。
 - en: '`click(*$selector*)`, `mouseover(*$selector*)`'
+  id: totrans-377
   prefs: []
   type: TYPE_NORMAL
+  zh: '`click(*$selector*)`、`mouseover(*$selector*)`'
 - en: Triggers a mouse click or a mouseover event on `*$selector*`.
+  id: totrans-378
   prefs: []
   type: TYPE_NORMAL
+  zh: 触发鼠标在`*$selector*`上的点击或悬停事件。
 - en: '`drag(*$selectorToDrag, $selectorToDragTo*)`'
+  id: totrans-379
   prefs: []
   type: TYPE_NORMAL
+  zh: '`drag(*$selectorToDrag, $selectorToDragTo*)`'
 - en: Drags an item to another item.
+  id: totrans-380
   prefs: []
   type: TYPE_NORMAL
+  zh: 将一个项目拖动到另一个项目。
 - en: '`dragLeft()`, `dragRight()`, `dragUp()`, `dragDown()`'
+  id: totrans-381
   prefs: []
   type: TYPE_NORMAL
+  zh: '`dragLeft()`、`dragRight()`、`dragUp()`、`dragDown()`'
 - en: Given a first parameter of a selector and a second parameter of a number of
     pixels, drags the selected item that many pixels in the given direction.
+  id: totrans-382
   prefs: []
   type: TYPE_NORMAL
+  zh: 给定选择器的第一个参数和像素数的第二个参数，向给定方向拖动所选项目的这么多像素。
 - en: '`keys(*$selector, $instructions*)`'
+  id: totrans-383
   prefs: []
   type: TYPE_NORMAL
+  zh: '`keys(*$selector, $instructions*)`'
 - en: 'Sends keypress events within the context of `*$selector*` according to the
     instructions in `*$instructions*`. You can even combine modifiers with your typing:'
+  id: totrans-384
   prefs: []
   type: TYPE_NORMAL
+  zh: 根据`*$instructions*`中的指示在`*$selector*`的上下文中发送键按下事件。您甚至可以将修饰符与键入组合：
 - en: '[PRE69]'
+  id: totrans-385
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE69]'
 - en: This would type “this is GREAT.” As you can see, adding an array to the list
     of items to type allows you to combine modifiers (wrapped with `{}`) with typing.
     You can see a full list of the possible modifiers in the [Facebook WebDriver source](https://oreil.ly/_gKa4).
+  id: totrans-386
   prefs: []
   type: TYPE_NORMAL
+  zh: 这将键入“this is GREAT。”正如您所见，将数组添加到要键入的项目列表中允许您将修饰符（用`{}`包装）与键入组合。您可以在[Facebook
+    WebDriver source](https://oreil.ly/_gKa4)中看到所有可能的修饰符列表。
 - en: 'If you’d like to just send your key sequence to the page (for example, to trigger
     a keyboard shortcut), you can target the top level of your app or page as your
     selector. For example, if it’s a Vue app and the top level is a `<div>` with an
     ID of `app`:'
+  id: totrans-387
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您只想将您的键序列发送到页面（例如触发键盘快捷键），则可以将您的应用或页面的顶级作为选择器。例如，如果它是一个Vue应用程序，并且顶级是ID为`app`的`<div>`：
 - en: '[PRE70]'
+  id: totrans-388
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE70]'
 - en: Waiting
+  id: totrans-389
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 等待中
 - en: 'Because Dusk interacts with JavaScript and is directing an actual browser,
     the concept of time and timeouts and “waiting” needs to be addressed. Dusk offers
     several methods you can use to ensure your tests handle timing issues correctly.
     Some of these methods are useful for interacting with intentionally slow or delayed
     elements of the page, but some of them are also just useful for getting around
     initialization times on your components. The available methods include the following:'
+  id: totrans-390
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为Dusk与JavaScript交互，并且正在操作实际的浏览器，所以需要解决时间和超时以及“等待”的概念。Dusk提供了几种方法，可以确保您的测试正确处理时间问题。其中一些方法对于与页面中故意缓慢或延迟的元素交互非常有用，但有些方法也仅仅是为了解决组件初始化时间。可用的方法包括以下内容：
 - en: '`pause(*$milliseconds*)`'
+  id: totrans-391
   prefs: []
   type: TYPE_NORMAL
+  zh: '`pause(*$milliseconds*)`'
 - en: Pauses the execution of Dusk tests for the given number of milliseconds. This
     is the simplest “wait” option; it makes any future commands you send to the browser
     wait that amount of time before operating.
+  id: totrans-392
   prefs: []
   type: TYPE_NORMAL
+  zh: 暂停Dusk测试的执行，以毫秒为单位。这是最简单的“等待”选项；它会使您发送给浏览器的未来命令在操作之前等待该时间量。
 - en: 'You can use this and other waiting methods in the midst of an assertion chain,
     as shown here:'
+  id: totrans-393
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在断言链中间使用此方法和其他等待方法，如下所示：
 - en: '[PRE71]'
+  id: totrans-394
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE71]'
 - en: '`waitFor(*$selector, $maxSeconds = null*)`, `waitUntilMissing(*$selector*,`
     `*$maxSeconds*` `*= null*)`'
+  id: totrans-395
   prefs: []
   type: TYPE_NORMAL
+  zh: '`waitFor(*$selector, $maxSeconds = null*)`，`waitUntilMissing(*$selector*,`
+    `*$maxSeconds*` `*= null*)`'
 - en: 'Waits until the given element exists on the page (`waitFor()`) or disappears
     from the page (`waitUntilMissing()`) or times out after the optional second parameter’s
     second count:'
+  id: totrans-396
   prefs: []
   type: TYPE_NORMAL
+  zh: 等待页面上存在给定元素（`waitFor()`）或消失（`waitUntilMissing()`），或在可选的第二个参数的秒数后超时：
 - en: '[PRE72]'
+  id: totrans-397
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE72]'
 - en: '`whenAvailable(*$selector, $callback*)`'
+  id: totrans-398
   prefs: []
   type: TYPE_NORMAL
+  zh: '`whenAvailable(*$selector, $callback*)`'
 - en: 'Similar to `waitFor()`, but accepts a closure as the second parameter, which
     will define what action to take when the specified element becomes available:'
+  id: totrans-399
   prefs: []
   type: TYPE_NORMAL
+  zh: 类似于`waitFor()`，但接受闭包作为第二个参数，该闭包将定义在指定元素可用时要执行的操作：
 - en: '[PRE73]'
+  id: totrans-400
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE73]'
 - en: '`waitForText(*$text, $maxSeconds = null*)`'
+  id: totrans-401
   prefs: []
   type: TYPE_NORMAL
+  zh: '`waitForText(*$text, $maxSeconds = null*)`'
 - en: 'Waits for text to show up on the page, or times out after the optional second
     parameter’s second count:'
+  id: totrans-402
   prefs: []
   type: TYPE_NORMAL
+  zh: 等待文本显示在页面上，或在可选的第二个参数的秒数后超时：
 - en: '[PRE74]'
+  id: totrans-403
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE74]'
 - en: '`waitForLink(*$linkText, $maxSeconds = null*)`'
+  id: totrans-404
   prefs: []
   type: TYPE_NORMAL
+  zh: '`waitForLink(*$linkText, $maxSeconds = null*)`'
 - en: 'Waits for a link to exist with the given link text, or times out after the
     optional second parameter’s second count:'
+  id: totrans-405
   prefs: []
   type: TYPE_NORMAL
+  zh: 等待具有给定链接文本的链接存在，或在可选的第二个参数的秒数后超时：
 - en: '[PRE75]'
+  id: totrans-406
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE75]'
 - en: '`waitForLocation(*$path*)`'
+  id: totrans-407
   prefs: []
   type: TYPE_NORMAL
+  zh: '`waitForLocation(*$path*)`'
 - en: 'Waits until the page URL matches the provided path:'
+  id: totrans-408
   prefs: []
   type: TYPE_NORMAL
+  zh: 等待直到页面URL与提供的路径匹配：
 - en: '[PRE76]'
+  id: totrans-409
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE76]'
 - en: '`waitForRoute(*$routeName*)`'
+  id: totrans-410
   prefs: []
   type: TYPE_NORMAL
+  zh: '`waitForRoute(*$routeName*)`'
 - en: 'Waits until the page URL matches the URL for the provided route:'
+  id: totrans-411
   prefs: []
   type: TYPE_NORMAL
+  zh: 等待直到页面URL与提供的路由的URL匹配：
 - en: '[PRE77]'
+  id: totrans-412
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE77]'
 - en: '`waitForReload()`'
+  id: totrans-413
   prefs: []
   type: TYPE_NORMAL
+  zh: '`waitForReload()`'
 - en: Waits until the page reloads.
+  id: totrans-414
   prefs: []
   type: TYPE_NORMAL
+  zh: 等待页面重新加载。
 - en: '`waitUntil(*$expression*)`'
+  id: totrans-415
   prefs: []
   type: TYPE_NORMAL
+  zh: '`waitUntil(*$expression*)`'
 - en: 'Waits until the provided JavaScript expression evaluates as true:'
+  id: totrans-416
   prefs: []
   type: TYPE_NORMAL
+  zh: 等待直到提供的 JavaScript 表达式评估为true：
 - en: '[PRE78]'
+  id: totrans-417
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE78]'
 - en: Other Assertions
+  id: totrans-418
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 其他断言
 - en: 'As I’ve mentioned, there’s a huge list of assertions you can make against your
     app with Dusk. Here are a few that I use most commonly—you can see the full list
     in the [Dusk docs](https://oreil.ly/ZqNtP):'
+  id: totrans-419
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如我提到的，您可以使用Dusk对应用程序进行大量断言。以下是我最常用的一些——您可以在[Dusk文档](https://oreil.ly/ZqNtP)中看到完整列表：
 - en: '`assertTitleContains(*$text*)`'
+  id: totrans-420
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`assertTitleContains(*$text*)`'
 - en: '`assertQueryStringHas(*$keyName*)`'
+  id: totrans-421
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`assertQueryStringHas(*$keyName*)`'
 - en: '`assertHasCookie(*$cookieName*)`'
+  id: totrans-422
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`assertHasCookie(*$cookieName*)`'
 - en: '`assertSourceHas(*$htmlSourceCode*)`'
+  id: totrans-423
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`assertSourceHas(*$htmlSourceCode*)`'
 - en: '`assertChecked(*$selector*)`'
+  id: totrans-424
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`assertChecked(*$selector*)`'
 - en: '`assertSelectHasOption(*$selectorForSelect, $optionValue*)`'
+  id: totrans-425
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`assertSelectHasOption(*$selectorForSelect, $optionValue*)`'
 - en: '`assertVisible(*$selector*)`'
+  id: totrans-426
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`assertVisible(*$selector*)`'
 - en: '`assertFocused()`'
+  id: totrans-427
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`assertFocused()`'
 - en: '`assertVue(*$dataLocation, $dataValue, $selector*)`'
+  id: totrans-428
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`assertVue(*$dataLocation, $dataValue, $selector*)`'
 - en: Other organizational structures
+  id: totrans-429
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 其他组织结构
 - en: So far, everything we’ve covered makes it possible to test individual elements
     on our pages. But we’ll often use Dusk to test more complex applications and single-page
     apps, which means we’re going to need organizational structures around our assertions.
+  id: totrans-430
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，我们所覆盖的内容使得我们能够测试页面上的各个元素。但是，我们经常会使用 Dusk 来测试更复杂的应用程序和单页面应用程序，这意味着我们需要围绕我们的断言建立组织结构。
 - en: The first organizational structures we have encountered have been the `dusk`
     attribute (e.g., `<div dusk="abc">`, creating a selector named `@abc` we can refer
     to later) and the closures we can use to wrap certain portions of our code (e.g.,
     with `when``Available()`).
+  id: totrans-431
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们遇到的第一个组织结构是 `dusk` 属性（例如，`<div dusk="abc">`，创建一个名为 `@abc` 的选择器，我们稍后可以引用它）和我们可以用来包装代码特定部分的闭包（例如，使用
+    `when` `Available()`）。
 - en: 'Dusk offers two more organizational tools: pages and components. Let’s start
     with pages.'
+  id: totrans-432
   prefs: []
   type: TYPE_NORMAL
+  zh: Dusk 提供了另外两个组织工具：页面和组件。让我们从页面开始。
 - en: Pages
+  id: totrans-433
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 页面
 - en: 'A page is a class that you’ll generate which contains two pieces of functionality:
     first, a URL and assertions to define which page in your app should be attached
     to this Dusk page; and second, shorthand like we used inline (the `@abc` selector
     generated by the `dusk="abc"` attribute in our HTML) but just for this page, and
     without needing to edit our HTML.'
+  id: totrans-434
   prefs: []
   type: TYPE_NORMAL
+  zh: 页面是一个你将生成的类，包含两个功能部分：首先是一个 URL 和断言，用来定义应用程序中应该附加到这个 Dusk 页面的页面；其次是像我们在内联中使用的快捷方式（由我们
+    HTML 中的 `dusk="abc"` 属性生成的 `@abc` 选择器），但只针对这个页面，而无需编辑我们的 HTML。
 - en: 'Let’s imagine our app has a “create package” page. We can generate a Dusk page
     for it as follows:'
+  id: totrans-435
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们想象一下我们的应用程序有一个“创建包裹”页面。我们可以按照以下步骤生成一个 Dusk 页面：
 - en: '[PRE79]'
+  id: totrans-436
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE79]'
 - en: Take a look at [Example 12-38](#generated_dusk_page) to see what our generated
     class will look like.
+  id: totrans-437
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看 [示例 12-38](#generated_dusk_page) 以查看我们生成的类会是什么样子。
 - en: Example 12-38\. The generated Dusk page
+  id: totrans-438
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-38\. 生成的 Dusk 页面
 - en: '[PRE80]'
+  id: totrans-439
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE80]'
 - en: The `url()` method defines the location where Dusk should expect this page to
     be, `assert()` lets you run additional assertions to verify you’re on the right
     page, and `elements()` provides shortcuts for `@dusk`-style selectors.
+  id: totrans-440
   prefs: []
   type: TYPE_NORMAL
+  zh: '`url()` 方法定义了 Dusk 应该期望此页面存在的位置，`assert()` 让您可以运行额外的断言来验证您是否在正确的页面上，而 `elements()`
+    则为 `@dusk` 风格的选择器提供了快捷方式。'
 - en: Let’s make a few quick modifications to our “create package” page, to make it
     look like [Example 12-39](#create_package_basic_dusk_page).
+  id: totrans-441
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们快速修改一下我们的“创建包裹”页面，使其看起来像 [示例 12-39](#create_package_basic_dusk_page)。
 - en: Example 12-39\. A simple “create package” Dusk page
+  id: totrans-442
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-39\. 一个简单的“创建包裹”Dusk页面
 - en: '[PRE81]'
+  id: totrans-443
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE81]'
 - en: 'Now that we have a functional page, we can navigate to it and access its defined
     elements:'
+  id: totrans-444
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们有了一个可用的页面，我们可以导航到它并访问其定义的元素：
 - en: '[PRE82]'
+  id: totrans-445
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE82]'
 - en: One common use for pages is to define a common action you want to take in your
     tests; consider these almost like macros for Dusk. You can define a method on
     your page and then call it from your code, as you can see in [Example 12-40](#dusk_custom_page_methods).
+  id: totrans-446
   prefs: []
   type: TYPE_NORMAL
+  zh: 页面的一个常见用途是定义您希望在测试中执行的常见操作；可以将其视为 Dusk 的宏。您可以在页面上定义一个方法，然后从您的代码中调用它，就像在 [示例 12-40](#dusk_custom_page_methods)
+    中所看到的。
 - en: Example 12-40\. Defining and using a custom page method
+  id: totrans-447
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-40\. 定义并使用自定义页面方法
 - en: '[PRE83]'
+  id: totrans-448
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE83]'
 - en: '[PRE84]'
+  id: totrans-449
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE84]'
 - en: Components
+  id: totrans-450
   prefs:
   - PREF_H4
   type: TYPE_NORMAL
+  zh: 组件
 - en: If you want the same functionality as Dusk pages offer, but without it being
     constrained to a specific URL, you’ll likely want to reach for Dusk *components*.
     These classes are shaped very similarly to pages, but instead of being bound to
     a URL, they’re each bound to a selector.
+  id: totrans-451
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你希望得到与 Dusk 页面提供的相同功能，但不限于特定的 URL，你可能想要使用 Dusk *组件*。这些类与页面非常相似，但不是绑定到 URL，而是绑定到选择器。
 - en: 'In *NovaPackages.com*, we have a little Vue component for rating packages and
     displaying ratings. Let’s make a Dusk component for it:'
+  id: totrans-452
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 *NovaPackages.com* 中，我们有一个用于评分包和显示评分的小 Vue 组件。让我们为它创建一个 Dusk 组件：
 - en: '[PRE85]'
+  id: totrans-453
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE85]'
 - en: Take a look at [Example 12-41](#generated_dusk_component) to see what that will
     generate.
+  id: totrans-454
   prefs: []
   type: TYPE_NORMAL
+  zh: 查看 [示例 12-41](#generated_dusk_component) 以查看将生成什么。
 - en: Example 12-41\. The default source of a generated Dusk component
+  id: totrans-455
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-41\. 生成的 Dusk 组件的默认源
 - en: '[PRE86]'
+  id: totrans-456
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE86]'
 - en: As you can see, this is basically the same as a Dusk page, but we’re encapsulating
     our work to an HTML element instead of a URL. Everything else is basically the
     same. Take a look at [Example 12-42](#simple_dusk_component) to see our rating
     widget example in Dusk component form.
+  id: totrans-457
   prefs: []
   type: TYPE_NORMAL
+  zh: 如你所见，这与Dusk页面基本相同，但我们将工作封装到HTML元素而不是URL中。其他方面基本相同。请看[示例 12-42](#simple_dusk_component)，看看我们的评分小部件在Dusk组件形式中的例子。
 - en: Example 12-42\. A Dusk component for the rating widget
+  id: totrans-458
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-42\. 一个用于评分小部件的Dusk组件
 - en: '[PRE87]'
+  id: totrans-459
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE87]'
 - en: Using components works just like using pages, as you can see in [Example 12-43](#using_dusk_components).
+  id: totrans-460
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用组件的方式与使用页面的方式完全相同，就像你在[示例 12-43](#using_dusk_components)中看到的那样。
 - en: Example 12-43\. Using Dusk components
+  id: totrans-461
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-43\. 使用Dusk组件
 - en: '[PRE88]'
+  id: totrans-462
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE88]'
 - en: That’s a good, brief overview of what Dusk can do. There’s a lot more—more assertions,
     more edge cases, more gotchas, more examples—in the [Dusk docs](https://oreil.ly/ZqNtP),
     so I’d recommend a read through there if you plan to work with Dusk.
+  id: totrans-463
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是Dusk可以做的一个很好的简要概述。还有更多内容——更多断言、更多边缘案例、更多陷阱、更多示例——详见[Dusk文档](https://oreil.ly/ZqNtP)，如果你计划使用Dusk，我建议你仔细阅读一下。
 - en: Pest
+  id: totrans-464
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: Pest
 - en: Pest is a third-party testing framework for Laravel. It’s a layer on top of
     PHPUnit that provides customized console output, easy parallel testing and code
     coverage, architecture testing, and more.
+  id: totrans-465
   prefs: []
   type: TYPE_NORMAL
+  zh: Pest是Laravel的第三方测试框架。它是建立在PHPUnit之上的一层，提供定制的控制台输出、简单的并行测试和代码覆盖率、架构测试等功能。
 - en: Pest also offers a different testing syntax, inspired by Ruby’s RSpec. You can
     use Pest and get all of its benefits without switching to its unique testing syntax,
     but if you do want to try it out, take a look at [Example 12-44](#EX1214) to see
     how the syntax looks.
+  id: totrans-466
   prefs: []
   type: TYPE_NORMAL
+  zh: Pest还提供了不同的测试语法，受Ruby的RSpec启发。你可以使用Pest并享受其所有好处，而无需切换到其独特的测试语法，但如果你确实想试试看，可以参考[示例 12-44](#EX1214)来看看语法是如何的。
 - en: Example 12-44\. Sample Pest syntax
+  id: totrans-467
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 12-44\. Pest语法示例
 - en: '[PRE89]'
+  id: totrans-468
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE89]'
 - en: To learn more about Pest, check out [*pestphp.com*](https://pestphp.com).
+  id: totrans-469
   prefs: []
   type: TYPE_NORMAL
+  zh: 欲了解更多关于Pest的信息，请访问[*pestphp.com*](https://pestphp.com)。
 - en: TL;DR
+  id: totrans-470
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: TL;DR
 - en: Laravel can work with any modern PHP testing framework, but it’s optimized for
     PHPUnit (especially if your tests extend Laravel’s `TestCase`). Laravel’s application
     testing framework makes it simple to send fake HTTP and console requests through
     your application and inspect the results.
+  id: totrans-471
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel可以与任何现代PHP测试框架一起使用，但它对PHPUnit进行了优化（特别是如果你的测试扩展了Laravel的`TestCase`）。Laravel的应用程序测试框架使得通过应用程序发送伪造的HTTP和控制台请求并检查结果变得简单。
 - en: Tests in Laravel can easily and powerfully interact with and assert against
     the database, cache, session, filesystem, mail, and many other systems. Quite
     a few of these systems have fakes built in to make them even easier to test. You
     can test DOM and browser-like interactions with Dusk.
+  id: totrans-472
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel中的测试可以轻松而强大地与数据库、缓存、会话、文件系统、邮件和许多其他系统进行交互和断言。其中很多系统都有内置的伪造功能，使测试变得更加简单。你可以使用Dusk测试DOM和类似浏览器的交互。
 - en: Laravel brings in Mockery in case you need mocks, stubs, spies, dummies, or
     anything else, but the testing philosophy of Laravel is to use real collaborators
     as much as possible. Don’t fake it unless you have to.
+  id: totrans-473
   prefs: []
   type: TYPE_NORMAL
+  zh: Laravel为了模拟、存根、监听器、虚拟对象或其他任何内容，引入了Mockery，但Laravel的测试哲学是尽可能使用真实的协作对象。除非必要，否则不要伪造。

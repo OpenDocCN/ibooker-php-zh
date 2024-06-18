@@ -1,14 +1,19 @@
 - en: Chapter 7\. Dates and Times
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第7章 日期和时间
 - en: The typical PHP developer likely needs to be aware of the available date and
     time functions, such as when adding a date stamp to a database record entry or
     calculating the difference between two dates. PHP provides a `DateTime` class
     that can handle both date and time information simultaneously, as well as a `DateTimeZone`
     class that works hand in hand with it.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 典型的 PHP 开发人员可能需要了解可用的日期和时间函数，比如向数据库记录条目添加日期戳或计算两个日期之间的差异。PHP 提供了 `DateTime`
+    类，可以同时处理日期和时间信息，以及与之配合使用的 `DateTimeZone` 类。
 - en: Time zone management has become more prominent in recent years with the onset
     of web portals and social web communities like Facebook and Twitter. To be able
     to post information to a website and have it recognize where you are in the world
@@ -18,19 +23,27 @@
     you where they are in the world, it can be quite difficult to determine time zone
     location automatically. Once you know the information, though, it’s easy to manipulate
     that data (more on time zones later in this chapter).
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 最近几年来，随着网页门户和社交网络社区（如 Facebook 和 Twitter）的出现，时区管理变得更加突出。能够将信息发布到网站，并让其根据用户所在的世界位置识别你在同一网站上的位置，确实是当今的一个要求。但请记住，像
+    `date()` 这样的函数会从运行脚本的服务器获取默认信息，因此，除非人类客户告诉你他们在世界上的位置，否则自动确定时区位置可能会非常困难。不过，一旦获取了信息，操作数据就变得很容易（本章稍后将详细讨论时区）。
 - en: Note
+  id: totrans-3
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: The original date (and related) functions contain a timing flaw on Windows and
     some Unix installations. They cannot process dates prior to December 13, 1901,
     or beyond January 19, 2038, due to the nature of the underlying 32-bit signed
     integer used to manage the date and time data. Therefore, it is recommended to
     use the newer `DateTime` class family for better accuracy going forward.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 原始的日期（及相关）函数在 Windows 和某些 Unix 安装中存在时间缺陷。由于底层使用的32位有符号整数的特性来管理日期和时间数据，它们无法处理1901年12月13日之前或2038年1月19日之后的日期。因此，建议使用更新的
+    `DateTime` 类系列以提高准确性。
 - en: There are four interrelated classes for handling dates and times. The `DateTime`
     class handles dates themselves; the `DateTimeZone` class handles time zones; the
     `Date``Interval` class handles spans of time between two `DateTime` instances;
@@ -38,35 +51,53 @@
     dates and times. There are two other rarely used supporting classes called `DateTimeImmutable`
     and `DateTimeInterface` that are part of the whole `DateTime` “family,” but we
     won’t cover those in this chapter.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 处理日期和时间的有四个相互关联的类。`DateTime` 类处理日期本身；`DateTimeZone` 类处理时区；`DateInterval` 类处理两个
+    `DateTime` 实例之间的时间跨度；最后，`DatePeriod` 类处理日期和时间的常规间隔遍历。还有两个不常用的支持类 `DateTimeImmutable`
+    和 `DateTimeInterface` 属于整个 `DateTime` “家族”，但本章不涵盖这些。
 - en: 'The constructor of the `DateTime` class is naturally where it all starts. This
     method takes two parameters, the timestamp and the time zone. For example:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: '`DateTime` 类的构造函数自然是一切的起点。此方法接受两个参数，时间戳和时区。例如：'
 - en: '[PRE0]'
+  id: totrans-7
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'We create the `$dt` object, assign it a date and time string with the first
     parameter, and set the time zone with the second parameter. Here, we’re instantiating
     the `DateTimeZone` instance inline, but you could alternately instantiate the
     `DateTimeZone` object into its own variable and then use that in the constructor,
     like so:'
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们创建 `$dt` 对象，为其分配日期和时间字符串作为第一个参数，并使用第二个参数设置时区。在此示例中，我们内联实例化了 `DateTimeZone`
+    实例，但您也可以将 `DateTimeZone` 对象实例化为其自己的变量，然后在构造函数中使用，如下所示：
 - en: '[PRE1]'
+  id: totrans-9
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: 'Now obviously we are assigning hardcoded values to these classes, and this
     type of information may not always be available to your code or it may not be
     what you want. Alternatively, we can pick up the value of the time zone from the
     server and use that inside the `DateTimeZone` class. To pick up the current server
     value, use code similar to the following:'
+  id: totrans-10
   prefs: []
   type: TYPE_NORMAL
+  zh: 显然，我们正在为这些类分配硬编码的值，而这种信息类型可能并非始终可供您的代码使用，或者可能不是您想要的。或者，我们可以从服务器获取时区值，并在 `DateTimeZone`
+    类中使用。要获取当前服务器值，请使用类似以下代码的代码：
 - en: '[PRE2]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'These code examples establish a set of values for two classes, `DateTime` and
     `DateTimeZone`. Eventually, you will be using that information in some way elsewhere
     in your script. One of the methods of the `DateTime` class is called `format()`,
@@ -74,159 +105,240 @@
     Those date format codes are all listed in the [Appendix](app01.xhtml#function_reference),
     in the section for the `date_format()` function. Here is a sample of the `format()`
     method being sent to the browser as output:'
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些代码示例为两个类 `DateTime` 和 `DateTimeZone` 设定了一组值。最终，你将在脚本的其他地方以某种方式使用这些信息。`DateTime`
+    类的一个方法是 `format()`，它使用与 `date_format()` 函数相同的格式输出代码。这些日期格式代码都列在[附录](app01.xhtml#function_reference)中，位于
+    `date_format()` 函数的部分。这里是 `format()` 方法作为输出发送到浏览器的示例：
 - en: '[PRE3]'
+  id: totrans-13
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: So far we have provided the date and time to the constructor, but sometimes
     you will also want to pick up the date and time values from the server. To do
     that, simply provide the string `"now"` as the first parameter.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，我们已经提供了日期和时间给构造函数，但有时您还希望从服务器获取日期和时间值。要做到这一点，只需将字符串 `"now"` 作为第一个参数提供。
 - en: 'The following code does the same as the other examples, except here we are
     getting the date and time class values from the server. In fact, since we are
     getting the information from the server, the class properties are much more fully
     populated (note that some instances of PHP will not have this parameter set and
     thus will return an error, and the server’s time zone may not match your own):'
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面的代码与其他示例相同，除了这里我们从服务器获取日期和时间类的值。实际上，由于我们从服务器获取信息，类的属性更加充分（请注意，某些 PHP 实例可能未设置此参数，因此将返回错误，且服务器的时区可能与您的时区不匹配）：
 - en: '[PRE4]'
+  id: totrans-16
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: The `diff()` method of `DateTime` does what you might expect—it returns the
     difference between two dates. The return value of the method is an instance of
     the `Date``Interval` class.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: '`DateTime` 的 `diff()` 方法做你可能期望的事情 —— 它返回两个日期之间的差异。方法的返回值是 `DateInterval` 类的一个实例。'
 - en: 'To get the difference between two `DateTime` instances, use:'
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 要获取两个 `DateTime` 实例之间的差异，请使用：
 - en: '[PRE5]'
+  id: totrans-19
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: The `diff()` method is called on one of the `DateTime` objects with the other
     `DateTime` object passed in as a parameter. Then we prepare the browser output
     with the `format()` method calls.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: '`diff()` 方法是在一个 `DateTime` 对象上调用的，参数是另一个 `DateTime` 对象。然后我们使用 `format()` 方法准备浏览器输出。'
 - en: Notice that the `DateInterval` class has a `format()` method as well. Since
     it deals with the difference between two dates, the format character codes are
     slightly different from that of the `DateTime` class. Precede each character code
     with a percent sign, `%`. The available character codes are provided in [Table 7-1](#dateinterval_formatting_control_charact).
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意，`DateInterval` 类也有一个 `format()` 方法。由于它处理两个日期之间的差异，格式字符代码与 `DateTime` 类略有不同。每个字符代码之前都要加上百分号
+    `%`。可用的字符代码在[表 7-1](#dateinterval_formatting_control_charact)中提供。
 - en: Table 7-1\. DateInterval formatting control characters
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 7-1\. DateInterval 格式控制字符
 - en: '| Character | Formatting Effect |'
+  id: totrans-23
   prefs: []
   type: TYPE_TB
+  zh: '| 字符 | 格式化效果 |'
 - en: '| --- | --- |'
+  id: totrans-24
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `a` | Number of days (e.g., 23) |'
+  id: totrans-25
   prefs: []
   type: TYPE_TB
+  zh: '| `a` | 天数（例如，23） |'
 - en: '| `d` | Number of days not already included in the number of months |'
+  id: totrans-26
   prefs: []
   type: TYPE_TB
+  zh: '| `d` | 天数（不包括已包含在月数中的天数） |'
 - en: '| `D` | Number of days, including a leading zero if under 10 days (e.g., 02
     and 125) |'
+  id: totrans-27
   prefs: []
   type: TYPE_TB
+  zh: '| `D` | 天数，如果小于 10 天则包括前导零（例如，02 和 125） |'
 - en: '| `f` | Numeric microseconds (e.g., 6602 or 41569) |'
+  id: totrans-28
   prefs: []
   type: TYPE_TB
+  zh: '| `f` | 数字微秒（例如，6602 或 41569） |'
 - en: '| `F` | Numeric microseconds with leading zero, at least six digits in length
     (e.g., 006602 or 041569) |'
+  id: totrans-29
   prefs: []
   type: TYPE_TB
+  zh: '| `F` | 数字微秒，前导零，至少六位数长度（例如，006602 或 041569） |'
 - en: '| `h` | Number of hours |'
+  id: totrans-30
   prefs: []
   type: TYPE_TB
+  zh: '| `h` | 小时数 |'
 - en: '| `H` | Number of hours, including a leading zero if under 10 hours (e.g.,
     12 and 04) |'
+  id: totrans-31
   prefs: []
   type: TYPE_TB
+  zh: '| `H` | 小时数，如果小于 10 小时则包括前导零（例如，12 和 04） |'
 - en: '| `i` | Number of minutes |'
+  id: totrans-32
   prefs: []
   type: TYPE_TB
+  zh: '| `i` | 分钟数 |'
 - en: '| `I` | Number of minutes, including a leading zero if under 10 minutes (e.g.,
     05 and 33) |'
+  id: totrans-33
   prefs: []
   type: TYPE_TB
+  zh: '| `I` | 分钟数，如果小于 10 分钟则包括前导零（例如，05 和 33） |'
 - en: '| `m` | Number of months |'
+  id: totrans-34
   prefs: []
   type: TYPE_TB
+  zh: '| `m` | 月数 |'
 - en: '| `M` | Number of months, including a leading zero if under 10 months (e.g.,
     05 and 1533) |'
+  id: totrans-35
   prefs: []
   type: TYPE_TB
+  zh: '| `M` | 月数，如果小于 10 个月则包括前导零（例如，05 和 1533） |'
 - en: '| `r` | `–` if the difference is negative; empty if the difference is positive
     |'
+  id: totrans-36
   prefs: []
   type: TYPE_TB
+  zh: '| `r` | 如果差异为负数，则为 `–`；如果差异为正数，则为空 |'
 - en: '| `R` | `–` if the difference is negative; `+` if the difference is positive
     |'
+  id: totrans-37
   prefs: []
   type: TYPE_TB
+  zh: '| `R` | 如果差异为负数，则为 `–`；如果差异为正数，则为 `+` |'
 - en: '| `s` | Number of seconds |'
+  id: totrans-38
   prefs: []
   type: TYPE_TB
+  zh: '| `s` | 秒数 |'
 - en: '| `S` | Number of seconds, including a leading zero if under 10 seconds (e.g.,
     05 and 15) |'
+  id: totrans-39
   prefs: []
   type: TYPE_TB
+  zh: '| `S` | 秒数的数量，如果少于10秒，则包括前导零（例如，05和15） |'
 - en: '| `y` | Number of years |'
+  id: totrans-40
   prefs: []
   type: TYPE_TB
+  zh: '| `y` | 年份的数量 |'
 - en: '| `Y` | Number of years, including a leading zero if under 10 years (e.g.,
     00 and 12) |'
+  id: totrans-41
   prefs: []
   type: TYPE_TB
+  zh: '| `Y` | 年份的数量，如果少于10年，则包括前导零（例如，00和12） |'
 - en: '| `%` | A literal `%` |'
+  id: totrans-42
   prefs: []
   type: TYPE_TB
+  zh: '| `%` | 百分号 `%` |'
 - en: 'Let’s look a little more closely at the `DateTimeZone` class now. The time
     zone setting can be lifted out of the *php.ini* file with `get_ini()`. You can
     get more information from the time zone object using the `getLocation()` method.
     It provides the country of origin of the time zone, the longitude and the latitude,
     plus some comments. With these few lines of code, you can have the beginnings
     of a web-based GPS system:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们更仔细地看看`DateTimeZone`类。可以使用`get_ini()`方法从*php.ini*文件中获取时区设置。使用`getLocation()`方法可以从时区对象获取更多信息。它提供时区的原始国家、经度和纬度，以及一些注释。通过这几行代码，您可以开始开发基于网络的GPS系统：
 - en: '[PRE6]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'If you want to set a time zone other than the server’s, you must pass that
     value to the constructor of the `DateTimeZone` object. This example sets the time
     zone for Rome, Italy, and displays the information with the `getLocation()` method:'
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想设置除服务器时区外的时区，必须将该值传递给`DateTimeZone`对象的构造函数。以下是一个示例，将时区设置为意大利罗马，并使用`getLocation()`方法显示信息：
 - en: '[PRE7]'
+  id: totrans-46
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: A list of valid time zone names by global regions can be found in the [PHP online
     manual](https://oreil.ly/EDpf6).
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以在[PHP在线手册](https://oreil.ly/EDpf6)中找到按全球地区分类的有效时区名称列表。
 - en: Using this same technique, you can make a website “local” to a visitor by providing
     a list of supported time zones for the visitor to choose from and then temporarily
     adjusting your *php.ini* setting with the `ini_set()` function for the duration
     of the visit.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用相同的技术，您可以通过为访问者提供一个支持的时区列表，并通过`ini_set()`函数临时调整您的*php.ini*设置，使网站对访问者“本地化”。
 - en: While there’s a fair amount of date and time processing power provided by the
     classes that we discussed in this chapter, it’s only the proverbial tip of the
     iceberg. Be sure to read more about these classes and what they can do on the
     PHP website.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管我们在本章讨论的类提供了相当多的日期和时间处理能力，但这只是冰山一角。请务必在PHP官网上进一步了解这些类及其功能。
 - en: What’s Next
+  id: totrans-50
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 接下来是什么
 - en: There’s so much more than date management to understand when you’re designing
     websites within PHP, and as a result there are many issues that can cause you
     stress and increase the PITA (pain in the ass) factor. The next chapter provides
@@ -234,5 +346,7 @@
     reduce these pain points. Techniques for working with variables, managing form
     data, and using SSL (Secure Sockets Layer) web data security are among the topics
     covered. Buckle up!
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 在设计PHP网站时，除了日期管理之外，还有很多需要理解的内容，因此可能会遇到许多问题，增加烦恼和PITA（让人头疼的事）因素。下一章提供了多种技巧、窍门以及一些需要注意的问题，帮助减少这些痛点。涵盖的主题包括处理变量、管理表单数据以及使用SSL（安全套接层）保护网络数据。做好准备吧！
