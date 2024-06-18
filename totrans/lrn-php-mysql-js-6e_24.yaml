@@ -1,1053 +1,1589 @@
 - en: Chapter 21\. Accessing CSS from JavaScript
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第 21 章。从 JavaScript 访问 CSS
 - en: With a good understanding of the DOM and CSS now under your belt, you’ll learn
     in this chapter how to access both the DOM and CSS directly from JavaScript, enabling
     you to create highly dynamic and responsive websites.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您已经对 DOM 和 CSS 有了很好的理解，本章将教您如何直接从 JavaScript 访问 DOM 和 CSS，使您能够创建高度动态和响应式的网站。
 - en: I’ll also show you how to use interrupts so you can create animations or provide
     any code that must continue running (such as a clock). Finally, I’ll explain how
     you can add new elements to or remove existing ones from the DOM so you don’t
     have to precreate elements in HTML just in case JavaScript may need to access
     them later.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 我还将向您展示如何使用中断，以便您可以创建动画或提供必须继续运行的任何代码（例如钟表）。最后，我将解释如何向 DOM 添加新元素或从中删除现有元素，这样您就无需预先在
+    HTML 中创建元素，以防 JavaScript 可能需要访问它们。
 - en: Revisiting the getElementById Function
+  id: totrans-3
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 重新访问 getElementById 函数
 - en: To help with the examples in the rest of this book, I would like to provide
     an enhanced version of the `getElementById` function, for handling DOM elements
     and CSS styles quickly and efficiently, without the need for including a framework
     such as jQuery.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了帮助本书其余部分的示例，我想提供一个增强版的 `getElementById` 函数，用于快速高效地处理 DOM 元素和 CSS 样式，无需包括 jQuery
+    等框架。
 - en: However, to avoid conflicting with frameworks that use the `$` character, I’ll
     use the uppercase `O`, because it’s the first letter of *Object*, which is what
     will be returned when the function is called (the object represented by the ID
     passed to the function).
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，为了避免与使用 `$` 字符的框架发生冲突，我将使用大写 `O`，因为它是 *Object* 的首字母，这将在调用函数时返回（通过函数传递的 ID
+    所代表的对象）。
 - en: The O Function
+  id: totrans-6
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 函数 O
 - en: 'Here’s what the bare-bones `O` function looks like:'
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 下面是裸骨函数 `O` 的样子：
 - en: '[PRE0]'
+  id: totrans-8
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: This alone saves 22 characters of typing each time it’s called. But I’ve chosen
     to extend the function a little by allowing either an ID name or an object to
     be passed to the function, as shown in the complete version in [Example 21-1](#oleft_parenthesisright_parenthesis_f).
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 这单独就节省了每次调用时 22 个字符的输入。但我选择稍微扩展该函数，允许将 ID 名称或对象传递给函数，如在 [Example 21-1](#oleft_parenthesisright_parenthesis_f)
+    的完整版本中所示。
 - en: Example 21-1\. The `O` function
+  id: totrans-10
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 21-1。函数 `O`
 - en: '[PRE1]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: If an object is passed to the function, it just returns that object back again.
     Otherwise, it assumes that an ID has been passed and returns the object to which
     the ID refers.
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果函数被传递一个对象，它只是将该对象再次返回。否则，它假定已传递了一个 ID，并返回该 ID 所引用的对象。
 - en: But why on Earth would I want to add this first statement, which simply returns
     the object passed to it?
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，我为什么要添加这个首语句呢，它只是将传递给它的对象再次返回？
 - en: The S Function
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 函数 S
 - en: The answer to this question becomes clear when you look at a partner function
     called `S`, which gives you easy access to the style (or CSS) properties of an
     object, as shown in [Example 21-2](#sleft_parenthesisright_parenthesis_f).
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 解答这个问题变得清晰起来，当你看一个称为 `S` 的伙伴函数，它为您提供了易于访问对象的样式（或 CSS）属性，如 [Example 21-2](#sleft_parenthesisright_parenthesis_f)
+    所示。
 - en: Example 21-2\. The `S` function
+  id: totrans-16
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 21-2。函数 `S`
 - en: '[PRE2]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: The `S` in this function name is the first letter of *Style*, and the function
     performs the task of returning the style property (or subobject) of the element
     referred to. Because the embedded `O` function accepts either an ID or an object,
     you can pass either an ID or an object to `S` as well.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 此函数名称中的 `S` 是 *Style* 的首字母，该函数执行返回所引用元素的样式属性（或子对象）的任务。由于嵌入的 `O` 函数接受 ID 或对象，您也可以将
+    ID 或对象传递给 `S`。
 - en: 'Let’s look at what’s going on here by taking a `<div>` element with the ID
     of `myobj` and setting its text color to green, like this:'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们通过拿一个 ID 为 `myobj` 的 `<div>` 元素作为例子，将其文本颜色设置为绿色，像这样：
 - en: '[PRE3]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'The preceding code will do the job, but it’s much simpler to call the new `S`
     function, like this:'
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 前面的代码将完成工作，但调用新的 `S` 函数要简单得多，如下所示：
 - en: '[PRE4]'
+  id: totrans-22
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'Now consider the case in which the object returned by calling `O` is stored
     in, for example, an object called `fred`, like this:'
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在考虑调用 `O` 后返回的对象存储在例如称为 `fred` 的对象中的情况，如下所示：
 - en: '[PRE5]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'Because of the way the `S` function works, we can still call it to change the
     text color to green, like this:'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于函数 `S` 的工作方式，我们仍然可以调用它将文本颜色更改为绿色，如下所示：
 - en: '[PRE6]'
+  id: totrans-26
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: This means that whether you wish to access an object directly or via its ID,
     you can do so by passing it to either the `O` or `S` function as required. Just
     remember that when you pass an object (rather than an ID), you must not place
     it in quotation marks.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 这意味着无论您希望直接访问对象还是通过其ID访问，都可以根据需要将其传递给`O`或`S`函数。只需记住，当您传递对象（而不是ID）时，不要将其放在引号中。
 - en: The C Function
+  id: totrans-28
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: C函数
 - en: 'So far I’ve provided you with two simple functions that make it easy for you
     to access any element on a web page and any style property of an element. Sometimes,
     though, you will want to access more than one element at a time. You can do this
     by assigning a CSS class name to each such element, like in these examples, which
     both employ the class `myclass`:'
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，我已为您提供了两个简单的函数，使您可以轻松访问网页上的任何元素和元素的任何样式属性。不过有时，您可能希望一次访问多个元素。您可以通过为每个这样的元素分配一个CSS类名来实现这一点，例如这些示例中都使用`myclass`类：
 - en: '[PRE7]'
+  id: totrans-30
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: If you want to access all elements on a page that use a particular class, you
     can use the `C` function (for the first letter of *Class*), shown in [Example 21-3](#cleft_parenthesisright_parenthesis_f),
     to return an array containing all the objects that match the class name provided.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想要访问页面上使用特定类的所有元素，可以使用`C`函数（代表*Class*的首字母），如[示例 21-3](#cleft_parenthesisright_parenthesis_f)中所示，返回一个包含所有匹配类名的对象数组。
 - en: Example 21-3\. The `C` function
+  id: totrans-32
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 21-3\. `C`函数
 - en: '[PRE8]'
+  id: totrans-33
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'To use this function, simply call it as follows, saving the returned array
     so that you can access each of the elements individually as required or (more
     likely to be the case) en masse via a loop:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用此函数，只需按以下方式调用它，保存返回的数组，以便根据需要单独访问每个元素，或者（更可能的情况是）通过循环一次性访问它们：
 - en: '[PRE9]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: 'Now you can do whatever you like with the objects returned, such as (for example)
     setting their `textDecoration` style property to `underline`, as follows:'
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您可以随意对返回的对象执行任何操作，例如（例如）将其`textDecoration`样式属性设置为`underline`，如下所示：
 - en: '[PRE10]'
+  id: totrans-37
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: This code iterates through the objects in `myarray[]` and then uses the `S`
     function to reference each one’s style property, setting its `textDecoration`
     property to `underline`.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 此代码遍历`myarray[]`中的对象，然后使用`S`函数引用每个对象的样式属性，并将其`textDecoration`属性设置为`underline`。
 - en: Note
+  id: totrans-39
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: It is highly unlikely you will use these `O`, `S`, and `C` functions in development
     code, because you will probably have a custom-made or third-party framework to
     provide this functionality, plus a whole lot more. But they serve to keep the
     examples in this book short and easy to follow, as well as being a simple example
     of how JavaScript can be enhanced.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 很有可能您在开发代码中不会使用这些`O`、`S`和`C`函数，因为您可能会有自定义或第三方框架来提供此功能，而且还有更多功能。但它们有助于使本书中的示例简短易懂，同时也是JavaScript如何可以增强的简单示例。
 - en: Including the Functions
+  id: totrans-41
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 包括函数
 - en: I use the `O` and `S` functions in the examples for the remainder of this chapter,
     as they make the code shorter and easier to follow. Therefore, I have saved them
     in the file *OSC.js* (along with the `C` function, which I think you’ll find extremely
     useful) in the Chapter 21 folder of the accompanying archive of examples, freely
     downloadable from the [book’s example repository](https://github.com/RobinNixon/lpmj6).
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 我在本章的其余部分示例中使用`O`和`S`函数，因为它们可以使代码更短且更易于理解。因此，我已将它们与`C`函数（我认为您会发现它非常有用）保存在了附带示例的存档的第21章文件夹中的*OSC.js*文件中，可以从[书本示例库](https://github.com/RobinNixon/lpmj6)免费下载。
 - en: 'You can include these functions in any web page by using the following statement—preferably
     in its `<head>` section, anywhere before any script that relies on calling them:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以通过以下语句将这些函数包含在任何网页中——最好是在其`<head>`部分，在任何依赖于调用它们的脚本之前：
 - en: '[PRE11]'
+  id: totrans-44
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: The contents of *OSC.js* are shown in [Example 21-4](#oscdotjs_file), where
     everything is neatened into just three lines.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: '*OSC.js*的内容显示在[示例 21-4](#oscdotjs_file)中，其中所有内容整理成了仅三行。'
 - en: Example 21-4\. The OSC.js file
+  id: totrans-46
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 21-4\. OSC.js文件
 - en: '[PRE12]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Accessing CSS Properties from JavaScript
+  id: totrans-48
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 从JavaScript中访问CSS属性
 - en: 'The `textDecoration` property I used in an earlier example represents a CSS
     property that is normally hyphenated like this: `text-decoration`. But since JavaScript
     reserves the hyphen character for use as a mathematical operator, whenever you
     access a hyphenated CSS property, you must omit the hyphen and set the character
     immediately following it to uppercase.'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 我在早些时候的示例中使用的`textDecoration`属性代表一个通常以连字符连接的CSS属性，就像这样：`text-decoration`。但由于JavaScript将连字符保留为数学运算符使用，因此每当访问连字符连接的CSS属性时，必须省略连字符，并将其后的字符设置为大写。
 - en: 'Another example of this is the `font-size` property, which is referenced in
     JavaScript as `fontSize` when placed after a period operator, like this:'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种情况的另一个示例是`font-size`属性，在JavaScript中被引用为放置在点运算符之后的`fontSize`，就像这样：
 - en: '[PRE13]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'An alternative to this is to be more long-winded and use the `setAttribute`
     function, which *does* support (and in fact requires) standard CSS property names,
     like this:'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一种方法是更冗长地使用`setAttribute`函数，该函数*支持*（实际上要求）标准的CSS属性名称，就像这样：
 - en: '[PRE14]'
+  id: totrans-53
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Some Common Properties
+  id: totrans-54
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 一些常见属性
 - en: Using JavaScript, you can modify any property of any element in a web document,
     in a similar manner to using CSS. I’ve already shown you how to access CSS properties
     using either the JavaScript short form or the `setAttribute` function to use exact
     CSS property names, so I won’t bore you by detailing all of the hundreds of properties.
     Rather, I’d like to show you how to access just a few of the CSS properties as
     an overview of some of the things you can do.
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用JavaScript，您可以以类似于使用CSS的方式修改Web文档中任何元素的任何属性。我已经向您展示了如何使用JavaScript简写形式或`setAttribute`函数来使用精确的CSS属性名称访问CSS属性，因此我不会详细介绍所有数百个属性。相反，我想向您展示如何访问一些CSS属性作为您可以执行的一些操作的概述。
 - en: First, then, let’s look at modifying a few CSS properties from JavaScript using
     [Example 21-5](#accessing_css_properties_from_ja-id00108), which loads in the
     three earlier functions, creates a `<div>` element, and then issues JavaScript
     statements within a `<script>` section of HTML to modify some of its attributes
     (see [Figure 21-1](#modifying_styles_from_javascript)).
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，让我们通过[示例 21-5](#accessing_css_properties_from_ja-id00108)来看一下如何从JavaScript中修改一些CSS属性，该示例加载了前面的三个函数，创建了一个`<div>`元素，然后在HTML的`<script>`部分内发出JavaScript语句来修改它的一些属性（见[图 21-1](#modifying_styles_from_javascript)）。
 - en: Example 21-5\. Accessing CSS properties from JavaScript
+  id: totrans-57
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 21-5\. 从JavaScript中访问CSS属性
 - en: '[PRE15]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: '![Modifying styles from JavaScript](Images/pmj6_2101.png)'
+  id: totrans-59
   prefs: []
   type: TYPE_IMG
+  zh: '![从JavaScript修改样式](Images/pmj6_2101.png)'
 - en: Figure 21-1\. Modifying styles from JavaScript
+  id: totrans-60
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 21-1\. 从JavaScript修改样式
 - en: You gain nothing by modifying properties like this, because you could just as
     easily have included some CSS directly, but shortly we’ll be modifying properties
     in response to user interaction—and then you’ll see the real power of combining
     JavaScript and CSS.
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过这种方式修改属性并没有什么好处，因为您可以直接包含一些CSS，但很快我们将根据用户交互来修改属性，然后您将看到结合JavaScript和CSS的真正力量。
 - en: Other Properties
+  id: totrans-62
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 其他属性
 - en: JavaScript also opens up access to a very wide range of other properties, such
     as the width and height of the browser window and of any pop-up or in-browser
     windows or frames, plus handy information such as the parent window (if there
     is one) and the history of URLs visited in this session.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: JavaScript还打开了对非常广泛的其他属性的访问，例如浏览器窗口的宽度和高度，任何弹出窗口或浏览器窗口或框架的宽度和高度，以及诸如父窗口（如果存在）和本次会话中访问的URL历史记录等便捷信息。
 - en: All these properties are accessed from the `window` object via the period operator
     (for example, `window.name`), and [Table 21-1](#common_window_properties) lists
     them all, along with descriptions of each.
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有这些属性都是通过点运算符（例如，`window.name`）从`window`对象访问的，并且[表 21-1](#common_window_properties)列出了它们以及每个属性的描述。
 - en: Table 21-1\. The window properties
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 21-1\. 窗口属性
 - en: '| Property | Description |'
+  id: totrans-66
   prefs: []
   type: TYPE_TB
+  zh: '| 属性 | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-67
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `closed` | Returns a Boolean value indicating whether a window has been closed
     or not |'
+  id: totrans-68
   prefs: []
   type: TYPE_TB
+  zh: '| `closed` | 返回一个布尔值，指示窗口是否已关闭 |'
 - en: '| `defaultStatus` | Sets or returns the default text in the status bar of a
     window |'
+  id: totrans-69
   prefs: []
   type: TYPE_TB
+  zh: '| `defaultStatus` | 设置或返回窗口状态栏中的默认文本 |'
 - en: '| `document` | Returns the `document` object for the window |'
+  id: totrans-70
   prefs: []
   type: TYPE_TB
+  zh: '| `document` | 返回窗口的`document`对象 |'
 - en: '| `frameElement` | Returns the `iframe` element in which the current window
     is inserted |'
+  id: totrans-71
   prefs: []
   type: TYPE_TB
+  zh: '| `frameElement` | 返回当前窗口插入的`iframe`元素 |'
 - en: '| `frames` | Returns an array of all the frames and iframes in the window |'
+  id: totrans-72
   prefs: []
   type: TYPE_TB
+  zh: '| `frames` | 返回窗口中所有帧和iframe的数组 |'
 - en: '| `history` | Returns the `history` object for the window |'
+  id: totrans-73
   prefs: []
   type: TYPE_TB
+  zh: '| `history` | 返回窗口的`history`对象 |'
 - en: '| `innerHeight` | Sets or returns the inner height of a window’s content area
     |'
+  id: totrans-74
   prefs: []
   type: TYPE_TB
+  zh: '| `innerHeight` | 设置或返回窗口内容区域的内部高度 |'
 - en: '| `innerWidth` | Sets or returns the inner width of a window’s content area
     |'
+  id: totrans-75
   prefs: []
   type: TYPE_TB
+  zh: '| `innerWidth` | 设置或返回窗口内容区域的内部宽度 |'
 - en: '| `length` | Returns the number of frames and iframes in a window |'
+  id: totrans-76
   prefs: []
   type: TYPE_TB
+  zh: '| `length` | 返回窗口中的帧和iframe的数量 |'
 - en: '| `localStorage` | Allows saving of key/value pairs in a web browser |'
+  id: totrans-77
   prefs: []
   type: TYPE_TB
+  zh: '| `localStorage` | 允许在Web浏览器中保存键/值对 |'
 - en: '| `location` | Returns the `location` object for the window |'
+  id: totrans-78
   prefs: []
   type: TYPE_TB
+  zh: '| `location` | 返回窗口的`location`对象 |'
 - en: '| `name` | Sets or returns the name of a window |'
+  id: totrans-79
   prefs: []
   type: TYPE_TB
+  zh: '| `name` | 设置或返回窗口的名称 |'
 - en: '| `navigator` | Returns the `navigator` object for the window |'
+  id: totrans-80
   prefs: []
   type: TYPE_TB
+  zh: '| `navigator` | 返回窗口的`navigator`对象 |'
 - en: '| `opener` | Returns a reference to the window that created the window |'
+  id: totrans-81
   prefs: []
   type: TYPE_TB
+  zh: '| `opener` | 返回创建当前窗口的窗口的引用 |'
 - en: '| `outerHeight` | Sets or returns the outer height of a window, including tool-
     and scrollbars |'
+  id: totrans-82
   prefs: []
   type: TYPE_TB
+  zh: '| `outerHeight` | 设置或返回窗口的外部高度，包括工具栏和滚动条 |'
 - en: '| `outerWidth` | Sets or returns the outer width of a window, including tool-
     and scrollbars |'
+  id: totrans-83
   prefs: []
   type: TYPE_TB
+  zh: '| `outerWidth` | 设置或返回窗口的外部宽度，包括工具栏和滚动条 |'
 - en: '| `pageXOffset` | Returns the number of pixels the document has been scrolled
     horizontally from the left of the window |'
+  id: totrans-84
   prefs: []
   type: TYPE_TB
+  zh: '| `pageXOffset` | 返回文档从窗口左侧水平滚动的像素数 |'
 - en: '| `pageYOffset` | Returns the number of pixels the document has been scrolled
     vertically from the top of the window |'
+  id: totrans-85
   prefs: []
   type: TYPE_TB
+  zh: '| `pageYOffset` | 返回文档从窗口顶部垂直滚动的像素数 |'
 - en: '| `parent` | Returns the parent window of a window |'
+  id: totrans-86
   prefs: []
   type: TYPE_TB
+  zh: '| `parent` | 返回窗口的父窗口 |'
 - en: '| `screen` | Returns the `screen` object for the window |'
+  id: totrans-87
   prefs: []
   type: TYPE_TB
+  zh: '| `screen` | 返回窗口的`screen`对象 |'
 - en: '| `screenLeft` | Returns the *x* coordinate of the window relative to the screen
     |'
+  id: totrans-88
   prefs: []
   type: TYPE_TB
+  zh: '| `screenLeft` | 返回窗口相对于屏幕的*x*坐标 |'
 - en: '| `screenTop` | Returns the *y* coordinate of the window relative to the screen
     |'
+  id: totrans-89
   prefs: []
   type: TYPE_TB
+  zh: '| `screenTop` | 返回窗口相对于屏幕的*y*坐标 |'
 - en: '| `screenX` | Returns the *x* coordinate of the window relative to the screen
     |'
+  id: totrans-90
   prefs: []
   type: TYPE_TB
+  zh: '| `screenX` | 返回窗口相对于屏幕的*x*坐标 |'
 - en: '| `screenY` | Returns the *y* coordinate of the window relative to the screen
     |'
+  id: totrans-91
   prefs: []
   type: TYPE_TB
+  zh: '| `screenY` | 返回窗口相对于屏幕的*y*坐标 |'
 - en: '| `sessionStorage` | Allows saving of key/value pairs in a web browser |'
+  id: totrans-92
   prefs: []
   type: TYPE_TB
+  zh: '| `sessionStorage` | 允许在Web浏览器中保存键/值对 |'
 - en: '| `self` | Returns the current window |'
+  id: totrans-93
   prefs: []
   type: TYPE_TB
+  zh: '| `self` | 返回当前窗口 |'
 - en: '| `status` | Sets or returns the text in the status bar of a window |'
+  id: totrans-94
   prefs: []
   type: TYPE_TB
+  zh: '| `status` | 设置或返回窗口状态栏中的文本 |'
 - en: '| `top` | Returns the top browser window |'
+  id: totrans-95
   prefs: []
   type: TYPE_TB
+  zh: '| `top` | 返回顶层浏览器窗口 |'
 - en: 'There are a few points to note about some of these properties:'
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 有几点需要注意关于其中一些属性：
 - en: The `defaultStatus` and `status` properties can be set only if users have modified
     their browsers to allow it (very unlikely).
+  id: totrans-97
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`defaultStatus` 和 `status` 属性只能在用户修改浏览器以允许时设置（这种情况非常少见）。'
 - en: The `history` object cannot be read from (so you cannot see where your visitors
     have been surfing). But it supports the `length` property to determine how long
     the history is, and the `back`, `forward`, and `go` methods to navigate to specific
     pages in the history.
+  id: totrans-98
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`history` 对象不能被读取（因此无法查看访问者浏览过的网址）。但它支持 `length` 属性以确定历史记录的长度，并支持 `back`、`forward`
+    和 `go` 方法以在历史记录中导航到特定页面。'
 - en: When you need to know how much space there is available in a current window
     of the web browser, just read the values in `window.innerHeight` and `window.innerWidth`.
     I often use these values for centering in-browser pop-up alert or “confirm dialog”
     windows.
+  id: totrans-99
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当您需要知道Web浏览器当前窗口中有多少可用空间时，只需读取 `window.innerHeight` 和 `window.innerWidth` 的值。我经常用这些值来在浏览器内居中弹出警报或“确认对话框”窗口。
 - en: The `screen` object supports the read-only properties `availHeight`, `availWidth`,
     `colorDepth`, `height`, `pixelDepth`, and `width` and is therefore great for determining
     information about the user’s display.
+  id: totrans-100
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`screen` 对象支持只读属性 `availHeight`、`availWidth`、`colorDepth`、`height`、`pixelDepth`
+    和 `width`，因此非常适合获取关于用户显示器的信息。'
 - en: Note
+  id: totrans-101
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Many of these properties can be invaluable when you’re targeting mobile phones
     and tablet devices, as they will tell you exactly how much screen space you have
     to work with, the type of browser being used, and more.
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些属性在针对移动电话和平板设备时非常有用，它们能告诉您可用的屏幕空间大小、正在使用的浏览器类型等信息。
 - en: These few items of information will get you started and provide you with an
     idea of the many new and interesting things you can do with JavaScript. There
     are far more properties and methods available than can be covered in this chapter,
     but now that you know how to access and use properties, all you need is a resource
     listing them all. I recommend that you check out [the online docs](https://tinyurl.com/domexplained) as
     a good starting point.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 这些少数信息将帮助您入门，并为您提供 JavaScript 中许多新奇有趣的功能的想法。此章节中涵盖的属性和方法远不止这些，但现在您已经知道如何访问和使用属性，您所需要的就是列出所有资源的资源。我建议您从
+    [在线文档](https://tinyurl.com/domexplained) 开始查看。
 - en: Inline JavaScript
+  id: totrans-104
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 内联 JavaScript
 - en: Using `<script>` tags isn’t the only way you can execute JavaScript statements;
     you can also access JavaScript from within HTML tags, which makes for great dynamic
     interactivity. For example, to add a quick effect when the mouse passes over an
     object, you can use code such as that in the `<img>` tag in [Example 21-6](#using_inline_javascript),
     which displays an apple by default but replaces it with an orange when the mouse
     passes over the object and restores the apple again when the mouse leaves.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `<script>` 标签并非执行 JavaScript 语句的唯一方式；您还可以从 HTML 标签中访问 JavaScript，实现出色的动态交互性。例如，要在鼠标经过对象时添加快速效果，可以使用类似于
+    `<img>` 标签中的代码，该示例在 [示例 21-6](#using_inline_javascript) 中默认显示一个苹果，但当鼠标经过对象时会将其替换为橙子，并在鼠标离开时恢复为苹果。
 - en: Example 21-6\. Using inline JavaScript
+  id: totrans-106
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 21-6\. 使用内联 JavaScript
 - en: '[PRE16]'
+  id: totrans-107
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: The this Keyword
+  id: totrans-108
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 关键字 `this`
 - en: In the preceding example, you see the `this` keyword in use. It tells the JavaScript
     to operate on the calling object, namely the `<img>` tag. You can see the result
     in [Figure 21-2](#inline_mouse_hover_javascript_example), where the mouse has
     yet to pass over the apple.
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 在上述示例中，您可以看到 `this` 关键字的使用。它告诉 JavaScript 在调用对象上操作，即 `<img>` 标签。您可以在 [图 21-2](#inline_mouse_hover_javascript_example)
+    中看到其结果，即鼠标尚未经过苹果时的状态。
 - en: Note
+  id: totrans-110
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: When supplied from an inline JavaScript call, the `this` keyword represents
     the calling object. When used in class methods, it represents an object to which
     the method applies.
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 当从内联 JavaScript 调用提供时，关键字 `this` 表示调用对象。在类方法中使用时，它表示应用方法的对象。
 - en: '![Inline mouse hover JavaScript example](Images/pmj6_2102.png)'
+  id: totrans-112
   prefs: []
   type: TYPE_IMG
+  zh: '![内联鼠标悬停 JavaScript 示例](Images/pmj6_2102.png)'
 - en: Figure 21-2\. Inline mouse hover JavaScript example
+  id: totrans-113
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 21-2\. 内联鼠标悬停 JavaScript 示例
 - en: Attaching Events to Objects in a Script
+  id: totrans-114
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在脚本中为对象附加事件
 - en: The preceding code is the equivalent of providing an ID to the `<img>` tag and
     then attaching the actions to the tag’s mouse events, like in [Example 21-7](#non-inline_javascript).
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 上述代码等同于为 `<img>` 标签提供 ID，并将操作附加到标签的鼠标事件中，如 [示例 21-7](#non-inline_javascript)
+    中所示。
 - en: Example 21-7\. Noninline JavaScript
+  id: totrans-116
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 21-7\. 非内联 JavaScript
 - en: '[PRE17]'
+  id: totrans-117
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: In the HTML section, this example gives the `<img>` element an ID of `object`,
     and it then proceeds to manipulate it separately in the JavaScript section by
     attaching anonymous functions to each event.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 HTML 部分，此示例为 `<img>` 元素赋予了 ID `object`，然后在 JavaScript 部分通过为每个事件附加匿名函数来单独操作它。
 - en: Attaching to Other Events
+  id: totrans-119
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 附加到其他事件
 - en: Whether you’re using inline or separate JavaScript, there are several events
     to which you can attach actions, providing a wealth of additional features you
     can offer your users. [Table 21-2](#events_and_when_they_are_triggered) lists
     these events and details when they will be triggered.
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论您是使用内联还是独立的 JavaScript，都可以依附多种事件来执行操作，为用户提供丰富的附加功能。[表 21-2](#events_and_when_they_are_triggered)
+    列出了这些事件及其触发时机的详细信息。
 - en: Table 21-2\. Events and when they are triggered
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 21-2\. 事件及其触发时机
 - en: '| Event | Occurs |'
+  id: totrans-122
   prefs: []
   type: TYPE_TB
+  zh: '| 事件 | 发生时 |'
 - en: '| --- | --- |'
+  id: totrans-123
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `onabort` | When an image’s loading is stopped before completion |'
+  id: totrans-124
   prefs: []
   type: TYPE_TB
+  zh: '| `onabort` | 当图像加载未完成前停止时 |'
 - en: '| `onblur` | When an element loses focus^([a](ch21.xhtml#idm45694686802856))
     |'
+  id: totrans-125
   prefs: []
   type: TYPE_TB
+  zh: '| `onblur` | 当元素失去焦点时^([a](ch21.xhtml#idm45694686802856)) |'
 - en: '| `onchange` | When any part of a form has changed |'
+  id: totrans-126
   prefs: []
   type: TYPE_TB
+  zh: '| `onchange` | 当表单的任何部分发生变化时 |'
 - en: '| `onclick` | When an object is clicked |'
+  id: totrans-127
   prefs: []
   type: TYPE_TB
+  zh: '| `onclick` | 当对象被点击时 |'
 - en: '| `ondblclick` | When an object is double-clicked |'
+  id: totrans-128
   prefs: []
   type: TYPE_TB
+  zh: '| `ondblclick` | 当对象被双击时 |'
 - en: '| `onerror` | When a JavaScript error is encountered |'
+  id: totrans-129
   prefs: []
   type: TYPE_TB
+  zh: '| `onerror` | 当遇到 JavaScript 错误时 |'
 - en: '| `onfocus` | When an element gets focus |'
+  id: totrans-130
   prefs: []
   type: TYPE_TB
+  zh: '| `onfocus` | 当元素获取焦点时 |'
 - en: '| `onkeydown` | When a key is being pressed (including Shift, Alt, Ctrl, and
     Esc) |'
+  id: totrans-131
   prefs: []
   type: TYPE_TB
+  zh: '| `onkeydown` | 当按键被按下（包括 Shift、Alt、Ctrl 和 Esc）时 |'
 - en: '| `onkeypress` | When a key is being pressed (not including Shift, Alt, Ctrl,
     and Esc) |'
+  id: totrans-132
   prefs: []
   type: TYPE_TB
+  zh: '| `onkeypress` | 当按键被按下（不包括 Shift、Alt、Ctrl 和 Esc）时 |'
 - en: '| `onkeyup` | When a key is released |'
+  id: totrans-133
   prefs: []
   type: TYPE_TB
+  zh: '| `onkeyup` | 当按键释放时 |'
 - en: '| `onload` | When an object has loaded |'
+  id: totrans-134
   prefs: []
   type: TYPE_TB
+  zh: '| `onload` | 当对象已加载时 |'
 - en: '| `onmousedown` | When the mouse button is pressed over an element |'
+  id: totrans-135
   prefs: []
   type: TYPE_TB
+  zh: '| `onmousedown` | 当鼠标按钮在元素上按下时 |'
 - en: '| `onmousemove` | When the mouse is moved over an element |'
+  id: totrans-136
   prefs: []
   type: TYPE_TB
+  zh: '| `onmousemove` | 当鼠标在元素上移动时 |'
 - en: '| `onmouseout` | When the mouse leaves an element |'
+  id: totrans-137
   prefs: []
   type: TYPE_TB
+  zh: '| `onmouseout` | 当鼠标离开元素时 |'
 - en: '| `onmouseover` | When the mouse passes over an element from outside it |'
+  id: totrans-138
   prefs: []
   type: TYPE_TB
+  zh: '| `onmouseover` | 当鼠标从元素外部经过时 |'
 - en: '| `onmouseup` | When the mouse button is released |'
+  id: totrans-139
   prefs: []
   type: TYPE_TB
+  zh: '| `onmouseup` | 当鼠标按钮释放时 |'
 - en: '| `onreset` | When a form is reset |'
+  id: totrans-140
   prefs: []
   type: TYPE_TB
+  zh: '| `onreset` | 当表单被重置时 |'
 - en: '| `onresize` | When the browser is resized |'
+  id: totrans-141
   prefs: []
   type: TYPE_TB
+  zh: '| `onresize` | 当浏览器调整大小时 |'
 - en: '| `onscroll` | When the document is scrolled |'
+  id: totrans-142
   prefs: []
   type: TYPE_TB
+  zh: '| `onscroll` | 当文档滚动时 |'
 - en: '| `onselect` | When some text is selected |'
+  id: totrans-143
   prefs: []
   type: TYPE_TB
+  zh: '| `onselect` | 当选择文本时 |'
 - en: '| `onsubmit` | When a form is submitted |'
+  id: totrans-144
   prefs: []
   type: TYPE_TB
+  zh: '| `onsubmit` | 当表单被提交时 |'
 - en: '| `onunload` | When a document is removed |'
+  id: totrans-145
   prefs: []
   type: TYPE_TB
+  zh: '| `onunload` | 当文档被卸载时 |'
 - en: '| ^([a](ch21.xhtml#idm45694686802856-marker)) An element that has *focus* is
     one that has been clicked or otherwise entered into, such as an input field. |'
+  id: totrans-146
   prefs: []
   type: TYPE_TB
+  zh: '| ^([a](ch21.xhtml#idm45694686802856-marker)) 一个具有 *焦点* 的元素是指已被点击或以其他方式进入的元素，如输入字段。
+    |'
 - en: Warning
+  id: totrans-147
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 警告
 - en: Make sure you attach events to objects that make sense. For example, an object
     that is not a form will not respond to the `onsubmit` event.
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保将事件附加到有意义的对象上。例如，非表单对象将不会响应 `onsubmit` 事件。
 - en: Adding New Elements
+  id: totrans-149
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 添加新元素
 - en: With JavaScript, you are not limited to manipulating the elements and objects
     supplied to a document in its HTML. In fact, you can create objects at will by
     inserting them into the DOM.
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 JavaScript，您不仅限于操纵 HTML 文档中提供的元素和对象。事实上，您可以通过将它们插入到 DOM 中随意创建对象。
 - en: For example, suppose you need a new `<div>` element. [Example 21-8](#inserting_an_element_into_the_dom)
     shows one way you can add it to a web page.
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，假设您需要一个新的 `<div>` 元素。[示例 21-8](#inserting_an_element_into_the_dom) 展示了一种将其添加到网页的方法。
 - en: Example 21-8\. Inserting an element into the DOM
+  id: totrans-152
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 21-8\. 将元素插入到 DOM 中
 - en: '[PRE18]'
+  id: totrans-153
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: '[Figure 21-3](#inserting_a_new_element_into_the_dom) shows this code being
     used to add a new `<div>` element to a web document. First, the new element is
     created with `createElement`; then the `appendChild` function is called, and the
     element gets inserted into the DOM.'
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图 21-3](#inserting_a_new_element_into_the_dom)展示了在 Web 文档中添加新 `<div>` 元素的代码示例。首先，使用
+    `createElement` 创建新元素；然后调用 `appendChild` 函数，将元素插入到 DOM 中。'
 - en: '![Inserting a new element into the DOM](Images/pmj6_2103.png)'
+  id: totrans-155
   prefs: []
   type: TYPE_IMG
+  zh: '![向 DOM 中插入新元素](Images/pmj6_2103.png)'
 - en: Figure 21-3\. Inserting a new element into the DOM
+  id: totrans-156
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 21-3\. 向 DOM 中插入新元素
 - en: After this, various properties are assigned to the element, including some text
     for its inner HTML. And then, in order to make sure the new element is instantly
     revealed, a timeout is set to trigger one second in the future, delaying the running
     of the remaining code to give the DOM time to update and display, before popping
     up the alert about removing the element again. See [“Using setTimeout”](#using_settimeout) for
     more on creating and using timeouts.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 之后，为元素分配了各种属性，包括其内部 HTML 的一些文本。然后，为了确保新元素立即显示，设置了一个延迟触发器，延迟执行余下的代码一秒钟，以便给 DOM
+    更新和显示的时间，然后再弹出关于再次移除元素的警报。有关创建和使用延迟触发器的更多信息，请参见 [“使用 setTimeout”](#using_settimeout)。
 - en: This new element that’s created is exactly the same as if it had been included
     in the original HTML and has all the same properties and methods available.
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建的这个新元素与其在原始 HTML 中被包含的方式完全相同，并且具有同样的属性和方法。
 - en: Note
+  id: totrans-159
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注
 - en: I sometimes use the technique of creating new elements when I want to create
     in-browser pop-up windows, because it doesn’t rely on there being a spare `<div>`
     element available in the DOM.
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 当我想要创建浏览器内弹出窗口时，有时会使用创建新元素的技术，因为它不依赖于 DOM 中是否有可用的空闲 `<div>` 元素。
 - en: Removing Elements
+  id: totrans-161
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 移除元素
 - en: 'You can also remove elements from the DOM, including ones that you didn’t insert
     using JavaScript; it’s even easier than adding an element. It works like this,
     assuming the element to remove is in the object `element`:'
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以从 DOM 中移除元素，包括那些未使用 JavaScript 插入的元素；这比添加元素更容易。假设要移除的元素在对象 `element` 中，操作如下：
 - en: '[PRE19]'
+  id: totrans-163
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: This code accesses the element’s `parentNode` object so that it can remove the
     element from that node. Then it calls the `removeChild` method on that parent
     object, passing the object to be removed.
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 这段代码访问元素的`parentNode`对象，以便它可以从该节点中移除元素。然后它在父对象上调用`removeChild`方法，传递要移除的对象。
 - en: Alternatives to Adding and Removing Elements
+  id: totrans-165
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 添加和移除元素的替代方案
 - en: Inserting an element is intended for adding totally new objects into a web page.
     But if all you intend to do is hide and reveal objects according to an `onmouseover`
     or other event, don’t forget that there are a couple of CSS properties you can
     use for this purpose, without taking such drastic measures as creating and deleting
     DOM elements.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 插入元素是用于向网页中添加全新对象的。但是如果你的意图只是根据`onmouseover`或其他事件隐藏和显示对象，不要忘记有几个CSS属性可以用于此目的，而不必采取创建和删除DOM元素的如此激进的措施。
 - en: 'For example, when you want to make an element invisible but leave it in place
     (and with all the elements surrounding it remaining in their positions), you can
     simply set the object’s `visibility` property to `hidden`, like this:'
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，当你想要使一个元素不可见但保持在原位（周围的所有元素保持原位），你可以简单地将对象的`visibility`属性设置为`hidden`，就像这样：
 - en: '[PRE20]'
+  id: totrans-168
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'And to redisplay the object, you can use the following:'
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 要重新显示对象，你可以使用以下内容：
 - en: '[PRE21]'
+  id: totrans-170
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: 'You can also collapse an element down to occupy zero width and height (with
     all the objects around it filling in the freed-up space), like this:'
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 你还可以将一个元素折叠到零宽度和高度（周围的所有对象填充释放出的空间），就像这样：
 - en: '[PRE22]'
+  id: totrans-172
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: 'To then restore the element to its original dimensions, you would use the following:'
+  id: totrans-173
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后恢复元素到其原始尺寸，你将使用以下内容：
 - en: '[PRE23]'
+  id: totrans-174
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: 'And, of course, there’s always the `innerHTML` property, with which you can
     change the HTML applied to an element, like this, for example:'
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，还有`innerHTML`属性，你可以使用它来改变应用于元素的HTML，例如：
 - en: '[PRE24]'
+  id: totrans-176
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: 'Or, to use the `O` function I outlined earlier:'
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，使用我之前概述的`O`函数：
 - en: '[PRE25]'
+  id: totrans-178
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: 'Or you can make an element seem to disappear, like this:'
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者你可以让一个元素似乎消失，就像这样：
 - en: '[PRE26]'
+  id: totrans-180
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: Note
+  id: totrans-181
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Don’t forget the other useful CSS properties you can access from JavaScript,
     such as `opacity` for setting the visibility of an object to somewhere between
     visible and invisible, or `width` and `height` for resizing an object. And, of
     course, using the `position` property with values of `absolute`, `static`, `fixed`,
     `sticky`, or `relative`, you can even locate an object anywhere in (or outside)
     the browser window that you like.
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: 不要忘记你可以从JavaScript访问的其他有用的CSS属性，比如`opacity`用于将对象的可见性设置为可见和不可见之间的某个值，或者`width`和`height`用于调整对象的大小。当然，使用`position`属性与值`absolute`、`static`、`fixed`、`sticky`或`relative`，你甚至可以将对象定位在（或者在外部）浏览器窗口中任何你喜欢的位置。
 - en: Using Interrupts
+  id: totrans-183
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用中断
 - en: JavaScript provides access to *interrupts*, a method by which you can ask the
     browser to call your code after a set period of time, or even to keep calling
     it at specified intervals. This gives you a means of handling background tasks
     such as asynchronous communications, or even things like animating web elements.
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: JavaScript提供了对*中断*的访问，这是一种方法，通过它你可以要求浏览器在一段预定的时间后调用你的代码，甚至在指定的间隔内继续调用它。这为你提供了处理后台任务的手段，例如异步通信，甚至像动画化网络元素这样的事情。
 - en: 'There are two types of interrupt: `setTimeout` and `setInterval`, which have
     accompanying `clearTimeout` and `clearInterval` functions for turning them off
     again.'
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 中断有两种类型：`setTimeout`和`setInterval`，它们有相应的`clearTimeout`和`clearInterval`函数用于再次关闭它们。
 - en: Using setTimeout
+  id: totrans-186
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用setTimeout
 - en: 'When you call `setTimeout`, you pass it some JavaScript code or the name of
     a function, and a value in milliseconds representing how long to wait before the
     code should be executed, like this:'
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你调用`setTimeout`时，你传递一些JavaScript代码或函数名，并且一个表示代码应在多少毫秒后执行的值，就像这样：
 - en: '[PRE27]'
+  id: totrans-188
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: 'Your `dothis` function might look like this:'
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 你的`dothis`函数可能看起来像这样：
 - en: '[PRE28]'
+  id: totrans-190
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: Note
+  id: totrans-191
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: In case you’re wondering, you cannot simply specify `alert()` (with empty parentheses)
     as a function to be called by `setTimeout`, because the function would be executed
     immediately. Only when you provide a function name without parentheses (for example,
     `alert`) can you safely pass the function name so that its code will be executed
     only when the timeout occurs.
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你在想，你不能简单地指定`alert()`（带空括号）作为`setTimeout`调用的函数，因为函数会立即执行。只有当你提供不带括号的函数名（例如，`alert`）时，你才能安全地传递函数名，这样它的代码只会在超时发生时执行。
 - en: Passing a string
+  id: totrans-193
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 传递一个字符串
 - en: 'When you need to provide an argument to a function, you can also pass a string
     value to the `setTimeout` function, which will not be executed until the correct
     time. For example:'
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您需要向函数提供参数时，您还可以向 `setTimeout` 函数传递一个字符串值，该值直到正确时间才会被执行。例如：
 - en: '[PRE29]'
+  id: totrans-195
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: 'In fact, you can provide as many lines of JavaScript code as you like if you
     place a semicolon after each statement, like this:'
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 实际上，如果您在每个语句后加上分号，您可以提供尽可能多的行JavaScript代码，例如：
 - en: '[PRE30]'
+  id: totrans-197
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: Repeating timeouts
+  id: totrans-198
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 重复超时
 - en: 'One technique some programmers use to provide repeating interrupts is to call
     the `setTimeout` function from the code called by it, as in the following example,
     which will initiate a never-ending loop of alert windows:'
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些程序员使用的一种技术是在由其调用的代码中调用 `setTimeout` 函数，如下面的示例所示，它将启动一系列不断弹出警报窗口的无限循环：
 - en: '[PRE31]'
+  id: totrans-200
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: Now the alert will pop up every five seconds. I don’t recommend you run this
     actual example (even as a test), or you’ll probably have to close your browser
     to stop it!
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在每五秒钟将弹出一个警报。我不建议您运行这个实际例子（即使作为测试），否则您可能不得不关闭浏览器才能停止它！
 - en: Note
+  id: totrans-202
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Another option is to use the `setInterval` function, as described shortly. However,
     chaining `setTimeout` has the advantage of only issuing the `setTimeout` function
     call after all the preceding code has finished executing, while `setInterval`
     will interrupt code to run, which sometimes may not give the result you intend.
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一种选择是使用 `setInterval` 函数，如稍后所述。但是，链接 `setTimeout` 具有一个优点，即仅在所有前面的代码执行完毕后才发出
+    `setTimeout` 函数调用，而 `setInterval` 将中断代码运行，有时可能不会得到您打算的结果。
 - en: Canceling a Timeout
+  id: totrans-204
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 取消超时
 - en: 'Once a timeout has been set up, you can cancel it if you previously saved the
     value returned from the initial call to `setTimeout`, like this:'
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置超时后，如果您之前保存了从初始调用 `setTimeout` 返回的值，您可以取消它，如下所示：
 - en: '[PRE32]'
+  id: totrans-206
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: 'Armed with the value in `handle`  (a term used to imply you have a *handle* with
     which to control the function), you can now cancel the interrupt at any point
     up until its due time, like this:'
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `handle` 中的值（一个用于暗示您可以控制函数的*句柄*）时，您可以随时取消中断，直到其到期时间，如下所示：
 - en: '[PRE33]'
+  id: totrans-208
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: When you do this, the interrupt is completely forgotten, and the code assigned
     to it will not get executed.
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您这样做时，中断将被完全遗忘，并且分配给它的代码将不会被执行。
 - en: Using setInterval
+  id: totrans-210
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 setInterval
 - en: An easier way to set up regular interrupts is to use the `setInterval` function.
     It works in the same way as `setTimeout`, except that having popped up after the
     interval you specify in milliseconds, it will do so again after that interval
     again passes, and so on forever, unless you cancel it.
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 设置定期中断的更简单的方法是使用 `setInterval` 函数。它的工作方式与 `setTimeout` 相同，只是在您指定的间隔后弹出警报，然后再次过去这个间隔，以此类推，除非您取消它。
 - en: '[Example 21-9](#clock_created_using_interrupts) uses this function to display
     a simple clock in the browser, as shown in [Figure 21-4](#maintaining_the_correct_time_with_interr).'
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 21-9](#clock_created_using_interrupts) 使用此函数在浏览器中显示一个简单的时钟，如图 [21-4](#maintaining_the_correct_time_with_interr)
+    所示。'
 - en: Example 21-9\. A clock created using interrupts
+  id: totrans-213
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 21-9\. 使用中断创建的时钟
 - en: '[PRE34]'
+  id: totrans-214
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: '![Maintaining the correct time with interrupts](Images/pmj6_2104.png)'
+  id: totrans-215
   prefs: []
   type: TYPE_IMG
+  zh: '![使用中断维护正确时间](Images/pmj6_2104.png)'
 - en: Figure 21-4\. Maintaining the correct time with interrupts
+  id: totrans-216
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 21-4\. 使用中断维护正确时间
 - en: 'Every time `ShowTime` is called, it sets the object `date` to the current date
     and time with a call to `Date`:'
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 每次调用 `ShowTime` 时，它都会使用 `Date` 调用将对象 `date` 设置为当前日期和时间：
 - en: '[PRE35]'
+  id: totrans-218
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: 'Then the `innerHTML` property of the object passed to `showtime` (namely, `object`)
     is set to the current time in hours, minutes, and seconds, as determined by a
     call to the function `toTimeString`. This returns a string such as `09:57:17 UTC+0530`,
     which is then truncated to just the first eight characters with a call to the
     `substr` function:'
+  id: totrans-219
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，将传递给 `showtime` 的对象的 `innerHTML` 属性（即 `object`）设置为由函数 `toTimeString` 调用确定的当前时间的小时、分钟和秒的字符串，这将返回一个字符串，例如
+    `09:57:17 UTC+0530`，然后使用 `substr` 函数将其截断为前八个字符：
 - en: '[PRE36]'
+  id: totrans-220
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: Using the function
+  id: totrans-221
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用该函数
 - en: 'To use this function, you first have to create an object whose `innerHTML`
     property will be used for displaying the time, like with this HTML:'
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用此函数，您首先必须创建一个对象，其 `innerHTML` 属性将用于显示时间，例如这个HTML：
 - en: '[PRE37]'
+  id: totrans-223
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: 'The value 00:00:00 is simply there to show where and how the time will display.
     It is not necessary as it will be replaced anyway. Then, from a `<script>` section
     of code, call the `setInterval` function like this:'
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: 值`00:00:00`只是显示时间的位置和方式，并不必要，因为它会被替换掉。然后，在`<script>`代码段中调用`setInterval`函数，如下所示：
 - en: '[PRE38]'
+  id: totrans-225
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: 'The script then passes a string to `setInterval` containing the following statement,
     which is set to execute once a second (every 1,000 milliseconds):'
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，脚本将一个包含以下语句的字符串传递给`setInterval`，该语句设置每秒执行一次（每1,000毫秒一次）：
 - en: '[PRE39]'
+  id: totrans-227
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: In the rare situation where somebody has disabled JavaScript (which people sometimes
     do for security reasons), your JavaScript will not run, and the user will just
     see the original `00:00:00`.
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 在极少数情况下，某人禁用了JavaScript（出于安全原因，有时人们会这样做），您的JavaScript将无法运行，用户将只看到原始的`00:00:00`。
 - en: Canceling an interval
+  id: totrans-229
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 取消间隔
 - en: 'To stop a repeating interval, when you first set up the interval with a call
     to the function `setInterval`, you must make a note of the interval’s handle,
     like this:'
+  id: totrans-230
   prefs: []
   type: TYPE_NORMAL
+  zh: 要停止重复间隔，当您首次调用`setInterval`函数设置间隔时，必须记下间隔的句柄，如下所示：
 - en: '[PRE40]'
+  id: totrans-231
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: 'Now you can stop the clock at any time by issuing the following call:'
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您可以随时通过以下调用来停止时钟：
 - en: '[PRE41]'
+  id: totrans-233
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: 'You can even set up a timer to stop the clock after a certain amount of time,
     like this:'
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 您甚至可以设置一个计时器，在一定时间后停止时钟，如下所示：
 - en: '[PRE42]'
+  id: totrans-235
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: This statement will issue an interrupt in 10 seconds that will clear the repeating
     intervals.
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 此语句将在10秒内发出中断，从而清除重复的间隔。
 - en: Using Interrupts for Animation
+  id: totrans-237
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用中断进行动画
 - en: By combining a few CSS properties with a repeating interrupt, you can produce
     all manner of animations and effects.
+  id: totrans-238
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过结合几个CSS属性与重复中断，您可以产生各种动画和效果。
 - en: For example, the code in [Example 21-10](#simple_animation) moves a square shape
     across the top of the browser window, all the time ballooning in size, as shown
     in [Figure 21-5](#this_object_slides_in_from_the_left_whil); when `LEFT` is reset
     to `0`, the animation restarts.
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，代码在[示例21-10](#simple_animation)中将一个方形形状沿着浏览器窗口顶部移动，同时大小膨胀，如[图21-5](#this_object_slides_in_from_the_left_whil)所示；当`LEFT`被重置为`0`时，动画将重新开始。
 - en: Example 21-10\. A simple animation
+  id: totrans-240
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例21-10。一个简单的动画
 - en: '[PRE43]'
+  id: totrans-241
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: '![This object slides in from the left while changing size](Images/pmj6_2105.png)'
+  id: totrans-242
   prefs: []
   type: TYPE_IMG
+  zh: '![该对象从左侧滑入，同时更改大小](Images/pmj6_2105.png)'
 - en: Figure 21-5\. This object slides in from the left while changing size
+  id: totrans-243
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图21-5。该对象从左侧滑入，同时更改大小
 - en: In the `<head>` section of the document, the `box` object is set to a `background`
     color of `orange` with a `border` value of `1px solid red`, and its `position`
     property is set to `absolute` so that the animation code that follows can position
     it in the precise ways you want.
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: 在文档的`<head>`部分，将`box`对象设置为`orange`的`background`颜色，并设置`border`值为`1px solid red`，其`position`属性设置为`absolute`，以便随后的动画代码可以精确地定位它。
 - en: Then, in the `animate` function, the global variables `SIZE` and `LEFT` are
     continuously updated and applied to the `width`, `height`, and `left` style attributes
     of the `box` object (with `'px'` added after each to specify that the values are
     in pixels), thus animating it at a frequency of once every 30 milliseconds. This
     results in an animation rate of 33.33 frames per second (1,000/30 milliseconds).
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，在`animate`函数中，全局变量`SIZE`和`LEFT`不断更新，并应用于`box`对象的`width`、`height`和`left`样式属性（在每个值后添加`'px'`以指定单位为像素），从而以每30毫秒一次的频率对其进行动画处理。这导致动画速率为每秒33.33帧（1,000/30毫秒）。
 - en: Questions
+  id: totrans-246
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 问题
 - en: What are the `O`, `S`, and `C` functions provided to do?
+  id: totrans-247
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`O`、`S`和`C`函数提供了哪些功能？'
 - en: Name two ways to modify a CSS attribute of an object.
+  id: totrans-248
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 命名两种修改对象CSS属性的方式。
 - en: Which properties provide the width and height available in a browser window?
+  id: totrans-249
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 哪些属性提供浏览器窗口中可用的宽度和高度？
 - en: How can you make something happen when the mouse passes both over and out of
     an object?
+  id: totrans-250
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 当鼠标在对象上方和对象外移动时，如何触发某些操作？
 - en: Which JavaScript function creates new elements, and which appends them to the
     DOM?
+  id: totrans-251
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 哪个JavaScript函数创建新元素，并将它们附加到DOM？
 - en: How can you make an element (a) invisible and (b) collapse to zero dimensions?
+  id: totrans-252
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何使元素（a）不可见，并（b）折叠为零维？
 - en: Which function creates a single event at a future time?
+  id: totrans-253
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 哪个函数在将来的某个时间创建单个事件？
 - en: Which function sets up repeating events at set intervals?
+  id: totrans-254
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 哪个函数设置了在设定的间隔时间重复发生的事件？
 - en: How can you release an element from its location in a web page to enable it
     to be moved around?
+  id: totrans-255
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何释放网页中元素的位置，使其能够被移动？
 - en: What delay between events should you set (in milliseconds) to achieve an animation
     rate of 50 frames per second?
+  id: totrans-256
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 设置事件之间的延迟（以毫秒为单位），以实现每秒 50 帧的动画速率？
 - en: See [“Chapter 21 Answers”](app01_split_020.xhtml#chapter_21_answers) in the
     [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions) for the
     answers to these questions.
+  id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: 参见 [“第 21 章答案”](app01_split_020.xhtml#chapter_21_answers)，获取这些问题的答案在 [附录 A](app01_split_000.xhtml#solutions_to_the_chapter_questions)
+    中。

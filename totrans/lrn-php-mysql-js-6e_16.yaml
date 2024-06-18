@@ -1,308 +1,449 @@
 - en: Chapter 13\. Cookies, Sessions, and Authentication
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第 13 章\. Cookies、会话和认证
 - en: As your web projects grow larger and more complicated, you will find an increasing
     need to keep track of your users. Even if you aren’t offering logins and passwords,
     you will still often need to store details about a user’s current session and
     possibly also recognize them when they return to your site.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 随着您的Web项目变得越来越大和复杂，您将发现越来越需要跟踪您的用户。即使您不提供登录和密码，您也经常需要存储关于用户当前会话的详细信息，并在他们返回您的站点时识别他们。
 - en: Several technologies support this kind of interaction, ranging from simple browser
     cookies to session handling and HTTP authentication. Between them, they offer
     the opportunity for you to configure your site to your users’ preferences and
     ensure a smooth and enjoyable transition through it.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 几种技术支持这种互动，从简单的浏览器cookies到会话处理和HTTP身份验证。它们之间为您提供了配置您的站点以符合用户偏好并确保流畅愉快过渡的机会。
 - en: Using Cookies in PHP
+  id: totrans-3
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 在PHP中使用Cookies
 - en: A *cookie* is an item of data that a web server saves to your computer’s hard
     disk via a web browser. It can contain almost any alphanumeric information (as
     long as it’s under 4 KB) and can be retrieved from your computer and returned
     to the server. Common uses include session tracking, maintaining data across multiple
     visits, holding shopping cart contents, storing login details, and more.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: '*Cookie*是通过web浏览器将数据项保存到计算机硬盘的一种数据。它几乎可以包含任何字母数字信息（只要在4 KB以下），并且可以从计算机检索并返回到服务器。常见用途包括会话跟踪，跨多次访问保持数据，保存购物车内容，存储登录详细信息等。'
 - en: Because of their privacy implications, cookies can be read only from the issuing
     domain. In other words, if a cookie is issued by, for example, *oreilly.com*,
     it can be retrieved only by a web server using that domain. This prevents other
     websites from gaining access to details for which they are not authorized.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于其隐私影响，**cookies**只能从发行域中读取。换句话说，如果一个cookie是由例如*oreilly.com*发行的，只有使用该域的web服务器才能检索它。这可以防止其他未经授权的网站获取这些细节。
 - en: Because of the way the internet works, multiple elements on a web page can be
     embedded from multiple domains, each of which can issue its own cookies. When
     this happens, they are referred to as *third-party cookies*. Most commonly, these
     are created by advertising companies in order to track users across multiple websites,
     or for analytic purposes.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于互联网的工作方式，网页上的多个元素可以嵌入来自多个域的内容，每个域都可以发行自己的cookies。当这种情况发生时，它们被称为*第三方cookies*。最常见的是由广告公司创建，用于跨多个网站跟踪用户或进行分析。
 - en: Because of this, most browsers allow users to turn cookies off either for the
     current server’s domain, third-party servers, or both. Fortunately, most people
     who disable cookies do so only for third-party websites.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，大多数浏览器允许用户关闭cookies，无论是对当前服务器的域、第三方服务器还是两者都可以。幸运的是，大多数禁用cookies的人只对第三方网站这样做。
 - en: Cookies are exchanged during the transfer of headers, before the actual HTML
     of a web page is sent, and it is impossible to send a cookie once any HTML has
     been transferred. Therefore, careful planning of cookie usage is important. [Figure 13-1](#browsersolidusserver_requestsolidusres)
     illustrates a typical request and response dialog between a web browser and web
     server passing cookies.
+  id: totrans-8
   prefs: []
   type: TYPE_NORMAL
+  zh: Cookies在传输头部期间交换，在实际HTML网页发送之前，一旦HTML已经传输，发送cookie是不可能的。因此，仔细规划cookie的使用非常重要。[图 13-1](#browsersolidusserver_requestsolidusres)说明了一个典型的浏览器和web服务器之间传递cookies的请求和响应对话。
 - en: '![A browser/server request/response dialog with cookies](Images/pmj6_1301.png)'
+  id: totrans-9
   prefs: []
   type: TYPE_IMG
+  zh: '![带有cookies的浏览器/服务器请求/响应对话框](Images/pmj6_1301.png)'
 - en: Figure 13-1\. A browser/server request/response dialog with cookies
+  id: totrans-10
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 13-1\. 带有cookies的浏览器/服务器请求/响应对话框
 - en: 'This exchange shows a browser receiving two pages:'
+  id: totrans-11
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个交换显示浏览器接收到两个页面：
 - en: The browser issues a request to retrieve the main page, *index.html*, at the
     website *http://www.webserver.com*. The first header specifies the file, and the
     second header specifies the server.
+  id: totrans-12
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 浏览器发出请求以检索网站*http://www.webserver.com*上的主页面*index.html*。第一个头部指定文件，第二个头部指定服务器。
 - en: When the web server at *webserver.com* receives this pair of headers, it returns
     some of its own. The second header defines the type of content to be sent (`text/html`),
     and the third one sends a cookie of the name `name` and with the value `value`.
     Only then are the contents of the web page transferred.
+  id: totrans-13
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 当 *webserver.com* 的 Web 服务器收到这对标头时，将返回一些自己的标头。第二个标头定义要发送的内容类型（`text/html`），第三个标头发送具有名称
+    `name` 和值 `value` 的 cookie。然后才传输网页内容。
 - en: Once the browser has received the cookie, it will then return it with every
     future request made to the issuing server until the cookie expires or is deleted.
     So, when the browser requests the new page */news.html*, it also returns the cookie
     `name` with the value `value`.
+  id: totrans-14
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 浏览器接收到 cookie 后，将在以后向发出请求的服务器发送该 cookie，直到 cookie 过期或被删除。因此，当浏览器请求新页面 */news.html*
+    时，它还会返回具有值 `value` 的 cookie `name`。
 - en: Because the cookie has already been set, when the server receives the request
     to send */news.html*, it does not have to resend the cookie but just returns the
     requested page.
+  id: totrans-15
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 由于 cookie 已经设置，当服务器接收到发送 */news.html* 的请求时，它不需要重新发送 cookie，而只需返回请求的页面。
 - en: Note
+  id: totrans-16
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: It is easy to edit cookies directly from within the browser by using built-in
     developer tools, or extensions. Therefore, because users can change cookie values,
     you should not put key information such as usernames in a cookie, or you face
     the possibility of having your website manipulated in ways you are not expecting.
     Cookies are best used for storing data such as language or currency settings.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 可以通过浏览器内置的开发者工具或扩展程序直接编辑 cookie。因此，由于用户可以更改 cookie 的值，您不应在 cookie 中放置用户名等关键信息，否则可能导致您的网站被意外操纵。Cookie
+    最适合用于存储语言或货币设置等数据。
 - en: Setting a Cookie
+  id: totrans-18
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 设置 Cookie
 - en: 'Setting a cookie in PHP is a simple matter. As long as no HTML has yet been
     transferred, you can call the `setcookie` function, which has the following syntax
     (see [Table 13-1](#setcookie_parameters)):'
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 PHP 中设置 cookie 很简单。只要还未传输任何 HTML，您可以调用 `setcookie` 函数，其语法如下（参见[表 13-1](#setcookie_parameters)）：
 - en: '[PRE0]'
+  id: totrans-20
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Table 13-1\. The `setcookie` parameters
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 13-1\. `setcookie` 参数
 - en: '| Parameter | Description | Example |'
+  id: totrans-22
   prefs: []
   type: TYPE_TB
+  zh: '| 参数 | 描述 | 示例 |'
 - en: '| --- | --- | --- |'
+  id: totrans-23
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| `name` | The name of the cookie. This is the name that your server will use
     to access the cookie on subsequent browser requests. | `location` |'
+  id: totrans-24
   prefs: []
   type: TYPE_TB
+  zh: '| `name` | cookie 的名称。这是服务器在后续浏览器请求中使用的名称，用于访问 cookie。 | `location` |'
 - en: '| `value` | The value of the cookie, or the cookie’s contents. This can contain
     up to 4 KB of alphanumeric text. | `USA` |'
+  id: totrans-25
   prefs: []
   type: TYPE_TB
+  zh: '| `value` | cookie 的值或 cookie 的内容。这可以包含最多 4 KB 的字母数字文本。 | `USA` |'
 - en: '| `expire` | (*Optional.*) The Unix timestamp of the expiration date. Generally,
     you will probably use `time()` plus a number of seconds. If not set, the cookie
     expires when the browser closes. | `time() + 2592000` |'
+  id: totrans-26
   prefs: []
   type: TYPE_TB
+  zh: '| `expire` | （*可选*）过期日期的 Unix 时间戳。通常，您可能会使用 `time()` 加上一定的秒数。如果未设置，该 cookie
+    将在浏览器关闭时过期。 | `time() + 2592000` |'
 - en: '| `path` | (*Optional.*) The path of the cookie on the server. If this is a
     `/` (forward slash), the cookie is available over the entire domain, such as *www.webserver.com*.
     If it is a subdirectory, the cookie is available only within that subdirectory.
     The default is the current directory that the cookie is being set in, and this
     is the setting you will normally use. | `/` |'
+  id: totrans-27
   prefs: []
   type: TYPE_TB
+  zh: '| `path` | （*可选*）服务器上 cookie 的路径。如果是 `/`（斜杠），则该 cookie 在整个域内有效，例如 *www.webserver.com*。如果是子目录，则
+    cookie 仅在该子目录中有效。默认为设置 cookie 的当前目录，这通常是您会使用的设置。 | `/` |'
 - en: '| `domain` | (*Optional.*) The internet domain of the cookie. If this is *webserver.com*,
     the cookie is available to all of *webserver.com* and its subdomains, such as
     *www.webserver.com* and *images.webserver.com*. If it is *images.webserver.com*,
     the cookie is available only to *images.webserver.com* and its subdomains, such
     as *sub.images.webserver.com*, but not, say, to *www.webserver.com*. | `webserver.com`
     |'
+  id: totrans-28
   prefs: []
   type: TYPE_TB
+  zh: '| `domain` | （*可选*）cookie 的互联网域。如果是 *webserver.com*，则该 cookie 对所有 *webserver.com*
+    及其子域（如 *www.webserver.com* 和 *images.webserver.com*）可用。如果是 *images.webserver.com*，则该
+    cookie 仅对 *images.webserver.com* 及其子域（如 *sub.images.webserver.com*）可用，但对例如 *www.webserver.com*
+    不可用。 | `webserver.com` |'
 - en: '| `secure` | (*Optional.*) Whether the cookie must use a secure connection
     (*https://*). If this value is `TRUE`, the cookie can be transferred only across
     a secure connection. The default is `FALSE`. | `FALSE` |'
+  id: totrans-29
   prefs: []
   type: TYPE_TB
+  zh: '| `secure` | （*可选*）cookie 是否必须使用安全连接（*https://*）。如果该值为 `TRUE`，则该 cookie 只能在安全连接上传输。默认为
+    `FALSE`。 | `FALSE` |'
 - en: '| `httponly` | (*Optional*; implemented since PHP version 5.2.0.) Whether the
     cookie must use the HTTP protocol. If this value is `TRUE`, scripting languages
     such as JavaScript cannot access the cookie. The default is `FALSE`. | `FALSE`
     |'
+  id: totrans-30
   prefs: []
   type: TYPE_TB
+  zh: '| `httponly` | （*可选*；自 PHP 版本 5.2.0 起实现。）Cookie 是否必须使用 HTTP 协议。如果该值为 `TRUE`，脚本语言（如
+    JavaScript）无法访问 Cookie。默认值为 `FALSE`。 | `FALSE` |'
 - en: 'So, to create a cookie with the name `location` and the value `USA` that is
     accessible across the entire web server on the current domain, and will be removed
     from the browser’s cache in seven days, use the following:'
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，要创建一个名为 `location`、值为 `USA` 的 Cookie，在当前域上整个 Web 服务器上都可以访问，并且将在七天内从浏览器缓存中删除，使用以下方法：
 - en: '[PRE1]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Accessing a Cookie
+  id: totrans-33
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 访问 Cookie
 - en: 'Reading the value of a cookie is as simple as accessing the `$_COOKIE` system
     array. For example, if you wish to see whether the current browser has the cookie
     called `location` already stored and, if so, to read its value, use the following:'
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: 读取 Cookie 的值就像访问 `$_COOKIE` 系统数组一样简单。例如，如果您想要查看当前浏览器是否已经存储了名为 `location` 的 Cookie，并且如果有的话，读取其值，可以使用以下方法：
 - en: '[PRE2]'
+  id: totrans-35
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Note that you can read a cookie back only after it has been sent to a web browser.
     This means that when you issue a cookie, you cannot read it in again until the
     browser reloads the page (or another with access to the cookie) from your website
     and passes the cookie back to the server in the process.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 请注意，只有在将 Cookie 发送到 Web 浏览器后，您才能读取 Cookie。这意味着当您发出一个 Cookie 时，直到浏览器重新加载页面（或另一个具有访问权限的页面）从您的网站返回
+    Cookie 给服务器时，您无法再次读取它。
 - en: Destroying a Cookie
+  id: totrans-37
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 销毁 Cookie
 - en: 'To delete a cookie, you must issue it again and set a date in the past. It
     is important for all parameters in your new `setcookie` call except the timestamp
     to be identical to the parameters when the cookie was first issued; otherwise,
     the deletion will fail. Therefore, to delete the cookie created earlier, you would
     use the following:'
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 要删除一个 Cookie，您必须再次发出它并将日期设置为过去。在您的新 `setcookie` 调用中，除了时间戳之外，所有参数都必须与首次发出 Cookie
+    时的参数相同；否则，删除操作将失败。因此，要删除之前创建的 Cookie，您将使用以下方法：
 - en: '[PRE3]'
+  id: totrans-39
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: As long as the time given is in the past, the cookie should be deleted. However,
     I have used a time of 2,592,000 seconds (one month) in the past in case the client
     computer’s date and time are not correctly set. You may also provide an empty
     string for the cookie value (or a value of `FALSE`), and PHP will automatically
     set its time in the past for you.
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: 只要给定的时间是过去的，Cookie 就应该被删除。然而，我已经在过去使用了 2,592,000 秒（一个月）的时间，以防客户端计算机的日期和时间设置不正确。您也可以为
+    Cookie 值提供一个空字符串（或一个值为 `FALSE` 的值），PHP 将自动为您将其时间设置为过去。
 - en: HTTP Authentication
+  id: totrans-41
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: HTTP 身份验证
 - en: HTTP authentication uses the web server to manage users and passwords for the
     application. It’s adequate for simple applications that ask users to log in, although
     most applications will have specialized needs or more stringent security requirements
     that call for other techniques.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: HTTP 身份验证使用 Web 服务器来管理应用程序的用户和密码。对于要求用户登录的简单应用程序来说，这是足够的，尽管大多数应用程序会有专门的需求或更严格的安全要求，需要使用其他技术。
 - en: To use HTTP authentication, PHP sends a header request asking to start an authentication
     dialog with the browser. The server must have this feature turned on in order
     for it to work, but because it’s so common, your server is likely to offer the
     feature.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用 HTTP 身份验证，PHP 发送一个头部请求，请求与浏览器开始身份验证对话。服务器必须启用此功能才能正常工作，但由于它是如此常见，您的服务器很可能提供此功能。
 - en: Note
+  id: totrans-44
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Although it is usually installed with Apache, the HTTP authentication module
     may not necessarily be installed on the server you use. So, attempting to run
     these examples may generate an error telling you that the feature is not enabled,
     in which case you must either install the module and change the configuration
     file to load it or ask your system administrator to make these changes.
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管它通常与 Apache 一起安装，但 HTTP 身份验证模块不一定安装在您使用的服务器上。因此，尝试运行这些示例可能会生成一个错误，告诉您该功能未启用，这种情况下，您必须安装该模块并更改配置文件以加载它，或者要求系统管理员进行这些更改。
 - en: 'After entering your URL into the browser or visiting the page via a link, the
     user will see an “Authentication Required” prompt pop up, requesting two fields:
     User Name and Password ([Figure 13-2](#http_authentication_login_prompt) shows
     how this looks in Firefox).'
+  id: totrans-46
   prefs: []
   type: TYPE_NORMAL
+  zh: 在将您的 URL 输入浏览器或通过链接访问页面后，用户将看到一个“需要身份验证”的提示弹出窗口，请求两个字段：用户名和密码（[图 13-2](#http_authentication_login_prompt)
+    显示了在 Firefox 中的外观）。
 - en: '![An HTTP authentication login prompt](Images/pmj6_1302.png)'
+  id: totrans-47
   prefs: []
   type: TYPE_IMG
+  zh: '![HTTP 鉴权登录提示](Images/pmj6_1302.png)'
 - en: Figure 13-2\. An HTTP authentication login prompt
+  id: totrans-48
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 13-2\. HTTP 鉴权登录提示
 - en: '[Example 13-1](#php_authentication) shows the code to make this happen.'
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 13-1](#php_authentication)展示了使其发生的代码。'
 - en: Example 13-1\. PHP authentication
+  id: totrans-50
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-1\. PHP 鉴权
 - en: '[PRE4]'
+  id: totrans-51
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'The first thing the program does is look for two particular array values: `$_SERVER[''PHP_AUTH_USER'']`
     and `$_SERVER[''PHP_AUTH_PW'']`. If they both exist, they represent the username
     and password entered by a user into an authentication prompt.'
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 程序首先查找两个特定数组值：`$_SERVER['PHP_AUTH_USER']` 和 `$_SERVER['PHP_AUTH_PW']`。如果它们都存在，它们代表用户在身份验证提示中输入的用户名和密码。
 - en: Note
+  id: totrans-53
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Notice that when being displayed to the screen, the values that have been returned
     in the `$_SERVER` array are first processed through the `htmlspecialchars` function.
     This is because these values have been entered by the user and therefore cannot
     be trusted, as a hacker could make a cross-site scripting attempt by adding HTML
     characters and other symbols to the input. `htmlspecialchars` translates any such
     input into harmless HTML entities.
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 注意，在显示到屏幕上时，返回到`$_SERVER`数组中的值首先通过`htmlspecialchars`函数进行处理。这是因为这些值是用户输入的，因此不能信任，黑客可能通过添加HTML字符和其他符号尝试跨站点脚本攻击。`htmlspecialchars`将任何这样的输入转换为无害的HTML实体。
 - en: 'If either value does not exist, the user has not yet been authenticated, and
     you display the prompt in [Figure 13-2](#http_authentication_login_prompt) by
     issuing the following header, where `Basic realm` is the name of the section that
     is protected and appears as part of the pop-up prompt:'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果任一值不存在，则用户尚未通过身份验证，并且您通过发出以下标题显示[图 13-2](#http_authentication_login_prompt)，其中`Basic
+    realm`是受保护部分的名称，并作为弹出提示的一部分显示：
 - en: '[PRE5]'
+  id: totrans-56
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: 'If the user fills out the fields, the PHP program runs again from the top.
     But if the user clicks the Cancel button, the program proceeds to the following
     two lines, which send the following header and an error message:'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果用户填写了字段，PHP 程序会再次从顶部运行。但如果用户点击取消按钮，则程序继续执行以下两行代码，发送以下标题和错误消息：
 - en: '[PRE6]'
+  id: totrans-58
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: The `die` statement causes the text “Please enter your username and password”
     to be displayed (see [Figure 13-3](#result_of_clicking_the_cancel_button)).
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '`die` 语句导致文本“请键入您的用户名和密码”被显示（参见[图 13-3](#result_of_clicking_the_cancel_button)）。'
 - en: '![The result of clicking the Cancel button](Images/pmj6_1303.png)'
+  id: totrans-60
   prefs: []
   type: TYPE_IMG
+  zh: '![点击取消按钮的结果](Images/pmj6_1303.png)'
 - en: Figure 13-3\. The result of clicking the Cancel button
+  id: totrans-61
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 13-3\. 点击取消按钮的结果
 - en: Note
+  id: totrans-62
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Once a user has been authenticated, you will not be able to get the authentication
     dialog to pop up again unless the user closes and reopens all browser windows,
     because the web browser will keep returning the same username and password to
@@ -310,120 +451,170 @@
     this section and try different things out. The easiest way to do this is to open
     up a new private or anonymous window to run these examples, so you won’t need
     to close the entire browser.
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦用户已经通过身份验证，您将无法再次弹出身份验证对话框，除非用户关闭并重新打开所有浏览器窗口，因为Web浏览器将持续将相同的用户名和密码返回给PHP。在通过此部分并尝试不同操作时，您可能需要关闭并重新打开浏览器几次。最简单的方法是打开一个新的私密或匿名窗口来运行这些示例，这样您就无需关闭整个浏览器。
 - en: Now let’s check for a valid username and password. The code in [Example 13-1](#php_authentication)
     doesn’t require you to change much to add this check, other than modifying the
     previous welcome message code to test for a correct username and password and
     then issuing a welcome message. A failed authentication causes an error message
     to be sent (see [Example 13-2](#php_authentication_with_input_checking)).
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们检查有效的用户名和密码。在[示例 13-1](#php_authentication)中的代码无需太多更改即可添加此检查，只需修改先前的欢迎消息代码以测试正确的用户名和密码，然后发出欢迎消息。认证失败会导致发送错误消息（参见[示例 13-2](#php_authentication_with_input_checking)）。
 - en: Example 13-2\. PHP authentication with input checking
+  id: totrans-65
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 13-2\. PHP 鉴权与输入检查
 - en: '[PRE7]'
+  id: totrans-66
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: When comparing usernames and passwords the `===` (identity) operator is used,
     rather than the `==` (equals) operator. This is because we are checking whether
     the two values match *exactly*. For example, `'0e123' == '0e456'`, and this is
     not a suitable match for either username or password purposes.
+  id: totrans-67
   prefs: []
   type: TYPE_NORMAL
+  zh: 在比较用户名和密码时，使用`===`（全等）运算符，而不是`==`（等于）运算符。这是因为我们要检查两个值是否*完全*匹配。例如，`'0e123' ==
+    '0e456'`，这对于用户名或密码目的来说不是合适的匹配。
 - en: In the previous instance, 0e123 is 0 times 10 raised to the 123rd power, which
     results in zero, and 0e456 is 0 times 10 raised to the 456th power, which also
     evaluates to zero. Therefore, using the `==` operator, they will match due to
     their values both evaluating to zero, and so the result of the comparison will
     be `true`, but the `===` operator says that the two parts must be identical in
     every way, and as these two strings are different, the test will return `false`.
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 在前面的例子中，0e123是0乘以10的123次方，结果为零，0e456也是0乘以10的456次方，同样计算结果为零。因此，使用`==`运算符，它们会匹配，因为它们的值都评估为零，因此比较的结果将为`true`，但`===`运算符表示两个部分在每个方面都必须完全相同，而这两个字符串是不同的，所以测试将返回`false`。
 - en: A mechanism is now in place to authenticate users, but only for a single username
     and password. Also, the password appears in clear text within the PHP file, and
     if someone managed to hack into your server, they would instantly know it. So,
     let’s look at a better way to handle usernames and passwords.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在已经有了一个机制来验证用户，但只能针对单个用户名和密码进行。此外，密码以明文形式出现在PHP文件中，如果有人成功入侵您的服务器，他们将立即知道密码。因此，让我们看看更好地处理用户名和密码的方法。
 - en: Storing Usernames and Passwords
+  id: totrans-70
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 存储用户名和密码
 - en: MySQL is a natural way to store usernames and passwords. But again, we don’t
     want to store the passwords as clear text, because our website could be compromised
     if the database were accessed by a hacker. Instead, we’ll use a neat trick called
     a *one-way function*.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: MySQL是存储用户名和密码的自然方式。但同样，我们不希望以明文形式存储密码，因为如果数据库被黑客访问，我们的网站可能会受到威胁。相反，我们将使用一个称为*单向函数*的巧妙技巧。
 - en: This type of function is easy to use and converts a string of text into a seemingly
     random string. Because of their one-way nature, such functions are impossible
     to reverse, so their output can be safely stored in a database—and anyone who
     steals it will be none the wiser as to the passwords used.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种类型的函数易于使用，并将文本字符串转换为看似随机的字符串。由于它们的单向性质，这些函数是不可能逆转的，因此它们的输出可以安全地存储在数据库中——窃取它的人将无法知道使用的密码。
 - en: In previous editions of this book, I recommended using the *MD5* hashing algorithm
     for your data security. Time marches on, however, and now MD5 is considered easily
     hackable and therefore unsafe. Indeed, even its previously recommended replacement
     of *SHA-1* can apparently be hacked.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本书的早期版本中，我建议您使用*MD5*散列算法来保护数据安全。然而，时间过去了，现在MD5被认为是易于被破解的，因此不安全。实际上，甚至其先前推荐的替代方案*SHA-1*也似乎可以被破解。
 - en: So, now that PHP 5.5 is pretty much the minimum standard everywhere, I have
     moved on to using its built-in hashing function, which is vastly more secure and
     handles everything for you in a neat fashion.
+  id: totrans-74
   prefs: []
   type: TYPE_NORMAL
+  zh: 所以，现在PHP 5.5几乎是到处的最低标准，我已经转而使用其内置的散列函数，这在安全性上更为可靠，并且以一种整洁的方式处理所有事务。
 - en: Previously, to store a password securely, you would have needed to *salt* the
     password, which is a term for adding extra characters to a password that the user
     did not enter (to further obscure it). You then needed to run the result of that
     through a one-way function to turn it into a seemingly random set of characters,
     which used to be hard to crack.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 以前，要安全地存储密码，您需要对密码进行*盐*处理，这是指向密码添加用户未输入的额外字符（以进一步混淆它）。然后，您需要通过单向函数将其结果转换为看似随机的字符集，这曾经是难以破解的。
 - en: 'For example, code such as the following (which is now very insecure, because
     modern graphics processing units have such speed and power):'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，如下代码（现在非常不安全，因为现代图形处理单元具有如此速度和功率）：
 - en: '[PRE8]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'would display this value:'
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 将显示此值：
 - en: '[PRE9]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Remember that this is not a recommended method you should ever use. Treat this
     as an example of what *not* to do, as it is very insecure. Instead, please read
     on.
+  id: totrans-80
   prefs: []
   type: TYPE_NORMAL
+  zh: 请记住，这并不是建议您使用的方法。请将其视为*不*应该做的示例，因为它非常不安全。请继续阅读。
 - en: Using password_hash
+  id: totrans-81
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用password_hash
 - en: 'From version 5.5 of PHP, there’s a far better way to create salted password
     hashes: the `password_hash` function. Supply `PASSWORD_DEFAULT` as its second
     (required) argument to ask the function to select the most secure hashing function
     currently available. `password_hash` will also choose a random salt for every
     password. (Don’t be tempted to add any more salting of your own, as this could
     compromise the algorithm’s security.) So, the following code:'
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 从 PHP 版本 5.5 开始，有一种更好的方法来创建加盐的密码哈希：`password_hash` 函数。将 `PASSWORD_DEFAULT` 作为其第二个（必需的）参数，要求函数选择当前可用的最安全的哈希函数。`password_hash`
+    还会为每个密码选择一个随机盐。（不要试图添加额外的盐，因为这可能会损害算法的安全性。）因此，以下代码：
 - en: '[PRE10]'
+  id: totrans-83
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'will return a string such as the following, which includes the salt and all
     information required for the password to be verified:'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 将返回以下形式的字符串，其中包括盐和验证密码所需的所有信息。
 - en: '[PRE11]'
+  id: totrans-85
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Note
+  id: totrans-86
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: If you are letting PHP choose the hashing algorithm for you, you should allow
     for the returned hash to expand in size over time as better security is implemented.
     The developers of PHP recommend that you store hashes in a database field that
@@ -432,15 +623,22 @@
     a hash string of only 60 characters, by supplying the constant `PASSWORD_BCRYPT`
     as the second argument to the function. However, I don’t recommend this unless
     you have a very good reason.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你让 PHP 自行选择哈希算法，你应该允许返回的哈希随着时间的推移而扩展，以实现更好的安全性。PHP 的开发者建议你将哈希存储在数据库字段中，该字段至少可以扩展到
+    255 个字符（即使现在的平均长度为 60–72）。如果你希望，你可以手动选择 BCRYPT 算法，通过向函数的第二个参数提供常量 `PASSWORD_BCRYPT`
+    来保证哈希字符串仅为 60 个字符。然而，我不建议这样做，除非你有很好的理由。
 - en: You can supply options (in the form of an optional third argument) to further
     tailor how hashes are calculated, such as the cost or amount of processor time
     to allocate to the hashing (more time means more security but a slower server).
     The cost has a default value of `10`, which is the minimum you should use with
     BCRYPT.
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可以提供选项（以可选的第三个参数形式），以进一步定制如何计算哈希值，比如分配给哈希计算的成本或处理器时间的量（更多时间意味着更多安全性，但服务器速度较慢）。成本的默认值为
+    `10`，这是你在使用 BCRYPT 时应该使用的最低值。
 - en: However, I don’t want to confuse you with more information than you need to
     be able to store password hashes securely with the minimum of fuss, so please
     refer to the [documentation](http://php.net/password-hash) if you’d like more
@@ -448,81 +646,121 @@
     this is deprecated from PHP 7.0 onward, as it’s not considered that secure unless
     you know for sure what you are doing, as remains the case with WordPress, which
     still handles its own salting).
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，我不想用比你需要的更多信息来使你困惑，所以如果你希望获取有关可用选项的更多细节，请参考 [文档](http://php.net/password-hash)。你甚至可以选择自己的盐（尽管从
+    PHP 7.0 开始已不建议这样做，因为除非你确切知道自己在做什么，否则这并不安全，就像 WordPress 仍然处理其自己的盐一样）。
 - en: Using password_verify
+  id: totrans-90
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用 `password_verify`
 - en: To verify that a password matches a hash, use the `password_verify` function,
     passing it the password string a user has just entered, and the stored hash value
     for that user’s password (generally retrieved from your database).
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 要验证密码是否与哈希匹配，使用 `password_verify` 函数，向其传递用户刚输入的密码字符串以及存储在数据库中的该用户密码的哈希值。
 - en: 'So, assuming your user had previously entered the (very insecure) password
     of *mypassword*, and you now have their password’s hash string (from when the
     user created their password) stored in the variable `$hash`, you could verify
     that they match like this:'
+  id: totrans-92
   prefs: []
   type: TYPE_NORMAL
+  zh: 所以，假设你的用户之前输入了（非常不安全的）密码 *mypassword*，现在你在变量 `$hash` 中存储了他们密码的哈希字符串（用户创建密码时），你可以像这样验证它们是否匹配：
 - en: '[PRE12]'
+  id: totrans-93
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: If the correct password for the hash has been supplied, `password_verify` returns
     the value `TRUE`, so this `if` statement will display the word “Valid.” If it
     doesn’t match, then `FALSE` is returned and you can ask the user to try again.
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果提供了哈希的正确密码，则 `password_verify` 返回值 `TRUE`，因此此 `if` 语句将显示单词 “Valid.” 如果不匹配，则返回
+    `FALSE`，然后你可以要求用户再试一次。
 - en: An Example Program
+  id: totrans-95
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 一个示例程序
 - en: Let’s see how these functions work together when combined with MySQL. First
     you need to create a new table to store password hashes, so type in the program
     in [Example 13-3](#creating_a_users_table_and_adding_two_ac) and save it as *setupusers.php*
     (or download it from [GitHub](https://github.com/RobinNixon/lpmj6)), and then
     open it in your browser.
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看这些函数与 MySQL 结合使用时是如何协同工作的。首先需要创建一个新表来存储密码哈希，因此在程序中键入 [示例 13-3](#creating_a_users_table_and_adding_two_ac)
+    并将其保存为 *setupusers.php*（或从 [GitHub](https://github.com/RobinNixon/lpmj6) 下载），然后在浏览器中打开它。
 - en: Example 13-3\. Creating a users table and adding two accounts
+  id: totrans-97
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-3\. 创建用户表并添加两个帐户
 - en: '[PRE13]'
+  id: totrans-98
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'This program will create the table *users* within your *publications* database
     (or whichever database you set up for the *login.php* file in [Chapter 11](ch11.xhtml#accessing_mysql_using_php)).
     In this table, it will create two users: Bill Smith and Pauline Jones. They have
     the usernames and passwords of *bsmith/mysecret* and *pjones/acrobat*, respectively.'
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 此程序将在 *publications* 数据库中创建名为 *users* 的表（或者您为 [第 11 章](ch11.xhtml#accessing_mysql_using_php)
+    中的 *login.php* 文件设置的任何数据库）。在此表中，它将创建两个用户：Bill Smith 和 Pauline Jones。他们的用户名和密码分别为
+    *bsmith/mysecret* 和 *pjones/acrobat*。
 - en: Using the data in this table, we can now modify [Example 13-2](#php_authentication_with_input_checking)
     to properly authenticate users, and [Example 13-4](#php_authentication_using_mysql)
     shows the code needed to do this. Type it in or download it from the companion
     website, then make sure it is saved as *authenticate.php*, and call it up in your
     browser.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用此表中的数据，我们现在可以修改 [示例 13-2](#php_authentication_with_input_checking) 以正确验证用户，并且
+    [示例 13-4](#php_authentication_using_mysql) 显示了执行此操作所需的代码。将其键入或从伴随网站下载，然后确保将其保存为
+    *authenticate.php*，并在浏览器中调用它。
 - en: Example 13-4\. PHP authentication using MySQL
+  id: totrans-101
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-4\. 使用 MySQL 进行 PHP 身份验证
 - en: '[PRE14]'
+  id: totrans-102
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: Note
+  id: totrans-103
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Using HTTP authentication will impose approximately an 80 ms penalty when using
     `password_verify` with passwords hashed with BCRYPT, with the default cost of
     10\. This slowdown serves as a barrier for attackers to prevent them from trying
     to crack the passwords at maximum speed. Therefore, HTTP authentication is not
     a good solution on very busy sites, where you will probably prefer to use sessions
     (see the next section).
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 HTTP 身份验证将在使用 BCrypt 哈希化的密码时施加约 80 毫秒的惩罚，其默认成本为 10。此减速作为攻击者的屏障，防止他们以最大速度尝试破解密码。因此，在非常繁忙的站点上，HTTP
+    身份验证不是一个好的解决方案，您可能更喜欢使用会话（请参阅下一节）。
 - en: As you might expect at this point in the book, some of these examples are starting
     to get quite a bit longer. But don’t be put off. The only lines to really concern
     yourself with at this point are the ones highlighted in bold. They start with
@@ -530,42 +768,61 @@
     username and password passed through the `sanitize` function to change any HTML
     entities to safe character strings with the `htmlentities` function, and add single
     quotes to the start and end of the string using the `quote` method.
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你在本书的这一部分可能期待的那样，其中一些示例开始变得相当长了。但不要灰心。这时你真正需要关注的只有加粗的那些行。它们从使用 `sanitize`
+    函数通过传递的用户名和密码开始，将任何 HTML 实体更改为安全字符串，再使用 `htmlentities` 函数添加单引号到字符串的起始和结束，以及使用
+    `quote` 方法。
 - en: Next, a query is issued to MySQL to look up the user `$un_temp` and, if a result
     is returned, to assign the first row to `$row`. Because usernames are unique,
     there will be only one row.
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，向 MySQL 发出查询以查找用户 `$un_temp`，如果返回结果，则将第一行分配给 `$row`。因为用户名是唯一的，所以只会有一行。
 - en: Now all that’s necessary is to check the hash value stored in the database,
     which is in `$row['password']` and is the previous hash value calculated with
     `password_hash` when the user created their password.
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在只需检查存储在数据库中的哈希值，即 `$row['password']`，这是用户创建密码时使用 `password_hash` 计算的先前哈希值。
 - en: If the hash and the password just supplied by the user verify, `password_verify`
     will return `TRUE` and a friendly welcome string will be output, calling the user
     by their first name (see [Figure 13-4](#bill_smith_has_now_been_authenticated)).
     Otherwise, an error message is displayed. Because we have sanitized the password
     using `quote`, when `password_verify` is called, the encapsulating single quotes
     are first removed with `str_replace`.
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果刚刚提供的哈希和密码验证成功，`password_verify` 将返回 `TRUE`，并输出友好的欢迎字符串，称呼用户的名字（参见 [图 13-4](#bill_smith_has_now_been_authenticated)）。否则，将显示错误消息。因为我们已经使用
+    `quote` 对密码进行了清理，所以在调用 `password_verify` 时，首先会使用 `str_replace` 删除封装的单引号。
 - en: You can try this out for yourself by calling up the program in your browser
     and entering a username of `bsmith` and password of `mysecret` (or `pjones` and
     `acrobat`), the values that were saved in the database by [Example 13-3](#creating_a_users_table_and_adding_two_ac).
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以尝试在您的浏览器中调用程序，并输入用户名`bsmith`和密码`mysecret`（或`pjones`和`acrobat`），这些值已被[示例13-3](#creating_a_users_table_and_adding_two_ac)保存到数据库中。
 - en: '![Bill Smith has now been authenticated](Images/pmj6_1304.png)'
+  id: totrans-110
   prefs: []
   type: TYPE_IMG
+  zh: '![Bill Smith has now been authenticated](Images/pmj6_1304.png)'
 - en: Figure 13-4\. Bill Smith has now been authenticated
+  id: totrans-111
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图13-4. Bill Smith has now been authenticated
 - en: Note
+  id: totrans-112
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: By sanitizing input immediately after it is encountered, you will block any
     malicious HTML, JavaScript, or MySQL attacks before they can get any further,
     and you will not have to sanitize this data again. If a user has characters such
@@ -573,12 +830,16 @@
     or `&amp;` by the `htmlentities` function—but as long as your code allows for
     strings that may end up larger than the provided input width, and as long as you
     always run passwords through this sanitization, you’ll be just fine.
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过在遇到输入后立即对其进行清理，您将阻止任何恶意HTML、JavaScript或MySQL攻击在继续之前，您将不必再次清理此数据。如果用户的密码中包含字符如`<`或`&`（例如），这些字符将被`htmlentities`函数扩展为`&lt;`或`&amp;`——只要您的代码允许字符串的长度可能大于提供的输入宽度，并且始终通过此清理运行密码，您将一切安好。
 - en: Using Sessions
+  id: totrans-114
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用会话（Sessions）
 - en: Because your program can’t tell what variables were set in other programs—or
     even what values the same program set the previous time it ran—you’ll sometimes
     want to track what your users are doing from one web page to another. You can
@@ -588,12 +849,16 @@
     These are groups of variables that are stored on the server but relate only to
     the current user. To ensure that the right variables are applied to the right
     users, PHP saves a cookie in the users’ web browsers to uniquely identify them.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为您的程序无法知道其他程序中设置了哪些变量——甚至不知道同一个程序上次运行时设置了什么值——因此有时您希望从一个网页跟踪用户的活动到另一个网页。您可以通过在表单中设置隐藏字段来实现这一点，如[第11章](ch11.xhtml#accessing_mysql_using_php)中所示，并在提交表单后检查字段的值，但是PHP提供了更强大、更安全和更简单的解决方案，即*会话（sessions）*。这些是存储在服务器上但只与当前用户相关的变量组。为了确保正确的变量应用于正确的用户，PHP会在用户的Web浏览器中保存一个cookie来唯一标识他们。
 - en: Note
+  id: totrans-116
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: In 2019 Google announced it was working toward phasing out third-party cookies
     in its browser with a project called Privacy Sandbox. No doubt other browsers
     will follow suit, particularly Opera and Microsoft Edge, which both rely on Google
@@ -607,8 +872,11 @@
     code once cookies are finally dropped. Therefore I recommend you keep an eye out
     for developments in this area that could affect how users interact with the code
     you develop.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 在2019年，谷歌宣布正在通过名为“隐私沙箱（Privacy Sandbox）”的项目逐步淘汰其浏览器中的第三方cookie。毫无疑问，其他浏览器也将效仿，特别是Opera和Microsoft
+    Edge，它们都依赖于Google Chrome的代码库。然而，这引起了监管部门的关注，因为一些公司暗示这可能会导致更多的支出流向谷歌的生态系统，因此其实施可能会发生变化。可以确定的是，cookie正变得不受欢迎，在您访问的几乎每个网站上都会看到cookie警告，其存在的日子已经不多了。总之，谷歌打算将用户分成大约1000个具有类似浏览器使用和产品兴趣的群体，以便无法唯一识别或跟踪任何人。然而，一旦cookie最终被淘汰，这可能会给您的代码带来问题。因此，我建议您关注可能影响用户与您开发的代码交互方式的这一领域的发展。
 - en: This cookie has meaning only to the web server and cannot be used to ascertain
     any information about a user. You might ask about those users who have cookies
     turned off. Well, in this day and age, anyone with cookies disabled should not
@@ -616,194 +884,279 @@
     should probably inform such a user that they require cookies enabled if they wish
     to fully benefit from your site, rather than trying to find ways around the use
     of cookies, which could create security issues.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 此cookie仅对Web服务器有意义，并不能用于获取用户的任何信息。您可能会问关于那些已禁用cookie的用户。在今天这个时代，任何禁用cookie的人都不应指望拥有最佳的浏览体验，如果您发现禁用了cookie，您应该告知这样的用户，如果他们希望充分享受您的网站，则需要启用cookie，而不是试图绕过cookie的使用，这可能会引发安全问题。
 - en: Starting a Session
+  id: totrans-119
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 启动会话
 - en: 'Starting a session requires calling the PHP function `session_start` before
     any HTML has been output, similarly to how cookies are sent during header exchanges.
     Then, to begin saving session variables, you just assign them as part of the `$_SESSION`
     array, like this:'
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 启动会话需要在输出任何HTML之前调用PHP函数`session_start`，类似于在头部交换期间发送cookie。然后，要开始保存会话变量，只需将它们分配为`$_SESSION`数组的一部分，如下所示：
 - en: '[PRE15]'
+  id: totrans-121
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'They can then be read back just as easily in later program runs, like this:'
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后可以在后续程序运行中轻松读取它们，如下所示：
 - en: '[PRE16]'
+  id: totrans-123
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Now assume that you have an application that always needs access to the first
     name and last name of each user, as stored in the table *users*, which you should
     have created a little earlier. Let’s further modify *authenticate.php* from [Example 13-4](#php_authentication_using_mysql)
     to set up a session once a user has been authenticated.
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在假设您有一个应用程序，它始终需要访问每个用户在表*users*中存储的名字和姓氏，而您应该稍早就已创建了这个表。让我们进一步修改[Example 13-4](#php_authentication_using_mysql)中的*authenticate.php*，以便在用户经过验证后设置会话。
 - en: '[Example 13-5](#setting_a_session_after_successful_authe) shows the changes
     needed. The only difference is the content of the `if (password_verify...` section,
     which we now start by opening a session and saving these variables into it. Type
     this program (or modify [Example 13-4](#php_authentication_using_mysql)) and save
     it as *authenticate2.php*. But don’t run it in your browser yet, as you will also
     need to create a second program in a moment.'
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Example 13-5](#setting_a_session_after_successful_authe)展示了所需的更改。唯一的区别是`if
+    (password_verify...`部分的内容，我们现在通过打开会话并将这些变量保存到其中来开始。请将此程序键入（或修改[Example 13-4](#php_authentication_using_mysql)）并保存为*authenticate2.php*。但是不要立即在浏览器中运行它，因为您稍后还需要创建第二个程序。'
 - en: Example 13-5\. Setting a session after successful authentication
+  id: totrans-126
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 13-5\. 在成功验证后设置会话
 - en: '[PRE17]'
+  id: totrans-127
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: One other addition to the program is the “Click here to continue” link with
     a destination URL of *continue.php*. This will be used to illustrate how the session
     will transfer to another program or PHP web page. So, create *continue.php* by
     typing the program in [Example 13-6](#retrieving_session_variables) and saving
     it.
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 程序的另一个增加部分是“[点击这里继续](continue.php)”链接，目标URL为*continue.php*。这将用于说明会话如何转移到另一个程序或PHP网页。因此，请通过键入[Example 13-6](#retrieving_session_variables)中的程序并保存来创建*continue.php*。
 - en: Example 13-6\. Retrieving session variables
+  id: totrans-129
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: Example 13-6\. 检索会话变量
 - en: '[PRE18]'
+  id: totrans-130
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: Now you are ready to call up *authenticate2.php* into your browser. Enter a
     username of `bsmith` and password of `mysecret` (or `pjones` and `acrobat`) when
     prompted, and click the link to load in *continue.php*. When your browser calls
     it up, the result should be something like [Figure 13-5](#maintaining-user-data).
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您已经准备好在浏览器中调用*authenticate2.php*了。在提示时输入用户名`bsmith`和密码`mysecret`（或`pjones`和`acrobat`），然后点击链接加载*continue.php*。当您的浏览器调用它时，结果应该类似于[Figure 13-5](#maintaining-user-data)。
 - en: '![](Images/pmj6_1305.png)'
+  id: totrans-132
   prefs: []
   type: TYPE_IMG
+  zh: '![](Images/pmj6_1305.png)'
 - en: Figure 13-5\. Maintaining user data with sessions
+  id: totrans-133
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图13-5\. 使用会话维护用户数据
 - en: Sessions neatly confine to a single program the extensive code required to authenticate
     and log in a user. Once a user has been authenticated, and you have created a
     session, your program code becomes very simple indeed. You need only call up `session_start`
     and look in `$_SESSION` for any variables to which you need access.
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 会话将复杂的用户认证和登录代码整洁地限制在单个程序中。一旦用户经过验证并创建了会话，您的程序代码就变得非常简单。您只需调用`session_start`并查看`$_SESSION`中您需要访问的任何变量即可。
 - en: In [Example 13-6](#retrieving_session_variables), a quick test of whether `$_SESSION['forename']`
     has a value is enough to let you know that the current user is authenticated,
     because session variables are stored on the server (unlike cookies, which are
     stored in the web browser) and can therefore be trusted.
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 在[示例 13-6](#retrieving_session_variables)中，快速测试`$_SESSION['forename']`是否有值就足以让您知道当前用户是否经过身份验证，因为会话变量存储在服务器上（不像cookie存储在Web浏览器中），因此可以信任。
 - en: If `$_SESSION['forename']` has not been assigned a value, no session is active,
     so the last line of code in [Example 13-6](#retrieving_session_variables) directs
     users to the login page at *authenticate2.php*.
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果`$_SESSION['forename']`尚未被赋值，表示没有活动会话，因此在[示例 13-6](#retrieving_session_variables)的最后一行代码将用户重定向到登录页面*authenticate2.php*。
 - en: Ending a Session
+  id: totrans-137
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 结束会话
 - en: When the time comes to end a session, usually when a user requests to log out
     from your site, you can use the `session_destroy` function, as in [Example 13-7](#handy_function_to_destroy_a_session_an).
     This example provides a useful function for totally destroying a session, logging
     a user out, and unsetting all session variables.
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: 当需要结束会话时，通常是用户从您的网站请求注销时，您可以使用`session_destroy`函数，如[示例 13-7](#handy_function_to_destroy_a_session_an)中所示。该示例提供了一个有用的函数来完全销毁会话，注销用户并取消所有会话变量的设置。
 - en: Example 13-7\. A handy function to destroy a session and its data
+  id: totrans-139
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-7\. 一个方便的函数来销毁会话及其数据
 - en: '[PRE19]'
+  id: totrans-140
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: To see this in action, you could modify *continue.php* as in [Example 13-8](#retrieving_session_variables_and_then_de).
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 要查看其实际操作，您可以修改*continue.php*，如[示例 13-8](#retrieving_session_variables_and_then_de)所示。
 - en: Example 13-8\. Retrieving session variables and then destroying the session
+  id: totrans-142
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-8\. 检索会话变量然后销毁会话
 - en: '[PRE20]'
+  id: totrans-143
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: The first time you navigate from *authenticate2.php* to *continue.php*, it will
     display all the session variables. But, because of the call to `destroy_session_and_data`,
     if you then click your browser’s Reload button, the session will have been destroyed
     and you’ll be prompted to return to the login page.
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一次从*authenticate2.php*导航到*continue.php*时，会显示所有会话变量。但是，由于调用了`destroy_session_and_data`函数，如果您之后点击浏览器的重新加载按钮，会话将被销毁，然后您将提示返回登录页面。
 - en: Setting a Timeout
+  id: totrans-145
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 设置超时时间
 - en: There are other times when you might wish to close a user’s session yourself,
     such as when the user has forgotten or neglected to log out, and you want the
     program to do so for them for their own security. You do this by setting the timeout
     after which a logout will automatically occur if there has been no activity.
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有其他时候，您可能希望自己关闭用户的会话，比如用户忘记或忽略注销时，为了他们自己的安全，您希望程序替他们这样做。您可以通过设置超时时间来实现这一点，超过该时间没有活动则自动注销。
 - en: 'To do this, use the `ini_set` function as follows. This example sets the timeout
     to exactly one day (the letters `gc` standing for garbage collection):'
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 要做到这一点，请使用`ini_set`函数如下所示。该示例将超时设置为正好一天（字母`gc`代表垃圾回收）：
 - en: '[PRE21]'
+  id: totrans-148
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: 'If you wish to know what the current timeout period is, you can display it
     using the following:'
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您想知道当前超时周期是多少，可以使用以下方法显示它：
 - en: '[PRE22]'
+  id: totrans-150
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Session Security
+  id: totrans-151
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 会话安全
 - en: Although I mentioned that once you had authenticated a user and set up a session
     you could safely assume that the session variables were trustworthy, this isn’t
     exactly the case. The reason is that it’s possible to use *packet sniffing* (sampling
     of data) to discover session IDs passing across a network. Additionally, if the
     session ID is passed in the GET part of a URL, it might appear in external site
     server logs.
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: 尽管我提到一旦您验证了用户并设置了会话，您可以安全地假定会话变量是可信的，但实际情况并非如此。原因是可能使用*数据包嗅探*（数据采样）来发现通过网络传输的会话ID。此外，如果会话ID在URL的GET部分传递，它可能会出现在外部站点服务器日志中。
 - en: The only truly secure way of preventing these from being discovered is to implement
     *Transport Layer Security* (TLS, the more secure successor to the *Secure Sockets
     Layer*, or SSL) and run HTTPS instead of HTTP web pages. That’s beyond the scope
     of this book, although you may like to take a look at the [Apache documentation](https://tinyurl.com/apachetls)
     for details on setting up a secure web server.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 防止这些信息被发现的唯一真正安全的方法是实施*传输层安全*（TLS，比安全套接字层更安全的后续版本），并运行HTTPS而不是HTTP网页。这超出了本书的范围，但您可能希望查看[Apache文档](https://tinyurl.com/apachetls)以获取设置安全Web服务器的详细信息。
 - en: Preventing session hijacking
+  id: totrans-154
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 防止会话劫持
 - en: 'When TLS is not a possibility, you can further authenticate users by storing
     their IP addresses along with their other details by adding a line such as the
     following when you store their sessions:'
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 当TLS不可行时，您可以通过在存储会话时添加像下面这样的行来进一步验证用户，将他们的IP地址与其他详细信息一起存储：
 - en: '[PRE23]'
+  id: totrans-156
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: 'Then, as an extra check, whenever any page loads and a session is available,
     perform the following check. It calls the function `different_user` if the stored
     IP address doesn’t match the current one:'
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，作为额外的检查，每当加载任何页面并且会话可用时，请执行以下检查。如果存储的IP地址与当前IP地址不匹配，则调用函数 `different_user`：
 - en: '[PRE24]'
+  id: totrans-158
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: What code you place in your `different_user` function is up to you. I recommend
     that you either delete the current session and ask the user to log in again due
     to a technical error or, if you have their email address, email them a link to
     confirm their identity, which will enable them to retain all the data in the session.
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 在你的 `different_user` 函数中放置的代码由你决定。由于技术错误，我建议你要么删除当前会话并要求用户重新登录，要么，如果你有他们的电子邮件地址，可以通过发送确认链接的方式，让他们确认身份，这将使他们保留会话中的所有数据。
 - en: 'Of course, you need to be aware that users on the same proxy server, or sharing
     the same IP address on a home or business network, will have the same IP address.
     Again, if this is a problem for you, use HTTPS. You can also store a copy of the
@@ -812,83 +1165,125 @@
     the wide variety of browser types, versions, and computer platforms in use (although
     this is not a perfect solution, and the string will change if the browser auto-updates).
     Use the following to store the user agent:'
+  id: totrans-160
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，你需要意识到在同一代理服务器上的用户或在家庭或商业网络上共享相同IP地址的用户将具有相同的IP地址。如果这对你来说是个问题，请再次使用HTTPS。你还可以存储浏览器的副本
+    *用户代理字符串*（开发者在浏览器中放置的标识它们的类型和版本的字符串），这也可能因使用中的各种浏览器类型、版本和计算机平台而区分用户（尽管这不是一个完美的解决方案，如果浏览器自动更新，该字符串将会更改）。使用以下方法存储用户代理：
 - en: '[PRE25]'
+  id: totrans-161
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: 'And use this to compare the current user-agent string with the saved one:'
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用这段代码来比较当前的用户代理字符串与保存的字符串：
 - en: '[PRE26]'
+  id: totrans-163
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: 'Or, better still, combine the two checks like this and save the combination
     as a `hash` hexadecimal string:'
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者更好的做法是，像这样结合两个检查，并将组合保存为 `hash` 十六进制字符串：
 - en: '[PRE27]'
+  id: totrans-165
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: 'And use this to compare the current and stored strings:'
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用这段代码来比较当前和存储的字符串：
 - en: '[PRE28]'
+  id: totrans-167
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: Preventing session fixation
+  id: totrans-168
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 防止会话固定攻击
 - en: '*Session fixation* happens when a malicious third party obtains a valid session
     ID (which could be server-generated) and makes the user authenticate themselves
     with that session ID, instead of authenticating with their own. It can happen
     when an attacker takes advantage of the ability to pass a session ID in the GET
     part of a URL, like this:'
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: '*会话固定攻击* 是指恶意第三方获取有效的会话ID（可能由服务器生成），并使用户使用该会话ID进行身份验证，而不是使用其自己的ID进行身份验证。当攻击者利用通过URL的GET部分传递会话ID的能力时，就可能发生这种情况，例如：'
 - en: '[PRE29]'
+  id: totrans-170
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: In this example, the made-up session ID of 123456789 is being passed to the
     server. Now, consider [Example 13-9](#session_susceptible_to_session_fixatio),
     which is susceptible to session fixation. To see how, type it and save it as *sessiontest.php*.
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中，虚构的会话ID 123456789 被传递到服务器。现在，请考虑[示例 13-9](#session_susceptible_to_session_fixatio)，它容易受到会话固定攻击的影响。要了解详细情况，请键入并保存为
+    *sessiontest.php*。
 - en: Example 13-9\. A session susceptible to session fixation
+  id: totrans-172
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-9\. 会话易受会话固定攻击影响
 - en: '[PRE30]'
+  id: totrans-173
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: 'Once it’s saved, call it up in your browser using the following URL (prefacing
     it with the correct pathname, such as *http://localhost*):'
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 保存之后，使用以下URL在浏览器中调用它（请用正确的路径名作为前缀，例如 *http://localhost*）：
 - en: '[PRE31]'
+  id: totrans-175
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: 'Click Reload a few times, and you’ll see the counter increase. Now try browsing
     to:'
+  id: totrans-176
   prefs: []
   type: TYPE_NORMAL
+  zh: 点击重新加载几次，你会看到计数器增加。现在尝试浏览到：
 - en: '[PRE32]'
+  id: totrans-177
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: Click Reload a few times here, and you should see it continue counting upward.
     Leave the counter on a different number from the first URL, go back to the first
     URL, and see how the number changes back. You have created two different sessions
     of your own choosing here, and you could easily create as many as you needed.
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里点击重新加载几次，你应该看到计数器继续增加。将计数器留在与第一个URL不同的数字上，返回第一个URL，然后查看数字如何变化。在这里，你已经创建了两个自己选择的不同会话，你也可以轻松地创建所需数量的会话。
 - en: The reason this approach is so dangerous is that a malicious attacker could
     try to distribute these types of URLs to unsuspecting users, and if any of them
     followed these links, the attacker would be able to come back and take over any
     sessions that had not been deleted or expired—imagine if that session was to a
     shopping site, or even worse, a bank!
+  id: totrans-179
   prefs: []
   type: TYPE_NORMAL
+  zh: 这种方法如此危险的原因在于恶意攻击者可能会尝试向毫不知情的用户分发这些类型的 URL，如果其中任何一个用户跟随这些链接，攻击者将能够返回并接管未被删除或过期的任何会话——想象一下，如果那个会话是对购物网站或者更糟的情况是银行的。
 - en: To prevent this, change the session ID using `session_regenerate_id` as soon
     as you can. This function keeps all current session variable values but replaces
     the session ID with a new one that an attacker cannot know. To do this, check
@@ -896,123 +1291,182 @@
     you know that this is a new session, so you simply change the session ID and set
     the special session variable to note the change. [Example 13-10](#session_regeneration)
     shows how the code to do this might look, using the session variable `initiated`.
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了防止这种情况发生，请尽快使用`session_regenerate_id`更改会话 ID。此函数保留所有当前会话变量值，但用一个攻击者无法知道的新
+    ID 替换会话 ID。为此，请检查一个您任意发明的特殊会话变量。如果不存在，您就知道这是一个新会话，因此您只需更改会话 ID 并设置特殊会话变量来记录更改。[示例 13-10](#session_regeneration)
+    展示了如何通过使用会话变量`initiated`的代码来实现这一点。
 - en: Example 13-10\. Session regeneration
+  id: totrans-181
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 13-10\. 会话再生成
 - en: '[PRE33]'
+  id: totrans-182
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: This way, an attacker can come back to your site using any of the session IDs
     that they generated, but none of them will call up another user’s session, as
     they will all have been replaced with regenerated IDs.
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 这样，攻击者可以使用他们生成的任何会话 ID 返回到您的网站，但它们中没有一个会调用另一个用户的会话，因为它们都已被重新生成的 ID 替换。
 - en: Forcing cookie-only sessions
+  id: totrans-184
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 强制仅限于 Cookie 的会话
 - en: 'If you are prepared to require your users to enable cookies on your website,
     you can use the `ini_set` function, like this:'
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您准备好要求用户在您的网站上启用 Cookie，您可以使用`ini_set`函数，如下所示：
 - en: '[PRE34]'
+  id: totrans-186
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: With that setting, the `?PHPSESSID=` trick will be completely ignored. If you
     use this security measure, I also recommend that you inform your users that your
     site requires cookies (but only if the user has cookies disabled, and especially
     if the user is in a part of the world that requires cookie notifications), so
     they know what’s wrong if they don’t get the results they want.
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了这个设置，`?PHPSESSID=`的技巧将被完全忽略。如果您使用这种安全措施，我还建议您告知用户您的网站需要使用 Cookie（但仅在用户禁用 Cookie
+    的情况下，特别是用户所在地区要求 Cookie 通知时），这样他们就知道如果未能获得他们想要的结果，出了什么问题。
 - en: Using a shared server
+  id: totrans-188
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用共享服务器
 - en: 'On a server shared with other accounts, you will not want to have all your
     session data saved into the same directory as theirs. Instead, you should choose
     a directory to which only your account has access (and that is not web-visible)
     to store your sessions, by placing an `ini_set` call near the start of your program,
     like this:'
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 在与其他帐户共享的服务器上，您不希望将所有会话数据保存在与他们相同的目录中。相反，您应选择一个只有您的帐户有访问权限（并且不可见于 Web）的目录来存储您的会话，方法是在程序开头附近放置一个`ini_set`调用，就像这样：
 - en: '[PRE35]'
+  id: totrans-190
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: The configuration option will keep this new value only during the program’s
     execution, and the original configuration will be restored at the program’s ending.
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: 配置选项仅在程序执行期间保留此新值，并在程序结束时恢复原始配置。
 - en: This *sessions* folder can fill up quickly; you may wish to periodically clear
     out older sessions according to how busy your server gets. The more it’s used,
     the less time you will want to keep a session stored.
+  id: totrans-192
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个*sessions*文件夹可能会很快填满；您可能希望根据服务器的繁忙程度定期清除旧会话。它被使用得越多，您希望保留会话的时间就越少。
 - en: Note
+  id: totrans-193
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Remember that your websites can and will be subject to hacking attempts. There
     are automated bots running riot around the internet, trying to find sites vulnerable
     to exploits. So whatever you do, whenever you are handling data that is not 100%
     generated within your own program, you should always treat it with the utmost
     caution.
+  id: totrans-194
   prefs: []
   type: TYPE_NORMAL
+  zh: 请记住，您的网站可能会受到黑客攻击的影响。有自动化机器人在互联网上肆虐，试图找到易受攻击的站点。因此，无论您做什么，每当处理不完全由您自己的程序生成的数据时，都应该极度小心对待它。
 - en: You should now have a very good grasp of both PHP and MySQL, so [Chapter 14](ch14.xhtml#exploring_javascript)
     introduces the third major technology covered by this book, JavaScript.
+  id: totrans-195
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您应该对 PHP 和 MySQL 有很好的掌握，所以[第 14 章](ch14.xhtml#exploring_javascript)介绍了本书涵盖的第三种主要技术，JavaScript。
 - en: Questions
+  id: totrans-196
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 问题
 - en: Why must a cookie be transferred at the start of a program?
+  id: totrans-197
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 为什么必须在程序开始时传输 cookie？
 - en: Which PHP function stores a cookie in a web browser?
+  id: totrans-198
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 哪个 PHP 函数在 web 浏览器中存储 cookie？
 - en: How can you destroy a cookie?
+  id: totrans-199
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何销毁一个 cookie？
 - en: Where are the username and password stored in a PHP program when you are using
     HTTP authentication?
+  id: totrans-200
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 当使用 HTTP 认证时，在 PHP 程序中用户名和密码存储在哪里？
 - en: Why is the `password_hash` function a powerful security measure?
+  id: totrans-201
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '`password_hash` 函数为什么是强大的安全措施？'
 - en: What is meant by *salting* a string?
+  id: totrans-202
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: '*加盐* 一个字符串是什么意思？'
 - en: What is a PHP session?
+  id: totrans-203
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: PHP 会话是什么？
 - en: How do you initiate a PHP session?
+  id: totrans-204
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何启动 PHP 会话？
 - en: What is session hijacking?
+  id: totrans-205
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 什么是会话劫持？
 - en: What is session fixation?
+  id: totrans-206
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 会话固定是什么？
 - en: See [“Chapter 13 Answers”](app01_split_012.xhtml#chapter_13_answers) in the
     [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions) for the
     answers to these questions.
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 请查看 [“第13章答案”](app01_split_012.xhtml#chapter_13_answers)，了解这些问题的答案。

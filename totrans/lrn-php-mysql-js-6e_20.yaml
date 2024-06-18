@@ -1,90 +1,131 @@
 - en: Chapter 17\. JavaScript and PHP Validation and Error Handling
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第 17 章\. JavaScript 和 PHP 验证与错误处理
 - en: With your solid foundation in both PHP and JavaScript, it’s time to bring these
     technologies together to create web forms that are as user-friendly as possible.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了你在 PHP 和 JavaScript 方面的坚实基础，现在是时候将这些技术结合起来，创建尽可能用户友好的 Web 表单了。
 - en: We’ll be using PHP to create the forms and JavaScript to perform client-side
     validation to ensure that the data is as complete and correct as it can be before
     it is submitted. Final validation of the input will then be done by PHP, which
     will, if necessary, present the form again to the user for further modification.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将使用 PHP 创建表单，并使用 JavaScript 执行客户端验证，以确保在提交之前数据尽可能完整和正确。然后 PHP 将对输入进行最终验证，必要时会再次向用户呈现表单以供进一步修改。
 - en: In the process, this chapter will cover validation and regular expressions in
     both JavaScript and PHP.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这一过程中，本章将涵盖 JavaScript 和 PHP 中的验证和正则表达式。
 - en: Validating User Input with JavaScript
+  id: totrans-4
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用 JavaScript 验证用户输入
 - en: JavaScript validation should be considered an assistance more to your users
     than to your websites because, as I have already stressed many times, you cannot
     trust any data submitted to your server, even if it has supposedly been validated
     with JavaScript. This is because hackers can quite easily simulate your web forms
     and submit any data of their choosing.
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: JavaScript 验证应被视为更多地为用户提供帮助而不是为你的网站，因为，正如我已经强调过很多次的那样，你不能信任任何提交到服务器的数据，即使它已经通过
+    JavaScript 验证过。这是因为黑客可以相当容易地模拟你的 Web 表单并提交任意数据。
 - en: Another reason you cannot rely on JavaScript to perform all your input validation
     is that some users disable JavaScript, or use browsers that don’t support it.
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 你不能完全依赖 JavaScript 来执行所有的输入验证的另一个原因是，一些用户禁用了 JavaScript，或者使用不支持 JavaScript 的浏览器。
 - en: So, the best types of validation to do in JavaScript are checking that fields
     have content if they are not to be left empty, ensuring that email addresses conform
     to the proper format, and ensuring that values entered are within expected bounds.
+  id: totrans-7
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，在 JavaScript 中最好的验证类型是检查字段是否有内容（如果不允许为空），确保电子邮件地址符合正确的格式，并确保输入的值在预期范围内。
 - en: The validate.html Document (Part 1)
+  id: totrans-8
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '**验证.html** 文档（第一部分）'
 - en: Let’s begin with a general signup form, common on most sites that offer memberships
     or user registration. The inputs requested will be *forename*, *surname*, *username*,
     *password*, *age*, and *email address*. [Example 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p)
     provides a good template for such a form.
+  id: totrans-9
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们从一个通用的注册表单开始，这在大多数提供会员或用户注册的网站上都很常见。请求的输入将是 *名*、*姓*、*用户名*、*密码*、*年龄* 和 *电子邮件地址*。[示例 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p)
+    提供了这样一个表单的良好模板。
 - en: Example 17-1\. A form with JavaScript validation (part 1)
+  id: totrans-10
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 17-1\. 具有 JavaScript 验证的表单（第一部分）
 - en: '[PRE0]'
+  id: totrans-11
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: As it stands, this form will display correctly but will not self-validate, because
     the main validation functions have not yet been added. Even so, save it as *validate.html*,
     and when you call it up in your browser, it will look like [Figure 17-1](ch17_split_001.xhtml#output_from_example_16-1).
+  id: totrans-12
   prefs: []
   type: TYPE_NORMAL
+  zh: 目前这个表单虽然可以正确显示，但并没有进行自我验证，因为主要的验证函数尚未添加。即便如此，请将其保存为 *validate.html*，当你在浏览器中调用它时，它将呈现为
+    [图 17-1](ch17_split_001.xhtml#output_from_example_16-1)。
 - en: '![The output from Example 16-1](Images/pmj6_1701.png)'
+  id: totrans-13
   prefs: []
   type: TYPE_IMG
+  zh: '![来自示例 16-1 的输出](Images/pmj6_1701.png)'
 - en: Figure 17-1\. The output from [Example 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p)
+  id: totrans-14
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 17-1\. 来自 [示例 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p)
+    的输出
 - en: Let’s look at how this document is made up. The first few lines set up the document
     and use a little CSS to make the form look a little less plain. The parts of the
     document related to JavaScript come next and are shown in bold.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看看这个文档是如何组成的。开头几行设置了文档并使用了一些 CSS 使表单看起来不那么简单。接下来是与 JavaScript 相关的部分，用粗体显示。
 - en: Between the `<script>` and `</script>` tags lies a single function called `validate`
     that itself calls up six other functions to validate each of the form’s input
     fields. We’ll get to these functions shortly. For now I’ll just explain that they
     return either an empty string if a field validates or an error message if it fails.
     If there are any errors, the final line of the script pops up an alert box to
     display them.
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 `<script>` 和 `</script>` 标签之间有一个名为 `validate` 的函数，它调用其他六个函数来验证表单的每个输入字段。稍后我们会详细介绍这些函数。现在我只想解释一下，它们会返回空字符串（如果字段验证通过）或错误消息（如果验证失败）。如果存在任何错误，脚本的最后一行会弹出一个警告框显示这些错误。
 - en: Upon passing validation, the `validate` function returns a value of `true`;
     otherwise, it returns `false`. The return values from `validate` are important,
     because if it returns `false`, the form is prevented from being submitted. This
     allows the user to close the alert pop-up and make changes. If `true` is returned,
     no errors were encountered in the form’s fields, and so the form is submitted.
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: 在通过验证后，`validate` 函数返回 `true`；否则返回 `false`。`validate` 的返回值很重要，因为如果它返回 `false`，则会阻止表单的提交。这允许用户关闭警告弹出窗口并进行更改。如果返回
+    `true`，则表单字段中未遇到任何错误，因此表单会被提交。
 - en: The second part of this example features the HTML for the form, with each field
     and its name placed within its own row of a table. This is pretty straightforward
     HTML, with the exception of the `onSubmit="return validate(this)"` statement within
@@ -92,131 +133,187 @@
     to be called when a form is submitted. That function can perform some checking
     and return a value of either `true` or `false` to signify whether the form should
     be allowed to be submitted.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个示例的第二部分展示了表单的 HTML 结构，每个字段及其名称都放在表格的单独行中。这是相当直接的 HTML，唯一的例外是在开头的 `<form>`
+    标签中的 `onSubmit="return validate(this)"` 语句。使用 `onSubmit`，你可以在提交表单时调用自定义的函数。该函数可以进行一些检查，并返回
+    `true` 或 `false` 的值，以表示是否允许提交表单。
 - en: The `this` parameter is the current object (i.e., this form) and is passed to
     the `validate` function just discussed. The `validate` function receives this
     parameter as the object `form`.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: '`this` 参数是当前对象（即此表单），并且正如前面讨论的，将其传递给 `validate` 函数。`validate` 函数接收此参数作为对象 `form`。'
 - en: As you can see, the only JavaScript used within the form’s HTML is the call
     to `return` buried in the `onSubmit` attribute. Browsers with JavaScript disabled
     or not available will simply ignore the `onSubmit` attribute, and the HTML will
     display just fine.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 如你所见，表单的 HTML 中仅包含嵌入在 `onSubmit` 属性中的 `return` 调用的 JavaScript。禁用或不可用 JavaScript
+    的浏览器将简单地忽略 `onSubmit` 属性，并且 HTML 将正常显示。
 - en: The validate.html Document (Part 2)
+  id: totrans-21
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: validate.html 文档（第二部分）
 - en: Now we come to [Example 17-2](ch17_split_002.xhtml#form_with_javascript_validation-id00101),
     a set of six functions that do the actual form-field validation. I suggest that
     you type all of this second part and save it in the `<script>...</script>` section
     of [Example 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p),
     which you should already have saved as *validate.html*.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们来到[示例 17-2](ch17_split_002.xhtml#form_with_javascript_validation-id00101)，这是六个执行实际表单字段验证的函数。我建议你键入所有这些内容的第二部分，并将其保存在[示例
+    17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p)的 `<script>...</script>`
+    部分中，你应该已经将其保存为 *validate.html*。
 - en: Example 17-2\. A form with JavaScript validation (part 2)
+  id: totrans-23
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 17-2. 具有 JavaScript 验证的表单（第二部分）
 - en: '[PRE1]'
+  id: totrans-24
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: We’ll go through each of these functions in turn, starting with `validateForename`,
     so you can see how validation works.
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将依次讨论每个这些函数，从 `validateForename` 开始，这样你就能看到验证的工作原理。
 - en: Validating the forename
+  id: totrans-26
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 验证名字
 - en: '`validateForename` is quite a short function that accepts the parameter `field`,
     which is the value of the forename passed to it by the `validate` function.'
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: '`validateForename` 是一个非常简短的函数，接受参数 `field`，该参数是由 `validate` 函数传递给它的名字的值。'
 - en: If this value is the empty string, an error message is returned; otherwise,
     an empty string is returned to signify that no error was encountered.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果此值为空字符串，则返回错误消息；否则，返回空字符串以表示未遇到错误。
 - en: If the user entered spaces in this field, it would be accepted by `validateForename`,
     even though it’s empty for all intents and purposes. You can fix this by adding
     an extra statement to trim whitespace from the field before checking whether it’s
     empty, use a regular expression to make sure there’s something besides whitespace
     in the field, or—as I do here—just let the user make the mistake and allow the
     PHP program to catch it on the server.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果用户在此字段中输入空格，则 `validateForename` 将接受它，尽管实际上它对所有目的而言是空的。你可以通过添加额外的语句来修复此问题，从字段中修剪空白字符然后检查它是否为空，或者使用正则表达式来确保字段中除空白字符外还有其他内容，或者——就像我在这里做的一样——让用户犯错，并允许
+    PHP 程序在服务器上捕获它。
 - en: Validating the surname
+  id: totrans-30
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 验证姓氏
 - en: The `validateSurname` function is almost identical to `validateForename` in
     that an error is returned only if the surname supplied was an empty string. I
     chose not to limit the characters allowed in either of the name fields to allow
     for possibilities such as non-English and accented characters.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: '`validateSurname`函数与`validateForename`几乎相同，仅当提供的姓氏是空字符串时才返回错误。我选择不限制名称字段中允许的字符，以便包括非英语和带重音字符的可能性。'
 - en: Validating the username
+  id: totrans-32
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 用户名验证
 - en: The `validateUsername` function is a little more interesting, because it has
     a more complicated job. It has to allow through only the characters `a-z`, `A-Z`,
     `0-9`, `_` and `-`, and ensure that usernames are at least five characters long.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: '`validateUsername`函数稍微有趣，因为它的工作更复杂。它必须仅允许字符`a-z`、`A-Z`、`0-9`、`_`和`-`通过，并确保用户名至少为五个字符长。'
 - en: The `if...else` statements commence by returning an error if `field` has not
     been filled in. If it’s not the empty string, but is fewer than five characters
     in length, another error message is returned.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: '`if...else`语句开始时，如果`field`未填写，则返回错误。如果不是空字符串，但长度少于五个字符，则返回另一条错误消息。'
 - en: Then the JavaScript `test` function is called, passing a regular expression
     (which matches any character that is *not* one of those allowed) to be matched
     against `field` (see [“Regular Expressions”](ch17_split_002.xhtml#regular_expressions)).
     If even one character that isn’t one of the acceptable characters is encountered,
     the `test` function returns `true`, and so `validateUser` returns an error string.
+  id: totrans-35
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后调用JavaScript的`test`函数，传递一个正则表达式（匹配任何不是允许字符之一的字符），与`field`进行匹配（参见[“正则表达式”](ch17_split_002.xhtml#regular_expressions)）。如果遇到不是允许字符之一的字符，则`test`函数返回`true`，因此`validateUser`返回错误字符串。
 - en: Validating the password
+  id: totrans-36
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 密码验证
 - en: Similar techniques are used in the `validatePassword` function. First the function
     checks whether `field` is empty, and if it is, it returns an error. Next, an error
     message is returned if the password is shorter than six characters.
+  id: totrans-37
   prefs: []
   type: TYPE_NORMAL
+  zh: '`validatePassword`函数中使用类似的技术。首先，函数检查`field`是否为空，如果是，则返回错误。接下来，如果密码长度少于六个字符，则返回错误消息。'
 - en: One of the requirements we’re imposing on passwords is that they must have at
     least one each of a lowercase, uppercase, and numerical character, so the `test`
     function is called three times, once for each of these cases. If any one of these
     calls returns `false`, one of the requirements was not met, and so an error message
     is returned. Otherwise, the empty string is returned to signify that the password
     was OK.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们对密码施加的要求之一是，它们必须至少包含一个小写字母、一个大写字母和一个数字字符，因此`test`函数被调用三次，分别对这三种情况进行检查。如果其中任何一次调用返回`false`，则表示未满足其中一项要求，因此返回错误消息。否则，返回空字符串表示密码符合要求。
 - en: Validating the age
+  id: totrans-39
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 年龄验证
 - en: '`validateAge` returns an error message if `field` is not a number (determined
     by a call to the `isNaN` function) or if the age entered is lower than 18 or greater
     than 110\. Your applications may well have different or no age requirements. Again,
     upon successful validation, the empty string is returned.'
+  id: totrans-40
   prefs: []
   type: TYPE_NORMAL
+  zh: '`validateAge`如果`field`不是数字（通过调用`isNaN`函数确定）或输入的年龄低于18或高于110，则返回错误消息。您的应用程序可能具有不同或无年龄要求。同样，验证成功后返回空字符串。'
 - en: Validating the email
+  id: totrans-41
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 邮件验证
 - en: In the last and most complicated example, the email address is validated with
     `validateEmail`. After checking whether anything was actually entered, and returning
     an error message if it wasn’t, the function calls the JavaScript `indexOf` function
     twice. The first time a check is made to ensure there is a period (`.`) somewhere
     after the first character of the field, and the second checks that an `@` symbol
     appears somewhere after the first character.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 在最后一个最复杂的示例中，电子邮件地址使用`validateEmail`进行验证。检查是否有实际输入内容，如果没有，则返回错误消息，函数将两次调用JavaScript的`indexOf`函数。第一次检查确保字段的第一个字符后面有一个句点（`.`），第二次检查确保`@`符号在第一个字符后面出现。
 - en: If those two checks are satisfied, the `test` function is called to see whether
     any disallowed characters appear in the field. If any of these tests fail, an
     error message is returned. The allowed characters in an email address are uppercase
@@ -224,250 +321,361 @@
     as detailed in the regular expression passed to the `test` method. If no errors
     are found, the empty string is returned to indicate successful validation. On
     the last line, the script and document are closed.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果这两个检查都满足，将调用`test`函数来查看字段中是否有任何不允许的字符出现。如果这些测试中有任何失败，将返回一个错误消息。电子邮件地址中允许的字符是大写字母、小写字母、数字以及`_`、`-`、句点和`@`字符，如传递给`test`方法的正则表达式详细说明的那样。如果没有发现错误，则返回空字符串表示验证成功。在最后一行，关闭了脚本和文档。
 - en: '[Figure 17-2](ch17_split_002.xhtml#javascript_form_validation_in_action) shows
     the result of the user clicking the Signup button without having completed any
     fields.'
+  id: totrans-44
   prefs: []
   type: TYPE_NORMAL
+  zh: '[图17-2](ch17_split_002.xhtml#javascript_form_validation_in_action)显示了用户在没有填写任何字段的情况下单击注册按钮的结果。'
 - en: '![JavaScript form validation in action](Images/pmj6_1702.png)'
+  id: totrans-45
   prefs: []
   type: TYPE_IMG
+  zh: '![JavaScript表单验证实例](Images/pmj6_1702.png)'
 - en: Figure 17-2\. JavaScript form validation in action
+  id: totrans-46
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图17-2\. JavaScript表单验证实例
 - en: Using a separate JavaScript file
+  id: totrans-47
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用单独的JavaScript文件
 - en: 'Of course, because they are generic in construction and could apply to many
     types of validations you might require, these six functions make ideal candidates
     for moving out into a separate JavaScript file. You could name the file something
     like *validate_functions.js* and include it right after the initial script section
     in [Example 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p),
     using the following statement:'
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，因为它们在结构上是通用的，并且可能适用于你可能需要的许多类型的验证，这六个函数是将理想的候选项移出到一个单独的JavaScript文件中。你可以将文件命名为*validate_functions.js*，并在[示例17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p)的初始脚本部分之后直接包含它，使用以下语句：
 - en: '[PRE2]'
+  id: totrans-49
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: Regular Expressions
+  id: totrans-50
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 正则表达式
 - en: Let’s look a little more closely at the pattern matching we have been doing.
     We’ve achieved it using *regular expressions*, which are supported by both JavaScript
     and PHP. They make it possible to construct the most powerful of pattern-matching
     algorithms within a single expression.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们更仔细地查看我们一直在进行的模式匹配。我们已经通过*正则表达式*实现了它，这在JavaScript和PHP中都受支持。它们使得能够在一个表达式中构造最强大的模式匹配算法成为可能。
 - en: Matching Through Metacharacters
+  id: totrans-52
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 通过元字符匹配
 - en: Every regular expression must be enclosed in slashes. Within these slashes,
     certain characters have special meanings; they are called *metacharacters*. For
     instance, an asterisk (`*`) has a meaning similar to what you have seen if you’ve
     used a shell or Windows command prompt (but not quite the same). An asterisk means
     “The text you’re trying to match may have any number of the preceding characters—or
     none at all.”
+  id: totrans-53
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个正则表达式都必须用斜杠括起来。在这些斜杠内部，某些字符具有特殊含义；它们被称为*元字符*。例如，星号（`*`）的含义类似于你在使用Shell或Windows命令提示符时看到的（但不完全相同）。星号表示“你尝试匹配的文本可以有任意数量的前导字符——或者根本没有。”
 - en: 'For instance, let’s say you’re looking for the name *Le Guin* and know that
     someone might spell it with or without a space. Because the text is laid out strangely
     (for instance, someone may have inserted extra spaces to right-justify lines),
     you could have to search for a line such as this:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，假设你正在寻找姓名*Le Guin*，并且知道有些人可能会带空格或者不带空格拼写。因为文本布局很奇怪（例如，有人可能插入额外的空格来右对齐行），你可能需要搜索类似这样的一行：
 - en: '[PRE3]'
+  id: totrans-55
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: 'So you need to match *LeGuin*, as well as *Le* and *Guin* separated by any
     number of spaces. The solution is to follow a space with an asterisk:'
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 所以你需要匹配*LeGuin*，以及用任意数量的空格分隔的*Le*和*Guin*。解决方案是在空格后面跟随一个星号：
 - en: '[PRE4]'
+  id: totrans-57
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: There’s a lot more than the name *Le Guin* in the line, but that’s OK. As long
     as the regular expression matches some part of the line, the `test` function returns
     a `true` value. What if it’s important to make sure the line contains nothing
     but *Le Guin*? I’ll show you how to ensure that later.
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 在那一行中除了姓名*Le Guin*之外还有很多内容，但没关系。只要正则表达式匹配行的某些部分，`test`函数就会返回一个`true`值。如果确保行中仅包含*Le
+    Guin*很重要，稍后我会告诉你如何确保这一点。
 - en: 'Suppose that you know there is always at least one space. In that case, you
     could use the plus sign (`+`), because it requires at least one of the preceding
     characters to be present:'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设你知道至少有一个空格。在这种情况下，你可以使用加号（`+`），因为它需要至少一个前导字符：
 - en: '[PRE5]'
+  id: totrans-60
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: Fuzzy Character Matching
+  id: totrans-61
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 模糊字符匹配
 - en: 'The dot (`.`) is particularly useful, because it can match anything except
     a newline. Suppose that you are looking for HTML tags, which start with `<` and
     end with `>`. A simple way to do so is shown here:'
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 点号（`.`）特别有用，因为它可以匹配除换行符以外的任何内容。假设您正在寻找以`<`开头、以`>`结尾的HTML标签。这里展示了一个简单的方法：
 - en: '[PRE6]'
+  id: totrans-63
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'The dot matches any character, and the `*` expands it to match zero or more
     characters, so this is saying, “Match anything that lies between `<` and `>`,
     even if there’s nothing.” You will match `<>`, `<em>`, `<br>`, and so on. But
     if you don’t want to match the empty case, `<>`, you should use `+` instead of
     `*`, like this:'
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 点号匹配任何字符，而`*`扩展它以匹配零个或多个字符，因此它表示：“匹配介于`<`和`>`之间的任何内容，即使其中什么也没有。” 您将匹配`<>`、`<em>`、`<br>`等等。但如果您不想匹配空情况`<>`，您应该使用`+`而不是`*`，如下所示：
 - en: '[PRE7]'
+  id: totrans-65
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: 'The plus sign expands the dot to match one or more characters, saying, “Match
     anything that lies between `<` and `>` as long as there’s at least one character
     between them.” You will match `<em>` and `</em>`, `<h1>` and `</h1>`, and tags
     with attributes, such as this:'
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 加号扩展了点号以匹配一个或多个字符，即表示：“匹配介于`<`和`>`之间的任何内容，只要它们之间至少有一个字符。” 您将匹配到`<em>`和`</em>`，`<h1>`和`</h1>`，以及带有属性的标签，如下所示：
 - en: '[PRE8]'
+  id: totrans-67
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'Unfortunately, the plus sign keeps on matching up to the last `>` on the line,
     so you might end up with this:'
+  id: totrans-68
   prefs: []
   type: TYPE_NORMAL
+  zh: 不幸的是，加号会持续匹配直到行尾的最后一个`>`，因此您可能会得到如下结果：
 - en: '[PRE9]'
+  id: totrans-69
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: A lot more than one tag! I’ll show a better solution later in this section.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 不仅仅是一个标签！稍后在本节中我将展示一个更好的解决方案。
 - en: Note
+  id: totrans-71
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: If you use the dot on its own between the angle brackets, without following
     it with either a `+` or `*`, then it matches a single character; you will match
     `<b>` and `<i>` but *not* `<em>` or `<textarea>`.
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您在尖括号之间单独使用点号，而不是跟随一个`+`或`*`，那么它将匹配单个字符；您将匹配到`<b>`和`<i>`，但*不会*匹配`<em>`或`<textarea>`。
 - en: 'If you want to match the dot character itself (`.`), you have to escape it
     by placing a backslash (`\`) before it, because otherwise it’s a metacharacter
     and matches anything. As an example, suppose you want to match the floating-point
     number `5.0`. The regular expression is as follows:'
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果要匹配点号字符本身（`.`），必须在其前面放置反斜杠（`\`）进行转义，因为否则它是一个元字符，可以匹配任何内容。例如，假设您想匹配浮点数`5.0`，则正则表达式如下：
 - en: '[PRE10]'
+  id: totrans-74
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: The backslash can escape any metacharacter, including another backslash (in
     case you’re trying to match a backslash in text). However, to make things a bit
     confusing, you’ll see later how backslashes sometimes give the following character
     a special meaning.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 反斜杠可以转义任何元字符，包括另一个反斜杠（如果您试图在文本中匹配反斜杠）。不过，有点让人困惑的是，稍后您将看到反斜杠有时会赋予其后的字符特殊含义。
 - en: 'We just matched a floating-point number. But perhaps you want to match `5.`
     as well as `5.0`, because both mean the same thing as a floating-point number.
     You also want to match `5.00`, `5.000`, and so forth—any number of zeros is allowed.
     You can do this by adding an asterisk, as you’ve seen:'
+  id: totrans-76
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们刚刚匹配了一个浮点数。但也许您想匹配`5.`以及`5.0`，因为它们在浮点数表示上是相同的。您还想匹配`5.00`、`5.000`等，允许任意数量的零。您可以通过添加一个星号来实现，正如您所见：
 - en: '[PRE11]'
+  id: totrans-77
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: Grouping Through Parentheses
+  id: totrans-78
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 通过括号进行分组
 - en: 'Suppose you want to match powers of increments of units, such as kilo, mega,
     giga, and tera. In other words, you want all the following to match:'
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设您想匹配单位增量的幂，例如kilo、mega、giga和tera。换句话说，您希望以下所有内容都匹配：
 - en: '[PRE12]'
+  id: totrans-80
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: 'The plus sign works here, too, but you need to group the string `,000` so the
     plus sign matches the whole thing. The regular expression is as follows:'
+  id: totrans-81
   prefs: []
   type: TYPE_NORMAL
+  zh: 加号在这里也适用，但您需要将字符串`,000`进行分组，以便加号匹配整个内容。正则表达式如下：
 - en: '[PRE13]'
+  id: totrans-82
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: The parentheses mean “Treat this as a group when you apply something such as
     a plus sign.” `1,00,000` and `1,000,00` won’t match because the text must have
     a 1 followed by one or more complete groups of a comma followed by three zeros.
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 括号意味着“在应用加号等操作时将其视为一个组”。`1,00,000`和`1,000,00`不会匹配，因为文本必须包含一个1，后跟一个或多个逗号，后跟三个零的完整组。
 - en: The space after the `+` character indicates that the match must end when a space
     is encountered. Without it, `1,000,00` would incorrectly match because only the
     first `1,000` would be taken into account, and the remaining `,00` would be ignored.
     Requiring a space afterward ensures that matching will continue right through
     to the end of a number.
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 加号后面的空格表示匹配在遇到空格时必须结束。如果没有它，`1,000,00`会因为只考虑到第一个`1,000`而错误匹配，而剩下的`,00`会被忽略。要求后面有空格确保匹配将持续到数字的末尾。
 - en: Character Classes
+  id: totrans-85
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 字符类
 - en: 'Sometimes you want to match something fuzzy but not so broadly that you want
     to use a dot. Fuzziness is the great strength of regular expressions: they allow
     you to be as precise or vague as you want.'
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时你想匹配模糊的内容，但又不想使用点号匹配得太广泛。正则表达式的伟大之处在于它们允许你尽可能精确或模糊地匹配。
 - en: 'One of the key features supporting fuzzy matching is the pair of square brackets,
     `[]`. It matches a single character, like a dot, but inside the brackets you put
     a list of things that can match. If any of those characters appears, the text
     matches. For instance, if you wanted to match both the American spelling *gray*
     and the British spelling *grey*, you could specify the following:'
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 支持模糊匹配的关键特性之一是方括号对，`[]`。它匹配单个字符，像点号一样，但是在方括号内你放的是一个可以匹配的列表。如果这些字符中的任何一个出现，文本就匹配。例如，如果你想匹配美式拼写*gray*和英式拼写*grey*，你可以指定如下内容：
 - en: '[PRE14]'
+  id: totrans-88
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'After the `gr` in the text you’re matching, there can be either an `a` or an
     `e`. But there must be only one of them: whatever you put inside the brackets
     matches exactly one character. The group of characters inside the brackets is
     called a *character class*.'
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: 在你匹配的文本中的`gr`后面，可以是`a`或`e`。但必须只有一个：方括号里放的东西刚好匹配一个字符。方括号里的字符组称为*字符类*。
 - en: Indicating a Range
+  id: totrans-90
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 指示范围
 - en: 'Inside the brackets, you can use a hyphen (`-`) to indicate a range. One very
     common task is matching a single digit, which you can do with a range as follows:'
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 在方括号内，你可以使用连字符（`-`）来表示一个范围。一个非常常见的任务是匹配单个数字，你可以用范围来做到如下所示：
 - en: '[PRE15]'
+  id: totrans-92
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: 'Digits are such a common item in regular expressions that a single character
     is provided to represent them: `\d`. You can use it in place of the bracketed
     regular expression to match a digit:'
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 数字在正则表达式中是如此常见，以至于提供了一个单字符来代表它们：`\d`。你可以用它代替方括号中的正则表达式来匹配一个数字：
 - en: '[PRE16]'
+  id: totrans-94
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Negation
+  id: totrans-95
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 否定
 - en: 'One other important feature of the square brackets is *negation* of a character
     class. You can turn the whole character class on its head by placing a caret (`^`)
     after the opening bracket. Here it means “Match any characters *except* the following.”
     So let’s say you want to find instances of *Yahoo* that lack the following exclamation
     point. (The name of the company officially contains an exclamation point!) You
     could do it as follows:'
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 方括号的另一个重要特性是对字符类的*否定*。你可以通过在开放的方括号后面放置一个插入符号（`^`）来颠倒整个字符类。这里的意思是“匹配任何字符*除了*以下内容”。所以，假设你想找到缺少以下感叹号的*Yahoo*实例。（公司的官方名称中正式包含一个感叹号！）你可以像这样做：
 - en: '[PRE17]'
+  id: totrans-97
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: The character class consists of a single character—an exclamation point—but
     it is inverted by the preceding `^`. This is actually not a great solution to
     the problem—for instance, it fails if *Yahoo* is at the end of the line, because
@@ -475,574 +683,895 @@
     A better solution involves negative *lookahead* (matching something that is not
     followed by anything else), but that’s beyond the scope of this book, so please
     refer to the [online documentation](https://tinyurl.com/regexdocs).
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 字符类别由一个单字符组成——一个感叹号，但它被前面的`^`反转。这实际上并不是解决问题的好方法——例如，如果*Yahoo*在行尾，它就不再后面跟着*任何东西*，而方括号必须匹配一个字符。一个更好的解决方案涉及到负向*前瞻*（匹配后面没有其他东西的内容），但这超出了本书的范围，请参考[在线文档](https://tinyurl.com/regexdocs)。
 - en: Some More Complicated Examples
+  id: totrans-99
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 一些更复杂的例子
 - en: 'With an understanding of character classes and negation, you’re ready now to
     see a better solution to the problem of matching an HTML tag. This solution avoids
     going past the end of a single tag but still matches tags such as `<em>` and `</em>`
     as well as tags with attributes such as this:'
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 了解字符类和否定后，你现在准备好看到更好的解决方案来匹配HTML标签的问题了。这个解决方案避免了越过单个标签的末尾，但仍然匹配像`<em>`和`</em>`这样的标签，以及带属性的标签，比如这样的：
 - en: '[PRE18]'
+  id: totrans-101
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'Here is one solution:'
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个解决方案：
 - en: '[PRE19]'
+  id: totrans-103
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: That regular expression may look like I just dropped my teacup on the keyboard,
     but it is perfectly valid and very useful. Let’s break it apart. [Figure 17-3](ch17_split_002.xhtml#breakdown_of_a_typical_regular_expressio)
     shows the various elements, which I’ll describe one by one.
+  id: totrans-104
   prefs: []
   type: TYPE_NORMAL
+  zh: 那个正则表达式看起来好像我把茶杯掉在键盘上，但它是完全有效和非常有用的。让我们分解它。[图 17-3](ch17_split_002.xhtml#breakdown_of_a_typical_regular_expressio)展示了各个元素，我会逐一描述它们。
 - en: '![Breakdown of a typical regular expression](Images/pmj6_1703.png)'
+  id: totrans-105
   prefs: []
   type: TYPE_IMG
+  zh: '![典型正则表达式的分解](Images/pmj6_1703.png)'
 - en: Figure 17-3\. Breakdown of a typical regular expression
+  id: totrans-106
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 17-3\. 典型正则表达式的分解
 - en: 'The elements are as follows:'
+  id: totrans-107
   prefs: []
   type: TYPE_NORMAL
+  zh: 元素如下：
 - en: <dfn class="keep-together">`/`</dfn>
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`/`</dfn>
 - en: Opening slash that indicates this is a regular expression.
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 指示这是正则表达式的开头斜杠。
 - en: <dfn class="keep-together">`<`</dfn>
+  id: totrans-110
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`<`</dfn>
 - en: Opening bracket of an HTML tag. This is matched exactly; it’s not a metacharacter.
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: HTML标签的开始括号。这是精确匹配；不是元字符。
 - en: <dfn class="keep-together">`[^>]`</dfn>
+  id: totrans-112
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`[^>]`</dfn>
 - en: Character class. The embedded `^>` means “Match anything except a closing angle
     bracket.”
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 字符类。嵌入的`^>`表示“匹配除了闭合尖括号之外的任何内容”。
 - en: <dfn class="keep-together">`+`</dfn>
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`+`</dfn>
 - en: Allows any number of characters to match the previous `[^>]`, as long as there
     is at least one of them.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 允许任意数量的字符匹配前一个`[^>]`，但至少要有一个。
 - en: <dfn class="keep-together">`>`</dfn>
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`>`</dfn>
 - en: Closing bracket of an HTML tag. This is matched exactly.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: HTML标签的闭合括号。这是精确匹配。
 - en: <dfn class="keep-together">`/`</dfn>
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`/`</dfn>
 - en: Closing slash that indicates the end of the regular expression.
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 表示正则表达式的结束斜杠。
 - en: Note
+  id: totrans-120
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Another solution to the problem of matching HTML tags is to use a nongreedy
     operation. By default, pattern matching is greedy, returning the longest match
     possible. Nongreedy (or lazy) matching finds the shortest possible match. Its
     use is beyond the scope of this book, but there are more details on the [JavaScript.info
     website](https://tinyurl.com/regexgreedy).
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一个解决匹配HTML标签问题的方法是使用非贪婪操作。默认情况下，模式匹配是贪婪的，返回可能的最长匹配。非贪婪（或惰性）匹配找到可能的最短匹配。这本书不涉及其使用，但可以在[JavaScript.info
+    website](https://tinyurl.com/regexgreedy)上找到更多细节。
 - en: 'We are going to look now at one of the expressions from [Example 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p),
     where the `validateUsername` function is used:'
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们现在将查看来自[Example 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p)中的表达式之一，其中使用了`validateUsername`函数：
 - en: '[PRE20]'
+  id: totrans-123
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: '[Figure 17-4](ch17_split_002.xhtml#val-usr-reg-exp) shows the various elements.'
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Figure 17-4](ch17_split_002.xhtml#val-usr-reg-exp)显示了各种元素。'
 - en: '![](Images/pmj6_1704.png)'
+  id: totrans-125
   prefs: []
   type: TYPE_IMG
+  zh: '![](Images/pmj6_1704.png)'
 - en: Figure 17-4\. Breakdown of the `validateUsername` regular expression
+  id: totrans-126
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图17-4. `validateUsername`正则表达式的详细分解
 - en: 'Let’s look at these elements in detail:'
+  id: totrans-127
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们详细看看这些元素：
 - en: <dfn class="keep-together">`/`</dfn>
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`/`</dfn>
 - en: Opening slash that indicates this is a regular expression.
+  id: totrans-129
   prefs: []
   type: TYPE_NORMAL
+  zh: 指示这是正则表达式的开头斜杠。
 - en: <dfn class="keep-together">`[`</dfn>
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`[`</dfn>
 - en: Opening bracket that starts a character class.
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: 开始字符类的开放方括号。
 - en: <dfn class="keep-together">`^`</dfn>
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`^`</dfn>
 - en: 'Negation character: inverts everything else between the brackets.'
+  id: totrans-133
   prefs: []
   type: TYPE_NORMAL
+  zh: 反向字符：反转方括号内的所有其他内容。
 - en: <dfn class="keep-together">`a-z`</dfn>
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`a-z`</dfn>
 - en: Represents any lowercase letter.
+  id: totrans-135
   prefs: []
   type: TYPE_NORMAL
+  zh: 表示任何小写字母。
 - en: <dfn class="keep-together">`A-Z`</dfn>
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`A-Z`</dfn>
 - en: Represents any uppercase letter.
+  id: totrans-137
   prefs: []
   type: TYPE_NORMAL
+  zh: 表示任何大写字母。
 - en: <dfn class="keep-together">`0-9`</dfn>
+  id: totrans-138
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`0-9`</dfn>
 - en: Represents any digit.
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 表示任何数字。
 - en: <dfn class="keep-together">`_`</dfn>
+  id: totrans-140
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`_`</dfn>
 - en: An underscore.
+  id: totrans-141
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个下划线。
 - en: <dfn class="keep-together">`-`</dfn>
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`-`</dfn>
 - en: A dash.
+  id: totrans-143
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个破折号。
 - en: <dfn class="keep-together">`]`</dfn>
+  id: totrans-144
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`]`</dfn>
 - en: Closing bracket that ends a character class.
+  id: totrans-145
   prefs: []
   type: TYPE_NORMAL
+  zh: 结束字符类的闭合括号。
 - en: <dfn class="keep-together">`/`</dfn>
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`/`</dfn>
 - en: Closing slash that indicates the end of the regular expression.
+  id: totrans-147
   prefs: []
   type: TYPE_NORMAL
+  zh: 表示正则表达式的结束斜杠。
 - en: There are two other important metacharacters. They “anchor” a regular expression
     by requiring that it appear in a particular place. If a caret (`^`) appears at
     the beginning of the regular expression, the expression has to appear at the beginning
     of a line of text; otherwise, it doesn’t match. Similarly, if a dollar sign (`$`)
     appears at the end of the regular expression, the expression has to appear at
     the end of a line of text.
+  id: totrans-148
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有两个重要的元字符。它们通过要求出现在特定位置来“锚定”正则表达式。如果`^`出现在正则表达式的开头，则表达式必须出现在文本行的开头；否则，它不匹配。同样地，如果`$`符号出现在正则表达式的末尾，则表达式必须出现在文本行的末尾。
 - en: Note
+  id: totrans-149
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: It may be somewhat confusing that `^` can mean “negate the character class”
     inside square brackets and “match the beginning of the line” if it’s at the beginning
     of the regular expression. Unfortunately, the same character is used for two different
     things, so take care when using it.
+  id: totrans-150
   prefs: []
   type: TYPE_NORMAL
+  zh: 可能会有些混淆，`^`在方括号内可以表示“否定字符类”，而在正则表达式的开头可以表示“匹配行的开头”。不幸的是，同一个字符用于两种不同的含义，因此在使用时要小心。
 - en: 'We’ll finish our exploration of regular expression basics by answering a question
     raised earlier: suppose you want to make sure there is nothing extra on a line
     besides the regular expression? What if you want a line that has “Le Guin” and
     nothing else? We can do that by amending the earlier regular expression to anchor
     the two ends:'
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将通过回答前面提出的问题来完成对正则表达式基础的探索：假设你想确保一行除了正则表达式之外没有任何其他内容，该怎么办？如果你想要一个包含“Le Guin”而没有其他内容的行？我们可以通过修改先前的正则表达式来实现这一点，将两端锚定：
 - en: '[PRE21]'
+  id: totrans-152
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Summary of Metacharacters
+  id: totrans-153
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 元字符总结
 - en: '[Table 17-1](ch17_split_002.xhtml#regular_expression_metacharacters) shows
     the metacharacters available in regular expressions.'
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: '[表 17-1](ch17_split_002.xhtml#regular_expression_metacharacters) 展示了正则表达式中可用的元字符。'
 - en: Table 17-1\. Regular expression metacharacters
+  id: totrans-155
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 17-1\. 正则表达式元字符
 - en: '| Metacharacters | Description |'
+  id: totrans-156
   prefs: []
   type: TYPE_TB
+  zh: '| 元字符 | 描述 |'
 - en: '| --- | --- |'
+  id: totrans-157
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `/` | Begins and ends the regular expression |'
+  id: totrans-158
   prefs: []
   type: TYPE_TB
+  zh: '| `/` | 开始和结束正则表达式 |'
 - en: '| `.` | Matches any single character except the newline |'
+  id: totrans-159
   prefs: []
   type: TYPE_TB
+  zh: '| `.` | 匹配除换行符外的任何单个字符 |'
 - en: '| ``*`element`**`` | Matches *`element`* zero or more times |'
+  id: totrans-160
   prefs: []
   type: TYPE_TB
+  zh: '| ``*`元素`**`` | 匹配零次或多次的*`元素`* |'
 - en: '| ``*`element`*+`` | Matches *`element`* one or more times |'
+  id: totrans-161
   prefs: []
   type: TYPE_TB
+  zh: '| ``*`元素`*+`` | 匹配至少一次的*`元素`* |'
 - en: '| ``*`element`*?`` | Matches *`element`* zero or one times |'
+  id: totrans-162
   prefs: []
   type: TYPE_TB
+  zh: '| ``*`元素`*?`` | 匹配零次或一次的*`元素`* |'
 - en: '| ``[*`characters`*]`` | Matches a character out of those contained within
     the brackets |'
+  id: totrans-163
   prefs: []
   type: TYPE_TB
+  zh: '| ``[*`字符`*]`` | 匹配括号内的任意字符 |'
 - en: '| ``[^*`characters`*]`` | Matches a single character that is not contained
     within the brackets |'
+  id: totrans-164
   prefs: []
   type: TYPE_TB
+  zh: '| ``[^*`字符`*]`` | 匹配不在括号内的单个字符 |'
 - en: '| ``(*`regex`*)`` | Treats the *`regex`* as a group for counting or a following
     `*`, `+`, or `?` |'
+  id: totrans-165
   prefs: []
   type: TYPE_TB
+  zh: '| ``(*`正则表达式`*)`` | 将*`正则表达式`*视为计数或后续 `*`、`+` 或 `?` 的组 |'
 - en: '| ``*`left`*&#124;*`right`*`` | Matches either *`left`* or *`right`* |'
+  id: totrans-166
   prefs: []
   type: TYPE_TB
+  zh: '| ``*`左`*&#124;*`右`*`` | 匹配*`左`*或*`右`* |'
 - en: '| ``[*`l`*-*`r`*]`` | Matches a range of characters between *`l`* and *`r`*
     |'
+  id: totrans-167
   prefs: []
   type: TYPE_TB
+  zh: '| ``[*`l`*-*`r`*]`` | 匹配介于*`l`*和*`r`*之间的字符范围 |'
 - en: '| `^` | Requires match to be at the string’s start |'
+  id: totrans-168
   prefs: []
   type: TYPE_TB
+  zh: '| `^` | 要求匹配字符串的开头 |'
 - en: '| `$` | Requires match to be at the string’s end |'
+  id: totrans-169
   prefs: []
   type: TYPE_TB
+  zh: '| `$` | 要求匹配字符串的结尾 |'
 - en: '| `\b` | Matches a word boundary |'
+  id: totrans-170
   prefs: []
   type: TYPE_TB
+  zh: '| `\b` | 匹配单词边界 |'
 - en: '| `\B` | Matches where there is not a word boundary |'
+  id: totrans-171
   prefs: []
   type: TYPE_TB
+  zh: '| `\B` | 匹配非单词边界 |'
 - en: '| `\d` | Matches a single digit |'
+  id: totrans-172
   prefs: []
   type: TYPE_TB
+  zh: '| `\d` | 匹配单个数字 |'
 - en: '| `\D` | Matches a single nondigit |'
+  id: totrans-173
   prefs: []
   type: TYPE_TB
+  zh: '| `\D` | 匹配单个非数字字符 |'
 - en: '| `\n` | Matches a newline character |'
+  id: totrans-174
   prefs: []
   type: TYPE_TB
+  zh: '| `\n` | 匹配换行符 |'
 - en: '| `\s` | Matches a whitespace character |'
+  id: totrans-175
   prefs: []
   type: TYPE_TB
+  zh: '| `\s` | 匹配空白字符 |'
 - en: '| `\S` | Matches a nonwhitespace character |'
+  id: totrans-176
   prefs: []
   type: TYPE_TB
+  zh: '| `\S` | 匹配非空白字符 |'
 - en: '| `\t` | Matches a tab character |'
+  id: totrans-177
   prefs: []
   type: TYPE_TB
+  zh: '| `\t` | 匹配制表符 |'
 - en: '| `\w` | Matches a word character (`a-z`, `A-Z`, `0-9`, and `_`) |'
+  id: totrans-178
   prefs: []
   type: TYPE_TB
+  zh: '| `\w` | 匹配单词字符（`a-z`、`A-Z`、`0-9` 和 `_`） |'
 - en: '| `\W` | Matches a nonword character (anything but `a-z`, `A-Z`, `0-9`, and
     `_`) |'
+  id: totrans-179
   prefs: []
   type: TYPE_TB
+  zh: '| `\W` | 匹配非单词字符（除了 `a-z`、`A-Z`、`0-9` 和 `_` 以外的任何字符） |'
 - en: '| ``\*`x`*`` | Matches *`x`* (useful if *`x`* is a metacharacter, but you really
     want *`x`*) |'
+  id: totrans-180
   prefs: []
   type: TYPE_TB
+  zh: '| ``\*`x`*`` | 匹配*`x`*（如果*`x`*是元字符，但你真正想要的是*`x`*） |'
 - en: '| ``{*`n`*}`` | Matches exactly *`n`* times |'
+  id: totrans-181
   prefs: []
   type: TYPE_TB
+  zh: '| ``{*`n`*}`` | 精确匹配*`n`*次 |'
 - en: '| ``{*`n`*,}`` | Matches *`n`* times or more |'
+  id: totrans-182
   prefs: []
   type: TYPE_TB
+  zh: '| ``{*`n`*,}`` | 匹配至少*`n`*次或更多 |'
 - en: '| ``{*`min`*,*`max`*}`` | Matches at least *`min`* and at most *`max`* times
     |'
+  id: totrans-183
   prefs: []
   type: TYPE_TB
+  zh: '| ``{*`最小`*,*`最大`*}`` | 匹配至少*`最小`*次，最多*`最大`*次 |'
 - en: Provided with this table, and looking again at the expression `/[^a-zA-Z0-9_]/`,
     you can see that it could easily be shortened to `/[^\w]/` because the single
     metacharacter `\w` (with a lowercase `w`) specifies the characters `a-z`, `A-Z`,
     `0-9`, and `_`.
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过这张表格的提供，并重新审视表达式 `/[^a-zA-Z0-9_]/`，你可以看到它很容易被简化为 `/[^\w]/`，因为小写 `w` 的单个元字符
+    `\w` 指定了字符 `a-z`、`A-Z`、`0-9` 和 `_`。
 - en: In fact, we can be cleverer than that, because the metacharacter `\W` (with
     an uppercase `W`) specifies all characters *except* for `a-z`, `A-Z`, `0-9`, and
     `_`. Therefore, we could also drop the `^` metacharacter and simply use `/[\W]/`
     for the expression, or even go a step further and drop the square brackets, as
     in `/\W/`, because it’s a single character.
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 实际上，我们可以比这更聪明，因为元字符 `\W`（大写 `W`）指定除了 `a-z`、`A-Z`、`0-9` 和 `_` 之外的所有字符。因此，我们也可以省略
+    `^` 元字符，直接使用 `/[\W]/` 或者甚至进一步简化为 `/\W/`，因为它只匹配单个字符。
 - en: To give you more ideas of how this all works, [Table 17-2](ch17_split_002.xhtml#some_example_regular_expressions)
     shows a range of expressions and the patterns they match.
+  id: totrans-186
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了让你更清楚地了解这一切是如何工作的，[表 17-2](ch17_split_002.xhtml#some_example_regular_expressions)
+    展示了一系列表达式及其匹配的模式。
 - en: Table 17-2\. Some example regular expressions
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 17-2\. 一些示例正则表达式
 - en: '| Example | Matches |'
+  id: totrans-188
   prefs: []
   type: TYPE_TB
+  zh: '| 示例 | 匹配结果 |'
 - en: '| --- | --- |'
+  id: totrans-189
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| `r` | The first *r* in *The quick brown* |'
+  id: totrans-190
   prefs: []
   type: TYPE_TB
+  zh: '| `r` | *The quick brown* 中的第一个 *r* |'
 - en: '| `rec[ei][ei]ve` | Either of *receive* or *recieve* (but also *receeve* or
     *reciive*) |'
+  id: totrans-191
   prefs: []
   type: TYPE_TB
+  zh: '| `rec[ei][ei]ve` | *receive* 或 *recieve*（同时也包括 *receeve* 或 *reciive*） |'
 - en: '| `rec[ei]{2}ve` | Either of *receive* or *recieve* (but also *receeve* or
     *reciive*) |'
+  id: totrans-192
   prefs: []
   type: TYPE_TB
+  zh: '| `rec[ei]{2}ve` | *receive* 或 *recieve*（同时也包括 *receeve* 或 *reciive*） |'
 - en: '| `rec(ei&#124;ie)ve` | Either of *receive* or *recieve* (but not *receeve*
     or *reciive*) |'
+  id: totrans-193
   prefs: []
   type: TYPE_TB
+  zh: '| `rec(ei&#124;ie)ve` | *receive* 或 *recieve*（但不是 *receeve* 或 *reciive*） |'
 - en: '| `cat` | The word *cat* in *I like cats and dogs* |'
+  id: totrans-194
   prefs: []
   type: TYPE_TB
+  zh: '| `cat` | *I like cats and dogs* 中的单词 *cat* |'
 - en: '| `cat&#124;dog` | The word *cat* in *I like cats and dogs* (matches either
     *cat* or *dog*, whichever is encountered first) |'
+  id: totrans-195
   prefs: []
   type: TYPE_TB
+  zh: '| `cat&#124;dog` | *I like cats and dogs* 中的单词 *cat*（匹配先遇到的 *cat* 或 *dog*）
+    |'
 - en: '| `\.` | `.` (the `\` is necessary because `.` is a metacharacter) |'
+  id: totrans-196
   prefs: []
   type: TYPE_TB
+  zh: '| `\.` | `.`（因为`.`是一个元字符，所以`\`是必需的） |'
 - en: '| `5\.0*` | *5.*, *5.0*, *5.00*, *5.000*, etc. |'
+  id: totrans-197
   prefs: []
   type: TYPE_TB
+  zh: '| `5\.0*` | *5.*、*5.0*、*5.00*、*5.000* 等 |'
 - en: '| `[a-f]` | Any of the characters *a*, *b*, *c*, *d*, *e*, or *f* |'
+  id: totrans-198
   prefs: []
   type: TYPE_TB
+  zh: '| `[a-f]` | 任意字符 *a*, *b*, *c*, *d*, *e*, 或 *f* 中的一个 |'
 - en: '| `cats$` | Only the final *cats* in *My cats are friendly cats* |'
+  id: totrans-199
   prefs: []
   type: TYPE_TB
+  zh: '| `cats$` | *My cats are friendly cats* 中的最后一个 *cats* |'
 - en: '| `^my` | Only the first *my* in *my cats are my pets* |'
+  id: totrans-200
   prefs: []
   type: TYPE_TB
+  zh: '| `^my` | 只匹配 *my cats are my pets* 中的第一个 *my* |'
 - en: '| `\d{2,3}` | Any two- or three-digit number (*00* through *999*) |'
+  id: totrans-201
   prefs: []
   type: TYPE_TB
+  zh: '| `\d{2,3}` | 任意两到三位数字（*00* 到 *999*） |'
 - en: '| `7(,000)+` | *7,000*; *7,000,000*; *7,000,000,000*; *7,000,000,000,000*;
     etc. |'
+  id: totrans-202
   prefs: []
   type: TYPE_TB
+  zh: '| `7(,000)+` | *7,000*、*7,000,000*、*7,000,000,000*、*7,000,000,000,000* 等 |'
 - en: '| `[\w]+` | Any word of one or more characters |'
+  id: totrans-203
   prefs: []
   type: TYPE_TB
+  zh: '| `[\w]+` | 任意一个或多个字符的单词 |'
 - en: '| `[\w]{5}` | Any five-letter word |'
+  id: totrans-204
   prefs: []
   type: TYPE_TB
+  zh: '| `[\w]{5}` | 任意五个字母的单词 |'
 - en: General Modifiers
+  id: totrans-205
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 通用修饰符
 - en: 'Some additional modifiers are available for regular expressions:'
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 一些额外的修饰符可用于正则表达式：
 - en: '`/g` enables *global* matching. When using a replace function, specify this
     modifier to replace all matches, rather than only the first one.'
+  id: totrans-207
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`/g` 使得匹配为全局匹配。在使用替换函数时，要指定此修饰符以替换所有匹配项，而不仅仅是第一个。'
 - en: '`/i` makes the regular expression match case-insensitive. Thus, instead of
     `/[a-zA-Z]/`, you could specify `/[a-z]/i` or `/[A-Z]/i`.'
+  id: totrans-208
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`/i` 使得正则表达式匹配时忽略大小写。因此，可以用 `/[a-z]/i` 或 `/[A-Z]/i` 替代 `/[a-zA-Z]/`。'
 - en: '`/m` enables multiline mode, in which the caret (`^`) and dollar sign (`$`)
     match before and after any newlines in the subject string. Normally, in a multiline
     string, `^` matches only at the start of the string, and `$` matches only at the
     end of the string.'
+  id: totrans-209
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: '`/m` 使得多行模式启用，在这种模式下，插入符 (`^`) 和美元符 (`$`) 将在主题字符串中的任何新行之前和之后匹配。通常情况下，多行字符串中，`^`
+    仅匹配字符串的开始，`$` 仅匹配字符串的结尾。'
 - en: For example, the expression `/cats/g` will match both occurrences of the word
     *cats* in the sentence “I like cats, and cats like me.” Similarly, `/dogs/gi`
     will match both occurrences of the word *dogs* (*Dogs* and *dogs*) in the sentence
     “Dogs like other dogs,” because you can use these specifiers together.
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，表达式 `/cats/g` 将匹配句子 “I like cats, and cats like me.” 中的两个 *cats*。同样，表达式 `/dogs/gi`
+    将匹配句子 “Dogs like other dogs.” 中的两个 *dogs*（*Dogs* 和 *dogs*），因为你可以结合使用这些修饰符。
 - en: Using Regular Expressions in JavaScript
+  id: totrans-211
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在 JavaScript 中使用正则表达式
 - en: 'In JavaScript, you will use regular expressions mostly in two methods: `test`
     (which you have already seen) and `replace`. Whereas `test` just tells you whether
     its argument matches the regular expression, `replace` takes a second parameter:
     the string to replace the text that matches. Like most functions, `replace` generates
     a new string as a return value; it does not change the input.'
+  id: totrans-212
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 JavaScript 中，你将主要使用两种方法来处理正则表达式：`test`（你已经见过）和 `replace`。`test` 方法仅告诉你其参数是否与正则表达式匹配，而
+    `replace` 则需要第二个参数：替换匹配文本的字符串。与大多数函数一样，`replace` 返回一个新字符串作为其返回值；它不会改变输入。
 - en: 'To compare the two methods, the following statement just returns `true` to
     let us know that the word *cats* appears at least once somewhere within the string:'
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 为了比较这两种方法，以下语句返回 `true`，告诉我们 *cats* 这个词在字符串中至少出现一次。
 - en: '[PRE22]'
+  id: totrans-214
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: 'But the following statement replaces both occurrences of the word *cats* with
     the word *dogs*, printing the result. The search has to be global (`/g`) to find
     all occurrences, and case-insensitive (`/i`) to find the capitalized *Cats*:'
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: 但以下语句将两次出现的 *cats* 替换为 *dogs*，并打印结果。搜索必须是全局的 (`/g`) 才能找到所有匹配，且大小写不敏感 (`/i`)
+    才能找到大写 *Cats*：
 - en: '[PRE23]'
+  id: totrans-216
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: 'If you try out the statement, you’ll see a limitation of `replace`: because
     it replaces text with exactly the string you tell it to use, the first word *Cats*
     is replaced by *dogs* instead of *Dogs*.'
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您尝试这个语句，您会看到 `replace` 的一个限制：因为它精确地使用您告诉它使用的字符串替换文本，所以第一个单词 *Cats* 被替换为 *dogs*
+    而不是 *Dogs*。
 - en: Using Regular Expressions in PHP
+  id: totrans-218
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 在 PHP 中使用正则表达式
 - en: The most common regular expression functions that you are likely to use in PHP
     are `preg_match`, `preg_match_all`, and `preg_replace`.
+  id: totrans-219
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 PHP 中，您可能会经常使用的正则表达式函数是 `preg_match`、`preg_match_all` 和 `preg_replace`。
 - en: 'To test whether the word *cats* appears anywhere within a string, in any combination
     of upper- and lowercase, you could use `preg_match` like this:'
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 要测试字符串中是否出现单词 *cats*，不论大小写，您可以像这样使用 `preg_match`：
 - en: '[PRE24]'
+  id: totrans-221
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: 'Because PHP uses `1` for `TRUE` and `0` for `FALSE`, the preceding statement
     sets `$n` to `1`. The first argument is the regular expression, and the second
     is the text to match. But `preg_match` is actually a good deal more powerful and
     complicated, because it takes a third argument that shows what text matched:'
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: 由于 PHP 使用 `1` 表示 `TRUE`，使用 `0` 表示 `FALSE`，所以上述语句将 `$n` 设置为 `1`。第一个参数是正则表达式，第二个参数是要匹配的文本。但是
+    `preg_match` 实际上更加强大和复杂，因为它接受第三个参数，显示匹配的文本是什么：
 - en: '[PRE25]'
+  id: totrans-223
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: 'The third argument is an array (here, given the name `$match`). The function
     puts the matching text into the first element, so if the match is successful,
     you can find the text that matched in `$match[0]`. In this example, the output
     lets us know that the matched text was capitalized:'
+  id: totrans-224
   prefs: []
   type: TYPE_NORMAL
+  zh: 第三个参数是一个数组（在这里，命名为 `$match`）。函数将匹配的文本放入第一个元素中，因此如果匹配成功，您可以在 `$match[0]` 中找到匹配的文本。在这个例子中，输出告诉我们匹配的文本是大写的：
 - en: '[PRE26]'
+  id: totrans-225
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: 'If you wish to locate all matches, you use the `preg_match_all` function, like
     this:'
+  id: totrans-226
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您希望查找所有匹配项，可以使用 `preg_match_all` 函数，如下所示：
 - en: '[PRE27]'
+  id: totrans-227
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: As before, `$match` is passed to the function, and the element `$match[0]` is
     assigned the matches made but this time as a subarray. To display the subarray,
     this example iterates through it with a `for` loop.
+  id: totrans-228
   prefs: []
   type: TYPE_NORMAL
+  zh: 与之前一样，将 `$match` 传递给函数，并将元素 `$match[0]` 分配为所做的匹配，但这次作为子数组。为了显示子数组，这个例子使用 `for`
+    循环进行迭代。
 - en: 'When you want to replace part of a string, you can use `preg_replace`, as shown
     here. This example replaces all occurrences of the word *cats* with the word *dogs*,
     regardless of case:'
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您想要替换字符串的一部分时，可以使用 `preg_replace`，如此例所示。这个例子替换了所有出现的单词 *cats*，不区分大小写地替换为 *dogs*：
 - en: '[PRE28]'
+  id: totrans-230
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: Note
+  id: totrans-231
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: The subject of regular expressions is a large one, and entire books have been
     written about it. If you would like further information, I suggest the [Wikipedia
     entry](http://bit.ly/regex-wiki) or *[Regular-Expressions.info](https://www.regular-expressions.info)*.
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: 正则表达式的主题是一个庞大的主题，已经有整本书写关于它。如果您需要进一步的信息，我建议查看 [维基百科条目](http://bit.ly/regex-wiki)
+    或 *[Regular-Expressions.info](https://www.regular-expressions.info)*。
 - en: Redisplaying a Form After PHP Validation
+  id: totrans-233
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 重新显示 PHP 验证后的表单
 - en: OK, back to form validation. So far we’ve created the HTML document *validate.html*,
     which will post through to the PHP program *adduser.php*, but only if JavaScript
     validates the fields or if JavaScript is disabled or unavailable.
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 好的，回到表单验证。到目前为止，我们已经创建了 HTML 文档 *validate.html*，它将通过到 PHP 程序 *adduser.php*，但只有当
+    JavaScript 验证字段或 JavaScript 禁用或不可用时。
 - en: So now it’s time to create *adduser.php* to receive the posted form, perform
     its own validation, and then present the form again to the visitor if the validation
     fails. [Example 17-3](ch17_split_002.xhtml#adduserdotphp_program) contains the
     code that you should type and save (or download from the companion website).
+  id: totrans-235
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在是时候创建 *adduser.php*，接收提交的表单，执行自己的验证，如果验证失败则再次向访客显示表单。[示例 17-3](ch17_split_002.xhtml#adduserdotphp_program)
+    包含了您应该输入和保存的代码（或从配套网站下载）。
 - en: Example 17-3\. The adduser.php program
+  id: totrans-236
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 17-3\. adduser.php 程序
 - en: '[PRE29]'
+  id: totrans-237
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: Note
+  id: totrans-238
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: In this example, all input is sanitized prior to use—even passwords, which,
     since they may contain characters used to format HTML, will be changed into HTML
     entities. For example, `&` will become `&amp;`, `<` will become `&lt;`, and so
     on. If you will be using a hash function to store encrypted passwords, this will
     not be an issue as long as when you later check the password entered it is sanitized
     in the same way so that the same inputs will be compared.
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个例子中，所有输入在使用前都经过了净化处理，甚至包括密码，因为密码可能包含用于格式化 HTML 的字符，将被转换为 HTML 实体。例如，`&` 将变成
+    `&amp;`，`<` 将变成 `&lt;`，依此类推。如果将使用哈希函数存储加密密码，只要稍后检查输入的密码时以相同方式进行净化处理，这将不成问题，因此将可以比较相同的输入。
 - en: The result of submitting the form with JavaScript disabled (and two fields incorrectly
     completed) is shown in [Figure 17-5](ch17_split_002.xhtml#form_as_represented_after_php_valida).
+  id: totrans-240
   prefs: []
   type: TYPE_NORMAL
+  zh: 在禁用 JavaScript 并且两个字段填写不正确的情况下提交表单的结果显示在 [图 17-5](ch17_split_002.xhtml#form_as_represented_after_php_valida)
+    中。
 - en: '![The form as represented after PHP validation fails](Images/pmj6_1705.png)'
+  id: totrans-241
   prefs: []
   type: TYPE_IMG
+  zh: '![PHP 验证失败后表单的呈现方式](Images/pmj6_1705.png)'
 - en: Figure 17-5\. The form as represented after PHP validation fails
+  id: totrans-242
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 17-5\. PHP 验证失败后表单的呈现方式
 - en: I have put the PHP section of this code (and changes to the HTML section) in
     a bold typeface so that you can more clearly see the difference between this and
     Examples [17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p) and
     [17-2](ch17_split_002.xhtml#form_with_javascript_validation-id00101).
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 我已经将这段代码的 PHP 部分（以及对 HTML 部分的更改）用粗体标记，以便你更清楚地看到这与示例 [17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p)
+    和 [17-2](ch17_split_002.xhtml#form_with_javascript_validation-id00101) 之间的区别。
 - en: If you browsed through this example, or typed it in or downloaded it from the
     [book’s example repository](https://github.com/RobinNixon/lpmj6), you’ll have
     seen that the PHP code is almost a clone of the JavaScript code; the same regular
     expressions are used to validate each field in very similar functions.
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你浏览过这个示例，或者从 [书中的示例存储库](https://github.com/RobinNixon/lpmj6) 中下载或者键入它，你会看到
+    PHP 代码几乎是 JavaScript 代码的克隆；相似的函数用于验证每个字段的正则表达式。
 - en: But there are a couple of things to note. First, the `fix_string` function (right
     at the end) is used to sanitize each field and prevent any attempts at code injection
     from succeeding.
+  id: totrans-245
   prefs: []
   type: TYPE_NORMAL
+  zh: 但有几点需要注意。首先，`fix_string` 函数（就在最后）用于清理每个字段，防止任何代码注入尝试成功。
 - en: Also, you will see that the HTML from [Example 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p)
     has been repeated in the PHP code within an `<<<_END..._END;` structure, displaying
     the form with the values that the visitor entered the previous time. You do this
     by simply adding an extra `value` parameter to each `<input>` tag (such as `value="$forename"`).
     This courtesy is highly recommended so that the user only has to edit the previously
     entered values and doesn’t have to type the values in the fields all over again.
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，你会看到 HTML 来自于 [示例 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p)，在
+    PHP 代码中通过 `<<<_END..._END;` 结构重复显示表单，展示上次访问者输入的值。你只需简单地为每个 `<input>` 标签添加额外的 `value`
+    参数（例如 `value="$forename"`）即可做到这一点。强烈建议这样做，这样用户只需编辑先前输入的值，而无需再次在字段中输入这些值。
 - en: Note
+  id: totrans-247
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: In the real world, you probably wouldn’t start with an HTML form such as the
     one in [Example 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p).
     Instead, you’d be more likely to go straight ahead and write the PHP program in
@@ -1052,57 +1581,86 @@
     errors when all the fields are empty. You also might drop the six JavaScript functions
     into their own *.js* file for separate inclusion, as mentioned in [“Using a separate
     JavaScript file”](ch17_split_002.xhtml#using_a_separate_javascript_file).
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 在现实世界中，你可能不会从 [示例 17-1](ch17_split_001.xhtml#form_with_javascript_validation_left_p)
+    这样的 HTML 表单开始。相反，你更可能直接编写 [示例 17-3](ch17_split_002.xhtml#adduserdotphp_program)
+    中包含所有 HTML 的 PHP 程序。当然，对于第一次调用程序时需要进行一些微小的调整，以防止在所有字段为空时显示错误。此外，你可能还会将六个 JavaScript
+    函数放入它们自己的 *.js* 文件中进行单独包含，正如 [“使用单独的 JavaScript 文件”](ch17_split_002.xhtml#using_a_separate_javascript_file)
+    中所述。
 - en: Now that you’ve seen how to bring PHP, HTML, and JavaScript together, the next
     chapter will introduce *Ajax* (Asynchronous JavaScript and XML), which uses JavaScript
     calls to the server in the background to seamlessly update portions of a web page,
     without having to resubmit the entire page to the web server.
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在你已经看到如何将 PHP、HTML 和 JavaScript 结合在一起，下一章将介绍*Ajax*（异步 JavaScript 和 XML），它利用
+    JavaScript 在后台向服务器发出调用，无缝更新网页的部分内容，而无需重新提交整个页面到服务器。
 - en: Questions
+  id: totrans-250
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 问题
 - en: What JavaScript method can you use to send a form for validation prior to submitting
     it?
+  id: totrans-251
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在提交之前，你可以使用什么 JavaScript 方法来发送表单进行验证？
 - en: What JavaScript method is used to match a string against a regular expression?
+  id: totrans-252
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 用于将字符串与正则表达式匹配的 JavaScript 方法是什么？
 - en: Write a regular expression to match any characters that are *not* in a word,
     as defined by regular expression syntax.
+  id: totrans-253
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 编写一个正则表达式来匹配任何不符合正则表达式语法定义的单词字符。
 - en: Write a regular expression to match either of the words *fox* or *fix*.
+  id: totrans-254
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 编写一个正则表达式来匹配单词*fox*或*fix*中的任意一个。
 - en: Write a regular expression to match any single word followed by any nonword
     character.
+  id: totrans-255
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 编写一个正则表达式来匹配任意单词后面紧跟任何非单词字符。
 - en: Using regular expressions, write a JavaScript function to test whether the word
     *fox* exists in the string `The quick brown fox`.
+  id: totrans-256
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用正则表达式，编写一个 JavaScript 函数来测试字符串`The quick brown fox`中是否存在单词*fox*。
 - en: Using regular expressions, write a PHP function to replace all occurrences of
     the word *the* in `The cow jumps over the moon` with the word *my*.
+  id: totrans-257
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 使用正则表达式，编写一个 PHP 函数，在字符串`The cow jumps over the moon`中将所有出现的单词*the*替换为*my*。
 - en: What HTML attribute is used to precomplete form fields with a value?
+  id: totrans-258
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 哪个 HTML 属性用于在表单字段中预先填充值？
 - en: See [“Chapter 17 Answers”](app01_split_016.xhtml#chapter_17_answers) in the
     [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions) for the
     answers to these questions.
+  id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: 参见《“第17章答案”》（[app01_split_016.xhtml#chapter_17_answers](app01_split_016.xhtml#chapter_17_answers)）附录A中的[解答](app01_split_000.xhtml#solutions_to_the_chapter_questions)。

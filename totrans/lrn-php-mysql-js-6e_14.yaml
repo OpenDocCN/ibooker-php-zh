@@ -1,105 +1,149 @@
 - en: Chapter 11\. Accessing MySQL Using PHP
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第11章\. 使用PHP访问MySQL
 - en: If you worked through the previous chapters, you’re proficient in using both
     MySQL and PHP. In this chapter, you will learn how to integrate the two by using
     PHP’s built-in functions to access MySQL.
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你已经完成了前面的章节，那么你应该已经熟练掌握了使用MySQL和PHP。在本章中，你将学习如何通过使用PHP的内置函数来集成这两者，以访问MySQL。
 - en: Querying a MySQL Database with PHP
+  id: totrans-2
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用PHP查询MySQL数据库。
 - en: The reason for using PHP as an interface to MySQL is to format the results of
     SQL queries in a form visible in a web page. As long as you can log in to your
     MySQL installation using your username and password, you can also do so from PHP.
+  id: totrans-3
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用PHP作为MySQL接口的原因是将SQL查询的结果格式化为在网页上可见的形式。只要你能使用用户名和密码登录到你的MySQL安装中，你也可以从PHP中进行这样的操作。
 - en: However, instead of using MySQL’s command line to enter instructions and view
     output, you will create query strings that are passed to MySQL. When MySQL returns
     its response, it will come as a data structure that PHP can recognize instead
     of the formatted output you see when you work on the command line. Further PHP
     commands can retrieve the data and format it for the web page.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，与其使用MySQL的命令行来输入指令和查看输出，你可以创建传递给MySQL的查询字符串。当MySQL返回其响应时，它将以PHP可以识别的数据结构形式返回，而不是你在命令行工作时看到的格式化输出。进一步的PHP命令可以检索数据并为网页格式化它。
 - en: The Process
+  id: totrans-5
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 过程
 - en: 'The process of using MySQL with PHP is as follows:'
+  id: totrans-6
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用PHP与MySQL的过程如下：
 - en: Connect to MySQL and select the database to use.
+  id: totrans-7
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 连接到MySQL并选择要使用的数据库。
 - en: Prepare a query string.
+  id: totrans-8
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 准备一个查询字符串。
 - en: Perform the query.
+  id: totrans-9
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 执行查询。
 - en: Retrieve the results and output them to a web page.
+  id: totrans-10
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 检索结果并将其输出到网页。
 - en: Repeat steps 2 to 4 until all desired data has been retrieved.
+  id: totrans-11
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 重复步骤2至4，直到检索到所有所需数据。
 - en: Disconnect from MySQL.
+  id: totrans-12
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 与MySQL断开连接。
 - en: We’ll work through these steps in turn, but first it’s important to set up your
     login details in a secure manner so people snooping around on your system have
     trouble getting access to your database.
+  id: totrans-13
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将依次完成这些步骤，但首先重要的是以安全的方式设置好你的登录细节，这样在你的系统上窥探的人们就很难访问你的数据库。
 - en: Creating a Login File
+  id: totrans-14
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建一个登录文件
 - en: Most websites developed with PHP contain multiple program files that will require
     access to MySQL and will thus need the login and password details. Therefore,
     it’s sensible to create a single file to store these and then include that file
     wherever it’s needed. [Example 11-1](#logindotphp_file) shows such a file, which
     I’ve called *login.php*.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 大多数使用PHP开发的网站包含多个程序文件，这些文件将需要访问MySQL，并因此需要登录和密码细节。因此，创建一个单独的文件来存储这些信息，并在需要的地方包含该文件是明智的。[示例11-1](#logindotphp_file)展示了这样一个文件，我称之为*login.php*。
 - en: Example 11-1\. The login.php file
+  id: totrans-16
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例11-1\. login.php文件
 - en: '[PRE0]'
+  id: totrans-17
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: Type the example, replacing the username *`root`* and password of *`mysql`*
     with the values you use for your MySQL database (and the host and database name
     too, if necessary), and save it to the document root directory you set up in [Chapter 2](ch02.xhtml#setting_up_a_development_server).
     We’ll be making use of the file shortly.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 键入示例，将用户名*`root`*和密码*`mysql`*替换为你在MySQL数据库中使用的值（如果需要，还要替换主机和数据库名称），并将其保存到你在[第2章](ch02.xhtml#setting_up_a_development_server)中设置的文档根目录中。我们很快将使用这个文件。
 - en: The hostname `localhost` should work as long as you’re using a MySQL database
     on your local system, and the database `publications` should work if you’re typing
     the examples I’ve used so far.
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: 主机名`localhost`应该能正常工作，只要你在本地系统上使用MySQL数据库，并且数据库`publications`应该能正常工作，如果你一直使用的是我使用过的示例。
 - en: The enclosing `<?php` and `?>` tags are especially important for the *login.php*
     file in [Example 11-1](#logindotphp_file), because they mean that the lines between
     can be interpreted *only* as PHP code. If you were to leave them out and someone
     were to call up the file directly from your website, it would display as text
     and reveal your secrets. But, with the tags in place, all that person will see
     is a blank page. The file will correctly include your other PHP files.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 封闭的`<?php`和`?>`标签对于[示例11-1](#logindotphp_file)中的*login.php*文件尤为重要，因为它们意味着只有在PHP代码中间的行才能被解释。如果你省略它们，并且有人从你的网站直接调用这个文件，它将显示为文本并暴露你的秘密。但是，如果标签放置正确，所有人将只会看到一个空白页面。文件将正确包含你的其他PHP文件。
 - en: Note
+  id: totrans-21
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: In previous versions of the book we have used direct access to MySQL, which
     was not at all secure, and later on switched to using *mysqli*, which was much
     more secure. But, as they say, time marches on, and now there’s the most secure
@@ -108,141 +152,210 @@
     interface for accessing databases in PHP. PDO stands for PHP Data Objects and
     is a data access layer that uses a unified API. Each database driver that implements
     the PDO interface can expose database-specific features as regular extension functions.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本书的早期版本中，我们使用了直接访问 MySQL，这完全不安全，后来改用了 *mysqli*，这要安全得多。但是，俗话说时间在前进，现在有了从 PHP
+    访问 MySQL 数据库的最安全和最简便的方法，称为 PDO，在本书的这一版本中我们默认使用它作为 PHP 中访问数据库的轻量级和一致的接口。PDO 代表
+    PHP 数据对象，是一个使用统一 API 的数据访问层。实现 PDO 接口的每个数据库驱动程序都可以将特定于数据库的特性公开为常规扩展函数。
 - en: The `$host` variable will tell PHP which computer to use when connecting to
     a database. This is required because you can access MySQL databases on any computer
     connected to your PHP installation, and that potentially includes any host anywhere
     on the web. However, the examples in this chapter will be working on the local
     server. So, in place of specifying a domain such as `mysql.myserver.com`, you
     can just use the word `localhost` (or the IP address `127.0.0.1`).
+  id: totrans-23
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$host` 变量将告诉 PHP 连接到数据库时要使用哪台计算机。这是必需的，因为您可以访问与您的 PHP 安装连接的任何计算机上的 MySQL 数据库，这可能包括任何连接到网络的主机。然而，本章中的示例将在本地服务器上运行。因此，不需要指定域名，如
+    `mysql.myserver.com`，您可以直接使用单词 `localhost`（或 IP 地址 `127.0.0.1`）。'
 - en: The database we’ll be using, `$data`, is the one called *publications* that
     we created in [Chapter 8](ch08.xhtml#introduction_to_mysql) (if you’re using a
     different database—one provided by your server administrator—you’ll have to modify
     *login.php* accordingly).
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们将使用的数据库 `$data` 是我们在 [第 8 章](ch08.xhtml#introduction_to_mysql) 中创建的名为 *publications*
+    的数据库（如果您使用的是服务器管理员提供的其他数据库，则必须相应修改 *login.php*）。
 - en: '`$chrs` stands for character set, and in this case we are using `utf8mb4`,
     while `$attr` and `$opts` contain additional options needed to access the database.'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$chrs` 表示字符集，在本例中我们使用 `utf8mb4`，而 `$attr` 和 `$opts` 包含访问数据库所需的附加选项。'
 - en: Note
+  id: totrans-26
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Another benefit of keeping these login details in a single place is that you
     can change your password as frequently as you like and there will be only one
     file to update when you do, no matter how many PHP files access MySQL.
+  id: totrans-27
   prefs: []
   type: TYPE_NORMAL
+  zh: 将这些登录详细信息保存在一个地方的另一个好处是，您可以随意更改密码，并且每当您更改时只需更新一个文件，无论有多少个 PHP 文件访问 MySQL。
 - en: Connecting to a MySQL Database
+  id: totrans-28
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 连接到 MySQL 数据库
 - en: Now that you have saved the *login.php* file, you can include it in any PHP
     files that will need to access the database by using the `require_once` statement.
     This is preferable to an `include` statement, as it will generate a fatal error
     if the file is not found—and believe me, not finding the file containing the login
     details to your database *is* a fatal error.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在您已经保存了 *login.php* 文件，可以通过使用 `require_once` 语句将其包含到需要访问数据库的任何 PHP 文件中。这比使用
+    `include` 语句更可取，因为如果找不到包含登录数据库详细信息的文件，它将生成致命错误，相信我，找不到这个文件是致命错误。
 - en: Also, using `require_once` instead of `require` means that the file will be
     read in only when it has not previously been included, which prevents wasteful
     duplicate disk accesses. [Example 11-2](#connecting-to-a-mysql-server-using-pdo) shows
     the code to use.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 此外，使用 `require_once` 而不是 `require` 意味着只有在之前未包含时才会读取文件，这可以防止多余的重复磁盘访问。[示例 11-2](#connecting-to-a-mysql-server-using-pdo)
+    显示了使用的代码。
 - en: Example 11-2\. Connecting to a MySQL server using PDO
+  id: totrans-31
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-2\. 使用 PDO 连接到 MySQL 服务器
 - en: '[PRE1]'
+  id: totrans-32
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: This example creates a new object called `$pdo` by calling a new instance of
     the `PDO` method, passing all the values retrieved from the *login.php* file. We
     achieve error checking by using the `try...catch` pair of commands.
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 此示例通过调用 `PDO` 方法的新实例来创建一个名为 `$pdo` 的新对象，并传递从 *login.php* 文件检索到的所有值。我们通过使用 `try...catch`
+    命令对错误进行检查。
 - en: The `PDO` object is used in the following examples to access the MySQL database.
+  id: totrans-34
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PDO` 对象在以下示例中用于访问 MySQL 数据库。'
 - en: Note
+  id: totrans-35
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: You should also never be tempted to output the contents of any error message
     received from MySQL. Rather than helping your users, you could give away sensitive
     information to hackers, such as login details. Instead, just guide the user with
     information on how to overcome their difficulty based on what the error message
     reports to your code.
+  id: totrans-36
   prefs: []
   type: TYPE_NORMAL
+  zh: 永远不要试图输出从MySQL接收到的任何错误消息的内容。与其帮助用户，你可能会向黑客泄露敏感信息，如登录详细信息。相反，根据错误消息向你的代码报告的信息指导用户克服困难。
 - en: Building and executing a query
+  id: totrans-37
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 构建和执行查询
 - en: Sending a query to MySQL from PHP is as simple as including the relevant SQL
     in the `query` method of a connection object. [Example 11-3](#querying-a-database-with-pdo) shows
     you how to do this.
+  id: totrans-38
   prefs: []
   type: TYPE_NORMAL
+  zh: 从PHP向MySQL发送查询就像在连接对象的`query`方法中包含相关SQL一样简单。[示例 11-3](#querying-a-database-with-pdo)
+    展示了如何做到这一点。
 - en: Example 11-3\. Querying a database with PDO
+  id: totrans-39
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-3\. 使用PDO查询数据库
 - en: '[PRE2]'
+  id: totrans-40
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: As you can see, the MySQL query looks just like what you would type directly
     at the command line, except that there is no trailing semicolon, as none is needed
     when you are accessing MySQL from PHP.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你所见，从PHP向MySQL发送查询与在命令行直接输入的内容几乎一样，唯一的区别是在访问MySQL时不需要尾随分号。
 - en: Here the variable `$query` is assigned a string containing the query to be made
     and then passed to the `query` method of the `$pdo` object, which returns a result
     that we place in the object `$result`.
+  id: totrans-42
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，变量`$query`被赋予一个包含要执行的查询的字符串，然后传递给`$pdo`对象的`query`方法，该方法返回一个结果，我们将其放入`$result`对象中。
 - en: All the data returned by MySQL is now stored in an easily interrogable format
     in the `$result` object.
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 所有由MySQL返回的数据现在以易于查询的格式存储在`$result`对象中。
 - en: Fetching a result
+  id: totrans-44
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 获取结果
 - en: Once you have an object returned in `$result`, you can use it to extract the
     data you want, one item at a time, using the `fetch` method of the object. [Example 11-4](#fetching_results_one_row_at_a_time) combines
     and extends the previous examples into a program that you can run yourself to
     retrieve the results (as depicted in [Figure 11-1](#output_from_querydotphp)).
     Type this script in and save it using the filename *query.php*, or download it
     from the [example repository](https://github.com/RobinNixon/lpmj6).
+  id: totrans-45
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦你在`$result`中得到一个对象返回，你可以使用它逐个提取你想要的数据项，使用对象的`fetch`方法。[示例 11-4](#fetching_results_one_row_at_a_time)
+    将之前的示例结合并扩展为一个程序，你可以自己运行以检索结果（如[图 11-1](#output_from_querydotphp)所示）。输入此脚本并使用文件名
+    *query.php* 保存它，或者从[示例仓库](https://github.com/RobinNixon/lpmj6)下载它。
 - en: Example 11-4\. Fetching results one row at a time
+  id: totrans-46
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-4\. 逐行提取结果
 - en: '[PRE3]'
+  id: totrans-47
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: '![The output from the query-mysqli.php program in Example 10-5](Images/pmj6_1101.png)'
+  id: totrans-48
   prefs: []
   type: TYPE_IMG
+  zh: '![示例 10-5 中 query-mysqli.php 程序的输出](Images/pmj6_1101.png)'
 - en: Figure 11-1\. The output from query.php
+  id: totrans-49
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 11-1\. 来自 query.php 的输出
 - en: Here, each time around the loop, we call the `fetch` method of the `$pdo` object
     to retrieve the value stored in each row, and output the result using `echo` statements.
     Don’t worry if you see the results in a different order. This is because we have
     not used an `ORDER BY` command to specify the order in which they should be returned,
     so the order will be unspecified.
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，每次循环时，我们调用`$pdo`对象的`fetch`方法来检索存储在每行中的值，并使用`echo`语句输出结果。如果你看到结果顺序不同，不要担心。这是因为我们没有使用`ORDER
+    BY`命令指定应返回的顺序，所以顺序是未指定的。
 - en: When displaying data in a browser whose source was (or may have been) user input,
     there’s always a risk of sneaky HTML characters being embedded within it—even
     if you believe it to have been previously sanitized—which could potentially be
@@ -251,8 +364,10 @@
     which replaces all such characters with harmless HTML entities. This technique
     was implemented in the preceding example and will be used in many of the following
     examples.
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 当在浏览器中显示数据时，其源可能是（或可能是）用户输入时，总会存在嵌入其中的阴险HTML字符的风险，即使你认为它已经经过了先前的清理。这些字符可能会被用于跨站点脚本（XSS）攻击。防止这种可能性的简单方法是将所有此类输出嵌入到`htmlspecialchars`函数的调用中，该函数将所有这些字符替换为无害的HTML实体。这种技术已在前面的示例中实施，并将在许多后续示例中使用。
 - en: In [Chapter 9](ch09.xhtml#mastering_mysql), I talked about First, Second, and
     Third Normal Form. You may have noticed that the *classics* table doesn’t satisfy
     these, because both author and book details are included within the same table.
@@ -260,142 +375,213 @@
     for the purposes of illustrating access to MySQL from PHP, reusing this table
     prevents the hassle of typing in a new set of test data, so we’ll stick with it
     for the time being.
+  id: totrans-52
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 [第9章](ch09.xhtml#mastering_mysql) 中，我讨论了第一、第二和第三范式。您可能已经注意到 *classics* 表不符合这些范式，因为作者和书籍详情都包含在同一个表中。这是因为我们在遇到规范化之前创建了这个表。但是，为了说明从PHP访问MySQL的目的，重新使用此表可以避免输入新的测试数据，因此我们暂时保留它。
 - en: Fetching a row while specifying the style
+  id: totrans-53
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 在指定样式的情况下获取一行
 - en: 'The `fetch` method can return data in various styles, including the following:'
+  id: totrans-54
   prefs: []
   type: TYPE_NORMAL
+  zh: '`fetch` 方法可以以各种风格返回数据，包括以下方式：'
 - en: '`PDO::FETCH_ASSOC`'
+  id: totrans-55
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PDO::FETCH_ASSOC`'
 - en: Returns the next row as an array indexed by column name
+  id: totrans-56
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回下一行作为一个由列名作为索引的数组
 - en: '`PDO::FETCH_BOTH` (default)'
+  id: totrans-57
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PDO::FETCH_BOTH` （默认）'
 - en: Returns the next row as an array indexed by both column name and number
+  id: totrans-58
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回下一行作为一个既由列名又由列号索引的数组
 - en: '`PDO::FETCH_LAZY`'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PDO::FETCH_LAZY`'
 - en: Returns the next row as an anonymous object with names as properties
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回下一行作为一个匿名对象，其中属性名作为属性
 - en: '`PDO::FETCH_OBJ`'
+  id: totrans-61
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PDO::FETCH_OBJ`'
 - en: Returns the next row as an anonymous object with column name as properties
+  id: totrans-62
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回下一行作为一个匿名对象，其中列名作为属性
 - en: '`PDO::FETCH_NUM`'
+  id: totrans-63
   prefs: []
   type: TYPE_NORMAL
+  zh: '`PDO::FETCH_NUM`'
 - en: Returns an array indexed by column number
+  id: totrans-64
   prefs: []
   type: TYPE_NORMAL
+  zh: 返回一个由列号索引的数组
 - en: For the full list of PDO fetch styles, please refer to the [online reference](https://tinyurl.com/pdofetch).
+  id: totrans-65
   prefs: []
   type: TYPE_NORMAL
+  zh: 如需查看PDO提取样式的完整列表，请参考 [在线参考](https://tinyurl.com/pdofetch)。
 - en: Therefore, the following (slightly changed) example (shown in [Example 11-5](#using-fetch-both)) shows
     more clearly the intention of the `fetch` method in this case. You may wish to
     save this revised file using the name *fetchrow.php*.
+  id: totrans-66
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，下面（稍作更改）的示例（在 [示例 11-5](#using-fetch-both) 中显示）更清楚地显示了在这种情况下 `fetch` 方法的意图。您可能希望使用名称
+    *fetchrow.php* 保存此修订文件。
 - en: Example 11-5\. Fetching results one row at a time
+  id: totrans-67
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-5\. 逐行获取结果
 - en: '[PRE4]'
+  id: totrans-68
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: In this modified code, only one-fifth of the interrogations of the `$result`
     object are made (compared to the previous example), and only one seek into the
     object is made in each iteration of the loop, because each row is fetched in its
     entirety via the `fetch` method. This returns a single row of data as an array,
     which is then assigned to the array `$row`.
+  id: totrans-69
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这个修改后的代码中，仅对 `$result` 对象进行了五分之一的询问（与前一个示例相比），并且每次迭代循环中仅进行一次对象搜索，因为每行数据都通过
+    `fetch` 方法完整地返回为一个数组，然后分配给数组 `$row`。
 - en: This script uses an associative array. Associative arrays are usually more useful
     than numeric ones because you can refer to each column by name, such as `$row['author']`,
     instead of trying to remember where it is in the column order.
+  id: totrans-70
   prefs: []
   type: TYPE_NORMAL
+  zh: 此脚本使用关联数组。关联数组通常比数值数组更有用，因为您可以通过名称引用每列，如 `$row['author']`，而不是试图记住其在列顺序中的位置。
 - en: Closing a connection
+  id: totrans-71
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 关闭连接
 - en: 'PHP will eventually return the memory it has allocated for objects after you
     have finished with the script, so in small scripts, you don’t usually need to
     worry about releasing memory yourself. However, should you wish to close a PDO
     connection manually, you simply set it to `null` like this:'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: PHP在脚本结束后会释放为对象分配的内存，因此在小型脚本中通常不需要担心释放内存。然而，如果您希望手动关闭PDO连接，只需将其设置为 `null` 即可：
 - en: '[PRE5]'
+  id: totrans-73
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: A Practical Example
+  id: totrans-74
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 实际示例
 - en: It’s time to write our first example of inserting data in and deleting it from
     a MySQL table using PHP. I recommend that you type [Example 11-6](#inserting_and_deleting_using_sqltestdotp)
     and save it to your web development directory using the filename *sqltest.php*.
     You can see an example of the program’s output in [Figure 11-2](#output_from_example_10-8comma_sqltes).
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在是时候编写我们的第一个示例，使用PHP向MySQL表中插入数据并从中删除。建议您输入 [示例 11-6](#inserting_and_deleting_using_sqltestdotp) 并将其保存到您的Web开发目录中，文件名为
+    *sqltest.php*。您可以在 [图 11-2](#output_from_example_10-8comma_sqltes) 中看到该程序输出的示例。
 - en: Note
+  id: totrans-76
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: '[Example 11-6](#inserting_and_deleting_using_sqltestdotp) creates a standard
     HTML form. [Chapter 12](ch12.xhtml#form_handling) explains forms in detail, but
     in this chapter I take form handling for granted and just deal with database interaction.'
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 11-6](#inserting_and_deleting_using_sqltestdotp) 创建了一个标准的HTML表单。 [第12章](ch12.xhtml#form_handling) 详细解释了表单，但在本章中，我默认处理表单处理并只处理数据库交互。'
 - en: Example 11-6\. Inserting and deleting using sqltest.php
+  id: totrans-78
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-6\. 使用sqltest.php进行插入和删除
 - en: '[PRE6]'
+  id: totrans-79
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: '![The output from Example 10-8, sqltest.php](Images/pmj6_1102.png)'
+  id: totrans-80
   prefs: []
   type: TYPE_IMG
+  zh: '![来自示例 10-8, sqltest.php的输出](Images/pmj6_1102.png)'
 - en: Figure 11-2\. The output from [Example 11-6](#inserting_and_deleting_using_sqltestdotp),
     sqltest.php
+  id: totrans-81
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图11-2\. 来自[示例 11-6](#inserting_and_deleting_using_sqltestdotp)，sqltest.php的输出
 - en: At almost 80 lines of code, this program may appear daunting, but don’t worry—you’ve
     already covered many of those lines in [Example 11-4](#fetching_results_one_row_at_a_time),
     and what the code does is actually quite simple.
+  id: totrans-82
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个程序大约有80行代码，可能看起来令人生畏，但不用担心——你已经在[示例 11-4](#fetching_results_one_row_at_a_time)中涵盖了许多行，并且代码的功能实际上非常简单。
 - en: It first checks for any inputs that may have been made and then either inserts
     new data into the table *classics* of the *publications* database or deletes a
     row from it, according to the input supplied. Regardless of whether there was
     input, the program then outputs all rows in the table to the browser. So, let’s
     see how it works.
+  id: totrans-83
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先检查可能已经输入的任何输入内容，然后根据提供的输入要么将新数据插入到*publications*数据库中的*classics*表中，要么从中删除一行。不管是否有输入，程序都会将表中的所有行输出到浏览器中。那么，让我们看看它是如何工作的。
 - en: 'The first section of new code starts by using the `isset` function to check
     whether values for all the fields have been posted to the program. Upon confirmation,
     each line within the `if` statement calls the function `get_post`, which appears
     at the end of the program. This function has one small but critical job: fetching
     input from the browser.'
+  id: totrans-84
   prefs: []
   type: TYPE_NORMAL
+  zh: 新代码的第一部分开始使用`isset`函数检查是否已经向程序发送了所有字段的值。确认后，`if`语句中的每行调用`get_post`函数，该函数出现在程序末尾。此函数有一个小但至关重要的工作：从浏览器获取输入。
 - en: Note
+  id: totrans-85
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: For reasons of clarity and brevity, and to explain things as simply as possible,
     many of the following examples omit certain very sensible security precautions
     that would have made them longer and possibly detract from explaining their function
@@ -403,122 +589,173 @@
     section later in this chapter on preventing your database from being hacked ([“Preventing
     Hacking Attempts”](#preventing_hacking_attempts)), in which you will learn about
     additional actions you can take with your code to secure it.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 出于清晰和简洁的原因，并且为了尽可能简单地解释事物，许多后续示例省略了某些非常明智的安全预防措施，这些措施本应使示例变得更长，可能会削弱对其功能的最清晰解释。因此，重要的是不要跳过本章后面关于防止数据库被黑客攻击的部分（[“防止黑客攻击”](#preventing_hacking_attempts)），在这部分中，您将了解有关通过代码采取的额外措施来保护数据库的信息。
 - en: The $_POST Array
+  id: totrans-87
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: '`$_POST` 数组'
 - en: I mentioned in an earlier chapter that a browser sends user input through either
     a GET request or a POST request. The POST request is usually preferred (because
     it prevents placing unsightly data in the browser’s address bar), and so we use
     it here. The web server bundles up all of the user input (even if the form was
     filled out with a hundred fields) and puts it into an array named `$_POST`.
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 我在前面的章节中提到，浏览器通过GET请求或POST请求发送用户输入。通常首选POST请求（因为它可以防止在浏览器地址栏中放置不雅观的数据），因此我们在这里使用它。Web服务器将所有用户输入（即使表单填写了一百个字段）捆绑到名为`$_POST`的数组中。
 - en: '`$_POST` is an associative array, which you encountered in [Chapter 6](ch06.xhtml#php_arrays).
     Depending on whether a form has been set to use the POST or the GET method, either
     the `$_POST` or the `$_GET` associative array will be populated with the form
     data. They can both be read in exactly the same way.'
+  id: totrans-89
   prefs: []
   type: TYPE_NORMAL
+  zh: '`$_POST` 是一个关联数组，在[第6章](ch06.xhtml#php_arrays)中已经遇到过。根据表单设置为使用POST还是GET方法，`$_POST`或`$_GET`关联数组将被填充表单数据。它们可以以完全相同的方式读取。'
 - en: Each field has an element in the array named after that field. So, if a form
     contains a field named `isbn`, the `$_POST` array contains an element keyed by
     the word `isbn`. The PHP program can read that field by referring to either `$_POST['isbn']`
     or `$_POST["isbn"]` (single and double quotes have the same effect in this case).
+  id: totrans-90
   prefs: []
   type: TYPE_NORMAL
+  zh: 每个字段在数组中都有一个以该字段命名的元素。因此，如果表单包含名为`isbn`的字段，则`$_POST`数组包含以单词`isbn`为键的元素。PHP程序可以通过引用`$_POST['isbn']`或`$_POST["isbn"]`（在这种情况下，单引号和双引号具有相同的效果）来读取该字段。
 - en: 'If the `$_POST` syntax still seems complex to you, rest assured that you can
     just use the convention I’ve shown in [Example 11-6](#inserting_and_deleting_using_sqltestdotp),
     copy the user’s input to other variables, and forget about `$_POST` after that.
     This is normal in PHP programs: they retrieve all the fields from `$_POST` at
     the beginning of the program and then ignore it.'
+  id: totrans-91
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果 `$_POST` 语法对你来说仍然复杂，可以放心地使用我在 [示例 11-6](#inserting_and_deleting_using_sqltestdotp)
+    中展示的惯例，将用户的输入复制到其他变量中，之后就可以忘记 `$_POST`。这在 PHP 程序中很正常：它们在程序开头从 `$_POST` 中检索所有字段，然后忽略它。
 - en: Note
+  id: totrans-92
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: There is no reason to write to an element in the `$_POST` array. Its only purpose
     is to communicate information from the browser to the program, and you’re better
     off copying data to your own variables before altering it.
+  id: totrans-93
   prefs: []
   type: TYPE_NORMAL
+  zh: 没有理由向 `$_POST` 数组中的元素写入。它的唯一目的是从浏览器传递信息给程序，最好在修改数据之前将数据复制到自己的变量中。
 - en: 'So, back to the `get_post` function, which passes each item it retrieves through
     the `quote` method of the PDO object to escape any quotes that a hacker may have
     inserted in order to break into or alter your database, like this, and it adds
     quotes around each string for you:'
+  id: totrans-94
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，回到 `get_post` 函数，该函数将检索到的每个项通过 PDO 对象的 `quote` 方法传递，以转义黑客可能插入以破坏或更改数据库的引号，并为你的每个字符串添加引号，例如这样：
 - en: '[PRE7]'
+  id: totrans-95
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: Deleting a Record
+  id: totrans-96
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 删除记录
 - en: Prior to checking whether new data has been posted, the program checks whether
     the variable `$_POST['delete']` has a value. If so, the user has clicked the DELETE
     RECORD button to erase a record. In this case, the value of `$isbn` will also
     have been posted.
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: 在检查新数据是否已发布之前，程序会检查变量 `$_POST['delete']` 是否有值。如果有，用户已点击“DELETE RECORD”按钮来删除记录。在这种情况下，`$isbn`
+    的值也将已发布。
 - en: As you’ll recall, the ISBN uniquely identifies each record. The HTML form appends
     the ISBN to the `DELETE FROM` query string created in the variable `$query`, which
     is then passed to the `query` method of the `$conn` object to issue it to MySQL.
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你可能记得的那样，ISBN 唯一标识每个记录。HTML 表单将 ISBN 追加到变量 `$query` 中创建的 `DELETE FROM` 查询字符串中，然后将其传递给
+    `$conn` 对象的 `query` 方法以发送到 MySQL。
 - en: If `$_POST['delete']` is not set (and there is no record to be deleted), `$_POST['author']`
     and other posted values are checked. If they have all been given values, `$query`
     is set to an `INSERT INTO` command, followed by the five values to be inserted.
     The string is then passed to the `query` method.
+  id: totrans-99
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果 `$_POST['delete']` 没有设置（并且没有记录需要删除），会检查 `$_POST['author']` 和其他已发布值。如果它们都有值，`$query`
+    将设置为 `INSERT INTO` 命令，后跟要插入的五个值。然后将字符串传递给 `query` 方法。
 - en: If any query fails, the `try...catch` commands will cause an error to be issued.
     On a production website, you will not want these very programmer-oriented error
     messages to show, and you will need to replace your `CATCH` statement with one
     in which you handle the error yourself neatly and decide what sort of error message
     (if any) to give to your users.
+  id: totrans-100
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果任何查询失败，`try...catch` 命令将导致错误的发生。在生产网站上，你不希望显示这些面向程序员的错误消息，你需要将你的 `CATCH` 语句替换为一个能够整洁地处理错误并决定向用户提供何种错误消息（如果有的话）的语句。
 - en: Displaying the Form
+  id: totrans-101
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 显示表单
 - en: Before displaying the little form (as shown in [Figure 11-2](#output_from_example_10-8comma_sqltes)),
     the program sanitizes copies of the elements we will be outputting from the `$row`
     array into the variables `$r0` through `$r4` by passing them to the `htmlspecialchars`
     function, to replace any potentially dangerous HTML characters with harmless HTML
     entities.
+  id: totrans-102
   prefs: []
   type: TYPE_NORMAL
+  zh: 在显示小表单之前（如在 [图 11-2](#output_from_example_10-8comma_sqltes) 中所示），程序通过将它们传递给
+    `htmlspecialchars` 函数，将从 `$row` 数组输出的元素的副本转义到变量 `$r0` 到 `$r4` 中，以替换任何潜在危险的 HTML
+    字符为无害的 HTML 实体。
 - en: Then the part of code that displays the output follows, using an `echo <<<_END..._END`
     structure as seen in previous chapters, which outputs everything between the `_END`
     tags.
+  id: totrans-103
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来是显示输出的代码部分，使用了像在前几章中看到的 `echo <<<_END..._END` 结构输出 `_END` 标记之间的所有内容。
 - en: Note
+  id: totrans-104
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: 'Instead of using the `echo` command, the program could drop out of PHP using
     `?>`, issue the HTML, and then reenter PHP processing with `<?php`. Which style
     is used is a matter of programmer preference, but I always recommend staying within
     PHP code, for these reasons:'
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 程序可以不使用 `echo` 命令，而是使用 `?>` 退出 PHP，输出 HTML，然后使用 `<?php` 重新进入 PHP 处理。使用哪种风格是程序员的个人偏好问题，但我始终建议保持在
+    PHP 代码内部，出于以下原因：
 - en: It makes it very clear when you’re debugging (and also for other users) that
     everything within a *.php* file is PHP code. Therefore, there is no need to go
     hunting for dropouts to HTML.
+  id: totrans-106
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 它清楚地表明，当您调试时（以及其他用户时），*.php* 文件中的所有内容都是 PHP 代码。因此，没有必要去寻找回到 HTML 的点。
 - en: When you wish to include a PHP variable directly within HTML, you can just type
     it. If you had dropped back to HTML, you would have had to temporarily reenter
     PHP processing, access the variable, and then drop back out again.
+  id: totrans-107
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 当您希望直接在 HTML 中包含 PHP 变量时，您可以直接输入它。如果您回到 HTML，您将不得不暂时重新进入 PHP 处理，访问变量，然后再退出。
 - en: The HTML form section simply sets the form’s action to *sqltest.php*. This means
     that when the form is submitted, the contents of the form fields will be sent
     to the file *sqltest.php*, which is the program itself. The form is also set up
@@ -529,112 +766,162 @@
     GET requests prevents too much information appearing in server logfiles. Therefore,
     whenever possible, you should use POST submissions, which also have the benefit
     of revealing less posted data.
+  id: totrans-108
   prefs: []
   type: TYPE_NORMAL
+  zh: HTML 表单部分简单地将表单的操作设置为*sqltest.php*。这意味着当提交表单时，表单字段的内容将发送到文件*sqltest.php*，即程序本身。表单还设置为将字段作为
+    POST 请求发送，而不是 GET 请求。这是因为 GET 请求会附加到正在提交的 URL 中，并且在浏览器中可能看起来混乱。它们还允许用户轻松修改提交并尝试黑客攻击您的服务器（尽管这也可以通过浏览器开发者工具实现）。此外，避免
+    GET 请求可以防止过多的信息出现在服务器日志文件中。因此，尽可能使用 POST 提交，这还有利于减少提交的数据量。
 - en: Having output the form fields, the HTML displays a submit button with the name
     ADD RECORD and closes the form. Note the `<pre>` and `</pre>` tags here, which
     have been used to force a monospaced font that lines up all the inputs neatly.
     The carriage returns at the end of each line are also output when inside `<pre>`
     tags.
+  id: totrans-109
   prefs: []
   type: TYPE_NORMAL
+  zh: 在输出表单字段之后，HTML 显示一个名为**添加记录**的提交按钮，并关闭表单。请注意这里的`<pre>`和`</pre>`标签，它们用于强制使用等宽字体，以便所有输入都整齐地对齐。当位于`<pre>`标签内时，每行末尾的换行符也会输出。
 - en: Querying the Database
+  id: totrans-110
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 查询数据库
 - en: 'Next, the code returns to the familiar territory of [Example 11-4](#fetching_results_one_row_at_a_time),
     where a query is sent to MySQL asking to see all the records in the *classics*
     table, like this:'
+  id: totrans-111
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来，代码回到了熟悉的[示例 11-4](#fetching_results_one_row_at_a_time)领域，其中向 MySQL 发送一个查询，请求查看*classics*表中的所有记录，如下所示：
 - en: '[PRE8]'
+  id: totrans-112
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: Next a `while` loop is then entered to display the contents of each row. Then
     the program populates the array `$row` with a row of results by calling the `fetch` method
     of `$result`.
+  id: totrans-113
   prefs: []
   type: TYPE_NORMAL
+  zh: 接下来进入一个`while`循环以显示每行的内容。然后，程序通过调用`$result`的`fetch`方法，将结果行填充到数组`$row`中。
 - en: With the data in `$row`, it’s now a simple matter to display it within the heredoc
     `echo` statement that follows, in which I have chosen to use a `<pre>` tag to
     line up the display of each record in a pleasing manner.
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了`$row`中的数据，现在很容易在随后的heredoc `echo`语句中显示它，我选择使用`<pre>`标签来使每个记录的显示对齐。
 - en: 'After the display of each record, there is a second form that also posts to
     *sqltest.php* (the program itself) but this time contains two hidden fields: `delete`
     and `isbn`. The `delete` field is set to `yes` and `isbn` to the value held in
     `$row[isbn]`, which contains the ISBN for the record.'
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: 在每个记录显示后，还有一个第二个表单，也会提交到*sqltest.php*（程序本身），但这次包含两个隐藏字段：`delete`和`isbn`。`delete`字段设置为`yes`，`isbn`设置为`$row[isbn]`中包含的值，其中包含记录的
+    ISBN。
 - en: Then a submit button with the name Delete Record is displayed, and the form
     is closed. A curly brace then completes the `while` loop, which will continue
     until all records have been displayed.
+  id: totrans-116
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后显示名为**删除记录**的提交按钮，并关闭表单。然后一个花括号完成了`while`循环，该循环将继续，直到显示所有记录为止。
 - en: Finally, you see the definition for the function `get_post`, which we’ve already
     looked at. And that’s it—our first PHP program to manipulate a MySQL database.
     So, let’s check out what it can do.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 最后，您会看到函数`get_post`的定义，我们已经看过了。这就是我们的第一个 PHP 程序，用于操作 MySQL 数据库。因此，让我们看看它能做什么。
 - en: 'Once you have typed the program (and corrected any typing errors), try entering
     the following data into the various input fields to add a new record for the book
     *Moby Dick* to the database:'
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦你输入了程序（并纠正了任何输入错误），尝试在各种输入字段中输入以下数据，为书籍 *Moby Dick* 添加一个新记录到数据库中：
 - en: '[PRE9]'
+  id: totrans-119
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Running the Program
+  id: totrans-120
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 运行程序
 - en: When you have submitted this data using the Add Record button, scroll down the
     web page to see the new addition. It should look something like [Figure 11-3](#result_of_adding_moby_dick_to_the_da),
     although since we have not ordered the results using `ORDER BY` , the position
     in which it appears is undetermined.
+  id: totrans-121
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你使用“添加记录”按钮提交这些数据后，向下滚动网页以查看新添加的内容。它应该类似于 [图 11-3](#result_of_adding_moby_dick_to_the_da)，尽管由于我们没有使用 `ORDER
+    BY` 对结果进行排序，因此它出现的位置是不确定的。
 - en: '![The result of adding Moby Dick to the database](Images/pmj6_1103.png)'
+  id: totrans-122
   prefs: []
   type: TYPE_IMG
+  zh: '![向数据库中添加白鲸的结果](Images/pmj6_1103.png)'
 - en: Figure 11-3\. The result of adding Moby Dick to the database
+  id: totrans-123
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 11-3\. 向数据库中添加白鲸的结果
 - en: Now let’s look at how deleting a record works by creating a dummy record. Try
     entering just the number `1` in each of the five fields and clicking the Add Record
     button. If you now scroll down, you’ll see a new record consisting just of 1s.
     Obviously, this record isn’t useful in this table, so now click the Delete Record
     button and scroll down again to confirm that the record has been deleted.
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们看看通过创建一个虚拟记录来了解删除记录的工作原理。尝试在每个五个字段中只输入数字`1`，然后点击“添加记录”按钮。如果现在向下滚动，你会看到一个新的记录，只包含数字1。显然，在这个表中这条记录是没有用的，所以现在点击“删除记录”按钮，再次向下滚动确认记录已删除。
 - en: Note
+  id: totrans-125
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Assuming that everything worked, you are now able to add and delete records
     at will. Try doing this a few times, but leave the main records in place (including
     the new one for *Moby Dick*), as we’ll be using them later. You could also try
     adding the record with all 1s again a couple of times and note the error message
     that you receive the second time, indicating that there is already an ISBN with
     the number 1.
+  id: totrans-126
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设一切正常，现在你可以随意添加和删除记录。试着多做几次，但保留主要记录（包括 *Moby Dick* 的新记录），因为我们稍后会用到它们。你也可以尝试再次添加全1的记录几次，并注意第二次收到的错误消息，表明已经有一个
+    ISBN 号为1的记录。
 - en: Practical MySQL
+  id: totrans-127
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 实用的 MySQL
 - en: You are now ready to look at some practical techniques that you can use in PHP
     to access the MySQL database, including tasks such as creating and dropping tables;
     inserting, updating, and deleting data; and protecting your database and website
     from malicious users. Note that the following examples assume that you’ve already
     created the *login.php* program discussed earlier in this chapter.
+  id: totrans-128
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在你可以开始学习一些实用的技术，以便在 PHP 中访问 MySQL 数据库，包括创建和删除表格；插入、更新和删除数据；以及保护数据库和网站免受恶意用户的侵害。请注意，以下示例假定你已经创建了本章前面讨论过的
+    *login.php* 程序。
 - en: Creating a Table
+  id: totrans-129
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建表格
 - en: Let’s assume that you are working for a wildlife park and need to create a database
     to hold details about all the types of cats it houses. You are told that there
     are nine *families* of cats—Lion, Tiger, Jaguar, Leopard, Cougar, Cheetah, Lynx,
@@ -644,104 +931,155 @@
     perhaps to hold dietary requirements, inoculations, and other details, but for
     now that’s enough to get going. A unique identifier is also needed for each animal,
     so you also decide to create a column for that called *id*.
+  id: totrans-130
   prefs: []
   type: TYPE_NORMAL
+  zh: 假设你正在一个野生动物园工作，需要创建一个数据库来存储它所养的各种类型猫的详细信息。据告知，这里有九个猫科动物——狮子、老虎、美洲豹、豹子、美洲狮、猎豹、山猫、瓜哇金钱豹和家猫，所以你需要一个用于这个的列。然后每只猫都被赋予了一个名字，所以又需要一个列，并且你还想要跟踪它们的年龄，这是另一个列。当然，你可能以后需要更多列，比如饮食需求、接种疫苗和其他细节，但现在已经足够开始了。每个动物还需要一个唯一标识符，所以你还决定创建一个叫做
+    *id* 的列。
 - en: '[Example 11-7](#creating_a_table_called_cats) shows the code you might use
     to create a MySQL table to hold this data, with the main query assignment in bold
     text.'
+  id: totrans-131
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 11-7](#creating_a_table_called_cats) 展示了你可能用来创建一个 MySQL 表来存储这些数据的代码，其中主要查询指定为粗体文本。'
 - en: Example 11-7\. Creating a table called cats
+  id: totrans-132
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-7\. 创建一个名为 cats 的表
 - en: '[PRE10]'
+  id: totrans-133
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: As you can see, the MySQL query looks just like what you would type directly
     at the command line, except without the trailing semicolon.
+  id: totrans-134
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你所看到的，MySQL 查询看起来就像直接在命令行中键入的内容，只是没有末尾的分号。
 - en: Describing a Table
+  id: totrans-135
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 描述表格
 - en: When you aren’t logged in to the MySQL command line, here’s a handy piece of
     code that you can use to verify that a table has been correctly created from inside
     a browser. It simply issues the query `DESCRIBE cats` and then outputs an HTML
     table with four headings—*Column*, *Type*, *Null*, and *Key*—underneath which
     all columns within the table are shown. To use it with other tables, simply replace
     the name `cats` in the query with that of the new table (see [Example 11-8](#describing_the_table_cats)).
+  id: totrans-136
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你未登录到 MySQL 命令行时，这里有一段方便的代码可以在浏览器内部验证表格是否已经正确创建。它简单地执行查询`DESCRIBE cats`，然后输出一个带有四个标题——*Column*、*Type*、*Null*
+    和 *Key*——以及表格中所有列的 HTML 表格。要在其他表格中使用它，只需将查询中的`cats`替换为新表格的名称（参见[示例 11-8](#describing_the_table_cats)）。
 - en: Example 11-8\. Describing the cats table
+  id: totrans-137
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-8\. 描述 cats 表格
 - en: '[PRE11]'
+  id: totrans-138
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'See how the PDO fetch style of `FETCH_NUM` is used to return a numeric array
     so that it is easy to display the contents of the returned data without using
     names. The output from the program should look like this:'
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 看看如何使用`FETCH_NUM`的 PDO 获取样式返回数值数组，以便轻松显示返回数据的内容，而不使用名称。程序的输出应如下所示：
 - en: '[PRE12]'
+  id: totrans-140
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Dropping a Table
+  id: totrans-141
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 删除表格
 - en: Dropping a table is very easy to do and is therefore very dangerous, so be careful.
     [Example 11-9](#dropping_the_table_cats) shows the code that you need. However,
     I don’t recommend that you try it until you have been through the other examples
     (up to [“Performing Additional Queries”](#performing_additional_queries)), as
     it will drop the table *cats* and you’ll have to re-create it using [Example 11-7](#creating_a_table_called_cats).
+  id: totrans-142
   prefs: []
   type: TYPE_NORMAL
+  zh: 删除表格非常容易，因此非常危险，请务必小心。[示例 11-9](#dropping_the_table_cats) 显示了您需要的代码。但是，在您通过其他示例（直到[“执行其他查询”](#performing_additional_queries)）之前，我不建议您尝试它，因为它将删除表
+    *cats*，您将需要使用 [示例 11-7](#creating_a_table_called_cats) 重新创建它。
 - en: Example 11-9\. Dropping the cats table
+  id: totrans-143
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-9\. 删除 cats 表格
 - en: '[PRE13]'
+  id: totrans-144
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: Adding Data
+  id: totrans-145
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 添加数据
 - en: Let’s add some data to the table now, using the code in [Example 11-10](#adding_data_to_table_cats).
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们使用 [示例 11-10](#adding_data_to_table_cats) 中的代码向表格中添加一些数据。
 - en: Example 11-10\. Adding data to the cats table
+  id: totrans-147
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-10\. 向 cats 表格添加数据
 - en: '[PRE14]'
+  id: totrans-148
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: 'You may wish to add a couple more items of data by modifying `$query` as follows
     and calling up the program in your browser again:'
+  id: totrans-149
   prefs: []
   type: TYPE_NORMAL
+  zh: 你可能希望通过修改 `$query` 来添加一些更多的数据项，然后再次在浏览器中调用程序：
 - en: '[PRE15]'
+  id: totrans-150
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: By the way, notice the `NULL` value passed as the first parameter? This is because
     the *id* column is of type `AUTO_INCREMENT`, and MySQL will decide what value
     to assign according to the next available number in sequence. So, we simply pass
     a `NULL` value, which will be ignored.
+  id: totrans-151
   prefs: []
   type: TYPE_NORMAL
+  zh: 顺便提一句，注意作为第一个参数传递的`NULL`值？这是因为 *id* 列的类型是 `AUTO_INCREMENT`，MySQL 将根据序列中的下一个可用编号决定分配什么值。因此，我们只需传递一个`NULL`值，这将被忽略。
 - en: Of course, the most efficient way to populate MySQL with data is to create an
     array and insert the data with a single query.
+  id: totrans-152
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，用数组创建并插入数据是将数据快速填充到 MySQL 中的最有效方法。
 - en: Note
+  id: totrans-153
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: At this point in the book, I am concentrating on showing you how to directly
     insert data into MySQL (and providing some security precautions to keep the process
     safe). However, later in this book we’ll move on to a better method you can employ
@@ -749,328 +1087,486 @@
     which make it virtually impossible for users to inject malicious hacks into your
     database. So, as you read this section, do understand that these are the basics
     of how MySQL insertion works, and remember that we will improve upon it later.
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: 在本书的这一部分，我专注于向您展示如何直接将数据插入到 MySQL 中（并提供一些保持过程安全的安全预防措施）。然而，在本书的后续部分，我们将介绍一种更好的方法，您可以使用占位符（见[“使用占位符”](#using_placeholders)），这几乎使用户无法向数据库中注入恶意攻击。因此，在阅读本节时，请理解这是
+    MySQL 插入操作的基础知识，并记住我们将在以后进一步完善它。
 - en: Retrieving Data
+  id: totrans-155
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 检索数据
 - en: Now that some data has been entered into the *cats* table, [Example 11-11](#retrieving-rows-from-the-cats-table) shows
     how you can check that it was correctly inserted.
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在已经向 *cats* 表格中输入了一些数据，[示例 11-11](#retrieving-rows-from-the-cats-table) 显示了如何检查其是否已正确插入。
 - en: Example 11-11\. Retrieving rows from the cats table
+  id: totrans-157
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-11\. 从 cats 表格检索行
 - en: '[PRE16]'
+  id: totrans-158
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: 'This code simply issues the MySQL query `SELECT * FROM cats` and then displays
     all the rows returned by requiring them in the form of numerically accessed arrays
     with the style of `PDO::FETCH_NUM`. Its output is as follows:'
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 此代码只需执行 MySQL 查询`SELECT * FROM cats`，然后显示所有以数值方式访问的数组形式返回的行。其输出如下：
 - en: '[PRE17]'
+  id: totrans-160
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Here you can see that the *id* column has correctly auto-incremented.
+  id: totrans-161
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，您可以看到*id*列已经正确地自动增加。
 - en: Updating Data
+  id: totrans-162
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 更新数据
 - en: Changing data that you have already inserted is also quite simple. Did you notice
     the spelling of *Charly* for the cheetah’s name? Let’s correct that to *Charlie*,
     as in [Example 11-12](#renaming_charly_the_cheetah_to_charlie).
+  id: totrans-163
   prefs: []
   type: TYPE_NORMAL
+  zh: 修改您已经插入的数据也非常简单。您是否注意到猎豹Charly的名字的拼写错误？让我们将其更正为Charlie，就像[示例 11-12](#renaming_charly_the_cheetah_to_charlie)中所示。
 - en: Example 11-12\. Changing the name Charly the cheetah to Charlie
+  id: totrans-164
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-12\. 将猎豹Charly的名称更改为Charlie
 - en: '[PRE18]'
+  id: totrans-165
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: 'If you run [Example 11-11](#retrieving-rows-from-the-cats-table) again, you’ll
     see that it now outputs the following:'
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您再次运行[示例 11-11](#retrieving-rows-from-the-cats-table)，您将看到它现在输出以下内容：
 - en: '[PRE19]'
+  id: totrans-167
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: Deleting Data
+  id: totrans-168
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 删除数据
 - en: Growler the cougar has been transferred to another zoo, so it’s time to remove
     him from the database; see [Example 11-13](#removing_growler_the_cougar_from_the_cat).
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: Cougar Growler已被转移到另一个动物园，所以现在是时候从数据库中删除它了；参见[示例 11-13](#removing_growler_the_cougar_from_the_cat)。
 - en: Example 11-13\. Removing Growler the cougar from the cats table
+  id: totrans-170
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-13\. 从cats表中删除Cougar Growler
 - en: '[PRE20]'
+  id: totrans-171
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'This uses a standard `DELETE FROM` query, and when you run [Example 11-11](#retrieving-rows-from-the-cats-table),
     you can see that the row has been removed in the following output:'
+  id: totrans-172
   prefs: []
   type: TYPE_NORMAL
+  zh: 这使用了标准的`DELETE FROM`查询，当您运行[示例 11-11](#retrieving-rows-from-the-cats-table)时，您可以看到行已在以下输出中被移除：
 - en: '[PRE21]'
+  id: totrans-173
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Using AUTO_INCREMENT
+  id: totrans-174
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用AUTO_INCREMENT
 - en: 'When using `AUTO_INCREMENT`, you cannot know what value has been given to a
     column before a row is inserted. Instead, if you need to know it, you must ask
     MySQL afterward using the `mysql_insert_id` function. This need is common: for
     instance, when you process a purchase, you might insert a new customer into a
     *Customers* table and then refer to the newly created *CustId* when inserting
     a purchase into the *Purchases* table.'
+  id: totrans-175
   prefs: []
   type: TYPE_NORMAL
+  zh: 当使用`AUTO_INCREMENT`时，您无法知道在插入行之前列已经被赋予了什么值。相反，如果您需要知道它，您必须在之后使用`mysql_insert_id`函数询问MySQL。这种需求很常见：例如，当您处理购买时，您可能会将新客户插入*Customers*表中，然后在将购买插入*Purchases*表时引用新创建的*CustId*。
 - en: Note
+  id: totrans-176
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Using `AUTO_INCREMENT` is recommended instead of selecting the highest ID in
     the *id* column and incrementing it by one, because concurrent queries could change
     the values in that column after the highest value has been fetched and before
     the calculated value is stored.
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 建议使用`AUTO_INCREMENT`而不是选择*id*列中的最高ID并将其递增一，因为并发查询可能会在获取最高值后并在计算值存储之前更改该列中的值。
 - en: '[Example 11-10](#adding_data_to_table_cats) can be rewritten as [Example 11-14](#adding_data_to_table_cats_and_reporting)
     to display this value after each insert.'
+  id: totrans-178
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 11-10](#adding_data_to_table_cats)可以重写为[示例 11-14](#adding_data_to_table_cats_and_reporting)，以在每次插入后显示此值。'
 - en: Example 11-14\. Adding data to the cats table and reporting the insert ID
+  id: totrans-179
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-14\. 向cats表中添加数据并报告插入ID
 - en: '[PRE22]'
+  id: totrans-180
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: 'The contents of the table should now look like the following (note how the
     previous *id* value of `2` is *not* reused, as this could cause complications
     in some instances):'
+  id: totrans-181
   prefs: []
   type: TYPE_NORMAL
+  zh: 表的内容现在应该像下面这样（请注意先前的*id*值为`2`没有被重用，因为这可能在某些情况下会引起问题）：
 - en: '[PRE23]'
+  id: totrans-182
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: Using insert IDs
+  id: totrans-183
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 使用插入ID
 - en: 'It’s very common to insert data in multiple tables: a book followed by its
     author, a customer followed by their purchase, and so on. When doing this with
     an auto-increment column, you will need to retain the insert ID returned for storing
     in the related table.'
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 在多个表中插入数据是非常常见的：一本书及其作者，一个客户及其购买记录等等。当在具有自动增量列的情况下进行此操作时，您需要保留返回的插入ID以存储在相关表中。
 - en: 'For example, let’s assume that these cats can be “adopted” by the public as
     a means of raising funds, and that when a new cat is stored in the *cats* table,
     we also want to create a key to tie it to the animal’s adoptive owner. The code
     to do this is similar to that in [Example 11-14](#adding_data_to_table_cats_and_reporting),
     except that the returned insert ID is stored in the variable `$insertID` and is
     then used as part of the subsequent query:'
+  id: totrans-185
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，假设这些猫可以作为筹集资金的手段被公众“领养”，当新猫被存储在*cats*表中时，我们还希望创建一个键将其与动物的领养主绑定。用于实现此目的的代码类似于[示例 11-14](#adding_data_to_table_cats_and_reporting)，不同之处在于返回的插入ID存储在变量`$insertID`中，并作为后续查询的一部分使用：
 - en: '[PRE24]'
+  id: totrans-186
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: Now the cat is connected to its “owner” through the cat’s unique ID, which was
     created automatically by `AUTO_INCREMENT`. This example, and especially the last
     two lines, is theoretical code showing how to use an insert ID as a key if we
     had created a table called `owners`.
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，通过猫的唯一ID将猫连接到其“所有者”，该ID是通过`AUTO_INCREMENT`自动创建的。此示例，尤其是最后两行，是展示如何在我们创建了一个名为`owners`的表后，如何使用插入ID作为键的理论代码。
 - en: Performing Additional Queries
+  id: totrans-188
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 执行附加查询
 - en: Okay, that’s enough feline fun. To explore some slightly more complex queries,
     we need to revert to using the *customers* and *classics* tables that you created
     in [Chapter 8](ch08.xhtml#introduction_to_mysql). There will be two customers
     in the *customers* table; the *classics* table holds the details of a few books.
     They also share a common column of ISBNs, called *isbn*, that you can use to perform
     additional queries.
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 好了，关于猫的趣味就到此为止。要探索一些稍微复杂的查询，我们需要恢复使用您在[第8章](ch08.xhtml#introduction_to_mysql)中创建的*customers*和*classics*表。*customers*表中将有两位客户；*classics*表包含一些书籍的详细信息。它们还共享一个名为*isbn*的常见列，您可以使用它来执行附加查询。
 - en: For example, to display all of the customers along with the titles and authors
     of the books they have bought, you can use the code in [Example 11-15](#performing_a_secondary_query).
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，要显示所有客户以及他们购买的书籍的标题和作者，您可以使用[示例 11-15](#performing_a_secondary_query)中的代码。
 - en: Example 11-15\. Performing a secondary query
+  id: totrans-191
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-15\. 执行次要查询
 - en: '[PRE25]'
+  id: totrans-192
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: 'This program uses an initial query to the *customers* table to look up all
     the customers and then, given the ISBNs of the books each customer purchased,
     makes a new query to the *classics* table to find out the title and author for
     each. The output from this code should be similar to the following:'
+  id: totrans-193
   prefs: []
   type: TYPE_NORMAL
+  zh: 此程序使用对*customers*表的初始查询来查找所有客户，然后根据每个客户购买的书籍的ISBN，对*classics*表进行新的查询，以查找每本书的标题和作者。此代码的输出应类似于以下内容：
 - en: '[PRE26]'
+  id: totrans-194
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: Note
+  id: totrans-195
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: 'Of course, although it wouldn’t illustrate performing additional queries, in
     this particular case you could also return the same information using a `NATURAL
     JOIN` query (see [Chapter 8](ch08.xhtml#introduction_to_mysql)), like this:'
+  id: totrans-196
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，尽管它不会说明执行附加查询，但在这种特定情况下，您也可以使用`NATURAL JOIN`查询返回相同的信息（参见[第8章](ch08.xhtml#introduction_to_mysql)），如下所示：
 - en: '[PRE27]'
+  id: totrans-197
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: Preventing Hacking Attempts
+  id: totrans-198
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 防止黑客攻击
 - en: 'If you haven’t looked into it, you may find it hard to appreciate just how
     dangerous it is to pass user input unchecked to MySQL. For example, suppose you
     have a simple piece of code to verify a user, and it looks like this:'
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您还没有研究过，您可能很难意识到将未经检查的用户输入传递给MySQL有多么危险。例如，假设您有一个简单的代码片段来验证用户，看起来像这样：
 - en: '[PRE28]'
+  id: totrans-200
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE28]'
 - en: 'At first glance, you might think this code is perfectly fine. If the user enters
     values of `fredsmith` and `mypass` for `$user` and `$pass`, respectively, then
     the query string, as passed to MySQL, will be as follows:'
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: 乍一看，您可能会认为这段代码完全没问题。如果用户为`$user`和`$pass`分别输入`fredsmith`和`mypass`的值，则作为传递给MySQL的查询字符串将如下所示：
 - en: '[PRE29]'
+  id: totrans-202
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE29]'
 - en: This is all well and good, but what if someone enters the following for `$user`
     (and doesn’t even enter anything for `$pass`)?
+  id: totrans-203
   prefs: []
   type: TYPE_NORMAL
+  zh: 这一切都很好，但是如果有人为`$user`输入以下内容（甚至不为`$pass`输入任何内容）会怎么样？
 - en: '[PRE30]'
+  id: totrans-204
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE30]'
 - en: 'Let’s look at the string that would be sent to MySQL:'
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 让我们看一下将发送到MySQL的字符串：
 - en: '[PRE31]'
+  id: totrans-206
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE31]'
 - en: Do you see the problem there? An *SQL injection* attack has occurred. In MySQL,
     the `#` symbol represents the start of a comment. Therefore, the user will be
     logged in as *admin* (assuming there is a user *admin*), without having to enter
     a password. In the following, the part of the query that will be executed is shown
     in bold; the rest will be ignored.
+  id: totrans-207
   prefs: []
   type: TYPE_NORMAL
+  zh: 您看到问题了吗？发生了*SQL注入*攻击。在MySQL中，`#`符号表示注释的开始。因此，用户将以*管理员*（假设存在用户*admin*）身份登录，而无需输入密码。以下是将执行的查询部分显示为粗体；其余部分将被忽略。
 - en: '[PRE32]'
+  id: totrans-208
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE32]'
 - en: 'But you should count yourself very lucky if that’s all a malicious user does
     to you. At least you might still be able to go into your application and undo
     any changes the user makes as *admin*. But what about the case in which your application
     code removes a user from the database? The code might look something like this:'
+  id: totrans-209
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，如果这只是一个恶意用户对您做的一切，您可以算自己非常幸运。至少您可能仍然可以进入应用程序并撤消用户作为*管理员*所做的任何更改。但是，如果您的应用程序代码从数据库中删除用户呢？代码可能看起来像这样：
 - en: '[PRE33]'
+  id: totrans-210
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE33]'
 - en: Again, this looks quite normal at first glance, but what if someone entered
     the following for `$user`?
+  id: totrans-211
   prefs: []
   type: TYPE_NORMAL
+  zh: 再次，乍一看，这看起来很正常，但是如果有人为`$user`输入以下内容会怎样？
 - en: '[PRE34]'
+  id: totrans-212
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE34]'
 - en: 'This would be interpreted by MySQL as follows:'
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: MySQL将按以下方式解释这个字符串：
 - en: '[PRE35]'
+  id: totrans-214
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE35]'
 - en: 'Ouch—because of the fact that any statement followed by `OR 1=1` is always `TRUE`,
     that SQL query will always be `TRUE`, and therefore, since the rest of the statement
     is ignored due to the # character, you’ve now lost your whole *users* database!
     So what can you do about this kind of attack?'
+  id: totrans-215
   prefs: []
   type: TYPE_NORMAL
+  zh: '噢——由于任何陈述后面跟着的`OR 1=1`都会始终为`TRUE`，所以该 SQL 查询将始终为`TRUE`，因此，由于 # 字符而忽略了其余部分的陈述，您现在失去了整个*用户*数据库！那么对于这种攻击，你能做些什么呢？'
 - en: Steps You Can Take
+  id: totrans-216
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 您可以采取的步骤
 - en: The first thing is not to rely on PHP’s built-in *magic quotes*, which automatically
     escape any characters such as single and double quotes by prefacing them with
     a backslash (`\`). Why? Because this feature can be turned off. Many programmers
     do so in order to put their own security code in place, and there is no guarantee
     that this hasn’t happened on the server you are working on. In fact, the feature
     was deprecated as of PHP 5.3.0 and removed in PHP 5.4.0.
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 首先，不要依赖于 PHP 的内置*魔术引号*，它会自动转义任何字符，例如单引号和双引号，并在它们之前加上反斜杠（`\`）。为什么？因为此功能可以关闭。许多程序员这样做是为了在服务器上放置他们自己的安全代码，并不能保证这在您所使用的服务器上没有发生。实际上，此功能已自
+    PHP 5.3.0 起不建议使用，并在 PHP 5.4.0 中删除。
 - en: Instead, as we showed earlier on, you could use the `quote` method of the PDO
     object to escape all characters and surround strings with quotation marks. [Example 11-16](#how_to_properly_sanitize_user_input_for)
     is a function you can use that will remove any magic quotes added to a user-inputted
     string and then properly sanitize it for you.
+  id: totrans-218
   prefs: []
   type: TYPE_NORMAL
+  zh: 相反，正如我们之前展示的那样，你可以使用 PDO 对象的`quote`方法来转义所有字符并用引号包围字符串。[示例 11-16](#how_to_properly_sanitize_user_input_for)
+    是一个你可以使用的函数，它将删除用户输入字符串中添加的任何魔术引号，然后为您正确地进行了清理。
 - en: Example 11-16\. How to properly sanitize user input for MySQL
+  id: totrans-219
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-16\. 如何正确清理 MySQL 的用户输入
 - en: '[PRE36]'
+  id: totrans-220
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE36]'
 - en: The `get_magic_quotes_gpc` function returns `TRUE` if magic quotes are active.
     In that case, any slashes that have been added to a string have to be removed,
     or the `quote` method could end up double-escaping some characters, creating corrupted
     strings. [Example 11-17](#how_to_safely_access_mysql_with_user_inp) illustrates
     how you would incorporate `mysql_fix_string` within your own code.
+  id: totrans-221
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果魔术引号处于活动状态，则`get_magic_quotes_gpc`函数将返回`TRUE`。在这种情况下，必须删除添加到字符串中的任何反斜杠，否则`quote`方法可能会导致一些字符双重转义，从而创建损坏的字符串。[示例 11-17](#how_to_safely_access_mysql_with_user_inp)
+    演示了如何在您自己的代码中使用`mysql_fix_string`。
 - en: Example 11-17\. How to safely access MySQL with user input
+  id: totrans-222
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-17\. 如何安全地使用用户输入访问 MySQL
 - en: '[PRE37]'
+  id: totrans-223
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE37]'
 - en: Note
+  id: totrans-224
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: 'Remember that, because the quote method automatically adds quotes around strings,
     you should *not* use them in any query that uses these sanitized strings. So,
     in place of using this:'
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: 请记住，由于引号方法会自动在字符串周围添加引号，因此您*不应*在任何使用这些经过清理的字符串的查询中使用它们。因此，在使用以下查询之前：
 - en: '[PRE38]'
+  id: totrans-226
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE38]'
 - en: 'you should enter the following:'
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: 您应该输入以下内容：
 - en: '[PRE39]'
+  id: totrans-228
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE39]'
 - en: These precautions are becoming less important, however, because there’s a much
     easier and safer way to access MySQL, which obviates the need for these types
     of functions—the use of placeholders, which is explained next.
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，这些预防措施正变得不那么重要，因为有一种更简单和更安全的访问 MySQL 的方法，可以避免这些类型的函数——即使用占位符，下面将对此进行解释。
 - en: Using Placeholders
+  id: totrans-230
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用占位符
 - en: All the methods you have seen so far work with MySQL but had security implications,
     with strings constantly requiring escaping to prevent security risks. So, now
     that you know the basics, let me introduce the best and recommended way to interact
@@ -1078,104 +1574,153 @@
     read this section, you should no longer use direct inserting of data into MySQL
     (though it was important to show you how to do this) but should always use placeholders
     instead.
+  id: totrans-231
   prefs: []
   type: TYPE_NORMAL
+  zh: 到目前为止，您看到的所有方法都适用于 MySQL，但都存在安全风险，因为字符串需要不断转义以防止安全风险。因此，现在您已经了解了基础知识，让我介绍与 MySQL
+    交互的最佳和推荐方法，从安全角度来看几乎是防弹的。阅读完本节后，您不应再直接将数据插入 MySQL（尽管重要的是向您展示如何做到这一点），而应始终使用占位符。
 - en: So what are placeholders? They are positions within prepared statements in which
     data is transferred directly to the database, without the possibility of user-submitted
     (or other) data being interpreted as MySQL statements (and the potential for hacking
     that could then result).
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: 那么什么是占位符？它们是准备语句中的位置，其中数据直接传输到数据库，无法将用户提交的（或其他）数据解释为 MySQL 语句（以及可能导致的黑客攻击）。
 - en: The technology works by requiring you to first prepare the statement you wish
     to be executed in MySQL but leave all the parts of the statement that refer to
     data as simple question marks.
+  id: totrans-233
   prefs: []
   type: TYPE_NORMAL
+  zh: 这项技术要求您首先准备要在MySQL中执行的语句，但是保留所有与数据有关的语句部分为简单的问号。
 - en: In plain MySQL, prepared statements look like [Example 11-18](#mysql_placeholders).
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 在普通的MySQL中，准备语句看起来像[示例 11-18](#mysql_placeholders)。
 - en: Example 11-18\. MySQL placeholders
+  id: totrans-235
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-18\. MySQL占位符
 - en: '[PRE40]'
+  id: totrans-236
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE40]'
 - en: 'This can be cumbersome to submit to MySQL, so the `PDO` extension makes handling
     placeholders easier for you with a ready-made method called `prepare`, which you
     call like this:'
+  id: totrans-237
   prefs: []
   type: TYPE_NORMAL
+  zh: 这可能对提交到MySQL很繁琐，因此`PDO`扩展使您更容易处理占位符，提供了一个名为`prepare`的现成方法，您可以像这样调用它：
 - en: '[PRE41]'
+  id: totrans-238
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE41]'
 - en: 'The object `$stmt` (which is shorthand for *statement*) returned by this method
     is then used for sending the data to the server in place of the question marks.
     Its first use is to bind some PHP variables to each of the question marks (the
     placeholder parameters) in turn, like this:'
+  id: totrans-239
   prefs: []
   type: TYPE_NORMAL
+  zh: 该方法返回的对象`$stmt`（简称*statement*）用于将数据发送到服务器，代替问题标记。首次使用是将一些PHP变量绑定到每个问题标记（占位符参数）中，如下所示：
 - en: '[PRE42]'
+  id: totrans-240
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE42]'
 - en: The first argument to `bindParam` is a number representing the position in the
     query string of the value to insert (in other words, which question mark placeholder
     is being referred to). This is followed by the variable that will supply the data
     for that placeholder, and then the type of data the variable must be, and, if
     a string, another value follows stating its maximum length.
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: '`bindParam`的第一个参数是表示要插入的值在查询字符串中的位置的数字（换句话说，指的是哪个问号占位符），其后是将为该占位符提供数据的变量，然后是变量必须是的数据类型，如果是字符串，还有另一个值指定其最大长度。'
 - en: 'With the variables bound to the prepared statement, it is now necessary to
     populate them with the data to be passed to MySQL, like this:'
+  id: totrans-242
   prefs: []
   type: TYPE_NORMAL
+  zh: 当将变量绑定到准备好的语句中时，现在有必要填充它们的数据传递给MySQL，就像这样：
 - en: '[PRE43]'
+  id: totrans-243
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE43]'
 - en: 'At this point, PHP has everything it needs to execute the prepared statement,
     so you can issue the following command, which calls the `execute` method of the
     `$stmt` object created earlier, passing the values to be inserted in the form
     of an array:'
+  id: totrans-244
   prefs: []
   type: TYPE_NORMAL
+  zh: 此时，PHP已经拥有执行准备语句所需的一切，因此您可以发出以下命令，调用先前创建的`$stmt`对象的`execute`方法，并将要插入的值作为数组传递：
 - en: '[PRE44]'
+  id: totrans-245
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE44]'
 - en: 'Before going any further, it makes sense to verify whether the command was
     executed successfully. Here’s how you can do that by calling the `rowCount` method
     of `$stmt`:'
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 在继续之前，验证命令是否成功执行是有意义的。以下是您如何通过调用`$stmt`的`rowCount`方法来执行验证：
 - en: '[PRE45]'
+  id: totrans-247
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE45]'
 - en: In this case, the output should indicate that one row was inserted.
+  id: totrans-248
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这种情况下，输出应指示已插入一行。
 - en: When you put all this together, the result is [Example 11-19](#issuing_prepared_statements).
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你把所有这些结合起来，结果就是[示例 11-19](#issuing_prepared_statements)。
 - en: Example 11-19\. Issuing prepared statements
+  id: totrans-250
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-19\. 发出准备语句
 - en: '[PRE46]'
+  id: totrans-251
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE46]'
 - en: Every time you are able to use prepared statements in place of nonprepared ones,
     you will be closing a potential security hole, so it’s worth spending some time
     getting to know how to use them.
+  id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: 每当你能够在非准备语句的地方使用准备语句时，你都将关闭一个潜在的安全漏洞，因此值得花些时间了解如何使用它们。
 - en: Preventing JavaScript Injection into HTML
+  id: totrans-253
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 防止JavaScript注入到HTML中
 - en: There’s another type of injection you need to concern yourself about—not for
     the safety of your own websites but for your users’ privacy and protection. That’s
     *cross-site scripting*, also referred to as an *XSS attack*.
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: 还有另一种类型的注入需要关注——不是为了您自己网站的安全，而是为了用户的隐私和保护。那就是*跨站脚本攻击*，也称为*XSS攻击*。
 - en: This occurs when you allow HTML or, more often, JavaScript code to be input
     by a user and then displayed by your website. One place this is common is in a
     comment form. What happens most often is that a malicious user will try to write
@@ -1184,93 +1729,139 @@
     that could enable session hijacking (in which a user’s login is taken over by
     a hacker, who could then take over that person’s account!). Or the malicious user
     might launch an attack to download a Trojan onto a user’s computer.
+  id: totrans-255
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你允许用户输入HTML或者更常见的JavaScript代码，并且在你的网站上显示时，这种情况就会发生。一个常见的场景是在评论表单中。最常见的情况是，恶意用户会尝试编写代码，从你网站的用户那里窃取cookie，甚至可以发现用户名和密码对（如果处理不当），或者其他可能导致会话劫持的信息（即黑客接管用户登录，然后接管该人的账户！）。或者恶意用户可能会发起攻击，下载特洛伊木马到用户的计算机上。
 - en: 'Preventing this is as simple as calling the `htmlentities` function, which
     strips out all HTML markup and replaces it with a form that displays the characters
     but does not allow a browser to act on them. For example, consider this HTML:'
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: 防止这种情况发生就像调用 `htmlentities` 函数一样简单，它会剥离所有的 HTML 标记并用一种显示字符但不允许浏览器执行的形式替换它们。例如，考虑以下
+    HTML：
 - en: '[PRE47]'
+  id: totrans-257
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE47]'
 - en: 'This code loads in a JavaScript program and then executes malicious functions.
     But if it is first passed through `htmlentities`, it will be turned into the following
     totally harmless string:'
+  id: totrans-258
   prefs: []
   type: TYPE_NORMAL
+  zh: 此代码加载一个 JavaScript 程序，然后执行恶意函数。但如果先通过 `htmlentities` 处理，它将变成以下完全无害的字符串：
 - en: '[PRE48]'
+  id: totrans-259
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE48]'
 - en: Therefore, if you are ever going to display anything that your users enter,
     either immediately or after storing it in a database, you need to first sanitize
     it using the `htmlentities` function. To do this, I recommend that you create
     a new function, like the first one in [Example 11-20](#functions_for_preventing_both_sql_and_xs),
     which can sanitize for both SQL and XSS injections.
+  id: totrans-260
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，如果您要显示用户输入的任何内容，无论是立即显示还是在将其存储到数据库后显示，都需要首先使用 `htmlentities` 函数对其进行清理。为此，建议您创建一个新函数，就像[示例 11-20](#functions_for_preventing_both_sql_and_xs)中的第一个函数一样，可以同时清理
+    SQL 和 XSS 注入。
 - en: Example 11-20\. Functions for preventing both SQL and XSS injection attacks
+  id: totrans-261
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-20\. 用于预防 SQL 和 XSS 注入攻击的函数
 - en: '[PRE49]'
+  id: totrans-262
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE49]'
 - en: The `mysql_entities_fix_string` function first calls `mysql_fix_string` and
     then passes the result through `htmlentities` before returning the fully sanitized
     string. To use either of these functions, you must already have an active connection
     object open to a MySQL database.
+  id: totrans-263
   prefs: []
   type: TYPE_NORMAL
+  zh: '`mysql_entities_fix_string` 函数首先调用 `mysql_fix_string`，然后将结果通过 `htmlentities`
+    处理后返回完全清理过的字符串。要使用这两个函数之一，您必须已经有一个活动的连接对象打开到一个 MySQL 数据库。'
 - en: '[Example 11-21](#how_to_safely_access_mysql_and_prevent_x) shows the new “higher
     protection” version of [Example 11-17](#how_to_safely_access_mysql_with_user_inp).
     This is just example code, and you need to add the code to access the results
     returned where you see the `//Etc...` comment line.'
+  id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 11-21](#how_to_safely_access_mysql_and_prevent_x) 展示了[示例 11-17](#how_to_safely_access_mysql_with_user_inp)的新“更高保护”版本。这只是示例代码，您需要在看到
+    `//Etc...` 注释行的地方添加访问返回结果的代码。'
 - en: Example 11-21\. How to safely access MySQL and prevent XSS attacks
+  id: totrans-265
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 11-21\. 如何安全访问 MySQL 并预防 XSS 攻击
 - en: '[PRE50]'
+  id: totrans-266
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE50]'
 - en: Questions
+  id: totrans-267
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 问题
 - en: How do you connect to a MySQL database using PDO?
+  id: totrans-268
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何使用 PDO 连接到 MySQL 数据库？
 - en: How do you submit a query to MySQL using PDO?
+  id: totrans-269
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何使用 PDO 向 MySQL 提交查询？
 - en: What style of the `fetch` method can be used to return a row as an array indexed
     by column number?
+  id: totrans-270
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 什么样的 `fetch` 方法可以用来将行作为按列编号的数组返回？
 - en: How can you manually close a PDO connection?
+  id: totrans-271
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何手动关闭 PDO 连接？
 - en: When adding a row to a table with an `AUTO_INCREMENT` column, what value should
     be passed to that column?
+  id: totrans-272
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在向具有 `AUTO_INCREMENT` 列的表添加行时，该列应传递什么值？
 - en: Which PDO method can be used to properly escape user input to prevent code injection?
+  id: totrans-273
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 哪个 PDO 方法可以用来正确转义用户输入以防止代码注入？
 - en: What is the best way to ensure database security when accessing it?
+  id: totrans-274
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在访问数据库时确保数据库安全的最佳方法是什么？
 - en: See [“Chapter 11 Answers”](app01_split_010.xhtml#chapter_11_answers) in the
     [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions) for the
     answers to these questions.
+  id: totrans-275
   prefs: []
   type: TYPE_NORMAL
+  zh: 请查看[“第 11 章答案”](app01_split_010.xhtml#chapter_11_answers)在[附录 A](app01_split_000.xhtml#solutions_to_the_chapter_questions)中查找这些问题的答案。

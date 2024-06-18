@@ -1,68 +1,96 @@
 - en: Chapter 9\. Mastering MySQL
+  id: totrans-0
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 第9章。精通MySQL
 - en: '[Chapter 8](ch08.xhtml#introduction_to_mysql) provided you with a good grounding
     in the practice of using relational databases with the Structured Query Language.
     You’ve learned about creating databases and the tables they comprise, as well
     as inserting, looking up, changing, and deleting data.'
+  id: totrans-1
   prefs: []
   type: TYPE_NORMAL
+  zh: '[第8章](ch08.xhtml#introduction_to_mysql)为您提供了使用结构化查询语言的关系数据库实践的良好基础。您已经了解了如何创建数据库及其包含的表，以及插入、查找、更改和删除数据。'
 - en: With that knowledge under your belt, we now need to look at how to design databases
     for maximum speed and efficiency. For example, how do you decide what data to
     place in which table? Well, over the years, a number of guidelines have been developed
     that—if you follow them—ensure that your databases will be efficient and capable
     of growing as you feed them more and more data.
+  id: totrans-2
   prefs: []
   type: TYPE_NORMAL
+  zh: 掌握了这些知识后，我们现在需要看看如何设计数据库以实现最大速度和效率。例如，您如何决定将哪些数据放在哪个表中？多年来，已经制定了许多指导原则，如果您遵循这些原则，可以确保您的数据库高效，并且能够随着数据的增加而增长。
 - en: Database Design
+  id: totrans-3
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 数据库设计
 - en: It’s very important that you design a database correctly before you start to
     create it; otherwise, you are almost certainly going to have to go back and change
     it by splitting up some tables, merging others, and moving various columns about
     in order to achieve sensible relationships that MySQL can easily use.
+  id: totrans-4
   prefs: []
   type: TYPE_NORMAL
+  zh: 在开始创建数据库之前，正确设计数据库非常重要；否则，您几乎肯定需要返回并更改它，分割一些表，合并其他表，并移动各种列，以建立MySQL可以轻松使用的合理关系。
 - en: 'Sitting down with a sheet of paper and a pencil and writing down a selection
     of the queries that you think you and your users are likely to ask is an excellent
     starting point. In the case of an online bookstore’s database, some of your questions
     could be:'
+  id: totrans-5
   prefs: []
   type: TYPE_NORMAL
+  zh: 坐下来，拿起一张纸和一支铅笔，写下您认为您和您的用户可能会问的一些查询是一个很好的起点。对于在线书店的数据库，您的一些问题可能是：
 - en: How many authors, books, and customers are in the database?
+  id: totrans-6
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 数据库中有多少作者、书籍和客户？
 - en: Which author wrote a certain book?
+  id: totrans-7
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 哪位作者写了某本书？
 - en: Which books were written by a certain author?
+  id: totrans-8
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 哪些书是某个作者写的？
 - en: What is the most expensive book?
+  id: totrans-9
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 哪本书是最贵的？
 - en: What is the best-selling book?
+  id: totrans-10
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 哪本书是畅销书？
 - en: Which books have not sold this year?
+  id: totrans-11
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 哪些书今年没有销售？
 - en: Which books did a certain customer buy?
+  id: totrans-12
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 特定客户购买了哪些书籍？
 - en: Which books have been purchased at the same time as other books?
+  id: totrans-13
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 哪些书与其他书同时购买？
 - en: Of course, there are many more queries that you could make on such a database,
     but even this small sample will begin to give you insights into how to lay out
     your tables. For example, books and ISBNs can probably be combined into one table,
@@ -71,73 +99,102 @@
     is very loose. A customer can buy any book, and even multiple copies of a book,
     yet a book can be bought by many customers and be ignored by still more potential
     customers.
+  id: totrans-14
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，在这样的数据库上，您可以提出许多其他查询，但即使这样一个小样本也将开始为您提供如何布置表的见解。例如，书籍和ISBN可能可以合并到一个表中，因为它们密切相关（稍后我们将讨论一些微妙之处）。相反，书籍和客户应该在不同的表中，因为它们之间的连接非常松散。一个客户可以购买任何一本书，甚至是多本书，而一本书可以被许多客户购买，也可能被更多潜在客户忽略。
 - en: When you plan to do a lot of searches on something, a search can often benefit
     from having its own table. And when couplings between things are loose, it’s best
     to put them in separate tables.
+  id: totrans-15
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您计划对某些内容进行大量搜索时，一个搜索通常可以从拥有自己的表中受益。当事物之间的耦合松散时，最好将它们放在单独的表中。
 - en: 'Taking into account those simple rules of thumb, we can guess we’ll need at
     least three tables to accommodate all these queries:'
+  id: totrans-16
   prefs: []
   type: TYPE_NORMAL
+  zh: 考虑到这些简单的经验法则，我们可以猜测我们至少需要三个表来容纳所有这些查询：
 - en: <dfn class="keep-together">Authors</dfn>
+  id: totrans-17
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">作者</dfn>
 - en: There will be lots of searches for authors, many of whom have collaborated on
     titles, and many of whom will be featured in collections. Listing all the information
     about each author together, linked to that author, will produce optimal results
     for searches—hence an *Authors* table.
+  id: totrans-18
   prefs: []
   type: TYPE_NORMAL
+  zh: 将有很多搜索关于作者的信息，其中许多作者合作撰写了书籍，并且许多作者将出现在合集中。将每位作者的所有信息一起列出，并与该作者关联，将为搜索产生最佳结果，因此有一个
+    *作者* 表。
 - en: <dfn class="keep-together">Books</dfn>
+  id: totrans-19
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">书籍</dfn>
 - en: Many books appear in different editions. Sometimes they change publisher, and
     sometimes they have the same titles as other unrelated books. So, the links between
     books and authors are complicated enough to call for a separate table.
+  id: totrans-20
   prefs: []
   type: TYPE_NORMAL
+  zh: 许多书籍有不同的版本。有时它们会更改出版商，有时它们与其他无关的书籍有相同的标题。因此，书籍和作者之间的链接足够复杂，需要一个单独的表格来处理。
 - en: <dfn class="keep-together">Customers</dfn>
+  id: totrans-21
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">顾客</dfn>
 - en: It’s even more clear why customers should get their own table, as they are free
     to purchase any book by any author.
+  id: totrans-22
   prefs: []
   type: TYPE_NORMAL
+  zh: 明确起见，顾客应该有自己的表格，因为他们可以自由购买任何作者的任何书籍。
 - en: 'Primary Keys: The Keys to Relational Databases'
+  id: totrans-23
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 主键：关系数据库的关键
 - en: Using the power of relational databases, we can define information for each
     author, book, and customer in just one place. Obviously, what interests us is
     the links between them—such as who wrote each book and who purchased it—but we
     can store that information just by making links between the three tables. I’ll
     show you the basic principles, and then it just takes practice for it to feel
     natural.
+  id: totrans-24
   prefs: []
   type: TYPE_NORMAL
+  zh: 利用关系数据库的强大功能，我们可以在一个地方定义每位作者、每本书和每位顾客的信息。显然，我们感兴趣的是它们之间的链接——比如谁写了每本书以及谁购买了它——但我们可以通过仅在三个表格之间建立链接来存储这些信息。我将向你展示基本原则，然后你只需实践，它会变得自然而然。
 - en: 'The magic involves giving every author a unique identifier. We’ll do the same
     for every book and for every customer. We saw the means of doing that in the previous
     chapter: the *primary key*. For a book, it makes sense to use the ISBN, although
     you then have to deal with multiple editions that have different ISBNs. For authors
     and customers, you can just assign arbitrary keys, which the `AUTO_INCREMENT`
     feature that you saw in the last chapter makes easy.'
+  id: totrans-25
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个神奇的方法是给每个作者一个唯一的标识符。我们将为每本书和每位顾客做同样的事情。我们在前一章中已经看到了这样做的方法：*主键*。对于书籍来说，使用ISBN是有意义的，尽管然后你必须处理具有不同ISBN的多个版本。对于作者和顾客，你可以简单地分配任意的键值，上一章中提到的`AUTO_INCREMENT`功能使这一过程变得容易。
 - en: In short, every table will be designed around some object that you’re likely
     to search for a lot—an author, book, or customer, in this case—and that object
     will have a primary key. Don’t choose a key that could possibly have the same
     value for different objects. The ISBN is a rare case for which an industry has
     provided a primary key that you can rely on to be unique for each product. Most
     of the time, you’ll create an arbitrary key for this purpose, using `AUTO_INCREMENT`.
+  id: totrans-26
   prefs: []
   type: TYPE_NORMAL
+  zh: 简而言之，每个表格将围绕着你可能经常搜索的某个对象设计——在本例中是作者、书籍或顾客——并且该对象将有一个主键。不要选择可能对不同对象具有相同值的键。ISBN是一个少见的情况，产业已经提供了一个可以依赖的主键，对于每个产品都是唯一的。大多数情况下，为此目的创建一个任意的键，使用`AUTO_INCREMENT`。
 - en: Normalization
+  id: totrans-27
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 规范化
 - en: The process of separating your data into tables and creating primary keys is
     called *normalization*. Its main goal is to make sure each piece of information
     appears in the database only once. Duplicating data is inefficient, because it
@@ -145,27 +202,35 @@
     the presence of duplicates creates a strong risk that you’ll update only one row
     of duplicated data, creating inconsistencies in a database and potentially causing
     serious errors.
+  id: totrans-28
   prefs: []
   type: TYPE_NORMAL
+  zh: 将数据分成表格并创建主键的过程称为*规范化*。它的主要目标是确保每个信息片段只出现在数据库中一次。数据重复是低效的，因为它使数据库变得比必要的更大，从而减慢访问速度。更重要的是，重复数据的存在会增加你只更新重复数据的一行的风险，从而在数据库中创建不一致性，可能引发严重的错误。
 - en: For example, if you list the titles of books in the *Authors* table as well
     as the *Books* table, and you have to correct a typographic error in a title,
     you’ll have to search through both tables and make sure you make the same change
     every place the title is listed. It’s better to keep the title in one place and
     use the ISBN in other places.
+  id: totrans-29
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，如果你在*作者*表格和*书籍*表格中列出书籍的标题，并且你需要纠正标题中的印刷错误，你必须搜索这两个表格，并确保在书名出现的每个地方都做出相同的更改。最好将书名保留在一个地方，并在其他地方使用ISBN。
 - en: But in the process of splitting a database into multiple tables, it’s important
     not to go too far and create more tables than is necessary, which would also lead
     to inefficient design and slower access.
+  id: totrans-30
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是在将数据库拆分成多个表格的过程中，重要的是不要走得太远，创建比必要更多的表格，这也会导致设计效率低下和访问速度变慢。
 - en: Luckily, E. F. Codd, the inventor of the relational model, analyzed the concept
     of normalization and split it into three separate schemas called *First*, *Second*,
     and *Third Normal Form*. If you modify a database to satisfy each of these forms
     in order, you will ensure that your database is optimally balanced for fast access
     and minimum memory and disk space usage.
+  id: totrans-31
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，关系模型的发明者E·F·科德分析了规范化的概念，并将其分为三个称为*第一*、*第二*和*第三范式*的独立模式。如果按顺序修改数据库以满足这些范式中的每一个，您将确保您的数据库在快速访问和最小内存和磁盘空间使用方面达到最佳平衡。
 - en: To see how the normalization process works, let’s start with the rather monstrous
     database in [Table 9-1](#highly_inefficient_design_for_a_databa), which shows
     a single table containing all of the author names, book titles, and (fictional)
@@ -173,114 +238,177 @@
     keep track of which customers have ordered books. Obviously this is an inefficient
     design, because data is duplicated all over the place (duplications are highlighted),
     but it represents a starting point.
+  id: totrans-32
   prefs: []
   type: TYPE_NORMAL
+  zh: 要了解规范化过程是如何工作的，请从[表9-1](#highly_inefficient_design_for_a_databa)中的相当庞大的数据库开始，该表格显示了一个包含所有作者姓名、书名和（虚构的）客户详细信息的表格。您可以考虑它是一个旨在跟踪哪些客户订购了书籍的第一个尝试。显然，这是一种低效的设计，因为数据到处重复（重复部分已经高亮显示），但这代表了一个起点。
 - en: Table 9-1\. A highly inefficient design for a database table
+  id: totrans-33
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 9-1\. 数据库表的高度低效设计
 - en: '| Author 1 | Author 2 | Title | ISBN | Price | Customer name | Customer address
     | Purchase date |'
+  id: totrans-34
   prefs: []
   type: TYPE_TB
+  zh: '| 作者1 | 作者2 | 标题 | ISBN | 价格 | 客户姓名 | 客户地址 | 购买日期 |'
 - en: '| --- | --- | --- | --- | --- | --- | --- | --- |'
+  id: totrans-35
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- | --- | --- | --- |'
 - en: '| *David Sklar* | *Adam Trachtenberg* | *PHP Cookbook* | *0596101015* | *44.99*
     | Emma Brown | 1565 Rainbow Road, Los Angeles, CA 90014 | Mar 03 2009 |'
+  id: totrans-36
   prefs: []
   type: TYPE_TB
+  zh: '| *大卫·斯克拉* | *亚当·特拉彻伯格* | *PHP Cookbook* | *0596101015* | *44.99* | 艾玛·布朗 |
+    加利福尼亚州洛杉矶市彩虹路1565号 | 2009年3月3日 |'
 - en: '| Danny Goodman |   | Dynamic HTML | 0596527403 | 59.99 | **Darren Ryder**
     | **4758 Emily Drive, Richmond, VA 23219** | **Dec 19 2008** |'
+  id: totrans-37
   prefs: []
   type: TYPE_TB
+  zh: '| 丹尼·古德曼 |   | 动态 HTML | 0596527403 | 59.99 | **达伦·赖德** | **弗吉尼亚州里士满市艾米丽大道4758号**
+    | **2008年12月19日** |'
 - en: '| Hugh E. Williams | David Lane | PHP and MySQL | 0596005436 | 44.95 | Earl
     B. Thurston | 862 Gregory Lane, Frankfort, KY 40601 | Jun 22 2009 |'
+  id: totrans-38
   prefs: []
   type: TYPE_TB
+  zh: '| 休·威廉姆斯 | 大卫·莱恩 | PHP 和 MySQL | 0596005436 | 44.95 | 厄尔·B·瑟斯顿 | 肯塔基州法兰克福市格雷戈里大道862号
+    | 2009年6月22日 |'
 - en: '| *David Sklar* | *Adam Trachtenberg* | *PHP Cookbook* | *0596101015* | *44.99*
     | **Darren Ryder** | **4758 Emily Drive, Richmond, VA 23219** | **Dec 19 2008**
     |'
+  id: totrans-39
   prefs: []
   type: TYPE_TB
+  zh: '| *大卫·斯克拉* | *亚当·特拉彻伯格* | *PHP Cookbook* | *0596101015* | *44.99* | **达伦·赖德**
+    | **弗吉尼亚州里士满市艾米丽大道4758号** | **2008年12月19日** |'
 - en: '| Rasmus Lerdorf | Kevin Tatroe & Peter MacIntyre | Programming PHP | 0596006815
     | 39.99 | David Miller | 3647 Cedar Lane, Waltham, MA 02154 | Jan 16 2009 |'
+  id: totrans-40
   prefs: []
   type: TYPE_TB
+  zh: '| 拉斯穆斯·勒多夫 | 凯文·塔特罗 & 彼得·麦金泰尔 | 编程 PHP | 0596006815 | 39.99 | 大卫·米勒 | 马萨诸塞州沃尔瑟姆市思达克莲街3647号
+    | 2009年1月16日 |'
 - en: In the following three sections, we will examine this database design, and you’ll
     see how we can improve it by removing the various duplicate entries and splitting
     the single table into multiple tables, each containing one type of data.
+  id: totrans-41
   prefs: []
   type: TYPE_NORMAL
+  zh: 在接下来的三个部分中，我们将检查这个数据库设计，您将看到我们如何通过消除各种重复条目并将单个表格拆分为包含一种类型数据的多个表格来改进它。
 - en: First Normal Form
+  id: totrans-42
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第一范式
 - en: 'For a database to satisfy the *First Normal Form*, it must fulfill three requirements:'
+  id: totrans-43
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使数据库符合*第一范式*，它必须满足三个要求：
 - en: There should be no repeating columns containing the same kind of data.
+  id: totrans-44
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 不应存在包含相同类型数据的重复列。
 - en: All columns should contain a single value.
+  id: totrans-45
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 所有列应包含单一值。
 - en: There should be a primary key to uniquely identify each row.
+  id: totrans-46
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 每行应该有一个主键，以唯一标识每一行。
 - en: Looking at these requirements in order, you should notice straightaway that
     both the *Author 1* and *Author 2* columns constitute repeating data types. So
     we already have a target column for pulling into a separate table, as the repeated
     *Author* columns violate Rule 1.
+  id: totrans-47
   prefs: []
   type: TYPE_NORMAL
+  zh: 顺序查看这些要求时，您应立即注意到*作者1*和*作者2*列均属于重复数据类型。因此，我们已经有了一个目标列，可以将其拉入单独的表格，因为重复的*作者*列违反了规则1。
 - en: Second, there are three authors listed for the final book, *Programming PHP*.
     I’ve handled that by making Kevin Tatroe and Peter MacIntyre share the *Author
     2* column, which violates Rule 2—yet another reason to transfer the *Author* details
     to a separate table.
+  id: totrans-48
   prefs: []
   type: TYPE_NORMAL
+  zh: 其次，最终书籍《*编程 PHP*》列出了三位作者。我通过让**凯文·塔特罗**和**彼得·麦金泰尔**共享*作者2*列来处理这一点，这违反了规则2——这也是将*作者*详细信息转移到单独表格的另一个原因。
 - en: However, Rule 3 is satisfied, because the primary key of ISBN has already been
     created.
+  id: totrans-49
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，规则3已得到满足，因为ISBN的主键已经创建。
 - en: '[Table 9-2](#result_of_stripping_the_authors_colu) shows the result of removing
     the *Author* columns from [Table 9-1](#highly_inefficient_design_for_a_databa).
     Already it looks a lot less cluttered, although there remain duplications that
     are highlighted.'
+  id: totrans-50
   prefs: []
   type: TYPE_NORMAL
+  zh: '[表9-2](#result_of_stripping_the_authors_colu)显示从[表9-1](#highly_inefficient_design_for_a_databa)中去除*作者*列的结果。尽管仍然有突出显示的重复项，但看起来清爽多了。'
 - en: Table 9-2\. The result of stripping the Author columns from [Table 9-1](#highly_inefficient_design_for_a_databa)
+  id: totrans-51
   prefs: []
   type: TYPE_NORMAL
+  zh: 表9-2\. 从[表9-1](#highly_inefficient_design_for_a_databa)中去除*作者*列的结果
 - en: '| Title | ISBN | Price | Customer name | Customer address | Purchase date |'
+  id: totrans-52
   prefs: []
   type: TYPE_TB
+  zh: '| 标题 | ISBN | 价格 | 客户姓名 | 客户地址 | 购买日期 |'
 - en: '| --- | --- | --- | --- | --- | --- |'
+  id: totrans-53
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- | --- | --- |'
 - en: '| *PHP Cookbook* | *0596101015* | *44.99* | Emma Brown | 1565 Rainbow Road,
     Los Angeles, CA 90014 | Mar 03 2009 |'
+  id: totrans-54
   prefs: []
   type: TYPE_TB
+  zh: '| *PHP Cookbook* | *0596101015* | *44.99* | 艾玛·布朗 | 加利福尼亚州洛杉矶市彩虹路1565号 | 2009年3月3日
+    |'
 - en: '| Dynamic HTML | 0596527403 | 59.99 | **Darren Ryder** | **4758 Emily Drive,
     Richmond, VA 23219** | **Dec 19 2008** |'
+  id: totrans-55
   prefs: []
   type: TYPE_TB
+  zh: '| 动态HTML | 0596527403 | 59.99 | **达伦·赖德** | **弗吉尼亚州里士满市艾米丽大道4758号** | **2008年12月19日**
+    |'
 - en: '| PHP and MySQL | 0596005436 | 44.95 | Earl B. Thurston | 862 Gregory Lane,
     Frankfort, KY 40601 | Jun 22 2009 |'
+  id: totrans-56
   prefs: []
   type: TYPE_TB
+  zh: '| PHP与MySQL | 0596005436 | 44.95 | 厄尔·B·瑟斯顿 | 肯塔基州法兰克福市格雷戈里巷862号 | 2009年6月22日
+    |'
 - en: '| *PHP Cookbook* | *0596101015* | *44.99* | **Darren Ryder** | **4758 Emily
     Drive, Richmond, VA 23219** | **Dec 19 2008** |'
+  id: totrans-57
   prefs: []
   type: TYPE_TB
+  zh: '| *PHP Cookbook* | *0596101015* | *44.99* | **达伦·赖德** | **弗吉尼亚州里士满市艾米丽大道4758号**
+    | **2008年12月19日** |'
 - en: '| Programming PHP | 0596006815 | 39.99 | David Miller | 3647 Cedar Lane, Waltham,
     MA 02154 | Jan 16 2009 |'
+  id: totrans-58
   prefs: []
   type: TYPE_TB
+  zh: '| 编程PHP | 0596006815 | 39.99 | 大卫·米勒 | 马萨诸塞州沃尔瑟姆市雪松巷3647号 | 2009年1月16日 |'
 - en: 'The new *Authors* table shown in [Table 9-3](#new_authors_table) is small and
     simple. It just lists the ISBN of a title along with an author. If a title has
     more than one author, additional authors get their own rows. At first, you may
@@ -288,110 +416,164 @@
     book. But don’t worry: MySQL can quickly tell you. All you have to do is tell
     it which book you want information for, and MySQL will use its ISBN to search
     the *Authors* table in a matter of milliseconds.'
+  id: totrans-59
   prefs: []
   type: TYPE_NORMAL
+  zh: 显示在[表9-3](#new_authors_table)中的新*作者*表规模小而简单。它只列出标题的ISBN及其作者。如果一本书有多位作者，其他作者将有他们自己的行。起初，你可能对这个表感到不适，因为你无法知道哪位作者写了哪本书。但别担心：MySQL可以快速告诉你。你要做的就是告诉它你想获取信息的书籍，MySQL将使用其ISBN在*作者*表中进行搜索，仅需几毫秒。
 - en: Table 9-3\. The new Authors table
+  id: totrans-60
   prefs: []
   type: TYPE_NORMAL
+  zh: 表9-3\. 新的作者表
 - en: '| ISBN | Author |'
+  id: totrans-61
   prefs: []
   type: TYPE_TB
+  zh: '| ISBN | 作者 |'
 - en: '| --- | --- |'
+  id: totrans-62
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| 0596101015 | David Sklar |'
+  id: totrans-63
   prefs: []
   type: TYPE_TB
+  zh: '| 0596101015 | 大卫·斯克拉 |'
 - en: '| 0596101015 | Adam Trachtenberg |'
+  id: totrans-64
   prefs: []
   type: TYPE_TB
+  zh: '| 0596101015 | 亚当·特拉切伯格 |'
 - en: '| 0596527403 | Danny Goodman |'
+  id: totrans-65
   prefs: []
   type: TYPE_TB
+  zh: '| 0596527403 | 丹尼·古德曼 |'
 - en: '| 0596005436 | Hugh E. Williams |'
+  id: totrans-66
   prefs: []
   type: TYPE_TB
+  zh: '| 0596005436 | 休·E·威廉姆斯 |'
 - en: '| 0596005436 | David Lane |'
+  id: totrans-67
   prefs: []
   type: TYPE_TB
+  zh: '| 0596005436 | 大卫·莱恩 |'
 - en: '| 0596006815 | Rasmus Lerdorf |'
+  id: totrans-68
   prefs: []
   type: TYPE_TB
+  zh: '| 0596006815 | 拉斯穆斯·勒多夫 |'
 - en: '| 0596006815 | Kevin Tatroe |'
+  id: totrans-69
   prefs: []
   type: TYPE_TB
+  zh: '| 0596006815 | 凯文·塔特罗 |'
 - en: '| 0596006815 | Peter MacIntyre |'
+  id: totrans-70
   prefs: []
   type: TYPE_TB
+  zh: '| 0596006815 | 皮特·麦金泰尔 |'
 - en: As I mentioned earlier, the ISBN will be the primary key for the *Books* table,
     when we get around to creating that table. I mention that here in order to emphasize
     that the ISBN is not, however, the primary key for the *Authors* table. In the
     real world, the *Authors* table would deserve a primary key, too, so that each
     author would have a key to uniquely identify them.
+  id: totrans-71
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如我之前提到的，当我们创建*书籍*表时，ISBN将成为其主键。我在这里提到这一点是为了强调ISBN不是*作者*表的主键。在现实世界中，*作者*表也应该有一个主键，以便每位作者都有一个唯一的标识符。
 - en: 'So, in the *Authors* table, *ISBN* is just a column that—for the purposes of
     speeding up searches—we’ll probably make a key, but not the primary key. In fact,
     it *cannot* be the primary key in this table because it’s not unique: the same
     ISBN appears multiple times whenever two or more authors have collaborated on
     a book.'
+  id: totrans-72
   prefs: []
   type: TYPE_NORMAL
+  zh: 所以，在*作者*表中，*ISBN*只是一列，用于加快搜索速度，我们可能会将其作为一个键，但不是主键。实际上，在这个表中它不能成为主键，因为它不是唯一的：同一个ISBN在两个或更多作者合作撰写的书籍中会出现多次。
 - en: Because we’ll use it to link authors to books in another table, this column
     is called a *foreign* key.
+  id: totrans-73
   prefs: []
   type: TYPE_NORMAL
+  zh: 因为我们将用它来链接另一张表中的作者与书籍，所以这列被称为*外键*。
 - en: Note
+  id: totrans-74
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Keys (also called *indexes*) have several purposes in MySQL. The fundamental
     reason for defining a key is to make searches faster. You’ve seen examples in
     [Chapter 8](ch08.xhtml#introduction_to_mysql) in which keys are used in `WHERE`
     clauses for searching. But a key can also be useful to uniquely identify an item.
     Thus, a unique key is often used as a primary key in one table and as a foreign
     key to link rows in that table to rows in another table.
+  id: totrans-75
   prefs: []
   type: TYPE_NORMAL
+  zh: 键（也称为*索引*）在MySQL中有几个目的。定义键的根本原因是加快搜索速度。在第8章中的示例中，您已经看到键在`WHERE`子句中用于搜索。但键还可以用于唯一标识一个项。因此，唯一键通常用作一张表的主键，并用作外键以将该表中的行链接到另一张表中的行。
 - en: Second Normal Form
+  id: totrans-76
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第二范式
 - en: The First Normal Form deals with duplicate data (or redundancy) across multiple
     columns. The *Second Normal Form* is all about redundancy across multiple rows.
     To achieve Second Normal Form, your tables must already be in First Normal Form.
     Once this has been done, you achieve Second Normal Form by identifying columns
     whose data repeats in different places and then removing them to their own tables.
+  id: totrans-77
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一范式处理多列之间的重复数据（或冗余）。*第二范式*则涉及多行之间的冗余。要实现第二范式，你的表必须已经处于第一范式。完成这一步后，通过识别数据在不同位置重复的列，然后将其移至自己的表中，即可实现第二范式。
 - en: So, let’s look again at [Table 9-2](#result_of_stripping_the_authors_colu).
     Notice how Darren Ryder bought two books, and therefore his details are duplicated.
     This tells us that the *Customer* columns need to be pulled into their own table.
     [Table 9-4](#new_titles_table) shows the result of removing the *Customer* columns
     from [Table 9-2](#result_of_stripping_the_authors_colu).
+  id: totrans-78
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，让我们再次看看[表 9-2](#result_of_stripping_the_authors_colu)。请注意，达伦·赖德购买了两本书，因此他的详细信息重复了。这告诉我们需要将*客户*列单独提取到自己的表中。[表 9-4](#new_titles_table)显示了从[表 9-2](#result_of_stripping_the_authors_colu)中移除*客户*列的结果。
 - en: Table 9-4\. The new Titles table
+  id: totrans-79
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 9-4\. 新的标题表
 - en: '| ISBN | Title | Price |'
+  id: totrans-80
   prefs: []
   type: TYPE_TB
+  zh: '| ISBN | 标题 | 价格 |'
 - en: '| --- | --- | --- |'
+  id: totrans-81
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| 0596101015 | PHP Cookbook | 44.99 |'
+  id: totrans-82
   prefs: []
   type: TYPE_TB
+  zh: '| 0596101015 | PHP Cookbook | 44.99 |'
 - en: '| 0596527403 | Dynamic HTML | 59.99 |'
+  id: totrans-83
   prefs: []
   type: TYPE_TB
+  zh: '| 0596527403 | Dynamic HTML | 59.99 |'
 - en: '| 0596005436 | PHP and MySQL | 44.95 |'
+  id: totrans-84
   prefs: []
   type: TYPE_TB
+  zh: '| 0596005436 | PHP and MySQL | 44.95 |'
 - en: '| 0596006815 | Programming PHP | 39.99 |'
+  id: totrans-85
   prefs: []
   type: TYPE_TB
+  zh: '| 0596006815 | Programming PHP | 39.99 |'
 - en: As you can see, all that’s left in [Table 9-4](#new_titles_table) are the *ISBN*,
     *Title*, and *Price* columns for four unique books, so this now constitutes an
     efficient and self-contained table that satisfies the requirements of both the
@@ -402,115 +584,179 @@
     have multiple values for a single book, because then we’d have to list the same
     book in multiple rows and would thus violate Second Normal Form. Restoring an
     *Author* column, for instance, would violate this normalization.
+  id: totrans-86
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如您所见，在[表 9-4](#new_titles_table)中，现在仅剩下四本唯一书籍的*ISBN*、*标题*和*价格*列，因此这现在构成了一个高效且自包含的表，满足了第一和第二范式的要求。在此过程中，我们设法将信息减少到与书名密切相关的数据。此表还可以包括出版年份、页数、再版次数等详细信息，因为这些详细信息也与书名密切相关。唯一的规则是不能在任何列中放入可能对于单本书有多个值的列，因为那样我们就必须在多行中列出同一本书，从而违反第二范式。例如，恢复*作者*列将违反这种规范化。
 - en: However, looking at the extracted *Customer* columns, now in [Table 9-5](#customer_details_from_table_9-2),
     we can see that there’s still more normalization work to do, because Darren Ryder’s
     details are still duplicated. And it could also be argued that First Normal Form
     Rule 2 (all columns should contain a single value) has not been properly complied
     with, because the addresses really need to be broken into separate columns for
     *Address*, *City*, *State*, and *Zip*.
+  id: totrans-87
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，看到提取的*客户*列，现在在[表 9-5](#customer_details_from_table_9-2)，我们可以看到仍然有更多的规范化工作要做，因为达伦·赖德的详细信息仍然重复。同时，也可以认为第一范式规则2（所有列应包含单个值）尚未得到正确遵守，因为地址确实需要拆分为*地址*、*城市*、*州*和*邮政编码*的单独列。
 - en: Table 9-5\. The customer details from [Table 9-2](#result_of_stripping_the_authors_colu)
+  id: totrans-88
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 9-5\. 来自[表 9-2](#result_of_stripping_the_authors_colu)的客户详细信息
 - en: '| ISBN | Customer name | Customer address | Purchase date |'
+  id: totrans-89
   prefs: []
   type: TYPE_TB
+  zh: '| ISBN | 客户名称 | 客户地址 | 购买日期 |'
 - en: '| --- | --- | --- | --- |'
+  id: totrans-90
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- |'
 - en: '| 0596101015 | Emma Brown | 1565 Rainbow Road, Los Angeles, CA 90014 | Mar
     03 2009 |'
+  id: totrans-91
   prefs: []
   type: TYPE_TB
+  zh: '| 0596101015 | Emma Brown | 1565 Rainbow Road, Los Angeles, CA 90014 | Mar
+    03 2009 |'
 - en: '| 0596527403 | Darren Ryder | 4758 Emily Drive, Richmond, VA 23219 | Dec 19
     2008 |'
+  id: totrans-92
   prefs: []
   type: TYPE_TB
+  zh: '| 0596527403 | Darren Ryder | 4758 Emily Drive, Richmond, VA 23219 | Dec 19
+    2008 |'
 - en: '| 0596005436 | Earl B. Thurston | 862 Gregory Lane, Frankfort, KY 40601 | Jun
     22 2009 |'
+  id: totrans-93
   prefs: []
   type: TYPE_TB
+  zh: '| 0596005436 | Earl B. Thurston | 862 Gregory Lane, Frankfort, KY 40601 | Jun
+    22 2009 |'
 - en: '| 0596101015 | Darren Ryder | 4758 Emily Drive, Richmond, VA 23219 | Dec 19
     2008 |'
+  id: totrans-94
   prefs: []
   type: TYPE_TB
+  zh: '| 0596101015 | Darren Ryder | 4758 Emily Drive, Richmond, VA 23219 | Dec 19
+    2008 |'
 - en: '| 0596006815 | David Miller | 3647 Cedar Lane, Waltham, MA 02154 | Jan 16 2009
     |'
+  id: totrans-95
   prefs: []
   type: TYPE_TB
+  zh: '| 0596006815 | David Miller | 3647 Cedar Lane, Waltham, MA 02154 | Jan 16 2009
+    |'
 - en: What we have to do is split this table further to ensure that each customer’s
     details are entered only once. Because the ISBN is not and cannot be used as a
     primary key to identify customers (or authors), a new key must be created.
+  id: totrans-96
   prefs: []
   type: TYPE_NORMAL
+  zh: 我们必须进一步分割此表，以确保每个客户的详细信息仅输入一次。因为ISBN不能用作标识客户（或作者）的主键，所以必须创建一个新的键。
 - en: '[Table 9-6](#new_customers_table) is the result of normalizing the *Customers*
     table into both First and Second Normal Forms. Each customer now has a unique
     customer number called *CustNo* that is the table’s primary key and that will
     most likely have been created via `AUTO_INCREMENT`. All the parts of customer
     addresses have also been separated into distinct columns to make them easily searchable
     and updatable.'
+  id: totrans-97
   prefs: []
   type: TYPE_NORMAL
+  zh: '[表 9-6](#new_customers_table) 是将*Customers*表规范化为第一和第二范式的结果。现在每个客户都有一个名为*CustNo*的唯一客户号，它是表的主键，很可能是通过`AUTO_INCREMENT`创建的。客户地址的所有部分也已分开为不同的列，以便于搜索和更新。'
 - en: Table 9-6\. The new Customers table
+  id: totrans-98
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 9-6\. 新客户表
 - en: '| CustNo | Name | Address | City | State | Zip |'
+  id: totrans-99
   prefs: []
   type: TYPE_TB
+  zh: '| 客户号 | 姓名 | 地址 | 城市 | 州 | 邮编 |'
 - en: '| --- | --- | --- | --- | --- | --- |'
+  id: totrans-100
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- | --- | --- |'
 - en: '| 1 | Emma Brown | 1565 Rainbow Road | Los Angeles | CA | 90014 |'
+  id: totrans-101
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | Emma Brown | 1565 Rainbow Road | 洛杉矶 | 加利福尼亚 | 90014 |'
 - en: '| 2 | Darren Ryder | 4758 Emily Drive | Richmond | VA | 23219 |'
+  id: totrans-102
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | Darren Ryder | 4758 Emily Drive | Richmond | VA | 23219 |'
 - en: '| 3 | Earl B. Thurston | 862 Gregory Lane | Frankfort | KY | 40601 |'
+  id: totrans-103
   prefs: []
   type: TYPE_TB
+  zh: '| 3 | Earl B. Thurston | 862 Gregory Lane | Frankfort | KY | 40601 |'
 - en: '| 4 | David Miller | 3647 Cedar Lane | Waltham | MA | 02154 |'
+  id: totrans-104
   prefs: []
   type: TYPE_TB
+  zh: '| 4 | David Miller | 3647 Cedar Lane | Waltham | MA | 02154 |'
 - en: At the same time, in order to normalize [Table 9-6](#new_customers_table), we
     had to remove the information on customer purchases, because otherwise, there
     would be multiple instances of customer details for each book purchased. Instead,
     the purchase data is now placed in a new table called *Purchases* (see [Table 9-7](#new_purchases_table)).
+  id: totrans-105
   prefs: []
   type: TYPE_NORMAL
+  zh: 同时，为了规范化[表 9-6](#new_customers_table)，我们不得不删除有关客户购买的信息，否则每本书购买都会有客户详细信息的多个实例。相反，购买数据现在放在一个称为*Purchases*的新表中（参见[表
+    9-7](#new_purchases_table)）。
 - en: Table 9-7\. The new Purchases table
+  id: totrans-106
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 9-7\. 新购买表
 - en: '| CustNo | ISBN | Date |'
+  id: totrans-107
   prefs: []
   type: TYPE_TB
+  zh: '| 客户号 | ISBN | 日期 |'
 - en: '| --- | --- | --- |'
+  id: totrans-108
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| 1 | 0596101015 | Mar 03 2009 |'
+  id: totrans-109
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | 0596101015 | Mar 03 2009 |'
 - en: '| 2 | 0596527403 | Dec 19 2008 |'
+  id: totrans-110
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | 0596527403 | Dec 19 2008 |'
 - en: '| 2 | 0596101015 | Dec 19 2008 |'
+  id: totrans-111
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | 0596101015 | Dec 19 2008 |'
 - en: '| 3 | 0596005436 | Jun 22 2009 |'
+  id: totrans-112
   prefs: []
   type: TYPE_TB
+  zh: '| 3 | 0596005436 | Jun 22 2009 |'
 - en: '| 4 | 0596006815 | Jan 16 2009 |'
+  id: totrans-113
   prefs: []
   type: TYPE_TB
+  zh: '| 4 | 0596006815 | Jan 16 2009 |'
 - en: Here the *CustNo* column from [Table 9-6](#new_customers_table) is reused as
     a key to tie the *Customers* and *Purchases* tables together. Because the *ISBN*
     column is also repeated here, this table can be linked with the *Authors* and
     *Titles* tables, too.
+  id: totrans-114
   prefs: []
   type: TYPE_NORMAL
+  zh: 在这里，来自[表 9-6](#new_customers_table)的*CustNo*列被重用为将*Customers*和*Purchases*表联系在一起的键。因为*ISBN*列也在这里重复，所以这个表也可以与*Authors*和*Titles*表关联。
 - en: The *CustNo* column may be a useful key in the *Purchases* table, but it’s not
     a primary key. A single customer can buy multiple books (and even multiple copies
     of one book), so the *CustNo* column is not a primary key. In fact, the *Purchases*
@@ -519,32 +765,46 @@
     on the same day, we’ll just allow two rows with the same information. For easy
     searching, we can define both *CustNo* and *ISBN* as keys—just not as primary
     keys.
+  id: totrans-115
   prefs: []
   type: TYPE_NORMAL
+  zh: '*CustNo* 列在*Purchases*表中可能是一个有用的键，但不是主键。一个客户可以购买多本书（甚至同一本书的多本副本），因此*CustNo*列不是主键。事实上，*Purchases*表没有主键。这没关系，因为我们不希望跟踪唯一的购买。如果一个客户在同一天购买了两本相同的书，我们会允许两行具有相同的信息。为了方便搜索，我们可以将*CustNo*和*ISBN*都定义为键，但不是主键。'
 - en: Note
+  id: totrans-116
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: There are now four tables, one more than the three we had initially assumed
     would be needed. We arrived at this decision through the normalization process,
     by methodically following the First and Second Normal Form rules, which made it
     plain that a fourth table called *Purchases* would also be required.
+  id: totrans-117
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在有四个表，比我们最初预计需要的三个多了一个。我们通过规范化过程做出了这个决定，方法是遵循第一和第二范式规则，这明确了还需要一个名为 *Purchases*
+    的第四个表。
 - en: The tables we now have are *Authors* ([Table 9-3](#new_authors_table)), *Titles*
     ([Table 9-4](#new_titles_table)), *Customers* ([Table 9-6](#new_customers_table)),
     and *Purchases* ([Table 9-7](#new_purchases_table)), and we can link each table
     to any other using either the *CustNo* or the *ISBN* key.
+  id: totrans-118
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在我们有的表是 *Authors*（[表 9-3](#new_authors_table)）、*Titles*（[表 9-4](#new_titles_table)）、*Customers*（[表 9-6](#new_customers_table)）和
+    *Purchases*（[表 9-7](#new_purchases_table)），我们可以使用 *CustNo* 或 *ISBN* 键将每个表与任何其他表链接起来。
 - en: For example, to see which books Darren Ryder has purchased, you can look him
     up in [Table 9-6](#new_customers_table), the *Customers* table, where you will
     see his *CustNo* is 2\. Armed with this number, you can now go to [Table 9-7](#new_purchases_table),
     the *Purchases* table; looking at the *ISBN* column here, you will see that he
     purchased titles 0596527403 and 0596101015 on December 19, 2008\. This looks like
     a lot of trouble for a human, but it’s not so hard for MySQL.
+  id: totrans-119
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，要查看Darren Ryder购买了哪些书，你可以在[表 9-6](#new_customers_table)，即 *Customers* 表中查找他；在这里你会看到他的
+    *CustNo* 是2。拿着这个编号，你现在可以去[表 9-7](#new_purchases_table)，即 *Purchases* 表；查看这里的 *ISBN*
+    列，你会看到他在2008年12月19日购买了书籍0596527403和0596101015。对于人类来说，这看起来是一件很麻烦的事情，但对MySQL来说却并不难。
 - en: To determine what these titles were, you can then refer to [Table 9-4](#new_titles_table),
     the *Titles* table, and see that the books he bought were *Dynamic HTML* and *PHP
     Cookbook*. Should you wish to know the authors of these books, you could also
@@ -552,146 +812,228 @@
     table, and you would see that ISBN 0596527403, *Dynamic HTML*, was written by
     Danny Goodman, and that ISBN 0596101015, *PHP Cookbook*, was written by David
     Sklar and Adam Trachtenberg.
+  id: totrans-120
   prefs: []
   type: TYPE_NORMAL
+  zh: 要确定这些标题是什么，你可以参考[表 9-4](#new_titles_table)，即 *Titles* 表，并看到他购买的书是 *Dynamic HTML*
+    和 *PHP Cookbook*。如果你想知道这些书的作者，你也可以使用刚刚在[表 9-3](#new_authors_table)查找的ISBN，即 *Authors*
+    表，你会发现ISBN 0596527403的 *Dynamic HTML* 是由Danny Goodman写的，而ISBN 0596101015的 *PHP
+    Cookbook* 是由David Sklar和Adam Trachtenberg写的。
 - en: Third Normal Form
+  id: totrans-121
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 第三范式
 - en: Once you have a database that complies with both the First and Second Normal
     Forms, it is in pretty good shape, and you might not have to modify it any further.
     However, if you wish to be very strict with your database, you can ensure that
     it adheres to the *Third Normal Form*, which requires that data that is *not*
     directly dependent on the primary key but *is* dependent on another value in the
     table also be moved into separate tables, according to the dependence.
+  id: totrans-122
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦你有一个符合第一和第二范式的数据库，它就已经非常完善了，你可能不需要进一步修改它。然而，如果你希望对数据库非常严格，你可以确保它符合*第三范式*，这要求那些不直接依赖于主键但依赖于表中另一个值的数据也被移到单独的表中，根据依赖关系。
 - en: For example, in [Table 9-6](#new_customers_table), the *Customers* table, it
     could be argued that the *State*, *City*, and *Zip* keys are not directly related
     to each customer, because many other people will have the same details in their
     addresses, too. However, they are directly related to each other, in that the
     *Address* relies on the *City*, and the *City* relies on the *State*.
+  id: totrans-123
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，在[表 9-6](#new_customers_table)中，*Customers* 表中可以认为 *State*、*City* 和 *Zip*
+    键与每个客户并非直接相关，因为许多其他人的地址中也会有相同的细节。然而，它们在彼此之间是直接相关的，因为 *Address* 依赖于 *City*，而 *City*
+    又依赖于 *State*。
 - en: Therefore, to satisfy Third Normal Form for [Table 9-6](#new_customers_table),
     you would need to split it into Tables [9-8](#third_normal_form_customers_table)
     through [9-11](#third_normal_form_states_table).
+  id: totrans-124
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，为了满足[表 9-6](#new_customers_table)的第三范式，你需要将它分解成[表 9-8](#third_normal_form_customers_table)至[表 9-11](#third_normal_form_states_table)。
 - en: Table 9-8\. Third Normal Form Customers table
+  id: totrans-125
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 9-8\. 第三范式 Customers 表
 - en: '| CustNo | Name | Address | Zip |'
+  id: totrans-126
   prefs: []
   type: TYPE_TB
+  zh: '| CustNo | Name | Address | Zip |'
 - en: '| --- | --- | --- | --- |'
+  id: totrans-127
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- | --- |'
 - en: '| 1 | Emma Brown | 1565 Rainbow Road | 90014 |'
+  id: totrans-128
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | Emma Brown | 1565 Rainbow Road | 90014 |'
 - en: '| 2 | Darren Ryder | 4758 Emily Drive | 23219 |'
+  id: totrans-129
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | Darren Ryder | 4758 Emily Drive | 23219 |'
 - en: '| 3 | Earl B. Thurston | 862 Gregory Lane | 40601 |'
+  id: totrans-130
   prefs: []
   type: TYPE_TB
+  zh: '| 3 | Earl B. Thurston | 862 Gregory Lane | 40601 |'
 - en: '| 4 | David Miller | 3647 Cedar Lane | 02154 |'
+  id: totrans-131
   prefs: []
   type: TYPE_TB
+  zh: '| 4 | David Miller | 3647 Cedar Lane | 02154 |'
 - en: Table 9-9\. Third Normal Form Zip codes table
+  id: totrans-132
   prefs: []
   type: TYPE_NORMAL
+  zh: 表9-9\. 第三范式邮政编码表
 - en: '| Zip | CityID |'
+  id: totrans-133
   prefs: []
   type: TYPE_TB
+  zh: '| 邮政编码 | 城市ID |'
 - en: '| --- | --- |'
+  id: totrans-134
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| 90014 | 1234 |'
+  id: totrans-135
   prefs: []
   type: TYPE_TB
+  zh: '| 90014 | 1234 |'
 - en: '| 23219 | 5678 |'
+  id: totrans-136
   prefs: []
   type: TYPE_TB
+  zh: '| 23219 | 5678 |'
 - en: '| 40601 | 4321 |'
+  id: totrans-137
   prefs: []
   type: TYPE_TB
+  zh: '| 40601 | 4321 |'
 - en: '| 02154 | 8765 |'
+  id: totrans-138
   prefs: []
   type: TYPE_TB
+  zh: '| 02154 | 8765 |'
 - en: Table 9-10\. Third Normal Form Cities table
+  id: totrans-139
   prefs: []
   type: TYPE_NORMAL
+  zh: 表9-10\. 第三范式城市表
 - en: '| CityID | Name | StateID |'
+  id: totrans-140
   prefs: []
   type: TYPE_TB
+  zh: '| 城市ID | 名称 | 州ID |'
 - en: '| --- | --- | --- |'
+  id: totrans-141
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| 1234 | Los Angeles | 5 |'
+  id: totrans-142
   prefs: []
   type: TYPE_TB
+  zh: '| 1234 | 洛杉矶 | 5 |'
 - en: '| 5678 | Richmond | 46 |'
+  id: totrans-143
   prefs: []
   type: TYPE_TB
+  zh: '| 5678 | 里士满 | 46 |'
 - en: '| 4321 | Frankfort | 17 |'
+  id: totrans-144
   prefs: []
   type: TYPE_TB
+  zh: '| 4321 | 法兰克福 | 17 |'
 - en: '| 8765 | Waltham | 21 |'
+  id: totrans-145
   prefs: []
   type: TYPE_TB
+  zh: '| 8765 | 沃尔瑟姆 | 21 |'
 - en: Table 9-11\. Third Normal Form States table
+  id: totrans-146
   prefs: []
   type: TYPE_NORMAL
+  zh: 表9-11\. 第三范式州表
 - en: '| StateID | Name | Abbreviation |'
+  id: totrans-147
   prefs: []
   type: TYPE_TB
+  zh: '| 州ID | 名称 | 缩写 |'
 - en: '| --- | --- | --- |'
+  id: totrans-148
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- | --- |'
 - en: '| 5 | California | CA |'
+  id: totrans-149
   prefs: []
   type: TYPE_TB
+  zh: '| 5 | 加利福尼亚州 | CA |'
 - en: '| 46 | Virginia | VA |'
+  id: totrans-150
   prefs: []
   type: TYPE_TB
+  zh: '| 46 | 弗吉尼亚州 | VA |'
 - en: '| 17 | Kentucky | KY |'
+  id: totrans-151
   prefs: []
   type: TYPE_TB
+  zh: '| 17 | 肯塔基州 | KY |'
 - en: '| 21 | Massachusetts | MA |'
+  id: totrans-152
   prefs: []
   type: TYPE_TB
+  zh: '| 21 | 马萨诸塞州 | MA |'
 - en: So, how would you use this set of four tables instead of the single [Table 9-6](#new_customers_table)?
     Well, you would look up the *Zip* *code* in [Table 9-8](#third_normal_form_customers_table)
     and then find the matching *CityID* in [Table 9-9](#third_normal_form_zip_codes_table).
     Given this information, you could look up the city *Name* in [Table 9-10](#third_normal_form_cities_table)
     and then also find the *StateID*, which you could use in [Table 9-11](#third_normal_form_states_table)
     to look up the state’s *Name*.
+  id: totrans-153
   prefs: []
   type: TYPE_NORMAL
+  zh: 那么，您将如何使用这四个表的集合，而不是单个的[表9-6](#new_customers_table)？好吧，您将在[表9-8](#third_normal_form_customers_table)中查找*Zip*
+    *code*，然后在[表9-9](#third_normal_form_zip_codes_table)中找到匹配的*CityID*。有了这些信息，您可以在[表9-10](#third_normal_form_cities_table)中查找城市*名称*，然后再找到*StateID*，您可以在[表9-11](#third_normal_form_states_table)中使用它来查找州的*名称*。
 - en: Although using the Third Normal Form in this way may seem like overkill, it
     can have advantages. For example, take a look at [Table 9-11](#third_normal_form_states_table),
     where it has been possible to include both a state’s name and its two-letter abbreviation.
     It could also contain population details and other demographics, if you desired.
+  id: totrans-154
   prefs: []
   type: TYPE_NORMAL
+  zh: 虽然以这种方式使用第三范式可能看起来有些多余，但它确实有其优势。例如，请参阅[表9-11](#third_normal_form_states_table)，在这里可以同时包括一个州的名称及其两字母缩写。如果您希望，它还可以包含人口详细信息和其他人口统计数据。
 - en: Note
+  id: totrans-155
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: '[Table 9-10](#third_normal_form_cities_table) could also contain even more
     localized demographics that could be useful to you and/or your customers. By splitting
     up these pieces of data, you can make it easier to maintain your database in the
     future, should it be necessary to add columns.'
+  id: totrans-156
   prefs: []
   type: TYPE_NORMAL
+  zh: '[表9-10](#third_normal_form_cities_table)还可以包含更多对您和/或您的客户有用的本地化人口统计信息。通过拆分这些数据片段，您可以更轻松地在未来维护您的数据库，如果有必要添加列的话。'
 - en: Deciding whether to use the Third Normal Form can be tricky. Your evaluation
     should rest on what data you may need to add at a later date. If you are absolutely
     certain that the name and address of a customer is all that you will ever require,
     you probably will want to leave out this final normalization stage.
+  id: totrans-157
   prefs: []
   type: TYPE_NORMAL
+  zh: 决定是否使用第三范式可能会有些棘手。您的评估应基于以后可能需要添加的数据。如果您绝对确定客户的姓名和地址是您所需要的全部信息，那么您可能希望跳过最后这个规范化阶段。
 - en: On the other hand, suppose you are writing a database for a large organization
     such as the US Postal Service. What would you do if a city were to be renamed?
     With a table such as [Table 9-6](#new_customers_table), you would need to perform
@@ -699,245 +1041,356 @@
     database set up according to the Third Normal Form, you would have to change only
     a single entry in [Table 9-10](#third_normal_form_cities_table) for the change
     to be reflected throughout the entire database.
+  id: totrans-158
   prefs: []
   type: TYPE_NORMAL
+  zh: 另一方面，假设您正在为美国邮政服务等大型组织编写数据库。如果一个城市改名了，您会怎么做？如果像[表9-6](#new_customers_table)这样的表，您将需要在每个该城市的实例上进行全局搜索和替换。但是如果您根据第三范式设置了数据库，您只需要在[表9-10](#third_normal_form_cities_table)中更改一个条目，即可反映在整个数据库中。
 - en: 'Therefore, I suggest that you ask yourself two questions to help you decide
     whether to perform a Third Normal Form normalization on any table:'
+  id: totrans-159
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，我建议您问自己两个问题，以帮助您决定是否对任何表执行第三范式规范化：
 - en: Is it likely that many new columns will need to be added to this table?
+  id: totrans-160
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 是否可能需要向这个表中添加许多新列？
 - en: Could any of this table’s fields require a global update at any point?
+  id: totrans-161
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 这个表的任何字段在任何时候是否需要全局更新？
 - en: If either of the answers is yes, you should probably consider performing this
     final stage of normalization.
+  id: totrans-162
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果两个答案中有任何一个是肯定的，那么您可能应该考虑执行这个最后的规范化阶段。
 - en: When Not to Use Normalization
+  id: totrans-163
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 不使用规范化的时机
 - en: Now that you know all about normalization, I’m going to tell you why you should
     throw these rules out of the window on high-traffic sites. That’s right—you should
     never fully normalize your tables on sites that will cause MySQL to thrash.
+  id: totrans-164
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在你已经了解了规范化的所有内容，我要告诉你为什么在高流量站点上应该把这些规则丢掉。没错——在会导致MySQL抖动的站点上，你永远不应该完全规范化你的表。
 - en: Normalization requires spreading data across multiple tables, and this means
     making multiple calls to MySQL for each query. On a very popular site, if you
     have normalized tables, your database access will slow down considerably once
     you get above a few dozen concurrent users, because they will be creating hundreds
     of database accesses between them. In fact, I would go so far as to say you should
     *denormalize* any commonly looked-up data as much as you can.
+  id: totrans-165
   prefs: []
   type: TYPE_NORMAL
+  zh: 规范化要求在多个表之间分布数据，这意味着每个查询需要对MySQL进行多次调用。在一个非常流行的站点上，如果你有规范化的表，一旦并发用户超过几十个，你的数据库访问速度将显著减慢，因为它们将在它们之间创建数百次数据库访问。事实上，我甚至会说，在你能够看到MySQL阻塞之前，你应该*反规范化*任何常常查找的数据。
 - en: You see, if you have data duplicated across your tables, you can substantially
     reduce the number of additional requests that need to be made, because most of
     the data you want is available in each table. This means that you can simply add
     an extra column to a query and that field will be available for all matching results.
+  id: totrans-166
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果你的表中存在重复的数据，你可以显著减少需要进行的额外请求的数量，因为大多数你想要的数据在每个表中都是可用的。这意味着你只需在查询中添加一个额外的列，该字段将对所有匹配结果可用。
 - en: Of course, you have to deal with the downsides previously mentioned, such as
     using up large amounts of disk space and ensuring that you update every single
     duplicate copy of the data when it needs modifying.
+  id: totrans-167
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，你必须处理之前提到的缺点，比如消耗大量的磁盘空间，并确保在需要修改数据时更新每一个副本。
 - en: Multiple updates can be computerized, though. MySQL provides a feature called
     *triggers* that make automatic changes to the database in response to changes
     you make. (Triggers are, however, beyond the scope of this book.) Another way
     to propagate redundant data is to set up a PHP program to run regularly and keep
     all copies in sync. The program reads changes from a “main” table and updates
     all the others. (You’ll see how to access MySQL from PHP in the next chapter.)
+  id: totrans-168
   prefs: []
   type: TYPE_NORMAL
+  zh: 多次更新可以自动化。MySQL提供了一个名为*触发器*的功能，可以在你做出更改时自动修改数据库。（触发器超出了本书的范围。）另一种传播冗余数据的方法是设置一个定期运行的PHP程序来保持所有副本同步。该程序从“主”表中读取更改并更新所有其他表。（你将在下一章学习如何从PHP访问MySQL。）
 - en: However, until you are very experienced with MySQL, I recommend that you fully
     normalize all your tables (at least to First and Second Normal Form), as this
     will instill the habit and put you in good stead. Only when you actually start
     to see MySQL logjams should you consider looking at denormalization.
+  id: totrans-169
   prefs: []
   type: TYPE_NORMAL
+  zh: 然而，在你对MySQL非常熟悉之前，我建议你完全规范化所有表（至少达到第一和第二范式），因为这将养成良好的习惯并使你处于良好的状态。只有当你真正开始看到MySQL日志阻塞时，你才应该考虑反规范化。
 - en: Relationships
+  id: totrans-170
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 关系
 - en: MySQL is called a *relational* database management system because its tables
     store not only data but also the *relationships* among the data. There are three
     categories of relationships.
+  id: totrans-171
   prefs: []
   type: TYPE_NORMAL
+  zh: MySQL被称为*关系型*数据库管理系统，因为它的表不仅存储数据，还存储数据之间的*关系*。有三类关系。
 - en: One-to-One
+  id: totrans-172
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 一对一
 - en: 'A *one-to-one relationship* is like a (traditional) marriage: each item has
     a relationship to only one item of the other type. This is surprisingly rare.
     For instance, an author can write multiple books, a book can have multiple authors,
     and even an address can be associated with multiple customers. Perhaps the best
     example in this chapter so far of a one-to-one relationship is the relationship
     between the name of a state and its two-character abbreviation.'
+  id: totrans-173
   prefs: []
   type: TYPE_NORMAL
+  zh: 一个*一对一关系*就像（传统的）婚姻：每个项目只与另一种类型的项目有关系。这种情况非常罕见。例如，一个作者可以写多本书，一本书可以有多个作者，甚至一个地址可以与多个客户关联。也许在本章中迄今为止最好的一个一对一关系的例子是一个州的名称与其两个字符缩写之间的关系。
 - en: 'However, for the sake of argument, let’s assume that there can always be only
     one customer at any address. In such a case, the Customers–Addresses relationship
     in [Figure 9-1](#customers_tablecomma_table_9-8comma) is a one-to-one relationship:
     only one customer lives at each address, and each address can have only one customer.'
+  id: totrans-174
   prefs: []
   type: TYPE_NORMAL
+  zh: 但是，为了论证，让我们假设在任何地址只能始终存在一个客户。在这种情况下，[图 9-1](#customers_tablecomma_table_9-8comma)
+    中的 Customers–Addresses 关系是一对一关系：每个地址只有一个客户居住，并且每个地址只能有一个客户。
 - en: '![The Customers table, Table 9-8, split into two tables](Images/pmj6_0901.png)'
+  id: totrans-175
   prefs: []
   type: TYPE_IMG
+  zh: '![客户表，表 9-8，分成两个表](Images/pmj6_0901.png)'
 - en: Figure 9-1\. The Customers table, [Table 9-8](#third_normal_form_customers_table),
     split into two tables
+  id: totrans-176
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 9-1\. 客户表，[表 9-8](#third_normal_form_customers_table)，分成两个表
 - en: 'Usually, when two items have a one-to-one relationship, you just include them
     as columns in the same table. There are two reasons for splitting them into separate
     tables:'
+  id: totrans-177
   prefs: []
   type: TYPE_NORMAL
+  zh: 通常，当两个项目具有一对一关系时，您只需将它们作为同一表中的列包括。将它们拆分为单独的表的两个原因是：
 - en: You want to be prepared in case the relationship changes later and is no longer
     one-to-one.
+  id: totrans-178
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 您希望做好准备，以防关系以后发生变化，并且不再是一对一。
 - en: The table has a lot of columns, and you think that performance or maintenance
     would be improved by splitting it.
+  id: totrans-179
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 表格有很多列，你认为通过拆分可以提高性能或维护。
 - en: Of course, when you build your own databases in the real world, you will have
     to create one-to-many Customer–Address relationships (*one* address, *many* customers).
+  id: totrans-180
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，当您在现实世界中构建自己的数据库时，您将不得不创建一对多的客户-地址关系（*一个* 地址，*多个* 客户）。
 - en: One-to-Many
+  id: totrans-181
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 一对多
 - en: '*One-to-many* (or many-to-one) relationships occur when one row in one table
     is linked to many rows in another table. You have already seen how [Table 9-8](#third_normal_form_customers_table)
     would take on a one-to-many relationship if multiple customers were allowed at
     the same address, which is why it would have to be split up if that were the case.'
+  id: totrans-182
   prefs: []
   type: TYPE_NORMAL
+  zh: '*一对多*（或多对一）关系发生在一个表中的一行与另一个表中的多行相关联时。如果允许在同一地址有多个客户，如前所述，[表 9-8](#third_normal_form_customers_table)
+    将形成一对多关系，这就是为什么在这种情况下必须拆分它。'
 - en: So, looking at Table 9-8a within [Figure 9-1](#customers_tablecomma_table_9-8comma),
     you can see that it shares a one-to-many relationship with [Table 9-7](#new_purchases_table)
     because there is only one of each customer in Table 9-8a. However [Table 9-7](#new_purchases_table),
     the *Purchases* table, can (and does) contain more than one purchase from a given
     customer. Therefore, *one* customer has a relationship with *many* purchases.
+  id: totrans-183
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，在 [图 9-1](#customers_tablecomma_table_9-8comma) 内查看表 9-8a 时，您可以看到它与 [表 9-7](#new_purchases_table)
+    具有一对多关系，因为表 9-8a 中每个客户只有一个。然而 [表 9-7](#new_purchases_table)，*Purchases* 表，可以（也确实）包含来自同一客户的多次购买。因此，*一个*
+    客户与 *多个* 购买之间存在关系。
 - en: You can see these two tables alongside each other in [Figure 9-2](#illustrating_the_relationship_between_tw),
     where the dashed lines joining rows in each table start from a single row in the
     left-hand table but can connect to more than one row in the right-hand table.
     This one-to-many relationship is also the preferred scheme to use when describing
     a many-to-one relationship, in which case you would normally swap the left and
     right tables to view them as a one-to-many relationship.
+  id: totrans-184
   prefs: []
   type: TYPE_NORMAL
+  zh: 您可以在 [图 9-2](#illustrating_the_relationship_between_tw) 中并排查看这两个表，其中连接每个表中行的虚线从左侧表的单行开始，但可以连接到右侧表的多行。这种一对多关系也是描述多对一关系的首选方案，此时通常会交换左右表以将它们视为一对多关系。
 - en: '![Illustrating the relationship between two tables](Images/pmj6_0902.png)'
+  id: totrans-185
   prefs: []
   type: TYPE_IMG
+  zh: '![说明两个表之间的关系](Images/pmj6_0902.png)'
 - en: Figure 9-2\. Illustrating the relationship between two tables
+  id: totrans-186
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 9-2\. 说明两个表之间的关系
 - en: To represent a one-to-many relationship in a relational database, create a table
     for the “many” and a table for the “one.” The table for the “many” must contain
     a column that lists the primary key from the “one” table. Thus, the *Purchases*
     table will contain a column that lists the primary key of the customer.
+  id: totrans-187
   prefs: []
   type: TYPE_NORMAL
+  zh: 要在关系数据库中表示一对多关系，请为“多”创建一个表和“一”创建一个表。 “多”表必须包含一个列，该列列出“一”表的主键。因此，*Purchases*
+    表将包含一个列，列出客户的主键。
 - en: Many-to-Many
+  id: totrans-188
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 多对多
 - en: In a *many-to-many relationship*, many rows in one table are linked to many
     rows in another table. To create this relationship, add a third table containing
     the same key column from each of the other tables. This third table contains nothing
     else, as its sole purpose is to link up the other tables.
+  id: totrans-189
   prefs: []
   type: TYPE_NORMAL
+  zh: 在 *多对多关系* 中，一个表中的多行与另一个表中的多行关联。要创建此关系，请添加一个包含其他每个表中相同关键列的第三个表。该第三个表除了连接其他表之外什么也不包含，因为它的唯一目的就是连接其他表。
 - en: '[Table 9-12](#intermediary_table) is just such a table. It was extracted from
     [Table 9-7](#new_purchases_table), the *Purchases* table, but omits the purchase
     date information. It contains a copy of the ISBN of every title sold, along with
     the customer number of each purchaser.'
+  id: totrans-190
   prefs: []
   type: TYPE_NORMAL
+  zh: '[Table 9-12](#intermediary_table) 就是这样一张表。它是从 [Table 9-7](#new_purchases_table)，即
+    *Purchases* 表中提取的，但省略了购买日期信息。它包含每个售出书籍的 ISBN 及其购买者的客户号的副本。'
 - en: Table 9-12\. An intermediary table
+  id: totrans-191
   prefs: []
   type: TYPE_NORMAL
+  zh: Table 9-12\. 一个中介表
 - en: '| CustNo | ISBN |'
+  id: totrans-192
   prefs: []
   type: TYPE_TB
+  zh: '| CustNo | ISBN |'
 - en: '| --- | --- |'
+  id: totrans-193
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| 1 | 0596101015 |'
+  id: totrans-194
   prefs: []
   type: TYPE_TB
+  zh: '| 1 | 0596101015 |'
 - en: '| 2 | 0596527403 |'
+  id: totrans-195
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | 0596527403 |'
 - en: '| 2 | 0596101015 |'
+  id: totrans-196
   prefs: []
   type: TYPE_TB
+  zh: '| 2 | 0596101015 |'
 - en: '| 3 | 0596005436 |'
+  id: totrans-197
   prefs: []
   type: TYPE_TB
+  zh: '| 3 | 0596005436 |'
 - en: '| 4 | 0596006815 |'
+  id: totrans-198
   prefs: []
   type: TYPE_TB
+  zh: '| 4 | 0596006815 |'
 - en: With this intermediary table in place, you can traverse all the information
     in the database through a series of relations. You can take an address as a starting
     point and find out the authors of any books purchased by the customer living at
     that address.
+  id: totrans-199
   prefs: []
   type: TYPE_NORMAL
+  zh: 有了这个中介表，您可以通过一系列的关联遍历数据库中的所有信息。您可以以地址作为起点，查找住在该地址的客户购买的任何书籍的作者。
 - en: For example, let’s suppose that you want to find out about purchases in the
     23219 zip code. Look that zip code up in Table 9-8b, and you’ll find that customer
     number 2 has bought at least one item from the database. At this point, you can
     use Table 9-8a to find out that customer’s name, or use the new intermediary [Table 9-12](#intermediary_table)
     to see the book(s) purchased.
+  id: totrans-200
   prefs: []
   type: TYPE_NORMAL
+  zh: 例如，假设您想了解邮政编码为 23219 的购买情况。在表 9-8b 中查找该邮政编码，您会发现客户号为 2 的客户至少购买了一件数据库中的物品。此时，您可以使用表
+    9-8a 查找该客户的姓名，或使用新的中介 [Table 9-12](#intermediary_table) 查看购买的书籍。
 - en: From here, you will find that two titles were purchased and can follow them
     back to [Table 9-4](#new_titles_table) to find the titles and prices of these
     books, or to [Table 9-3](#new_authors_table) to see who the authors were.
+  id: totrans-201
   prefs: []
   type: TYPE_NORMAL
+  zh: 从这里，您将发现购买了两个标题，并可以跟踪它们回到 [Table 9-4](#new_titles_table) 查找这些书籍的标题和价格，或者到 [Table 9-3](#new_authors_table)
+    查看这些书籍的作者。
 - en: If it seems to you that this is really combining multiple one-to-many relationships,
     then you are absolutely correct. To illustrate, [Figure 9-3](#creating_a_many-to-many_relationship_via)
     brings three tables together.
+  id: totrans-202
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果您觉得这实际上是将多个一对多关系结合在一起，那么您是完全正确的。为了说明这一点，[Figure 9-3](#creating_a_many-to-many_relationship_via)
+    将三个表结合在一起。
 - en: '![Creating a many-to-many relationship via a third table](Images/pmj6_0903.png)'
+  id: totrans-203
   prefs: []
   type: TYPE_IMG
+  zh: '![通过第三张表创建多对多关系](Images/pmj6_0903.png)'
 - en: Figure 9-3\. Creating a many-to-many relationship via a third table
+  id: totrans-204
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 9-3\. 通过第三张表创建多对多关系
 - en: Follow any zip code in the left-hand table to the associated customer IDs. From
     there, you can link to the middle table, which joins the left and right tables
     by linking customer IDs and ISBNs. Now all you have to do is follow an ISBN over
     to the right-hand table to see which book it relates to.
+  id: totrans-205
   prefs: []
   type: TYPE_NORMAL
+  zh: 跟随左侧表中的任何邮政编码到相关的客户 ID。从那里，您可以链接到中间表，该表通过链接客户 ID 和 ISBN 连接左侧和右侧表。现在您只需跟随一个 ISBN
+    到右侧表，即可查看它与哪本书相关联。
 - en: You can also use the intermediary table to work your way backward from book
     titles to zip codes. The *Titles* table can tell you the ISBN, which you can use
     in the middle table to find the ID numbers of customers who bought the book, and
     finally you can use the *Customers* table to match the customer ID numbers to
     the customers’ zip codes.
+  id: totrans-206
   prefs: []
   type: TYPE_NORMAL
+  zh: 您还可以使用中介表从书名反向查找到邮政编码。*Titles* 表可以告诉您 ISBN，然后您可以在中间表中使用这个 ISBN 找到购买该书的客户的 ID
+    号码，最后您可以使用 *Customers* 表将客户 ID 号码与客户的邮政编码匹配。
 - en: Databases and Anonymity
+  id: totrans-207
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 数据库与匿名性
 - en: An interesting aspect of using relations is that you can accumulate a lot of
     information about some item—such as a customer—without actually knowing who that
     customer is. Note that in the previous example we went from customers’ zip codes
@@ -945,30 +1398,40 @@
     Databases can be used to track people, but they can also be used to help preserve
     people’s privacy while still finding useful information, by returning information
     about a purchase, without revealing other customer details, for example.
+  id: totrans-208
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用关系的一个有趣方面是，你可以累积关于某个项（如客户）的大量信息，而不需要实际了解该客户是谁。请注意，在前面的示例中，我们从客户的邮政编码到客户的购买记录，再返回，而无需了解客户的姓名。数据库可以用于跟踪人员，但也可以帮助保护人们的隐私，同时返回关于购买的信息，而不泄露其他客户详细信息，例如。
 - en: Transactions
+  id: totrans-209
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 事务
 - en: 'In some applications, it is vitally important that a sequence of queries runs
     in the correct order and that every single query successfully completes. For example,
     suppose that you are creating a sequence of queries to transfer funds from one
     bank account to another. You would not want either of the following events to
     occur:'
+  id: totrans-210
   prefs: []
   type: TYPE_NORMAL
+  zh: 在一些应用程序中，确保一系列查询按正确顺序运行，并且每个查询都成功完成非常重要。例如，假设你正在创建一系列用于从一个银行账户转账到另一个账户的查询。你不希望发生以下事件之一：
 - en: You add the funds to the second account, but when you try to subtract them from
     the first account, the update fails, and now both accounts have the funds.
+  id: totrans-211
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你将资金添加到第二个账户，但当你尝试从第一个账户扣除时，更新失败，现在两个账户都有资金。
 - en: You subtract the funds from the first bank account, but the update request to
     add them to the second account fails, and the funds have disappeared into thin
     air.
+  id: totrans-212
   prefs:
   - PREF_UL
   type: TYPE_NORMAL
+  zh: 你从第一个银行账户中扣除资金，但是添加到第二个账户的更新请求失败了，资金就这样消失了。
 - en: As you can see, not only is it important how you order queries in this type
     of transaction but it is also vital that all parts of the transaction complete
     successfully. But how can you ensure this happens, because surely after a query
@@ -976,249 +1439,381 @@
     transaction and then undo them all one at a time if any one fails? The answer
     is absolutely not, because MySQL comes with powerful transaction-handling features
     to cover just these types of eventualities.
+  id: totrans-213
   prefs: []
   type: TYPE_NORMAL
+  zh: 如你所见，在这种类型的事务中，查询的顺序非常重要，而且事务的每个部分都必须成功完成。但是，如何确保这种情况发生呢？因为一旦发生了查询，它就无法撤销了？你是否需要跟踪事务的所有部分，然后逐个撤销它们？答案绝对是否定的，因为MySQL提供了强大的事务处理功能，正好可以处理这些情况。
 - en: In addition, transactions allow concurrent access to a database by many users
     or programs at the same time. MySQL handles this seamlessly by ensuring that all
     transactions are queued and that users or programs take their turns and don’t
     tread on each other’s toes.
+  id: totrans-214
   prefs: []
   type: TYPE_NORMAL
+  zh: 另外，事务允许多个用户或程序同时访问数据库。MySQL通过确保所有事务排队执行，并确保用户或程序依次执行，而不会互相干扰，无缝处理这一过程。
 - en: Transaction Storage Engines
+  id: totrans-215
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 事务存储引擎
 - en: To be able to use MySQL’s transaction facility, you have to be using MySQL’s
     InnoDB storage engine (which is the default from version 5.5 onward). If you are
     not sure which version of MySQL your code will be running on, rather than assuming
     InnoDB is the default engine, you can force its use when creating a table, as
     follows.
+  id: totrans-216
   prefs: []
   type: TYPE_NORMAL
+  zh: 要使用MySQL的事务功能，你必须使用MySQL的InnoDB存储引擎（从版本5.5开始默认使用）。如果不确定你的代码将在哪个版本的MySQL上运行，而不是假设InnoDB是默认引擎，你可以在创建表时强制使用它，如下所示。
 - en: Create a table of bank accounts by typing the commands in [Example 9-1](#creating_a_transaction-ready_table).
     (Remember that to do this, you will need access to the MySQL command line, and
     you must also have already selected a suitable database in which to create this
     table.)
+  id: totrans-217
   prefs: []
   type: TYPE_NORMAL
+  zh: 通过在[示例 9-1](#creating_a_transaction-ready_table)中输入命令来创建一个银行账户表。（记住，为此你需要访问MySQL命令行，并且必须已经选择了一个适合创建此表的数据库。）
 - en: Example 9-1\. Creating a transaction-ready table
+  id: totrans-218
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-1\. 创建一个事务准备的表
 - en: '[PRE0]'
+  id: totrans-219
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE0]'
 - en: 'The final line of this example displays the contents of the new table so you
     can ensure that it was correctly created. The output from it should look like
     this:'
+  id: totrans-220
   prefs: []
   type: TYPE_NORMAL
+  zh: 此示例的最后一行显示了新表的内容，以确保它已正确创建。输出应如下所示：
 - en: '[PRE1]'
+  id: totrans-221
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE1]'
 - en: Now let’s create two rows within the table so that you can practice using transactions.
     Type the commands in [Example 9-2](#populating_the_accounts_table).
+  id: totrans-222
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在让我们在表内创建两行，以便你可以练习使用事务。在[示例 9-2](#populating_the_accounts_table)中输入这些命令。
 - en: Example 9-2\. Populating the accounts table
+  id: totrans-223
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-2\. 填充 accounts 表
 - en: '[PRE2]'
+  id: totrans-224
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE2]'
 - en: 'The third line displays the contents of the table to confirm that the rows
     were correctly inserted. The output should look like this:'
+  id: totrans-225
   prefs: []
   type: TYPE_NORMAL
+  zh: 第三行显示表格内容以确认行已正确插入。输出应如下所示：
 - en: '[PRE3]'
+  id: totrans-226
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE3]'
 - en: With this table created and prepopulated, you are ready to start using transactions.
+  id: totrans-227
   prefs: []
   type: TYPE_NORMAL
+  zh: 创建并预填充了这个表后，你可以开始使用事务了。
 - en: Using BEGIN
+  id: totrans-228
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 BEGIN
 - en: Transactions in MySQL start with either a `BEGIN` or a `START TRANSACTION` statement.
     Type the commands in [Example 9-3](#mysql_transaction) to send a transaction to
     MySQL.
+  id: totrans-229
   prefs: []
   type: TYPE_NORMAL
+  zh: MySQL 的事务以 `BEGIN` 或 `START TRANSACTION` 语句开始。键入 [示例 9-3](#mysql_transaction)
+    中的命令将事务发送给 MySQL。
 - en: Example 9-3\. A MySQL transaction
+  id: totrans-230
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-3\. MySQL 事务
 - en: '[PRE4]'
+  id: totrans-231
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE4]'
 - en: 'The result of this transaction is displayed by the final line and should look
     like this:'
+  id: totrans-232
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个事务的结果由最后一行显示，应如下所示：
 - en: '[PRE5]'
+  id: totrans-233
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE5]'
 - en: As you can see, the balance of account number 12345 was increased by 25.11 and
     is now 1050.61\. You may also have noticed the `COMMIT` command in [Example 9-3](#mysql_transaction),
     which is explained next.
+  id: totrans-234
   prefs: []
   type: TYPE_NORMAL
+  zh: 正如你所见，账号 12345 的余额增加了 25.11，现在是 1050.61。你也许注意到了 [示例 9-3](#mysql_transaction)
+    中的 `COMMIT` 命令，接下来将对其进行解释。
 - en: Using COMMIT
+  id: totrans-235
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 COMMIT
 - en: When you are satisfied that a series of queries in a transaction has successfully
     completed, issue a `COMMIT` command to commit all the changes to the database.
     Until it receives a `COMMIT`, MySQL considers all the changes you make to be merely
     temporary. This feature gives you the opportunity to cancel a transaction by not
     sending a `COMMIT` but issuing a `ROLLBACK` command instead.
+  id: totrans-236
   prefs: []
   type: TYPE_NORMAL
+  zh: 当你确认事务中的一系列查询已成功完成时，使用 `COMMIT` 命令将所有更改提交到数据库。在接收到 `COMMIT` 命令之前，MySQL认为你所做的所有更改只是临时的。这个功能让你有机会通过不发送
+    `COMMIT` 而是发出 `ROLLBACK` 命令来取消事务。
 - en: Using ROLLBACK
+  id: totrans-237
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用 ROLLBACK
 - en: Using the `ROLLBACK` command, you can tell MySQL to forget all the queries made
     since the start of a transaction and to cancel the transaction. See this in action
     by entering the funds transfer transaction in [Example 9-4](#funds_transfer_transaction).
+  id: totrans-238
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用 `ROLLBACK` 命令，你可以告诉 MySQL 忘记从事务开始以来的所有查询，并取消事务。通过在 [示例 9-4](#funds_transfer_transaction)
+    中输入资金转移事务来看看它的运行效果。
 - en: Example 9-4\. A funds transfer transaction
+  id: totrans-239
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-4\. 资金转移事务
 - en: '[PRE6]'
+  id: totrans-240
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE6]'
 - en: 'Once you have entered these lines, you should see the following result:'
+  id: totrans-241
   prefs: []
   type: TYPE_NORMAL
+  zh: 输入完这些行后，你应该看到以下结果：
 - en: '[PRE7]'
+  id: totrans-242
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE7]'
 - en: The first bank account now has a value that is 250 less than before, and the
     second has been incremented by 250; you have transferred a value of 250 between
     them. But let’s assume that something went wrong and you wish to undo this transaction.
     All you have to do is issue the commands in [Example 9-5](#canceling_a_transaction_using_rollback).
+  id: totrans-243
   prefs: []
   type: TYPE_NORMAL
+  zh: 第一个银行账户的值比之前少了250，第二个账户增加了250；你已经在它们之间转移了250的价值。但假设出现了问题，你希望撤销这笔交易。你只需按照 [示例
+    9-5](#canceling_a_transaction_using_rollback) 中的命令执行即可。
 - en: Example 9-5\. Canceling a transaction using `ROLLBACK`
+  id: totrans-244
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-5\. 使用 `ROLLBACK` 取消事务
 - en: '[PRE8]'
+  id: totrans-245
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE8]'
 - en: 'You should now see the following output, showing that the two accounts have
     had their previous balances restored, due to the entire transaction being canceled
     via the `ROLLBACK` command:'
+  id: totrans-246
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在你应该看到以下输出，显示两个账户的先前余额已经恢复，因为整个事务已通过 `ROLLBACK` 命令被取消：
 - en: '[PRE9]'
+  id: totrans-247
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE9]'
 - en: Using EXPLAIN
+  id: totrans-248
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 使用 EXPLAIN
 - en: MySQL comes with a powerful tool for investigating how the queries you issue
     to it are interpreted. Using `EXPLAIN`, you can get a snapshot of any query to
     find out whether you could issue it in a better or more efficient way. [Example 9-6](#using_the_explain_command)
     shows how to use it with the *accounts* table you created earlier.
+  id: totrans-249
   prefs: []
   type: TYPE_NORMAL
+  zh: MySQL 提供了一个强大的工具来调查你向其发出的查询的解释方式。使用 `EXPLAIN`，你可以获取任何查询的快照，以查明是否可以以更好或更有效的方式发出它。[示例
+    9-6](#using_the_explain_command) 展示了如何与你之前创建的 *accounts* 表一起使用它。
 - en: Example 9-6\. Using the `EXPLAIN` command
+  id: totrans-250
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-6\. 使用 `EXPLAIN` 命令
 - en: '[PRE10]'
+  id: totrans-251
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE10]'
 - en: 'The results of this `EXPLAIN` command should look like the following:'
+  id: totrans-252
   prefs: []
   type: TYPE_NORMAL
+  zh: 这个 `EXPLAIN` 命令的结果应该如下所示：
 - en: '[PRE11]'
+  id: totrans-253
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE11]'
 - en: 'The information that MySQL is giving you here is as follows:'
+  id: totrans-254
   prefs: []
   type: TYPE_NORMAL
+  zh: MySQL 在此给出的信息如下：
 - en: <dfn class="keep-together">`select_type`</dfn>
+  id: totrans-255
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`select_type`</dfn>
 - en: The selection type is `SIMPLE`. If you were joining tables together, this would
     show the join type.
+  id: totrans-256
   prefs: []
   type: TYPE_NORMAL
+  zh: 选择类型是 `SIMPLE`。如果你正在将表连接在一起，这将显示连接类型。
 - en: <dfn class="keep-together">`table`</dfn>
+  id: totrans-257
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`table`</dfn>
 - en: The current table being queried is `accounts`.
+  id: totrans-258
   prefs: []
   type: TYPE_NORMAL
+  zh: 当前正在查询的表是 `accounts`。
 - en: <dfn class="keep-together">`type`</dfn>
+  id: totrans-259
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`type`</dfn>
 - en: The query type is `const`. From the least efficient to the most efficient type,
     the possible values can be `ALL`, `index`, `range`, `ref`, `eq`*_*`ref`, `const`,
     `system`, and `NULL`.
+  id: totrans-260
   prefs: []
   type: TYPE_NORMAL
+  zh: 查询类型为`const`。从效率最低到最高的类型，可能的值可以是`ALL`、`index`、`range`、`ref`、`eq`*_*`ref`、`const`、`system`和`NULL`。
 - en: <dfn class="keep-together">`possible_keys`</dfn>
+  id: totrans-261
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`possible_keys`</dfn>
 - en: There is a possible `PRIMARY` key, which means that accessing should be fast.
+  id: totrans-262
   prefs: []
   type: TYPE_NORMAL
+  zh: 存在一个`PRIMARY`键，这意味着访问应该很快。
 - en: <dfn class="keep-together">`key`</dfn>
+  id: totrans-263
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`key`</dfn>
 - en: The key actually used is `PRIMARY`. This is good.
+  id: totrans-264
   prefs: []
   type: TYPE_NORMAL
+  zh: 实际使用的键是`PRIMARY`。这很好。
 - en: <dfn class="keep-together">`key_len`</dfn>
+  id: totrans-265
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`key_len`</dfn>
 - en: The key length is `4`. This is the number of bytes of the index that MySQL will
     use.
+  id: totrans-266
   prefs: []
   type: TYPE_NORMAL
+  zh: 键长度为`4`。这是MySQL将使用的索引字节数。
 - en: <dfn class="keep-together">`ref`</dfn>
+  id: totrans-267
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`ref`</dfn>
 - en: The `ref` column displays which columns or constants are used with the key.
     In this case, a constant key is being used.
+  id: totrans-268
   prefs: []
   type: TYPE_NORMAL
+  zh: '`ref`列显示与键一起使用的列或常量。在这种情况下，正在使用一个常量键。'
 - en: <dfn class="keep-together">`rows`</dfn>
+  id: totrans-269
   prefs: []
   type: TYPE_NORMAL
+  zh: <dfn class="keep-together">`rows`</dfn>
 - en: The number of rows that need to be searched by this query is `1`. This is good.
+  id: totrans-270
   prefs: []
   type: TYPE_NORMAL
+  zh: 此查询需要搜索的行数为`1`。这很好。
 - en: Whenever you have a query that seems to be taking longer than you think it should
     to execute, try using `EXPLAIN` to see where you can optimize it. You will discover
     which keys (if any) are being used, their lengths, and so on, and you will be
     able to adjust your query or the design of your table(s) accordingly.
+  id: totrans-271
   prefs: []
   type: TYPE_NORMAL
+  zh: 每当你有一个查询似乎执行时间比你预期的长时，请尝试使用`EXPLAIN`来查看可以优化的地方。你将会发现哪些键（如果有的话）正在使用，它们的长度等信息，从而可以相应地调整你的查询或表的设计。
 - en: Note
+  id: totrans-272
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: 'When you have finished experimenting with the temporary *accounts* table, you
     may wish to remove it by entering the following command:'
+  id: totrans-273
   prefs: []
   type: TYPE_NORMAL
+  zh: 当您完成临时*accounts*表的实验后，可能希望通过输入以下命令将其删除：
 - en: '[PRE12]'
+  id: totrans-274
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE12]'
 - en: Backing Up and Restoring
+  id: totrans-275
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 备份与恢复
 - en: Whatever kind of data you are storing in your database, it must have some value
     to you, even if it’s only the cost of the time required for reentering it should
     the hard disk fail. Therefore, it’s important that you keep backups to protect
@@ -1226,16 +1821,22 @@
     over to a new server; the best way to do this is usually to back it up first.
     It is also important that you test your backups from time to time to ensure that
     they are valid and will work if they need to be used.
+  id: totrans-276
   prefs: []
   type: TYPE_NORMAL
+  zh: 无论您在数据库中存储哪种类型的数据，它对您都必须有一定的价值，即使只是重新输入它所需的时间成本，如果硬盘发生故障。因此，重要的是您保持备份以保护您的投资。此外，有时您必须将数据库迁移到新服务器；通常最好的方法是先备份它。还重要的是，您定期测试备份以确保它们有效，并且在需要时能够使用。
 - en: Thankfully, backing up and restoring MySQL data is easy with the `mysqldump`
     command.
+  id: totrans-277
   prefs: []
   type: TYPE_NORMAL
+  zh: 幸运的是，使用`mysqldump`命令轻松备份和恢复MySQL数据。
 - en: Using mysqldump
+  id: totrans-278
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 使用mysqldump
 - en: With `mysqldump`, you can dump a database or collection of databases into one
     or more files containing all the instructions necessary to re-create all your
     tables and repopulate them with your data. This command can also generate files
@@ -1244,232 +1845,349 @@
     while you’re backing it up. There are various ways to do this, but the easiest
     is to shut down the MySQL server before running `mysqldump` and start up the server
     again after `mysqldump` finishes.
+  id: totrans-279
   prefs: []
   type: TYPE_NORMAL
+  zh: 使用`mysqldump`，您可以将一个或多个数据库转储到一个或多个文件中，这些文件包含重新创建所有表并填充其数据所需的所有指令。此命令还可以生成*CSV*（逗号分隔值）和其他分隔文本格式的文件，甚至是XML格式的文件。其主要缺点是在备份时必须确保没有人在写入表。有各种方法可以做到这一点，但最简单的方法是在运行`mysqldump`之前关闭MySQL服务器，然后在`mysqldump`完成后重新启动服务器。
 - en: 'Alternatively, you can lock the tables you are backing up before running `mysqldump`.
     To lock tables for reading (as we want to read the data), from the MySQL command
     line issue this command:'
+  id: totrans-280
   prefs: []
   type: TYPE_NORMAL
+  zh: 或者，在运行`mysqldump`之前，您可以锁定要备份的表。要锁定表以便读取数据（因为我们想要读取数据），请从MySQL命令行执行以下命令：
 - en: '[PRE13]'
+  id: totrans-281
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE13]'
 - en: 'Then, to release the lock(s), enter the following:'
+  id: totrans-282
   prefs: []
   type: TYPE_NORMAL
+  zh: 然后，要释放锁，请输入以下命令：
 - en: '[PRE14]'
+  id: totrans-283
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE14]'
 - en: By default, the output from `mysqldump` is simply printed out, but you can capture
     it in a file through the `>` redirect symbol.
+  id: totrans-284
   prefs: []
   type: TYPE_NORMAL
+  zh: 默认情况下，`mysqldump`的输出只是简单地打印出来，但您可以通过`>`重定向符号将其捕获到文件中。
 - en: 'The basic format of the `mysqldump` command is shown here:'
+  id: totrans-285
   prefs: []
   type: TYPE_NORMAL
+  zh: '`mysqldump`命令的基本格式如下所示：'
 - en: '[PRE15]'
+  id: totrans-286
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE15]'
 - en: However, before you can dump the contents of a database, you must make sure
     that `mysqldump` is in your path, or else specify its location as part of your
     command. [Table 9-13](#likely_locations_of_mysqldump_for_differ) shows the likely
     locations of the program for the different installations and operating systems
     covered in [Chapter 2](ch02.xhtml#setting_up_a_development_server). If you have
     a different installation, it may be in a slightly different location.
+  id: totrans-287
   prefs: []
   type: TYPE_NORMAL
+  zh: 但在转储数据库内容之前，必须确保 `mysqldump` 在你的路径中，否则需在命令中指定其位置。[表 9-13](#likely_locations_of_mysqldump_for_differ)
+    显示了在不同安装和操作系统中可能的程序位置，这些已在[第 2 章](ch02.xhtml#setting_up_a_development_server)中涵盖。如果使用不同的安装程序，则其位置可能略有不同。
 - en: Table 9-13\. Likely locations of `mysqldump` for different installations
+  id: totrans-288
   prefs: []
   type: TYPE_NORMAL
+  zh: 表 9-13\. 不同安装的 `mysqldump` 的可能位置
 - en: '| Operating system and program | Likely folder location |'
+  id: totrans-289
   prefs: []
   type: TYPE_TB
+  zh: '| 操作系统和程序 | 可能的文件夹位置 |'
 - en: '| --- | --- |'
+  id: totrans-290
   prefs: []
   type: TYPE_TB
+  zh: '| --- | --- |'
 - en: '| Windows AMPPS | *C:\Program Files\Ampps\mysql\bin* |'
+  id: totrans-291
   prefs: []
   type: TYPE_TB
+  zh: '| Windows AMPPS | *C:\Program Files\Ampps\mysql\bin* |'
 - en: '| macOS AMPPS | */Applications/ampps/mysql/bin* |'
+  id: totrans-292
   prefs: []
   type: TYPE_TB
+  zh: '| macOS AMPPS | */Applications/ampps/mysql/bin* |'
 - en: '| Linux AMPPS | */Applications/ampps/mysql/bin* |'
+  id: totrans-293
   prefs: []
   type: TYPE_TB
+  zh: '| Linux AMPPS | */Applications/ampps/mysql/bin* |'
 - en: So, to dump the contents of the *publications* database that you created in
     [Chapter 8](ch08.xhtml#introduction_to_mysql) to the screen, first exit MySQL
     and then enter the command in [Example 9-7](#dumping_the_publications_database_to_scr)
     (specifying the full path to `mysqldump` if necessary).
+  id: totrans-294
   prefs: []
   type: TYPE_NORMAL
+  zh: 因此，要将你在[第 8 章](ch08.xhtml#introduction_to_mysql)中创建的*publications*数据库的内容转储到屏幕上，首先退出
+    MySQL，然后输入[示例 9-7](#dumping_the_publications_database_to_scr) 中的命令（必要时指定`mysqldump`的完整路径）。
 - en: Example 9-7\. Dumping the publications database to screen
+  id: totrans-295
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-7\. 将 publications 数据库转储到屏幕上
 - en: '[PRE16]'
+  id: totrans-296
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE16]'
 - en: Make sure that you replace *`user`* and *`password`* with the correct details
     for your installation of MySQL. If there is no password set for the user, you
     can omit that part of the command, but the `-u` *`user`* part is mandatory unless
     you have root access without a password and are executing as root (not recommended).
     The result of issuing this command will look something like [Figure 9-4](#dumping_the_publications_databas-id00028).
+  id: totrans-297
   prefs: []
   type: TYPE_NORMAL
+  zh: 确保用你的 MySQL 安装的正确详细信息替换 *`user`* 和 *`password`*。如果用户没有设置密码，可以省略命令的这部分，但 `-u`
+    *`user`* 部分是必需的，除非你以 root 身份执行而无需密码并且正在以 root 身份执行（不推荐）。执行此命令的结果将类似于 [图 9-4](#dumping_the_publications_databas-id00028)。
 - en: '![Dumping the publications database to the screen](Images/pmj6_0904.png)'
+  id: totrans-298
   prefs: []
   type: TYPE_IMG
+  zh: '![将 publications 数据库转储到屏幕上](Images/pmj6_0904.png)'
 - en: Figure 9-4\. Dumping the publications database to the screen
+  id: totrans-299
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 图 9-4\. 将 publications 数据库转储到屏幕上
 - en: Creating a Backup File
+  id: totrans-300
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 创建备份文件
 - en: Now that you have `mysqldump` working, and have verified it outputs correctly
     to the screen, you can send the backup data directly to a file using the `>` redirect
     symbol. Assuming that you wish to call the backup file *publications.sql*, type
     the command in [Example 9-8](#dumping_the_publications_database_to_fil) (remembering
     to replace *`user`* and *`password`* with the correct details).
+  id: totrans-301
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在 `mysqldump` 可以工作，并且已验证其正确输出到屏幕，你可以使用 `>` 重定向符号直接将备份数据发送到文件。假设你希望将备份文件命名为
+    *publications.sql*，则输入 [示例 9-8](#dumping_the_publications_database_to_fil) 中的命令（记得替换
+    *`user`* 和 *`password`* 为正确的详细信息）。
 - en: Note
+  id: totrans-302
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: The command in [Example 9-8](#dumping_the_publications_database_to_fil) stores
     the backup file into the current directory. If you need it to be saved elsewhere,
     you should insert a filepath before the filename. You must also ensure that the
     directory you are backing up to has the right permissions set to allow the file
     to be written, but not to be accessed by any unprivileged user!
+  id: totrans-303
   prefs: []
   type: TYPE_NORMAL
+  zh: '[示例 9-8](#dumping_the_publications_database_to_fil) 中的命令将备份文件存储到当前目录。如果需要保存到其他位置，应在文件名之前插入文件路径。还必须确保备份目录已设置正确的权限，允许写入文件，但不允许任何非特权用户访问！'
 - en: Example 9-8\. Dumping the publications database to a file
+  id: totrans-304
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-8\. 将 publications 数据库转储到文件中
 - en: '[PRE17]'
+  id: totrans-305
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE17]'
 - en: Note
+  id: totrans-306
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Sometimes you may get errors accessing MySQL using Windows PowerShell, which
     you will not see in a standard Command Prompt window.
+  id: totrans-307
   prefs: []
   type: TYPE_NORMAL
+  zh: 有时在使用 Windows PowerShell 访问 MySQL 时可能会出现错误，而在标准命令提示符窗口中则看不到这些错误。
 - en: 'If you echo the backup file to screen or load it into a text editor, you will
     see that it comprises sequences of SQL commands such as the following:'
+  id: totrans-308
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果将备份文件 echo 到屏幕或加载到文本编辑器中，你会看到它包含如下的 SQL 命令序列：
 - en: '[PRE18]'
+  id: totrans-309
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE18]'
 - en: This is smart code that can be used to restore a database from a backup, even
     if it currently exists; it will first drop any tables that need to be re-created,
     thus avoiding potential MySQL errors.
+  id: totrans-310
   prefs: []
   type: TYPE_NORMAL
+  zh: 这是一个智能代码，可用于从备份中恢复数据库，即使当前数据库已存在；它将首先删除需要重新创建的任何表，从而避免可能出现的MySQL错误。
 - en: Backing up a single table
+  id: totrans-311
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 备份单个表
 - en: 'To back up only a single table from a database (such as the *classics* table
     from the *publications* database), you should first lock the table from within
     the MySQL command line, by issuing a command such as the following:'
+  id: totrans-312
   prefs: []
   type: TYPE_NORMAL
+  zh: 要仅从数据库备份中备份单个表（例如从*publications*数据库的*classics*表），您应首先从MySQL命令行内锁定该表，通过发出以下命令：
 - en: '[PRE19]'
+  id: totrans-313
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE19]'
 - en: 'This ensures that MySQL remains running for read purposes but that writes cannot
     be made. Then, while keeping the MySQL command line open, use another Terminal
     window to issue the following command from the operating system command line:'
+  id: totrans-314
   prefs: []
   type: TYPE_NORMAL
+  zh: 这确保MySQL继续运行以进行读取，但不能进行写入。然后，保持MySQL命令行打开状态，使用操作系统命令行发出以下命令：
 - en: '[PRE20]'
+  id: totrans-315
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE20]'
 - en: 'You must now release the table lock by entering the following command from
     the MySQL command line in the first Terminal window, which unlocks all tables
     that have been locked during the current session:'
+  id: totrans-316
   prefs: []
   type: TYPE_NORMAL
+  zh: 现在，您必须从MySQL命令行内释放表锁，通过在第一个终端窗口中输入以下命令，解锁在当前会话期间已锁定的所有表：
 - en: '[PRE21]'
+  id: totrans-317
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE21]'
 - en: Backing up all tables
+  id: totrans-318
   prefs:
   - PREF_H3
   type: TYPE_NORMAL
+  zh: 备份所有表
 - en: If you want to back up all your MySQL databases at once (including the system
     databases such as *mysql*), you can use a command such as the one in [Example 9-9](#dumping_all_the_mysql_databases_to_file),
     which would enable you to restore an entire MySQL database installation. Remember
     to use locking where required.
+  id: totrans-319
   prefs: []
   type: TYPE_NORMAL
+  zh: 如果要一次备份所有MySQL数据库（包括系统数据库如*mysql*），可以使用类似[示例 9-9](#dumping_all_the_mysql_databases_to_file)中的命令，这样可以恢复整个MySQL数据库安装。记得在需要时使用锁定。
 - en: Example 9-9\. Dumping all the MySQL databases to file
+  id: totrans-320
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-9\. 将所有MySQL数据库转储到文件
 - en: '[PRE22]'
+  id: totrans-321
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE22]'
 - en: Note
+  id: totrans-322
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: Of course, there’s a lot more than just a few lines of SQL code in backed-up
     database files. I recommend that you take a few minutes to examine a couple in
     order to familiarize yourself with the types of commands that appear in backup
     files and how they work.
+  id: totrans-323
   prefs: []
   type: TYPE_NORMAL
+  zh: 当然，备份的数据库文件中不仅仅是几行SQL代码。建议您花几分钟时间查看一些文件，以熟悉备份文件中出现的命令类型及其工作原理。
 - en: Restoring from a Backup File
+  id: totrans-324
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 从备份文件恢复
 - en: To perform a restore from a file, call the *mysql* executable, passing it the
     file to restore from using the `<` symbol. So, to recover an entire database that
     you dumped using the `--all-databases` option, use a command such as that in [Example 9-10](#restoring_an_entire_set_of_databases).
+  id: totrans-325
   prefs: []
   type: TYPE_NORMAL
+  zh: 要从文件执行恢复，请调用*mysql*可执行文件，并使用`<`符号指定要从中恢复的文件。因此，要恢复使用`--all-databases`选项转储的整个数据库，可以使用类似[示例 9-10](#restoring_an_entire_set_of_databases)中的命令。
 - en: Example 9-10\. Restoring an entire set of databases
+  id: totrans-326
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-10\. 恢复整个数据库集
 - en: '[PRE23]'
+  id: totrans-327
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE23]'
 - en: To restore a single database, use the `-D` option followed by the name of the
     database, as in [Example 9-11](#restoring_the_publications_database), where the
     *publications* database is being restored from the backup made in [Example 9-8](#dumping_the_publications_database_to_fil).
+  id: totrans-328
   prefs: []
   type: TYPE_NORMAL
+  zh: 要恢复单个数据库，请使用`-D`选项，后跟数据库名称，如[示例 9-11](#restoring_the_publications_database)，其中*publications*数据库正在从[示例 9-8](#dumping_the_publications_database_to_fil)生成的备份中恢复。
 - en: Example 9-11\. Restoring the publications database
+  id: totrans-329
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-11\. 恢复publications数据库
 - en: '[PRE24]'
+  id: totrans-330
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE24]'
 - en: To restore a single table to a database, use a command such as that in [Example 9-12](#restoring_the_classics_table_to_the_publ),
     where just the *classics* table is being restored to the *publications* database.
+  id: totrans-331
   prefs: []
   type: TYPE_NORMAL
+  zh: 要将单个表恢复到数据库，请使用类似[示例 9-12](#restoring_the_classics_table_to_the_publ)中的命令，这里只恢复*publications*数据库中的*classics*表。
 - en: Example 9-12\. Restoring the classics table to the publications database
+  id: totrans-332
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-12\. 将classics表恢复到publications数据库
 - en: '[PRE25]'
+  id: totrans-333
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE25]'
 - en: Dumping Data in CSV Format
+  id: totrans-334
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 以CSV格式转储数据
 - en: As previously mentioned, the `mysqldump` program is very flexible and supports
     various types of output, such as the CSV format, which you might use to import
     data into a spreadsheet, among other purposes. [Example 9-13](#dumping_data_to_csv_format_files)
@@ -1477,101 +2195,145 @@
     the *publications* database to the files *classics.txt* and *customers.txt* in
     the folder *c:/temp*. On macOS or Linux systems, you should modify the destination
     path to an existing folder.
+  id: totrans-335
   prefs: []
   type: TYPE_NORMAL
+  zh: 如前所述，`mysqldump`程序非常灵活，支持各种输出格式，例如CSV格式，您可以将其用于将数据导入电子表格等其他用途。[示例 9-13](#dumping_data_to_csv_format_files)展示了如何将*publications*数据库中的*classics*和*customers*表数据导出到*c:/temp*文件夹下的*classics.txt*和*customers.txt*文件中。在macOS或Linux系统上，您应修改目标路径为一个已存在的文件夹。
 - en: Example 9-13\. Dumping data to CSV-format files
+  id: totrans-336
   prefs:
   - PREF_H5
   type: TYPE_NORMAL
+  zh: 示例 9-13\. 将数据转储到CSV格式文件
 - en: '[PRE26]'
+  id: totrans-337
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE26]'
 - en: 'This command is quite long and is shown here wrapped over two lines, but you
     must type it all as a single line. The result is the following:'
+  id: totrans-338
   prefs: []
   type: TYPE_NORMAL
+  zh: 此命令非常长，在这里显示为两行，但您必须将其作为单行输入。结果如下：
 - en: '[PRE27]'
+  id: totrans-339
   prefs: []
   type: TYPE_PRE
+  zh: '[PRE27]'
 - en: Planning Your Backups
+  id: totrans-340
   prefs:
   - PREF_H2
   type: TYPE_NORMAL
+  zh: 计划您的备份
 - en: The golden rule to backing up is to do so as often as you find practical. The
     more valuable the data, the more often you should back it up, and the more copies
     you should make. If your database gets updated at least once a day, you should
     really back it up on a daily basis. If, on the other hand, it is not updated very
     often, you could probably get by with less frequent backups.
+  id: totrans-341
   prefs: []
   type: TYPE_NORMAL
+  zh: 备份的黄金法则是在您认为合适的频率进行备份。数据越有价值，您就越应该频繁备份，并制作更多的副本。如果您的数据库每天至少更新一次，您应该真的每天备份一次。另一方面，如果更新频率不高，您可能可以更少地备份。
 - en: Note
+  id: totrans-342
   prefs:
   - PREF_H6
   type: TYPE_NORMAL
+  zh: 注意
 - en: You should consider making multiple backups and storing them in different locations.
     If you have several servers, it is a simple matter to copy your backups between
     them. You would also be well advised to make physical backups on removable hard
     disks, thumb drives, CDs or DVDs, and so on, and to keep these in separate locations—preferably
     somewhere like a fireproof safe.
+  id: totrans-343
   prefs: []
   type: TYPE_NORMAL
+  zh: 您应考虑制作多份备份并将它们存储在不同的位置。如果您有多台服务器，将备份在它们之间复制将变得非常简单。您还应该考虑在可移动硬盘、闪存驱动器、CD或DVD等物理介质上进行备份，并将其保管在不同的地方——最好是像防火保险柜之类的地方。
 - en: It’s important to test restoring a database once in a while, too, to make sure
     your backups are done correctly. You also want to be familiar with restoring a
     database because you may have to do so when you are stressed and in a hurry, such
     as after a power failure that takes down the website. You can restore a database
     to a private server and run a few SQL commands to make sure the data is as you
     think it should be.
+  id: totrans-344
   prefs: []
   type: TYPE_NORMAL
+  zh: 定期测试数据库的还原也很重要，以确保您的备份操作正确无误。您还需要熟悉数据库的还原操作，因为在压力和匆忙情况下，例如网站遭遇停电后，可能需要进行数据库的还原操作。您可以将数据库还原到私有服务器并运行一些SQL命令，以确保数据符合您的预期。
 - en: Once you’ve digested the contents of this chapter, you will be proficient in
     using both PHP and MySQL; the next chapter outlines the changes in the latest
     PHP/MySQL releases.
+  id: totrans-345
   prefs: []
   type: TYPE_NORMAL
+  zh: 一旦您消化了本章的内容，您将能够熟练使用PHP和MySQL；下一章概述了最新PHP/MySQL版本的变化。
 - en: Questions
+  id: totrans-346
   prefs:
   - PREF_H1
   type: TYPE_NORMAL
+  zh: 问题
 - en: What does the word *relationship* mean in reference to a relational database?
+  id: totrans-347
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在关系数据库中，“关系”一词的含义是什么？
 - en: What is the term for the process of removing duplicate data and optimizing tables?
+  id: totrans-348
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 删除重复数据和优化表的过程术语是什么？
 - en: What are the three rules of the First Normal Form?
+  id: totrans-349
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 第一范式有哪三条规则？
 - en: How can you make a table satisfy the Second Normal Form?
+  id: totrans-350
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何使表满足第二范式？
 - en: What do you put in a column to tie together two tables that contain items having
     a one-to-many relationship?
+  id: totrans-351
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 在一个包含一对多关系项的两个表中，您会在列中放置什么以将它们联系在一起？
 - en: How can you create a database with a many-to-many relationship?
+  id: totrans-352
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 如何创建具有多对多关系的数据库？
 - en: What commands initiate and end a MySQL transaction?
+  id: totrans-353
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 什么命令启动和结束MySQL事务？
 - en: What feature does MySQL provide to enable you to examine how a query will work
     in detail?
+  id: totrans-354
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: MySQL提供了哪个功能，使您能够详细查看查询的工作方式？
 - en: What command would you use to back up the database *publications* to a file
     called *publications.sql*?
+  id: totrans-355
   prefs:
   - PREF_OL
   type: TYPE_NORMAL
+  zh: 您会使用什么命令将*publications*数据库备份到名为*publications.sql*的文件中？
 - en: See [“Chapter 9 Answers”](app01_split_008.xhtml#chapter_9_answers) in the [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions)
     for the answers to these questions.
+  id: totrans-356
   prefs: []
   type: TYPE_NORMAL
+  zh: 参见[“第9章答案”](app01_split_008.xhtml#chapter_9_answers)，在[附录 A](app01_split_000.xhtml#solutions_to_the_chapter_questions)中查看这些问题的答案。
