@@ -1,0 +1,1103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xml:lang="en"
+      lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<title>PHP Cookbook</title>
+<link rel="stylesheet" type="text/css" href="override_v1.css"/>
+<link rel="stylesheet" type="text/css" href="epub.css"/>
+</head>
+<body>
+<div id="book-content">
+<div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 11. Streams"><div class="chapter" id="chapter_streams">
+<h1><span class="label">Chapter 11. </span>Streams</h1>
+
+
+<p><em>Streams</em> in PHP represent common <a data-type="indexterm" data-primary="streams" id="idm45875147859936"></a>interfaces to data resources that can be written to or read from in a linear, continuous manner. Internally, each stream is represented by a collection of objects <a data-type="indexterm" data-primary="buckets" id="idm45875147859312"></a>referred to as <em>buckets</em>. Each bucket represents a chunk of data from the underlying stream, which is treated like a digital re-creation of an old-fashioned bucket brigade, like the one illustrated in <a data-type="xref" href="#bucket_brigade_illustration">Figure 11-1</a>.</p>
+
+<figure><div id="bucket_brigade_illustration" class="figure">
+<img src="assets/phpc_1101.png" alt="Bucket brigades pass buckets of data from one to another in turn" width="600" height="246"/>
+<h6><span class="label">Figure 11-1. </span>Bucket brigades pass buckets of data from one to another in turn</h6>
+</div></figure>
+
+<p>Bucket brigades were often used to transport water from a river, stream, lake, or well to the source of a fire. When it was impossible to use hoses to move the water, people would line up and pass buckets from one to another in order to fight the fire. One person would fill a bucket at the water source and then pass the bucket to the next person in line. The people in line didn’t move, but the bucket of water was transported from person to person in turn until the final person could throw the water on the fire. This process would continue until either the fire was extinguished or the source ran out of water.</p>
+
+<p>Though you’re not using PHP to fight a fire, the internal structure of a stream is somewhat similar to a bucket brigade because of the way data is passed one chunk (bucket) at a time through whatever component of code is processing it.</p>
+
+<p>Generators are also analogous to this pattern.<sup><a data-type="noteref" id="idm45875147854464-marker" href="ch11.html#idm45875147854464">1</a></sup> Rather than loading an entire collection of data into memory all at once, generators provide a way to reduce it into smaller chunks and operate on one piece of data at a time. This enables a PHP application to operate on data that would otherwise exhaust system memory. Streams empower similar functionality, except working on continuous data rather than collections or arrays of discrete data points.</p>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Wrappers and Protocols"><div class="sect2" id="idm45875147852848">
+<h2>Wrappers and Protocols</h2>
+
+<p>In PHP, streams are <a data-type="indexterm" data-primary="streams" data-secondary="wrappers" id="strmwr"></a><a data-type="indexterm" data-primary="wrappers" id="wpprs"></a>implemented using <em>wrappers</em> that are registered with the system to operate on a specific protocol. The most common wrappers you might interact with are those for file access or HTTP URLs, registered as <code>file://</code> and <code>http://</code>, respectively. Each wrapper operates against different kinds of data, but they all support the same basic functionality. <a data-type="xref" href="#php_native_protocols">Table 11-1</a> enumerates the wrappers and protocols that are exposed natively by PHP.</p>
+<table id="php_native_protocols">
+<caption><span class="label">Table 11-1. </span>Native stream wrappers and protocols</caption>
+<thead>
+<tr>
+<th>Protocol</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>file://</code></p></td>
+<td><p>Access the local filesystem</p></td>
+</tr>
+<tr>
+<td><p><code>http://</code></p></td>
+<td><p>Access remote URLs over HTTP(S)</p></td>
+</tr>
+<tr>
+<td><p><code>ftp://</code></p></td>
+<td><p>Access remote filesystems over FTP(S)</p></td>
+</tr>
+<tr>
+<td><p><code>php://</code></p></td>
+<td><p>Access various local I/O streams (memory, <code>stdin</code>, <code>stdout</code>, etc.)</p></td>
+</tr>
+<tr>
+<td><p><code>zlib://</code></p></td>
+<td><p>Compression</p></td>
+</tr>
+<tr>
+<td><p><code>data://</code></p></td>
+<td><p>Raw data (according to <a href="https://oreil.ly/EBJv6">RFC 2397</a>)</p></td>
+</tr>
+<tr>
+<td><p><code>glob://</code></p></td>
+<td><p>Find pathnames matching a pattern</p></td>
+</tr>
+<tr>
+<td><p><code>phar://</code></p></td>
+<td><p>Manipulate PHP archives</p></td>
+</tr>
+<tr>
+<td><p><code>ssh2://</code></p></td>
+<td><p>Connect via secure shell</p></td>
+</tr>
+<tr>
+<td><p><code>rar://</code></p></td>
+<td><p>RAR compression</p></td>
+</tr>
+<tr>
+<td><p><code>ogg://</code></p></td>
+<td><p>Audio streams</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>Each wrapper produces a <code>stream</code> resource that enables you to read or write data in a linear fashion with the additional ability <a data-type="indexterm" data-primary="streams" data-secondary="wrappers" data-startref="strmwr" id="idm45875147821888"></a><a data-type="indexterm" data-primary="wrappers" data-startref="wpprs" id="idm45875147820640"></a><a data-type="indexterm" data-primary="stream resource" id="idm45875147819696"></a>to “seek” to an arbitrary location within the stream. A <code>file://</code> stream, for example, allows arbitrary access to bytes on disk. 
+<span class="keep-together">Similarly</span>, the <code>php://</code> protocol provides read/write access to various streams of bytes held in the local system memory.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Filters"><div class="sect2" id="idm45875147817136">
+<h2>Filters</h2>
+
+<p>PHP’s stream filters provide a <a data-type="indexterm" data-primary="streams" data-secondary="filters" id="strmfts"></a><a data-type="indexterm" data-primary="filters" id="fltrs"></a>construct that allows for the dynamic manipulation of the bytes in a stream during either read or write. A simple example would be to automatically convert every character in a string to either uppercase or lowercase. This is accomplished by creating a custom class that extends the <code>php_user_filter</code> class <a data-type="indexterm" data-primary="filters" data-secondary="user-defined" id="idm45875147812704"></a><a data-type="indexterm" data-primary="user-defined filters" id="idm45875147811696"></a>and registering that class as a filter for the compiler to use, as in <a data-type="xref" href="#example_user_defined_filter">Example 11-1</a>.</p>
+<div id="example_user_defined_filter" data-type="example">
+<h5><span class="label">Example 11-1. </span>User-defined filter</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">class</code><code> </code><code class="nc">StringFilter</code><code> </code><code class="k">extends</code><code> </code><code class="k">php_user_filter</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">private</code><code> </code><code class="nx">string</code><code> </code><code class="nv">$mode</code><code class="p">;</code><code>
+
+    </code><code class="k">public</code><code> </code><code class="k">function</code><code> </code><code class="nf">filter</code><code class="p">(</code><code class="nv">$in</code><code class="p">,</code><code> </code><code class="nv">$out</code><code class="p">,</code><code> </code><code class="o">&amp;</code><code class="nv">$consumed</code><code class="p">,</code><code> </code><code class="nx">bool</code><code> </code><code class="nv">$closing</code><code class="p">)</code><code class="o">:</code><code> </code><code class="nx">int</code><code>
+    </code><code class="p">{</code><code>
+        </code><code class="k">while</code><code> </code><code class="p">(</code><code class="nv">$bucket</code><code> </code><code class="o">=</code><code> </code><code class="nb">stream_bucket_make_writeable</code><code class="p">(</code><code class="nv">$in</code><code class="p">))</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_streams_CO1-1" href="#callout_streams_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+            </code><code class="k">switch</code><code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">mode</code><code class="p">)</code><code> </code><code class="p">{</code><code>
+                </code><code class="k">case</code><code> </code><code class="s1">'lower'</code><code class="o">:</code><code>
+                    </code><code class="nv">$bucket</code><code class="o">-&gt;</code><code class="na">data</code><code> </code><code class="o">=</code><code> </code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$bucket</code><code class="o">-&gt;</code><code class="na">data</code><code class="p">);</code><code>
+                    </code><code class="k">break</code><code class="p">;</code><code>
+                </code><code class="k">case</code><code> </code><code class="s1">'upper'</code><code class="o">:</code><code>
+                    </code><code class="nv">$bucket</code><code class="o">-&gt;</code><code class="na">data</code><code> </code><code class="o">=</code><code> </code><code class="nb">strtoupper</code><code class="p">(</code><code class="nv">$bucket</code><code class="o">-&gt;</code><code class="na">data</code><code class="p">);</code><code>
+                    </code><code class="k">break</code><code class="p">;</code><code>
+            </code><code class="p">}</code><code>
+
+            </code><code class="nv">$consumed</code><code> </code><code class="o">+=</code><code> </code><code class="nv">$bucket</code><code class="o">-&gt;</code><code class="na">datalen</code><code class="p">;</code><code> </code><a class="co" id="co_streams_CO1-2" href="#callout_streams_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+            </code><code class="nb">stream_bucket_append</code><code class="p">(</code><code class="nv">$out</code><code class="p">,</code><code> </code><code class="nv">$bucket</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO1-3" href="#callout_streams_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+        </code><code class="p">}</code><code>
+
+        </code><code class="k">return</code><code> </code><code class="nx">PSFS_PASS_ON</code><code class="p">;</code><code> </code><a class="co" id="co_streams_CO1-4" href="#callout_streams_CO1-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+    </code><code class="p">}</code><code>
+
+    </code><code class="k">public</code><code> </code><code class="k">function</code><code> </code><code class="nf">onCreate</code><code class="p">()</code><code class="o">:</code><code> </code><code class="nx">bool</code><code>
+    </code><code class="p">{</code><code>
+        </code><code class="k">switch</code><code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">filtername</code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_streams_CO1-5" href="#callout_streams_CO1-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a><code>
+            </code><code class="k">case</code><code> </code><code class="s1">'str.tolower'</code><code class="o">:</code><code>
+                </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">mode</code><code> </code><code class="o">=</code><code> </code><code class="s1">'lower'</code><code class="p">;</code><code>
+                </code><code class="k">return</code><code> </code><code class="k">true</code><code class="p">;</code><code>
+            </code><code class="k">case</code><code> </code><code class="s1">'str.toupper'</code><code class="o">:</code><code>
+                </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">mode</code><code> </code><code class="o">=</code><code> </code><code class="s1">'upper'</code><code class="p">;</code><code>
+                </code><code class="k">return</code><code> </code><code class="k">true</code><code class="p">;</code><code>
+            </code><code class="k">default</code><code class="o">:</code><code>
+                </code><code class="k">return</code><code> </code><code class="k">false</code><code class="p">;</code><code>
+        </code><code class="p">}</code><code>
+    </code><code class="p">}</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nb">stream_filter_register</code><code class="p">(</code><code class="s1">'str.*'</code><code class="p">,</code><code> </code><code class="s1">'StringFilter'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO1-6" href="#callout_streams_CO1-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a><code>
+
+</code><code class="nv">$fp</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'document.txt'</code><code class="p">,</code><code> </code><code class="s1">'w'</code><code class="p">);</code><code>
+</code><code class="nb">stream_filter_append</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="s1">'str.toupper'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO1-7" href="#callout_streams_CO1-7"><img src="assets/7.png" alt="7" width="12" height="12"/></a><code>
+
+</code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="s1">'Hello'</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO1-8" href="#callout_streams_CO1-8"><img src="assets/8.png" alt="8" width="12" height="12"/></a><code>
+</code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="s1">'World'</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">);</code><code>
+
+</code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code><code>
+
+</code><code class="k">echo</code><code> </code><code class="nb">file_get_contents</code><code class="p">(</code><code class="s1">'document.txt'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO1-9" href="#callout_streams_CO1-9"><img src="assets/9.png" alt="9" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_streams_CO1-1" href="#co_streams_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The <code>$in</code> resource passed into the filter must first be made writable before you can do anything with it.</p></dd>
+<dt><a class="co" id="callout_streams_CO1-2" href="#co_streams_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>When consuming data, always be sure to update the <code>$consumed</code> output variable so PHP can keep track of how many bytes you’ve operated on.</p></dd>
+<dt><a class="co" id="callout_streams_CO1-3" href="#co_streams_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>The <code>$out</code> resource is initially empty, and you need to write buckets to it in order for other filters (or just PHP itself) to continue acting on the stream.</p></dd>
+<dt><a class="co" id="callout_streams_CO1-4" href="#co_streams_CO1-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>The <code>PSFS_PASS_ON</code> flag tells PHP that the filter was successful and data is available in the resource defined by <code>$out</code>.</p></dd>
+<dt><a class="co" id="callout_streams_CO1-5" href="#co_streams_CO1-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p>This particular filter can act on any <code>str.</code> flag but intentionally only reads two filter names for converting text to uppercase or lowercase. By switching on the defined filter name, you can intercept and filter <em>just</em> the operations you want, while allowing other filters to define their own <code>str.</code> functions.</p></dd>
+<dt><a class="co" id="callout_streams_CO1-6" href="#co_streams_CO1-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></dt>
+<dd><p>Defining the filter is not enough; you must explicitly register the filter so PHP knows which class to instantiate when filtering a stream.</p></dd>
+<dt><a class="co" id="callout_streams_CO1-7" href="#co_streams_CO1-7"><img src="assets/7.png" alt="7" width="12" height="12"/></a></dt>
+<dd><p>Once the filter is defined and registered, you must either append (or prepend) the custom filter to the list of filters attached to the current stream resource.</p></dd>
+<dt><a class="co" id="callout_streams_CO1-8" href="#co_streams_CO1-8"><img src="assets/8.png" alt="8" width="12" height="12"/></a></dt>
+<dd><p>With the filter attached, any data written to the stream will pass through the 
+<span class="keep-together">filter</span>.</p></dd>
+<dt><a class="co" id="callout_streams_CO1-9" href="#co_streams_CO1-9"><img src="assets/9.png" alt="9" width="12" height="12"/></a></dt>
+<dd><p>Opening the file again demonstrates that your input data was indeed converted to uppercase. Note that <code>file_get_contents()</code> reads the entire file into memory rather than operating on it as a stream.</p></dd>
+</dl></div>
+
+<p>Internally, any custom filter’s <code>filter()</code> method must <a data-type="indexterm" data-primary="filter() function" id="idm45875147480992"></a><a data-type="indexterm" data-primary="functions" data-secondary="filter()" id="idm45875147480384"></a>return one of three flags:</p>
+<dl>
+<dt><code>PSFS_PASS_ON</code></dt>
+<dd>
+<p>Demonstrates that processing completed successfully and that the output bucket brigade (<code>$out</code>) contains data ready for the next filter</p>
+</dd>
+<dt><code>PSFS_FEED_ME</code></dt>
+<dd>
+<p>Demonstrates that the filter completed successfully, but no data was available to the output brigade. You must provide more data to the filter (either from the base stream or the filter immediately prior in the stack) to get any output</p>
+</dd>
+<dt><code>PSFS_ERR_FATAL</code></dt>
+<dd>
+<p>Indicates that the filter experienced an error</p>
+</dd>
+</dl>
+
+<p>The <code>onCreate()</code> method <a data-type="indexterm" data-primary="onCreate() method" id="idm45875147473696"></a>exposes three internal variables from the underlying <code>php_user_filter</code> class as if they were properties of the child class itself:</p>
+<dl>
+<dt><code>::filtername</code></dt>
+<dd>
+<p>The name of the filter as specified in <code>stream_filter_append()</code> or <code>stream_​fil⁠ter_​pre⁠pend()</code></p>
+</dd>
+<dt><code>::params</code></dt>
+<dd>
+<p>Additional parameters passed into the filter either when appending or prepending it to the filter stack</p>
+</dd>
+<dt><code>::stream</code></dt>
+<dd>
+<p>The actual stream resource being filtered</p>
+</dd>
+</dl>
+
+<p>Stream filters are powerful ways to manipulate data as it flows into or out of the system. The following recipes cover various uses of streams in PHP, including both stream wrappers <a data-type="indexterm" data-primary="streams" data-secondary="filters" data-startref="strmfts" id="idm45875147466448"></a><a data-type="indexterm" data-primary="filters" data-startref="fltrs" id="idm45875147465168"></a>and filters.</p>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="11.1 Streaming Data to/from a Temporary File"><div class="sect1" id="idm45875147463968">
+<h1>11.1 Streaming Data to/from a Temporary File</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875147462784">
+<h2>Problem</h2>
+
+<p>You want to use a temporary file to <a data-type="indexterm" data-primary="streaming" data-secondary="to/from temporary files" id="stmgtmpry"></a><a data-type="indexterm" data-primary="temporary files" data-secondary="streaming to/from" id="tpryfsmg"></a><a data-type="indexterm" data-primary="files" data-secondary="temporary" data-tertiary="streaming to/from" id="fltprymg"></a>store data used elsewhere in a program.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875147457824">
+<h2>Solution</h2>
+
+<p>To store data, use the <code>php://temp</code> stream as <a data-type="indexterm" data-primary="php://temp stream" id="idm45875147456064"></a><a data-type="indexterm" data-primary="streams" data-secondary="php://temp" id="idm45875147455456"></a>if it were a file as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://temp'</code><code class="p">,</code> <code class="s1">'rw'</code><code class="p">);</code>
+
+<code class="k">while</code> <code class="p">(</code><code class="k">true</code><code class="p">)</code> <code class="p">{</code>
+    <code class="c1">// Get data from some source</code>
+
+    <code class="nb">fputs</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="nv">$data</code><code class="p">);</code>
+
+    <code class="k">if</code> <code class="p">(</code><code class="nv">$endOfData</code><code class="p">)</code> <code class="p">{</code>
+        <code class="k">break</code><code class="p">;</code>
+    <code class="p">}</code>
+<code class="p">}</code></pre>
+
+<p>To retrieve that data again, rewind the stream to the beginning and then read the data back out as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">rewind</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code>
+
+<code class="k">while</code> <code class="p">(</code><code class="k">true</code><code class="p">)</code> <code class="p">{</code>
+    <code class="nv">$data</code> <code class="o">=</code> <code class="nb">fgets</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code>
+
+    <code class="k">if</code> <code class="p">(</code><code class="nv">$data</code> <code class="o">===</code> <code class="k">false</code><code class="p">)</code> <code class="p">{</code>
+        <code class="k">break</code><code class="p">;</code>
+    <code class="p">}</code>
+
+    <code class="k">echo</code> <code class="nv">$data</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nb">fclose</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875147386432">
+<h2>Discussion</h2>
+
+<p>In general, PHP supports two different temporary data streams. The Solution example leverages the <code>php://temp</code> stream but could have just as easily used <code>php://memory</code> to achieve the same effect. For streams of data that fit entirely in memory, the two wrappers are interchangeable. Both will, by default, use system memory to store stream data. Once the stream surpasses the amount of memory available to the application, however, <code>php://temp</code> will instead route the data to a temporary file on disk.</p>
+
+<p>In both cases, the data written to the stream is assumed to be ephemeral. Once you close the stream, this data is no longer available. Likewise, you cannot create a <em>new</em> stream resource that points to the same data. <a data-type="xref" href="#temp_stream_unique">Example 11-2</a> illustrates how PHP will leverage <em>different</em> temporary files for streams even when <a data-type="indexterm" data-primary="temporary streams" id="idm45875147371120"></a><a data-type="indexterm" data-primary="streaming" data-secondary="temporary streams" id="idm45875147370416"></a>using the same stream 
+<span class="keep-together">wrapper</span>.</p>
+<div id="temp_stream_unique" data-type="example">
+<h5><span class="label">Example 11-2. </span>Temporary streams are unique</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://temp'</code><code class="p">,</code><code> </code><code class="s1">'rw'</code><code class="p">);</code><code>
+
+</code><code class="nb">fputs</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="s1">'Hello world!'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO2-1" href="#callout_streams_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="nb">rewind</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO2-2" href="#callout_streams_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="k">echo</code><code> </code><code class="nb">fgets</code><code class="p">(</code><code class="nv">$fp</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_streams_CO2-3" href="#callout_streams_CO2-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+
+</code><code class="nv">$fp2</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://temp'</code><code class="p">,</code><code> </code><code class="s1">'rw'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO2-4" href="#callout_streams_CO2-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+</code><code class="nb">fputs</code><code class="p">(</code><code class="nv">$fp2</code><code class="p">,</code><code> </code><code class="s1">'Goodnight moon.'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO2-5" href="#callout_streams_CO2-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a><code>
+
+</code><code class="nb">rewind</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO2-6" href="#callout_streams_CO2-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a><code>
+</code><code class="nb">rewind</code><code class="p">(</code><code class="nv">$fp2</code><code class="p">);</code><code>
+
+</code><code class="k">echo</code><code> </code><code class="nb">fgets</code><code class="p">(</code><code class="nv">$fp2</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_streams_CO2-7" href="#callout_streams_CO2-7"><img src="assets/7.png" alt="7" width="12" height="12"/></a><code>
+</code><code class="k">echo</code><code> </code><code class="nb">fgets</code><code class="p">(</code><code class="nv">$fp</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_streams_CO2-8" href="#callout_streams_CO2-8"><img src="assets/8.png" alt="8" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_streams_CO2-1" href="#co_streams_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Write a single line to the temporary stream.</p></dd>
+<dt><a class="co" id="callout_streams_CO2-2" href="#co_streams_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Rewind the stream handle so you can reread data from it.</p></dd>
+<dt><a class="co" id="callout_streams_CO2-3" href="#co_streams_CO2-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Reading data back out of the stream prints <code>Hello world!</code> to the console.</p></dd>
+<dt><a class="co" id="callout_streams_CO2-4" href="#co_streams_CO2-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Creating a new stream handle creates an entirely new stream despite the identical protocol wrapper.</p></dd>
+<dt><a class="co" id="callout_streams_CO2-5" href="#co_streams_CO2-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p>Write some unique data to this new stream.</p></dd>
+<dt><a class="co" id="callout_streams_CO2-6" href="#co_streams_CO2-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></dt>
+<dd><p>For good measure, rewind both streams.</p></dd>
+<dt><a class="co" id="callout_streams_CO2-7" href="#co_streams_CO2-7"><img src="assets/7.png" alt="7" width="12" height="12"/></a></dt>
+<dd><p>Print the second stream first to prove it’s unique. This prints <code>Goodnight moon</code>. to the console.</p></dd>
+<dt><a class="co" id="callout_streams_CO2-8" href="#co_streams_CO2-8"><img src="assets/8.png" alt="8" width="12" height="12"/></a></dt>
+<dd><p>Reprint <code>Hello world!</code> to the console to prove that the original stream still works as expected.</p></dd>
+</dl></div>
+
+<p>In either case, a temporary stream is useful when you need <a data-type="indexterm" data-primary="streaming" data-secondary="to/from temporary files" data-startref="stmgtmpry" id="idm45875147171696"></a><a data-type="indexterm" data-primary="temporary files" data-secondary="streaming to/from" data-startref="tpryfsmg" id="idm45875147170544"></a><a data-type="indexterm" data-primary="files" data-secondary="temporary" data-tertiary="streaming to/from" data-startref="fltprymg" id="idm45875147169328"></a>to store some data while running an application and don’t explicitly want to persist it to disk.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875147167472">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/LR8pa"><code>fopen()</code></a> and <a href="https://oreil.ly/6De6p">PHP I/O stream wrappers</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="11.2 Reading from the PHP Input Stream"><div class="sect1" id="recipe_input_stream">
+<h1>11.2 Reading from the PHP Input Stream</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875147162928">
+<h2>Problem</h2>
+
+<p>You want to read raw input from <a data-type="indexterm" data-primary="streams" data-secondary="input, reading from" id="smptrfr"></a><a data-type="indexterm" data-primary="input stream, reading from" id="pusmrfr"></a><a data-type="indexterm" data-primary="reading" data-secondary="from input stream" id="rdgfmpm"></a>within PHP.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875147157840">
+<h2>Solution</h2>
+
+<p>Leverage the <code>php://stdin</code> stream to read the <a href="https://oreil.ly/-_Bxl">standard input stream (<code>stdin</code>)</a> as 
+<span class="keep-together">follows</span>:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$stdin</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://stdin'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875147107520">
+<h2>Discussion</h2>
+
+<p>Like any other application, PHP has direct access to the input passed to it by commands and other upstream applications. In a console world, this might be another command, literal input in the terminal, or data piped in from another application. In a web context, though, you would instead use <code>php://input</code>+ to access the literal contents submitted in a web request and passed through whatever web server is in front of the PHP application.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>In command-line applications, you can also use the predefined <a href="https://oreil.ly/wgDpd"><code>STDIN</code> constant</a> directly. PHP natively opens a stream for you, meaning you don’t need to create a new resource variable at all.</p>
+</div>
+
+<p>A simple command-line application might take data from the input, manipulate that data, and then store it in a file. In <a data-type="xref" href="ch09.html#storing_encrypted_data_in_a_file">Recipe 9.5</a>, you learned how to encrypt and decrypt files by using symmetric keys with <a data-type="indexterm" data-primary="Libsodium" data-secondary="stdn" data-tertiary="encrypting" id="idm45875147147104"></a>Libsodium. Assuming you have an encryption key (encoded in hexadecimal) exposed as an environment variable, the program in <a data-type="xref" href="#encrypting_stdin_with_libsodium">Example 11-3</a> would use that key to encrypt any data passed in and store it in an output file.</p>
+<div id="encrypting_stdin_with_libsodium" data-type="example">
+<h5><span class="label">Example 11-3. </span>Encrypting <code>stdin</code> with Libsodium</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">if</code><code> </code><code class="p">(</code><code class="k">empty</code><code class="p">(</code><code class="nv">$key</code><code> </code><code class="o">=</code><code> </code><code class="nb">getenv</code><code class="p">(</code><code class="s1">'ENCRYPTION_KEY'</code><code class="p">)))</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_streams_CO3-1" href="#callout_streams_CO3-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+    </code><code class="k">throw</code><code> </code><code class="k">new</code><code> </code><code class="nx">Exception</code><code class="p">(</code><code class="s1">'No encryption key provided!'</code><code class="p">);</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nv">$key</code><code> </code><code class="o">=</code><code> </code><code class="nb">hex2bin</code><code class="p">(</code><code class="nv">$key</code><code class="p">);</code><code>
+</code><code class="k">if</code><code> </code><code class="p">(</code><code class="nb">strlen</code><code class="p">(</code><code class="nv">$key</code><code class="p">)</code><code> </code><code class="o">!==</code><code> </code><code class="nx">SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES</code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_streams_CO3-2" href="#callout_streams_CO3-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+    </code><code class="k">throw</code><code> </code><code class="k">new</code><code> </code><code class="nx">Exception</code><code class="p">(</code><code class="s1">'Invalid encryption key provided!'</code><code class="p">);</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nv">$in</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://stdin'</code><code class="p">,</code><code> </code><code class="s1">'r'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO3-3" href="#callout_streams_CO3-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+</code><code class="nv">$filename</code><code> </code><code class="o">=</code><code> </code><code class="nb">sprintf</code><code class="p">(</code><code class="s1">'encrypted-%s.bin'</code><code class="p">,</code><code> </code><code class="nb">uniqid</code><code class="p">());</code><code> </code><a class="co" id="co_streams_CO3-4" href="#callout_streams_CO3-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+</code><code class="nv">$out</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="nv">$filename</code><code class="p">,</code><code> </code><code class="s1">'w'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO3-5" href="#callout_streams_CO3-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a><code>
+
+</code><code class="p">[</code><code class="nv">$state</code><code class="p">,</code><code> </code><code class="nv">$header</code><code class="p">]</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretstream_xchacha20poly1305_init_push</code><code class="p">(</code><code class="nv">$key</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO3-6" href="#callout_streams_CO3-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a><code>
+
+</code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$out</code><code class="p">,</code><code> </code><code class="nv">$header</code><code class="p">);</code><code>
+
+</code><code class="k">while</code><code> </code><code class="p">(</code><code class="o">!</code><code class="nb">feof</code><code class="p">(</code><code class="nv">$in</code><code class="p">))</code><code> </code><code class="p">{</code><code>
+    </code><code class="nv">$text</code><code> </code><code class="o">=</code><code> </code><code class="nb">fread</code><code class="p">(</code><code class="nv">$in</code><code class="p">,</code><code> </code><code class="mi">8175</code><code class="p">);</code><code>
+
+    </code><code class="k">if</code><code> </code><code class="p">(</code><code class="nb">strlen</code><code class="p">(</code><code class="nv">$text</code><code class="p">)</code><code> </code><code class="o">&gt;</code><code> </code><code class="mi">0</code><code class="p">)</code><code> </code><code class="p">{</code><code>
+        </code><code class="nv">$cipher</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretstream_xchacha20poly1305_push</code><code class="p">(</code><code class="nv">$state</code><code class="p">,</code><code> </code><code class="nv">$text</code><code class="p">);</code><code>
+
+        </code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$out</code><code class="p">,</code><code> </code><code class="nv">$cipher</code><code class="p">);</code><code>
+    </code><code class="p">}</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nb">sodium_memzero</code><code class="p">(</code><code class="nv">$state</code><code class="p">);</code><code>
+
+</code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$in</code><code class="p">);</code><code>
+</code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$out</code><code class="p">);</code><code>
+
+</code><code class="k">echo</code><code> </code><code class="nb">sprintf</code><code class="p">(</code><code class="s1">'Wrote %s'</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">,</code><code> </code><code class="nv">$filename</code><code class="p">);</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_streams_CO3-1" href="#co_streams_CO3-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Since you want to use an environment variable to house the encryption key, first check that this variable exists.</p></dd>
+<dt><a class="co" id="callout_streams_CO3-2" href="#co_streams_CO3-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Also do a sanity check that the key is of the right size before using it for 
+<span class="keep-together">encryption</span>.</p></dd>
+<dt><a class="co" id="callout_streams_CO3-3" href="#co_streams_CO3-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>In this example, read the bytes directly from <code>stdin</code>.</p></dd>
+<dt><a class="co" id="callout_streams_CO3-4" href="#co_streams_CO3-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Use a dynamically named file to store the encrypted data. Note that, in practice, <code>uniqid()</code> uses timestamps <a data-type="indexterm" data-primary="uniqid() function" id="idm45875146936752"></a><a data-type="indexterm" data-primary="functions" data-secondary="uniqid()" id="idm45875146936016"></a>and could be subject to race conditions and name collisions on highly used systems. In a real-world environment, you will want to use a more reliable source of randomness for a generated filename.</p></dd>
+<dt><a class="co" id="callout_streams_CO3-5" href="#co_streams_CO3-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p>The output could be passed back to the console but, since this encryption produces raw bytes, it’s safer to stream the output to a file. In this case, the filename will be generated dynamically based on the system clock.</p></dd>
+<dt><a class="co" id="callout_streams_CO3-6" href="#co_streams_CO3-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></dt>
+<dd><p>The rest of the encryption follows the same pattern as <a data-type="xref" href="ch09.html#storing_encrypted_data_in_a_file">Recipe 9.5</a>.</p></dd>
+</dl></div>
+
+<p>The preceding example enables you to pipe data from a file directly into PHP by using the standard input buffer. Such a piping operation might look something like <code>cat plaintext-file.txt | php encrypt.php</code>.</p>
+
+<p>Given that the encryption operation will produce a file, you can reverse the operation with a similar script and similarly leverage <code>cat</code> to pipe the raw binary back into PHP, as <a data-type="indexterm" data-primary="Libsodium" data-secondary="stdn" data-tertiary="decrypting" id="idm45875146860736"></a>shown in <a data-type="xref" href="#decrypting_stdin_with_libsodium">Example 11-4</a>.</p>
+<div id="decrypting_stdin_with_libsodium" data-type="example">
+<h5><span class="label">Example 11-4. </span>Decrypting <code>stdin</code> with Libsodium</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">if</code> <code class="p">(</code><code class="k">empty</code><code class="p">(</code><code class="nv">$key</code> <code class="o">=</code> <code class="nb">getenv</code><code class="p">(</code><code class="s1">'ENCRYPTION_KEY'</code><code class="p">)))</code> <code class="p">{</code>
+    <code class="k">throw</code> <code class="k">new</code> <code class="nx">Exception</code><code class="p">(</code><code class="s1">'No encryption key provided!'</code><code class="p">);</code>
+<code class="p">}</code>
+
+<code class="nv">$key</code> <code class="o">=</code> <code class="nb">hex2bin</code><code class="p">(</code><code class="nv">$key</code><code class="p">);</code>
+<code class="k">if</code> <code class="p">(</code><code class="nb">strlen</code><code class="p">(</code><code class="nv">$key</code><code class="p">)</code> <code class="o">!==</code> <code class="nx">SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">throw</code> <code class="k">new</code> <code class="nx">Exception</code><code class="p">(</code><code class="s1">'Invalid encryption key provided!'</code><code class="p">);</code>
+<code class="p">}</code>
+
+<code class="nv">$in</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://stdin'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code>
+<code class="nv">$filename</code> <code class="o">=</code> <code class="nb">sprintf</code><code class="p">(</code><code class="s1">'decrypted-%s.txt'</code><code class="p">,</code> <code class="nb">uniqid</code><code class="p">());</code>
+<code class="nv">$out</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="nv">$filename</code><code class="p">,</code> <code class="s1">'w'</code><code class="p">);</code>
+
+<code class="nv">$header</code> <code class="o">=</code> <code class="nb">fread</code><code class="p">(</code><code class="nv">$in</code><code class="p">,</code> <code class="nx">SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES</code><code class="p">);</code>
+<code class="nv">$state</code> <code class="o">=</code> <code class="nb">sodium_crypto_secretstream_xchacha20poly1305_init_pull</code><code class="p">(</code><code class="nv">$header</code><code class="p">,</code> <code class="nv">$key</code><code class="p">);</code>
+
+<code class="k">try</code> <code class="p">{</code>
+    <code class="k">while</code> <code class="p">(</code><code class="o">!</code><code class="nb">feof</code><code class="p">(</code><code class="nv">$in</code><code class="p">))</code> <code class="p">{</code>
+        <code class="nv">$cipher</code> <code class="o">=</code> <code class="nb">fread</code><code class="p">(</code><code class="nv">$in</code><code class="p">,</code> <code class="mi">8192</code><code class="p">);</code>
+
+        <code class="p">[</code><code class="nv">$plain</code><code class="p">,</code> <code class="p">]</code> <code class="o">=</code> <code class="nb">sodium_crypto_secretstream_xchacha20poly1305_pull</code><code class="p">(</code>
+            <code class="nv">$state</code><code class="p">,</code>
+            <code class="nv">$cipher</code>
+        <code class="p">);</code>
+
+        <code class="k">if</code> <code class="p">(</code><code class="nv">$plain</code> <code class="o">===</code> <code class="k">false</code><code class="p">)</code> <code class="p">{</code>
+            <code class="k">throw</code> <code class="k">new</code> <code class="nx">Exception</code><code class="p">(</code><code class="s1">'Error decrypting file!'</code><code class="p">);</code>
+        <code class="p">}</code>
+
+        <code class="nb">fwrite</code><code class="p">(</code><code class="nv">$out</code><code class="p">,</code> <code class="nv">$plain</code><code class="p">);</code>
+    <code class="p">}</code>
+<code class="p">}</code> <code class="k">finally</code> <code class="p">{</code>
+    <code class="nb">sodium_memzero</code><code class="p">(</code><code class="nv">$state</code><code class="p">);</code>
+
+    <code class="nb">fclose</code><code class="p">(</code><code class="nv">$in</code><code class="p">);</code>
+    <code class="nb">fclose</code><code class="p">(</code><code class="nv">$out</code><code class="p">);</code>
+
+    <code class="k">echo</code> <code class="nb">sprintf</code><code class="p">(</code><code class="s1">'Wrote %s'</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">,</code> <code class="nv">$filename</code><code class="p">);</code>
+<code class="p">}</code></pre></div>
+
+<p>Thanks to PHP’s I/O stream wrappers, arbitrary input <a data-type="indexterm" data-primary="streams" data-secondary="input, reading from" data-startref="smptrfr" id="idm45875146531984"></a><a data-type="indexterm" data-primary="input stream, reading from" data-startref="pusmrfr" id="idm45875146530896"></a><a data-type="indexterm" data-primary="reading" data-secondary="from input stream" data-startref="rdgfmpm" id="idm45875146530016"></a>streams are just as easy to manipulate as native files on a local disk.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875146763920">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/wKjj9">PHP I/O stream wrappers</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="11.3 Writing to the PHP Output Stream"><div class="sect1" id="idm45875146761648">
+<h1>11.3 Writing to the PHP Output Stream</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875146760368">
+<h2>Problem</h2>
+
+<p>You want to output <a data-type="indexterm" data-primary="streams" data-secondary="output, writing to" id="smsttwr"></a><a data-type="indexterm" data-primary="output stream, writing to" id="opsmwtg"></a><a data-type="indexterm" data-primary="writing to output stream" id="wgttstm"></a>data directly.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875146755504">
+<h2>Solution</h2>
+
+<p>Write to <code>php://output</code> to push data directly to the <a href="https://oreil.ly/coZ8n">standard output (<code>stdout</code>) stream</a> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$stdout</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://stdout'</code><code class="p">,</code> <code class="s1">'w'</code><code class="p">);</code>
+<code class="nb">fputs</code><code class="p">(</code><code class="nv">$stdout</code><code class="p">,</code> <code class="s1">'Hello, world!'</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875146739216">
+<h2>Discussion</h2>
+
+<p>PHP exposes three standard I/O streams to userland code—<code>stdin</code>, <code>stdout</code>, and <code>stderr</code>. By default, anything you print in your application is sent to the standard output stream (<code>stdout</code>), which makes the following two lines of code functionally 
+<span class="keep-together">equivalent</span>:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">fputs</code><code class="p">(</code><code class="nv">$stdout</code><code class="p">,</code> <code class="s1">'Hello, world!'</code><code class="p">);</code>
+<code class="k">echo</code> <code class="s1">'Hello, world!'</code><code class="p">;</code></pre>
+
+<p>Many developers learn to use <code>echo</code> and <code>print</code> statements as simple ways to debug an application; adding an indicator in your <a data-type="indexterm" data-primary="stdout stream" id="idm45875146730640"></a>code makes it easy to identify where exactly the compiler is failing or to emit the value of an otherwise hidden variable. However, this isn’t the <em>only</em> way to manage output. The <code>stdout</code> stream is common to many applications and writing to it directly (versus an implicit <code>print</code> statement) is a way to keep your application focused on what it needs to be doing.</p>
+
+<p>Similarly, once you start leveraging <code>php://stdout</code> directly to print output to the client, you can start leveraging the <code>php://stderr</code> stream to emit messages about <em>errors</em> as well. These two streams are treated differently by the operating system, and you can use them to segment your messaging between useful messages and error states.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>In command-line applications, you can also use the predefined <a href="https://oreil.ly/HArEs"><code>STDOUT</code> and <code>STDERR</code> constants</a> directly. PHP natively opens these streams for you, meaning you don’t need to create new resource variables at all.</p>
+</div>
+
+<p><a data-type="xref" href="#decrypting_stdin_with_libsodium">Example 11-4</a> allowed you to read encrypted data from <code>php://stdin</code>, decrypt it, and then store the decrypted content in a file. A more useful example would instead present that decrypted data to <code>php://stdout</code> (and any errors to <code>php://stderr</code>), as shown in <a data-type="xref" href="#decrypting_stdin_with_libsodium_revamped">Example 11-5</a>.</p>
+<div id="decrypting_stdin_with_libsodium_revamped" data-type="example">
+<h5><span class="label">Example 11-5. </span>Decrypting <code>stdin</code> to <code>stdout</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">if</code><code> </code><code class="p">(</code><code class="k">empty</code><code class="p">(</code><code class="nv">$key</code><code> </code><code class="o">=</code><code> </code><code class="nb">getenv</code><code class="p">(</code><code class="s1">'ENCRYPTION_KEY'</code><code class="p">)))</code><code> </code><code class="p">{</code><code>
+    </code><code class="k">throw</code><code> </code><code class="k">new</code><code> </code><code class="nx">Exception</code><code class="p">(</code><code class="s1">'No encryption key provided!'</code><code class="p">);</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nv">$key</code><code> </code><code class="o">=</code><code> </code><code class="nb">hex2bin</code><code class="p">(</code><code class="nv">$key</code><code class="p">);</code><code>
+</code><code class="k">if</code><code> </code><code class="p">(</code><code class="nb">strlen</code><code class="p">(</code><code class="nv">$key</code><code class="p">)</code><code> </code><code class="o">!==</code><code> </code><code class="nx">SODIUM_CRYPTO_STREAM_XCHACHA20_KEYBYTES</code><code class="p">)</code><code> </code><code class="p">{</code><code>
+    </code><code class="k">throw</code><code> </code><code class="k">new</code><code> </code><code class="nx">Exception</code><code class="p">(</code><code class="s1">'Invalid encryption key provided!'</code><code class="p">);</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nv">$in</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://stdin'</code><code class="p">,</code><code> </code><code class="s1">'r'</code><code class="p">);</code><code>
+</code><code class="nv">$out</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://stdout'</code><code class="p">,</code><code> </code><code class="s1">'w'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO4-1" href="#callout_streams_CO4-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nv">$err</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://stderr'</code><code class="p">,</code><code> </code><code class="s1">'w'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO4-2" href="#callout_streams_CO4-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$header</code><code> </code><code class="o">=</code><code> </code><code class="nb">fread</code><code class="p">(</code><code class="nv">$in</code><code class="p">,</code><code> </code><code class="nx">SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES</code><code class="p">);</code><code>
+</code><code class="nv">$state</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretstream_xchacha20poly1305_init_pull</code><code class="p">(</code><code class="nv">$header</code><code class="p">,</code><code> </code><code class="nv">$key</code><code class="p">);</code><code>
+
+</code><code class="k">while</code><code> </code><code class="p">(</code><code class="o">!</code><code class="nb">feof</code><code class="p">(</code><code class="nv">$in</code><code class="p">))</code><code> </code><code class="p">{</code><code>
+    </code><code class="nv">$cipher</code><code> </code><code class="o">=</code><code> </code><code class="nb">fread</code><code class="p">(</code><code class="nv">$in</code><code class="p">,</code><code> </code><code class="mi">8192</code><code class="p">);</code><code>
+
+    </code><code class="p">[</code><code class="nv">$plain</code><code class="p">,</code><code> </code><code class="p">]</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretstream_xchacha20poly1305_pull</code><code class="p">(</code><code>
+        </code><code class="nv">$state</code><code class="p">,</code><code>
+        </code><code class="nv">$cipher</code><code>
+    </code><code class="p">);</code><code>
+
+    </code><code class="k">if</code><code> </code><code class="p">(</code><code class="nv">$plain</code><code> </code><code class="o">===</code><code> </code><code class="k">false</code><code class="p">)</code><code> </code><code class="p">{</code><code>
+        </code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$err</code><code class="p">,</code><code> </code><code class="s1">'Error decrypting file!'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO4-3" href="#callout_streams_CO4-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+        </code><code class="k">exit</code><code class="p">(</code><code class="mi">1</code><code class="p">);</code><code>
+    </code><code class="p">}</code><code>
+
+    </code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$out</code><code class="p">,</code><code> </code><code class="nv">$plain</code><code class="p">);</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nb">sodium_memzero</code><code class="p">(</code><code class="nv">$state</code><code class="p">);</code><code>
+
+</code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$in</code><code class="p">);</code><code>
+</code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$out</code><code class="p">);</code><code>
+</code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$err</code><code class="p">);</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_streams_CO4-1" href="#co_streams_CO4-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Rather than creating an intermediary file, you can write directly to the standard output stream.</p></dd>
+<dt><a class="co" id="callout_streams_CO4-2" href="#co_streams_CO4-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>You should also get a handle on the standard error stream while you’re at it.</p></dd>
+<dt><a class="co" id="callout_streams_CO4-3" href="#co_streams_CO4-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Rather than triggering an exception, you <a data-type="indexterm" data-primary="streams" data-secondary="output, writing to" data-startref="smsttwr" id="idm45875146339216"></a><a data-type="indexterm" data-primary="output stream, writing to" data-startref="opsmwtg" id="idm45875146337968"></a><a data-type="indexterm" data-primary="writing to output stream" data-startref="wgttstm" id="idm45875146337056"></a>can write directly to the error stream.</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875146335888">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/PmXdc">PHP I/O stream wrappers</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="11.4 Reading from One Stream and Writing to Another"><div class="sect1" id="idm45875146333792">
+<h1>11.4 Reading from One Stream and Writing to Another</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875146289264">
+<h2>Problem</h2>
+
+<p>You want to connect <a data-type="indexterm" data-primary="streams" data-secondary="combining" id="smscb"></a><a data-type="indexterm" data-primary="streams" data-secondary="reading from/writing to another" id="stmrfwr"></a><a data-type="indexterm" data-primary="reading" data-secondary="from streams, writing to another" id="rdgfmswr"></a><a data-type="indexterm" data-primary="stream_copy_to_stream() function" id="idm45875146284864"></a><a data-type="indexterm" data-primary="functions" data-secondary="stream_copy_to_stream()" id="ftsmcpys"></a>two streams, passing the bytes from one to the other.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875146282784">
+<h2>Solution</h2>
+
+<p>Use <code>stream_copy_to_stream()</code> to copy data from one stream to another as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$source</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'document1.txt'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code>
+<code class="nv">$dest</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'destination.txt'</code><code class="p">,</code> <code class="s1">'w'</code><code class="p">);</code>
+
+<code class="nb">stream_copy_to_stream</code><code class="p">(</code><code class="nv">$source</code><code class="p">,</code> <code class="nv">$destination</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875146231152">
+<h2>Discussion</h2>
+
+<p>The streaming mechanisms in PHP provide for very efficient ways to work with rather large chunks of data. Often, you might end up using files within your PHP application that are too large to fit in the application’s available memory. Most files you might make public and send to the user directly via Apache or NGINX. In other cases, for example, you might want to safeguard large file downloads (like zip files or videos) with scripts written in PHP to validate a user’s identity.</p>
+
+<p>Such a scenario is possible in PHP because the system doesn’t need to keep the entire stream in memory but can instead write bytes to one stream as they are read from another stream. <a data-type="xref" href="#copy_large_file_stdout">Example 11-6</a> assumes that your PHP application directly authenticates a user and validates that they have the right to a particular file before streaming its contents.</p>
+<div id="copy_large_file_stdout" data-type="example">
+<h5><span class="label">Example 11-6. </span>Copy large file to <code>stdout</code> by linking streams</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">if</code><code> </code><code class="p">(</code><code class="nv">$user</code><code class="o">-&gt;</code><code class="na">isAuthenticated</code><code class="p">())</code><code> </code><code class="p">{</code><code>
+    </code><code class="nv">$in</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'largeZipFile.zip'</code><code class="p">,</code><code> </code><code class="s1">'r'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO5-1" href="#callout_streams_CO5-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+    </code><code class="nv">$out</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://stdout'</code><code class="p">,</code><code> </code><code class="s1">'w'</code><code class="p">);</code><code>
+
+    </code><code class="nb">stream_copy_to_stream</code><code class="p">(</code><code class="nv">$in</code><code class="p">,</code><code> </code><code class="nv">$out</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO5-2" href="#callout_streams_CO5-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+    </code><code class="k">exit</code><code class="p">;</code><code> </code><a class="co" id="co_streams_CO5-3" href="#callout_streams_CO5-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+</code><code class="p">}</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_streams_CO5-1" href="#co_streams_CO5-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The act of opening a stream merely gets a handle on the underlying data. No bytes have yet been read by the system.</p></dd>
+<dt><a class="co" id="callout_streams_CO5-2" href="#co_streams_CO5-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Copying a stream to another stream will copy the bytes directly without keeping the entire contents of either stream in memory. Remember, streams work on chunks similar to a bucket brigade, so only a subset of the necessary bytes are held in memory at any given time.</p></dd>
+<dt><a class="co" id="callout_streams_CO5-3" href="#co_streams_CO5-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>It’s important to always <code>exit</code> after copying a stream; otherwise, you might inadvertently append miscellaneous bytes by mistake.</p></dd>
+</dl></div>
+
+<p>Similarly, it is possible to programmatically <em>build</em> a large stream and copy it to another stream when needed. Some web applications might need to programmatically build large chunks of data (very large single-page web applications, for example). It is possible to write these large data elements to PHP’s temporary memory stream and <a data-type="indexterm" data-primary="streams" data-secondary="temporary memory stream" id="idm45875146197744"></a>then copy the bytes back out when needed. <a data-type="xref" href="#copying_temporary_stream_stdout">Example 11-7</a> illustrates exactly how that would work.</p>
+<div id="copying_temporary_stream_stdout" data-type="example">
+<h5><span class="label">Example 11-7. </span>Copying a temporary stream to <code>stdout</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$buffer</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://temp'</code><code class="p">,</code><code> </code><code class="s1">'w+'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO6-1" href="#callout_streams_CO6-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$buffer</code><code class="p">,</code><code> </code><code class="s1">'&lt;html&gt;&lt;head&gt;'</code><code class="p">);</code><code>
+
+</code><code class="c1">// ... Several hundred fwrite()s later ...
+</code><code>
+</code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$buffer</code><code class="p">,</code><code> </code><code class="s1">'&lt;/body&gt;&lt;/html&gt;'</code><code class="p">);</code><code>
+</code><code class="nb">rewind</code><code class="p">(</code><code class="nv">$buffer</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO6-2" href="#callout_streams_CO6-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$output</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://stdout'</code><code class="p">,</code><code> </code><code class="s1">'w'</code><code class="p">);</code><code>
+</code><code class="nb">stream_copy_to_stream</code><code class="p">(</code><code class="nv">$buffer</code><code class="p">,</code><code> </code><code class="nv">$output</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO6-3" href="#callout_streams_CO6-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+</code><code class="k">exit</code><code class="p">;</code><code> </code><a class="co" id="co_streams_CO6-4" href="#callout_streams_CO6-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_streams_CO6-1" href="#co_streams_CO6-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>A temporary stream leverages a temporary file on disk. You are limited not by the memory available to PHP but by the available space allocated to temporary files by the operating system.</p></dd>
+<dt><a class="co" id="callout_streams_CO6-2" href="#co_streams_CO6-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>After writing the entire HTML document to a temporary file, rewind the stream back to the beginning in order to copy all of those bytes to <code>stdout</code>.</p></dd>
+<dt><a class="co" id="callout_streams_CO6-3" href="#co_streams_CO6-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>The mechanism to copy one stream to another remains unchanged even though neither of these streams point to a specifically identified file on disk.</p></dd>
+<dt><a class="co" id="callout_streams_CO6-4" href="#co_streams_CO6-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Always <code>exit</code> after all bytes have been <a data-type="indexterm" data-primary="streams" data-secondary="combining" data-startref="smscb" id="idm45875146047200"></a><a data-type="indexterm" data-primary="streams" data-secondary="reading from/writing to another" data-startref="stmrfwr" id="idm45875146045984"></a><a data-type="indexterm" data-primary="reading" data-secondary="from streams, writing to another" data-startref="rdgfmswr" id="idm45875146044800"></a><a data-type="indexterm" data-primary="stream_copy_to_stream() function" id="idm45875146043616"></a><a data-type="indexterm" data-primary="functions" data-secondary="stream_copy_to_stream()" data-startref="ftsmcpys" id="idm45875146042976"></a>copied to the client to avoid accidental errors.</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875146041504">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/Us_Yj"><code>stream_copy_to_stream()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="11.5 Composing Different Stream Handlers Together"><div class="sect1" id="idm45875146039168">
+<h1>11.5 Composing Different Stream Handlers Together</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875146037984">
+<h2>Problem</h2>
+
+<p>You want to combine multiple <a data-type="indexterm" data-primary="stream handlers" id="strmhd"></a>stream concepts—e.g., a wrapper and a filter—in one piece of code.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875146035296">
+<h2>Solution</h2>
+
+<p>Append filters as necessary and use the <a data-type="indexterm" data-primary="filters" data-secondary="appending" id="idm45875146033936"></a>appropriate wrapper protocol. <a data-type="xref" href="#applying_multiple_fliers_stream">Example 11-8</a> uses the <code>file://</code> protocol for local filesystem access and two additional filters to handle Base64-encoding and file decompression.</p>
+<div id="applying_multiple_fliers_stream" data-type="example">
+<h5><span class="label">Example 11-8. </span>Applying multiple fliers to a stream</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'compressed.txt'</code><code class="p">,</code><code> </code><code class="s1">'r'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO7-1" href="#callout_streams_CO7-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nb">stream_filter_append</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="s1">'convert.base64-decode'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO7-2" href="#callout_streams_CO7-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="nb">stream_filter_append</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="s1">'zlib.inflate'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO7-3" href="#callout_streams_CO7-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+
+</code><code class="k">echo</code><code> </code><code class="nb">fread</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="mi">1024</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_streams_CO7-4" href="#callout_streams_CO7-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_streams_CO7-1" href="#co_streams_CO7-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Assume this file exists on disk and contains the literal contents <code>80jNycnXUS​jPL8pJUQQA</code>.</p></dd>
+<dt><a class="co" id="callout_streams_CO7-2" href="#co_streams_CO7-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>The first stream filter added to the stack will convert from Base64-encoded ASCII text to raw bytes.</p></dd>
+<dt><a class="co" id="callout_streams_CO7-3" href="#co_streams_CO7-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>The second filter will leverage Zlib compression to inflate (or uncompress) the raw bytes.</p></dd>
+<dt><a class="co" id="callout_streams_CO7-4" href="#co_streams_CO7-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>If you started with the literal contents in step 1, this will likely print <code>Hello, world!</code> to the console.</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875145946256">
+<h2>Discussion</h2>
+
+<p>When it comes to streams, it’s helpful to <a data-type="indexterm" data-primary="streams" data-secondary="layers" id="idm45875145944688"></a>think about layers. The foundation is always the protocol handler used to instantiate the stream. There is no explicit protocol in the Solution example, which means PHP will leverage the <code>file://</code> protocol by default. Atop that foundation is any number of layers of filters on the stream.</p>
+
+<p>The Solution example leverages both Zlib compression and Base64 encoding to compress text and encode the raw (compressed) bytes, respectively. To create such a compressed/encoded file, you would do the following:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'compressed.txt'</code><code class="p">,</code> <code class="s1">'w'</code><code class="p">);</code>
+
+<code class="nb">stream_filter_append</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="s1">'zlib.deflate'</code><code class="p">);</code>
+<code class="nb">stream_filter_append</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="s1">'convert.base64-encode'</code><code class="p">);</code>
+
+<code class="nb">fwrite</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="s1">'Goodnight, moon!'</code><code class="p">);</code></pre>
+
+<p>The preceding example leverages the same protocol wrapper and filters as the Solution example. But note that the <em>order</em> in which they are added is reversed. This is because stream filters work like the layers on a jawbreaker, similar to the illustration in <a data-type="xref" href="#filter_layers_data">Figure 11-2</a>. The protocol wrapper is at the core, and data flows from that core to the outside world, through each subsequent layer in a specific order.</p>
+
+<figure><div id="filter_layers_data" class="figure">
+<img src="assets/phpc_1102.png" alt="Data flowing into and out of PHP stream filters" width="600" height="319"/>
+<h6><span class="label">Figure 11-2. </span>Data flowing into and out of PHP stream filters</h6>
+</div></figure>
+
+<p>There are several filters that you can apply to a stream already built into PHP. However, you can also define your <em>own</em> filter. It’s useful to encode raw bytes in Base64, but it’s also sometimes useful to encode/decode bytes as hexadecimal. Such a filter doesn’t exist natively in PHP, but you can define it yourself by extending the <code>php_​user_​fil⁠ter</code> class similarly to the way <a data-type="xref" href="#example_user_defined_filter">Example 11-1</a> did in this chapter’s introduction. Consider the class in <a data-type="xref" href="#userland_hex_filter">Example 11-9</a>.</p>
+<div id="userland_hex_filter" data-type="example">
+<h5><span class="label">Example 11-9. </span>Encoding/decoding hexadecimal with a filter</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">class</code> <code class="nc">HexFilter</code> <code class="k">extends</code> <code class="k">php_user_filter</code>
+<code class="p">{</code>
+    <code class="k">private</code> <code class="nx">string</code> <code class="nv">$mode</code><code class="p">;</code>
+
+    <code class="k">public</code> <code class="k">function</code> <code class="nf">filter</code><code class="p">(</code><code class="nv">$in</code><code class="p">,</code> <code class="nv">$out</code><code class="p">,</code> <code class="o">&amp;</code><code class="nv">$consumed</code><code class="p">,</code> <code class="nx">bool</code> <code class="nv">$closing</code><code class="p">)</code><code class="o">:</code> <code class="nx">int</code>
+    <code class="p">{</code>
+        <code class="k">while</code> <code class="p">(</code><code class="nv">$bucket</code> <code class="o">=</code> <code class="nb">stream_bucket_make_writeable</code><code class="p">(</code><code class="nv">$in</code><code class="p">))</code> <code class="p">{</code>
+            <code class="k">switch</code> <code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">mode</code><code class="p">)</code> <code class="p">{</code>
+                <code class="k">case</code> <code class="s1">'encode'</code><code class="o">:</code>
+                    <code class="nv">$bucket</code><code class="o">-&gt;</code><code class="na">data</code> <code class="o">=</code> <code class="nb">bin2hex</code><code class="p">(</code><code class="nv">$bucket</code><code class="o">-&gt;</code><code class="na">data</code><code class="p">);</code>
+                    <code class="k">break</code><code class="p">;</code>
+                <code class="k">case</code> <code class="s1">'decode'</code><code class="o">:</code>
+                    <code class="nv">$bucket</code><code class="o">-&gt;</code><code class="na">data</code> <code class="o">=</code> <code class="nb">hex2bin</code><code class="p">(</code><code class="nv">$bucket</code><code class="o">-&gt;</code><code class="na">data</code><code class="p">);</code>
+                    <code class="k">break</code><code class="p">;</code>
+                <code class="k">default</code><code class="o">:</code>
+                    <code class="k">throw</code> <code class="k">new</code> <code class="nx">Exception</code><code class="p">(</code><code class="s1">'Invalid encoding mode!'</code><code class="p">);</code>
+            <code class="p">}</code>
+
+            <code class="nv">$consumed</code> <code class="o">+=</code> <code class="nv">$bucket</code><code class="o">-&gt;</code><code class="na">datalen</code><code class="p">;</code>
+            <code class="nb">stream_bucket_append</code><code class="p">(</code><code class="nv">$out</code><code class="p">,</code> <code class="nv">$bucket</code><code class="p">);</code>
+        <code class="p">}</code>
+
+        <code class="k">return</code> <code class="nx">PSFS_PASS_ON</code><code class="p">;</code>
+    <code class="p">}</code>
+
+    <code class="k">public</code> <code class="k">function</code> <code class="nf">onCreate</code><code class="p">()</code><code class="o">:</code> <code class="nx">bool</code>
+    <code class="p">{</code>
+        <code class="k">switch</code><code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">filtername</code><code class="p">)</code> <code class="p">{</code>
+            <code class="k">case</code> <code class="s1">'hex.decode'</code><code class="o">:</code>
+                <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">mode</code> <code class="o">=</code> <code class="s1">'decode'</code><code class="p">;</code>
+                <code class="k">return</code> <code class="k">true</code><code class="p">;</code>
+            <code class="k">case</code> <code class="s1">'hex.encode'</code><code class="o">:</code>
+                <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">mode</code> <code class="o">=</code> <code class="s1">'encode'</code><code class="p">;</code>
+                <code class="k">return</code> <code class="k">true</code><code class="p">;</code>
+            <code class="k">default</code><code class="o">:</code>
+                <code class="k">return</code> <code class="k">false</code><code class="p">;</code>
+        <code class="p">}</code>
+    <code class="p">}</code>
+<code class="p">}</code></pre></div>
+
+<p>The class defined in <a data-type="xref" href="#userland_hex_filter">Example 11-9</a> can be used to arbitrarily encode to and decode from hexadecimal when applied as a filter to any arbitrary stream. Merely register it as you would any other filter, then apply it to whatever streams need to be converted.</p>
+
+<p>The Base64 encoding used in the Solution example could be substituted with hexadecimal entirely, as shown in <a data-type="xref" href="#combining_hex_filters">Example 11-10</a>.</p>
+<div id="combining_hex_filters" data-type="example">
+<h5><span class="label">Example 11-10. </span>Combining a hexadecimal stream filter with Zlib compression</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">stream_filter_register</code><code class="p">(</code><code class="s1">'hex.*'</code><code class="p">,</code><code> </code><code class="s1">'HexFilter'</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO8-1" href="#callout_streams_CO8-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="c1">// Writing data
+</code><code class="nv">$fp</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'compressed.txt'</code><code class="p">,</code><code> </code><code class="s1">'w'</code><code class="p">);</code><code>
+
+</code><code class="nb">stream_filter_append</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="s1">'zlib.deflate'</code><code class="p">);</code><code>
+</code><code class="nb">stream_filter_append</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="s1">'hex.encode'</code><code class="p">);</code><code>
+
+</code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="s1">'Hello, world!'</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">);</code><code>
+</code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="s1">'Goodnight, moon!'</code><code class="p">);</code><code>
+
+</code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO8-2" href="#callout_streams_CO8-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$fp2</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'compressed.txt'</code><code class="p">,</code><code> </code><code class="s1">'r'</code><code class="p">);</code><code>
+</code><code class="nb">stream_filter_append</code><code class="p">(</code><code class="nv">$fp2</code><code class="p">,</code><code> </code><code class="s1">'hex.decode'</code><code class="p">);</code><code>
+</code><code class="nb">stream_filter_append</code><code class="p">(</code><code class="nv">$fp2</code><code class="p">,</code><code> </code><code class="s1">'zlib.inflate'</code><code class="p">);</code><code>
+
+</code><code class="k">echo</code><code> </code><code class="nb">fread</code><code class="p">(</code><code class="nv">$fp2</code><code class="p">,</code><code> </code><code class="mi">1024</code><code class="p">);</code><code> </code><a class="co" id="co_streams_CO8-3" href="#callout_streams_CO8-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_streams_CO8-1" href="#co_streams_CO8-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Once the filter exists, it must be registered so PHP knows how to use it. Leveraging a <code>*</code> wildcard during registration allows for both encoding and decoding to be registered at once.</p></dd>
+<dt><a class="co" id="callout_streams_CO8-2" href="#co_streams_CO8-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>The contents of <em>compressed.txt</em> will be <code>f348cdc9c9d75128cf2fca4951e472cfcf
+4fc9cb4ccf28d151c8cdcfcf530400</code> at this point.</p></dd>
+<dt><a class="co" id="callout_streams_CO8-3" href="#co_streams_CO8-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>After decoding and decompressing, <code>Hello world! Goodnight, moon!</code> will be printed to the console (with a newline between <a data-type="indexterm" data-primary="stream handlers" data-startref="strmhd" id="idm45875145648528"></a>the two statements).</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875145945792">
+<h2>See Also</h2>
+
+<p>Supported <a href="https://oreil.ly/HxKpb">protocols and wrappers</a> and the <a href="https://oreil.ly/IE5UR">list of available filters</a>. Also, <a data-type="xref" href="#example_user_defined_filter">Example 11-1</a> for a user-defined stream filter.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="11.6 Writing a Custom Stream Wrapper"><div class="sect1" id="idm45875145531104">
+<h1>11.6 Writing a Custom Stream Wrapper</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875145529984">
+<h2>Problem</h2>
+
+<p>You want to define your own <a data-type="indexterm" data-primary="streams" data-secondary="custom stream protocol" id="strmcsmmp"></a>custom stream protocol.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875145527024">
+<h2>Solution</h2>
+
+<p>Create a custom class that follows the prototype of <code>streamWrapper</code> and register it with PHP. For example, a <code>VariableStream</code> class could provide a stream-like interface to read from or write to a specific global variable, as follows:<sup><a data-type="noteref" id="idm45875145524560-marker" href="ch11.html#idm45875145524560">2</a></sup></p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">class</code> <code class="nc">VariableStream</code>
+<code class="p">{</code>
+    <code class="k">private</code> <code class="nx">int</code> <code class="nv">$position</code><code class="p">;</code>
+    <code class="k">private</code> <code class="nx">string</code> <code class="nv">$name</code><code class="p">;</code>
+    <code class="k">public</code> <code class="nv">$context</code><code class="p">;</code>
+
+    <code class="k">function</code> <code class="nf">stream_open</code><code class="p">(</code><code class="nv">$path</code><code class="p">,</code> <code class="nv">$mode</code><code class="p">,</code> <code class="nv">$options</code><code class="p">,</code> <code class="o">&amp;</code><code class="nv">$opened_path</code><code class="p">)</code>
+    <code class="p">{</code>
+        <code class="nv">$url</code> <code class="o">=</code> <code class="nb">parse_url</code><code class="p">(</code><code class="nv">$path</code><code class="p">);</code>
+        <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">name</code> <code class="o">=</code> <code class="nv">$url</code><code class="p">[</code><code class="s1">'host'</code><code class="p">];</code>
+        <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">position</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+
+        <code class="k">return</code> <code class="k">true</code><code class="p">;</code>
+    <code class="p">}</code>
+
+    <code class="k">function</code> <code class="nf">stream_write</code><code class="p">(</code><code class="nv">$data</code><code class="p">)</code>
+    <code class="p">{</code>
+        <code class="nv">$left</code> <code class="o">=</code> <code class="nb">substr</code><code class="p">(</code><code class="nv">$GLOBALS</code><code class="p">[</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">name</code><code class="p">],</code> <code class="mi">0</code><code class="p">,</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">position</code><code class="p">);</code>
+        <code class="nv">$right</code> <code class="o">=</code> <code class="nb">substr</code><code class="p">(</code><code class="nv">$GLOBALS</code><code class="p">[</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">name</code><code class="p">],</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">position</code> <code class="o">+</code> <code class="nb">strlen</code><code class="p">(</code><code class="nv">$data</code><code class="p">));</code>
+        <code class="nv">$GLOBALS</code><code class="p">[</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">name</code><code class="p">]</code> <code class="o">=</code> <code class="nv">$left</code> <code class="o">.</code> <code class="nv">$data</code> <code class="o">.</code> <code class="nv">$right</code><code class="p">;</code>
+        <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">position</code> <code class="o">+=</code> <code class="nb">strlen</code><code class="p">(</code><code class="nv">$data</code><code class="p">);</code>
+        <code class="k">return</code> <code class="nb">strlen</code><code class="p">(</code><code class="nv">$data</code><code class="p">);</code>
+    <code class="p">}</code>
+<code class="p">}</code></pre>
+
+<p>The preceding class would be registered and used in PHP as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nb">in_array</code><code class="p">(</code><code class="s1">'var'</code><code class="p">,</code> <code class="nb">stream_get_wrappers</code><code class="p">()))</code> <code class="p">{</code>
+    <code class="nb">stream_wrapper_register</code><code class="p">(</code><code class="s1">'var'</code><code class="p">,</code> <code class="s1">'VariableStream'</code><code class="p">);</code>
+<code class="p">}</code>
+
+<code class="nv">$varContainer</code> <code class="o">=</code> <code class="s1">''</code><code class="p">;</code>
+
+<code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'var://varContainer'</code><code class="p">,</code> <code class="s1">'w'</code><code class="p">);</code>
+
+<code class="nb">fwrite</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="s1">'Hello'</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">);</code>
+<code class="nb">fwrite</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="s1">'World'</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">);</code>
+<code class="nb">fclose</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code>
+
+<code class="k">echo</code> <code class="nv">$varContainer</code><code class="p">;</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875145332672">
+<h2>Discussion</h2>
+
+<p>The <code>streamWrapper</code> construct in PHP is a prototype for a class. Unfortunately, it is not a class that can be extended, nor is it an interface that can be concretely implemented. Instead, it is a documented format that any user-defined stream protocols must follow.</p>
+
+<p>While it is possible to register classes as protocol handlers following a different interface, it is strongly advised that any potential protocol classes implement all methods defined by the <code>streamWrapper</code> interface (copied from the PHP document as a pseudo-interface definition in <a data-type="xref" href="#streamwrapper_interface_definition">Example 11-11</a>) in <a data-type="indexterm" data-primary="streamWrapper class" id="idm45875145436480"></a><a data-type="indexterm" data-primary="classes" data-secondary="streamWrapper" id="idm45875145435776"></a>order to satisfy PHP’s expected stream behavior</p>
+<div id="streamwrapper_interface_definition" data-type="example">
+<h5><span class="label">Example 11-11. </span><code>streamWrapper</code> interface definition</h5>
+
+<pre data-type="programlisting" data-code-language="php"> <code class="k">class</code> <code class="nc">streamWrapper</code> <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$context</code><code class="p">;</code>
+
+    <code class="k">public</code> <code class="nx">__construct</code><code class="p">()</code>
+
+    <code class="k">public</code> <code class="nx">dir_closedir</code><code class="p">()</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">dir_opendir</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$path</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$options</code><code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">dir_readdir</code><code class="p">()</code><code class="o">:</code> <code class="nx">string</code>
+
+    <code class="k">public</code> <code class="nx">dir_rewinddir</code><code class="p">()</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nb">mkdir</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$path</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$mode</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$options</code><code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nb">rename</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$path_from</code><code class="p">,</code> <code class="nx">string</code> <code class="nv">$path_to</code><code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nb">rmdir</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$path</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$options</code><code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">stream_cast</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$cast_as</code><code class="p">)</code><code class="o">:</code> <code class="nx">resource</code>
+
+    <code class="k">public</code> <code class="nx">stream_close</code><code class="p">()</code><code class="o">:</code> <code class="nx">void</code>
+
+    <code class="k">public</code> <code class="nx">stream_eof</code><code class="p">()</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">stream_flush</code><code class="p">()</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">stream_lock</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$operation</code><code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">stream_metadata</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$path</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$option</code><code class="p">,</code> <code class="nx">mixed</code> <code class="nv">$value</code><code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">stream_open</code><code class="p">(</code>
+        <code class="nx">string</code> <code class="nv">$path</code><code class="p">,</code>
+        <code class="nx">string</code> <code class="nv">$mode</code><code class="p">,</code>
+        <code class="nx">int</code> <code class="nv">$options</code><code class="p">,</code>
+        <code class="o">?</code><code class="nx">string</code> <code class="o">&amp;</code><code class="nv">$opened_path</code>
+    <code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">stream_read</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$count</code><code class="p">)</code><code class="o">:</code> <code class="nx">string</code><code class="o">|</code><code class="k">false</code>
+
+    <code class="k">public</code> <code class="nx">stream_seek</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$offset</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$whence</code> <code class="o">=</code> <code class="nx">SEEK_SET</code><code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">stream_set_option</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$option</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$arg1</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$arg2</code><code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">stream_stat</code><code class="p">()</code><code class="o">:</code> <code class="k">array</code><code class="o">|</code><code class="k">false</code>
+
+    <code class="k">public</code> <code class="nx">stream_tell</code><code class="p">()</code><code class="o">:</code> <code class="nx">int</code>
+
+    <code class="k">public</code> <code class="nx">stream_truncate</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$new_size</code><code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">stream_write</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$data</code><code class="p">)</code><code class="o">:</code> <code class="nx">int</code>
+
+    <code class="k">public</code> <code class="nb">unlink</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$path</code><code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+
+    <code class="k">public</code> <code class="nx">url_stat</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$path</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$flags</code><code class="p">)</code><code class="o">:</code> <code class="k">array</code><code class="o">|</code><code class="k">false</code>
+
+    <code class="k">public</code> <code class="nx">__destruct</code><code class="p">()</code>
+<code class="p">}</code></pre></div>
+
+<p>Some specific functionality—e.g., <code>mkdir</code>, <code>rename</code>, <code>rmdir</code>, or <code>unlink</code>—should <em>not</em> be implemented at all unless the protocol has a specific use for it. Otherwise, the system will not provide helpful error messages to you (or developers building atop your library) and will behave unexpectedly.</p>
+
+<p>While most protocols you will use day-to-day ship natively with PHP, it’s possible to write new protocol handlers or leverage those built by other developers.</p>
+
+<p>It’s common to see references to cloud storage that use a proprietary protocol (e.g., Amazon Web Services’ <code>s3://</code>) rather than the more common <code>https://</code> or <code>file://</code> prefixes seen elsewhere. AWS actually publishes a <a href="https://oreil.ly/RVXlw">public SDK</a> that uses <code>stream_​wrap⁠per_​register()</code> internally to provide an <code>s3://</code> protocol to other application code, <a data-type="indexterm" data-primary="streams" data-secondary="custom stream protocol" data-startref="strmcsmmp" id="idm45875144817040"></a>empowering you to work with cloud-hosted data as easily as you would local files.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875145177728">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/SyhD8"><code>streamWrapper</code></a>.</p>
+</div></section>
+</div></section>
+<div data-type="footnotes"><p data-type="footnote" id="idm45875147854464"><sup><a href="ch11.html#idm45875147854464-marker">1</a></sup> For more on generators, review <a data-type="xref" href="ch07.html#iterating_over_large_arrays">Recipe 7.15</a>.</p><p data-type="footnote" id="idm45875145524560"><sup><a href="ch11.html#idm45875145524560-marker">2</a></sup> The PHP Manual provides <a href="https://oreil.ly/b0PLM">a similarly named class</a> with much broader and more <a data-type="indexterm" data-primary="VariableStream class" id="idm45875145523216"></a><a data-type="indexterm" data-primary="classes" data-secondary="VariableStream" id="idm45875145522512"></a>complete functionality than is demonstrated in this Solution example.</p></div></div></section></div>
+</div>
+</body>
+</html>

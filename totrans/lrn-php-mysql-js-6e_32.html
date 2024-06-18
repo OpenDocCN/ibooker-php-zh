@@ -1,0 +1,1387 @@
+<html><head></head><body><div id="sbo-rt-content" class="calibre1"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 29. Bringing It All Together" class="calibre4"><div class="preface" id="bringing_it_all_together-id00130">
+<h1 class="calibre10"><span class="keep-together">Chapter 29. </span>Bringing It All Together</h1>
+
+<p class="author1">Now<a contenteditable="false" data-primary="social networking app example" data-secondary="overview of" data-type="indexterm" id="idm45694662919288" class="calibre6"/><a contenteditable="false" data-primary="PHP programming language" data-secondary="social networking app example" data-type="indexterm" id="PHPsocial27" class="calibre6"/> that you’ve reached the end of this book, your first milestone along the path of the hows, whys, and wherefores of dynamic web programming, I want to leave you with a real example that you can sink your teeth into. In fact, it’s a collection of examples, because I’ve put together a simple social networking project comprising all the main features you’d expect from such a site, or more to the point, such a web app.</p>
+
+<p class="author1">Across the various files, there are examples of MySQL table creation and database access, CSS, file inclusion, session control, DOM access, asynchronous calls, event and error handling, file uploading, image manipulation, the HTML5 canvas, and a whole lot more.</p>
+
+<p class="author1">Each example file is complete and self-contained yet works with all the others to build a fully working social networking site, even including a stylesheet you can modify to completely change the look and feel of the project. Being small and light, the end product is particularly usable on mobile platforms such as a smartphone or tablet but will run equally well on a full-size desktop computer.</p>
+
+<p class="author1">And you should find that, by utilizing the power of both jQuery and jQuery Mobile, the code runs fast, is easy to use, adapts itself well to all environments, and looks good. As an exercise, you may wish to adapt the code further, perhaps including utilizing React in some way.</p>
+
+<p class="author1">That said, I have tried to keep this code as slimmed-down as possible to keep it easy to follow. Consequently, there’s a great deal of improvement that could be made to it, such as enhancing security by storing hashes (the fixed-length output of irreversible one-way functions) instead of unencrypted passwords, and smoother handling of some of the transitions between being logged on and off—but let’s leave those as the proverbial exercises for the reader, particularly since there are no questions at the end of this chapter. (Well, just the one!)</p>
+
+<p class="author1">I leave it up to you to take any pieces of this code you think you can use and expand on them for your own purposes. Perhaps you may even wish to build on these files to create a social networking site of your own.</p>
+
+<section data-type="sect1" data-pdf-bookmark="Designing a Social Networking App" class="calibre4"><div class="preface" id="designing_a_social_networking_site">
+<h1 class="calibre11">Designing a Social Networking App</h1>
+
+<p class="author1">Before<a contenteditable="false" data-primary="social networking app example" data-secondary="design considerations" data-type="indexterm" id="idm45694662910056" class="calibre6"/> writing any code, I sat down and came up with several things that I decided were essential to such an app. These included the following:</p>
+
+<ul class="printings">
+	<li class="calibre9">
+	<p class="author1">A signup process</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">A login form</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">A logout facility</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Session control</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">User profiles with uploaded thumbnails</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">A member directory</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Adding members as friends</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Public and private messaging between members</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Styling the project</p>
+	</li>
+</ul>
+
+<p class="author1">I decided to name the project <em class="hyperlink">Robin’s Nest</em>; if you use this code, you will need to modify the name and logo in the <em class="hyperlink">index.php</em> and <em class="hyperlink">header.php</em> files.</p>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="On the Website" class="calibre4"><div class="preface" id="on_the_website">
+<h1 class="calibre11">On the Website</h1>
+
+<p class="author1">All<a contenteditable="false" data-primary="social networking app example" data-secondary="code examples, obtaining and using" data-type="indexterm" id="idm45694662896392" class="calibre6"/><a contenteditable="false" data-primary="code examples, obtaining and using" data-type="indexterm" id="idm45694662894952" class="calibre6"/> the examples in this chapter can be found in <a href="https://github.com/RobinNixon/lpmj6" class="calibre6">my GitHub repository</a>, where you can download an archive file, which you should extract to a suitable location on your computer.</p>
+
+<p class="author1">Of particular interest to this chapter, within the <em class="hyperlink">ZIP</em> file, you’ll find a folder called <em class="hyperlink">robinsnest</em>, in which all the following examples have been saved with the correct filenames required by this sample application. This means you can easily copy them all to your web development folder to try them out.</p>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="functions.php" class="calibre4"><div class="preface" id="functionsdotphp">
+<h1 class="calibre11">functions.php</h1>
+
+<p class="author1">Let’s jump<a contenteditable="false" data-primary="social networking app example" data-secondary="functions.php file" data-type="indexterm" id="SNAfunc27" class="calibre6"/><a contenteditable="false" data-primary="functions (PHP)" data-secondary="social networking app example" data-type="indexterm" id="Fsocial27" class="calibre6"/> right into the project, starting with <a data-type="xref" href="#functionsdotphp-id00132" class="calibre6">Example 29-1</a>, <em class="hyperlink">functions.php</em>, the include file for the main functions. This file contains a little more than just the functions, though, because I have added the database login details here instead of using yet another separate file. The first four lines of code define the host and name of the database to use, as well as the username and password.</p>
+
+<p class="author1">By default, in this file the MySQL username is set to <em class="hyperlink">robinsnest</em>, and the database used by the program is also called <em class="hyperlink">robinsnest</em>. <a data-type="xref" href="ch08.xhtml#introduction_to_mysql" class="calibre6">Chapter 8</a> provides detailed instructions on how to create a new user and/or database, but to recap, first create a new database called <em class="hyperlink">robinsnest</em> by entering a MySQL command prompt and typing this:</p>
+
+<pre data-code-language="sql" data-programming-language="perl" class="calibre29">
+<code class="k">CREATE</code> <code class="k">DATABASE</code> <code class="n">robinsnest</code><code class="p">;</code></pre>
+
+<p class="author1">Then you can create a user called <em class="hyperlink">robinsnest</em> capable of accessing this database like this:</p>
+
+<pre data-code-language="sql" data-programming-language="perl" class="calibre29">
+<code class="k">CREATE</code> <code class="k">USER</code> <code class="s">'robinsnest'</code><code class="o">@</code><code class="s">'localhost'</code> <code class="n">IDENTIFIED</code> <code class="k">BY</code> <code class="s">'password'</code><code class="p">;</code>
+<code class="k">GRANT</code> <code class="k">ALL</code> <code class="k">PRIVILEGES</code> <code class="k">ON</code> <code class="n">robinsnest</code><code class="p">.</code><code class="o">*</code> <code class="k">TO</code> <code class="s">'robinsnest'</code><code class="o">@</code><code class="s">'localhost'</code><code class="p">;</code></pre>
+
+<p class="author1">Obviously you would use a much more secure password for this user than <em class="hyperlink">password</em>, but for the sake of simplicity, this is the password used in these examples—just make sure you change it if you use any of this code on a production site.</p>
+
+<section data-type="sect2" data-pdf-bookmark="The Functions" class="calibre4"><div class="preface" id="functions-id00131">
+<h2 class="calibre28">The Functions</h2>
+
+<p class="author1">The project uses five main functions:</p>
+
+<dl class="calibre13">
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">createTable</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Checks whether a table already exists and, if not, creates it</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">queryMysql</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Issues a query to MySQL, outputting an error message if it fails</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">destroySession</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Destroys a PHP session and clears its data to log users out</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">sanitizeString</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Removes potentially malicious code or tags from user input</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">showProfile</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Displays the user’s image and “about me” message if they have one</p>
+	</dd>
+</dl>
+
+<p class="author1">The behavior of all of these should be obvious to you by now, with the possible exception of <code class="calibre15">showProfile</code>, which looks for an image of the name <em class="hyperlink">&lt;user.jpg&gt;</em> (where <em class="hyperlink">&lt;user&gt;</em> is the username of the current user) and, if it finds it, displays it. It also displays any “about me” text the user may have saved.</p>
+
+<p class="author1">I have ensured that error handling is in place for all the functions that need it so that they can catch any typographical or other errors you may introduce and generate error messages. However, if you use any of this code on a production server, you will want to provide your own error-handling routines to make the code more user-friendly.</p>
+
+<p class="author1">So, type in <a data-type="xref" href="#functionsdotphp-id00132" class="calibre6">Example 29-1</a> and save it as <em class="hyperlink">functions.php</em> (or download it from the companion website), and you’ll be ready to move on to the next section.</p>
+
+<div data-type="example" id="functionsdotphp-id00132" class="calibre41"><!--
+
+  AO: I though you would remove $conn->error from all output.
+  RN: Well spotted. It was fixed in the example files, but not put back here. Now done.
+
+-->
+<h5 class="calibre42"><span class="keep-together">Example 29-1. </span>functions.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// Example 01: functions.php</code>
+<code class="n"> </code> <code class="nv">$host</code> <code class="o">=</code> <code class="s">'localhost'</code><code class="p">;</code><code class="n"> </code> <code class="n"> </code> <code class="c">// Change as necessary</code>
+<code class="n"> </code> <code class="nv">$data</code> <code class="o">=</code> <code class="s">'robinsnest'</code><code class="p">;</code><code class="n"> </code> <code class="n"> </code><code class="c">// Change as necessary</code>
+<code class="n"> </code> <code class="nv">$user</code> <code class="o">=</code> <code class="s">'robinsnest'</code><code class="p">;</code><code class="n"> </code> <code class="n"> </code><code class="c">// Change as necessary</code>
+<code class="n"> </code> <code class="nv">$pass</code> <code class="o">=</code> <code class="s">'password'</code><code class="p">;</code><code class="n"> </code> <code class="n"> </code> <code class="n"> </code><code class="c">// Change as necessary</code>
+<code class="n"> </code> <code class="nv">$chrs</code> <code class="o">=</code> <code class="s">'utf8mb4'</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$attr</code> <code class="o">=</code> <code class="s">"mysql:host=</code><code class="err">$host</code><code class="s">;dbname=</code><code class="err">$data</code><code class="s">;charset=</code><code class="err">$chrs</code><code class="s">"</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$opts</code> <code class="o">=</code>
+<code class="n"> </code> <code class="p">[</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n">PDO</code><code class="o">::</code><code class="na">ATTR_ERRMODE </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="o">=&gt;</code> <code class="n">PDO</code><code class="o">::</code><code class="na">ERRMODE_EXCEPTION</code><code class="p">,</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n">PDO</code><code class="o">::</code><code class="na">ATTR_DEFAULT_FETCH_MODE</code> <code class="o">=&gt;</code> <code class="n">PDO</code><code class="o">::</code><code class="na">FETCH_ASSOC</code><code class="p">,</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n">PDO</code><code class="o">::</code><code class="na">ATTR_EMULATE_PREPARES </code> <code class="n"> </code><code class="o">=&gt;</code> <code class="k">false</code><code class="p">,</code>
+<code class="n"> </code> <code class="p">];</code>
+<code class="n">  </code>
+<code class="n"> </code> <code class="k">try</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$pdo</code> <code class="o">=</code> <code class="k">new</code> <code class="n">PDO</code><code class="p">(</code><code class="nv">$attr</code><code class="p">,</code> <code class="nv">$user</code><code class="p">,</code> <code class="nv">$pass</code><code class="p">,</code> <code class="nv">$opts</code><code class="p">);</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="k">catch</code> <code class="p">(</code><code class="n">\PDOException</code> <code class="nv">$e</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">throw</code> <code class="k">new</code> <code class="n">\PDOException</code><code class="p">(</code><code class="nv">$e</code><code class="o">-&gt;</code><code class="na">getMessage</code><code class="p">(),</code> <code class="p">(</code><code class="n">int</code><code class="p">)</code><code class="nv">$e</code><code class="o">-&gt;</code><code class="na">getCode</code><code class="p">());</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">function</code> <code class="nf">createTable</code><code class="p">(</code><code class="nv">$name</code><code class="p">,</code> <code class="nv">$query</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"CREATE TABLE IF NOT EXISTS </code><code class="err">$name</code><code class="s">(</code><code class="err">$query</code><code class="s">)"</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"Table '</code><code class="err">$name</code><code class="s">' created or already exists.&lt;br&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">function</code> <code class="nf">queryMysql</code><code class="p">(</code><code class="nv">$query</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">global</code> <code class="nv">$pdo</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">return</code> <code class="nv">$pdo</code><code class="o">-&gt;</code><code class="na">query</code><code class="p">(</code><code class="nv">$query</code><code class="p">);</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">function</code> <code class="nf">destroySession</code><code class="p">()</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$_SESSION</code><code class="o">=</code><code class="k">array</code><code class="p">();</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">session_id</code><code class="p">()</code> <code class="o">!=</code> <code class="s">""</code> <code class="o">||</code> <code class="nb">isset</code><code class="p">(</code><code class="nv">$_COOKIE</code><code class="p">[</code><code class="nb">session_name</code><code class="p">()]))</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nb">setcookie</code><code class="p">(</code><code class="nb">session_name</code><code class="p">(),</code> <code class="s">''</code><code class="p">,</code> <code class="nb">time</code><code class="p">()</code><code class="o">-</code><code class="mi">2592000</code><code class="p">,</code> <code class="s">'/'</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="nb">session_destroy</code><code class="p">();</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">function</code> <code class="nf">sanitizeString</code><code class="p">(</code><code class="nv">$var</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">global</code> <code class="nv">$pdo</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$var</code> <code class="o">=</code> <code class="nb">strip_tags</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$var</code> <code class="o">=</code> <code class="nb">htmlentities</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">get_magic_quotes_gpc</code><code class="p">())</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$var</code> <code class="o">=</code> <code class="nb">stripslashes</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="nv">$pdo</code><code class="o">-&gt;</code><code class="na">quote</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>          <code class="c">// This adds single quotes</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">return</code> <code class="nb">str_replace</code><code class="p">(</code><code class="s">"'"</code><code class="p">,</code> <code class="s">""</code><code class="p">,</code> <code class="nv">$result</code><code class="p">);</code> <code class="c">// So now remove them</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">function</code> <code class="nf">showProfile</code><code class="p">(</code><code class="nv">$user</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">file_exists</code><code class="p">(</code><code class="s">"</code><code class="err">$user</code><code class="s">.jpg"</code><code class="p">))</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;img src='</code><code class="err">$user</code><code class="s">.jpg' style='float:left;'&gt;"</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="nv">$pdo</code><code class="o">-&gt;</code><code class="na">query</code><code class="p">(</code><code class="s">"SELECT * FROM profiles WHERE user='</code><code class="err">$user</code><code class="s">'"</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">while</code> <code class="p">(</code><code class="nv">$row</code> <code class="o">=</code> <code class="nv">$result</code><code class="o">-&gt;</code><code class="na">fetch</code><code class="p">())</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">die</code><code class="p">(</code><code class="nb">stripslashes</code><code class="p">(</code><code class="nv">$row</code><code class="p">[</code><code class="s">'text'</code><code class="p">])</code> <code class="o">.</code> <code class="s">"&lt;br style='clear:left;'&gt;&lt;br&gt;"</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="n">  </code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;p&gt;Nothing to see here, yet&lt;/p&gt;&lt;br&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/>
+</pre>
+</div>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">If you’ve read previous editions of this book, in which these examples used the old <code class="calibre15">mysql</code> extension, and later on <code class="calibre15">mysqli</code>, you will see I have now moved on again to the best solution so far, which is <code class="calibre15">PDO</code>.</p>
+
+<p class="author1">To reference the MySQL database using <code class="calibre15">PDO</code>, you must apply the <code class="calibre15">global</code> keyword in the <code class="calibre15">queryMysql</code> and <code class="calibre15">sanitizeString</code> functions, to allow them to use the value in <code class="calibre15">$PDO</code>.<a contenteditable="false" data-primary="" data-startref="SNAfunc27" data-type="indexterm" id="idm45694662772840" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="Fsocial27" data-type="indexterm" id="idm45694662417224" class="calibre6"/></p>
+</div>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="header.php" class="calibre4"><div class="preface" id="headerdotphp">
+<h1 class="calibre11">header.php</h1>
+
+<p class="author1">For<a contenteditable="false" data-primary="social networking app example" data-secondary="header.php file" data-type="indexterm" id="SNAhead27" class="calibre6"/> uniformity, each page of the project needs to have access to the same set of features. Therefore, I placed these things in <a data-type="xref" href="#headerdotphp-id00133" class="calibre6">Example 29-2</a>, <em class="hyperlink">header.php</em>. This is the file that is actually included by the other files. It includes <em class="hyperlink">functions.php</em>. This means that only a single <code class="calibre15">require_once</code> is needed in each file.</p>
+
+<p class="author1"><em class="hyperlink">header.php</em> starts by calling the function <code class="calibre15">session_start</code>. As you’ll recall from <a data-type="xref" href="ch13.xhtml#cookiescomma_sessionscomma_and_authentic" class="calibre6">Chapter 13</a>, this sets up a session that will remember certain values we want stored across different PHP files. In other words, it represents a visit by a user to the site, and it can time out if the user ignores the site for a period of time.</p>
+
+<p class="author1">With the session started, the program then outputs the HTML needed to set up each web page, including loading stylesheets and the various JavaScript libraries required. After this the file of functions (<em class="hyperlink">functions.php</em>) is included, and the default string of “Welcome Guest” is assigned to <code class="calibre15">$userstr</code>.</p>
+
+<p class="author1">After this a random string value is assigned to the variable <code class="calibre15">$randstr</code>, used throughout the app for appending to URLs so that every single page loaded looks unique to the jQuery sliding interface. Without this, pages that look like they should not have changed to jQuery would be fetched from its cache, leading to the best performance possible. That’s fine on a set of pages with static information, but this is a dynamic app where information on the pages changes all the time, so we must ensure each new page request comes from the server and not the cache.</p>
+
+<p class="author1">Next the code checks whether the session variable <code class="calibre15">user</code> is currently assigned a value. If so, a user has already logged in, so the variable <code class="calibre15">$loggedin</code> is set to <code class="calibre15">TRUE</code> and the username is retrieved from the session variable <code class="calibre15">user</code> into the PHP variable <code class="calibre15">$user</code>, with <code class="calibre15">$userstr</code> updated appropriately. If the user has not yet logged in, then <span class="keep-together"><code class="calibre15">$loggedin</code></span> is set to <code class="calibre15">FALSE</code>.</p>
+
+<p class="author1">Next, some HTML is output welcoming the user (or guest if not yet logged in), and the <code class="calibre15">&lt;div&gt;</code> elements required by jQuery Mobile for the page’s header and content sections are output.</p>
+
+<p class="author1">After this, using the value of <code class="calibre15">$loggedin</code>, an <code class="calibre15">if</code> block displays one of two sets of menus. The non-logged-in set simply offers options of Home, Sign Up, and Log In, whereas the logged-in version offers full access to the app’s features. The buttons are styled using jQuery Mobile notation, such as <code class="calibre15">data-role='button'</code> to display an element as a button, <code class="calibre15">data-inline='true'</code> to display elements inline (like a <code class="calibre15">&lt;span&gt;</code> element), and <code class="calibre15">data-transition="slide"</code> to make new pages slide into view when clicked, as described in <a data-type="xref" href="ch23.xhtml#introduction_to_jquery_mobile" class="calibre6">Chapter 23</a>.</p>
+
+<p class="author1">You will notice the use of <code class="calibre15">r=$randstr</code> in these URLs, as previously described, to ensure every page is fetched from the server and not jQuery’s cache.</p>
+
+<p class="author1">The additional styling applied to this file is in the file <em class="hyperlink">styles.css</em> (<a data-type="xref" href="#stylesdotcss-id00145" class="calibre6">Example 29-13</a>, detailed at the end of this chapter).</p>
+
+<div data-type="example" id="headerdotphp-id00133" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-2. </span>header.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// Example 02: header.php</code>
+  <code class="nb">session_start</code><code class="p">();</code>
+
+<code class="k">echo</code> <code class="s">&lt;&lt;&lt;_INIT</code>
+<code class="s">&lt;!DOCTYPE html&gt;</code>
+<code class="s">&lt;html&gt;</code>
+<code class="s">  &lt;head&gt;</code>
+<code class="s">    &lt;meta charset='utf-8'&gt;</code>
+<code class="s">    &lt;meta name='viewport' content='width=device-width, initial-scale=1'&gt; </code>
+<code class="s">    &lt;link rel='stylesheet' href='jquery.mobile-1.4.5.min.css'&gt;</code>
+<code class="s">    &lt;link rel='stylesheet' href='styles.css'&gt;</code>
+<code class="s">    &lt;script src='javascript.js'&gt;&lt;/script&gt;</code>
+<code class="s">    &lt;script src='jquery-2.2.4.min.js'&gt;&lt;/script&gt;</code>
+<code class="s">    &lt;script src='jquery.mobile-1.4.5.min.js'&gt;&lt;/script&gt;</code>
+
+<code class="s">_INIT;</code>
+
+<code class="n"> </code> <code class="k">require_once</code> <code class="s">'functions.php'</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="nv">$userstr</code> <code class="o">=</code> <code class="s">'Welcome Guest'</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$randstr</code> <code class="o">=</code> <code class="nb">substr</code><code class="p">(</code><code class="nb">md5</code><code class="p">(</code><code class="nb">rand</code><code class="p">()),</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">7</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'user'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$user </code> <code class="n"> </code> <code class="n"> </code><code class="o">=</code> <code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'user'</code><code class="p">];</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$loggedin</code> <code class="o">=</code> <code class="k">TRUE</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$userstr </code> <code class="o">=</code> <code class="s">"Logged in as: </code><code class="err">$user</code><code class="s">"</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="k">else</code> <code class="nv">$loggedin</code> <code class="o">=</code> <code class="k">FALSE</code><code class="p">;</code>
+
+<code class="k">echo</code> <code class="s">&lt;&lt;&lt;_MAIN</code>
+<code class="s">    &lt;title&gt;Robin's Nest: $userstr&lt;/title&gt;</code>
+<code class="s">  &lt;/head&gt;</code>
+<code class="s">  &lt;body&gt;</code>
+<code class="s">    &lt;div data-role='page'&gt;</code>
+<code class="s">      &lt;div data-role='header'&gt;</code>
+<code class="s">        &lt;div id='logo'</code>
+<code class="s">          class='center'&gt;R&lt;img id='robin' src='robin.gif'&gt;bin's Nest&lt;/div&gt;</code>
+<code class="s">        &lt;div class='username'&gt;$userstr&lt;/div&gt;</code>
+<code class="s">      &lt;/div&gt;</code>
+<code class="s">      &lt;div data-role='content'&gt;</code>
+
+<code class="s">_MAIN;</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$loggedin</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="k">echo</code> <code class="s">&lt;&lt;&lt;_LOGGEDIN</code>
+<code class="s">        &lt;div class='center'&gt;</code>
+<code class="s">          &lt;a data-role='button' data-inline='true' data-icon='home'</code>
+<code class="s">            data-transition="slide" href='members.php?view=$user&amp;r=$randstr'&gt;Home&lt;/a&gt;</code>
+<code class="s">          &lt;a data-role='button' data-inline='true' data-icon='user'</code>
+<code class="s">            data-transition="slide" href='members.php?r=$randstr'&gt;Members&lt;/a&gt;</code>
+<code class="s">          &lt;a data-role='button' data-inline='true' data-icon='heart'</code>
+<code class="s">            data-transition="slide" href='friends.php?r=$randstr'&gt;Friends&lt;/a&gt;&lt;br&gt;</code>
+<code class="s">          &lt;a data-role='button' data-inline='true' data-icon='mail'</code>
+<code class="s">            data-transition="slide" href='messages.php?r=$randstr'&gt;Messages&lt;/a&gt;</code>
+<code class="s">          &lt;a data-role='button' data-inline='true' data-icon='edit'</code>
+<code class="s">            data-transition="slide" href='profile.php?r=$randstr'&gt;Edit Profile&lt;/a&gt;</code>
+<code class="s">          &lt;a data-role='button' data-inline='true' data-icon='action'</code>
+<code class="s">            data-transition="slide" href='logout.php?r=$randstr'&gt;Log out&lt;/a&gt;</code>
+<code class="s">        &lt;/div&gt;</code>
+<code class="s">        </code>
+<code class="s">_LOGGEDIN;</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="k">else</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="k">echo</code> <code class="s">&lt;&lt;&lt;_GUEST</code>
+<code class="s">        &lt;div class='center'&gt;</code>
+<code class="s">          &lt;a data-role='button' data-inline='true' data-icon='home'</code>
+<code class="s">            data-transition='slide' href='index.php?r=$randstr''&gt;Home&lt;/a&gt;</code>
+<code class="s">          &lt;a data-role='button' data-inline='true' data-icon='plus'</code>
+<code class="s">            data-transition="slide" href='signup.php?r=$randstr''&gt;Sign Up&lt;/a&gt;</code>
+<code class="s">          &lt;a data-role='button' data-inline='true' data-icon='check'</code>
+<code class="s">            data-transition="slide" href='login.php?r=$randstr''&gt;Log In&lt;/a&gt;</code>
+<code class="s">        &lt;/div&gt;</code>
+<code class="s">        &lt;p class='info'&gt;(You must be logged in to use this app)&lt;/p&gt;</code>
+<code class="s">        </code>
+<code class="s">_GUEST;</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/>
+</pre>
+</div>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="setup.php" class="calibre4"><div class="preface" id="setupdotphp">
+<h1 class="calibre11">setup.php</h1>
+
+<p class="author1">With<a contenteditable="false" data-primary="" data-startref="SNAhead27" data-type="indexterm" id="idm45694662371160" class="calibre6"/><a contenteditable="false" data-primary="social networking app example" data-secondary="setup.php file" data-type="indexterm" id="idm45694662289400" class="calibre6"/> the pair of included files written, it’s now time to set up the MySQL tables they will use. We do this with <a data-type="xref" href="#setupdotphp-id00134" class="calibre6">Example 29-3</a>, <em class="hyperlink">setup.php</em>, which you should type and load into your browser before calling up any other files; otherwise, you’ll get numerous MySQL errors.</p>
+
+<p class="author1">The tables created are short and sweet, and have the following names and columns:</p>
+
+<dl class="calibre13">
+	<dt class="plain"><em class="hyperlink">members</em></dt>
+	<dd class="calibre14">username <em class="hyperlink">user</em> (indexed), password <em class="hyperlink">pass</em></dd>
+	<dt class="plain"><em class="hyperlink">messages</em></dt>
+	<dd class="calibre14">ID <em class="hyperlink">id</em> (indexed), author <em class="hyperlink">auth</em> (indexed), recipient <em class="hyperlink">recip</em>, message type <em class="hyperlink">pm</em>, message <em class="hyperlink">message</em></dd>
+	<dt class="plain"><em class="hyperlink">friends</em></dt>
+	<dd class="calibre14">username <em class="hyperlink">user</em> (indexed), friend’s username <em class="hyperlink">friend</em></dd>
+	<dt class="plain"><em class="hyperlink">profiles</em></dt>
+	<dd class="calibre14">username <em class="hyperlink">user</em> (indexed), “about me” <em class="hyperlink">text</em></dd>
+</dl>
+
+<p class="author1">Because the <code class="calibre15">createTable</code> function first checks whether a table already exists, this program can be safely called multiple times without generating any errors.</p>
+
+<p class="author1">It is very likely that you will need to add many more columns to these tables if you choose to expand this project. If so, bear in mind that you may need to issue a MySQL <code class="calibre15">DROP TABLE</code> command before re-creating a table.</p>
+
+<div class="calibre41" data-type="example" id="setupdotphp-id00134">
+<h5 class="calibre42"><span class="keep-together">Example 29-3. </span>setup.php</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE html&gt;</code> <code class="c4">&lt;!-- Example 03: setup.php --&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Setting up database<code class="nt">&lt;/title&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    <code class="nt">&lt;h3&gt;</code>Setting up...<code class="nt">&lt;/h3&gt;</code>
+
+<code class="cp">&lt;?php</code>
+<code class="cp">  require_once 'functions.php';</code>
+
+<code class="cp">  createTable('members',</code>
+<code class="cp">              'user VARCHAR(16),</code>
+<code class="cp">              pass VARCHAR(16),</code>
+<code class="cp">              INDEX(user(6))');</code>
+
+<code class="cp">  createTable('messages',</code>
+<code class="cp">              'id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,</code>
+<code class="cp">              auth VARCHAR(16),</code>
+<code class="cp">              recip VARCHAR(16),</code>
+<code class="cp">              pm CHAR(1),</code>
+<code class="cp">              time INT UNSIGNED,</code>
+<code class="cp">              message VARCHAR(4096),</code>
+<code class="cp">              INDEX(auth(6)),</code>
+<code class="cp">              INDEX(recip(6))');</code>
+
+<code class="cp">  createTable('friends',</code>
+<code class="cp">              'user VARCHAR(16),</code>
+<code class="cp">              friend VARCHAR(16),</code>
+<code class="cp">              INDEX(user(6)),</code>
+<code class="cp">              INDEX(friend(6))');</code>
+
+<code class="cp">  createTable('profiles',</code>
+<code class="cp">              'user VARCHAR(16),</code>
+<code class="cp">              text VARCHAR(4096),</code>
+<code class="cp">              INDEX(user(6))');</code>
+<code class="cp">?&gt;</code>
+
+    <code class="nt">&lt;br&gt;</code>...done.
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code></pre>
+</div>
+
+<div data-type="warning" epub:type="warning" class="calibre21"><h6 class="calibre22">Warning</h6>
+<p class="author1">For this example to work, you must first ensure that you have already created the database specified in the variable <code class="calibre15">$data</code> in <a data-type="xref" href="#functionsdotphp-id00132" class="calibre6">Example 29-1</a> and also have granted access to it by the user given the name in <code class="calibre15">$user</code>, with the password in <code class="calibre15">$pass</code>.</p>
+</div>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="index.php" class="calibre4"><div class="preface" id="indexdotphp">
+<h1 class="calibre11">index.php</h1>
+
+<p class="author1">This<a contenteditable="false" data-primary="social networking app example" data-secondary="index.php file" data-type="indexterm" id="idm45694661906760" class="calibre6"/> file is trivial but necessary nonetheless to give the project a home page. All it does is display a simple welcome message. In a finished application, this would be where you sell the virtues of your site to encourage signups.</p>
+
+<p class="author1">Incidentally, seeing as we have already set up all the MySQL tables and created the included files, you can now load <a data-type="xref" href="#indexdotphp-id00135" class="calibre6">Example 29-4</a>, <em class="hyperlink">index.php</em>, into your browser to get your first peek at the new application. It should look like <a data-type="xref" href="#the-main-page-of-the-app" class="calibre6">Figure 29-1</a>.</p>
+
+<div data-type="example" id="indexdotphp-id00135" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-4. </span>index.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// Example 04: index.php</code>
+<code class="n"> </code> <code class="nb">session_start</code><code class="p">();</code>
+<code class="n"> </code> <code class="k">require_once</code> <code class="s">'header.php'</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;div class='center'&gt;Welcome to Robin's Nest,"</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$loggedin</code><code class="p">)</code> <code class="k">echo</code> <code class="s">" </code><code class="err">$user</code><code class="s">, you are logged in"</code><code class="p">;</code>
+<code class="n"> </code> <code class="k">else</code><code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> echo</code> <code class="s">' please sign up or log in'</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">echo</code> <code class="s">&lt;&lt;&lt;_END</code>
+<code class="s">      &lt;/div&gt;&lt;br&gt;</code>
+<code class="s">    &lt;/div&gt;</code>
+<code class="s">    &lt;div data-role="footer"&gt;</code>
+<code class="s">      &lt;h4&gt;Web App from &lt;i&gt;&lt;a href='https://github.com/RobinNixon/lpmj6'</code>
+<code class="s">      target='_blank'&gt;Learning PHP MySQL &amp; JavaScript&lt;/a&gt;&lt;/i&gt;&lt;/h4&gt;</code>
+<code class="s">    &lt;/div&gt;</code>
+<code class="s">  &lt;/body&gt;</code>
+<code class="s">&lt;/html&gt;</code>
+<code class="s">_END;</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<figure class="calibre23"><div id="the-main-page-of-the-app" class="figure"><img alt="" class="iimagesnest01png" src="Images/pmj6_2901.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 29-1. </span>The main page of the app</h6>
+</div></figure>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="signup.php" class="calibre4"><div class="preface" id="signupdotphp">
+<h1 class="calibre11">signup.php</h1>
+
+<p class="author1">Now<a contenteditable="false" data-primary="social networking app example" data-secondary="signup.php file" data-type="indexterm" id="SNAsign27" class="calibre6"/> we need a module to enable users to join our new social network, and that’s <a data-type="xref" href="#signupdotphp-id00137" class="calibre6">Example 29-5</a>, <em class="hyperlink">signup.php</em>. This is a slightly longer program, but you’ve seen all its parts before.</p>
+
+<p class="author1">Let’s start by looking at the end block of HTML. This is a simple form that allows a username and password to be entered. But note the use of the empty <code class="calibre15">&lt;div&gt;</code> given the <code class="calibre15">id</code> of <code class="calibre15">used</code>. This will be the destination of the asynchronous call in this program that checks whether a desired username is available. See <a data-type="xref" href="ch18.xhtml#using_ajax" class="calibre6">Chapter 18</a> for a complete description of how this works.</p>
+
+<section data-type="sect2" data-pdf-bookmark="Checking for Username Availability" class="calibre4"><div class="preface" id="checking_for_username_availability">
+<h2 class="calibre28">Checking for Username Availability</h2>
+
+<p class="author1">Now<a contenteditable="false" data-primary="usernames" data-secondary="checking availability of" data-type="indexterm" id="idm45694662199992" class="calibre6"/> go back to the program start and you’ll see a block of JavaScript that starts with the function <code class="calibre15">checkUser</code>. This is called by the JavaScript <code class="calibre15">onBlur</code> event when focus is removed from the <code class="calibre15">username</code> field of the form. First it sets the contents of the <code class="calibre15">&lt;div&gt;</code> I mentioned (with the <code class="calibre15">id</code> of <code class="calibre15">used</code>) to a nonblank space <code class="calibre15">&amp;nbsp;</code>, which clears it in case it previously had a value.</p>
+
+<p class="author1">Next a request is made to the program <em class="hyperlink">checkuser.php</em>, which reports whether the username in <code class="calibre15">user</code> is available. The returned result of the asynchronous call (performed using jQuery), a friendly message, is then placed in the <code class="calibre15">used</code> <code class="calibre15">&lt;div&gt;</code>.</p>
+
+<p class="author1">After the JavaScript section comes some PHP code that you should recognize from the discussion of form validation in <a data-type="xref" href="ch17_split_000.xhtml#javascript_and_php_validation_and_error" class="calibre6">Chapter 17</a>. This section also uses the <span class="keep-together"><code class="calibre15">sanitizeString</code></span> function to remove potentially malicious characters before looking up the username in the database and, if it’s not already taken, inserting the new username <code class="calibre15">$user</code> and password <code class="calibre15">$pass</code>.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Logging In" class="calibre4"><div class="preface" id="logging_in-id00136">
+<h2 class="calibre28">Logging In</h2>
+
+<p class="author1">Upon successfully signing up, the user is then prompted to log in. A more fluid response at this point might be to automatically log in a newly created user, but because I don’t want to overly complicate the code, I have kept the signup and login modules separate. You can easily implement this if you want to, however.</p>
+
+<p class="author1">This file uses the CSS class <code class="calibre15">fieldname</code> to arrange the form fields, aligning them neatly under each other in columns. When loaded into a browser (and in conjunction with <em class="hyperlink">checkuser.php</em>, shown later), this program will look like <a data-type="xref" href="#the-signup-page" class="calibre6">Figure 29-2</a>, where you can see that the asynchronous call has identified that the username <em class="hyperlink">Robin</em> is available. If<a contenteditable="false" data-primary="passwords" data-secondary="showing asterisks instead of" data-type="indexterm" id="idm45694661845672" class="calibre6"/><a contenteditable="false" data-primary="* (asterisk)" data-secondary="showing instead of password" data-type="indexterm" id="idm45694661844248" class="calibre6"/><a contenteditable="false" data-primary="asterisk (*)" data-secondary="showing instead of password" data-type="indexterm" id="idm45694661842856" class="calibre6"/> you would like the password field to show only asterisks, change its type from <code class="calibre15">text</code> to <code class="calibre15">password</code>.</p>
+
+<p class="author1">Remember that you must run <em class="hyperlink">setup.php</em> before you can run any of these other PHP program files.</p>
+
+<div data-type="warning" epub:type="warning" class="calibre21"><h6 class="calibre22">Warning</h6>
+<p class="author1">On a production server, I wouldn’t recommend storing user passwords in the clear, as I’ve done here for reasons of space and simplicity. Instead, you should salt them and store them as one-way hash strings. See <a data-type="xref" href="ch13.xhtml#cookiescomma_sessionscomma_and_authentic" class="calibre6">Chapter 13</a> for more details on how to do this.<a contenteditable="false" data-primary="" data-startref="SNAsign27" data-type="indexterm" id="idm45694661837448" class="calibre6"/></p>
+</div>
+
+<figure class="calibre23"><div id="the-signup-page" class="figure"><img alt="" class="iimagesnest02png" src="Images/pmj6_2902.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 29-2. </span>The signup page</h6>
+</div></figure>
+
+<div data-type="example" id="signupdotphp-id00137" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-5. </span>signup.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// Example 05: signup.php</code>
+<code class="n"> </code> <code class="k">require_once</code> <code class="s">'header.php'</code><code class="p">;</code>
+
+<code class="k">echo</code> <code class="s">&lt;&lt;&lt;_END</code>
+<code class="s">  &lt;script&gt;</code>
+<code class="s">    function checkUser(user)</code>
+<code class="s">    {</code>
+<code class="s">      if (user.value == '')</code>
+<code class="s">      {</code>
+<code class="s">        $('#used').html('&amp;nbsp;')</code>
+<code class="s">        return</code>
+<code class="s">      }</code>
+
+<code class="s">      $.post</code>
+<code class="s">      (</code>
+<code class="s">        'checkuser.php',</code>
+<code class="s">        { user : user.value },</code>
+<code class="s">        function(data)</code>
+<code class="s">        {</code>
+<code class="s">          $('#used').html(data)</code>
+<code class="s">        }</code>
+<code class="s">      )</code>
+<code class="s">    }</code>
+<code class="s">  &lt;/script&gt;  </code>
+<code class="s">_END;</code>
+
+<code class="n"> </code> <code class="nv">$error</code> <code class="o">=</code> <code class="nv">$user</code> <code class="o">=</code> <code class="nv">$pass</code> <code class="o">=</code> <code class="s">""</code><code class="p">;</code>
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'user'</code><code class="p">]))</code> <code class="n">destroySession</code><code class="p">();</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'user'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$user</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'user'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$pass</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'pass'</code><code class="p">]);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$user</code> <code class="o">==</code> <code class="s">""</code> <code class="o">||</code> <code class="nv">$pass</code> <code class="o">==</code> <code class="s">""</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$error</code> <code class="o">=</code> <code class="s">'Not all fields were entered&lt;br&gt;&lt;br&gt;'</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">else</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"SELECT * FROM members WHERE user='</code><code class="err">$user</code><code class="s">'"</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$result</code><code class="o">-&gt;</code><code class="na">rowCount</code><code class="p">())</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$error</code> <code class="o">=</code> <code class="s">'That username already exists&lt;br&gt;&lt;br&gt;'</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">else</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"INSERT INTO members VALUES('</code><code class="err">$user</code><code class="s">', '</code><code class="err">$pass</code><code class="s">')"</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">die</code><code class="p">(</code><code class="s">'&lt;h4&gt;Account created&lt;/h4&gt;Please Log in.&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;'</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="k">echo</code> <code class="s">&lt;&lt;&lt;_END</code>
+<code class="s">      &lt;form method='post' action='signup.php?r=$randstr'&gt;$error</code>
+<code class="s">      &lt;div data-role='fieldcontain'&gt;</code>
+<code class="s">        &lt;label&gt;&lt;/label&gt;</code>
+<code class="s">        Please enter your details to sign up</code>
+<code class="s">      &lt;/div&gt;</code>
+<code class="s">      &lt;div data-role='fieldcontain'&gt;</code>
+<code class="s">        &lt;label&gt;Username&lt;/label&gt;</code>
+<code class="s">        &lt;input type='text' maxlength='16' name='user' value='$user'</code>
+<code class="s">          onBlur='checkUser(this)'&gt;</code>
+<code class="s">        &lt;label&gt;&lt;/label&gt;&lt;div id='used'&gt;&amp;nbsp;&lt;/div&gt;</code>
+<code class="s">      &lt;/div&gt;</code>
+<code class="s">      &lt;div data-role='fieldcontain'&gt;</code>
+<code class="s">        &lt;label&gt;Password&lt;/label&gt;</code>
+<code class="s">        &lt;input type='text' maxlength='16' name='pass' value='$pass'&gt;</code>
+<code class="s">      &lt;/div&gt;</code>
+<code class="s">      &lt;div data-role='fieldcontain'&gt;</code>
+<code class="s">        &lt;label&gt;&lt;/label&gt;</code>
+<code class="s">        &lt;input data-transition='slide' type='submit' value='Sign Up'&gt;</code>
+<code class="s">      &lt;/div&gt;</code>
+<code class="s">    &lt;/div&gt;</code>
+<code class="s">  &lt;/body&gt;</code>
+<code class="s">&lt;/html&gt;</code>
+<code class="s">_END;</code>
+<code class="cp">?&gt;</code><code class="x"/>
+</pre>
+</div>
+
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="checkuser.php" class="calibre4"><div class="preface" id="checkuserdotphp">
+<h1 class="calibre11">checkuser.php</h1>
+
+<p class="author1">To<a contenteditable="false" data-primary="social networking app example" data-secondary="checkuser.php file" data-type="indexterm" id="idm45694661817064" class="calibre6"/> go with <em class="hyperlink">signup.php</em>, here’s <a data-type="xref" href="#checkuserdotphp-id00138" class="calibre6">Example 29-6</a>, <em class="hyperlink">checkuser.php</em>, which looks up a username in the database and returns a string indicating whether it has already been taken. Because it relies on the functions <code class="calibre15">sanitizeString</code> and <code class="calibre15">queryMysql</code>, the program first includes the file <em class="hyperlink">functions.php</em>.</p>
+
+<p class="author1">Then, if the <code class="calibre15">$_POST</code> variable <code class="calibre15">user</code> has a value, the function looks it up in the database and, depending on whether it exists as a username, outputs either “Sorry, the username <em class="hyperlink">‘user’</em> is taken” or “The username <em class="hyperlink">‘user’</em> is available.” Just checking the value returned by the function call to <code class="calibre15">$result-&gt;rowCount</code> is sufficient for this, as it will return <code class="calibre15">0</code> if the name is not found or <code class="calibre15">1</code> if it is found.</p>
+
+<p class="author1">The HTML entities <code class="calibre15">&amp;#x2718;</code> and <code class="calibre15">&amp;#x2714;</code> are also used to preface the string with either a cross or a checkmark, and the string will be displayed in either red for the class <code class="calibre15">taken</code> or green for the class <code class="calibre15">available</code>, as defined in <em class="hyperlink">styles.css</em>, shown later in this chapter.</p>
+
+<div data-type="example" id="checkuserdotphp-id00138" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-6. </span>checkuser.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php </code><code class="c">// Example 06: checkuser.php</code>
+<code class="n"> </code> <code class="k">require_once</code> <code class="s">'functions.php'</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'user'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$user </code> <code class="n"> </code><code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'user'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"SELECT * FROM members WHERE user='</code><code class="err">$user</code><code class="s">'"</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$result</code><code class="o">-&gt;</code><code class="na">rowCount</code><code class="p">())</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code><code class="n"> </code> <code class="s">"&lt;span class='taken'&gt;&amp;nbsp;&amp;#x2718; "</code> <code class="o">.</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="s">"The username '</code><code class="err">$user</code><code class="s">' is taken&lt;/span&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">else</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;span class='available'&gt;&amp;nbsp;&amp;#x2714; "</code> <code class="o">.</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code><code class="s">"The username '</code><code class="err">$user</code><code class="s">' is available&lt;/span&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/>
+</pre>
+</div>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="login.php" class="calibre4"><div class="preface" id="logindotphp">
+<h1 class="calibre11">login.php</h1>
+
+<p class="author1">With<a contenteditable="false" data-primary="social networking app example" data-secondary="login.php file" data-type="indexterm" id="SNAlogin27" class="calibre6"/> users now able to sign up on the site, <a data-type="xref" href="#logindotphp-id00139" class="calibre6">Example 29-7</a>, <em class="hyperlink">login.php</em>, provides the code needed to let them log in. Like the signup page, it features a simple HTML form and some basic error checking, as well as uses <code class="calibre15">sanitizeString</code> before querying the MySQL database.</p>
+
+<p class="author1">The main thing to note here is that, upon successful verification of the username and password, the session variables <code class="calibre15">user</code> and <code class="calibre15">pass</code> are given the username and password values. As long as the current session remains active, these variables will be accessible by all the programs in the project, allowing them to automatically provide access to logged-in users.</p>
+
+<p class="author1">You may be interested in the use of the <code class="calibre15">die</code> function upon successfully logging in. This is there because it combines an <code class="calibre15">echo</code> and an <code class="calibre15">exit</code> command in one, thus saving a line of code. For styling, this (like most of the files) applies the class <code class="calibre15">main</code> to indent the content from the left-hand edge.</p>
+
+<p class="author1">When you call this program up in your browser, it should look like <a data-type="xref" href="#the-login-page" class="calibre6">Figure 29-3</a>. Note<a contenteditable="false" data-primary="* (asterisk)" data-secondary="showing instead of password" data-type="indexterm" id="idm45694661179448" class="calibre6"/><a contenteditable="false" data-primary="asterisk (*)" data-secondary="showing instead of password" data-type="indexterm" id="idm45694661178072" class="calibre6"/> how the input type of <code class="calibre15">password</code> has been used here to mask the password with asterisks to prevent it from being viewed by anyone looking over the user’s shoulder.</p>
+
+<div data-type="example" id="logindotphp-id00139" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-7. </span>login.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+ <code class="o">&lt;?</code><code class="n">php</code> <code class="c">// Example 07: login.php</code>
+<code class="n"> </code> <code class="k">require_once</code> <code class="s">'header.php'</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$error</code> <code class="o">=</code> <code class="nv">$user</code> <code class="o">=</code> <code class="nv">$pass</code> <code class="o">=</code> <code class="s">""</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'user'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$user</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'user'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$pass</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'pass'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="n">  </code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$user</code> <code class="o">==</code> <code class="s">""</code> <code class="o">||</code> <code class="nv">$pass</code> <code class="o">==</code> <code class="s">""</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$error</code> <code class="o">=</code> <code class="s">'Not all fields were entered'</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">else</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="n">queryMySQL</code><code class="p">(</code><code class="s">"SELECT user,pass FROM members</code>
+<code class="s">        WHERE user='</code><code class="err">$user</code><code class="s">' AND pass='</code><code class="err">$pass</code><code class="s">'"</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$result</code><code class="o">-&gt;</code><code class="na">rowCount</code><code class="p">()</code> <code class="o">==</code> <code class="mi">0</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$error</code> <code class="o">=</code> <code class="s">"Invalid login attempt"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">else</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'user'</code><code class="p">]</code> <code class="o">=</code> <code class="nv">$user</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'pass'</code><code class="p">]</code> <code class="o">=</code> <code class="nv">$pass</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">die</code><code class="p">(</code><code class="s">"&lt;div class='center'&gt;You are now logged in. Please</code>
+<code class="s">             &lt;a data-transition='slide'</code>
+<code class="s">               href='members.php?view=</code><code class="err">$user</code><code class="s">&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;click here&lt;/a&gt;</code>
+<code class="s">               to continue.&lt;/div&gt;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;"</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="k">echo</code> <code class="s">&lt;&lt;&lt;_END</code>
+<code class="s">      &lt;form method='post' action='login.php?r=$randstr'&gt;</code>
+<code class="s">        &lt;div data-role='fieldcontain'&gt;</code>
+<code class="s">          &lt;label&gt;&lt;/label&gt;</code>
+<code class="s">          &lt;span class='error'&gt;$error&lt;/span&gt;</code>
+<code class="s">        &lt;/div&gt;</code>
+<code class="s">        &lt;div data-role='fieldcontain'&gt;</code>
+<code class="s">          &lt;label&gt;&lt;/label&gt;</code>
+<code class="s">          Please enter your details to log in</code>
+<code class="s">        &lt;/div&gt;</code>
+<code class="s">        &lt;div data-role='fieldcontain'&gt;</code>
+<code class="s">          &lt;label&gt;Username&lt;/label&gt;</code>
+<code class="s">          &lt;input type='text' maxlength='16' name='user' value='$user'&gt;</code>
+<code class="s">        &lt;/div&gt;</code>
+<code class="s">        &lt;div data-role='fieldcontain'&gt;</code>
+<code class="s">          &lt;label&gt;Password&lt;/label&gt;</code>
+<code class="s">          &lt;input type='password' maxlength='16' name='pass' value='$pass'&gt;</code>
+<code class="s">        &lt;/div&gt;</code>
+<code class="s">        &lt;div data-role='fieldcontain'&gt;</code>
+<code class="s">          &lt;label&gt;&lt;/label&gt;</code>
+<code class="s">          &lt;input data-transition='slide' type='submit' value='Login'&gt;</code>
+<code class="s">        &lt;/div&gt;</code>
+<code class="s">      &lt;/form&gt;</code>
+<code class="s">    &lt;/div&gt;</code>
+<code class="s">  &lt;/body&gt;</code>
+<code class="s">&lt;/html&gt;</code>
+<code class="s">_END;</code>
+<code class="cp">?&gt;</code><code class="x"/>
+</pre>
+</div>
+
+<figure class="calibre23"><div id="the-login-page" class="figure"><img alt="" class="iimagesnest03png" src="Images/pmj6_2903.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 29-3. </span>The login page</h6>
+</div></figure>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="profile.php" class="calibre4"><div class="preface" id="profiledotphp">
+<h1 class="calibre11">profile.php</h1>
+
+<p class="author1">One<a contenteditable="false" data-primary="" data-startref="SNAlogin27" data-type="indexterm" id="idm45694661170328" class="calibre6"/><a contenteditable="false" data-primary="social networking app example" data-secondary="profile.php file" data-type="indexterm" id="SNAprof27" class="calibre6"/> of the first things that new users may want to do after signing up and logging in is to create a profile, which can be done via <a data-type="xref" href="#profiledotphp-id00140" class="calibre6">Example 29-8</a>, <em class="hyperlink">profile.php</em>. I think you’ll find some interesting code here, such as routines to upload, resize, and sharpen images.</p>
+
+<p class="author1">Let’s start by looking at the main HTML at the end of the code. This is like the forms you’ve just seen, but this time it has the parameter <code class="calibre15">enctype='multipart/form-data'</code>. This allows us to send more than one type of data at a time, enabling the posting of an image as well as some text. There’s also an input type of <code class="calibre15">file</code>, which creates a Browse button that a user can click to select a file to be uploaded.</p>
+
+<p class="author1">When the form is submitted, the code at the start of the program is executed. The first thing it does is ensure that a user is logged in before allowing program execution to proceed. Only then is the page heading displayed.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">As described in <a data-type="xref" href="ch23.xhtml#introduction_to_jquery_mobile" class="calibre6">Chapter 23</a>, due to the way that jQuery Mobile uses asynchronous communication, it is not possible to upload files from HTML using it, unless you disable that feature by adding an attribute to the <code class="calibre15">&lt;form&gt;</code> element of <code class="calibre15">data-ajax='false'</code>. This will allow HTML file upload to proceed as normal, but you will lose the ability to perform page change animations.</p>
+</div>
+
+<section data-type="sect2" data-pdf-bookmark="Adding the “About Me” Text" class="calibre4"><div class="preface" id="adding_the_quotation_markabout_mequotati">
+<h2 class="calibre28">Adding the “About Me” Text</h2>
+
+<p class="author1">Next,<a contenteditable="false" data-primary="text handling" data-secondary="adding &quot;about me&quot; text to social networking app" data-type="indexterm" id="idm45694661043736" class="calibre6"/> the <code class="calibre15">$_POST</code> variable <code class="calibre15">text</code> is checked to see whether some text was posted to the program. If so, it is sanitized, and all long whitespace sequences (including carriage returns and line feeds) are replaced with single spaces. This function incorporates a double security check, ensuring that the user actually exists in the database and that no attempt at hacking can succeed before inserting this text into the database, where it will become the user’s “about me” details.</p>
+
+<p class="author1">If no text was posted, the database is queried to see whether any text already exists in order to prepopulate the <code class="calibre15">&lt;textarea&gt;</code> for the user to edit it.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Adding a Profile Image" class="calibre4"><div class="preface" id="adding_a_profile_image">
+<h2 class="calibre28">Adding a Profile Image</h2>
+
+<p class="author1">Next<a contenteditable="false" data-primary="images" data-secondary="adding profile images" data-type="indexterm" id="idm45694661037720" class="calibre6"/> we move on to the section where the <code class="calibre15">$_FILES</code> system variable is checked to see whether an image has been uploaded. If so, a string variable called <code class="calibre15">$saveto</code> is created, based on the user’s username followed by the extension <em class="hyperlink">.jpg</em>. For example, a user called <em class="hyperlink">Jill</em> will cause <code class="calibre15">$saveto</code> to have the value <em class="hyperlink">Jill.jpg</em>. This is the file where the uploaded image will be saved for use in the user’s profile.</p>
+
+<p class="author1">Following this, the uploaded image type is examined and is accepted only if it is a <em class="hyperlink">.jpeg</em>, <em class="hyperlink">.png</em>, or <em class="hyperlink">.gif</em> image. Upon success, the variable <code class="calibre15">$src</code> is populated with the uploaded image using one of the <code class="calibre15">imagecreatefrom</code> functions, according to the image type uploaded. The image is now in a raw format that PHP can process. If the image is not of an allowed type, the flag <code class="calibre15">$typeok</code> is set to <code class="calibre15">FALSE</code>, preventing the final section of image upload code from being processed.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Processing the Image" class="calibre4"><div class="preface" id="processing_the_image">
+<h2 class="calibre28">Processing the Image</h2>
+
+<p class="author1">First, we store the image’s dimensions in <code class="calibre15">$w</code> and <code class="calibre15">$h</code> using the following statement, which is a quick way of assigning values from an array to separate variables:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">list</code><code class="p">(</code><code class="nv">$w</code><code class="p">,</code> <code class="nv">$h</code><code class="p">)</code> <code class="o">=</code> <code class="nb">getimagesize</code><code class="p">(</code><code class="nv">$saveto</code><code class="p">);</code></pre>
+
+<p class="author1">Then, using the value of <code class="calibre15">$max</code> (which is set to <code class="calibre15">100</code>), we calculate new dimensions that will result in a new image of the same ratio but with no dimension greater than 100 pixels. This results in giving the variables <code class="calibre15">$tw</code> and <code class="calibre15">$th</code> the new values needed. If you want smaller or larger thumbnails, simply change the value of <code class="calibre15">$max</code> accordingly.</p>
+
+<p class="author1">Next, the function <code class="calibre15">imagecreatetruecolor</code> is called to create a new, blank canvas <code class="calibre15">$tw</code> wide and <code class="calibre15">$th</code> high in <code class="calibre15">$tmp</code>. Then <code class="calibre15">imagecopyresampled</code> is called to resample the image from <code class="calibre15">$src</code> to the new <code class="calibre15">$tmp</code>. Sometimes resampling images can result in a slightly blurred copy, so the next piece of code uses the <code class="calibre15">imageconvolution</code> function to sharpen the image up a bit.</p>
+
+<p class="author1">Finally, the image is saved as a <em class="hyperlink">.jpeg</em> file in the location defined by the variable <code class="calibre15">$saveto</code>, after which we remove both the original and the resized image canvases from memory using the <code class="calibre15">imagedestroy</code> function, returning the memory that was used.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Displaying the Current Profile" class="calibre4"><div class="preface" id="displaying_the_current_profile">
+<h2 class="calibre28">Displaying the Current Profile</h2>
+
+<p class="author1">Last but not least, so that the user can see what the current profile looks like before editing it, the <code class="calibre15">showProfile</code> function from <em class="hyperlink">functions.php</em> is called prior to outputting the form HTML. If no profile exists yet, nothing will be displayed.</p>
+
+<p class="author1">When a profile image is displayed, CSS is applied to it to provide a border, a shadow, and a margin to its right, to separate the profile text from the image. The result of loading <a data-type="xref" href="#profiledotphp-id00140" class="calibre6">Example 29-8</a> into a browser is shown in <a data-type="xref" href="#editing-a-user-profile" class="calibre6">Figure 29-4</a>, where you can see that the <code class="calibre15">&lt;textarea&gt;</code> has been prepopulated with the “about me” text.</p>
+
+<div data-type="example" id="profiledotphp-id00140" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-8. </span>profile.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// Example 08: profile.php</code>
+<code class="n"> </code> <code class="k">require_once</code> <code class="s">'header.php'</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nv">$loggedin</code><code class="p">)</code> <code class="k">die</code><code class="p">(</code><code class="s">"&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;"</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;h3&gt;Your Profile&lt;/h3&gt;"</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"SELECT * FROM profiles WHERE user='</code><code class="err">$user</code><code class="s">'"</code><code class="p">);</code>
+<code class="n"> </code> <code class="n">  </code>
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'text'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$text</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'text'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$text</code> <code class="o">=</code> <code class="nb">preg_replace</code><code class="p">(</code><code class="s">'/\s\s+/'</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="nv">$text</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$result</code><code class="o">-&gt;</code><code class="na">rowCount</code><code class="p">())</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> queryMysql</code><code class="p">(</code><code class="s">"UPDATE profiles SET text='</code><code class="err">$text</code><code class="s">' where user='</code><code class="err">$user</code><code class="s">'"</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">else</code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"INSERT INTO profiles VALUES('</code><code class="err">$user</code><code class="s">', '</code><code class="err">$text</code><code class="s">')"</code><code class="p">);</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="k">else</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$result</code><code class="o">-&gt;</code><code class="na">rowCount</code><code class="p">())</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$row </code> <code class="o">=</code> <code class="nv">$result</code><code class="o">-&gt;</code><code class="na">fetch</code><code class="p">();</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$text</code> <code class="o">=</code> <code class="nb">stripslashes</code><code class="p">(</code><code class="nv">$row</code><code class="p">[</code><code class="s">'text'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">else</code> <code class="nv">$text</code> <code class="o">=</code> <code class="s">""</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="nv">$text</code> <code class="o">=</code> <code class="nb">stripslashes</code><code class="p">(</code><code class="nb">preg_replace</code><code class="p">(</code><code class="s">'/\s\s+/'</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="nv">$text</code><code class="p">));</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_FILES</code><code class="p">[</code><code class="s">'image'</code><code class="p">][</code><code class="s">'name'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$saveto</code> <code class="o">=</code> <code class="s">"</code><code class="err">$user</code><code class="s">.jpg"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nb">move_uploaded_file</code><code class="p">(</code><code class="nv">$_FILES</code><code class="p">[</code><code class="s">'image'</code><code class="p">][</code><code class="s">'tmp_name'</code><code class="p">],</code> <code class="nv">$saveto</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$typeok</code> <code class="o">=</code> <code class="k">TRUE</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">switch</code><code class="p">(</code><code class="nv">$_FILES</code><code class="p">[</code><code class="s">'image'</code><code class="p">][</code><code class="s">'type'</code><code class="p">])</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">case</code> <code class="s">"image/gif"</code><code class="o">:</code><code class="n"> </code> <code class="n"> </code><code class="nv">$src</code> <code class="o">=</code> <code class="nb">imagecreatefromgif</code><code class="p">(</code><code class="nv">$saveto</code><code class="p">);</code> <code class="k">break</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">case</code> <code class="s">"image/jpeg"</code><code class="o">:</code><code class="n"> </code> <code class="c">// Both regular and progressive jpegs</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">case</code> <code class="s">"image/pjpeg"</code><code class="o">:</code> <code class="nv">$src</code> <code class="o">=</code> <code class="nb">imagecreatefromjpeg</code><code class="p">(</code><code class="nv">$saveto</code><code class="p">);</code> <code class="k">break</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">case</code> <code class="s">"image/png"</code><code class="o">:</code><code class="n"> </code> <code class="n"> </code><code class="nv">$src</code> <code class="o">=</code> <code class="nb">imagecreatefrompng</code><code class="p">(</code><code class="nv">$saveto</code><code class="p">);</code> <code class="k">break</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">default</code><code class="o">:</code><code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$typeok</code> <code class="o">=</code> <code class="k">FALSE</code><code class="p">;</code> <code class="k">break</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$typeok</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">list</code><code class="p">(</code><code class="nv">$w</code><code class="p">,</code> <code class="nv">$h</code><code class="p">)</code> <code class="o">=</code> <code class="nb">getimagesize</code><code class="p">(</code><code class="nv">$saveto</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$max</code> <code class="o">=</code> <code class="mi">100</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$tw </code> <code class="o">=</code> <code class="nv">$w</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$th </code> <code class="o">=</code> <code class="nv">$h</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$w</code> <code class="o">&gt;</code> <code class="nv">$h</code> <code class="o">&amp;&amp;</code> <code class="nv">$max</code> <code class="o">&lt;</code> <code class="nv">$w</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$th</code> <code class="o">=</code> <code class="nv">$max</code> <code class="o">/</code> <code class="nv">$w</code> <code class="o">*</code> <code class="nv">$h</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$tw</code> <code class="o">=</code> <code class="nv">$max</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">elseif</code> <code class="p">(</code><code class="nv">$h</code> <code class="o">&gt;</code> <code class="nv">$w</code> <code class="o">&amp;&amp;</code> <code class="nv">$max</code> <code class="o">&lt;</code> <code class="nv">$h</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$tw</code> <code class="o">=</code> <code class="nv">$max</code> <code class="o">/</code> <code class="nv">$h</code> <code class="o">*</code> <code class="nv">$w</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$th</code> <code class="o">=</code> <code class="nv">$max</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">elseif</code> <code class="p">(</code><code class="nv">$max</code> <code class="o">&lt;</code> <code class="nv">$w</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$tw</code> <code class="o">=</code> <code class="nv">$th</code> <code class="o">=</code> <code class="nv">$max</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$tmp</code> <code class="o">=</code> <code class="nb">imagecreatetruecolor</code><code class="p">(</code><code class="nv">$tw</code><code class="p">,</code> <code class="nv">$th</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nb">imagecopyresampled</code><code class="p">(</code><code class="nv">$tmp</code><code class="p">,</code> <code class="nv">$src</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="nv">$tw</code><code class="p">,</code> <code class="nv">$th</code><code class="p">,</code> <code class="nv">$w</code><code class="p">,</code> <code class="nv">$h</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nb">imageconvolution</code><code class="p">(</code><code class="nv">$tmp</code><code class="p">,</code> <code class="k">array</code><code class="p">(</code><code class="k">array</code><code class="p">(</code><code class="o">-</code><code class="mi">1</code><code class="p">,</code> <code class="o">-</code><code class="mi">1</code><code class="p">,</code> <code class="o">-</code><code class="mi">1</code><code class="p">),</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">array</code><code class="p">(</code><code class="o">-</code><code class="mi">1</code><code class="p">,</code> <code class="mi">16</code><code class="p">,</code> <code class="o">-</code><code class="mi">1</code><code class="p">),</code> <code class="k">array</code><code class="p">(</code><code class="o">-</code><code class="mi">1</code><code class="p">,</code> <code class="o">-</code><code class="mi">1</code><code class="p">,</code> <code class="o">-</code><code class="mi">1</code><code class="p">)),</code> <code class="mi">8</code><code class="p">,</code> <code class="mi">0</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nb">imagejpeg</code><code class="p">(</code><code class="nv">$tmp</code><code class="p">,</code> <code class="nv">$saveto</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nb">imagedestroy</code><code class="p">(</code><code class="nv">$tmp</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nb">imagedestroy</code><code class="p">(</code><code class="nv">$src</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="n">showProfile</code><code class="p">(</code><code class="nv">$user</code><code class="p">);</code>
+
+<code class="k">echo</code> <code class="s">&lt;&lt;&lt;_END</code>
+<code class="s">      &lt;form data-ajax='false' method='post'</code>
+<code class="s">        action='profile.php?r=$randstr' enctype='multipart/form-data'&gt;</code>
+<code class="s">      &lt;h3&gt;Enter or edit your details and/or upload an image&lt;/h3&gt;</code>
+<code class="s">      &lt;textarea name='text'&gt;$text&lt;/textarea&gt;&lt;br&gt;</code>
+<code class="s">      Image: &lt;input type='file' name='image' size='14'&gt;</code>
+<code class="s">      &lt;input type='submit' value='Save Profile'&gt;</code>
+<code class="s">      &lt;/form&gt;</code>
+<code class="s">    &lt;/div&gt;&lt;br&gt;</code>
+<code class="s">  &lt;/body&gt;</code>
+<code class="s">&lt;/html&gt;</code>
+<code class="s">_END;</code>
+<code class="cp">?&gt;</code><code class="x"/>
+</pre>
+</div>
+
+<figure class="calibre23"><div id="editing-a-user-profile" class="figure"><img alt="" class="iimagesnest04png" src="Images/pmj6_2904.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 29-4. </span>Editing a user profile</h6>
+</div></figure>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="members.php" class="calibre4"><div class="preface" id="membersdotphp">
+<h1 class="calibre11">members.php</h1>
+
+<p class="author1">Using <a data-type="xref" href="#membersdotphp-id00141" class="calibre6">Example 29-9</a>, <em class="hyperlink">members.php</em>, your users<a contenteditable="false" data-primary="" data-startref="SNAprof27" data-type="indexterm" id="idm45694660992904" class="calibre6"/><a contenteditable="false" data-primary="social networking app example" data-secondary="members.php file" data-type="indexterm" id="SNAmember27" class="calibre6"/> will be able to find other members and choose to add them as friends (or drop them if they are already friends). This program has two modes. The first lists all members and their relationships to you, and the second shows a user’s profile.</p>
+
+<section data-type="sect2" data-pdf-bookmark="Viewing a User’s Profile" class="calibre4"><div class="preface" id="viewing_a_userapostrophes_profile">
+<h2 class="calibre28">Viewing a User’s Profile</h2>
+
+<p class="author1">The code for the latter mode comes first, where a test is made for the variable <code class="calibre15">view</code>, retrieved from the <code class="calibre15">$_GET</code> array. If it exists, a user wants to view someone’s profile, so the program does that using the <code class="calibre15">showProfile</code> function, along with providing a couple of links to the user’s friends and messages.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Adding and Dropping Friends" class="calibre4"><div class="preface" id="adding_and_dropping_friends">
+<h2 class="calibre28">Adding and Dropping Friends</h2>
+
+<p class="author1">After that, the two <code class="calibre15">$_GET</code> variables <code class="calibre15">add</code> and <code class="calibre15">remove</code> are tested. If one or the other has a value, it will be the username of a user to either add or drop as a friend. We achieve this by looking up the user in the MySQL <em class="hyperlink">friends</em> table and either inserting the username or removing it from the table.</p>
+
+<p class="author1">And, of course, every posted variable is first passed through <code class="calibre15">sanitizeString</code> to ensure that it is safe to use with MySQL.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Listing All Members" class="calibre4"><div class="preface" id="listing_all_members">
+<h2 class="calibre28">Listing All Members</h2>
+
+<p class="author1">The final section of code issues an SQL query to list all usernames. The code places the number returned in the variable <code class="calibre15">$num</code> before outputting the page heading.</p>
+
+<p class="author1">A <code class="calibre15">for</code> loop then iterates through each and every member, fetching their details and then looking them up in the <em class="hyperlink">friends</em> table to see if they are either being followed by or following the user. If someone is both a follower and a followee, they are classed as a mutual friend.</p>
+
+<p class="author1">The variable <code class="calibre15">$t1</code> is nonzero when the user is following another member, and <code class="calibre15">$t2</code> is nonzero when another member is following the user. Depending on these values, text is displayed after each username, showing the relationship (if any) to the current user.</p>
+
+<p class="author1">Icons are also displayed to show the relationships. A double-pointing arrow means that the users are mutual friends, a left-pointing arrow indicates the user is following another member, and a right-pointing arrow indicates that another member is following the user.</p>
+
+<p class="author1">Finally, depending on whether the user is following another member, a link is provided to either add or drop that member as a friend.</p>
+
+<p class="author1">When you call <a data-type="xref" href="#membersdotphp-id00141" class="calibre6">Example 29-9</a> up in a browser, it will look like <a data-type="xref" href="#using-the-members-module" class="calibre6">Figure 29-5</a>. Note how the user is invited to “follow” a nonfollowing member, but if the member is already following the user, a “recip” link to reciprocate the friendship is offered. In the case of a user already following another member, the user can select “drop” to end the <span class="keep-together">following.</span></p>
+
+<figure class="calibre23"><div id="using-the-members-module" class="figure"><img alt="" class="iimagesnest05png" src="Images/pmj6_2905.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 29-5. </span>Using the members module</h6>
+</div></figure>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">On a production server, there could be thousands or even hundreds of thousands of users, so you would substantially modify this program to include support for searching the “about me” text, paging the output a screen at a time, and so on.<a contenteditable="false" data-primary="" data-startref="SNAmember27" data-type="indexterm" id="idm45694660338296" class="calibre6"/></p>
+</div>
+
+<div data-type="example" id="membersdotphp-id00141" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-9. </span>members.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// Example 09: members.php</code>
+<code class="n"> </code> <code class="k">require_once</code> <code class="s">'header.php'</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nv">$loggedin</code><code class="p">)</code> <code class="k">die</code><code class="p">(</code><code class="s">"&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;"</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'view'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$view</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'view'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="n">  </code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$view</code> <code class="o">==</code> <code class="nv">$user</code><code class="p">)</code> <code class="nv">$name</code> <code class="o">=</code> <code class="s">"Your"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">else</code><code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$name</code> <code class="o">=</code> <code class="s">"</code><code class="err">$view</code><code class="s">'s"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n">  </code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;h3&gt;</code><code class="err">$name</code><code class="s"> Profile&lt;/h3&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n">showProfile</code><code class="p">(</code><code class="nv">$view</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;a data-role='button' data-transition='slide'</code>
+<code class="s">          href='messages.php?view=</code><code class="err">$view</code><code class="s">&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;View </code><code class="err">$name</code><code class="s"> messages&lt;/a&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">die</code><code class="p">(</code><code class="s">"&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;"</code><code class="p">);</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'add'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$add</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'add'</code><code class="p">]);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"SELECT * FROM friends</code>
+<code class="s">      WHERE user='</code><code class="err">$add</code><code class="s">' AND friend='</code><code class="err">$user</code><code class="s">'"</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nv">$result</code><code class="o">-&gt;</code><code class="na">rowCount</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"INSERT INTO friends VALUES ('</code><code class="err">$add</code><code class="s">', '</code><code class="err">$user</code><code class="s">')"</code><code class="p">);</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="k">elseif</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'remove'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$remove</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'remove'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"DELETE FROM friends</code>
+<code class="s">      WHERE user='</code><code class="err">$remove</code><code class="s">' AND friend='</code><code class="err">$user</code><code class="s">'"</code><code class="p">);</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"SELECT user FROM members ORDER BY user"</code><code class="p">);</code>
+<code class="n"> </code> <code class="nv">$num </code> <code class="n"> </code> <code class="o">=</code> <code class="nv">$result</code><code class="o">-&gt;</code><code class="na">rowCount</code><code class="p">();</code>
+
+<code class="n"> </code> <code class="k">while</code> <code class="p">(</code><code class="nv">$row</code> <code class="o">=</code> <code class="nv">$result</code><code class="o">-&gt;</code><code class="na">fetch</code><code class="p">())</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$row</code><code class="p">[</code><code class="s">'user'</code><code class="p">]</code> <code class="o">==</code> <code class="nv">$user</code><code class="p">)</code> <code class="k">continue</code><code class="p">;</code>
+<code class="n"> </code> <code class="n">  </code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;li&gt;&lt;a data-transition='slide' href='members.php?view="</code> <code class="o">.</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$row</code><code class="p">[</code><code class="s">'user'</code><code class="p">]</code> <code class="o">.</code> <code class="s">"&amp;</code><code class="err">$randstr</code><code class="s">'&gt;"</code> <code class="o">.</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'user'</code><code class="p">]</code> <code class="o">.</code> <code class="s">"&lt;/a&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$follow</code> <code class="o">=</code> <code class="s">"follow"</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$result1</code> <code class="o">=</code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"SELECT * FROM friends WHERE</code>
+<code class="s">      user='"</code> <code class="o">.</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'user'</code><code class="p">]</code> <code class="o">.</code> <code class="s">"' AND friend='</code><code class="err">$user</code><code class="s">'"</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$t1 </code> <code class="n"> </code> <code class="n"> </code> <code class="o">=</code> <code class="nv">$result1</code><code class="o">-&gt;</code><code class="na">rowCount</code><code class="p">();</code>
+<code class="n"> </code> <code class="n">  </code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$result1</code> <code class="o">=</code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"SELECT * FROM friends WHERE</code>
+<code class="s">      user='</code><code class="err">$user</code><code class="s">' AND friend='"</code> <code class="o">.</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'user'</code><code class="p">]</code> <code class="o">.</code> <code class="s">"'"</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$t2 </code> <code class="n"> </code> <code class="n"> </code> <code class="o">=</code> <code class="nv">$result1</code><code class="o">-&gt;</code><code class="na">rowCount</code><code class="p">();</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">((</code><code class="nv">$t1</code> <code class="o">+</code> <code class="nv">$t2</code><code class="p">)</code> <code class="o">&gt;</code> <code class="mi">1</code><code class="p">)</code> <code class="k">echo</code> <code class="s">" &amp;harr; is a mutual friend"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">elseif</code> <code class="p">(</code><code class="nv">$t1</code><code class="p">)</code><code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> echo</code> <code class="s">" &amp;larr; you are following"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">elseif</code> <code class="p">(</code><code class="nv">$t2</code><code class="p">)</code><code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code><code class="p">{</code> <code class="k">echo</code> <code class="s">" &amp;rarr; is following you"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code><code class="nv">$follow</code> <code class="o">=</code> <code class="s">"recip"</code><code class="p">;</code> <code class="p">}</code>
+<code class="n"> </code> <code class="n">  </code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nv">$t1</code><code class="p">)</code> <code class="k">echo</code> <code class="s">" [&lt;a data-transition='slide'</code>
+<code class="s">      href='members.php?add="</code> <code class="o">.</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'user'</code><code class="p">]</code> <code class="o">.</code> <code class="s">"&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;</code><code class="err">$follow</code><code class="s">&lt;/a&gt;]"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">else</code><code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">" [&lt;a data-transition='slide'</code>
+<code class="s">      href='members.php?remove="</code> <code class="o">.</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'user'</code><code class="p">]</code> <code class="o">.</code> <code class="s">"&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;drop&lt;/a&gt;]"</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="cp">?&gt;</code><code class="x"/>
+<code class="x">    &lt;/ul&gt;&lt;/div&gt;</code>
+<code class="x">  &lt;/body&gt;</code>
+<code class="x">&lt;/html&gt;</code>
+</pre>
+</div>
+
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="friends.php" class="calibre4"><div class="preface" id="friendsdotphp">
+<h1 class="calibre11">friends.php</h1>
+
+<p class="author1">The<a contenteditable="false" data-primary="social networking app example" data-secondary="friends.php file" data-type="indexterm" id="SNAfriends27" class="calibre6"/> module that shows a user’s friends and followers is <a data-type="xref" href="#friendsdotphp-id00142" class="calibre6">Example 29-10</a>, <em class="hyperlink">friends.php</em>. This interrogates the <em class="hyperlink">friends</em> table just like the <em class="hyperlink">members.php</em> program but only for a single user. It then shows all of that user’s mutual friends and followers along with the people they are following.</p>
+
+<p class="author1">All the followers are saved into an array called <code class="calibre15">$followers</code>, and all the people being followed are placed in an array called <code class="calibre15">$following</code>. Then a neat piece of code is used to extract all of those who are both following and followed by the user, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$mutual</code> <code class="o">=</code> <code class="nb">array_intersect</code><code class="p">(</code><code class="nv">$followers</code><code class="p">,</code> <code class="nv">$following</code><code class="p">);</code></pre>
+
+<p class="author1">The <code class="calibre15">array_intersect</code> function extracts all members common to both arrays and returns a new array containing only those people. This array is then stored in <code class="calibre15">$mutual</code>. Now it’s possible to use the <code class="calibre15">array_diff</code> function for each of the <code class="calibre15">$followers</code> and <code class="calibre15">$following</code> arrays to keep only those people who are <em class="hyperlink">not</em> mutual friends, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$followers</code> <code class="o">=</code> <code class="nb">array_diff</code><code class="p">(</code><code class="nv">$followers</code><code class="p">,</code> <code class="nv">$mutual</code><code class="p">);</code>
+<code class="nv">$following</code> <code class="o">=</code> <code class="nb">array_diff</code><code class="p">(</code><code class="nv">$following</code><code class="p">,</code> <code class="nv">$mutual</code><code class="p">);</code></pre>
+
+<p class="author1">This results in the array <code class="calibre15">$mutual</code> containing only mutual friends, <code class="calibre15">$followers</code> containing only followers (and no mutual friends), and <code class="calibre15">$following</code> containing only people being followed (and no mutual friends).</p>
+
+<p class="author1">Now that we’re armed with these arrays, it’s a simple matter to separately display each category of members, as can be seen in <a data-type="xref" href="#displaying-a-users-followers" class="calibre6">Figure 29-6</a>. The PHP <code class="calibre15">sizeof</code> function returns the number of elements in an array; here I use it just to trigger code when the size is nonzero (that is, when friends of that type exist). Note how, by using the variables <code class="calibre15">$name1</code>, <code class="calibre15">$name2</code>, and <code class="calibre15">$name3</code> in the relevant places, the code can tell when you’re looking at your own friends list, using the words <em class="hyperlink">Your</em> and <em class="hyperlink">You are</em>, instead of simply displaying the username. The commented line can be uncommented if you wish to display the user’s profile information on this screen.</p>
+
+<div data-type="example" id="friendsdotphp-id00142" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-10. </span>friends.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// Example 10: friends.php</code>
+<code class="n"> </code> <code class="k">require_once</code> <code class="s">'header.php'</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nv">$loggedin</code><code class="p">)</code> <code class="k">die</code><code class="p">(</code><code class="s">"&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;"</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'view'</code><code class="p">]))</code> <code class="nv">$view</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'view'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="k">else</code><code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$view</code> <code class="o">=</code> <code class="nv">$user</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$view</code> <code class="o">==</code> <code class="nv">$user</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$name1</code> <code class="o">=</code> <code class="nv">$name2</code> <code class="o">=</code> <code class="s">"Your"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$name3</code> <code class="o">=</code><code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="s">"You are"</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="k">else</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$name1</code> <code class="o">=</code> <code class="s">"&lt;a data-transition='slide'</code>
+<code class="s">              href='members.php?view=</code><code class="err">$view</code><code class="s">&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;</code><code class="err">$view</code><code class="s">&lt;/a&gt;'s"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$name2</code> <code class="o">=</code> <code class="s">"</code><code class="err">$view</code><code class="s">'s"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$name3</code> <code class="o">=</code> <code class="s">"</code><code class="err">$view</code><code class="s"> is"</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="c">// Uncomment this line if you wish the user’s profile to show here</code>
+<code class="n"> </code> <code class="c">// showProfile($view);</code>
+
+<code class="n"> </code> <code class="nv">$followers</code> <code class="o">=</code> <code class="k">array</code><code class="p">();</code>
+<code class="n"> </code> <code class="nv">$following</code> <code class="o">=</code> <code class="k">array</code><code class="p">();</code>
+
+<code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"SELECT * FROM friends WHERE user='</code><code class="err">$view</code><code class="s">'"</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="k">while</code> <code class="p">(</code><code class="nv">$row</code> <code class="o">=</code> <code class="nv">$result</code><code class="o">-&gt;</code><code class="na">fetch</code><code class="p">())</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$followers</code><code class="p">[</code><code class="nv">$j</code><code class="p">]</code> <code class="o">=</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'friend'</code><code class="p">];</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"SELECT * FROM friends WHERE friend='</code><code class="err">$view</code><code class="s">'"</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="k">while</code> <code class="p">(</code><code class="nv">$row</code> <code class="o">=</code> <code class="nv">$result</code><code class="o">-&gt;</code><code class="na">fetch</code><code class="p">())</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$following</code><code class="p">[</code><code class="nv">$j</code><code class="p">]</code> <code class="o">=</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'user'</code><code class="p">];</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="nv">$mutual </code> <code class="n"> </code> <code class="o">=</code> <code class="nb">array_intersect</code><code class="p">(</code><code class="nv">$followers</code><code class="p">,</code> <code class="nv">$following</code><code class="p">);</code>
+<code class="n"> </code> <code class="nv">$followers</code> <code class="o">=</code> <code class="nb">array_diff</code><code class="p">(</code><code class="nv">$followers</code><code class="p">,</code> <code class="nv">$mutual</code><code class="p">);</code>
+<code class="n"> </code> <code class="nv">$following</code> <code class="o">=</code> <code class="nb">array_diff</code><code class="p">(</code><code class="nv">$following</code><code class="p">,</code> <code class="nv">$mutual</code><code class="p">);</code>
+<code class="n"> </code> <code class="nv">$friends </code> <code class="n"> </code><code class="o">=</code> <code class="k">FALSE</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+<code class="n">  </code>
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">sizeof</code><code class="p">(</code><code class="nv">$mutual</code><code class="p">))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;span class='subhead'&gt;</code><code class="err">$name2</code><code class="s"> mutual friends&lt;/span&gt;&lt;ul&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">foreach</code><code class="p">(</code><code class="nv">$mutual</code> <code class="k">as</code> <code class="nv">$friend</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;li&gt;&lt;a data-transition='slide'</code>
+<code class="s">            href='members.php?view=</code><code class="err">$friend</code><code class="s">&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;</code><code class="err">$friend</code><code class="s">&lt;/a&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;/ul&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$friends</code> <code class="o">=</code> <code class="k">TRUE</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">sizeof</code><code class="p">(</code><code class="nv">$followers</code><code class="p">))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;span class='subhead'&gt;</code><code class="err">$name2</code><code class="s"> followers&lt;/span&gt;&lt;ul&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">foreach</code><code class="p">(</code><code class="nv">$followers</code> <code class="k">as</code> <code class="nv">$friend</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;li&gt;&lt;a data-transition='slide'</code>
+<code class="s">            href='members.php?view=</code><code class="err">$friend</code><code class="s">&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;</code><code class="err">$friend</code><code class="s">&lt;/a&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;/ul&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$friends</code> <code class="o">=</code> <code class="k">TRUE</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">sizeof</code><code class="p">(</code><code class="nv">$following</code><code class="p">))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;span class='subhead'&gt;</code><code class="err">$name3</code><code class="s"> following&lt;/span&gt;&lt;ul&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">foreach</code><code class="p">(</code><code class="nv">$following</code> <code class="k">as</code> <code class="nv">$friend</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;li&gt;&lt;a data-transition='slide'</code>
+<code class="s">            href='members.php?view=</code><code class="err">$friend</code><code class="s">&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;</code><code class="err">$friend</code><code class="s">&lt;/a&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;/ul&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$friends</code> <code class="o">=</code> <code class="k">TRUE</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nv">$friends</code><code class="p">)</code> <code class="k">echo</code> <code class="s">"&lt;br&gt;You don't have any friends yet."</code><code class="p">;</code>
+<code class="cp">?&gt;</code><code class="x"/>
+<code class="x">    &lt;/div&gt;&lt;br&gt;</code>
+<code class="x">  &lt;/body&gt;</code>
+<code class="x">&lt;/html&gt;</code>
+</pre>
+</div>
+
+<figure class="calibre23"><div id="displaying-a-users-followers" class="figure"><img alt="" class="iimagesnest06png" src="Images/pmj6_2906.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 29-6. </span>Displaying a user’s friends and followers</h6>
+</div></figure>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="messages.php" class="calibre4"><div class="preface" id="messagesdotphp">
+<h1 class="calibre11">messages.php</h1>
+
+<p class="author1">The<a contenteditable="false" data-primary="" data-startref="SNAfriends27" data-type="indexterm" id="idm45694659530232" class="calibre6"/><a contenteditable="false" data-primary="social networking app example" data-secondary="messages.php file" data-type="indexterm" id="SNAmessage27" class="calibre6"/> last of the main modules is <a data-type="xref" href="#messagesdotphp-id00143" class="calibre6">Example 29-11</a>, <em class="hyperlink">messages.php</em>. The program starts by checking whether a message has been posted in the variable <code class="calibre15">text</code>. If so, it is inserted into the <em class="hyperlink">messages</em> table. At the same time, the value of <code class="calibre15">pm</code> is also stored. This indicates whether a message is private or public. A <code class="calibre15">0</code> represents a public message, and <code class="calibre15">1</code> is <span class="keep-together">private</span>.</p>
+
+<p class="author1">Next, the user’s profile and a form for entering a message are displayed, along with radio buttons to choose between a private or public message. After this, all the messages are shown, depending on whether they are private or public. If they are public, all users can see them, but private messages are visible only to the sender and recipient. This is all handled by a couple of queries to the MySQL database. Additionally, when a message is private, it is introduced by the word <em class="hyperlink">whispered</em> and shown in italic.</p>
+
+<p class="author1">Finally, the program displays a couple of links to refresh the messages (in case another user has posted one in the meantime) and to view the user’s friends. The trick using the variables <code class="calibre15">$name1</code> and <code class="calibre15">$name2</code> is again used so that when you view your own profile, the word <em class="hyperlink">Your</em> is displayed instead of the username.</p>
+
+<div data-type="example" id="messagesdotphp-id00143" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-11. </span>messages.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// Example 11: messages.php</code>
+<code class="n"> </code> <code class="k">require_once</code> <code class="s">'header.php'</code><code class="p">;</code>
+<code class="n">  </code>
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nv">$loggedin</code><code class="p">)</code> <code class="k">die</code><code class="p">(</code><code class="s">"&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;"</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'view'</code><code class="p">]))</code> <code class="nv">$view</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'view'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="k">else</code><code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$view</code> <code class="o">=</code> <code class="nv">$user</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'text'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$text</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'text'</code><code class="p">]);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$text</code> <code class="o">!=</code> <code class="s">""</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$pm </code> <code class="n"> </code><code class="o">=</code> <code class="nb">substr</code><code class="p">(</code><code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'pm'</code><code class="p">]),</code><code class="mi">0</code><code class="p">,</code><code class="mi">1</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$time</code> <code class="o">=</code> <code class="nb">time</code><code class="p">();</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"INSERT INTO messages VALUES(NULL, '</code><code class="err">$user</code><code class="s">',</code>
+<code class="s">        '</code><code class="err">$view</code><code class="s">', '</code><code class="err">$pm</code><code class="s">', </code><code class="err">$time</code><code class="s">, '</code><code class="err">$text</code><code class="s">')"</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$view</code> <code class="o">!=</code> <code class="s">""</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$view</code> <code class="o">==</code> <code class="nv">$user</code><code class="p">)</code> <code class="nv">$name1</code> <code class="o">=</code> <code class="nv">$name2</code> <code class="o">=</code> <code class="s">"Your"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">else</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$name1</code> <code class="o">=</code> <code class="s">"&lt;a href='members.php?view=</code><code class="err">$view</code><code class="s">&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;</code><code class="err">$view</code><code class="s">&lt;/a&gt;'s"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$name2</code> <code class="o">=</code> <code class="s">"</code><code class="err">$view</code><code class="s">'s"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;h3&gt;</code><code class="err">$name1</code><code class="s"> Messages&lt;/h3&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n">showProfile</code><code class="p">(</code><code class="nv">$view</code><code class="p">);</code>
+<code class="n"> </code> <code class="n">  </code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">&lt;&lt;&lt;_END</code>
+<code class="s">      &lt;form method='post' action='messages.php?view=$view&amp;r=$randstr'&gt;</code>
+<code class="s">        &lt;fieldset data-role="controlgroup" data-type="horizontal"&gt;</code>
+<code class="s">          &lt;legend&gt;Type here to leave a message&lt;/legend&gt;</code>
+<code class="s">          &lt;input type='radio' name='pm' id='public' value='0' checked='checked'&gt;</code>
+<code class="s">          &lt;label for="public"&gt;Public&lt;/label&gt;</code>
+<code class="s">          &lt;input type='radio' name='pm' id='private' value='1'&gt;</code>
+<code class="s">          &lt;label for="private"&gt;Private&lt;/label&gt;</code>
+<code class="s">        &lt;/fieldset&gt;</code>
+<code class="s">      &lt;textarea name='text'&gt;&lt;/textarea&gt;</code>
+<code class="s">      &lt;input data-transition='slide' type='submit' value='Post Message'&gt;</code>
+<code class="s">    &lt;/form&gt;&lt;br&gt;</code>
+<code class="s">_END;</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="nb">date_default_timezone_set</code><code class="p">(</code><code class="s">'UTC'</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'erase'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$erase</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s">'erase'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n">queryMysql</code><code class="p">(</code><code class="s">"DELETE FROM messages WHERE id='</code><code class="err">$erase</code><code class="s">' AND recip='</code><code class="err">$user</code><code class="s">'"</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="n">  </code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$query </code> <code class="o">=</code> <code class="s">"SELECT * FROM messages WHERE recip='</code><code class="err">$view</code><code class="s">' ORDER BY time DESC"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="n">queryMysql</code><code class="p">(</code><code class="nv">$query</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="k">while</code> <code class="p">(</code><code class="nv">$row</code> <code class="o">=</code> <code class="nv">$result</code><code class="o">-&gt;</code><code class="na">fetch</code><code class="p">())</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$row</code><code class="p">[</code><code class="s">'pm'</code><code class="p">]</code> <code class="o">==</code> <code class="mi">0</code> <code class="o">||</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'auth'</code><code class="p">]</code> <code class="o">==</code> <code class="nv">$user</code> <code class="o">||</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'recip'</code><code class="p">]</code> <code class="o">==</code> <code class="nv">$user</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="nb">date</code><code class="p">(</code><code class="s">'M jS \'y g:ia:'</code><code class="p">,</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'time'</code><code class="p">]);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">" &lt;a href='messages.php?view="</code> <code class="o">.</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'auth'</code><code class="p">]</code> <code class="o">.</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code><code class="s">"&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;"</code> <code class="o">.</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'auth'</code><code class="p">]</code><code class="o">.</code> <code class="s">"&lt;/a&gt; "</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$row</code><code class="p">[</code><code class="s">'pm'</code><code class="p">]</code> <code class="o">==</code> <code class="mi">0</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"wrote: &amp;quot;"</code> <code class="o">.</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'message'</code><code class="p">]</code> <code class="o">.</code> <code class="s">"&amp;quot; "</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">else</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"whispered: &lt;span class='whisper'&gt;&amp;quot;"</code> <code class="o">.</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$row</code><code class="p">[</code><code class="s">'message'</code><code class="p">]</code><code class="o">.</code> <code class="s">"&amp;quot;&lt;/span&gt; "</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nv">$row</code><code class="p">[</code><code class="s">'recip'</code><code class="p">]</code> <code class="o">==</code> <code class="nv">$user</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"[&lt;a href='messages.php?view=</code><code class="err">$view</code><code class="s">"</code> <code class="o">.</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code><code class="s">"&amp;erase="</code> <code class="o">.</code> <code class="nv">$row</code><code class="p">[</code><code class="s">'id'</code><code class="p">]</code> <code class="o">.</code> <code class="s">"&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;erase&lt;/a&gt;]"</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nv">$num</code><code class="p">)</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;br&gt;&lt;span class='info'&gt;No messages yet&lt;/span&gt;&lt;br&gt;&lt;br&gt;"</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;br&gt;&lt;a data-role='button'</code>
+<code class="s">        href='messages.php?view=</code><code class="err">$view</code><code class="s">&amp;r=</code><code class="err">$randstr</code><code class="s">'&gt;Refresh messages&lt;/a&gt;"</code><code class="p">;</code>
+<code class="cp">?&gt;</code><code class="x"/>
+
+<code class="x">    &lt;/div&gt;&lt;br&gt;</code>
+<code class="x">  &lt;/body&gt;</code>
+<code class="x">&lt;/html&gt;</code>
+</pre>
+</div>
+
+<p class="author1">You can see the result of viewing this program with a browser in <a data-type="xref" href="#the-messaging-module" class="calibre6">Figure 29-7</a>. Note how users viewing their own messages are provided with links to erase any they don’t want to keep. Also of note is how jQuery Mobile’s styling of radio buttons has been implemented for selecting between sending a private or a public message. How this works is explained in <a data-type="xref" href="ch23.xhtml#introduction_to_jquery_mobile" class="calibre6">Chapter 23</a>.</p>
+
+<figure class="calibre23"><div id="the-messaging-module" class="figure"><img alt="" class="iimagesnest07png" src="Images/pmj6_2907.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 29-7. </span>The messaging module</h6>
+</div></figure>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="logout.php" class="calibre4"><div class="preface" id="logoutdotphp">
+<h1 class="calibre11">logout.php</h1>
+
+<p class="author1">The<a contenteditable="false" data-primary="" data-startref="SNAmessage27" data-type="indexterm" id="idm45694658989784" class="calibre6"/><a contenteditable="false" data-primary="social networking app example" data-secondary="logout.php file" data-type="indexterm" id="SNAlogout27" class="calibre6"/> final ingredient in our social networking recipe is <a data-type="xref" href="#logoutdotphp-id00144" class="calibre6">Example 29-12</a>, <em class="hyperlink">logout.php</em>, the logout page that closes a session and deletes any associated data and cookies. The result of calling up this program is shown in <a data-type="xref" href="#the-logout-page" class="calibre6">Figure 29-8</a>, where the user is now asked to click a link that will take them to the not logged-in home page and remove the logged-in links from the top of the screen. Of course, you could write a JavaScript or PHP redirect to do this (probably a good idea if you wish to keep logout looking clean).</p>
+
+<figure class="calibre23"><div id="the-logout-page" class="figure"><img alt="" class="iimagesnest08png" src="Images/pmj6_2908.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 29-8. </span>The logout page</h6>
+</div></figure>
+
+<div data-type="example" id="logoutdotphp-id00144" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-12. </span>logout.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php </code><code class="c">// Example 12: logout.php</code>
+<code class="n"> </code> <code class="k">require_once</code> <code class="s">'header.php'</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'user'</code><code class="p">]))</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n">destroySession</code><code class="p">();</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">echo</code> <code class="s">"&lt;br&gt;&lt;div class='center'&gt;You have been logged out. Please</code>
+<code class="s">         &lt;a data-transition='slide'</code>
+<code class="s">           href='index.php?r=</code><code class="err">$randstr</code><code class="s">'&gt;click here&lt;/a&gt;</code>
+<code class="s">           to refresh the screen.&lt;/div&gt;"</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="k">else</code> <code class="k">echo</code> <code class="s">"&lt;div class='center'&gt;You cannot log out because</code>
+<code class="s">             you are not logged in&lt;/div&gt;"</code><code class="p">;</code>
+<code class="cp">?&gt;</code><code class="x"/>
+<code class="x">    &lt;/div&gt;</code>
+<code class="x">  &lt;/body&gt;</code>
+<code class="x">&lt;/html&gt;</code>
+</pre>
+</div>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="styles.css" class="calibre4"><div class="preface" id="stylesdotcss">
+<h1 class="calibre11">styles.css</h1>
+
+<p class="author1">The<a contenteditable="false" data-primary="" data-startref="SNAlogout27" data-type="indexterm" id="idm45694658255432" class="calibre6"/><a contenteditable="false" data-primary="social networking app example" data-secondary="styles.css file" data-type="indexterm" id="SNAsytles27" class="calibre6"/><a contenteditable="false" data-primary="CSS (Cascading Style Sheets)" data-secondary="social networking app example" data-type="indexterm" id="CSSsocial27" class="calibre6"/> stylesheet used for this project is shown in <a data-type="xref" href="#stylesdotcss-id00145" class="calibre6">Example 29-13</a>. There are a number of sets of declarations, as follows:</p>
+
+<dl class="calibre13">
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">*</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Sets the default font family and size for the project using the universal selector.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">body</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Sets the width of the project window, centers it horizontally, specifies a background color, and gives it a border.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">html</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Sets the background color of the HTML section.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">img</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Gives all images a border, a shadow, and a right-hand margin.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">.username</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Centers the username and chooses the font family, size, color, background, and padding with which to display it.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">.info</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">This class is used for displaying important information. It sets a background and foreground text color, applies a border and padding, and indents elements that employ it.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">.center</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">This class is used for centering the contents of a <code class="calibre15">&lt;div&gt;</code> element.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">.subhead</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">This class emphasizes sections of text.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">.taken</code>, <code class="calibre15">.available</code>, <code class="calibre15">.error</code>, and <code class="calibre15">.whisper</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">These declarations set the colors and font styles to be used for displaying different types of information.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">#logo</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Styles the logo text as a fallback in case a non-HTML5 browser is in use and the canvas logo doesn’t get created.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">#robin</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Aligns the image of the robin in the page title.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">#used</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Ensures the element that is populated by the <em class="hyperlink">checkuser.php</em> asynchronous call if a username is already taken is not too close to the field above it.</p>
+	</dd>
+</dl>
+
+<div data-type="example" id="stylesdotcss-id00145" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-13. </span>styles.css</h5>
+
+<pre data-code-language="css" data-programming-language="perl" class="calibre29">
+<code class="o">*</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">font-family</code><code class="o">:</code><code class="n">verdana</code><code class="o">,</code><code class="nb">sans-serif</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">font-size</code><code class="err"> </code> <code class="o">:</code><code class="mi">14pt</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nt">body</code> <code class="p">{</code>
+<code class="err"> </code> <code class="n">width</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code><code class="o">:</code><code class="mi">700px</code><code class="p">;</code>
+<code class="err"> </code> <code class="n">margin</code><code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="mi">20px</code> <code class="nb">auto</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">background</code><code class="o">:</code><code class="mi">#f8f8f8</code><code class="p">;</code>
+<code class="err"> </code> <code class="n">border</code><code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="mi">1px</code> <code class="nb">solid</code> <code class="mi">#888</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nt">html</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">background</code><code class="o">:</code><code class="mi">#fff</code>
+<code class="p">}</code>
+
+<code class="nt">img</code> <code class="p">{</code>
+<code class="err"> </code> <code class="n">border</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="mi">1px</code> <code class="nb">solid</code> <code class="nb">black</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">margin-right</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="mi">15px</code><code class="p">;</code>
+<code class="err"> </code> <code class="o">-</code><code class="n">moz</code><code class="o">-</code><code class="n">box-shadow</code><code class="err"> </code> <code class="err"> </code><code class="o">:</code><code class="mi">2px</code> <code class="mi">2px</code> <code class="mi">2px</code> <code class="mi">#888</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">-webkit-box-shadow</code><code class="o">:</code><code class="mi">2px</code> <code class="mi">2px</code> <code class="mi">2px</code> <code class="mi">#888</code><code class="p">;</code>
+<code class="err"> </code> <code class="n">box-shadow</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="mi">2px</code> <code class="mi">2px</code> <code class="mi">2px</code> <code class="mi">#888</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nc">.username</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">text-align</code> <code class="o">:</code><code class="nb">center</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">background</code> <code class="o">:</code><code class="mi">#eb8</code><code class="p">;</code>
+<code class="err"> </code> <code class="n">color</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="mi">#40d</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">font-family</code><code class="o">:</code><code class="n">helvetica</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">font-size</code><code class="err"> </code> <code class="o">:</code><code class="mi">20pt</code><code class="p">;</code>
+<code class="err"> </code> <code class="n">padding</code><code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="mi">4px</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nc">.info</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">font-style</code> <code class="o">:</code><code class="nb">italic</code><code class="p">;</code>
+<code class="err"> </code> <code class="n">margin</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code><code class="o">:</code><code class="mi">40px</code> <code class="mi">0px</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">text-align</code> <code class="o">:</code><code class="nb">center</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nc">.center</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">text-align</code><code class="o">:</code><code class="nb">center</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nc">.subhead</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">font-weight</code><code class="o">:</code><code class="nb">bold</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nc">.taken</code><code class="o">,</code> <code class="nc">.error</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">color</code><code class="o">:</code><code class="nb">red</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nc">.available</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">color</code><code class="o">:</code><code class="nb">green</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nc">.whisper</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">font-style</code><code class="o">:</code><code class="nb">italic</code><code class="p">;</code>
+<code class="err"> </code> <code class="n">color</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code><code class="o">:</code><code class="mi">#006600</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nf">#logo</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">font-family</code><code class="o">:</code><code class="n">Georgia</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">font-weight</code><code class="o">:</code><code class="nb">bold</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">font-style</code> <code class="o">:</code><code class="nb">italic</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">font-size</code><code class="err"> </code> <code class="o">:</code><code class="mi">97px</code><code class="p">;</code>
+<code class="err"> </code> <code class="n">color</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="nb">red</code><code class="p">;</code>
+<code class="err"> </code> <code class="p">}</code>
+
+<code class="nf">#robin</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">position</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="nb">relative</code><code class="p">;</code>
+<code class="err"> </code> <code class="n">border</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="mi">0px</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">margin-left</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code><code class="o">:-</code><code class="mi">6px</code><code class="p">;</code>
+<code class="err"> </code> <code class="k">margin-right</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="mi">0px</code><code class="p">;</code>
+<code class="err"> </code> <code class="nb">top</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code><code class="o">:</code><code class="mi">17px</code><code class="p">;</code>
+  <code class="o">-</code><code class="n">moz</code><code class="o">-</code><code class="n">box-shadow</code><code class="err"> </code> <code class="err"> </code><code class="o">:</code><code class="mi">0px</code> <code class="mi">0px</code> <code class="mi">0px</code><code class="p">;</code>
+  <code class="k">-webkit-box-shadow</code><code class="o">:</code><code class="mi">0px</code> <code class="mi">0px</code> <code class="mi">0px</code><code class="p">;</code>
+  <code class="n">box-shadow</code><code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="err"> </code> <code class="o">:</code><code class="mi">0px</code> <code class="mi">0px</code> <code class="mi">0px</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nf">#used</code> <code class="p">{</code>
+<code class="err"> </code> <code class="k">margin-top</code><code class="o">:</code><code class="mi">50px</code><code class="p">;</code>
+<code class="p">}</code>
+</pre>
+</div>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="javascript.js" class="calibre4"><div class="preface" id="javascriptdotjs">
+<h1 class="calibre11">javascript.js</h1>
+
+<p class="author1">Finally, there’s the<a contenteditable="false" data-primary="" data-startref="CSSsocial27" data-type="indexterm" id="idm45694658205464" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="SNAsytles27" data-type="indexterm" id="idm45694658204056" class="calibre6"/><a contenteditable="false" data-primary="social networking app example" data-secondary="javascript.js file" data-type="indexterm" id="idm45694658202680" class="calibre6"/> JavaScript file (see <a data-type="xref" href="#javascriptdotjs-id00146" class="calibre6">Example 29-14</a>), which contains the <code class="calibre15">O</code>, <code class="calibre15">S</code>, and <code class="calibre15">C</code> functions used throughout this book.</p>
+
+<div data-type="example" id="javascriptdotjs-id00146" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 29-14. </span>javascript.js</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">function</code> <code class="n">O</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="k">return</code> <code class="k">typeof</code> <code class="n">i</code> <code class="o">==</code> <code class="s">'object'</code> <code class="o">?</code> <code class="n">i</code> <code class="o">:</code> <code class="nb">document</code><code class="p">.</code><code class="n">getElementById</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">}</code>
+
+<code class="k">function</code> <code class="n">S</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="k">return</code> <code class="n">O</code><code class="p">(</code><code class="n">i</code><code class="p">).</code><code class="n">style</code>
+<code class="p">}</code>
+
+<code class="k">function</code> <code class="n">C</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="k">return</code> <code class="nb">document</code><code class="p">.</code><code class="n">getElementsByClassName</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">}</code></pre>
+</div>
+
+<p class="author1">And that, as they say, is that. If you write anything based on this code or any other examples in this book, or have gained in any other way from it, then I am glad to have been of help, and thank you for reading this book.</p>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Questions" class="calibre4"><div class="preface" id="questions-id00050">
+<h1 class="calibre11">Questions</h1>
+
+<ol class="calibre25">
+	<li class="calibre26">
+	<p class="author1">Have you enjoyed learning from this book?</p>
+	</li>
+</ol>
+
+<p class="author1">See <a data-type="xref" href="app01_split_028.xhtml#chapter_29_answers" class="calibre6">“Chapter 29 Answers”</a> in the <a data-type="xref" href="app01_split_000.xhtml#solutions_to_the_chapter_questions" class="calibre6">Appendix A</a> for the answer to this <span class="keep-together">question</span>.</p>
+</div></section>
+</div></section></div></body></html>

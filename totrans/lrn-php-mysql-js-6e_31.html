@@ -1,0 +1,585 @@
+<html><head></head><body><div id="sbo-rt-content" class="calibre1"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 28. Other HTML5 Features" class="calibre4"><div class="preface" id="other_html5_features">
+<h1 class="calibre10"><span class="keep-together">Chapter 28. </span>Other HTML5 Features</h1>
+
+<p class="author1">In this final chapter on HTML5, I explain how to use geolocation and local storage and demonstrate the use of in-browser dragging and dropping, as well as how to set up and use web workers and make use of cross-document messaging.</p>
+
+<p class="author1">Strictly speaking, most of these features (like much of HTML5) aren’t really extensions to HTML, because you access them with JavaScript rather than with HTML markup. They are simply technologies that are being embraced by browser developers and have been given the handy umbrella name of HTML5.</p>
+
+<p class="author1">This means, though, that you need to have fully understood the JavaScript tutorial in this book in order to use them properly. That said, once you get the hang of them, you’ll wonder how you ever did without these powerful new features.</p>
+
+<section data-type="sect1" data-pdf-bookmark="Geolocation and the GPS Service" class="calibre4"><div class="preface" id="geolocation_and_the_gps_service">
+<h1 class="calibre11">Geolocation and the GPS Service</h1>
+
+<p class="author1">The<a contenteditable="false" data-primary="Global Positioning System (GPS)" data-type="indexterm" id="idm45694664682088" class="calibre6"/><a contenteditable="false" data-primary="HTML5" data-secondary="geolocation and GPS service" data-type="indexterm" id="idm45694664681112" class="calibre6"/><a contenteditable="false" data-primary="geolocation" data-type="indexterm" id="idm45694664679896" class="calibre6"/> Global Positioning System (GPS) service consists of multiple satellites orbiting the Earth whose positions are very precisely known. When a GPS-enabled device tunes into them, the different times at which signals from these various satellites arrive enable the device to quite accurately determine where it is; because the speed of light (and therefore radio waves) is a known constant, the time it takes a signal to get from a satellite to a GPS device indicates the satellite’s distance.</p>
+
+<p class="author1">By noting the different times at which signals arrive from different satellites, which are in precisely known orbital locations at any one time, a simple triangulation calculation gives the device its position relative to the satellites within a few meters or less.</p>
+
+<p class="author1">Many mobile devices, such as phones and tablets, have GPS chips and can provide this information. But some don’t, others have them turned off, and others may be used indoors where they are shielded from the GPS satellites and therefore cannot receive any signals. In these cases, additional techniques may be used to attempt to determine the device’s location.</p>
+
+<div data-type="warning" epub:type="warning" class="calibre21"><h6 class="calibre22">Warning</h6>
+<p class="author1">I should<a contenteditable="false" data-primary="security issues" data-secondary="privacy implications of geolocation" data-type="indexterm" id="idm45694664675960" class="calibre6"/><a contenteditable="false" data-primary="privacy policies" data-type="indexterm" id="idm45694664674744" class="calibre6"/><a contenteditable="false" data-primary="personally identifiable information (PII)" data-type="indexterm" id="idm45694664673768" class="calibre6"/> also caution you to consider the privacy implications of geolocation, especially if the coordinates are transmitted back to the server as part of an application’s function. Any application that has geolocation functionality should have an explicit privacy policy. Oh, and by the way, technically geolocation is not actually in the HTML5 standard. In fact, it’s a standalone feature defined by the W3C/WHATWG, but most people think of it as part of HTML5.</p>
+</div>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Other Location Methods" class="calibre4"><div class="preface" id="other_location_methods">
+<h1 class="calibre11">Other Location Methods</h1>
+
+<p class="author1">If<a contenteditable="false" data-primary="HTML5" data-secondary="other location methods" data-type="indexterm" id="idm45694664670440" class="calibre6"/> your device has mobile phone hardware but no GPS chip, it may attempt to triangulate its location by checking the timing of signals received from the various communication towers with which it can communicate (and whose positions are very precisely known). If there are a few towers, this can get almost as close to your location as GPS. But where there’s only a single tower, the signal strength can be used to determine a rough radius around the tower, and the circle it creates represents the area in which you are likely to be located. This could place you anywhere within a mile or two of your actual location, down to within a few tens of meters.</p>
+
+<p class="author1">Failing<a contenteditable="false" data-primary="Media Access Control (MAC) addresses" data-type="indexterm" id="idm45694664668040" class="calibre6"/> that, there may be WiFi access points whose positions are known within range of your device, and since all access points have a unique identifying address called a Media Access Control (MAC) address, a reasonably good approximation of your location can be obtained, perhaps to within a street or two. This is the type of information that Google Street View vehicles have been collecting (some of which it has since been made to discard due to potential breaches of data privacy rights).</p>
+
+<p class="author1">And<a contenteditable="false" data-primary="Internet Protocol (IP) addresses" data-type="indexterm" id="idm45694664666056" class="calibre6"/> if that fails, the Internet Protocol (IP) address used by your device can be queried and used as a rough indicator of your location. Often, though, this provides only the location of a major switch belonging to your internet provider, which could be dozens or even hundreds of miles away. But at the very least, your IP address can (usually) narrow down the country and sometimes the region you are in.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">IP addresses are commonly used by media companies for restricting playback of their content by territory. However, it’s a simple matter to set up proxy servers that use a forwarding IP address (in the territory that is blocking outside access) to fetch and pass content through the blockade directly to a “foreign” browser. Proxy servers are also often employed to disguise a user’s real IP address or bypass censorship restrictions and can be shared across many users on a WiFi hotspot (for example). Therefore, if you locate someone by IP address, you can’t be completely sure that you have identified the right location, or even country, and should treat this information as only a best guess.</p>
+</div>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Geolocation and HTML5" class="calibre4"><div class="preface" id="geolocation_and_html5">
+<h1 class="calibre11">Geolocation and HTML5</h1>
+
+<p class="author1">In <a data-type="xref" href="ch25.xhtml#introduction_to_html5" class="calibre6">Chapter 25</a>, I briefly introduced HTML5<a contenteditable="false" data-primary="HTML5" data-secondary="geolocation and HTML5" data-type="indexterm" id="idm45694664660008" class="calibre6"/><a contenteditable="false" data-primary="geolocation" data-type="indexterm" id="idm45694664658792" class="calibre6"/> geolocation. Now it’s time to look at it in depth, shown again in <a data-type="xref" href="#displaying_a_map_of_your_current_locatio" class="calibre6">Example 28-1</a>.</p>
+
+<div data-type="example" id="displaying_a_map_of_your_current_locatio" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 28-1. </span>Displaying a map of your current location</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE html&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Geolocation Example<code class="nt">&lt;/title&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    <code class="nt">&lt;script&gt;</code>
+      <code class="k">if</code> <code class="p">(</code><code class="k">typeof</code> <code class="n">navigator</code><code class="p">.</code><code class="n">geolocation</code> <code class="o">==</code> <code class="s">'undefined'</code><code class="p">)</code>
+         <code class="n">alert</code><code class="p">(</code><code class="s">"Geolocation not supported."</code><code class="p">)</code>
+      <code class="k">else</code>
+        <code class="n">navigator</code><code class="p">.</code><code class="n">geolocation</code><code class="p">.</code><code class="n">getCurrentPosition</code><code class="p">(</code><code class="n">granted</code><code class="p">,</code> <code class="n">denied</code><code class="p">)</code>
+
+      <code class="k">function</code> <code class="n">granted</code><code class="p">(</code><code class="n">position</code><code class="p">)</code>
+      <code class="p">{</code>
+        <code class="k">var</code> <code class="n">lat</code> <code class="o">=</code> <code class="n">position</code><code class="p">.</code><code class="n">coords</code><code class="p">.</code><code class="n">latitude</code>
+        <code class="k">var</code> <code class="n">lon</code> <code class="o">=</code> <code class="n">position</code><code class="p">.</code><code class="n">coords</code><code class="p">.</code><code class="n">longitude</code>
+        
+        <code class="n">alert</code><code class="p">(</code><code class="s">"Permission Granted. You are at location:\n\n"</code>
+          <code class="o">+</code> <code class="n">lat</code> <code class="o">+</code> <code class="s">", "</code> <code class="o">+</code> <code class="n">lon</code> <code class="o">+</code>
+          <code class="s">"\n\nClick 'OK' to load Google Maps with your location"</code><code class="p">)</code>
+
+        <code class="nb">window</code><code class="p">.</code><code class="n">location</code><code class="p">.</code><code class="n">replace</code><code class="p">(</code><code class="s">"https://www.google.com/maps/@"</code>
+          <code class="o">+</code> <code class="n">lat</code> <code class="o">+</code> <code class="s">","</code> <code class="o">+</code> <code class="n">lon</code> <code class="o">+</code> <code class="s">",8z"</code><code class="p">)</code>
+      <code class="p">}</code>
+
+      <code class="k">function</code> <code class="n">denied</code><code class="p">(</code><code class="n">error</code><code class="p">)</code>
+      <code class="p">{</code>
+        <code class="k">var</code> <code class="n">message</code>
+
+        <code class="k">switch</code><code class="p">(</code><code class="n">error</code><code class="p">.</code><code class="n">code</code><code class="p">)</code>
+        <code class="p">{</code>
+          <code class="k">case</code> <code class="mi">1</code><code class="o">:</code> <code class="n">message</code> <code class="o">=</code> <code class="s">'Permission Denied'</code><code class="p">;</code> <code class="k">break</code><code class="p">;</code>
+          <code class="k">case</code> <code class="mi">2</code><code class="o">:</code> <code class="n">message</code> <code class="o">=</code> <code class="s">'Position Unavailable'</code><code class="p">;</code> <code class="k">break</code><code class="p">;</code>
+          <code class="k">case</code> <code class="mi">3</code><code class="o">:</code> <code class="n">message</code> <code class="o">=</code> <code class="s">'Operation Timed Out'</code><code class="p">;</code> <code class="k">break</code><code class="p">;</code>
+          <code class="k">case</code> <code class="mi">4</code><code class="o">:</code> <code class="n">message</code> <code class="o">=</code> <code class="s">'Unknown Error'</code><code class="p">;</code> <code class="k">break</code><code class="p">;</code>
+        <code class="p">}</code>
+
+        <code class="n">alert</code><code class="p">(</code><code class="s">"Geolocation Error: "</code> <code class="o">+</code> <code class="n">message</code><code class="p">)</code>
+      <code class="p">}</code>
+    <code class="nt">&lt;/script&gt;</code>
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code>
+</pre>
+</div>
+
+<p class="author1">Let’s walk through this code and see how it works, starting with the <code class="calibre15">&lt;head&gt;</code> section, which displays a title. The <code class="calibre15">&lt;body&gt;</code> of the document is made up entirely of JavaScript, which immediately starts by interrogating the <code class="calibre15">navigator.geolocation</code> property. If the value returned is <code class="calibre15">undefined</code>, then geolocation is not supported by the browser and an error alert window is popped up.</p>
+
+<p class="author1">Otherwise, we call the <code class="calibre15">getCurrentPosition</code> method<a contenteditable="false" data-primary="getCurrentPosition method" data-type="indexterm" id="idm45694664507624" class="calibre6"/> of the property, passing it the names of two functions: <code class="calibre15">granted</code> and <code class="calibre15">denied</code> (remember that by passing only the function names, we pass the actual function code, not the result of calling the function, which would be the case if the function names had parentheses attached):</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">navigator</code><code class="p">.</code><code class="n">geolocation</code><code class="p">.</code><code class="n">getCurrentPosition</code><code class="p">(</code><code class="n">granted</code><code class="p">,</code> <code class="n">denied</code><code class="p">)</code></pre>
+
+<p class="author1">These functions appear later in the script and are for handling the two possibilities of permission to provide the user’s location data: <code class="calibre15">granted</code> or <code class="calibre15">denied</code>.</p>
+
+<p class="author1">The <code class="calibre15">granted</code> function<a contenteditable="false" data-primary="granted function" data-type="indexterm" id="idm45694664497592" class="calibre6"/> comes first and is entered only if the data can be accessed. If so, the variables <code class="calibre15">lat</code> and <code class="calibre15">long</code> are given the values returned by the geolocation routines in the browser.</p>
+
+<p class="author1">An alert window is then popped up containing details about the user’s current location. When<a contenteditable="false" data-primary="Google Maps" data-type="indexterm" id="idm45694664494824" class="calibre6"/> they click OK, the alert is closed and the current web page is replaced <span class="keep-together">by one at Google Maps.</span> It’s passed the latitude and longitude returned from the geolocation call, using a zoom setting of 8. You can set a different zoom level by changing the value <code class="calibre15">8z</code> to another numeric value followed by a <code class="calibre15">z</code>, at the end of the <code class="calibre15"><span class="keep-together">window</span><span class="keep-together">.location.replace</span></code> call.</p>
+
+<p class="author1">Displaying the map is achieved with a call to <code class="calibre15">window.location.replace</code>. The result looks like <a data-type="xref" href="#an-interactive-map-of" class="calibre6">Figure 28-1</a>.</p>
+
+<figure class="calibre23"><div id="an-interactive-map-of" class="figure"><img alt="" class="iimagesnew-geolocjpg" src="Images/pmj6_2502.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 28-1. </span>Interactive map of user’s location is displayed</h6>
+</div></figure>
+
+<p class="author1">If permission is denied (or there is another issue), an error message is displayed by the <code class="calibre15">denied</code> function, which pops up its own alert window to inform the user of the error:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">switch</code><code class="p">(</code><code class="n">error</code><code class="p">.</code><code class="n">code</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="k">case</code> <code class="mi">1</code><code class="o">:</code> <code class="n">message</code> <code class="o">=</code> <code class="s">'Permission Denied'</code><code class="p">;</code> <code class="k">break</code><code class="p">;</code>
+  <code class="k">case</code> <code class="mi">2</code><code class="o">:</code> <code class="n">message</code> <code class="o">=</code> <code class="s">'Position Unavailable'</code><code class="p">;</code> <code class="k">break</code><code class="p">;</code>
+  <code class="k">case</code> <code class="mi">3</code><code class="o">:</code> <code class="n">message</code> <code class="o">=</code> <code class="s">'Operation Timed Out'</code><code class="p">;</code> <code class="k">break</code><code class="p">;</code>
+  <code class="k">case</code> <code class="mi">4</code><code class="o">:</code> <code class="n">message</code> <code class="o">=</code> <code class="s">'Unknown Error'</code><code class="p">;</code> <code class="k">break</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="n">alert</code><code class="p">(</code><code class="s">"Geolocation Error: "</code> <code class="o">+</code> <code class="n">message</code><code class="p">)</code></pre>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">When a browser requests geolocation data from the host, it will prompt the user for permission. The user can grant or deny permission. Denial results in the <em class="hyperlink">Permission Denied</em> state, <em class="hyperlink">Position Unavailable</em> results when the user grants permission but the host system cannot determine their location, and <em class="hyperlink">Timeout</em> happens when the user grants permission and the host attempts to get their location but the request times out.</p>
+
+<p class="author1">There’s also another error condition in which some platform and browser combinations allow the user to dismiss the permission request dialog without either granting or denying permission. This results in the application “hanging” while waiting for a callback to occur.</p>
+</div>
+
+<p class="author1">In<a contenteditable="false" data-primary="Google Maps" data-type="indexterm" id="idm45694664322984" class="calibre6"/> previous editions of this book, I used to call the Google Maps API to embed a map directly within the web page, but the service now requires a unique API key that you must apply for yourself, and usage over a certain amount can incur a fee. This is why the example now simply generates a Google Maps link. If you’d like to embed Google Maps in your web pages and web apps, everything you need to know is on the <a href="https://developers.google.com/maps" class="calibre6">website</a>. Of course, there are also many other mapping options, such as <a href="https://www.bing.com/maps" class="calibre6">Bing Maps</a> and <a href="https://www.openstreetmap.org" class="calibre6">OpenStreetMap</a>, that have APIs you can access.</p>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Local Storage" class="calibre4"><div class="preface" id="local_storage-id00125">
+<h1 class="calibre11">Local Storage</h1>
+
+<p class="author1">Cookies<a contenteditable="false" data-primary="HTML5" data-secondary="local storage enhancements" data-type="indexterm" id="HTstorage26" class="calibre6"/><a contenteditable="false" data-primary="local storage" data-secondary="vs. cookies" data-secondary-sortas="cookies" data-type="indexterm" id="idm45694664315864" class="calibre6"/><a contenteditable="false" data-primary="cookies" data-secondary="vs. local storage" data-secondary-sortas="local storage" data-type="indexterm" id="idm45694664314216" class="calibre6"/> are an essential part of the modern internet, because they enable websites to save on each user’s machine small snippets of information that can be used for tracking purposes. This isn’t as ominous as it sounds, because most of the tracking going on helps web surfers by saving usernames and passwords, keeping them logged in to websites and social networks such as Twitter, Facebook, and more.</p>
+
+<p class="author1">Cookies can also locally save your preferences for the way you access a website (rather than having those settings stored on the website’s server) or can be used to keep track of a shopping cart as you build up an order on an ecommerce website.</p>
+
+<p class="author1">But yes, they can also be used more aggressively to track the websites you frequent and gain a picture of your interests to try to target advertising more effectively. That’s why the <a href="https://tinyurl.com/cookielaweu" class="calibre6">European Union</a> now “requires prior informed consent for storage or for access to information stored on a user’s terminal equipment.”</p>
+
+<p class="author1">But, as a web developer, think how useful it might be to keep data on users’ devices, especially if you have a small budget for computer servers and disk space. For example, you could create in-browser web apps and services for editing word processing documents, spreadsheets, and graphic images, saving all this data offsite on users’ computers and keeping your server purchasing budget as low as possible.</p>
+
+<p class="author1">And from the user’s point of view, think about how much faster a document can be loaded up locally than from across the web, especially on a slow connection. Plus, there’s more security if you know that a website is not storing copies of your documents. Of course, you can never guarantee that a website or web app is totally secure, and you should never work on highly sensitive documents using software (or hardware) that can go online. But for minimally private documents such as family photographs, you might feel more comfortable using a web app that saves locally than one that saves files to an external server.</p>
+
+<section data-type="sect2" data-pdf-bookmark="Using Local Storage" class="calibre4"><div class="preface" id="using_local_storage">
+<h2 class="calibre28">Using Local Storage</h2>
+
+<p class="author1">The<a contenteditable="false" data-primary="security issues" data-secondary="cookies" data-type="indexterm" id="idm45694664306072" class="calibre6"/> biggest problem with using cookies for local storage is that each cookie can save only a maximum of 4 KB of data. Cookies also have to be passed back and forth on every page reload. And, unless your server uses Transport Layer Security (TLS) encryption—the more secure successor to the Secure Sockets Layer (SSL)—each time a cookie is transmitted, it travels in the clear.</p>
+
+<p class="author1">But with HTML5, you have access to a much larger local storage space (typically between 5 MB and 10 MB per domain, depending on the browser) that persists over page loads and between website visits (and even after powering a computer down and back up again). Also, the local storage data is not sent to the server on each page load, and it can be cleared by the user, so you usually want to keep the data on the servers as well; otherwise the user may find their data gone and be upset, even if they were the one who cleared the data.</p>
+
+<p class="author1">Local<a contenteditable="false" data-primary="key/value pairs" data-secondary="local storage and" data-type="indexterm" id="idm45694664302760" class="calibre6"/> storage data is handled through key/value pairs. The key is the name assigned for referencing the data, and the value can hold any type of data, but it is saved as a string. All data is unique to the current domain, and for security reasons any local storage created by websites with different domains is separate from the current local storage and is not accessible by any domain other than the one that stored the data.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The localStorage Object" class="calibre4"><div class="preface" id="localstorage_object">
+<h2 class="calibre28">The localStorage Object</h2>
+
+<p class="author1">You<a contenteditable="false" data-primary="local storage" data-secondary="localStorage object" data-type="indexterm" id="LSobject26" class="calibre6"/> gain access to local storage by means of the <code class="calibre15">localStorage</code> object. To test whether this object is available, query its type to check whether or not it has been defined, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="k">typeof</code> <code class="n">localStorage</code> <code class="o">==</code> <code class="s">'undefined'</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="c">// Local storage is not available—tell the user and quit.</code>
+  <code class="c">// Or maybe offer to save data on the web server instead?</code>
+<code class="p">}</code></pre>
+
+<p class="author1">How you handle the lack of local storage being available will depend on what you intend to use it for, so the code you place inside the <code class="calibre15">if</code> statement will be up to you.</p>
+
+<p class="author1">Once you’ve ascertained that local storage is available, you can start making use of it with the <code class="calibre15">setItem</code> and <code class="calibre15">getItem</code> methods of the <code class="calibre15">localStorage</code> object, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">localStorage</code><code class="p">.</code><code class="n">setItem</code><code class="p">(</code><code class="s">'loc'</code><code class="p">,</code> <code class="s">'USA'</code><code class="p">)</code>
+<code class="n">localStorage</code><code class="p">.</code><code class="n">setItem</code><code class="p">(</code><code class="s">'lan'</code><code class="p">,</code> <code class="s">'English'</code><code class="p">)</code></pre>
+
+<p class="author1">To later retrieve this data, pass the keys to the <code class="calibre15">getItem</code> method, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">loc</code> <code class="o">=</code> <code class="n">localStorage</code><code class="p">.</code><code class="n">getItem</code><code class="p">(</code><code class="s">'loc'</code><code class="p">)</code>
+<code class="n">lan</code> <code class="o">=</code> <code class="n">localStorage</code><code class="p">.</code><code class="n">getItem</code><code class="p">(</code><code class="s">'lan'</code><code class="p">)</code></pre>
+
+<p class="author1">Unlike saving and reading cookies, you can call these methods at any time you like, not simply before any headers have been sent by the web server. The saved values will remain in local storage until erased in the following manner:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">localStorage</code><code class="p">.</code><code class="n">removeItem</code><code class="p">(</code><code class="s">'loc'</code><code class="p">)</code>
+<code class="n">localStorage</code><code class="p">.</code><code class="n">removeItem</code><code class="p">(</code><code class="s">'lan'</code><code class="p">)</code></pre>
+
+<p class="author1">Or, you can totally wipe the local storage for the current domain by calling the <code class="calibre15">clear</code> method, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">localStorage</code><code class="p">.</code><code class="n">clear</code><code class="p">()</code></pre>
+
+<p class="author1"><a data-type="xref" href="#gettingcomma_settingcomma_and_removing_l" class="calibre6">Example 28-2</a> combines the preceding examples into a single document that displays the current values of the two keys in a pop-up alert message, which initially will be <code class="calibre15">null</code>. Then the keys and values are saved to local storage, retrieved, and redisplayed, this time having assigned values. Finally, the keys are removed, and then an attempt at retrieving these values is again made, but the returned values are once again <code class="calibre15">null</code>. <a data-type="xref" href="#two-keys-and-their-values" class="calibre6">Figure 28-2</a> shows the second of these three alert messages.</p>
+
+<div data-type="example" id="gettingcomma_settingcomma_and_removing_l" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 28-2. </span>Getting, setting, and removing local storage data</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE html&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Local Storage<code class="nt">&lt;/title&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    <code class="nt">&lt;script&gt;</code>
+      <code class="k">if</code> <code class="p">(</code><code class="k">typeof</code> <code class="n">localStorage</code> <code class="o">==</code> <code class="s">'undefined'</code><code class="p">)</code>
+      <code class="p">{</code>
+        <code class="n">alert</code><code class="p">(</code><code class="s">"Local storage is not available"</code><code class="p">)</code>
+      <code class="p">}</code>
+      <code class="k">else</code>
+      <code class="p">{</code>
+        <code class="n">loc</code> <code class="o">=</code> <code class="n">localStorage</code><code class="p">.</code><code class="n">getItem</code><code class="p">(</code><code class="s">'loc'</code><code class="p">)</code>
+        <code class="n">lan</code> <code class="o">=</code> <code class="n">localStorage</code><code class="p">.</code><code class="n">getItem</code><code class="p">(</code><code class="s">'lan'</code><code class="p">)</code>
+        <code class="n">alert</code><code class="p">(</code><code class="s">"The current values of 'loc' and 'lan' are\n\n"</code> <code class="o">+</code>
+          <code class="n">loc</code> <code class="o">+</code> <code class="s">" / "</code> <code class="o">+</code> <code class="n">lan</code> <code class="o">+</code> <code class="s">"\n\nClick OK to assign values"</code><code class="p">)</code>
+
+        <code class="n">localStorage</code><code class="p">.</code><code class="n">setItem</code><code class="p">(</code><code class="s">'loc'</code><code class="p">,</code> <code class="s">'USA'</code><code class="p">)</code>
+        <code class="n">localStorage</code><code class="p">.</code><code class="n">setItem</code><code class="p">(</code><code class="s">'lan'</code><code class="p">,</code> <code class="s">'English'</code><code class="p">)</code>
+        <code class="n">loc</code> <code class="o">=</code> <code class="n">localStorage</code><code class="p">.</code><code class="n">getItem</code><code class="p">(</code><code class="s">'loc'</code><code class="p">)</code>
+        <code class="n">lan</code> <code class="o">=</code> <code class="n">localStorage</code><code class="p">.</code><code class="n">getItem</code><code class="p">(</code><code class="s">'lan'</code><code class="p">)</code>
+        <code class="n">alert</code><code class="p">(</code><code class="s">"The current values of 'loc' and 'lan' are\n\n"</code> <code class="o">+</code>
+          <code class="n">loc</code> <code class="o">+</code> <code class="s">" / "</code> <code class="o">+</code> <code class="n">lan</code> <code class="o">+</code>  <code class="s">"\n\nClick OK to clear values"</code><code class="p">)</code>
+
+        <code class="n">localStorage</code><code class="p">.</code><code class="n">removeItem</code><code class="p">(</code><code class="s">'loc'</code><code class="p">)</code>
+        <code class="n">localStorage</code><code class="p">.</code><code class="n">removeItem</code><code class="p">(</code><code class="s">'lan'</code><code class="p">)</code>
+        <code class="n">loc</code> <code class="o">=</code> <code class="n">localStorage</code><code class="p">.</code><code class="n">getItem</code><code class="p">(</code><code class="s">'loc'</code><code class="p">)</code>
+        <code class="n">lan</code> <code class="o">=</code> <code class="n">localStorage</code><code class="p">.</code><code class="n">getItem</code><code class="p">(</code><code class="s">'lan'</code><code class="p">)</code>
+        <code class="n">alert</code><code class="p">(</code><code class="s">"The current values of 'loc' and 'lan' are\n\n"</code> <code class="o">+</code>
+          <code class="n">loc</code> <code class="o">+</code> <code class="s">" / "</code> <code class="o">+</code> <code class="n">lan</code><code class="p">)</code>
+      <code class="p">}</code>
+    <code class="nt">&lt;/script&gt;</code>
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code>
+</pre>
+</div>
+
+<figure class="calibre23"><div id="two-keys-and-their-values" class="figure"><img alt="" class="iimageslocal-storagepng" src="Images/pmj6_2802.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 28-2. </span>Two keys and their values are read from local storage</h6>
+</div></figure>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">In local storage you can include virtually any and all data and as many key/value pairs as you like, up to the available storage limit for your domain.<a contenteditable="false" data-primary="" data-startref="HTstorage26" data-type="indexterm" id="idm45694663959768" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="LSobject26" data-type="indexterm" id="idm45694663958392" class="calibre6"/></p>
+</div>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Web Workers" class="calibre4"><div class="preface" id="web_workers-id00126">
+<h1 class="calibre11">Web Workers</h1>
+
+<p class="author1"><em class="hyperlink">Web workers</em> run<a contenteditable="false" data-primary="HTML5" data-secondary="web workers in" data-type="indexterm" id="HTwebwork25" class="calibre6"/><a contenteditable="false" data-primary="web workers" data-type="indexterm" id="web26" class="calibre6"/> background jobs and are useful for calculations that take a long time and should not be allowed to hold the user back from doing other things. To use a web worker, you can create sections of JavaScript code that will run in the background. This code doesn’t have to set up and monitor interrupts, as jobs have to do in some asynchronous systems. Instead, whenever it has something to report, your background process communicates with the main JavaScript through the use of an event.</p>
+
+<p class="author1">This means the JavaScript interpreter gets to decide how to allocate time slices most efficiently, and your code only needs to worry about communicating with the background task whenever there’s information to convey.</p>
+
+<p class="author1"><a data-type="xref" href="#setting_up_and_communicating_with_a_web" class="calibre6">Example 28-3</a> shows how you can set up web workers to perform a repetitive task in the background—in this instance, calculating prime numbers.</p>
+
+<div data-type="example" id="setting_up_and_communicating_with_a_web" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 28-3. </span>Setting up and communicating with a web worker</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE html&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Web Workers<code class="nt">&lt;/title&gt;</code>
+    <code class="nt">&lt;script </code><code class="na">src=</code><code class="s">'OSC.js'</code><code class="nt">&gt;&lt;/script&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    Current highest prime number:
+    <code class="nt">&lt;span</code> <code class="na">id=</code><code class="s">'result'</code><code class="nt">&gt;</code>0<code class="nt">&lt;/span&gt;</code>
+
+    <code class="nt">&lt;script&gt;</code>
+      <code class="k">if</code> <code class="p">(</code><code class="o">!!</code><code class="nb">window</code><code class="p">.</code><code class="n">Worker</code><code class="p">)</code>
+      <code class="p">{</code>
+        <code class="k">var</code> <code class="n">worker</code> <code class="o">=</code> <code class="k">new</code> <code class="n">Worker</code><code class="p">(</code><code class="s">'worker.js'</code><code class="p">)</code>
+
+        <code class="n">worker</code><code class="p">.</code><code class="n">onmessage</code> <code class="o">=</code> <code class="k">function</code> <code class="p">(</code><code class="n">event</code><code class="p">)</code>
+        <code class="p">{</code>
+          <code class="n">O</code><code class="p">(</code><code class="s">'result'</code><code class="p">).</code><code class="n">innerText</code> <code class="o">=</code> <code class="n">event</code><code class="p">.</code><code class="n">data</code><code class="p">;</code>
+        <code class="p">}</code>
+      <code class="p">}</code>
+      <code class="k">else</code>
+      <code class="p">{</code>
+        <code class="n">alert</code><code class="p">(</code><code class="s">"Web workers not supported"</code><code class="p">)</code>
+      <code class="p">}</code>
+    <code class="nt">&lt;/script&gt;</code>
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code></pre>
+</div>
+
+<p class="author1">This example first creates a <code class="calibre15">&lt;span&gt;</code> element with the ID of <code class="calibre15">result</code> in which output from the web worker will be placed. Then, in the <code class="calibre15">&lt;script&gt;</code> section, <code class="calibre15">window.Worker</code> is tested via a <code class="calibre15">!!</code> pair of <code class="calibre15">not</code> operators. This has the effect of returning a Boolean value of <code class="calibre15">true</code> if the <code class="calibre15">Worker</code> method exists and <code class="calibre15">false</code> otherwise. If it is not <code class="calibre15">true</code>, a message is displayed in the <code class="calibre15">else</code> section, alerting us that web workers are not available.</p>
+
+<p class="author1">Otherwise, the program creates a new <code class="calibre15">worker</code> object by calling <code class="calibre15">Worker</code>, passing it the filename <em class="hyperlink">worker.js</em>. Then the <code class="calibre15">onmessage</code> event of the new <code class="calibre15">worker</code> object is attached to an anonymous function that places any message passed to it by <em class="hyperlink">worker.js</em> into the <code class="calibre15">innerText</code> property of the previously created <code class="calibre15">&lt;span&gt;</code> element.</p>
+
+<p class="author1">The web worker itself is saved in the file <em class="hyperlink">worker.js</em>, whose contents are shown in <a data-type="xref" href="#workerdotjs_web_worker" class="calibre6">Example 28-4</a>.</p>
+
+<div data-type="example" id="workerdotjs_web_worker" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 28-4. </span>The worker.js web worker</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">var</code> <code class="n">n</code> <code class="o">=</code> <code class="mi">1</code>
+
+<code class="n">search</code><code class="o">:</code> <code class="k">while</code> <code class="p">(</code><code class="k">true</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="n">n</code> <code class="o">+=</code> <code class="mi">1</code>
+
+  <code class="k">for</code> <code class="p">(</code><code class="k">var</code> <code class="n">i</code> <code class="o">=</code> <code class="mi">2</code><code class="p">;</code> <code class="n">i</code> <code class="o">&lt;=</code> <code class="nb">Math</code><code class="p">.</code><code class="n">sqrt</code><code class="p">(</code><code class="n">n</code><code class="p">);</code> <code class="n">i</code> <code class="o">+=</code> <code class="mi">1</code><code class="p">)</code>
+  <code class="p">{</code>
+    <code class="k">if</code> <code class="p">(</code><code class="n">n</code> <code class="o">%</code> <code class="n">i</code> <code class="o">==</code> <code class="mi">0</code><code class="p">)</code> <code class="k">continue</code> <code class="n">search</code>
+  <code class="p">}</code>
+
+  <code class="n">postMessage</code><code class="p">(</code><code class="n">n</code><code class="p">)</code>
+<code class="p">}</code></pre>
+</div>
+
+<p class="author1">This file assigns the value <code class="calibre15">1</code> to the variable <code class="calibre15">n</code>. It then loops continuously, incrementing <code class="calibre15">n</code> and checking it for primality by a brute-force method of testing all values from <code class="calibre15">1</code> to the square root of <code class="calibre15">n</code> to see whether they divide exactly into <code class="calibre15">n</code>, with no remainder. Should a factor be found, the <code class="calibre15">continue</code> command stops the brute-force attack immediately because the number is not prime and starts processing at the next higher value of <code class="calibre15">n</code>.</p>
+
+<p class="author1">But if all possible factors are tested and none result in a zero remainder, <code class="calibre15">n</code> must be prime, so its value is passed to <code class="calibre15">postMessage</code>, which sends a message back to the <span class="keep-together"><code class="calibre15">onmessage</code></span> event of the object that set up this web worker.</p>
+
+<p class="author1">The result looks like the following:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">Current highest prime number: 30477191</strong></pre>
+
+<p class="author1">To stop a web worker from running, issue a call to the <code class="calibre15">terminate</code> method of the <code class="calibre15">worker</code> object, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">worker</code><code class="p">.</code><code class="n">terminate</code><code class="p">()</code></pre>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">If you wish to stop this particular example from running, you can enter the following into your browser’s address bar:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre45">
+<code class="n">javascript</code><code class="o">:</code><code class="n">worker</code><code class="p">.</code><code class="n">terminate</code><code class="p">()</code></pre>
+
+<p class="author1">Also note that due to the way Chrome handles security, you cannot use web workers on a filesystem, only from a web server (or running the files from <em class="hyperlink">localhost</em> on a development server such as AMPPS, detailed in <a data-type="xref" href="ch02.xhtml#setting_up_a_development_server" class="calibre6">Chapter 2</a>).</p>
+</div>
+
+<p class="author1">Web workers do have some security limitations that you should be aware of:</p>
+
+<ul class="printings">
+	<li class="calibre9">
+	<p class="author1">Web workers run in their own independent JavaScript context and have no direct access to anything in any other execution context, including the main JavaScript thread or other web workers.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Communication between web worker contexts is done via web messaging (<code class="calibre15">postMessage</code>).</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Because web workers have no access to the main JavaScript context, they cannot modify the DOM. The only DOM methods available to web workers are <code class="calibre15">atob</code>, <code class="calibre15">btoa</code>, <code class="calibre15">clearInterval</code>, <code class="calibre15">clearTimeout</code>, <code class="calibre15">dump</code>, <code class="calibre15">setInterval</code>, and <code class="calibre15">setTimeout</code>.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Web workers are bound by the same-origin policy, so you can’t load a web worker from a different origin than the original script without going through a cross-site methodology.<a contenteditable="false" data-primary="" data-startref="web26" data-type="indexterm" id="idm45694663675512" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="HTwebwork25" data-type="indexterm" id="idm45694663674136" class="calibre6"/></p>
+	</li>
+</ul>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Drag and Drop" class="calibre4"><div class="preface" id="drag_and_drop">
+<h1 class="calibre11">Drag and Drop</h1>
+
+<p class="author1">You<a contenteditable="false" data-primary="HTML5" data-secondary="drag and drop feature" data-type="indexterm" id="idm45694663617240" class="calibre6"/><a contenteditable="false" data-primary="drag and drop feature" data-type="indexterm" id="idm45694663615832" class="calibre6"/><a contenteditable="false" data-primary="images" data-secondary="drag and drop feature" data-type="indexterm" id="idm45694663614728" class="calibre6"/> can easily support dragging and dropping of objects on a web page by setting up event handlers for the <code class="calibre15">ondragstart</code>, <code class="calibre15">ondragover</code>, and <code class="calibre15">ondrop</code> events, as in <a data-type="xref" href="#dragging_and_dropping_objects" class="calibre6">Example 28-5</a>.</p>
+
+<div data-type="example" id="dragging_and_dropping_objects" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 28-5. </span>Dragging and dropping objects</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE HTML&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Drag and Drop<code class="nt">&lt;/title&gt;</code>
+    <code class="nt">&lt;script </code><code class="na">src=</code><code class="s">'OSC.js'</code><code class="nt">&gt;&lt;/script&gt;</code>
+    <code class="nt">&lt;style&gt;</code>
+      <code class="nf">#dest</code> <code class="p">{</code>
+        <code class="k">background</code><code class="o">:</code><code class="nb">lightblue</code><code class="p">;</code>
+        <code class="k">border</code>    <code class="o">:</code><code class="mi">1px</code> <code class="nb">solid</code> <code class="mi">#444</code><code class="p">;</code>
+        <code class="k">width</code>     <code class="o">:</code><code class="mi">320px</code><code class="p">;</code>
+        <code class="k">height</code>    <code class="o">:</code><code class="mi">100px</code><code class="p">;</code>
+        <code class="k">padding</code>   <code class="o">:</code><code class="mi">10px</code><code class="p">;</code>
+      <code class="p">}</code>
+    <code class="nt">&lt;/style&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    <code class="nt">&lt;div</code> <code class="na">id=</code><code class="s">'dest'</code> <code class="na">ondrop=</code><code class="s">'drop(event)'</code> <code class="na">ondragover=</code><code class="s">'allow(event)'</code><code class="nt">&gt;&lt;/div&gt;&lt;br&gt;</code>
+    Drag the image below into the above element<code class="nt">&lt;br&gt;&lt;br&gt;</code>
+
+    <code class="nt">&lt;img</code> <code class="na">id=</code><code class="s">'source1'</code> <code class="na">src=</code><code class="s">'image1.png'</code> <code class="na">draggable=</code><code class="s">'true'</code> <code class="na">ondragstart=</code><code class="s">'drag(event)'</code><code class="nt">&gt;</code>
+    <code class="nt">&lt;img</code> <code class="na">id=</code><code class="s">'source2'</code> <code class="na">src=</code><code class="s">'image2.png'</code> <code class="na">draggable=</code><code class="s">'true'</code> <code class="na">ondragstart=</code><code class="s">'drag(event)'</code><code class="nt">&gt;</code>
+    <code class="nt">&lt;img</code> <code class="na">id=</code><code class="s">'source3'</code> <code class="na">src=</code><code class="s">'image3.png'</code> <code class="na">draggable=</code><code class="s">'true'</code> <code class="na">ondragstart=</code><code class="s">'drag(event)'</code><code class="nt">&gt;</code>
+
+    <code class="nt">&lt;script&gt;</code>
+      <code class="k">function</code> <code class="n">allow</code><code class="p">(</code><code class="n">event</code><code class="p">)</code>
+      <code class="p">{</code>
+        <code class="n">event</code><code class="p">.</code><code class="n">preventDefault</code><code class="p">()</code>
+      <code class="p">}</code>
+
+      <code class="k">function</code> <code class="n">drag</code><code class="p">(</code><code class="n">event</code><code class="p">)</code>
+      <code class="p">{</code>
+        <code class="n">event</code><code class="p">.</code><code class="n">dataTransfer</code><code class="p">.</code><code class="n">setData</code><code class="p">(</code><code class="s">'image/png'</code><code class="p">,</code> <code class="n">event</code><code class="p">.</code><code class="n">target</code><code class="p">.</code><code class="n">id</code><code class="p">)</code>
+      <code class="p">}</code>
+
+      <code class="k">function</code> <code class="n">drop</code><code class="p">(</code><code class="n">event</code><code class="p">)</code>
+      <code class="p">{</code>
+        <code class="n">event</code><code class="p">.</code><code class="n">preventDefault</code><code class="p">()</code>
+        <code class="k">var</code> <code class="n">data</code><code class="o">=</code><code class="n">event</code><code class="p">.</code><code class="n">dataTransfer</code><code class="p">.</code><code class="n">getData</code><code class="p">(</code><code class="s">'image/png'</code><code class="p">)</code>
+        <code class="n">event</code><code class="p">.</code><code class="n">target</code><code class="p">.</code><code class="n">appendChild</code><code class="p">(</code><code class="n">O</code><code class="p">(</code><code class="n">data</code><code class="p">))</code>
+      <code class="p">}</code>
+    <code class="nt">&lt;/script&gt;</code>
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code></pre>
+</div>
+
+<p class="author1">After setting up the HTML, providing a title, and loading in the <em class="hyperlink">OSC.js</em> file, this document styles the <code class="calibre15">&lt;div&gt;</code> element with the ID of <code class="calibre15">dest</code>, giving it a background color, border, set dimensions, and padding.</p>
+
+<p class="author1">Then, the <code class="calibre15">&lt;body&gt;</code> section creates the <code class="calibre15">&lt;div&gt;</code> element and attaches the event handler functions <code class="calibre15">drop</code> and <code class="calibre15">allow</code> to the <code class="calibre15">ondrop</code> and <code class="calibre15">ondragover</code> events of the <code class="calibre15">&lt;div&gt;</code>. After this there’s some text and then three images with their <code class="calibre15">draggable</code> properties set to <code class="calibre15">true</code>. The <code class="calibre15">drag</code> function is attached to the <code class="calibre15">ondragstart</code> event of each.</p>
+
+<p class="author1">In the <code class="calibre15">&lt;script&gt;</code> section, the <code class="calibre15">allow</code> event handler function simply prevents the default action for dragging (which is to disallow it), while the <code class="calibre15">drag</code> event handler function calls the <code class="calibre15">setData</code> method of the <code class="calibre15">dataTransfer</code> object of the event, passing it the MIME type <code class="calibre15">image/png</code> and the <code class="calibre15">target.id</code> of the event (which is the object being dragged). The <code class="calibre15">dataTransfer</code> object holds the data that is being dragged during a drag-and-drop operation.</p>
+
+<p class="author1">Finally, the <code class="calibre15">drop</code> event handler function also intercepts its default action so that dropping is allowed and then it fetches the contents of the object being dragged from the <code class="calibre15">dataTransfer</code> object, passing it the MIME type of the object. Then the dropped data is appended to the target (which is the <code class="calibre15">dest &lt;div&gt;</code>) via its <code class="calibre15">appendChild</code> method.</p>
+
+<p class="author1">If you try this example for yourself, you’ll be able to drag and drop the images into the <code class="calibre15">&lt;div&gt;</code> element, where they will stay, as shown in <a data-type="xref" href="Images/#two-images-have-been" class="calibre6">Figure 28-3</a>. The images cannot be dropped elsewhere, only into elements with <code class="calibre15">drop</code> and <code class="calibre15">allow</code> event handlers attached.</p>
+
+<figure class="calibre23"><div id="two-images-have-been" class="figure"><img alt="" class="iimagesdragdroppng" src="Images/pmj6_2803.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 28-3. </span>Two images have been dragged and dropped</h6>
+</div></figure>
+
+<p class="author1">Other events you can attach to include <code class="calibre15">ondragenter</code> (to run when a drag operation enters an element), <code class="calibre15">ondragleave</code> (to run when one leaves an element), and <code class="calibre15">ondragend</code> (to run when a dragging operation ends), which you can use, for example, to modify the cursor during these operations.</p>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Cross-Document Messaging" class="calibre4"><div class="preface" id="cross_document_messaging">
+<h1 class="calibre11">Cross-Document Messaging</h1>
+
+<p class="author1">You’ve<a contenteditable="false" data-primary="HTML5" data-secondary="cross-document messaging" data-type="indexterm" id="HTcross26" class="calibre6"/><a contenteditable="false" data-primary="cross-document messaging" data-type="indexterm" id="cross26" class="calibre6"/><a contenteditable="false" data-primary="messaging, cross-document" data-type="indexterm" id="mess26" class="calibre6"/> already seen messaging in use a little earlier, in the web worker section. I didn’t go into any details, however, as it wasn’t the core topic being discussed, and the message was being posted only to the same document anyway. But for obvious security reasons, cross-document messaging does need to be applied with caution, so you need to fully understand its workings if you plan to use it.</p>
+
+<p class="author1">Before HTML5, browser developers disallowed cross-document scripting, but in addition to blocking potential attack sites, this prevented communication between legitimate pages. Document interaction of any kind generally had to occur through Ajax and a third-party web server, which was cumbersome and fiddly to build and maintain.</p>
+
+<p class="author1">But<a contenteditable="false" data-primary="postMessage method" data-type="indexterm" id="idm45694663424280" class="calibre6"/> web messaging now allows scripts to interact across these boundaries by using some sensible security restraints to prevent malicious hacking attempts. It is achieved through use of the <code class="calibre15">postMessage</code> method, allowing plain-text messages to be sent from one domain to another, always within a single browser.</p>
+
+<p class="author1">This requires that JavaScript first obtain the <code class="calibre15">window</code> object of the receiving document, letting messages post to a variety of other windows, frames, or iframes directly related to the sender’s document. The received message event has the following attributes:</p>
+
+<dl class="calibre13">
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">data</code></dfn></dt>
+	<dd class="calibre14">The incoming message</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">origin</code></dfn></dt>
+	<dd class="calibre14">The origin of the sender document, including the scheme, hostname, and port</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">source</code></dfn></dt>
+	<dd class="calibre14">The source window of the sender document</dd>
+</dl>
+
+<p class="author1">The code to send messages is just a single instruction, in which you pass the message to be sent and the domain to which it applies, as in <a data-type="xref" href="#sending_web_messages_to_an_iframe" class="calibre6">Example 28-6</a>.</p>
+
+<div data-type="example" id="sending_web_messages_to_an_iframe" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 28-6. </span>Sending web messages to an iframe</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE HTML&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Web Messaging (a)<code class="nt">&lt;/title&gt;</code>
+    <code class="nt">&lt;script </code><code class="na">src=</code><code class="s">'OSC.js'</code><code class="nt">&gt;&lt;/script&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    <code class="nt">&lt;iframe</code> <code class="na">id=</code><code class="s">'frame'</code> <code class="na">src=</code><code class="s">'07.html'</code> <code class="na">width=</code><code class="s">'360'</code> <code class="na">height=</code><code class="s">'75'</code><code class="nt">&gt;&lt;/iframe&gt;</code>
+
+    <code class="nt">&lt;script&gt;</code>
+      <code class="n">count</code> <code class="o">=</code> <code class="mi">1</code>
+
+      <code class="n">setInterval</code><code class="p">(</code><code class="k">function</code><code class="p">()</code>
+      <code class="p">{</code>
+        <code class="n">O</code><code class="p">(</code><code class="s">'frame'</code><code class="p">).</code><code class="n">contentWindow</code><code class="p">.</code><code class="n">postMessage</code><code class="p">(</code><code class="s">'Message '</code> <code class="o">+</code> <code class="n">count</code><code class="o">++</code><code class="p">,</code> <code class="s">'*'</code><code class="p">)</code>
+      <code class="p">},</code> <code class="mi">1000</code><code class="p">)</code>
+    <code class="nt">&lt;/script&gt;</code>
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code></pre>
+</div>
+
+<p class="author1">Here the usual use is made of the <em class="hyperlink">OSC.js</em> file to pull in the <code class="calibre15">O</code> function, and then an <code class="calibre15">&lt;iframe&gt;</code> element with the ID of <code class="calibre15">frame</code> is created, which loads in <a data-type="xref" href="#receiving_messages_from_another_document" class="calibre6">Example 28-7</a>. Then, within the <code class="calibre15">&lt;script&gt;</code> section, the variable <code class="calibre15">count</code> is initialized to <code class="calibre15">1</code>, and a repeating interval is set up to occur every second to post the string <code class="calibre15">'Message '</code> (using the <code class="calibre15">postMessage</code> method) along with the current value of <code class="calibre15">count</code>, which is then incremented. The <code class="calibre15">postMessage</code> call is attached to the <code class="calibre15">contentWindow</code> property of the <code class="calibre15">iframe</code> object, not the <code class="calibre15">iframe</code> object itself. This is important because web messaging requires posts to be made to a window, not to an object within a window.</p>
+
+<div data-type="example" id="receiving_messages_from_another_document" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 28-7. </span>Receiving messages from another document</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE HTML&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Web Messaging (b)<code class="nt">&lt;/title&gt;</code>
+    <code class="nt">&lt;style&gt;</code>
+      <code class="nf">#output</code> <code class="p">{</code>
+        <code class="k">font-family</code><code class="o">:</code><code class="s">"Courier New"</code><code class="p">;</code>
+        <code class="k">white-space</code><code class="o">:</code><code class="n">pre</code><code class="p">;</code>
+      <code class="p">}</code>
+    <code class="nt">&lt;/style&gt;</code>
+    <code class="nt">&lt;script </code><code class="na">src=</code><code class="s">'OSC.js'</code><code class="nt">&gt;&lt;/script&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    <code class="nt">&lt;div</code> <code class="na">id=</code><code class="s">'output'</code><code class="nt">&gt;</code>Received messages will display here<code class="nt">&lt;/div&gt;</code>
+
+    <code class="nt">&lt;script&gt;</code>
+      <code class="nb">window</code><code class="p">.</code><code class="n">onmessage</code> <code class="o">=</code> <code class="k">function</code><code class="p">(</code><code class="n">event</code><code class="p">)</code>
+      <code class="p">{</code>
+        <code class="n">O</code><code class="p">(</code><code class="s">'output'</code><code class="p">).</code><code class="n">innerHTML</code> <code class="o">=</code>
+          <code class="s">'&lt;b&gt;Origin:&lt;/b&gt; '</code> <code class="o">+</code> <code class="n">event</code><code class="p">.</code><code class="n">origin</code> <code class="o">+</code> <code class="s">'&lt;br&gt;'</code> <code class="o">+</code>
+          <code class="s">'&lt;b&gt;Source:&lt;/b&gt; '</code> <code class="o">+</code> <code class="n">event</code><code class="p">.</code><code class="n">source</code> <code class="o">+</code> <code class="s">'&lt;br&gt;'</code> <code class="o">+</code>
+          <code class="s">'&lt;b&gt;Data:&lt;/b&gt;   '</code> <code class="o">+</code> <code class="n">event</code><code class="p">.</code><code class="n">data</code>
+      <code class="p">}</code>
+    <code class="nt">&lt;/script&gt;</code>
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code></pre>
+</div>
+
+<p class="author1">This example sets up a little styling to make the output clearer and then creates a <code class="calibre15">&lt;div&gt;</code> element with the ID <code class="calibre15">output</code>, in which the contents of received messages will be placed. The <code class="calibre15">&lt;script&gt;</code> section contains a single anonymous function attached to the <code class="calibre15">onmessage</code> event of the window. In this function, the <code class="calibre15">event.origin</code>, <code class="calibre15">event.source</code>, and <code class="calibre15">event.data</code> property values are then displayed, as shown in <a data-type="xref" href="#the-iframe-has-so-far" class="calibre6">Figure 28-4</a>.</p>
+
+<figure class="calibre23"><div id="the-iframe-has-so-far" class="figure"><img alt="" class="iimageswebmesspng" src="Images/pmj6_2804.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 28-4. </span>iframe has so far received 29 messages</h6>
+</div></figure>
+
+<p class="author1">Web messaging works only across domains, so you cannot test it by loading files in from a filesystem; you must use a web server (such as the AMPPS stack suggested in <a data-type="xref" href="ch02.xhtml#setting_up_a_development_server" class="calibre6">Chapter 2</a>). As you can see from <a data-type="xref" href="#the-iframe-has-so-far" class="calibre6">Figure 28-4</a>, the origin is <em class="hyperlink">http://localhost</em> because these examples are running on a local development server. The source is the <code class="calibre15">window</code> object, and the current message value is <code class="calibre15">Message 29</code>.</p>
+
+<p class="author1">To run this for yourself, just load <em class="hyperlink">06.html</em> into your browser using <code class="calibre15">localhost://</code> and not from a filesystem, and it will talk with <em class="hyperlink">07.html</em> without you having to load it, because it is inserted into an iframe.</p>
+
+<p class="author1">At the moment, <a data-type="xref" href="#sending_web_messages_to_an_iframe" class="calibre6">Example 28-6</a> is not at all secure because the domain value passed to <code class="calibre15">postMessage</code> is the wildcard <code class="calibre15">*</code>:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">O</code><code class="p">(</code><code class="s">'frame'</code><code class="p">)</code><code class="p">.</code><code class="n">contentWindow</code><code class="p">.</code><code class="n">postMessage</code><code class="p">(</code><code class="s">'Message '</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="n">count</code><code class="o">++</code><code class="p">,</code><code class="calibre15"> </code><strong class="calibre31"><code class="s2">'*'</code></strong><code class="p">)</code></pre>
+
+<p class="author1">To direct messages only to documents originating from a particular domain, you can change this parameter. In the current case, a value of <code class="calibre15">http://localhost</code> would ensure that only documents loaded from the local server will be sent any messages:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">O</code><code class="p">(</code><code class="s">'frame'</code><code class="p">)</code><code class="p">.</code><code class="n">contentWindow</code><code class="p">.</code><code class="n">postMessage</code><code class="p">(</code><code class="s">'Message '</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="n">count</code><code class="o">++</code><code class="p">,</code><code class="calibre15"> </code><strong class="calibre31"><code class="s2">'http://localhost'</code></strong><code class="p">)</code></pre>
+
+<p class="author1">Likewise, as it stands, the listener program displays any and all messages it receives. This is also not a very secure state of affairs, because malicious documents also present in the browser can attempt to send messages that unwary listener code in other documents might otherwise access. Therefore, you can restrict the messages your listeners react to by using an <code class="calibre15">if</code> statement, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="nb">window</code><code class="p">.</code><code class="n">onmessage</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="k">function</code><code class="p">(</code><code class="n">event</code><code class="p">)</code><code class="calibre15">
+</code><code class="p">{</code><code class="calibre15">
+  </code><strong class="calibre31"><code class="k1">if</code><code class="calibre17"> </code><code class="p1">(</code><code class="nx1">event</code><code class="p1">.</code><code class="nx1">origin</code><code class="p1">)</code><code class="calibre17"> </code><code class="o1">==</code><code class="calibre17"> </code><code class="s2">'http://localhost'</code><code class="p1">)</code></strong><code class="calibre15">
+  </code><strong class="calibre31"><code class="p1">{</code></strong><code class="calibre15">
+    </code><code class="n">O</code><code class="p">(</code><code class="s">'output'</code><code class="p">)</code><code class="p">.</code><code class="n">innerHTML</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15">
+      </code><code class="s">'&lt;b&gt;Origin:&lt;/b&gt; '</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="n">event</code><code class="p">.</code><code class="n">origin</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="s">'&lt;br&gt;'</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15">
+      </code><code class="s">'&lt;b&gt;Source:&lt;/b&gt; '</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="n">event</code><code class="p">.</code><code class="n">source</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="s">'&lt;br&gt;'</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15">
+      </code><code class="s">'&lt;b&gt;Data:&lt;/b&gt;   '</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="n">event</code><code class="p">.</code><code class="n">data</code><code class="calibre15">
+  </code><strong class="calibre31"><code class="p1">}</code></strong><code class="calibre15">
+</code><code class="p">}</code></pre>
+
+<div data-type="warning" epub:type="warning" class="calibre21"><h6 class="calibre22">Warning</h6>
+<p class="author1">If you always use the proper domain for the site you are working with, your web messaging communications will be more secure. However, be aware that since messages are sent in the clear, there may be insecurities in some browsers or browser plug-ins that might make this kind of communication insecure. One way to boost your security, then, is to use an encryption scheme for all your web messages and also consider introducing two-way communication protocols to verify each message as being authentic.</p>
+</div>
+
+<p class="author1">Normally, you won’t alert the user to the <code class="calibre15">origin</code> or <code class="calibre15">source</code> values and will simply make use of them for security checking. These examples, however, display those values to help you experiment with web messaging and see what is going on. Instead of using iframes, documents in pop-up windows and other tabs may also talk to each other using this method.<a contenteditable="false" data-primary="" data-startref="mess26" data-type="indexterm" id="idm45694662969112" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="HTcross26" data-type="indexterm" id="idm45694662967736" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="cross26" data-type="indexterm" id="idm45694662966360" class="calibre6"/></p>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Other HTML5 Tags" class="calibre4"><div class="preface" id="other_html5_tags">
+<h1 class="calibre11">Other HTML5 Tags</h1>
+
+<p class="author1">A<a contenteditable="false" data-primary="HTML5" data-secondary="common tags in use" data-type="indexterm" id="idm45694662963688" class="calibre6"/><a contenteditable="false" data-primary="browsers" data-secondary="common HTML tags in use" data-type="indexterm" id="idm45694662942360" class="calibre6"/> number of other new HTML5 tags are being adopted by the major browsers, including <code class="calibre15">&lt;article&gt;</code>, <code class="calibre15">&lt;aside&gt;</code>, <span class="keep-together"><code class="calibre15">&lt;details&gt;</code></span>, <code class="calibre15">&lt;figcaption&gt;</code>, <code class="calibre15">&lt;figure&gt;</code>, <code class="calibre15">&lt;footer&gt;</code>, <code class="calibre15">&lt;header&gt;</code>, <code class="calibre15">&lt;hgroup&gt;</code>, <code class="calibre15">&lt;mark&gt;</code>, <code class="calibre15">&lt;menuitem&gt;</code>, <code class="calibre15">&lt;meter&gt;</code>, <code class="calibre15">&lt;nav&gt;</code>, <code class="calibre15">&lt;output&gt;</code>, <code class="calibre15">&lt;progress&gt;</code>, <code class="calibre15">&lt;rp&gt;</code>, <code class="calibre15">&lt;rt&gt;</code>, <code class="calibre15">&lt;ruby&gt;</code>, <code class="calibre15">&lt;section&gt;</code>, <code class="calibre15">&lt;summary&gt;</code>, <code class="calibre15">&lt;time&gt;</code>, and <code class="calibre15">&lt;wbr&gt;</code>. You can get more information on these and all other HTML5 tags from <a href="https://tinyurl.com/htmltaglist" class="calibre6">eastmanreference.com</a>.</p>
+
+<p class="author1">This concludes your introduction to HTML5. You now have a number of powerful new features with which to make even more dynamic and compelling websites. In the final chapter, I’ll show you how you can bring all the different technologies in this book together to create a mini–social networking site.</p>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Questions" class="calibre4"><div class="preface" id="questions-id00129">
+<h1 class="calibre11">Questions</h1>
+
+<ol class="calibre25">
+	<li class="calibre26">
+	<p class="author1">What method do you call to request geolocation data from a web browser?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you determine whether a browser supports local storage?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What method can you call to erase all local storage data for the current domain?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is the best way for web workers to communicate with a main program?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you stop a web worker from running?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">To support drag-and-drop operations, how can you prevent the default action of disallowing dragging and dropping for these events?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you make cross-document messaging more secure?</p>
+	</li>
+</ol>
+
+<p class="author1">See <a data-type="xref" href="app01_split_027.xhtml#chapter_28_answers" class="calibre6">“Chapter 28 Answers”</a> in the <a data-type="xref" href="app01_split_000.xhtml#solutions_to_the_chapter_questions" class="calibre6">Appendix A</a> for the answers to these <span class="keep-together">questions</span>.</p>
+</div></section>
+</div></section></div></body></html>

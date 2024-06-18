@@ -1,0 +1,807 @@
+<html><head></head><body><div id="sbo-rt-content" class="calibre1"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 13. Cookies, Sessions, and Authentication" class="calibre4"><div class="preface" id="cookiescomma_sessionscomma_and_authentic">
+<h1 class="calibre10"><span class="keep-together">Chapter 13. </span>Cookies, Sessions, and Authentication</h1>
+
+<p class="author1">As your web projects grow larger and more complicated, you will find an increasing need to keep track of your users. Even if you aren’t offering logins and passwords, you will still often need to store details about a user’s current session and possibly also recognize them when they return to your site.</p>
+
+<p class="author1">Several<a contenteditable="false" data-primary="user preferences, configuring" data-type="indexterm" id="idm45694710169992" class="calibre6"/> technologies support this kind of interaction, ranging from simple browser cookies to session handling and HTTP authentication. Between them, they offer the opportunity for you to configure your site to your users’ preferences and ensure a smooth and enjoyable transition through it.</p>
+
+<section data-type="sect1" data-pdf-bookmark="Using Cookies in PHP" class="calibre4"><div class="preface" id="using_cookies_in_php">
+<h1 class="calibre11">Using Cookies in PHP</h1>
+
+<p class="author1">A<a contenteditable="false" data-primary="PHP programming language" data-secondary="cookies and" data-type="indexterm" id="PHPcookie1" class="calibre6"/> <a contenteditable="false" data-primary="cookies" data-secondary="defined" data-type="indexterm" id="idm45694710164616" class="calibre6"/><em class="hyperlink">cookie</em> is an item of data that a web server saves to your computer’s hard disk via a web browser. It can contain almost any alphanumeric information (as long as it’s under 4 KB) and can be retrieved from your computer and returned to the server. Common uses include session tracking, maintaining data across multiple visits, holding shopping cart contents, storing login details, and more.</p>
+
+<p class="author1">Because of their privacy implications, cookies can be read only from the issuing domain. In other words, if a cookie is issued by, for example, <em class="hyperlink">oreilly.com</em>, it can be retrieved only by a web server using that domain. This prevents other websites from gaining access to details for which they are not authorized.</p>
+
+<p class="author1">Because<a contenteditable="false" data-primary="third-party cookies" data-type="indexterm" id="idm45694710160808" class="calibre6"/><a contenteditable="false" data-primary="cookies" data-secondary="third-party cookies" data-type="indexterm" id="idm45694710159672" class="calibre6"/> of the way the internet works, multiple elements on a web page can be embedded from multiple domains, each of which can issue its own cookies. When this happens, they are referred to as <em class="hyperlink">third-party cookies</em>. Most commonly, these are created by advertising companies in order to track users across multiple websites, or for analytic purposes.</p>
+
+<p class="author1">Because of this, most browsers allow users to turn cookies off either for the current server’s domain, third-party servers, or both. Fortunately, most people who disable cookies do so only for third-party websites.</p>
+
+<p class="author1">Cookies<a contenteditable="false" data-primary="cookies" data-secondary="request/response procedure" data-type="indexterm" id="idm45694710156328" class="calibre6"/> are exchanged during the transfer of headers, before the actual HTML of a web page is sent, and it is impossible to send a cookie once any HTML has been transferred. Therefore, careful planning of cookie usage is important. <a data-type="xref" href="#browsersolidusserver_requestsolidusres" class="calibre6">Figure 13-1</a> illustrates a typical request and response dialog between a web browser and web server passing cookies.</p>
+
+<figure class="calibre23"><div id="browsersolidusserver_requestsolidusres" class="figure"><img alt="A browser/server request/response dialog with cookies" src="Images/pmj6_1301.png" class="calibre80"/>
+<h6 class="calibre24"><span class="keep-together">Figure 13-1. </span>A browser/server request/response dialog with cookies</h6>
+</div></figure>
+
+<p class="author1">This exchange shows a browser receiving two pages:</p>
+
+<ol class="calibre25">
+	<li class="calibre26">
+	<p class="author1">The browser issues a request to retrieve the main page, <em class="hyperlink">index.html</em>, at the website <em class="hyperlink">http://www.webserver.com</em>. The first header specifies the file, and the second header specifies the server.</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">When the web server at <em class="hyperlink">webserver.com</em> receives this pair of headers, it returns some of its own. The second header defines the type of content to be sent (<code class="calibre15">text/html</code>), and the third one sends a cookie of the name <code class="calibre15">name</code> and with the value <code class="calibre15">value</code>. Only then are the contents of the web page transferred.</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Once the browser has received the cookie, it will then return it with every future request made to the issuing server until the cookie expires or is deleted. So, when the browser requests the new page <em class="hyperlink">/news.html</em>, it also returns the cookie <code class="calibre15">name</code> with the value <code class="calibre15">value</code>.</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Because the cookie has already been set, when the server receives the request to send <em class="hyperlink">/news.html</em>, it does not have to resend the cookie but just returns the requested page.</p>
+	</li>
+</ol>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1"><a contenteditable="false" data-primary="security issues" data-secondary="cookies" data-type="indexterm" id="idm45694710141336" class="calibre6"/>It is easy to edit cookies directly from within the browser by using built-in developer tools, or extensions. Therefore, because<a contenteditable="false" data-primary="usernames" data-secondary="cookies and" data-type="indexterm" id="idm45694710139688" class="calibre6"/> users can change cookie values, you should not put key information such as usernames in a cookie, or you face the possibility of having your website manipulated in ways you are not expecting. Cookies are best used for storing data such as language or currency settings.</p>
+</div>
+
+<section data-type="sect2" data-pdf-bookmark="Setting a Cookie" class="calibre4"><div class="preface" id="setting_a_cookie">
+<h2 class="calibre28">Setting a Cookie</h2>
+
+<p class="author1">Setting<a contenteditable="false" data-primary="cookies" data-secondary="setting in PHP" data-type="indexterm" id="idm45694710135864" class="calibre6"/><a contenteditable="false" data-primary="setcookie function (PHP)" data-type="indexterm" id="idm45694710134456" class="calibre6"/> a cookie in PHP is a simple matter. As long as no HTML has yet been transferred, you can call the <code class="calibre15">setcookie</code> function, which has the following syntax (see <a data-type="xref" href="#setcookie_parameters" class="calibre6">Table 13-1</a>):</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">setcookie</code><code class="p">(</code><code class="n">name</code><code class="p">,</code> <code class="n">value</code><code class="p">,</code> <code class="n">expire</code><code class="p">,</code> <code class="n">path</code><code class="p">,</code> <code class="n">domain</code><code class="p">,</code> <code class="n">secure</code><code class="p">,</code> <code class="n">httponly</code><code class="p">);</code></pre>
+
+<table id="setcookie_parameters" class="calibre33">
+	<caption class="calibre34"><span class="keep-together">Table 13-1. </span>The <code class="calibre60">setcookie</code> parameters</caption>
+	<thead class="calibre35">
+		<tr class="calibre36">
+			<th class="calibre37">Parameter</th>
+			<th class="calibre37">Description</th>
+			<th class="calibre37">Example</th>
+		</tr>
+	</thead>
+	<tbody class="calibre38">
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">name</code></td>
+			<td class="calibre39">The name of the cookie. This is the name that your server will use to access the cookie on subsequent browser requests.</td>
+			<td class="calibre39"><code class="calibre48">location</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">value</code></td>
+			<td class="calibre39">The value of the cookie, or the cookie’s contents. This can contain up to 4 KB of alphanumeric text.</td>
+			<td class="calibre39"><code class="calibre48">USA</code></td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">expire</code></td>
+			<td class="calibre39">(<em class="hyperlink">Optional.</em>) The Unix timestamp of the expiration date. Generally, you will probably use <code class="calibre48">time()</code> plus a number of seconds. If not set, the cookie expires when the browser closes.</td>
+			<td class="calibre39"><code class="calibre48">time() + 2592000</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">path</code></td>
+			<td class="calibre39">(<em class="hyperlink">Optional.</em>) The path of the cookie on the server. If this is a <code class="calibre48">/</code> (forward slash), the cookie is available over the entire domain, such as <em class="hyperlink">www.webserver.com</em>. If it is a subdirectory, the cookie is available only within that subdirectory. The default is the current directory that the cookie is being set in, and this is the setting you will normally use.</td>
+			<td class="calibre39"><code class="calibre48">/</code></td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">domain</code></td>
+			<td class="calibre39">(<em class="hyperlink">Optional.</em>) The internet domain of the cookie. If this is <em class="hyperlink">webserver.com</em>, the cookie is available to all of <em class="hyperlink">webserver.com</em> and its subdomains, such as <em class="hyperlink">www.webserver.com</em> and <em class="hyperlink">images.webserver.com</em>. If it is <em class="hyperlink">images.webserver.com</em>, the cookie is available only to <em class="hyperlink">images.webserver.com</em> and its subdomains, such as <em class="hyperlink">sub.images.webserver.com</em>, but not, say, to <em class="hyperlink">www.webserver.com</em>.</td>
+			<td class="calibre39"><code class="calibre48">webserver.com</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">secure</code></td>
+			<td class="calibre39">(<em class="hyperlink">Optional.</em>) Whether the cookie must use a secure connection (<em class="hyperlink">https://</em>). If this value is <code class="calibre48">TRUE</code>, the cookie can be transferred only across a secure connection. The default is <code class="calibre48">FALSE</code>.</td>
+			<td class="calibre39"><code class="calibre48">FALSE</code></td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">httponly</code></td>
+			<td class="calibre39">(<em class="hyperlink">Optional</em>; implemented since PHP version 5.2.0.) Whether the cookie must use the HTTP protocol. If this value is <code class="calibre48">TRUE</code>, scripting languages such as JavaScript cannot access the cookie. The default is <code class="calibre48">FALSE</code>.</td>
+			<td class="calibre39"><code class="calibre48">FALSE</code></td>
+		</tr>
+	</tbody>
+</table>
+
+<p class="author1">So, to create a cookie with the name <code class="calibre15">location</code> and the value <code class="calibre15">USA</code> that is accessible across the entire web server on the current domain, and will be removed from the browser’s cache in seven days, use the following:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">setcookie</code><code class="p">(</code><code class="s">'location'</code><code class="p">,</code> <code class="s">'USA'</code><code class="p">,</code> <code class="nb">time</code><code class="p">()</code> <code class="o">+</code> <code class="mi">60</code> <code class="o">*</code> <code class="mi">60</code> <code class="o">*</code> <code class="mi">24</code> <code class="o">*</code> <code class="mi">7</code><code class="p">,</code> <code class="s">'/'</code><code class="p">);</code></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Accessing a Cookie" class="calibre4"><div class="preface" id="accessing_a_cookie">
+<h2 class="calibre28">Accessing a Cookie</h2>
+
+<p class="author1">Reading<a contenteditable="false" data-primary="cookies" data-secondary="accessing" data-type="indexterm" id="idm45694710055224" class="calibre6"/><a contenteditable="false" data-primary="$_COOKIE variable" data-primary-sortas="COOKIE variable" data-type="indexterm" id="idm45694710053816" class="calibre6"/> the value of a cookie is as simple as accessing the <code class="calibre15">$_COOKIE</code> system array. For example, if you wish to see whether the current browser has the cookie called <span class="keep-together"><code class="calibre15">location</code></span> already stored and, if so, to read its value, use the following:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_COOKIE</code><code class="p">[</code><code class="s">'location'</code><code class="p">]))</code> <code class="nv">$location</code> <code class="o">=</code> <code class="nv">$_COOKIE</code><code class="p">[</code><code class="s">'location'</code><code class="p">];</code></pre>
+
+<p class="author1">Note that you can read a cookie back only after it has been sent to a web browser. This means that when you issue a cookie, you cannot read it in again until the browser reloads the page (or another with access to the cookie) from your website and passes the cookie back to the server in the process.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Destroying a Cookie" class="calibre4"><div class="preface" id="destroying_a_cookie">
+<h2 class="calibre28">Destroying a Cookie</h2>
+
+<p class="author1">To<a contenteditable="false" data-primary="cookies" data-secondary="destroying" data-type="indexterm" id="idm45694710037272" class="calibre6"/> delete a cookie, you must issue it again and set a date in the past. It is important for all parameters in your new <code class="calibre15">setcookie</code> call except the timestamp to be identical to the parameters when the cookie was first issued; otherwise, the deletion will fail. Therefore, to delete the cookie created earlier, you would use the following:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">setcookie</code><code class="p">(</code><code class="s">'location'</code><code class="p">,</code> <code class="s">'USA'</code><code class="p">,</code> <code class="nb">time</code><code class="p">()</code> <code class="o">-</code> <code class="mi">2592000</code><code class="p">,</code> <code class="s">'/'</code><code class="p">);</code></pre>
+
+<p class="author1">As long as the time given is in the past, the cookie should be deleted. However, I have used a time of 2,592,000 seconds (one month) in the past in case the client computer’s date and time are not correctly set. You may also provide an empty string for the cookie value (or a value of <code class="calibre15">FALSE</code>), and PHP will automatically set its time in the past for you.<a contenteditable="false" data-primary="" data-startref="PHPcookie1" data-type="indexterm" id="idm45694709950744" class="calibre6"/></p>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="HTTP Authentication" class="calibre4"><div class="preface" id="http_authentication">
+<h1 class="calibre11">HTTP Authentication</h1>
+
+<p class="author1">HTTP authentication<a contenteditable="false" data-primary="authentication (HTTP)" data-type="indexterm" id="authenhttp12" class="calibre6"/><a contenteditable="false" data-primary="security issues" data-secondary="HTTP authentication" data-type="indexterm" id="SIauthen12" class="calibre6"/><a contenteditable="false" data-primary="HTTP authentication" data-secondary="purpose of" data-type="indexterm" id="idm45694709932904" class="calibre6"/><a contenteditable="false" data-primary="passwords" data-secondary="HTTP authentication and" data-type="indexterm" id="idm45694709931528" class="calibre6"/> uses the web server to manage users and passwords for the application. It’s adequate for simple applications that ask users to log in, although most applications will have specialized needs or more stringent security requirements that call for other techniques.</p>
+
+<p class="author1">To use HTTP authentication, PHP sends a header request asking to start an authentication dialog with the browser. The server must have this feature turned on in order for it to work, but because it’s so common, your server is likely to offer the feature.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">Although it is usually installed with Apache, the<a contenteditable="false" data-primary="HTTP authentication" data-secondary="HTTP authentication module" data-type="indexterm" id="HTmodule12" class="calibre6"/> HTTP authentication module may not necessarily be installed on the server you use. So, attempting to run these examples may generate an error telling you that the feature is not enabled, in which case you must either install the module and change the configuration file to load it or ask your system administrator to make these changes.</p>
+</div>
+
+<p class="author1">After entering your URL into the browser or visiting the page via a link, the user will see an “Authentication Required” prompt pop up, requesting two fields: User Name and Password (<a data-type="xref" href="#http_authentication_login_prompt" class="calibre6">Figure 13-2</a> shows how this looks in Firefox).</p>
+
+<figure class="calibre23"><div id="http_authentication_login_prompt" class="figure"><img alt="An HTTP authentication login prompt" src="Images/pmj6_1302.png" class="calibre81"/>
+<h6 class="calibre24"><span class="keep-together">Figure 13-2. </span>An HTTP authentication login prompt</h6>
+</div></figure>
+
+<p class="author1"><a data-type="xref" href="#php_authentication" class="calibre6">Example 13-1</a> shows the code to make this happen.</p>
+
+<div data-type="example" id="php_authentication" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 13-1. </span>PHP authentication</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_USER'</code><code class="p">])</code> <code class="o">&amp;&amp;</code>
+      <code class="nb">isset</code><code class="p">(</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_PW'</code><code class="p">]))</code>
+  <code class="p">{</code>
+    <code class="k">echo</code> <code class="s">"Welcome User: "</code> <code class="o">.</code> <code class="nb">htmlspecialchars</code><code class="p">(</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_USER'</code><code class="p">])</code> <code class="o">.</code>
+         <code class="s">" Password: "</code>    <code class="o">.</code> <code class="nb">htmlspecialchars</code><code class="p">(</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_PW'</code><code class="p">]);</code>
+  <code class="p">}</code>
+  <code class="k">else</code>
+  <code class="p">{</code>
+    <code class="nb">header</code><code class="p">(</code><code class="s">'WWW-Authenticate: Basic realm="Restricted Area"'</code><code class="p">);</code>
+    <code class="nb">header</code><code class="p">(</code><code class="s">'HTTP/1.1 401 Unauthorized'</code><code class="p">);</code>
+    <code class="k">die</code><code class="p">(</code><code class="s">"Please enter your username and password"</code><code class="p">);</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">The first thing the program does is look for two particular array values: <code class="calibre15">$_SERVER['PHP_AUTH_USER']</code> and <code class="calibre15">$_SERVER['PHP_AUTH_PW']</code>. If they<a contenteditable="false" data-primary="usernames" data-secondary="checking availability of" data-type="indexterm" id="idm45694709881416" class="calibre6"/> both exist, they represent the username and password entered by a user into an authentication prompt.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">Notice<a contenteditable="false" data-primary="htmlspecialchars function (PHP)" data-type="indexterm" id="idm45694709878888" class="calibre6"/> that when being displayed to the screen, the values that have been returned in the <code class="calibre15">$_SERVER</code> array are first processed through the <code class="calibre15">htmlspecialchars</code> function. This is because these values have been entered by the user and therefore cannot be trusted, as a hacker could make a cross-site scripting attempt by adding HTML characters and other symbols to the input. <code class="calibre15">htmlspecialchars</code> translates any such input into harmless HTML entities.</p>
+</div>
+
+<p class="author1">If either value does not exist, the user has not yet been authenticated, and you display the prompt in <a data-type="xref" href="#http_authentication_login_prompt" class="calibre6">Figure 13-2</a> by issuing the following header, where <code class="calibre15">Basic realm</code> is the name of the section that is protected and appears as part of the pop-up prompt:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">WWW-Authenticate: Basic realm="Restricted Area"</strong></pre>
+
+<p class="author1">If the user fills out the fields, the PHP program runs again from the top. But if the user clicks the Cancel button, the program proceeds to the following two lines, which send the following header and an error message:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">HTTP/1.1 401 Unauthorized</strong></pre>
+
+<p class="author1">The <code class="calibre15">die</code> statement<a contenteditable="false" data-primary="die function (PHP)" data-type="indexterm" id="idm45694709853752" class="calibre6"/><a contenteditable="false" data-primary="passwords" data-secondary="validating" data-type="indexterm" id="idm45694709852616" class="calibre6"/> causes the text “Please enter your username and password” to be displayed (see <a data-type="xref" href="#result_of_clicking_the_cancel_button" class="calibre6">Figure 13-3</a>).</p>
+
+<figure class="calibre23"><div id="result_of_clicking_the_cancel_button" class="figure"><img alt="The result of clicking the Cancel button" src="Images/pmj6_1303.png" class="calibre82"/>
+<h6 class="calibre24"><span class="keep-together">Figure 13-3. </span>The result of clicking the Cancel button</h6>
+</div></figure>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">Once a user has been authenticated, you will not be able to get the authentication dialog to pop up again unless the user closes and reopens all browser windows, because the web browser will keep returning the same username and password to PHP. You may need to close and reopen your browser a few times as you work through this section and try different things out. The easiest way to do this is to open up a new private or anonymous window to run these examples, so you won’t need to close the entire browser.</p>
+</div>
+
+<p class="author1">Now<a contenteditable="false" data-primary="passwords" data-secondary="validating for form input" data-type="indexterm" id="idm45694709846040" class="calibre6"/><a contenteditable="false" data-primary="usernames" data-secondary="checking validity of" data-type="indexterm" id="idm45694709844616" class="calibre6"/> let’s check for a valid username and password. The code in <a data-type="xref" href="#php_authentication" class="calibre6">Example 13-1</a> doesn’t require you to change much to add this check, other than modifying the previous welcome message code to test for a correct username and password and then issuing a welcome message. A failed authentication causes an error message to be sent (see <a data-type="xref" href="#php_authentication_with_input_checking" class="calibre6">Example 13-2</a>).</p>
+
+<div data-type="example" id="php_authentication_with_input_checking" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 13-2. </span>PHP authentication with input checking</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$username</code> <code class="o">=</code> <code class="s">'admin'</code><code class="p">;</code>
+  <code class="nv">$password</code> <code class="o">=</code> <code class="s">'letmein'</code><code class="p">;</code>
+
+  <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_USER'</code><code class="p">])</code> <code class="o">&amp;&amp;</code>
+      <code class="nb">isset</code><code class="p">(</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_PW'</code><code class="p">]))</code>
+  <code class="p">{</code>
+    <code class="k">if</code> <code class="p">(</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_USER'</code><code class="p">]</code> <code class="o">===</code> <code class="nv">$username</code> <code class="o">&amp;&amp;</code>
+        <code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_PW'</code><code class="p">]</code>   <code class="o">===</code> <code class="nv">$password</code><code class="p">)</code>
+          <code class="k">echo</code> <code class="s">"You are now logged in"</code><code class="p">;</code>
+    <code class="k">else</code> <code class="k">die</code><code class="p">(</code><code class="s">"Invalid username/password combination"</code><code class="p">);</code>
+  <code class="p">}</code>
+  <code class="k">else</code>
+  <code class="p">{</code>
+    <code class="nb">header</code><code class="p">(</code><code class="s">'WWW-Authenticate: Basic realm="Restricted Area"'</code><code class="p">);</code>
+    <code class="nb">header</code><code class="p">(</code><code class="s">'HTTP/1.0 401 Unauthorized'</code><code class="p">);</code>
+    <code class="k">die</code> <code class="p">(</code><code class="s">"Please enter your username and password"</code><code class="p">);</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">When<a contenteditable="false" data-primary="=== (identity) operator" data-secondary="in PHP" data-type="indexterm" id="idm45694709836904" class="calibre6"/><a contenteditable="false" data-primary="identity (===) operator" data-secondary="in PHP" data-type="indexterm" id="idm45694709770040" class="calibre6"/><a contenteditable="false" data-primary="== (equality) operator" data-secondary="in PHP" data-type="indexterm" id="idm45694709768664" class="calibre6"/><a contenteditable="false" data-primary="equality (==) operator" data-secondary="in PHP" data-type="indexterm" id="idm45694709767288" class="calibre6"/><a contenteditable="false" data-primary="usernames" data-secondary="comparing" data-type="indexterm" id="idm45694709765912" class="calibre6"/><a contenteditable="false" data-primary="passwords" data-secondary="comparing" data-type="indexterm" id="idm45694709764536" class="calibre6"/> comparing usernames and passwords the <code class="calibre15">===</code> (identity) operator is used, rather than the <code class="calibre15">==</code> (equals) operator. This is because we are checking whether the two values match <em class="hyperlink">exactly</em>. For example, <code class="calibre15">'0e123' == '0e456'</code>, and this is not a suitable match for either username or password purposes.</p>
+
+<p class="author1">In the previous instance, 0e123 is 0 <span class="keep-together">times 10</span> raised to the 123rd power, which results in zero, and 0e456 is 0 times 10 raised to the 456th power, which also evaluates to zero. Therefore, using the <code class="calibre15">==</code> operator, they will match due to their values both evaluating to zero, and so the result of the comparison will be <code class="calibre15">true</code>, but the <code class="calibre15">===</code> operator says that the two parts must be identical in every way, and as these two strings are different, the test will return <code class="calibre15">false</code>.</p>
+
+<p class="author1">A mechanism is now in place to authenticate users, but only for a single username and password. Also, the password appears in clear text within the PHP file, and if someone managed to hack into your server, they would instantly know it. So, let’s look at a better way to handle usernames and passwords.<a contenteditable="false" data-primary="" data-startref="HTmodule12" data-type="indexterm" id="idm45694709757288" class="calibre6"/></p>
+
+<section data-type="sect2" data-pdf-bookmark="Storing Usernames and Passwords" class="calibre4"><div class="preface" id="storing_usernames_and_passwords">
+<h2 class="calibre28">Storing Usernames and Passwords</h2>
+
+<p class="author1">MySQL is<a contenteditable="false" data-primary="HTTP authentication" data-secondary="storing usernames and passwords" data-type="indexterm" id="idm45694709753800" class="calibre6"/><a contenteditable="false" data-primary="usernames" data-secondary="storing" data-type="indexterm" id="idm45694709752328" class="calibre6"/><a contenteditable="false" data-primary="passwords" data-secondary="storing" data-type="indexterm" id="idm45694709750952" class="calibre6"/><a contenteditable="false" data-primary="one-way function" data-type="indexterm" id="idm45694709749576" class="calibre6"/> a natural way to store usernames and passwords. But again, we don’t want to store the passwords as clear text, because our website could be compromised if the database were accessed by a hacker. Instead, we’ll use a neat trick called a <em class="hyperlink">one-way function</em>.</p>
+
+<p class="author1">This type of function is easy to use and converts a string of text into a seemingly random string. Because of their one-way nature, such functions are impossible to reverse, so their output can be safely stored in a database—and anyone who steals it will be none the wiser as to the passwords used.</p>
+
+<p class="author1">In<a contenteditable="false" data-primary="MD5 hashing algorithm" data-type="indexterm" id="idm45694709746488" class="calibre6"/><a contenteditable="false" data-primary="SHA-1 algorithm" data-type="indexterm" id="idm45694709745352" class="calibre6"/> previous editions of this book, I recommended using the <em class="hyperlink">MD5</em> hashing algorithm for your data security. Time marches on, however, and now MD5 is considered easily hackable and therefore unsafe. Indeed, even its previously recommended replacement of <em class="hyperlink">SHA-1</em> can apparently be hacked.</p>
+
+<p class="author1">So, now that PHP 5.5 is pretty much the minimum standard everywhere, I have moved on to using its built-in hashing function, which is vastly more secure and handles everything for you in a neat fashion.</p>
+
+<p class="author1">Previously, to store a password securely, you would have needed<a contenteditable="false" data-primary="passwords" data-secondary="salting" data-type="indexterm" id="idm45694709742024" class="calibre6"/><a contenteditable="false" data-primary="salting passwords" data-type="indexterm" id="idm45694709740648" class="calibre6"/> to <em class="hyperlink">salt</em> the password, which is a term for adding extra characters to a password that the user did not enter (to further obscure it). You then needed to run the result of that through a one-way function to turn it into a seemingly random set of characters, which used to be hard to crack.</p>
+
+<p class="author1">For example, code such as the following (which is now very insecure, because modern graphics processing units have such speed and power):</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code><code class="calibre15"> </code><code class="nb">hash</code><code class="p">(</code><code class="s">'ripemd128'</code><code class="p">,</code><code class="calibre15"> </code><code class="s">'</code><strong class="calibre31"><code class="s2">saltstring</code></strong><code class="s">mypassword'</code><code class="p">);</code></pre>
+
+<p class="author1">would display this value:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">9eb8eb0584f82e5d505489e6928741e7</strong></pre>
+
+<p class="author1">Remember that this is not a recommended method you should ever use. Treat this as an example of what <em class="hyperlink">not</em> to do, as it is very insecure. Instead, please read on.</p>
+
+<section data-type="sect3" data-pdf-bookmark="Using password_hash" class="calibre4"><div class="preface" id="idm45694709697576">
+<h3 class="calibre43">Using password_hash</h3>
+
+<p class="author1">From<a contenteditable="false" data-primary="password_hash function (PHP)" data-type="indexterm" id="idm45694709727000" class="calibre6"/><a contenteditable="false" data-primary="passwords" data-secondary="password_hash function" data-type="indexterm" id="idm45694709725896" class="calibre6"/> version 5.5 of PHP, there’s a far better way to create salted password hashes: the <code class="calibre15">password_hash</code> function. Supply <code class="calibre15">PASSWORD_DEFAULT</code> as its second (required) argument to ask the function to select the most secure hashing function currently available. <code class="calibre15">password_hash</code> will also choose a random salt for every password. (Don’t be tempted to add any more salting of your own, as this could compromise the algorithm’s security.) So, the following code:</p>
+
+<pre data-code-language="php" data-type="programlisting" class="calibre29">
+<code class="k">echo</code> <code class="nb">password_hash</code><code class="p">(</code><code class="s">"mypassword"</code><code class="p">,</code> <code class="n">PASSWORD_DEFAULT</code><code class="p">);</code></pre>
+
+<p class="author1">will return a string such as the following, which includes the salt and all information required for the password to be verified:</p>
+
+<pre data-type="programlisting" class="calibre29">
+<strong class="calibre31">$2y$10$k0YljbC2dmmCq8WKGf8oteBGiXlM9Zx0ss4PEtb5kz22EoIkXBtbG</strong></pre>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">If<a contenteditable="false" data-primary="BCRYPT algorithm" data-type="indexterm" id="idm45694709639112" class="calibre6"/><a contenteditable="false" data-primary="passwords" data-secondary="BCRYPT algorithm for" data-type="indexterm" id="idm45694709637976" class="calibre6"/> you are letting PHP choose the hashing algorithm for you, you should allow for the returned hash to expand in size over time as better security is implemented. The developers of PHP recommend that you store hashes in a database field that can expand to at least 255 characters (even though 60–72 is the average length right now). Should you wish, you can manually select the BCRYPT algorithm to guarantee a hash string of only 60 characters, by supplying the constant <code class="calibre15">PASSWORD_BCRYPT</code> as the second argument to the function. However, I don’t recommend this unless you have a very good reason.</p>
+</div>
+
+<p class="author1">You can supply options (in the form of an optional third argument) to further tailor how hashes are calculated, such as the cost or amount of processor time to allocate to the hashing (more time means more security but a slower server). The cost has a default value of <code class="calibre15">10</code>, which is the minimum you should use with BCRYPT.</p>
+
+<p class="author1">However, I don’t want to confuse you with more information than you need to be able to store password hashes securely with the minimum of fuss, so please refer to the <a href="http://php.net/password-hash" class="calibre6">documentation</a> if you’d like more details on the available options. You can even choose your own salts (although this is deprecated from PHP 7.0 onward, as it’s not considered that secure unless you know for sure what you are doing, as remains the case with WordPress, which still handles its own salting).</p>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Using password_verify" class="calibre4"><div class="preface" id="idm45694709632488">
+<h3 class="calibre43">Using password_verify</h3>
+
+<p class="author1">To<a contenteditable="false" data-primary="password_verify function (PHP)" data-type="indexterm" id="idm45694709627176" class="calibre6"/><a contenteditable="false" data-primary="passwords" data-secondary="password_verify function" data-type="indexterm" id="idm45694709626184" class="calibre6"/> verify that a password matches a hash, use the <code class="calibre15">password_verify</code> function, passing it the password string a user has just entered, and the stored hash value for that user’s password (generally retrieved from your database).</p>
+
+<p class="author1">So, assuming your user had previously entered the (very insecure) password of <em class="hyperlink">mypassword</em>, and you now have their password’s hash string (from when the user created their password) stored in the variable <code class="calibre15">$hash</code>, you could verify that they match like this:</p>
+
+<pre data-code-language="php" data-type="programlisting" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="nb">password_verify</code><code class="p">(</code><code class="s">"mypassword"</code><code class="p">,</code> <code class="nv">$hash</code><code class="p">))</code>
+  <code class="k">echo</code> <code class="s">"Valid"</code><code class="p">;</code></pre>
+
+<p class="author1">If the correct password for the hash has been supplied, <code class="calibre15">password_verify</code> returns the value <code class="calibre15">TRUE</code>, so this <code class="calibre15">if</code> statement will display the word “Valid.” If it doesn’t match, then <code class="calibre15">FALSE</code> is returned and you can ask the user to try again.</p>
+</div></section>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="An Example Program" class="calibre4"><div class="preface" id="salting">
+<h2 class="calibre28">An Example Program</h2>
+
+<p class="author1">Let’s see<a contenteditable="false" data-primary="HTTP authentication" data-secondary="example program" data-type="indexterm" id="HTTPexam12" class="calibre6"/><a contenteditable="false" data-primary="passwords" data-secondary="example program using" data-type="indexterm" id="idm45694709587112" class="calibre6"/> how these functions work together when combined with MySQL. First you need to create a new table to store password hashes, so type in the program in <a data-type="xref" href="#creating_a_users_table_and_adding_two_ac" class="calibre6">Example 13-3</a> and save it as <em class="hyperlink">setupusers.php</em> (or download it from <a href="https://github.com/RobinNixon/lpmj6" class="calibre6">GitHub</a>), and then open it in your browser.</p>
+
+<div data-type="example" id="creating_a_users_table_and_adding_two_ac" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 13-3. </span>Creating a users table and adding two accounts</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">//setupusers.php</code>
+<code class="n"> </code> <code class="k">require_once</code> <code class="s">'login.php'</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="k">try</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$pdo</code> <code class="o">=</code> <code class="k">new</code> <code class="n">PDO</code><code class="p">(</code><code class="nv">$attr</code><code class="p">,</code> <code class="nv">$user</code><code class="p">,</code> <code class="nv">$pass</code><code class="p">,</code> <code class="nv">$opts</code><code class="p">);</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="n"> </code> <code class="k">catch</code> <code class="p">(</code><code class="n">\PDOException</code> <code class="nv">$e</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">throw</code> <code class="k">new</code> <code class="n">\PDOException</code><code class="p">(</code><code class="nv">$e</code><code class="o">-&gt;</code><code class="na">getMessage</code><code class="p">(),</code> <code class="p">(</code><code class="n">int</code><code class="p">)</code><code class="nv">$e</code><code class="o">-&gt;</code><code class="na">getCode</code><code class="p">());</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="nv">$query</code> <code class="o">=</code> <code class="s">"CREATE TABLE users (</code>
+<code class="s">    forename VARCHAR(32) NOT NULL,</code>
+<code class="s">    surname  VARCHAR(32) NOT NULL,</code>
+<code class="s">    username VARCHAR(32) NOT NULL UNIQUE,</code>
+<code class="s">    password VARCHAR(255) NOT NULL</code>
+<code class="s">  )"</code><code class="p">;</code>
+
+<code class="n"> </code> <code class="nv">$result</code> <code class="o">=</code> <code class="nv">$pdo</code><code class="o">-&gt;</code><code class="na">query</code><code class="p">(</code><code class="nv">$query</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="nv">$forename</code> <code class="o">=</code> <code class="s">'Bill'</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$surname </code> <code class="o">=</code> <code class="s">'Smith'</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$username</code> <code class="o">=</code> <code class="s">'bsmith'</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$password</code> <code class="o">=</code> <code class="s">'mysecret'</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$hash </code> <code class="n"> </code> <code class="n"> </code><code class="o">=</code> <code class="nb">password_hash</code><code class="p">(</code><code class="nv">$password</code><code class="p">,</code> <code class="n">PASSWORD_DEFAULT</code><code class="p">);</code>
+<code class="n">  </code>
+<code class="n"> </code> <code class="n">add_user</code><code class="p">(</code><code class="nv">$pdo</code><code class="p">,</code> <code class="nv">$forename</code><code class="p">,</code> <code class="nv">$surname</code><code class="p">,</code> <code class="nv">$username</code><code class="p">,</code> <code class="nv">$hash</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="nv">$forename</code> <code class="o">=</code> <code class="s">'Pauline'</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$surname </code> <code class="o">=</code> <code class="s">'Jones'</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$username</code> <code class="o">=</code> <code class="s">'pjones'</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$password</code> <code class="o">=</code> <code class="s">'acrobat'</code><code class="p">;</code>
+<code class="n"> </code> <code class="nv">$hash </code> <code class="n"> </code> <code class="n"> </code><code class="o">=</code> <code class="nb">password_hash</code><code class="p">(</code><code class="nv">$password</code><code class="p">,</code> <code class="n">PASSWORD_DEFAULT</code><code class="p">);</code>
+<code class="n">  </code>
+<code class="n"> </code> <code class="n">add_user</code><code class="p">(</code><code class="nv">$pdo</code><code class="p">,</code> <code class="nv">$forename</code><code class="p">,</code> <code class="nv">$surname</code><code class="p">,</code> <code class="nv">$username</code><code class="p">,</code> <code class="nv">$hash</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="k">function</code> <code class="nf">add_user</code><code class="p">(</code><code class="nv">$pdo</code><code class="p">,</code> <code class="nv">$fn</code><code class="p">,</code> <code class="nv">$sn</code><code class="p">,</code> <code class="nv">$un</code><code class="p">,</code> <code class="nv">$pw</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$stmt</code> <code class="o">=</code> <code class="nv">$pdo</code><code class="o">-&gt;</code><code class="na">prepare</code><code class="p">(</code><code class="s">'INSERT INTO users VALUES(?,?,?,?)'</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$stmt</code><code class="o">-&gt;</code><code class="na">bindParam</code><code class="p">(</code><code class="mi">1</code><code class="p">,</code> <code class="nv">$fn</code><code class="p">,</code> <code class="n">PDO</code><code class="o">::</code><code class="na">PARAM_STR</code><code class="p">,</code><code class="n"> </code> <code class="mi">32</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$stmt</code><code class="o">-&gt;</code><code class="na">bindParam</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code> <code class="nv">$sn</code><code class="p">,</code> <code class="n">PDO</code><code class="o">::</code><code class="na">PARAM_STR</code><code class="p">,</code><code class="n"> </code> <code class="mi">32</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$stmt</code><code class="o">-&gt;</code><code class="na">bindParam</code><code class="p">(</code><code class="mi">3</code><code class="p">,</code> <code class="nv">$un</code><code class="p">,</code> <code class="n">PDO</code><code class="o">::</code><code class="na">PARAM_STR</code><code class="p">,</code><code class="n"> </code> <code class="mi">32</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$stmt</code><code class="o">-&gt;</code><code class="na">bindParam</code><code class="p">(</code><code class="mi">4</code><code class="p">,</code> <code class="nv">$pw</code><code class="p">,</code> <code class="n">PDO</code><code class="o">::</code><code class="na">PARAM_STR</code><code class="p">,</code> <code class="mi">255</code><code class="p">);</code>
+
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$stmt</code><code class="o">-&gt;</code><code class="na">execute</code><code class="p">([</code><code class="nv">$fn</code><code class="p">,</code> <code class="nv">$sn</code><code class="p">,</code> <code class="nv">$un</code><code class="p">,</code> <code class="nv">$pw</code><code class="p">]);</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/>
+</pre>
+</div>
+
+<p class="author1">This program will create the table <em class="hyperlink">users</em> within your <em class="hyperlink">publications</em> database (or whichever database you set up for the <em class="hyperlink">login.php</em> file in <a data-type="xref" href="ch11.xhtml#accessing_mysql_using_php" class="calibre6">Chapter 11</a>). In this table, it will create two users: Bill Smith and Pauline Jones. They have the usernames and passwords of <em class="hyperlink">bsmith/mysecret</em> and <em class="hyperlink">pjones/acrobat</em>, respectively.</p>
+
+<p class="author1">Using the data in this table, we can now modify <a data-type="xref" href="#php_authentication_with_input_checking" class="calibre6">Example 13-2</a> to properly authenticate users, and <a data-type="xref" href="#php_authentication_using_mysql" class="calibre6">Example 13-4</a> shows the code needed to do this. Type it in or download it from the companion website, then make sure it is saved as <em class="hyperlink">authenticate.php</em>, and call it up in your browser.</p>
+
+<div data-type="example" id="php_authentication_using_mysql" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 13-4. </span>PHP authentication using MySQL</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="o">?</code><code class="n">php</code><code class="calibre15"> </code><code class="c">// authenticate.php
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">require_once</code><code class="calibre15"> </code><code class="s">'login.php'</code><code class="p">;</code><code class="calibre15">
+
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">try</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">{</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$pdo</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="k">new</code><code class="calibre15"> </code><code class="n">PDO</code><code class="p">(</code><code class="nv">$attr</code><code class="p">,</code><code class="calibre15"> </code><code class="nv">$user</code><code class="p">,</code><code class="calibre15"> </code><code class="nv">$pass</code><code class="p">,</code><code class="calibre15"> </code><code class="nv">$opts</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">}</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">catch</code><code class="calibre15"> </code><code class="p">(</code><code class="n">\PDOException</code><code class="calibre15"> </code><code class="nv">$e</code><code class="p">)</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">{</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="k">throw</code><code class="calibre15"> </code><code class="k">new</code><code class="calibre15"> </code><code class="n">\PDOException</code><code class="p">(</code><code class="nv">$e</code><code class="o">-&gt;</code><code class="na">getMessage</code><code class="p">(),</code><code class="calibre15"> </code><code class="p">(</code><code class="n">int</code><code class="p">)</code><code class="nv">$e</code><code class="o">-&gt;</code><code class="na">getCode</code><code class="p">());</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">}</code><code class="calibre15">
+
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">if</code><code class="calibre15"> </code><code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_USER'</code><code class="p">])</code><code class="calibre15"> </code><code class="o">&amp;&amp;</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_PW'</code><code class="p">]))</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">{</code><code class="calibre15">
+</code><strong class="calibre31"><code class="nx1">  </code><code class="calibre17"> </code><code class="nx1"> </code><code class="nv1">$un_temp</code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="nx1">sanitize</code><code class="p1">(</code><code class="nv1">$pdo</code><code class="p1">,</code><code class="calibre17"> </code><code class="nv1">$_SERVER</code><code class="p1">[</code><code class="s2">'PHP_AUTH_USER'</code><code class="p1">]);</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nv1">$pw_temp</code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="nx1">sanitize</code><code class="p1">(</code><code class="nv1">$pdo</code><code class="p1">,</code><code class="calibre17"> </code><code class="nv1">$_SERVER</code><code class="p1">[</code><code class="s2">'PHP_AUTH_PW'</code><code class="p1">]);</code><code class="calibre17">
+</code></strong><strong class="calibre31"><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nv1">$query </code><code class="calibre17"> </code><code class="nx1"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="s2">"</code><code class="s2">SELECT * FROM users WHERE username=</code><code class="si">$un_temp</code><code class="s2">"</code><code class="p1">;</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nv1">$result </code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="nv1">$pdo</code><code class="o1">-&gt;</code><code class="na1">query</code><code class="p1">(</code><code class="nv1">$query</code><code class="p1">);</code><code class="calibre17">
+
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="k1">if</code><code class="calibre17"> </code><code class="p1">(</code><code class="o1">!</code><code class="nv1">$result</code><code class="o1">-&gt;</code><code class="na1">rowCount</code><code class="p1">())</code><code class="calibre17"> </code><code class="k1">die</code><code class="p1">(</code><code class="s2">"</code><code class="s2">User not found</code><code class="s2">"</code><code class="p1">);</code><code class="calibre17">
+
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nv1">$row</code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="nv1">$result</code><code class="o1">-&gt;</code><code class="na1">fetch</code><code class="p1">();</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nv1">$fn </code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="nv1">$row</code><code class="p1">[</code><code class="s2">'forename'</code><code class="p1">];</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nv1">$sn </code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="nv1">$row</code><code class="p1">[</code><code class="s2">'surname'</code><code class="p1">];</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nv1">$un </code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="nv1">$row</code><code class="p1">[</code><code class="s2">'username'</code><code class="p1">];</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nv1">$pw </code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="nv1">$row</code><code class="p1">[</code><code class="s2">'password'</code><code class="p1">];</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1">  </code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="k1">if</code><code class="calibre17"> </code><code class="p1">(</code><code class="nb1">password_verify</code><code class="p1">(</code><code class="nb1">str_replace</code><code class="p1">(</code><code class="s2">"</code><code class="s2">'</code><code class="s2">"</code><code class="p1">,</code><code class="calibre17"> </code><code class="s2">"</code><code class="s2">"</code><code class="p1">,</code><code class="calibre17"> </code><code class="nv1">$pw_temp</code><code class="p1">),</code><code class="calibre17"> </code><code class="nv1">$pw</code><code class="p1">))</code></strong><code class="calibre15">
+</code><strong class="calibre31"><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="k1">echo</code><code class="calibre17"> </code><code class="nb1">htmlspecialchars</code><code class="p1">(</code><code class="s2">"</code><code class="si">$fn</code><code class="s2"> </code><code class="si">$sn</code><code class="s2"> : Hi </code><code class="si">$fn</code><code class="s2">,
+        you are now logged in as '</code><code class="si">$un</code><code class="s2">'</code><code class="s2">"</code><code class="p1">);</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="k1">else</code><code class="calibre17"> </code><code class="k1">die</code><code class="p1">(</code><code class="s2">"</code><code class="s2">Invalid username/password combination</code><code class="s2">"</code><code class="p1">);</code></strong><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">}</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">else</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">{</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nb">header</code><code class="p">(</code><code class="s">'WWW-Authenticate: Basic realm="Restricted Area"'</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nb">header</code><code class="p">(</code><code class="s">'HTTP/1.1 401 Unauthorized'</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="k">die</code><code class="calibre15"> </code><code class="p">(</code><code class="s">"</code><code class="s">Please enter your username and password</code><code class="s">"</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">}</code><code class="calibre15">
+
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">function</code><code class="calibre15"> </code><code class="nf">sanitize</code><code class="p">(</code><code class="nv">$pdo</code><code class="p">,</code><code class="calibre15"> </code><code class="nv">$str</code><code class="p">)</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">{</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$str</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="nb">htmlentities</code><code class="p">(</code><code class="nv">$str</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="k">return</code><code class="calibre15"> </code><code class="nv">$pdo</code><code class="o">-&gt;</code><code class="na">quote</code><code class="p">(</code><code class="nv">$str</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">}</code><code class="calibre15">
+</code><code class="cp">?&gt;</code><code class="x">
+</code></pre>
+</div>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">Using<a contenteditable="false" data-primary="passwords" data-secondary="BCRYPT algorithm for" data-type="indexterm" id="idm45694709255304" class="calibre6"/><a contenteditable="false" data-primary="passwords" data-secondary="password_verify function" data-type="indexterm" id="idm45694708680360" class="calibre6"/><a contenteditable="false" data-primary="BCRYPT algorithm" data-type="indexterm" id="idm45694709227064" class="calibre6"/><a contenteditable="false" data-primary="password_verify function" data-type="indexterm" id="idm45694709225992" class="calibre6"/> HTTP authentication will impose approximately an 80 ms penalty when using <code class="calibre15">password_verify</code> with passwords hashed with BCRYPT, with the default cost of 10. This slowdown serves as a barrier for attackers to prevent them from trying to crack the passwords at maximum speed. Therefore, HTTP authentication is not a good solution on very busy sites, where you will probably prefer to use sessions (see the next section).</p>
+</div>
+
+<p class="author1">As you might expect at this point in the book, some of these examples are starting to get quite a bit longer. But don’t be put off. The only lines to really concern yourself with at this point are the ones highlighted in bold. They start with the assigning of two variables, <code class="calibre15">$un_temp</code> and <code class="calibre15">$pw_temp</code>, using the submitted username and password passed through the <code class="calibre15">sanitize</code> function to change any HTML entities to safe character strings with the <code class="calibre15">htmlentities</code> function, and add single quotes to the start and end of the string using the <code class="calibre15">quote</code> method.</p>
+
+<p class="author1">Next, a query is issued to MySQL to look up the user <code class="calibre15">$un_temp</code> and, if a result is returned, to assign the first row to <code class="calibre15">$row</code>. Because usernames are unique, there will be only one row.</p>
+
+<p class="author1">Now all that’s necessary is to check the hash value stored in the database, which is in <code class="calibre15">$row['password']</code> and is the previous hash value calculated with <code class="calibre15">password_hash</code> when the user created their password.</p>
+
+<p class="author1">If the hash and the password just supplied by the user verify, <code class="calibre15">password_verify</code> will return <code class="calibre15">TRUE</code> and a friendly welcome string will be output, calling the user by their first name (see <a data-type="xref" href="#bill_smith_has_now_been_authenticated" class="calibre6">Figure 13-4</a>). Otherwise, an error message is displayed. Because<a contenteditable="false" data-primary="str_replace" data-type="indexterm" id="idm45694708798760" class="calibre6"/> we have sanitized the password using <code class="calibre15">quote</code>, when <code class="calibre15">password_verify</code> is called, the encapsulating single quotes are first removed with <code class="calibre15">str_replace</code>.</p>
+
+<p class="author1">You can try this out for yourself by calling up the program in your browser and entering a username of <code class="calibre15">bsmith</code> and password of <code class="calibre15">mysecret</code> (or <code class="calibre15">pjones</code> and <code class="calibre15">acrobat</code>), the values that were saved in the database by <a data-type="xref" href="#creating_a_users_table_and_adding_two_ac" class="calibre6">Example 13-3</a>.</p>
+
+<figure class="calibre23"><div id="bill_smith_has_now_been_authenticated" class="figure"><img alt="Bill Smith has now been authenticated" src="Images/pmj6_1304.png" class="calibre83"/>
+<h6 class="calibre24"><span class="keep-together">Figure 13-4. </span>Bill Smith has now been authenticated</h6>
+</div></figure>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">By sanitizing input immediately after it is encountered, you will block any malicious HTML, JavaScript, or MySQL attacks before they can get any further, and you will not have to sanitize this data again. If a user has characters such as <code class="calibre15">&lt;</code> or <code class="calibre15">&amp;</code> in their password (for example), these will be expanded to <code class="calibre15">&amp;lt;</code> or <code class="calibre15">&amp;amp;</code> by the <code class="calibre15">htmlentities</code> function—but as long as your code allows for strings that may end up larger than the provided input width, and as long as you always run passwords through this sanitization, you’ll be just fine.<a contenteditable="false" data-primary="" data-startref="authenhttp12" data-type="indexterm" id="idm45694708814856" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="HTTPexam12" data-type="indexterm" id="idm45694708813480" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="SIauthen12" data-type="indexterm" id="idm45694708812104" class="calibre6"/></p>
+</div>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Using Sessions" class="calibre4"><div class="preface" id="using_sessions">
+<h1 class="calibre11">Using Sessions</h1>
+
+<p class="author1">Because<a contenteditable="false" data-primary="sessions" data-secondary="purpose of" data-type="indexterm" id="idm45694708792968" class="calibre6"/> your program can’t tell what variables were set in other programs—or even what values the same program set the previous time it ran—you’ll sometimes want to track what your users are doing from one web page to another. You can do this by setting hidden fields in a form, as seen in <a data-type="xref" href="ch11.xhtml#accessing_mysql_using_php" class="calibre6">Chapter 11</a>, and checking the values of the fields after the form is submitted, but PHP provides a much more powerful, more secure, and simpler solution in the form of <em class="hyperlink">sessions</em>. These are groups of variables that are stored on the server but relate only to the current user. To ensure that the right variables are applied to the right users, PHP saves a cookie in the users’ web browsers to uniquely identify them.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+
+<p class="author1">In<a contenteditable="false" data-primary="third-party cookies" data-type="indexterm" id="idm45694709122872" class="calibre6"/><a contenteditable="false" data-primary="Privacy Sandbox" data-type="indexterm" id="idm45694708811368" class="calibre6"/><a contenteditable="false" data-primary="cookies" data-secondary="Google's cookie-free approach" data-type="indexterm" id="idm45694708810264" class="calibre6"/><a contenteditable="false" data-primary="Google Chrome" data-secondary="cookie-free approach" data-type="indexterm" id="idm45694708808872" class="calibre6"/> 2019 Google announced it was working toward phasing out third-party cookies in its browser with a project called Privacy Sandbox. No doubt other browsers will follow suit, particularly Opera and Microsoft Edge, which both rely on Google Chrome’s codebase. However, this is attracting regulatory attention as some companies have suggested this could drive even more spend toward Google’s ecosystem, and so its implementation could change. What is sure, though, is that the cookie is becoming hated, and with the cookie warning on almost every site you visit, its days are numbered. In summary, Google intends to lump users into groups of 1,000 or so who have similar browser usage and product interests, so that nobody can be uniquely identified or traced. However, this could cause problems for your code once cookies are finally dropped. Therefore I recommend you keep an eye out for developments in this area that could affect how users interact with the code you develop.</p>
+</div>
+
+<p class="author1">This<a contenteditable="false" data-primary="cookies" data-secondary="alerting users to" data-type="indexterm" id="idm45694709243800" class="calibre6"/> cookie has meaning only to the web server and cannot be used to ascertain any information about a user. You might ask about those users who have cookies turned off. Well, in this day and age, anyone with cookies disabled should not expect to have the best browsing experience, and if you find them disabled you should probably inform such a user that they require cookies enabled if they wish to fully benefit from your site, rather than trying to find ways around the use of cookies, which could create security issues.</p>
+
+<section data-type="sect2" data-pdf-bookmark="Starting a Session" class="calibre4"><div class="preface" id="starting_a_session">
+<h2 class="calibre28">Starting a Session</h2>
+
+<p class="author1">Starting<a contenteditable="false" data-primary="sessions" data-secondary="starting" data-type="indexterm" id="Sstart12" class="calibre6"/> a session requires calling the PHP function <code class="calibre15">session_start</code> before any HTML has been output, similarly to how cookies are sent during header exchanges. Then, to begin saving session variables, you just assign them as part of the <code class="calibre15">$_SESSION</code> array, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'variable'</code><code class="p">]</code> <code class="o">=</code> <code class="nv">$value</code><code class="p">;</code></pre>
+
+<p class="author1">They can then be read back just as easily in later program runs, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$variable</code> <code class="o">=</code> <code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'variable'</code><code class="p">];</code></pre>
+
+<p class="author1">Now assume that you have an application that always needs access to the first name and last name of each user, as stored in the table <em class="hyperlink">users</em>, which you should have created a little earlier. Let’s further modify <em class="hyperlink">authenticate.php</em> from <a data-type="xref" href="#php_authentication_using_mysql" class="calibre6">Example 13-4</a> to set up a session once a user has been authenticated.</p>
+
+<p class="author1"><a data-type="xref" href="#setting_a_session_after_successful_authe" class="calibre6">Example 13-5</a> shows the changes needed. The only difference is the content of the <code class="calibre15">if (password_verify...</code> section, which we now start by opening a session and saving these variables into it. Type this program (or modify <a data-type="xref" href="#php_authentication_using_mysql" class="calibre6">Example 13-4</a>) and save it as <em class="hyperlink">authenticate2.php</em>. But don’t run it in your browser yet, as you will also need to create a second program in a moment.</p>
+
+<div data-type="example" id="setting_a_session_after_successful_authe" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 13-5. </span>Setting a session after successful authentication</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="o">?</code><code class="n">php</code><code class="calibre15"> </code><code class="c">// authenticate2.php
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">require_once</code><code class="calibre15"> </code><code class="s">'login.php'</code><code class="p">;</code><code class="calibre15">
+
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">try</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">{</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$pdo</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="k">new</code><code class="calibre15"> </code><code class="n">PDO</code><code class="p">(</code><code class="nv">$attr</code><code class="p">,</code><code class="calibre15"> </code><code class="nv">$user</code><code class="p">,</code><code class="calibre15"> </code><code class="nv">$pass</code><code class="p">,</code><code class="calibre15"> </code><code class="nv">$opts</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">}</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">catch</code><code class="calibre15"> </code><code class="p">(</code><code class="n">\PDOException</code><code class="calibre15"> </code><code class="nv">$e</code><code class="p">)</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">{</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="k">throw</code><code class="calibre15"> </code><code class="k">new</code><code class="calibre15"> </code><code class="n">\PDOException</code><code class="p">(</code><code class="nv">$e</code><code class="o">-&gt;</code><code class="na">getMessage</code><code class="p">(),</code><code class="calibre15"> </code><code class="p">(</code><code class="n">int</code><code class="p">)</code><code class="nv">$e</code><code class="o">-&gt;</code><code class="na">getCode</code><code class="p">());</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">}</code><code class="calibre15">
+
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">if</code><code class="calibre15"> </code><code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_USER'</code><code class="p">])</code><code class="calibre15"> </code><code class="o">&amp;&amp;</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_PW'</code><code class="p">]))</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">{</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$un_temp</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="n">sanitize</code><code class="p">(</code><code class="nv">$pdo</code><code class="p">,</code><code class="calibre15"> </code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_USER'</code><code class="p">]);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$pw_temp</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="n">sanitize</code><code class="p">(</code><code class="nv">$pdo</code><code class="p">,</code><code class="calibre15"> </code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'PHP_AUTH_PW'</code><code class="p">]);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$query </code><code class="calibre15"> </code><code class="n"> </code><code class="o">=</code><code class="calibre15"> </code><code class="s">"</code><code class="s">SELECT * FROM users WHERE username=</code><code class="err">$un_temp</code><code class="s">"</code><code class="p">;</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$result </code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="nv">$pdo</code><code class="o">-&gt;</code><code class="na">query</code><code class="p">(</code><code class="nv">$query</code><code class="p">);</code><code class="calibre15">
+
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="k">if</code><code class="calibre15"> </code><code class="p">(</code><code class="o">!</code><code class="nv">$result</code><code class="o">-&gt;</code><code class="na">rowCount</code><code class="p">())</code><code class="calibre15"> </code><code class="k">die</code><code class="p">(</code><code class="s">"</code><code class="s">User not found</code><code class="s">"</code><code class="p">);</code><code class="calibre15">
+
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$row</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="nv">$result</code><code class="o">-&gt;</code><code class="na">fetch</code><code class="p">();</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$fn </code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="nv">$row</code><code class="p">[</code><code class="s">'forename'</code><code class="p">];</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$sn </code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="nv">$row</code><code class="p">[</code><code class="s">'surname'</code><code class="p">];</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$un </code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="nv">$row</code><code class="p">[</code><code class="s">'username'</code><code class="p">];</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$pw </code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="nv">$row</code><code class="p">[</code><code class="s">'password'</code><code class="p">];</code><code class="calibre15">
+
+</code><strong class="calibre31"><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="k1">if</code><code class="calibre17"> </code><code class="p1">(</code><code class="nb1">password_verify</code><code class="p1">(</code><code class="nb1">str_replace</code><code class="p1">(</code><code class="s2">"</code><code class="s2">'</code><code class="s2">"</code><code class="p1">,</code><code class="calibre17"> </code><code class="s2">"</code><code class="s2">"</code><code class="p1">,</code><code class="calibre17"> </code><code class="nv1">$pw_temp</code><code class="p1">),</code><code class="calibre17"> </code><code class="nv1">$pw</code><code class="p1">))</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="p1">{</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nb1">session_start</code><code class="p1">();</code><code class="calibre17">
+
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nv1">$_SESSION</code><code class="p1">[</code><code class="s2">'forename'</code><code class="p1">]</code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="nv1">$fn</code><code class="p1">;</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nv1">$_SESSION</code><code class="p1">[</code><code class="s2">'surname'</code><code class="p1">]</code><code class="nx1"> </code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="nv1">$sn</code><code class="p1">;</code><code class="calibre17">
+
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="k1">echo</code><code class="calibre17"> </code><code class="nb1">htmlspecialchars</code><code class="p1">(</code><code class="s2">"</code><code class="si">$fn</code><code class="s2"> </code><code class="si">$sn</code><code class="s2"> : Hi </code><code class="si">$fn</code><code class="s2">,
+        you are now logged in as '</code><code class="si">$un</code><code class="s2">'</code><code class="s2">"</code><code class="p1">);</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="k1">die</code><code class="calibre17"> </code><code class="p1">(</code><code class="s2">"</code><code class="s2">&lt;p&gt;&lt;a href='continue.php'&gt;Click here to continue&lt;/a&gt;&lt;/p&gt;</code><code class="s2">"</code><code class="p1">);</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="p1">}</code><code class="calibre17">
+</code></strong><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="k">else</code><code class="calibre15"> </code><code class="k">die</code><code class="p">(</code><code class="s">"</code><code class="s">Invalid username/password combination</code><code class="s">"</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">}</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">else</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">{</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nb">header</code><code class="p">(</code><code class="s">'WWW-Authenticate: Basic realm="Restricted Area"'</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nb">header</code><code class="p">(</code><code class="s">'HTTP/1.0 401 Unauthorized'</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="k">die</code><code class="calibre15"> </code><code class="p">(</code><code class="s">"</code><code class="s">Please enter your username and password</code><code class="s">"</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">}</code><code class="calibre15">
+
+</code><code class="n"> </code><code class="calibre15"> </code><code class="k">function</code><code class="calibre15"> </code><code class="nf">sanitize</code><code class="p">(</code><code class="nv">$pdo</code><code class="p">,</code><code class="calibre15"> </code><code class="nv">$str</code><code class="p">)</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">{</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="nv">$str</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="nb">htmlentities</code><code class="p">(</code><code class="nv">$str</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="n"> </code><code class="calibre15"> </code><code class="k">return</code><code class="calibre15"> </code><code class="nv">$pdo</code><code class="o">-&gt;</code><code class="na">quote</code><code class="p">(</code><code class="nv">$str</code><code class="p">);</code><code class="calibre15">
+</code><code class="n"> </code><code class="calibre15"> </code><code class="p">}</code><code class="calibre15">
+</code><code class="cp">?&gt;</code><code class="x">
+</code></pre>
+</div>
+
+<p class="author1">One other addition to the program is the “Click here to continue” link with a destination URL of <em class="hyperlink">continue.php</em>. This will be used to illustrate how the session will transfer to another program or PHP web page. So, create <em class="hyperlink">continue.php</em> by typing the program in <a data-type="xref" href="#retrieving_session_variables" class="calibre6">Example 13-6</a> and saving it.</p>
+
+<div data-type="example" id="retrieving_session_variables" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 13-6. </span>Retrieving session variables</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// continue.php</code>
+  <code class="nb">session_start</code><code class="p">();</code>
+
+  <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'forename'</code><code class="p">]))</code>
+  <code class="p">{</code>
+    <code class="nv">$forename</code> <code class="o">=</code> <code class="nb">htmlspecialchars</code><code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'forename'</code><code class="p">]);</code>
+    <code class="nv">$surname</code>  <code class="o">=</code> <code class="nb">htmlspecialchars</code><code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'surname'</code><code class="p">]);</code>
+
+    <code class="k">echo</code> <code class="s">"Welcome back </code><code class="err">$forename</code><code class="s">.&lt;br&gt;</code>
+<code class="s">          Your full name is </code><code class="err">$forename</code><code class="s"> </code><code class="err">$surname</code><code class="s">.&lt;br&gt;"</code><code class="p">;</code>
+  <code class="p">}</code>
+  <code class="k">else</code> <code class="k">echo</code> <code class="s">"Please &lt;a href='authenticate2.php'&gt;click here&lt;/a&gt; to log in."</code><code class="p">;</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Now you are ready to call up <em class="hyperlink">authenticate2.php</em> into your browser. Enter a username of <code class="calibre15">bsmith</code> and password of <code class="calibre15">mysecret</code> (or <code class="calibre15">pjones</code> and <code class="calibre15">acrobat</code>) when prompted, and click the link to load in <em class="hyperlink">continue.php</em>. When your browser calls it up, the result should be something like <a data-type="xref" href="#maintaining-user-data" class="calibre6">Figure 13-5</a>.</p>
+
+<figure class="calibre23"><div id="maintaining-user-data" class="figure"><img alt="" class="calibre83" src="Images/pmj6_1305.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 13-5. </span>Maintaining user data with sessions</h6>
+</div></figure>
+
+<p class="author1">Sessions neatly confine to a single program the extensive code required to authenticate and log in a user. Once a user has been authenticated, and you have created a session, your program code becomes very simple indeed. You need only call up <span class="keep-together"><code class="calibre15">session_start</code></span> and look in <code class="calibre15">$_SESSION</code> for any variables to which you need access.</p>
+
+<p class="author1">In <a data-type="xref" href="#retrieving_session_variables" class="calibre6">Example 13-6</a>, a quick test of whether <code class="calibre15">$_SESSION['forename']</code> has a value is enough to let you know that the current user is authenticated, because session variables are stored on the server (unlike cookies, which are stored in the web browser) and can therefore be trusted.</p>
+
+<p class="author1">If <code class="calibre15">$_SESSION['forename']</code> has not been assigned a value, no session is active, so the last line of code in <a data-type="xref" href="#retrieving_session_variables" class="calibre6">Example 13-6</a> directs users to the login page at <em class="hyperlink">authenticate2.php</em>.<a contenteditable="false" data-primary="" data-startref="Sstart12" data-type="indexterm" id="idm45694709109560" class="calibre6"/></p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Ending a Session" class="calibre4"><div class="preface" id="ending_a_session">
+<h2 class="calibre28">Ending a Session</h2>
+
+<p class="author1">When<a contenteditable="false" data-primary="sessions" data-secondary="ending" data-type="indexterm" id="idm45694707820600" class="calibre6"/> the time comes to end a session, usually when a user requests to log out from your site, you can use the <code class="calibre15">session_destroy</code> function, as in <a data-type="xref" href="#handy_function_to_destroy_a_session_an" class="calibre6">Example 13-7</a>. This example provides a useful function for totally destroying a session, logging a user out, and unsetting all session variables.</p>
+
+<div data-type="example" id="handy_function_to_destroy_a_session_an" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 13-7. </span>A handy function to destroy a session and its data</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">function</code> <code class="nf">destroy_session_and_data</code><code class="p">()</code>
+  <code class="p">{</code>
+    <code class="nb">session_start</code><code class="p">();</code>
+    <code class="nv">$_SESSION</code> <code class="o">=</code> <code class="k">array</code><code class="p">();</code>
+    <code class="nb">setcookie</code><code class="p">(</code><code class="nb">session_name</code><code class="p">(),</code> <code class="s">''</code><code class="p">,</code> <code class="nb">time</code><code class="p">()</code> <code class="o">-</code> <code class="mi">2592000</code><code class="p">,</code> <code class="s">'/'</code><code class="p">);</code>
+    <code class="nb">session_destroy</code><code class="p">();</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">To see this in action, you could modify <em class="hyperlink">continue.php</em> as in <a data-type="xref" href="#retrieving_session_variables_and_then_de" class="calibre6">Example 13-8</a>.</p>
+
+<div data-type="example" id="retrieving_session_variables_and_then_de" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 13-8. </span>Retrieving session variables and then destroying the session</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="o">?</code><code class="n">php</code><code class="calibre15">
+  </code><code class="nb">session_start</code><code class="p">();</code><code class="calibre15">
+
+
+  </code><code class="k">if</code><code class="calibre15"> </code><code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'forename'</code><code class="p">]))</code><code class="calibre15">
+  </code><code class="p">{</code><code class="calibre15">
+    </code><code class="nv">$forename</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'forename'</code><code class="p">];</code><code class="calibre15">
+    </code><code class="nv">$surname</code><code class="calibre15">  </code><code class="o">=</code><code class="calibre15"> </code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'surname'</code><code class="p">];</code><code class="calibre15">
+
+    </code><strong class="calibre31"><code class="nx1">destroy_session_and_data</code><code class="p1">();</code></strong><code class="calibre15">
+
+    </code><code class="k">echo</code><code class="calibre15"> </code><code class="nb">htmlspecialchars</code><code class="p">(</code><code class="s">"</code><code class="s">Welcome back </code><code class="err">$forename</code><code class="s">"</code><code class="p">);</code><code class="calibre15">
+    </code><code class="k">echo</code><code class="calibre15"> </code><code class="s">"</code><code class="s">&lt;br&gt;</code><code class="s">"</code><code class="p">;</code><code class="calibre15">
+    </code><code class="k">echo</code><code class="calibre15"> </code><code class="nb">htmlspecialchars</code><code class="p">(</code><code class="s">"</code><code class="s">Your full name is </code><code class="err">$forename</code><code class="s"> </code><code class="err">$surname</code><code class="s">.</code><code class="s">"</code><code class="p">);</code><code class="calibre15">
+
+  </code><code class="p">}</code><code class="calibre15">
+  </code><code class="k">else</code><code class="calibre15"> </code><code class="k">echo</code><code class="calibre15"> </code><code class="s">"</code><code class="s">Please &lt;a href='authenticate.php'&gt;click here&lt;/a&gt; to log in.</code><code class="s">"</code><code class="p">;</code><code class="calibre15">
+
+  </code><strong class="calibre31"><code class="k1">function</code><code class="calibre17"> </code><code class="nf2">destroy_session_and_data</code><code class="p1">()</code><code class="calibre17">
+  </code><code class="p1">{</code><code class="calibre17">
+    </code><code class="nv1">$_SESSION</code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="k1">array</code><code class="p1">();</code><code class="calibre17">
+    </code><code class="nb1">setcookie</code><code class="p1">(</code><code class="nb1">session_name</code><code class="p1">(),</code><code class="calibre17"> </code><code class="s2">''</code><code class="p1">,</code><code class="calibre17"> </code><code class="nb1">time</code><code class="p1">()</code><code class="calibre17"> </code><code class="o1">-</code><code class="calibre17"> </code><code class="mi1">2592000</code><code class="p1">,</code><code class="calibre17"> </code><code class="s2">'/'</code><code class="p1">);</code><code class="calibre17">
+    </code><code class="nb1">session_destroy</code><code class="p1">();</code><code class="calibre17">
+  </code><code class="p1">}</code></strong><code class="calibre15">
+</code><code class="cp">?&gt;</code></pre>
+</div>
+
+<p class="author1">The first time you navigate from <em class="hyperlink">authenticate2.php</em> to <em class="hyperlink">continue.php</em>, it will display all the session variables. But, because of the call to <code class="calibre15">destroy_session_and_data</code>, if you then click your browser’s Reload button, the session will have been destroyed and you’ll be prompted to return to the login page.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Setting a Timeout" class="calibre4"><div class="preface" id="setting_a_timeout">
+<h2 class="calibre28">Setting a Timeout</h2>
+
+<p class="author1">There<a contenteditable="false" data-primary="sessions" data-secondary="timeouts for" data-type="indexterm" id="idm45694708514968" class="calibre6"/><a contenteditable="false" data-primary="timeouts, for sessions" data-type="indexterm" id="idm45694708513560" class="calibre6"/> are other times when you might wish to close a user’s session yourself, such as when the user has forgotten or neglected to log out, and you want the program to do so for them for their own security. You do this by setting the timeout after which a logout will automatically occur if there has been no activity.</p>
+
+<p class="author1">To do this, use the <code class="calibre15">ini_set</code> function as follows. This example sets the timeout to exactly one day (the letters <code class="calibre15">gc</code> standing for garbage collection):</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">ini_set</code><code class="p">(</code><code class="s">'session.gc_maxlifetime'</code><code class="p">,</code> <code class="mi">60</code> <code class="o">*</code> <code class="mi">60</code> <code class="o">*</code> <code class="mi">24</code><code class="p">);</code></pre>
+
+<p class="author1">If you wish to know what the current timeout period is, you can display it using the following:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code> <code class="nb">ini_get</code><code class="p">(</code><code class="s">'session.gc_maxlifetime'</code><code class="p">);</code></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Session Security" class="calibre4"><div class="preface" id="session_security">
+<h2 class="calibre28">Session Security</h2>
+
+<p class="author1">Although<a contenteditable="false" data-primary="sessions" data-secondary="security issues" data-type="indexterm" id="Ssecur12" class="calibre6"/><a contenteditable="false" data-primary="security issues" data-secondary="sessions" data-type="indexterm" id="SIsession12" class="calibre6"/><a contenteditable="false" data-primary="packet sniffing" data-type="indexterm" id="idm45694708389864" class="calibre6"/> I mentioned that once you had authenticated a user and set up a session you could safely assume that the session variables were trustworthy, this isn’t exactly the case. The reason is that it’s possible to use <em class="hyperlink">packet sniffing</em> (sampling of data) to discover session IDs passing across a network. Additionally, if the session ID is passed in the GET part of a URL, it might appear in external site server logs.</p>
+
+<p class="author1">The<a contenteditable="false" data-primary="Transport Layer Security (TLS)" data-type="indexterm" id="idm45694708387160" class="calibre6"/><a contenteditable="false" data-primary="Secure Sockets Layer (SSL)" data-type="indexterm" id="idm45694708386056" class="calibre6"/> only truly secure way of preventing these from being discovered is to implement <em class="hyperlink">Transport Layer Security</em> (TLS, the more secure successor to the <em class="hyperlink">Secure Sockets Layer</em>, or SSL) and run HTTPS instead of HTTP web pages. That’s beyond the scope of this book, although you may like to take a look at the<a contenteditable="false" data-primary="Apache web server" data-secondary="documentation" data-type="indexterm" id="idm45694708383912" class="calibre6"/> <a href="https://tinyurl.com/apachetls" class="calibre6">Apache documentation</a> for details on setting up a secure web server.</p>
+
+<section data-type="sect3" data-pdf-bookmark="Preventing session hijacking" class="calibre4"><div class="preface" id="preventing_session_hijacking">
+<h3 class="calibre43">Preventing session hijacking</h3>
+
+<p class="author1">When TLS is not a possibility, you can further authenticate users by storing their IP addresses along with their other details by adding a line such as the following when you store their sessions:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'ip'</code><code class="p">]</code> <code class="o">=</code> <code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'REMOTE_ADDR'</code><code class="p">];</code></pre>
+
+<p class="author1">Then, as<a contenteditable="false" data-primary="different_user function (PHP)" data-type="indexterm" id="idm45694707888856" class="calibre6"/> an extra check, whenever any page loads and a session is available, perform the following check. It calls the function <code class="calibre15">different_user</code> if the stored IP address doesn’t match the current one:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'ip'</code><code class="p">]</code> <code class="o">!=</code> <code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'REMOTE_ADDR'</code><code class="p">])</code> <code class="n">different_user</code><code class="p">();</code></pre>
+
+<p class="author1">What code you place in your <code class="calibre15">different_user</code> function is up to you. I recommend that you either delete the current session and ask the user to log in again due to a technical error or, if you have their email address, email them a link to confirm their identity, which will enable them to retain all the data in the session.</p>
+
+<p class="author1">Of course, you need to be aware that users on the same proxy server, or sharing the same IP address on a home or business network, will have the same IP address. Again, if this is a problem for you, use HTTPS. You can also store a copy of the browser <em class="hyperlink">user-agent string</em> (a string that developers put in their browsers to identify them by type and version), which might also distinguish users due to the wide variety of browser types, versions, and computer platforms in use (although this is not a perfect solution, and the string will change if the browser auto-updates). Use the following to store the user agent:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'ua'</code><code class="p">]</code> <code class="o">=</code> <code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'HTTP_USER_AGENT'</code><code class="p">];</code></pre>
+
+<p class="author1">And use this to compare the current user-agent string with the saved one:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'ua'</code><code class="p">]</code> <code class="o">!=</code> <code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'HTTP_USER_AGENT'</code><code class="p">])</code> <code class="n">different_user</code><code class="p">();</code></pre>
+
+<p class="author1">Or, better still, combine the two checks like this and save the combination as a <code class="calibre15">hash</code> hexadecimal string:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'check'</code><code class="p">]</code> <code class="o">=</code> <code class="nb">hash</code><code class="p">(</code><code class="s">'ripemd128'</code><code class="p">,</code> <code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'REMOTE_ADDR'</code><code class="p">]</code> <code class="o">.</code>
+    <code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'HTTP_USER_AGENT'</code><code class="p">]);</code></pre>
+
+<p class="author1">And use this to compare the current and stored strings:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'check'</code><code class="p">]</code> <code class="o">!=</code> <code class="nb">hash</code><code class="p">(</code><code class="s">'ripemd128'</code><code class="p">,</code> <code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'REMOTE_ADDR'</code><code class="p">]</code> <code class="o">.</code>
+    <code class="nv">$_SERVER</code><code class="p">[</code><code class="s">'HTTP_USER_AGENT'</code><code class="p">]))</code> <code class="n">different_user</code><code class="p">();</code></pre>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Preventing session fixation" class="calibre4"><div class="preface" id="preventing_session_fixation">
+<h3 class="calibre43">Preventing session fixation</h3>
+
+<p class="author1"><em class="hyperlink">Session fixation</em> happens<a contenteditable="false" data-primary="session fixation" data-type="indexterm" id="idm45694708198200" class="calibre6"/> when a malicious third party obtains a valid session ID (which could be server-generated) and makes the user authenticate themselves with that session ID, instead of authenticating with their own. It can happen when an attacker takes advantage of the ability to pass a session ID in the GET part of a URL, like this:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+http://yourserver.com/authenticate.php?PHPSESSID=123456789</pre>
+
+<p class="author1">In this example, the made-up session ID of 123456789 is being passed to the server. Now, consider <a data-type="xref" href="#session_susceptible_to_session_fixatio" class="calibre6">Example 13-9</a>, which is susceptible to session fixation. To see how, type it and save it as <em class="hyperlink">sessiontest.php</em>.</p>
+
+<div data-type="example" id="session_susceptible_to_session_fixatio" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 13-9. </span>A session susceptible to session fixation</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// sessiontest.php</code>
+  <code class="nb">session_start</code><code class="p">();</code>
+
+  <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'count'</code><code class="p">]))</code> <code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'count'</code><code class="p">]</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+  <code class="k">else</code> <code class="o">++</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'count'</code><code class="p">];</code>
+
+  <code class="k">echo</code> <code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'count'</code><code class="p">];</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Once it’s saved, call it up in your browser using the following URL (prefacing it with the correct pathname, such as <em class="hyperlink">http://localhost</em>):</p>
+
+<pre data-programming-language="perl" class="calibre29">
+sessiontest.php?PHPSESSID=1234</pre>
+
+<p class="author1">Click Reload a few times, and you’ll see the counter increase. Now try browsing to:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+sessiontest.php?PHPSESSID=5678</pre>
+
+<p class="author1">Click Reload a few times here, and you should see it continue counting upward. Leave the counter on a different number from the first URL, go back to the first URL, and see how the number changes back. You have created two different sessions of your own choosing here, and you could easily create as many as you needed.</p>
+
+<p class="author1">The reason this approach is so dangerous is that a malicious attacker could try to distribute these types of URLs to unsuspecting users, and if any of them followed these links, the attacker would be able to come back and take over any sessions that had not been deleted or expired—imagine if that session was to a shopping site, or even worse, a bank!</p>
+
+<p class="author1">To<a contenteditable="false" data-primary="session_regenerate_id function (PHP)" data-type="indexterm" id="idm45694708192152" class="calibre6"/> prevent this, change the session ID using <code class="calibre15">session_regenerate_id</code> as soon as you can. This function keeps all current session variable values but replaces the session ID with a new one that an attacker cannot know. To do this, check for a special session variable that you arbitrarily invent. If it doesn’t exist, you know that this is a new session, so you simply change the session ID and set the special session variable to note the change. <a data-type="xref" href="#session_regeneration" class="calibre6">Example 13-10</a> shows how the code to do this might look, using the session variable <code class="calibre15">initiated</code>.</p>
+
+<div data-type="example" id="session_regeneration" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 13-10. </span>Session regeneration</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nb">session_start</code><code class="p">();</code>
+
+  <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'initiated'</code><code class="p">]))</code>
+  <code class="p">{</code>
+    <code class="nb">session_regenerate_id</code><code class="p">();</code>
+    <code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'initiated'</code><code class="p">]</code> <code class="o">=</code> <code class="mi">1</code><code class="p">;</code>
+  <code class="p">}</code>
+
+  <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'count'</code><code class="p">]))</code> <code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'count'</code><code class="p">]</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+  <code class="k">else</code> <code class="o">++</code><code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'count'</code><code class="p">];</code>
+
+  <code class="k">echo</code> <code class="nv">$_SESSION</code><code class="p">[</code><code class="s">'count'</code><code class="p">];</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">This way, an attacker can come back to your site using any of the session IDs that they generated, but none of them will call up another user’s session, as they will all have been replaced with regenerated IDs.</p>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Forcing cookie-only sessions" class="calibre4"><div class="preface" id="forcing_cookie-only_sessions">
+<h3 class="calibre43">Forcing cookie-only sessions</h3>
+
+<p class="author1">If<a contenteditable="false" data-primary="ini_set function (PHP)" data-type="indexterm" id="idm45694708103352" class="calibre6"/><a contenteditable="false" data-primary="cookies" data-secondary="requiring" data-type="indexterm" id="idm45694708102216" class="calibre6"/> you are prepared to require your users to enable cookies on your website, you can use the <code class="calibre15">ini_set</code> function, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">ini_set</code><code class="p">(</code><code class="s">'session.use_only_cookies'</code><code class="p">,</code> <code class="mi">1</code><code class="p">);</code></pre>
+
+<p class="author1">With that setting, the <code class="calibre15">?PHPSESSID=</code> trick will be completely ignored. If you use this security measure, I also recommend that you inform your users that your site requires cookies (but only if the user has cookies disabled, and especially if the user is in a part of the world that requires cookie notifications), so they know what’s wrong if they don’t get the results they want.</p>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Using a shared server" class="calibre4"><div class="preface" id="using_a_shared_server">
+<h3 class="calibre43">Using a shared server</h3>
+
+<p class="author1">On<a contenteditable="false" data-primary="shared servers" data-type="indexterm" id="idm45694708092600" class="calibre6"/><a contenteditable="false" data-primary="servers" data-secondary="shared" data-type="indexterm" id="idm45694708091464" class="calibre6"/> a server shared with other accounts, you will not want to have all your session data saved into the same directory as theirs. Instead, you should choose a directory to which only your account has access (and that is not web-visible) to store your sessions, by placing an <code class="calibre15">ini_set</code> call near the start of your program, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">ini_set</code><code class="p">(</code><code class="s">'session.save_path'</code><code class="p">,</code> <code class="s">'/home/user/myaccount/sessions'</code><code class="p">);</code></pre>
+
+<p class="author1">The configuration option will keep this new value only during the program’s execution, and the original configuration will be restored at the program’s ending.</p>
+
+<p class="author1">This <em class="hyperlink">sessions</em> folder can fill up quickly; you may wish to periodically clear out older sessions according to how busy your server gets. The more it’s used, the less time you will want to keep a session stored.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">Remember that your websites can and will be subject to hacking attempts. There are automated bots running riot around the internet, trying to find sites vulnerable to exploits. So whatever you do, whenever you are handling data that is not 100% generated within your own program, you should always treat it with the utmost <span class="keep-together">caution.</span></p>
+</div>
+
+<p class="author1">You should now have a very good grasp of both PHP and MySQL, so <a href="ch14.xhtml#exploring_javascript" class="calibre6">Chapter 14</a> introduces the third major technology covered by this book, JavaScript.<a contenteditable="false" data-primary="" data-startref="Ssecur12" data-type="indexterm" id="idm45694708080232" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="SIsession12" data-type="indexterm" id="idm45694708078856" class="calibre6"/></p>
+</div></section>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Questions" class="calibre4"><div class="preface" id="questions-id00033">
+<h1 class="calibre11">Questions</h1>
+
+<ol class="calibre25">
+	<li class="calibre26">
+	<p class="author1">Why must a cookie be transferred at the start of a program?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Which PHP function stores a cookie in a web browser?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you destroy a cookie?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Where are the username and password stored in a PHP program when you are using HTTP authentication?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Why is the <code class="calibre15">password_hash</code> function a powerful security measure?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is meant by <em class="hyperlink">salting </em>a string?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is a PHP session?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How do you initiate a PHP session?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is session hijacking?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is session fixation?</p>
+	</li>
+</ol>
+
+<p class="author1">See <a data-type="xref" href="app01_split_012.xhtml#chapter_13_answers" class="calibre6">“Chapter 13 Answers”</a> in the <a data-type="xref" href="app01_split_000.xhtml#solutions_to_the_chapter_questions" class="calibre6">Appendix A</a> for the answers to these <span class="keep-together">questions.</span></p>
+</div></section>
+</div></section></div></body></html>

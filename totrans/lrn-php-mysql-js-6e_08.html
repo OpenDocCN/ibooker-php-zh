@@ -1,0 +1,1150 @@
+<html><head></head><body><div id="sbo-rt-content" class="calibre1"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 5. PHP Functions and Objects" class="calibre4"><div class="preface" id="php_functions_and_objects">
+<h1 class="calibre10"><span class="keep-together">Chapter 5. </span>PHP Functions and Objects</h1>
+
+<p class="author1">The<a contenteditable="false" data-primary="PHP programming language" data-secondary="functions in" data-type="indexterm" id="PHPfunc05" class="calibre6"/> basic requirements of any programming language include somewhere to store data, a means of directing program flow, and a few bits and pieces such as expression evaluation, file management, and text output. PHP has all these, plus tools like <code class="calibre15">else</code> and <code class="calibre15">elseif</code> to make life easier. But even with all these in your toolkit, programming can be clumsy and tedious, especially if you have to rewrite portions of very similar code each time you need them.</p>
+
+<p class="author1">That’s<a contenteditable="false" data-primary="functions (PHP)" data-secondary="purpose of" data-type="indexterm" id="idm45694754729064" class="calibre6"/> where functions and objects come in. As you might guess, a <em class="hyperlink">function</em> is a set of statements that performs a particular function and—optionally—returns a value. You can pull out a section of code that you have used more than once, place it into a function, and call the function by name when you want the code.</p>
+
+<p class="author1">Functions<a contenteditable="false" data-primary="functions (PHP)" data-secondary="advantages of" data-type="indexterm" id="idm45694754711784" class="calibre6"/> have many advantages over contiguous, inline code. For example, they:</p>
+
+<ul class="printings">
+	<li class="calibre9">
+	<p class="author1">Involve less typing</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Reduce syntax and other programming errors</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Decrease the loading time of program files</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Decrease execution time, because each function is compiled only once, no matter how often you call it</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Accept arguments and can therefore be used for general as well as specific cases</p>
+	</li>
+</ul>
+
+<p class="author1">Objects<a contenteditable="false" data-primary="objects (PHP)" data-secondary="purpose of" data-type="indexterm" id="idm45694754704680" class="calibre6"/> take this concept a step further. An <em class="hyperlink">object</em> incorporates one or more functions, and the data they use, into a single structure called a <em class="hyperlink">class</em>.</p>
+
+<p class="author1">In this chapter, you’ll learn all about using functions, from defining and calling them to passing arguments back and forth. With that knowledge under your belt, you’ll start creating functions and using them in your own objects (where they will be referred to as <em class="hyperlink">methods</em>).</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">It<a contenteditable="false" data-primary="AMPPS server" data-secondary="PHP version selection" data-type="indexterm" id="idm45694754700008" class="calibre6"/><a contenteditable="false" data-primary="PHP programming language" data-secondary="version selection" data-type="indexterm" id="idm45694754698600" class="calibre6"/> is now highly unusual (and definitely not recommended) to use any version of PHP lower than 5.4. Therefore, this chapter assumes that this release is the bare minimum version you will be working with. Generally I would recommend version 5.6, or the new version 7.0 or 7.1 (there is no version 6). You can select any of these from the AMPPS control panel, as described in <a data-type="xref" href="ch02.xhtml#setting_up_a_development_server" class="calibre6">Chapter 2</a>.</p>
+</div>
+
+<section data-type="sect1" data-pdf-bookmark="PHP Functions" class="calibre4"><div class="preface" id="php_functions">
+<h1 class="calibre11">PHP Functions</h1>
+
+<p class="author1">PHP<a contenteditable="false" data-primary="functions (PHP)" data-secondary="using (calling)" data-type="indexterm" id="idm45694754693144" class="calibre6"/> comes with hundreds of ready-made, built-in functions, making it a very rich language. To use a function, call it by name. For example, you can see the <code class="calibre15">date</code> function in action here:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code> <code class="nb">date</code><code class="p">(</code><code class="s">"l"</code><code class="p">);</code> <code class="c">// Displays the day of the week</code></pre>
+
+<p class="author1">The<a contenteditable="false" data-primary="() (parentheses)" data-secondary="in functions in PHP" data-type="indexterm" id="idm45694754687096" class="calibre6"/><a contenteditable="false" data-primary="parentheses (())" data-secondary="in functions in PHP" data-type="indexterm" id="idm45694754662312" class="calibre6"/> parentheses tell PHP that you’re referring to a function. Otherwise, it thinks you’re referring to a constant or variable.</p>
+
+<p class="author1">Functions<a contenteditable="false" data-primary="functions (PHP)" data-secondary="arguments accepted by" data-type="indexterm" id="idm45694754660248" class="calibre6"/><a contenteditable="false" data-primary="arguments, in PHP" data-type="indexterm" id="idm45694754684520" class="calibre6"/> can take any number of arguments, including zero. For example, <code class="calibre15">phpinfo</code>, as shown next, displays lots of information about the current installation of PHP and requires no argument:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">phpinfo</code><code class="p">();</code></pre>
+
+<p class="author1">The result of calling this function can be seen in <a data-type="xref" href="#phpinfo" class="calibre6">Figure 5-1</a>.</p>
+
+<figure class="calibre23"><div id="phpinfo" class="figure"><img alt="" class="iimagesphpinfopng" src="Images/pmj6_0501.png"/>
+<h6 class="calibre24"><span class="keep-together">Figure 5-1. </span>The output of PHP’s built-in <code class="calibre15">phpinfo</code> function</h6>
+</div></figure>
+
+<div data-type="warning" epub:type="warning" class="calibre21"><h6 class="calibre22">Warning</h6>
+<p class="author1">The <code class="calibre15">phpinfo</code> function is<a contenteditable="false" data-primary="phpinfo function" data-type="indexterm" id="idm45694754668456" class="calibre6"/><a contenteditable="false" data-primary="security issues" data-secondary="phpinfo function" data-type="indexterm" id="idm45694754667320" class="calibre6"/> extremely useful for obtaining information about your current PHP installation, but that information could also be very useful to potential hackers. Therefore, never leave a call to this function in any web-ready code.</p>
+</div>
+
+<p class="author1">Some of the built-in functions that use one or more arguments appear in <a data-type="xref" href="#three_string_functions" class="calibre6">Example 5-1</a>.</p>
+
+<div data-type="example" id="three_string_functions" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-1. </span>Three string functions</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">echo</code> <code class="nb">strrev</code><code class="p">(</code><code class="s">" .dlrow olleH"</code><code class="p">);</code> <code class="c">// Reverse string</code>
+  <code class="k">echo</code> <code class="nb">str_repeat</code><code class="p">(</code><code class="s">"Hip "</code><code class="p">,</code> <code class="mi">2</code><code class="p">);</code>   <code class="c">// Repeat string</code>
+  <code class="k">echo</code> <code class="nb">strtoupper</code><code class="p">(</code><code class="s">"hooray!"</code><code class="p">);</code>   <code class="c">// String to uppercase</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">This example uses three string functions to output the following text:</p>
+<p class="author1">
+<strong class="calibre16"><code class="calibre17">Hello world. Hip Hip HOORAY!</code></strong>
+</p>
+
+<p class="author1">As<a contenteditable="false" data-primary="strrev function (PHP)" data-type="indexterm" id="idm45694754603512" class="calibre6"/> you can see, the <code class="calibre15">strrev</code> function reversed the order of characters in the string, <code class="calibre15">str_repeat</code> repeated the string <code class="calibre15">"Hip "</code> twice (as required by the second argument), <a contenteditable="false" data-primary="strtoupper function (PHP)" data-type="indexterm" id="idm45694754599448" class="calibre6"/>and <code class="calibre15">strtoupper</code> converted <code class="calibre15">"hooray!"</code> to uppercase.</p>
+
+<section data-type="sect2" data-pdf-bookmark="Defining a Function" class="calibre4"><div class="preface" id="defining_a_function">
+<h2 class="calibre28">Defining a Function</h2>
+
+<p class="author1">The<a contenteditable="false" data-primary="functions (PHP)" data-secondary="defining" data-type="indexterm" id="idm45694754595480" class="calibre6"/><a contenteditable="false" data-primary="[] (square brackets)" data-secondary="in PHP function definitions" data-type="indexterm" id="idm45694754594072" class="calibre6"/><a contenteditable="false" data-primary="square brackets ([])" data-secondary="in PHP function definitions" data-type="indexterm" id="idm45694754592728" class="calibre6"/> general syntax for a function is as follows:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">function</code><code class="calibre15"> </code><em class="calibre30"><code class="nf1">function_name</code></em><code class="p">([</code><em class="calibre30"><code class="nx">parameter</code></em><code class="calibre15"> </code><code class="p">[,</code><code class="calibre15"> </code><code class="o">...</code><code class="p">]])</code><code class="calibre15">
+</code><code class="p">{</code><code class="calibre15">
+  </code><code class="c">// </code><em class="calibre30"><code class="c1">Statements</code></em><code class="c">
+</code><code class="p">}</code></pre>
+
+<p class="author1">The first line of the syntax indicates the following:</p>
+
+<ul class="printings">
+	<li class="calibre9">
+	<p class="author1">A definition starts with the word <code class="calibre15">function</code>.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">A name follows, which must start with a letter or underscore, followed by any number of letters, numbers, or underscores.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">The parentheses are required.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">One or more parameters, separated by commas, are optional (as indicated by the square brackets).</p>
+	</li>
+</ul>
+
+<p class="author1">Function<a contenteditable="false" data-primary="names and naming" data-secondary="functions in PHP" data-type="indexterm" id="idm45694754557272" class="calibre6"/><a contenteditable="false" data-primary="functions (PHP)" data-secondary="naming rules" data-type="indexterm" id="idm45694754555864" class="calibre6"/> names are case-insensitive, so all of the following strings can refer to the <code class="calibre15">print</code> function: <code class="calibre15">PRINT</code>, <code class="calibre15">Print</code>, and <code class="calibre15">PrInT</code>.</p>
+
+<p class="author1">The<a contenteditable="false" data-primary="curly braces ({ })" data-secondary="in functions in PHP" data-type="indexterm" id="idm45694754539864" class="calibre6"/><a contenteditable="false" data-primary="{ } (curly braces)" data-secondary="in functions in PHP" data-type="indexterm" id="idm45694754538568" class="calibre6"/> opening curly brace starts the statements that will execute when you call the function; a matching curly brace must close it. These statements may include one or more <code class="calibre15">return</code> statements, which force the function to cease execution and return to the calling code. If<a contenteditable="false" data-primary="return statements" data-secondary="in PHP" data-type="indexterm" id="idm45694754536344" class="calibre6"/> a value is attached to the <code class="calibre15">return</code> statement, the calling code can retrieve it, as we’ll see next.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Returning a Value" class="calibre4"><div class="preface" id="returning_a_value">
+<h2 class="calibre28">Returning a Value</h2>
+
+<p class="author1">Let’s<a contenteditable="false" data-primary="functions (PHP)" data-secondary="returning values from" data-type="indexterm" id="idm45694754531928" class="calibre6"/> take a look at a simple function to convert a person’s full name to lowercase and then capitalize the first letter of each part of the name.</p>
+
+<p class="author1">We’ve<a contenteditable="false" data-primary="strtolower function (PHP)" data-type="indexterm" id="idm45694754529928" class="calibre6"/> already seen an example of PHP’s built-in <code class="calibre15">strtoupper</code> function in <a data-type="xref" href="#three_string_functions" class="calibre6">Example 5-1</a>. For our current function, we’ll use its counterpart, <code class="calibre15">strtolower</code>:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$lowered</code> <code class="o">=</code> <code class="nb">strtolower</code><code class="p">(</code><code class="s">"aNY # of Letters and Punctuation you WANT"</code><code class="p">);</code></pre>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code> <code class="nv">$lowered</code><code class="p">;</code></pre>
+
+<p class="author1">The output of this experiment is as follows:</p>
+
+<p class="author1">
+<strong class="calibre16"><code class="calibre17">any # of letters and punctuation you want</code></strong>
+</p>
+
+<p class="author1">We don’t want names all lowercase, though; we want the first letter of each part of the sentence capitalized. (We’re not going to deal with subtle cases such as Mary-Ann or Jo-En-Lai for this example.) Luckily, PHP<a contenteditable="false" data-primary="ucfirst function (PHP)" data-type="indexterm" id="idm45694754268248" class="calibre6"/> also provides a <code class="calibre15">ucfirst</code> function that sets the first character of a string to uppercase:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$ucfixed</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="s">"any # of letters and punctuation you want"</code><code class="p">);</code></pre>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code> <code class="nv">$ucfixed</code><code class="p">;</code></pre>
+
+<p class="author1">The output is as follows:</p>
+
+<p class="author1">
+<strong class="calibre16"><code class="calibre17">    Any # of letters and punctuation you want</code></strong>
+</p>
+
+<p class="author1">Now<a contenteditable="false" data-primary="functions (PHP)" data-secondary="nesting for execution order" data-type="indexterm" id="idm45694754273304" class="calibre6"/> we can do our first bit of program design: to get a word with its initial letter capitalized, we call <code class="calibre15">strtolower</code> on the string first and then <code class="calibre15">ucfirst</code>. The way to do this is to nest a call to <code class="calibre15">strtolower</code> within <code class="calibre15">ucfirst</code>. Let’s see why, because it’s important to understand the order in which code is evaluated.</p>
+
+<p class="author1">Say<a contenteditable="false" data-primary="print command (PHP)" data-type="indexterm" id="idm45694754511048" class="calibre6"/> you make a simple call to the <code class="calibre15">print</code> function:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">print</code><code class="p">(</code><code class="mi">5</code><code class="o">-</code><code class="mi">8</code><code class="p">);</code></pre>
+
+<p class="author1">The expression <code class="calibre15">5-8</code> is evaluated first, and the output is <code class="calibre15">–3</code>. (As you saw in the previous chapter, PHP converts the result to a string in order to display it.) If the expression contains a function, that function is evaluated first as well:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">print</code><code class="p">(</code><code class="nb">abs</code><code class="p">(</code><code class="mi">5</code><code class="o">-</code><code class="mi">8</code><code class="p">));</code></pre>
+
+<p class="author1">PHP is doing several things in executing that short statement:</p>
+
+<ol class="calibre25">
+	<li class="calibre26">
+	<p class="author1">Evaluate <code class="calibre15">5-8</code> to produce <code class="calibre15">–3</code>.</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Use the <code class="calibre15">abs</code> function to turn <code class="calibre15">–3</code> into <code class="calibre15">3</code>.</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Convert the result to a string and output it using the <code class="calibre15">print</code> function.</p>
+	</li>
+</ol>
+
+<p class="author1">It all works because PHP evaluates each element from the inside out. The same procedure is in operation when we call the following:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="s">"aNY # of Letters and Punctuation you WANT"</code><code class="p">))</code></pre>
+
+<p class="author1">PHP passes our string to <code class="calibre15">strtolower</code> and then to <code class="calibre15">ucfirst</code>, producing (as we’ve already seen when we played with the functions separately):</p>
+
+<p class="author1">
+<strong class="calibre16"><code class="calibre17">    Any # of letters and punctuation you want</code></strong>
+</p>
+
+<p class="author1">Now let’s define a function (shown in <a data-type="xref" href="#cleaning_up_a_full_name" class="calibre6">Example 5-2</a>) that takes three names and makes each one lowercase, with an initial capital letter.</p>
+
+<div data-type="example" id="cleaning_up_a_full_name" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-2. </span>Cleaning up a full name</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">echo</code> <code class="n">fix_names</code><code class="p">(</code><code class="s">"WILLIAM"</code><code class="p">,</code> <code class="s">"henry"</code><code class="p">,</code> <code class="s">"gatES"</code><code class="p">);</code>
+
+  <code class="k">function</code> <code class="nf">fix_names</code><code class="p">(</code><code class="nv">$n1</code><code class="p">,</code> <code class="nv">$n2</code><code class="p">,</code> <code class="nv">$n3</code><code class="p">)</code>
+  <code class="p">{</code>
+    <code class="nv">$n1</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$n1</code><code class="p">));</code>
+    <code class="nv">$n2</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$n2</code><code class="p">));</code>
+    <code class="nv">$n3</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$n3</code><code class="p">));</code>
+
+    <code class="k">return</code> <code class="nv">$n1</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$n2</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$n3</code><code class="p">;</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">You may well find yourself writing this type of code, because users often leave their Caps Lock key on, accidentally insert capital letters in the wrong places, and even forget capitals altogether. The output from this example is shown here:</p>
+<strong class="calibre16"> <code class="calibre17">    William Henry Gates</code></strong></div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Returning an Array" class="calibre4"><div class="preface" id="returning_an_array">
+<h2 class="calibre28">Returning an Array</h2>
+
+<p class="author1">We<a contenteditable="false" data-primary="functions (PHP)" data-secondary="returning arrays from" data-type="indexterm" id="idm45694754307400" class="calibre6"/><a contenteditable="false" data-primary="arrays (PHP)" data-secondary="returning values from functions in" data-type="indexterm" id="idm45694754305992" class="calibre6"/> just saw a function returning a single value. There are also ways of getting multiple values from a function.</p>
+
+<p class="author1">The first method is to return them within an array. As you saw in <a data-type="xref" href="ch03.xhtml#introduction_to_php" class="calibre6">Chapter 3</a>, an array is like a bunch of variables stuck together in a row. <a data-type="xref" href="#returning_multiple_values_in_an_array" class="calibre6">Example 5-3</a> shows how you can use an array to return function values.</p>
+
+<div data-type="example" id="returning_multiple_values_in_an_array" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-3. </span>Returning multiple values in an array</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$names</code> <code class="o">=</code> <code class="n">fix_names</code><code class="p">(</code><code class="s">"WILLIAM"</code><code class="p">,</code> <code class="s">"henry"</code><code class="p">,</code> <code class="s">"gatES"</code><code class="p">);</code>
+  <code class="k">echo</code> <code class="nv">$names</code><code class="p">[</code><code class="mi">0</code><code class="p">]</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$names</code><code class="p">[</code><code class="mi">1</code><code class="p">]</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$names</code><code class="p">[</code><code class="mi">2</code><code class="p">];</code>
+
+  <code class="k">function</code> <code class="nf">fix_names</code><code class="p">(</code><code class="nv">$n1</code><code class="p">,</code> <code class="nv">$n2</code><code class="p">,</code> <code class="nv">$n3</code><code class="p">)</code>
+  <code class="p">{</code>
+    <code class="nv">$n1</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$n1</code><code class="p">));</code>
+    <code class="nv">$n2</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$n2</code><code class="p">));</code>
+    <code class="nv">$n3</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$n3</code><code class="p">));</code>
+
+    <code class="k">return</code> <code class="k">array</code><code class="p">(</code><code class="nv">$n1</code><code class="p">,</code> <code class="nv">$n2</code><code class="p">,</code> <code class="nv">$n3</code><code class="p">);</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">This method has the benefit of keeping all three names separate, rather than concatenating them into a single string, so you can refer to any user simply by first or last name without having to extract either name from the returned string.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Passing Arguments by Reference" class="calibre4"><div class="preface" id="passing_by_reference">
+<h2 class="calibre28">Passing Arguments by Reference</h2>
+
+<p class="author1">In<a contenteditable="false" data-primary="arguments, in PHP" data-type="indexterm" id="idm45694751153848" class="calibre6"/><a contenteditable="false" data-primary="functions (PHP)" data-secondary="passing arguments by reference" data-type="indexterm" id="idm45694751152824" class="calibre6"/><a contenteditable="false" data-primary="&amp; (ampersand), prefacing PHP variables" data-type="indexterm" id="idm45694751151432" class="calibre6"/> PHP versions prior to 5.3, you used to be able to preface a variable with the <code class="calibre15">&amp;</code> symbol at the time of calling a function (for example, <code class="calibre15">increment(&amp;$myvar);</code>) to tell the parser to pass a reference to the variable, not the variable’s value. This granted a function access to the variable (allowing different values to be written back to it).</p>
+
+<div data-type="caution" class="calibre21"><h6 class="calibre22">Caution</h6>
+<p class="author1">Call-time pass-by-reference<a contenteditable="false" data-primary="call-time pass-by-reference" data-type="indexterm" id="idm45694751148136" class="calibre6"/><a contenteditable="false" data-primary="pass-by-reference feature" data-type="indexterm" id="idm45694751146968" class="calibre6"/> was deprecated in PHP 5.3 and removed in PHP 5.4. You should therefore not use this feature other than on legacy websites, and even there it is recommended you rewrite code that passes by reference, because it will halt with a fatal error on newer versions of PHP.</p>
+</div>
+
+<p class="author1">However, <em class="hyperlink">within</em> a function definition, you may continue to access arguments by reference. This concept can be hard to get your head around, so let’s go back to the matchbox metaphor from <a data-type="xref" href="ch03.xhtml#introduction_to_php" class="calibre6">Chapter 3</a>.</p>
+
+<p class="author1">Imagine that instead of taking a piece of paper out of a matchbox, reading it, copying what’s on it onto another piece of paper, putting the original back, and passing the copy to a function (phew!) you could simply attach a piece of thread to the original piece of paper and pass one end of it to the function (see <a data-type="xref" href="#imagining_a_reference_as_a_thread_attach" class="calibre6">Figure 5-2</a>).</p>
+
+<figure class="calibre23"><div id="imagining_a_reference_as_a_thread_attach" class="figure"><img alt="Imagining a reference as a thread attached to a variable" src="Images/pmj6_0502.png" class="calibre56"/>
+<h6 class="calibre24"><span class="keep-together">Figure 5-2. </span>Imagining a reference as a thread attached to a variable</h6>
+</div></figure>
+
+<p class="author1">Now the function can follow the thread to find the data to be accessed. This prevents all the overhead of creating a copy of the variable just for the function’s use. What’s more, the function can now modify the variable’s value.</p>
+
+<p class="author1">This means you can rewrite <a data-type="xref" href="#returning_multiple_values_in_an_array" class="calibre6">Example 5-3</a> to pass references to all the parameters, and then the function can modify these directly (see <a data-type="xref" href="#returning_values_from_a_function_by_refe" class="calibre6">Example 5-4</a>).</p>
+
+<div data-type="example" id="returning_values_from_a_function_by_refe" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-4. </span>Passing values to a function by reference</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$a1</code> <code class="o">=</code> <code class="s">"WILLIAM"</code><code class="p">;</code>
+  <code class="nv">$a2</code> <code class="o">=</code> <code class="s">"henry"</code><code class="p">;</code>
+  <code class="nv">$a3</code> <code class="o">=</code> <code class="s">"gatES"</code><code class="p">;</code>
+
+  <code class="k">echo</code> <code class="nv">$a1</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$a2</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$a3</code> <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+  <code class="n">fix_names</code><code class="p">(</code><code class="nv">$a1</code><code class="p">,</code> <code class="nv">$a2</code><code class="p">,</code> <code class="nv">$a3</code><code class="p">);</code>
+  <code class="k">echo</code> <code class="nv">$a1</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$a2</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$a3</code><code class="p">;</code>
+
+  <code class="k">function</code> <code class="nf">fix_names</code><code class="p">(</code><code class="o">&amp;</code><code class="nv">$n1</code><code class="p">,</code> <code class="o">&amp;</code><code class="nv">$n2</code><code class="p">,</code> <code class="o">&amp;</code><code class="nv">$n3</code><code class="p">)</code>
+  <code class="p">{</code>
+    <code class="nv">$n1</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$n1</code><code class="p">));</code>
+    <code class="nv">$n2</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$n2</code><code class="p">));</code>
+    <code class="nv">$n3</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$n3</code><code class="p">));</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Rather than passing strings directly to the function, you first assign them to variables and print them out to see their “before” values. Then you call the function as before, but within the function definition you place an <code class="calibre15">&amp;</code> symbol in front of each parameter to be passed by reference.</p>
+
+<p class="author1">Now the variables <code class="calibre15">$n1</code>, <code class="calibre15">$n2</code>, and <code class="calibre15">$n3</code> are attached to “threads” that lead to the values of <code class="calibre15">$a1</code>, <code class="calibre15">$a2</code>, and <code class="calibre15">$a3</code>. In other words, there is one group of values, but two sets of variable names are allowed to access them.</p>
+
+<p class="author1">Therefore, the function <code class="calibre15">fix_names</code> only has to assign new values to <code class="calibre15">$n1</code>, <code class="calibre15">$n2</code>, and <code class="calibre15">$n3</code> to update the values of <code class="calibre15">$a1</code>, <code class="calibre15">$a2</code>, and <code class="calibre15">$a3</code>. The output from this code is:</p>
+<strong class="calibre16"><code class="calibre17">    WILLIAM henry gatES<br class="calibre57"/>
+William Henry Gates</code></strong>
+
+<p class="author1">As you see, both of the <code class="calibre15">echo</code> statements use only the values of <code class="calibre15">$a1</code>, <code class="calibre15">$a2</code>, and <code class="calibre15">$a3</code>.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Returning Global Variables" class="calibre4"><div class="preface" id="returning_global_variables">
+<h2 class="calibre28">Returning Global Variables</h2>
+
+<p class="author1">The<a contenteditable="false" data-primary="variables (PHP)" data-secondary="global" data-type="indexterm" id="idm45694750976632" class="calibre6"/><a contenteditable="false" data-primary="global variables" data-secondary="in PHP" data-type="indexterm" id="idm45694750975224" class="calibre6"/><a contenteditable="false" data-primary="functions (PHP)" data-secondary="returning global variables" data-type="indexterm" id="idm45694750973848" class="calibre6"/> better way to give a function access to an externally created variable that is not passed as an argument is by declaring it to have global access from within the function. The <code class="calibre15">global</code> keyword followed by the variable name gives every part of your code full access to it (see <a data-type="xref" href="#returning_values_in_global_variables" class="calibre6">Example 5-5</a>).</p>
+
+<div data-type="example" id="returning_values_in_global_variables" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-5. </span>Returning values in global variables</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$a1</code> <code class="o">=</code> <code class="s">"WILLIAM"</code><code class="p">;</code>
+  <code class="nv">$a2</code> <code class="o">=</code> <code class="s">"henry"</code><code class="p">;</code>
+  <code class="nv">$a3</code> <code class="o">=</code> <code class="s">"gatES"</code><code class="p">;</code>
+
+  <code class="k">echo</code> <code class="nv">$a1</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$a2</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$a3</code> <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+  <code class="n">fix_names</code><code class="p">();</code>
+  <code class="k">echo</code> <code class="nv">$a1</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$a2</code> <code class="o">.</code> <code class="s">" "</code> <code class="o">.</code> <code class="nv">$a3</code><code class="p">;</code>
+
+  <code class="k">function</code> <code class="nf">fix_names</code><code class="p">()</code>
+  <code class="p">{</code>
+    <code class="k">global</code> <code class="nv">$a1</code><code class="p">;</code> <code class="nv">$a1</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$a1</code><code class="p">));</code>
+    <code class="k">global</code> <code class="nv">$a2</code><code class="p">;</code> <code class="nv">$a2</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$a2</code><code class="p">));</code>
+    <code class="k">global</code> <code class="nv">$a3</code><code class="p">;</code> <code class="nv">$a3</code> <code class="o">=</code> <code class="nb">ucfirst</code><code class="p">(</code><code class="nb">strtolower</code><code class="p">(</code><code class="nv">$a3</code><code class="p">));</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Now you don’t have to pass parameters to the function, and it doesn’t have to accept them. Once declared, these variables retain global access and are available to the rest of your program, including its functions.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Recap of Variable Scope" class="calibre4"><div class="preface" id="recap_of_variable_scope">
+<h2 class="calibre28">Recap of Variable Scope</h2>
+
+<p class="author1">A<a contenteditable="false" data-primary="functions (PHP)" data-secondary="variable scope" data-type="indexterm" id="idm45694750713560" class="calibre6"/><a contenteditable="false" data-primary="variables (PHP)" data-secondary="scope of" data-type="indexterm" id="idm45694750712152" class="calibre6"/><a contenteditable="false" data-primary="scope" data-secondary="variable scope in PHP" data-type="indexterm" id="idm45694750710776" class="calibre6"/> quick reminder of what you know from <a data-type="xref" href="ch03.xhtml#introduction_to_php" class="calibre6">Chapter 3</a>:</p>
+
+<ul class="printings">
+	<li class="calibre9">
+	<p class="author1"><em class="hyperlink">Local variables<a contenteditable="false" data-primary="variables (PHP)" data-secondary="local" data-type="indexterm" id="idm45694750707064" class="calibre6"/><a contenteditable="false" data-primary="local variables (PHP)" data-type="indexterm" id="idm45694750705656" class="calibre6"/></em> are accessible just from the part of your code where you define them. If they’re outside of a function, they can be accessed by all code outside of functions, classes, and so on. If a variable is inside a function, only that function can access the variable, and its value is lost when the function returns.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1"><em class="hyperlink">Global variables</em> are accessible from all parts of your code, whether within or outside of functions.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1"><em class="hyperlink">Static variables<a contenteditable="false" data-primary="variables (PHP)" data-secondary="static" data-type="indexterm" id="idm45694750701960" class="calibre6"/><a contenteditable="false" data-primary="static variables (PHP)" data-type="indexterm" id="idm45694750700552" class="calibre6"/></em> are accessible only within the function that declared them but retain their value over multiple calls.</p>
+	</li>
+</ul>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Including and Requiring Files" class="calibre4"><div class="preface" id="including_and_requiring_files">
+<h1 class="calibre11">Including and Requiring Files</h1>
+
+<p class="author1">As<a contenteditable="false" data-primary="functions (PHP)" data-secondary="including and requiring files" data-type="indexterm" id="idm45694750697432" class="calibre6"/><a contenteditable="false" data-primary="file handling (PHP)" data-secondary="including/requiring files" data-type="indexterm" id="idm45694750696056" class="calibre6"/> you progress in your use of PHP programming, you are likely to start building a library of functions that you think you will need again. You’ll also probably start using libraries created by other programmers.</p>
+
+<p class="author1">There’s no need to copy and paste these functions into your code. You can save them in separate files and use commands to pull them in. There are two commands to perform this action: <code class="calibre15">include</code> and <code class="calibre15">require</code>.</p>
+
+<section data-type="sect2" data-pdf-bookmark="The include Statement" class="calibre4"><div class="preface" id="include_statement">
+<h2 class="calibre28">The include Statement</h2>
+
+<p class="author1">Using <code class="calibre15">include</code>, you<a contenteditable="false" data-primary="include statement (PHP)" data-type="indexterm" id="idm45694750690664" class="calibre6"/> can tell PHP to fetch a particular file and load all its contents. It’s as if you pasted the included file into the current file at the insertion point. <a data-type="xref" href="#including_a_php_file" class="calibre6">Example 5-6</a> shows how you would include a file called <em class="hyperlink">library.php</em>.</p>
+
+<div data-type="example" id="including_a_php_file" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-6. </span>Including a PHP file</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">include</code> <code class="s">"library.php"</code><code class="p">;</code>
+
+  <code class="c">// Your code goes here</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Using include_once" class="calibre4"><div class="preface" id="using_include_once">
+<h2 class="calibre28">Using include_once</h2>
+
+<p class="author1">Each<a contenteditable="false" data-primary="include_once statement (PHP)" data-type="indexterm" id="idm45694750678360" class="calibre6"/> time you issue the <code class="calibre15">include</code> directive, it includes the requested file again, even if you’ve already inserted it. For instance, suppose that <em class="hyperlink">library.php</em> contains a lot of useful functions, so you include it in your file, but you also include another library that includes <em class="hyperlink">library.php</em>. Through nesting, you’ve inadvertently included <em class="hyperlink">library.php</em> twice. This will produce error messages, because you’re trying to define the same constant or function multiple times. So, you should use <code class="calibre15">include_once</code> instead (see <a data-type="xref" href="#including_a_php_file_only_once" class="calibre6">Example 5-7</a>).</p>
+
+<div class="calibre41" data-type="example" id="including_a_php_file_only_once">
+<h5 class="calibre42"><span class="keep-together">Example 5-7. </span>Including a PHP file only once</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">include_once</code> <code class="s">"library.php"</code><code class="p">;</code>
+
+  <code class="c">// Your code goes here</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Then, any further attempts to include the same file (with <code class="calibre15">include</code> or <code class="calibre15">include_once</code>) will be ignored. To determine whether the requested file has already been executed, the absolute filepath is matched after all relative paths are resolved (to their absolute paths) and the file is found in your <code class="calibre15">include</code> path.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">In general, it’s probably best to stick with <code class="calibre15">include_once</code> and ignore the basic <code class="calibre15">include</code> statement. That way, you will never have the problem of files being included multiple times.</p>
+</div>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Using require and require_once" class="calibre4"><div class="preface" id="using_require_and_require_once">
+<h2 class="calibre28">Using require and require_once</h2>
+
+<p class="author1">A<a contenteditable="false" data-primary="require statement (PHP)" data-type="indexterm" id="idm45694750666888" class="calibre6"/><a contenteditable="false" data-primary="require_once statement (PHP)" data-type="indexterm" id="idm45694750871432" class="calibre6"/> potential problem with <code class="calibre15">include</code> and <code class="calibre15">include_once</code> is that PHP will only <em class="hyperlink">attempt</em> to include the requested file. Program execution continues even if the file is not found.</p>
+
+<p class="author1">When it is absolutely essential to include a file, <code class="calibre15">require</code> it. For the same reasons I gave for using <code class="calibre15">include_once</code>, I recommend that you generally stick with <code class="calibre15">require_once</code> whenever you need to <code class="calibre15">require</code> a file (see <a data-type="xref" href="#requiring_a_php_file_only_once" class="calibre6">Example 5-8</a>).</p>
+
+<div data-type="example" id="requiring_a_php_file_only_once" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-8. </span>Requiring a PHP file only once</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">require_once</code> <code class="s">"library.php"</code><code class="p">;</code>
+
+  <code class="c">// Your code goes here</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="PHP Version Compatibility" class="calibre4"><div class="preface" id="php_version_compatibility">
+<h1 class="calibre11">PHP Version Compatibility</h1>
+
+<p class="author1">PHP<a contenteditable="false" data-primary="functions (PHP)" data-secondary="version compatibility and" data-type="indexterm" id="idm45694750839320" class="calibre6"/><a contenteditable="false" data-primary="PHP programming language" data-secondary="version compatibility" data-type="indexterm" id="idm45694750837976" class="calibre6"/><a contenteditable="false" data-primary="function_exists function (PHP)" data-type="indexterm" id="idm45694750836632" class="calibre6"/> is in an ongoing process of development, and there are multiple versions. If you need to check whether a particular function is available to your code, you can use the <code class="calibre15">function_exists</code> function, which checks all predefined and user-created functions.</p>
+
+<p class="author1"><a data-type="xref" href="#checking_for_a_functionapostrophes_exist" class="calibre6">Example 5-9</a> checks for <code class="calibre15">array_combine</code>, a<a contenteditable="false" data-primary="array_combine function (PHP)" data-type="indexterm" id="idm45694750830024" class="calibre6"/> function specific to only some versions of PHP.</p>
+
+<div data-type="example" id="checking_for_a_functionapostrophes_exist" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-9. </span>Checking for a function’s existence</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">if</code> <code class="p">(</code><code class="nb">function_exists</code><code class="p">(</code><code class="s">"array_combine"</code><code class="p">))</code>
+  <code class="p">{</code>
+    <code class="k">echo</code> <code class="s">"Function exists"</code><code class="p">;</code>
+  <code class="p">}</code>
+  <code class="k">else</code>
+  <code class="p">{</code>
+    <code class="k">echo</code> <code class="s">"Function does not exist - better write our own"</code><code class="p">;</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Using code such as this, you can take advantage of features in newer versions of PHP and yet still have your code run on earlier versions where the newer features are unavailable, as long as you replicate any features that are missing. Your functions may be slower than the built-in ones, but at least your code will be much more portable.</p>
+
+<p class="author1">You<a contenteditable="false" data-primary="" data-startref="PHPfunc05" data-type="indexterm" id="idm45694750763240" class="calibre6"/><a contenteditable="false" data-primary="phpversion function" data-type="indexterm" id="idm45694750761960" class="calibre6"/> can also use the <code class="calibre15">phpversion</code> function to determine which version of PHP your code is running on. The returned result will be similar to the following, depending on the version:</p>
+
+<p class="author1"><strong class="calibre16">  8.0.0</strong></p>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="PHP Objects" class="calibre4"><div class="preface" id="php_objects">
+<h1 class="calibre11">PHP Objects</h1>
+
+<p class="author1">In<a contenteditable="false" data-primary="PHP programming language" data-secondary="objects in" data-type="indexterm" id="PHPobj05" class="calibre6"/><a contenteditable="false" data-primary="objects (PHP)" data-secondary="basics of" data-type="indexterm" id="idm45694750755288" class="calibre6"/> much the same way that functions represent a huge increase in programming power over the early days of computing, where sometimes the best program navigation available was a very basic <code class="calibre15">GOTO</code> or <code class="calibre15">GOSUB</code> statement, <em class="hyperlink">object-oriented programming</em> (OOP) takes<a contenteditable="false" data-primary="object-oriented programming (OOP)" data-type="indexterm" id="idm45694750565272" class="calibre6"/> the use of functions in a different direction.</p>
+
+<p class="author1">Once you get the hang of condensing reusable bits of code into functions, it’s not that great a leap to consider bundling the functions and their data into objects.</p>
+
+<p class="author1">Let’s take a social networking site that has many parts. One handles all user functions—that is, code to enable new users to sign up and existing users to modify their details. In standard PHP, you might create a few functions to handle this and embed some calls to the MySQL database to keep track of all the users.</p>
+
+<p class="author1">To create an object to represent the current user, you could create a class, perhaps called <code class="calibre15">User</code>, that would contain all the code required for handling users and all the variables needed for manipulating the data within the class. Then, whenever you need to manipulate a user’s data, you could simply create a new object with the <code class="calibre15">User</code> class.</p>
+
+<p class="author1">You could treat this new object as if it were the actual user. For example, you could pass the object a name, password, and email address; ask it whether such a user already exists; and, if not, have it create a new user with those attributes. You could even have an instant messaging object, or one for managing whether two users are friends.</p>
+
+<section data-type="sect2" data-pdf-bookmark="Terminology" class="calibre4"><div class="preface" id="terminology">
+<h2 class="calibre28">Terminology</h2>
+
+<p class="author1">When<a contenteditable="false" data-primary="objects (PHP)" data-secondary="terminology surrounding" data-type="indexterm" id="idm45694750558088" class="calibre6"/><a contenteditable="false" data-primary="classes" data-secondary="in PHP" data-type="indexterm" id="CLphp05" class="calibre6"/><a contenteditable="false" data-primary="instances" data-type="indexterm" id="idm45694750555032" class="calibre6"/><a contenteditable="false" data-primary="occurrences" data-type="indexterm" id="idm45694750553928" class="calibre6"/> creating a program to use objects, you need to design a composite of data and code called a <em class="hyperlink">class</em>. Each new object based on this class is called an <em class="hyperlink">instance</em> (or <em class="hyperlink">occurrence</em>) of that class.</p>
+
+<p class="author1">The<a contenteditable="false" data-primary="properties (PHP)" data-secondary="defined" data-type="indexterm" id="idm45694750795320" class="calibre6"/><a contenteditable="false" data-primary="methods" data-secondary="in PHP" data-type="indexterm" id="idm45694750793912" class="calibre6"/> data associated with an object is called its <em class="hyperlink">properties</em>; the functions it uses are called <em class="hyperlink">methods</em>. In defining a class, you supply the names of its properties and the code for its methods. See <a data-type="xref" href="#jukebox_a_great_example_of_a_self-cont" class="calibre6">Figure 5-3</a> for a jukebox metaphor for an object. Think of the CDs that it holds in the carousel as its properties; the method of playing them is to press buttons on the front panel. There is also a slot for inserting coins (the method used to activate the object) and a laser disc reader (the method used to retrieve the music, or properties, from the CDs).</p>
+
+<figure class="calibre23"><div id="jukebox_a_great_example_of_a_self-cont" class="figure"><img alt="A jukebox: a great example of a self-contained object" src="Images/pmj6_0503.png" class="calibre58"/>
+<h6 class="calibre24"><span class="keep-together">Figure 5-3. </span>A jukebox: a great example of a self-contained object</h6>
+</div></figure>
+
+<p class="author1">When<a contenteditable="false" data-primary="encapsulation" data-type="indexterm" id="idm45694750787800" class="calibre6"/><a contenteditable="false" data-primary="interfaces" data-type="indexterm" id="idm45694750786664" class="calibre6"/> you’re creating objects, it is best to use <em class="hyperlink">encapsulation</em>, or writing a class in such a way that only its methods can be used to manipulate its properties. In other words, you deny outside code direct access to its data. The methods you supply are known as the object’s <em class="hyperlink">interface</em>.</p>
+
+<p class="author1">This approach makes debugging easy: you have to fix faulty code only within a class. Additionally, when you want to upgrade a program, if you have used proper encapsulation and maintained the same interface, you can simply develop new replacement classes, debug them fully, and then swap them in for the old ones. If they don’t work, you can swap the old ones back in to immediately fix the problem before further debugging the new classes.</p>
+
+<p class="author1">Once you have created a class, you may find that you need another class that is similar to it but not quite the same. The<a contenteditable="false" data-primary="inheritance" data-type="indexterm" id="idm45694750782616" class="calibre6"/> quick and easy thing to do is to define a new class using <em class="hyperlink">inheritance</em>. When you do this, your new class has all the properties of the one it has inherited from. The<a contenteditable="false" data-primary="superclasses" data-type="indexterm" id="idm45694750548120" class="calibre6"/><a contenteditable="false" data-primary="subclasses" data-type="indexterm" id="idm45694750547016" class="calibre6"/><a contenteditable="false" data-primary="derived classes" data-type="indexterm" id="idm45694750545912" class="calibre6"/> original class is now called the <em class="hyperlink">parent</em> (or occasionally the <em class="hyperlink">superclass</em>), and the new one is the <em class="hyperlink">subclass</em> (or <em class="hyperlink">derived</em> class).</p>
+
+<p class="author1">In our jukebox example, if you invent a new jukebox that can play a video along with the music, you can inherit all the properties and methods from the original jukebox superclass and add some new properties (videos) and new methods (a movie player).</p>
+
+<p class="author1">An excellent benefit of this system is that if you improve the speed or any other aspect of the superclass, its subclasses will receive the same benefit. On the other hand, any change made to the parent/superclass could break the subclass.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Declaring a Class" class="calibre4"><div class="preface" id="declaring_a_class">
+<h2 class="calibre28">Declaring a Class</h2>
+
+<p class="author1">Before<a contenteditable="false" data-primary="objects (PHP)" data-secondary="declaring classes" data-type="indexterm" id="idm45694750539656" class="calibre6"/><a contenteditable="false" data-primary="class keyword (PHP)" data-type="indexterm" id="idm45694750538248" class="calibre6"/> you can use an object, you must define a class with the <code class="calibre15">class</code> keyword. Class definitions contain the class name (which is case-sensitive), its properties, and its methods. <a data-type="xref" href="#declaring_a_class_and_examining_an_objec" class="calibre6">Example 5-10</a> defines the class <code class="calibre15">User</code> with two properties, which are <code class="calibre15">$name</code> and <code class="calibre15">$password</code> (indicated by the <code class="calibre15">public</code> keyword—see <a data-type="xref" href="#property_and_method_scope_in_php_5" class="calibre6">“Property and Method Scope”</a>). It also creates a new instance (called <code class="calibre15">$object</code>) of this class.</p>
+
+<div data-type="example" id="declaring_a_class_and_examining_an_objec" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-10. </span>Declaring a class and examining an object</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$object</code> <code class="o">=</code> <code class="k">new</code> <code class="n">User</code><code class="p">;</code>
+  <code class="nb">print_r</code><code class="p">(</code><code class="nv">$object</code><code class="p">);</code>
+
+  <code class="k">class</code> <code class="nc">User</code>
+  <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$name</code><code class="p">,</code> <code class="nv">$password</code><code class="p">;</code>
+
+    <code class="k">function</code> <code class="nf">save_user</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">echo</code> <code class="s">"Save User code goes here"</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Here<a contenteditable="false" data-primary="print_r function (PHP)" data-type="indexterm" id="idm45694750506888" class="calibre6"/><a contenteditable="false" data-primary="human-readable data" data-type="indexterm" id="idm45694750505880" class="calibre6"/> I have also used an invaluable function called <code class="calibre15">print_r</code>. It asks PHP to display information about a variable in human-readable form. (The <code class="calibre15">_r</code> stands for <em class="hyperlink">human-readable</em>.) In the case of the new object <code class="calibre15">$object</code>, it displays the following:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<strong class="calibre31"><code class="nx1">User</code><code class="calibre17"> </code><code class="nx1">Object</code><code class="calibre17">
+</code><code class="p1">(</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="p1">[</code><code class="nx1">name</code><code class="p1">]</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="o1">=&gt;</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="p1">[</code><code class="nx1">password</code><code class="p1">]</code><code class="calibre17"> </code><code class="o1">=&gt;</code><code class="calibre17">
+</code><code class="p1">)</code></strong><code class="calibre15">
+</code></pre>
+
+<p class="author1">However, a browser compresses all the whitespace, so the output in a browser is slightly harder to read:</p>
+<p class="author1">
+<strong class="calibre16"><code class="calibre17">    User Object ( [name] =&gt; [password] =&gt; )</code></strong>
+</p>
+
+<p class="author1">In any case, the output says that <code class="calibre15">$object</code> is a user-defined object that has the properties <code class="calibre15">name</code> and <code class="calibre15">password</code>.<a contenteditable="false" data-primary="" data-startref="CLphp05" data-type="indexterm" id="idm45694750473768" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="CLphp05" data-type="indexterm" id="idm45694750472472" class="calibre6"/></p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Creating an Object" class="calibre4"><div class="preface" id="creating_an_object">
+<h2 class="calibre28">Creating an Object</h2>
+
+<p class="author1">To<a contenteditable="false" data-primary="objects (PHP)" data-secondary="creating" data-type="indexterm" id="idm45694750469128" class="calibre6"/><a contenteditable="false" data-primary="new keyword" data-type="indexterm" id="idm45694750447592" class="calibre6"/> create an object with a specified class, use the <code class="calibre15">new</code> keyword, like this: <code class="calibre15">$object = new Class</code>. Here are a couple of ways in which we could do this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$object</code> <code class="o">=</code> <code class="k">new</code> <code class="n">User</code><code class="p">;</code>
+<code class="nv">$temp</code>   <code class="o">=</code> <code class="k">new</code> <code class="n">User</code><code class="p">(</code><code class="s">'name'</code><code class="p">,</code> <code class="s">'password'</code><code class="p">);</code></pre>
+
+<p class="author1">On the first line, we simply assign an object to the <code class="calibre15">User</code> class. In the second, we pass arguments to the call.</p>
+
+<p class="author1">A class may require or prohibit arguments; it may also allow arguments without explicitly requiring them.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Accessing Objects" class="calibre4"><div class="preface" id="accessing_objects">
+<h2 class="calibre28">Accessing Objects</h2>
+
+<p class="author1">Let’s<a contenteditable="false" data-primary="objects (PHP)" data-secondary="accessing" data-type="indexterm" id="idm45694750430472" class="calibre6"/> add a few lines to <a data-type="xref" href="#declaring_a_class_and_examining_an_objec" class="calibre6">Example 5-10</a> and check the results. <a data-type="xref" href="#creating_and_interacting_with_an_object" class="calibre6">Example 5-11</a> extends the previous code by setting object properties and calling a method.</p>
+
+<div data-type="example" id="creating_and_interacting_with_an_object" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-11. </span>Creating and interacting with an object</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$object</code> <code class="o">=</code> <code class="k">new</code> <code class="n">User</code><code class="p">;</code>
+  <code class="nb">print_r</code><code class="p">(</code><code class="nv">$object</code><code class="p">);</code> <code class="k">echo</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+
+  <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">name</code>     <code class="o">=</code> <code class="s">"Joe"</code><code class="p">;</code>
+  <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">password</code> <code class="o">=</code> <code class="s">"mypass"</code><code class="p">;</code>
+  <code class="nb">print_r</code><code class="p">(</code><code class="nv">$object</code><code class="p">);</code> <code class="k">echo</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+
+  <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">save_user</code><code class="p">();</code>
+
+  <code class="k">class</code> <code class="nc">User</code>
+  <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$name</code><code class="p">,</code> <code class="nv">$password</code><code class="p">;</code>
+
+    <code class="k">function</code> <code class="nf">save_user</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">echo</code> <code class="s">"Save User code goes here"</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">As you can see, the syntax for accessing an object’s property is <em class="hyperlink"><code class="calibre18">$object-&gt;property</code></em>. Likewise, you call a method like this: <em class="hyperlink"><code class="calibre18">$object-&gt;method()</code></em>.</p>
+
+<p class="author1">You<a contenteditable="false" data-primary="$ (dollar) symbol" data-secondary="in PHP" data-type="indexterm" id="idm45694750371288" class="calibre6"/><a contenteditable="false" data-primary="dollar symbol ($)" data-secondary="in PHP" data-type="indexterm" id="idm45694750369528" class="calibre6"/> should note that the example <code class="calibre15">property</code> and <code class="calibre15">method</code> do not have <code class="calibre15">$</code> signs in front of them. If you were to preface them with <code class="calibre15">$</code> signs, the code would not work, as it would try to reference the value inside a variable. For example, the expression <code class="calibre15">$object-&gt;$property</code> would attempt to look up the value assigned to a variable named <code class="calibre15">$property</code> (let’s say that value is the string <code class="calibre15">brown</code>) and then attempt to reference the property <code class="calibre15">$object-&gt;brown</code>. If <code class="calibre15">$property</code> is undefined, an attempt to reference <code class="calibre15">$object-&gt;NULL</code> would occur and cause an error.</p>
+
+<p class="author1">When looked at using a browser’s View Source facility, the output from <a data-type="xref" href="#creating_and_interacting_with_an_object" class="calibre6">Example 5-11</a> is as follows:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<strong class="calibre31"><code class="nx1">User</code><code class="calibre17"> </code><code class="nx1">Object</code><code class="calibre17">
+</code><code class="p1">(</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="p1">[</code><code class="nx1">name</code><code class="p1">]</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="o1">=&gt;</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="p1">[</code><code class="nx1">password</code><code class="p1">]</code><code class="calibre17"> </code><code class="o1">=&gt;</code><code class="calibre17">
+</code><code class="p1">)</code><code class="calibre17">
+</code><code class="nx1">User</code><code class="calibre17"> </code><code class="nx1">Object</code><code class="calibre17">
+</code><code class="p1">(</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="p1">[</code><code class="nx1">name</code><code class="p1">]</code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="calibre17"> </code><code class="nx1"> </code><code class="o1">=&gt;</code><code class="calibre17"> </code><code class="nx1">Joe</code><code class="calibre17">
+</code><code class="nx1"> </code><code class="calibre17"> </code><code class="p1">[</code><code class="nx1">password</code><code class="p1">]</code><code class="calibre17"> </code><code class="o1">=&gt;</code><code class="calibre17"> </code><code class="nx1">mypass</code><code class="calibre17">
+</code><code class="p1">)</code><code class="calibre17">
+</code><code class="nx1">Save</code><code class="calibre17"> </code><code class="nx1">User</code><code class="calibre17"> </code><code class="nx1">code</code><code class="calibre17"> </code><code class="nx1">goes</code><code class="calibre17"> </code><code class="nx1">here</code></strong><code class="calibre15">
+</code></pre>
+
+<p class="author1">Again, <code class="calibre15">print_r</code> shows its utility by providing the contents of <code class="calibre15">$object</code> before and after property assignment. From now on, I’ll omit <code class="calibre15">print_r</code> statements, but if you are working along with this book on your development server, you can put some in to see exactly what is happening.</p>
+
+<p class="author1">You can also see that the code in the method <code class="calibre15">save_user</code> was executed via the call to that method. It printed the string reminding us to create some code.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">You can place functions and class definitions anywhere in your code, before or after statements that use them. Generally, though, it is considered good practice to place them toward the end of a file.</p>
+</div>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Cloning Objects" class="calibre4"><div class="preface" id="cloning_objects">
+<h2 class="calibre28">Cloning Objects</h2>
+
+<p class="author1">Once<a contenteditable="false" data-primary="objects (PHP)" data-secondary="cloning" data-type="indexterm" id="idm45694750360520" class="calibre6"/> you have created an object, it is passed by reference when you pass it as a parameter. In the matchbox metaphor, this is like keeping several threads attached to an object stored in a matchbox so that you can follow any attached thread to access it.</p>
+
+<p class="author1">In other words, making object assignments does not copy objects in their entirety. You’ll see how this works in <a data-type="xref" href="#copying_an_objectquestion_mark" class="calibre6">Example 5-12</a>, where we define a very simple <code class="calibre15">User</code> class with no methods and only the property <code class="calibre15">name</code>.</p>
+
+<div data-type="example" id="copying_an_objectquestion_mark" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-12. </span>Copying an object</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$object1</code>       <code class="o">=</code> <code class="k">new</code> <code class="n">User</code><code class="p">();</code>
+  <code class="nv">$object1</code><code class="o">-&gt;</code><code class="na">name</code> <code class="o">=</code> <code class="s">"Alice"</code><code class="p">;</code>
+  <code class="nv">$object2</code>       <code class="o">=</code> <code class="nv">$object1</code><code class="p">;</code>
+  <code class="nv">$object2</code><code class="o">-&gt;</code><code class="na">name</code> <code class="o">=</code> <code class="s">"Amy"</code><code class="p">;</code>
+
+  <code class="k">echo</code> <code class="s">"object1 name = "</code> <code class="o">.</code> <code class="nv">$object1</code><code class="o">-&gt;</code><code class="na">name</code> <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+  <code class="k">echo</code> <code class="s">"object2 name = "</code> <code class="o">.</code> <code class="nv">$object2</code><code class="o">-&gt;</code><code class="na">name</code><code class="p">;</code>
+
+  <code class="k">class</code> <code class="nc">User</code>
+  <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$name</code><code class="p">;</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Here, we first create the object <code class="calibre15">$object1</code> and assign the value <code class="calibre15">Alice</code> to the <code class="calibre15">name</code> property. Then we create <code class="calibre15">$object2</code>, assigning it the value of <code class="calibre15">$object1</code>, and assign the value <code class="calibre15">Amy</code> just to the <code class="calibre15">name</code> property of <code class="calibre15">$object2</code>—or so we might think. But this code outputs the following:</p>
+
+<pre class="calibre29">
+<strong class="calibre31">object1 name = Amy</strong>
+<strong class="calibre31">object2 name = Amy</strong>
+</pre>
+
+<p class="author1">What has happened? Both <code class="calibre15">$object1</code> and <code class="calibre15">$object2</code> refer to the <em class="hyperlink">same</em> object, so changing the <code class="calibre15">name</code> property of <code class="calibre15">$object2</code> to <code class="calibre15">Amy</code> also sets that property for <code class="calibre15">$object1</code>.</p>
+
+<p class="author1">To<a contenteditable="false" data-primary="clone operator" data-type="indexterm" id="idm45694750129016" class="calibre6"/> avoid this confusion, you can use the <code class="calibre15">clone</code> operator, which creates a new instance of the class and copies the property values from the original instance to the new instance. <a data-type="xref" href="#cloning_an_object" class="calibre6">Example 5-13</a> illustrates this usage.</p>
+
+<div data-type="example" id="cloning_an_object" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-13. </span>Cloning an object</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$object1</code>       <code class="o">=</code> <code class="k">new</code> <code class="n">User</code><code class="p">();</code>
+  <code class="nv">$object1</code><code class="o">-&gt;</code><code class="na">name</code> <code class="o">=</code> <code class="s">"Alice"</code><code class="p">;</code>
+  <code class="nv">$object2</code>       <code class="o">=</code> <code class="k">clone</code> <code class="nv">$object1</code><code class="p">;</code>
+  <code class="nv">$object2</code><code class="o">-&gt;</code><code class="na">name</code> <code class="o">=</code> <code class="s">"Amy"</code><code class="p">;</code>
+
+  <code class="k">echo</code> <code class="s">"object1 name = "</code> <code class="o">.</code> <code class="nv">$object1</code><code class="o">-&gt;</code><code class="na">name</code> <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+  <code class="k">echo</code> <code class="s">"object2 name = "</code> <code class="o">.</code> <code class="nv">$object2</code><code class="o">-&gt;</code><code class="na">name</code><code class="p">;</code>
+
+  <code class="k">class</code> <code class="nc">User</code>
+  <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$name</code><code class="p">;</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Voilà! The output from this code is what we initially wanted:</p>
+
+<pre class="calibre29">
+<strong class="calibre31">object1 name = Alice</strong>
+<strong class="calibre31">object2 name = Amy</strong>
+</pre>
+
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Constructors" class="calibre4"><div class="preface" id="constructors">
+<h2 class="calibre28">Constructors</h2>
+
+<p class="author1">When<a contenteditable="false" data-primary="objects (PHP)" data-secondary="constructors" data-type="indexterm" id="idm45694749948840" class="calibre6"/><a contenteditable="false" data-primary="constructors" data-secondary="in PHP" data-type="indexterm" id="idm45694749947432" class="calibre6"/> creating a new object, you can pass a list of arguments to the class being called. These are passed to a special method within the class, called the <em class="hyperlink">constructor</em>, which initializes various properties.</p>
+
+<p class="author1">To do this you use the function name <code class="calibre15">__construct</code> (that is, <code class="calibre15">construct</code> preceded by two underscore characters), as in <a data-type="xref" href="#creating_a_constructor_method" class="calibre6">Example 5-14</a>.</p>
+
+<div data-type="example" id="creating_a_constructor_method" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-14. </span>Creating a constructor method</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">class</code> <code class="nc">User</code>
+  <code class="p">{</code>
+    <code class="k">function</code> <code class="calibre15">__construct</code><code class="p">(</code><code class="nv">$param1</code><code class="p">,</code> <code class="nv">$param2</code><code class="p">)</code>
+    <code class="p">{</code>
+      <code class="c">// Constructor statements go here</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Destructors" class="calibre4"><div class="preface" id="php_5_destructors">
+<h2 class="calibre28">Destructors</h2>
+
+<p class="author1">You<a contenteditable="false" data-primary="objects (PHP)" data-secondary="destructors" data-type="indexterm" id="idm45694750056872" class="calibre6"/><a contenteditable="false" data-primary="destructors (PHP)" data-type="indexterm" id="idm45694750055464" class="calibre6"/> also have the ability to create <em class="hyperlink">destructor</em> methods. This ability is useful when code has made the last reference to an object or when a script reaches the end. <a data-type="xref" href="#creating_a_destructor_method" class="calibre6">Example 5-15</a> shows how to create a destructor method. The destructor can do clean-up such as releasing a connection to a database or some other resource that you reserved within the class. Because you reserved the resource within the class, you have to release it here, or it will stick around indefinitely. Many system-wide problems are caused by programs reserving resources and forgetting to release them.</p>
+
+<div data-type="example" id="creating_a_destructor_method" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-15. </span>Creating a destructor method</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">class</code> <code class="nc">User</code>
+  <code class="p">{</code>
+    <code class="k">function</code> <code class="calibre15">__destruct</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="c">// Destructor code goes here</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Writing Methods" class="calibre4"><div class="preface" id="writing_methods">
+<h2 class="calibre28">Writing Methods</h2>
+
+<p class="author1">As<a contenteditable="false" data-primary="objects (PHP)" data-secondary="writing methods" data-type="indexterm" id="idm45694749898376" class="calibre6"/><a contenteditable="false" data-primary="methods" data-secondary="in PHP" data-type="indexterm" id="idm45694749896968" class="calibre6"/><a contenteditable="false" data-primary="__ (double underscore)" data-type="indexterm" id="idm45694749895592" class="calibre6"/><a contenteditable="false" data-primary="underscore, double (__)" data-type="indexterm" id="idm45694749894488" class="calibre6"/> you have seen, declaring a method is similar to declaring a function, but there are a few differences. For example, method names beginning with a double underscore (<code class="calibre15">__</code>) are reserved (for example, for <code class="calibre15">__construct</code> and <code class="calibre15">__destruct</code>), and you should not create any of this form.</p>
+
+<p class="author1">You<a contenteditable="false" data-primary="$this variable (PHP)" data-type="indexterm" id="idm45694749891288" class="calibre6"/><a contenteditable="false" data-primary="get_password method (PHP)" data-type="indexterm" id="idm45694749890152" class="calibre6"/> also have access to a special variable called <code class="calibre15">$this</code>, which can be used to access the current object’s properties. To see how it works, take a look at <a data-type="xref" href="#using_the_variable_dollarthis_in_a_metho" class="calibre6">Example 5-16</a>, which contains a different method from the <code class="calibre15">User</code> class definition called <code class="calibre15">get_password</code>.</p>
+
+<div data-type="example" id="using_the_variable_dollarthis_in_a_metho" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-16. </span>Using the variable <code class="calibre15">$this</code> in a method</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">class</code> <code class="nc">User</code>
+  <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$name</code><code class="p">,</code> <code class="nv">$password</code><code class="p">;</code>
+
+    <code class="k">function</code> <code class="nf">get_password</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">return</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">password</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1"><code class="calibre15">get_password</code> uses the <code class="calibre15">$this</code> variable to access the current object and then return<a contenteditable="false" data-primary="password property" data-type="indexterm" id="idm45694749842280" class="calibre6"/><a contenteditable="false" data-primary="-&gt; operator" data-type="indexterm" id="idm45694749841240" class="calibre6"/> the value of that object’s <code class="calibre15">password</code> property. Note how the preceding <code class="calibre15">$</code> of the property <code class="calibre15">$password</code> is omitted when we use the <code class="calibre15">-&gt;</code> operator. Leaving the <code class="calibre15">$</code> in place is a typical error you may run into, particularly when you first use this feature.</p>
+
+<p class="author1">Here’s how you would use the class defined in <a data-type="xref" href="#using_the_variable_dollarthis_in_a_metho" class="calibre6">Example 5-16</a>:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$object</code>           <code class="o">=</code> <code class="k">new</code> <code class="n">User</code><code class="p">;</code>
+<code class="nv">$object</code><code class="o">-&gt;</code><code class="na">password</code> <code class="o">=</code> <code class="s">"secret"</code><code class="p">;</code>
+
+<code class="k">echo</code> <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">get_password</code><code class="p">();</code></pre>
+
+<p class="author1">This code prints the password <code class="calibre15">secret</code>.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Declaring Properties" class="calibre4"><div class="preface" id="declaring_properties">
+<h2 class="calibre28">Declaring Properties</h2>
+
+<p class="author1">It<a contenteditable="false" data-primary="objects (PHP)" data-secondary="declaring properties" data-type="indexterm" id="idm45694749822680" class="calibre6"/><a contenteditable="false" data-primary="properties (PHP)" data-secondary="declaring" data-type="indexterm" id="idm45694749821272" class="calibre6"/> is not necessary to explicitly declare properties within classes, as they can be implicitly defined when first used. To illustrate this, in <a data-type="xref" href="#defining_a_property_implicitly" class="calibre6">Example 5-17</a> the class <code class="calibre15">User</code> has no properties and no methods but is legal code.</p>
+
+<div data-type="example" id="defining_a_property_implicitly" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-17. </span>Defining a property implicitly</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$object1</code>       <code class="o">=</code> <code class="k">new</code> <code class="n">User</code><code class="p">();</code>
+  <code class="nv">$object1</code><code class="o">-&gt;</code><code class="na">name</code> <code class="o">=</code> <code class="s">"Alice"</code><code class="p">;</code>
+
+  <code class="k">echo</code> <code class="nv">$object1</code><code class="o">-&gt;</code><code class="na">name</code><code class="p">;</code>
+
+  <code class="k">class</code> <code class="nc">User</code> <code class="p">{}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">This code correctly outputs the string <code class="calibre15">Alice</code> without a problem, because PHP implicitly declares the property <code class="calibre15">$object1-&gt;name</code> for you. But this kind of programming can lead to bugs that are infuriatingly difficult to discover, because <code class="calibre15">name</code> was declared from outside the class.</p>
+
+<p class="author1">To help yourself and anyone else who will maintain your code, I advise that you get into the habit of always declaring your properties explicitly within classes. You’ll be glad you did.</p>
+
+<p class="author1">Also, when you declare a property within a class, you may assign a default value to it. The value you use must be a constant and not the result of a function or expression. <a data-type="xref" href="#valid_and_invalid_property_declarations" class="calibre6">Example 5-18</a> shows a few valid and invalid assignments.</p>
+
+<div data-type="example" id="valid_and_invalid_property_declarations" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-18. </span>Valid and invalid property declarations</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">class</code> <code class="nc">Test</code>
+  <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$name</code>  <code class="o">=</code> <code class="s">"Paul Smith"</code><code class="p">;</code> <code class="c">// Valid</code>
+    <code class="k">public</code> <code class="nv">$age</code>   <code class="o">=</code> <code class="mi">42</code><code class="p">;</code>           <code class="c">// Valid</code>
+    <code class="k">public</code> <code class="nv">$time</code>  <code class="o">=</code> <code class="nb">time</code><code class="p">();</code>       <code class="c">// Invalid - calls a function</code>
+    <code class="k">public</code> <code class="nv">$score</code> <code class="o">=</code> <code class="nv">$level</code> <code class="o">*</code> <code class="mi">2</code><code class="p">;</code>   <code class="c">// Invalid - uses an expression</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Declaring Constants" class="calibre4"><div class="preface" id="declaring_constants">
+<h2 class="calibre28">Declaring Constants</h2>
+
+<p class="author1">In<a contenteditable="false" data-primary="objects (PHP)" data-secondary="declaring constants" data-type="indexterm" id="idm45694749666392" class="calibre6"/><a contenteditable="false" data-primary="constants (PHP)" data-type="indexterm" id="idm45694749664984" class="calibre6"/><a contenteditable="false" data-primary="define function (PHP)" data-type="indexterm" id="idm45694749663880" class="calibre6"/> the same way that you can create a global constant with the <code class="calibre15">define</code> function, you can define constants inside classes. The generally accepted practice is to use uppercase letters to make them stand out, as in <a data-type="xref" href="#defining_constants_within_a_class" class="calibre6">Example 5-19</a>.</p>
+
+<div data-type="example" id="defining_constants_within_a_class" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-19. </span>Defining constants within a class</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="n">Translate</code><code class="o">::</code><code class="na">lookup</code><code class="p">();</code>
+
+  <code class="k">class</code> <code class="nc">Translate</code>
+  <code class="p">{</code>
+    <code class="k">const</code> <code class="no">ENGLISH</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+    <code class="k">const</code> <code class="no">SPANISH</code> <code class="o">=</code> <code class="mi">1</code><code class="p">;</code>
+    <code class="k">const</code> <code class="no">FRENCH</code>  <code class="o">=</code> <code class="mi">2</code><code class="p">;</code>
+    <code class="k">const</code> <code class="no">GERMAN</code>  <code class="o">=</code> <code class="mi">3</code><code class="p">;</code>
+    <code class="c">// ...</code>
+
+    <code class="k">static</code> <code class="k">function</code> <code class="nf">lookup</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">echo</code> <code class="n">self</code><code class="o">::</code><code class="na">SPANISH</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">You<a contenteditable="false" data-primary="self keyword (PHP)" data-type="indexterm" id="idm45694749608808" class="calibre6"/> can reference constants directly, using the <code class="calibre15">self</code> keyword and double colon operator. Note that this code calls the class directly, using the double colon operator at line 1, without creating an instance of it first. As you would expect, the value printed when you run this code is <code class="calibre15">1</code>.</p>
+
+<p class="author1">Remember that once you define a constant, you can’t change it.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Property and Method Scope" class="calibre4"><div class="preface" id="property_and_method_scope_in_php_5">
+<h2 class="calibre28">Property and Method Scope</h2>
+
+<p class="author1">PHP provides<a contenteditable="false" data-primary="objects (PHP)" data-secondary="property and method scope" data-type="indexterm" id="idm45694749584408" class="calibre6"/><a contenteditable="false" data-primary="properties (PHP)" data-secondary="scope of" data-type="indexterm" id="idm45694749583032" class="calibre6"/><a contenteditable="false" data-primary="methods" data-secondary="in PHP" data-type="indexterm" id="idm45694749581656" class="calibre6"/><a contenteditable="false" data-primary="scope" data-secondary="property/method scope in PHP" data-type="indexterm" id="idm45694749580280" class="calibre6"/> three keywords for controlling the scope of properties and methods (<em class="hyperlink">members</em>):</p>
+
+<dl class="calibre13">
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">public</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">Public<a contenteditable="false" data-primary="public keyword (PHP)" data-type="indexterm" id="idm45694749576152" class="calibre6"/> members can be referenced anywhere, including by other classes and instances of the object. This is the default when variables are declared with the <code class="calibre15">var</code> or <code class="calibre15">public</code> keywords, or when a variable is implicitly declared the first time it is used. The keywords <code class="calibre15">var</code> and <code class="calibre15">public</code> are interchangeable because, although deprecated, <code class="calibre15">var</code> is retained for compatibility with previous versions of PHP. Methods are assumed to be <code class="calibre15">public</code> by default.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">protected</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">These<a contenteditable="false" data-primary="protected keyword (PHP)" data-type="indexterm" id="idm45694749570472" class="calibre6"/> members can be referenced only by the object’s class methods and those of any subclasses.</p>
+	</dd>
+	<dt class="plain"><dfn class="keep-together"><code class="calibre15">private</code></dfn></dt>
+	<dd class="calibre14">
+	<p class="calibre59">These<a contenteditable="false" data-primary="private keyword (PHP)" data-type="indexterm" id="idm45694749550568" class="calibre6"/> members can be referenced only by methods within the same class—not by subclasses.</p>
+	</dd>
+</dl>
+
+<p class="author1">Here’s how to decide which you need to use:</p>
+
+<ul class="printings">
+	<li class="calibre9">
+	<p class="author1">Use <code class="calibre15">public</code> when outside code <em class="hyperlink">should</em> access this member and extending classes <em class="hyperlink">should</em> also inherit it.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Use <code class="calibre15">protected</code> when outside code <em class="hyperlink">should not</em> access this member but extending classes <em class="hyperlink">should</em> inherit it.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">Use <code class="calibre15">private</code> when outside code <em class="hyperlink">should not</em> access this member and extending classes also <em class="hyperlink">should not</em> inherit it.</p>
+	</li>
+</ul>
+
+<p class="author1"><a data-type="xref" href="#changing_property_and_method_scope" class="calibre6">Example 5-20</a> illustrates the use of these keywords.</p>
+
+<div data-type="example" id="changing_property_and_method_scope" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-20. </span>Changing property and method scope</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">class</code> <code class="nc">Example</code>
+  <code class="p">{</code>
+    <code class="k">var</code> <code class="nv">$name</code>   <code class="o">=</code> <code class="s">"Michael"</code><code class="p">;</code> <code class="c">// Same as public but deprecated</code>
+    <code class="k">public</code> <code class="nv">$age</code> <code class="o">=</code> <code class="mi">23</code><code class="p">;</code>        <code class="c">// Public property</code>
+    <code class="k">protected</code> <code class="nv">$usercount</code><code class="p">;</code>    <code class="c">// Protected property</code>
+
+    <code class="k">private</code> <code class="k">function</code> <code class="nf">admin</code><code class="p">()</code> <code class="c">// Private method</code>
+    <code class="p">{</code>
+      <code class="c">// Admin code goes here</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Static Methods" class="calibre4"><div class="preface" id="static_properties_and_methods">
+<h2 class="calibre28">Static Methods</h2>
+
+<p class="author1">You<a contenteditable="false" data-primary="objects (PHP)" data-secondary="static methods" data-type="indexterm" id="idm45694749421352" class="calibre6"/><a contenteditable="false" data-primary="static methods" data-secondary="in PHP" data-type="indexterm" id="idm45694749419944" class="calibre6"/> can define a method as <code class="calibre15">static</code>, which means that it is called on a class, not on an object. A static method has no access to any object properties and is created and accessed as in <a data-type="xref" href="#creating_and_accessing_a_static_method" class="calibre6">Example 5-21</a>.</p>
+
+<div data-type="example" id="creating_and_accessing_a_static_method" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-21. </span>Creating and accessing a static method</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="n">User</code><code class="o">::</code><code class="na">pwd_string</code><code class="p">();</code>
+
+  <code class="k">class</code> <code class="nc">User</code>
+  <code class="p">{</code>
+    <code class="k">static</code> <code class="k">function</code> <code class="nf">pwd_string</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">echo</code> <code class="s">"Please enter your password"</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Note<a contenteditable="false" data-primary="scope resolution (::) operator" data-type="indexterm" id="idm45694749404808" class="calibre6"/><a contenteditable="false" data-primary=":: (scope resolution) operator" data-type="indexterm" id="idm45694749403832" class="calibre6"/> how we call the class itself, along with the static method, using a double colon (also known as the <em class="hyperlink">scope resolution</em> operator), not <code class="calibre15">-&gt;</code>. Static functions are useful for performing actions relating to the class itself but not to specific instances of the class. You can see another example of a static method in <a data-type="xref" href="#defining_constants_within_a_class" class="calibre6">Example 5-19</a>.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">If you try to access <code class="calibre15">$this-&gt;property</code>, or other object properties from within a static function, you will receive an error message.</p>
+</div>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Static Properties" class="calibre4"><div class="preface" id="idm45694749497416">
+<h2 class="calibre28">Static Properties</h2>
+
+<p class="author1">Most<a contenteditable="false" data-primary="objects (PHP)" data-secondary="static properties" data-type="indexterm" id="idm45694749495688" class="calibre6"/><a contenteditable="false" data-primary="static properties" data-secondary="in PHP" data-type="indexterm" id="idm45694749494280" class="calibre6"/> data and methods apply to instances of a class. For example, in a <code class="calibre15">User</code> class, you want to do such things as set a particular user’s password or check when the user has been registered. These facts and operations apply separately to each user and therefore use instance-specific properties and methods.</p>
+
+<p class="author1">But occasionally you’ll want to maintain data about a whole class. For instance, to report how many users are registered, you will store a variable that applies to the whole <code class="calibre15">User</code> class. PHP provides static properties and methods for such data.</p>
+
+<p class="author1">As shown briefly in <a data-type="xref" href="#creating_and_accessing_a_static_method" class="calibre6">Example 5-21</a>, declaring members of a class <code class="calibre15">static</code> makes them accessible without an instantiation of the class. A property declared <code class="calibre15">static</code> cannot be directly accessed within an instance of a class, but a static method can.</p>
+
+<p class="author1"><a data-type="xref" href="#defining_a_class_with_a_static_property" class="calibre6">Example 5-22</a> defines a class called <code class="calibre15">Test</code> with a static property and a public method.</p>
+
+<div data-type="example" id="defining_a_class_with_a_static_property" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-22. </span>Defining a class with a static property</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$temp</code> <code class="o">=</code> <code class="k">new</code> <code class="n">Test</code><code class="p">();</code>
+
+  <code class="k">echo</code> <code class="s">"Test A: "</code> <code class="o">.</code> <code class="n">Test</code><code class="o">::</code><code class="nv">$static_property</code> <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+  <code class="k">echo</code> <code class="s">"Test B: "</code> <code class="o">.</code> <code class="nv">$temp</code><code class="o">-&gt;</code><code class="na">get_sp</code><code class="p">()</code>        <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+  <code class="k">echo</code> <code class="s">"Test C: "</code> <code class="o">.</code> <code class="nv">$temp</code><code class="o">-&gt;</code><code class="na">static_property</code> <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+
+  <code class="k">class</code> <code class="nc">Test</code>
+  <code class="p">{</code>
+    <code class="k">static</code> <code class="nv">$static_property</code> <code class="o">=</code> <code class="s">"I'm static"</code><code class="p">;</code>
+
+    <code class="k">function</code> <code class="nf">get_sp</code><code class="p">()</code>
+    <code class="p">{</code>
+       <code class="k">return</code> <code class="n">self</code><code class="o">::</code><code class="nv">$static_property</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">When you run this code, it returns the following output:</p>
+
+<pre class="calibre29"><strong class="calibre31">
+Test A: I'm static
+Test B: I'm static
+Notice: Undefined property: Test::$static_property
+Test C:
+</strong>
+</pre>
+
+<p class="author1">This example shows that the property <code class="calibre15">$static_property</code> could be directly referenced from the class itself via the double colon operator in Test A. Also, Test B could obtain its value by calling the <code class="calibre15">get_sp</code> method of the object <code class="calibre15">$temp</code>, created from class <code class="calibre15">Test</code>. But Test C failed, because the static property <code class="calibre15">$static_property</code> was not accessible to the object <code class="calibre15">$temp</code>.</p>
+
+<p class="author1">Note how the method <code class="calibre15">get_sp</code> accesses <code class="calibre15">$static_property</code> using the keyword <code class="calibre15">self</code>. This is how a static property or constant can be directly accessed within a class.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Inheritance" class="calibre4"><div class="preface" id="inheritance">
+<h2 class="calibre28">Inheritance</h2>
+
+<p class="author1">Once<a contenteditable="false" data-primary="objects (PHP)" data-secondary="inheritance" data-type="indexterm" id="Oinh05" class="calibre6"/><a contenteditable="false" data-primary="inheritance" data-type="indexterm" id="inher05" class="calibre6"/><a contenteditable="false" data-primary="extends keyword (PHP)" data-type="indexterm" id="idm45694749317432" class="calibre6"/> you have written a class, you can derive subclasses from it. This can save lots of painstaking code rewriting: you can take a class similar to the one you need to write, extend it to a subclass, and just modify the parts that are different. You achieve this using the <code class="calibre15">extends</code> keyword.</p>
+
+<p class="author1">In <a data-type="xref" href="#inheriting_and_extending_a_class" class="calibre6">Example 5-23</a>, the class <code class="calibre15">Subscriber</code> is declared a subclass of <code class="calibre15">User</code> by means of the <code class="calibre15">extends</code> keyword.</p>
+
+<div data-type="example" id="inheriting_and_extending_a_class" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-23. </span>Inheriting and extending a class</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$object</code>           <code class="o">=</code> <code class="k">new</code> <code class="n">Subscriber</code><code class="p">;</code>
+  <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">name</code>     <code class="o">=</code> <code class="s">"Fred"</code><code class="p">;</code>
+  <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">password</code> <code class="o">=</code> <code class="s">"pword"</code><code class="p">;</code>
+  <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">phone</code>    <code class="o">=</code> <code class="s">"012 345 6789"</code><code class="p">;</code>
+  <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">email</code>    <code class="o">=</code> <code class="s">"fred@bloggs.com"</code><code class="p">;</code>
+  <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">display</code><code class="p">();</code>
+
+  <code class="k">class</code> <code class="nc">User</code>
+  <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$name</code><code class="p">,</code> <code class="nv">$password</code><code class="p">;</code>
+
+    <code class="k">function</code> <code class="nf">save_user</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">echo</code> <code class="s">"Save User code goes here"</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+
+  <code class="k">class</code> <code class="nc">Subscriber</code> <code class="k">extends</code> <code class="n">User</code>
+  <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$phone</code><code class="p">,</code> <code class="nv">$email</code><code class="p">;</code>
+
+    <code class="k">function</code> <code class="nf">display</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">echo</code> <code class="s">"Name:  "</code> <code class="o">.</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">name</code>     <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+      <code class="k">echo</code> <code class="s">"Pass:  "</code> <code class="o">.</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">password</code> <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+      <code class="k">echo</code> <code class="s">"Phone: "</code> <code class="o">.</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">phone</code>    <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+      <code class="k">echo</code> <code class="s">"Email: "</code> <code class="o">.</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">email</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">The original <code class="calibre15">User</code> class has two properties, <code class="calibre15">$name</code> and <code class="calibre15">$password</code>, and a method to save the current user to the database. <code class="calibre15">Subscriber</code> extends this class by adding an additional two properties, <code class="calibre15">$phone</code> and <code class="calibre15">$email</code>, and includes a method of displaying the properties of the current object using the variable <code class="calibre15">$this</code>, which refers to the current values of the object being accessed. The output from this code is as follows:</p>
+<strong class="calibre16"><code class="calibre17">    Name:  Fred<br class="calibre57"/>
+    Pass:  pword<br class="calibre57"/>
+    Phone: 012 345 6789<br class="calibre57"/>
+    Email: fred@bloggs.com</code></strong>
+
+<section data-type="sect3" data-pdf-bookmark="The parent keyword" class="calibre4"><div class="preface" id="parent_operator">
+<h3 class="calibre43">The parent keyword</h3>
+
+<p class="author1">If<a contenteditable="false" data-primary="parent keyword (PHP)" data-type="indexterm" id="idm45694749138088" class="calibre6"/> you write a method in a subclass with the same name as one in its parent class, its statements will override those of the parent class. Sometimes this is not the behavior you want, and you need to access the parent’s method. To do this, you can use the <code class="calibre15">parent</code> operator, as in <a data-type="xref" href="#overriding_a_method_and_using_the_parent" class="calibre6">Example 5-24</a>.</p>
+
+<div data-type="example" id="overriding_a_method_and_using_the_parent" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-24. </span>Overriding a method and using the <code class="calibre15">parent</code> operator</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$object</code> <code class="o">=</code> <code class="k">new</code> <code class="n">Son</code><code class="p">;</code>
+  <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">test</code><code class="p">();</code>
+  <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">test2</code><code class="p">();</code>
+
+  <code class="k">class</code> <code class="nc">Dad</code>
+  <code class="p">{</code>
+    <code class="k">function</code> <code class="nf">test</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">echo</code> <code class="s">"[Class Dad] I am your Father&lt;br&gt;"</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+
+  <code class="k">class</code> <code class="nc">Son</code> <code class="k">extends</code> <code class="n">Dad</code>
+  <code class="p">{</code>
+    <code class="k">function</code> <code class="nf">test</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">echo</code> <code class="s">"[Class Son] I am Luke&lt;br&gt;"</code><code class="p">;</code>
+    <code class="p">}</code>
+
+    <code class="k">function</code> <code class="nf">test2</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">parent</code><code class="o">::</code><code class="na">test</code><code class="p">();</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">This code creates a class called <code class="calibre15">Dad</code> and a subclass called <code class="calibre15">Son</code> that inherits its properties and methods and then overrides the method <code class="calibre15">test</code>. Therefore, when line 2 calls the method <code class="calibre15">test</code>, the new method is executed. The only way to execute the overridden <code class="calibre15">test</code> method in the <code class="calibre15">Dad</code> class is to use the <code class="calibre15">parent</code> operator, as shown in function <code class="calibre15">test2</code> of class <code class="calibre15">Son</code>. The code outputs the following:</p>
+<p class="author1">
+<code class="calibre15"><strong class="calibre31">    [Class Son] I am Luke</strong></code><br class="calibre57"/>
+<code class="calibre15"><strong class="calibre31">    [Class Dad] I am your Father</strong></code>
+</p>
+
+<p class="author1">If you wish to ensure that your code calls a method from the current class, you can use the <code class="calibre15">self</code> keyword, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="n">self</code><code class="o">::</code><code class="na">method</code><code class="p">();</code></pre>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Subclass constructors" class="calibre4"><div class="preface" id="subclass_constructors">
+<h3 class="calibre43">Subclass constructors</h3>
+
+<p class="author1">When<a contenteditable="false" data-primary="constructors" data-secondary="in PHP" data-type="indexterm" id="idm45694748885912" class="calibre6"/><a contenteditable="false" data-primary="objects (PHP)" data-secondary="constructors" data-type="indexterm" id="idm45694748884504" class="calibre6"/> you extend a class and declare your own constructor, you should be aware that PHP will not automatically call the constructor method of the parent class. If you want to be certain that all initialization code is executed, subclasses should always call the parent constructors, as in <a data-type="xref" href="#calling_the_parent_class_constructor" class="calibre6">Example 5-25</a>.</p>
+
+<div data-type="example" id="calling_the_parent_class_constructor" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-25. </span>Calling the parent class constructor</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$object</code> <code class="o">=</code> <code class="k">new</code> <code class="n">Tiger</code><code class="p">();</code>
+
+  <code class="k">echo</code> <code class="s">"Tigers have...&lt;br&gt;"</code><code class="p">;</code>
+  <code class="k">echo</code> <code class="s">"Fur: "</code> <code class="o">.</code> <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">fur</code> <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+  <code class="k">echo</code> <code class="s">"Stripes: "</code> <code class="o">.</code> <code class="nv">$object</code><code class="o">-&gt;</code><code class="na">stripes</code><code class="p">;</code>
+
+  <code class="k">class</code> <code class="nc">Wildcat</code>
+  <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$fur</code><code class="p">;</code> <code class="c">// Wildcats have fur</code>
+
+    <code class="k">function</code> <code class="calibre15">__construct</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">fur</code> <code class="o">=</code> <code class="s">"TRUE"</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+
+  <code class="k">class</code> <code class="nc">Tiger</code> <code class="k">extends</code> <code class="n">Wildcat</code>
+  <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$stripes</code><code class="p">;</code> <code class="c">// Tigers have stripes</code>
+
+    <code class="k">function</code> <code class="calibre15">__construct</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">parent</code><code class="o">::</code><code class="na">__construct</code><code class="p">();</code> <code class="c">// Call parent constructor first</code>
+      <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">stripes</code> <code class="o">=</code> <code class="s">"TRUE"</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">This example takes advantage of inheritance in the typical manner. The <code class="calibre15">Wildcat</code> class has created the property <code class="calibre15">$fur</code>, which we’d like to reuse, so we create the <code class="calibre15">Tiger</code> class to inherit <code class="calibre15">$fur</code> and additionally create another property, <code class="calibre15">$stripes</code>. To verify that both constructors have been called, the program outputs the following:</p>
+<strong class="calibre16"><code class="calibre17">    Tigers have...<br class="calibre57"/>
+    Fur: TRUE<br class="calibre57"/>
+    Stripes: TRUE</code></strong></div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Final methods" class="calibre4"><div class="preface" id="final_methods">
+<h3 class="calibre43">Final methods</h3>
+
+<p class="author1">When<a contenteditable="false" data-primary="final keyword (PHP)" data-type="indexterm" id="idm45694748786392" class="calibre6"/> you wish to prevent a subclass from overriding a superclass method, you can use the <code class="calibre15">final</code> keyword. <a data-type="xref" href="#creating_a_final_method" class="calibre6">Example 5-26</a> shows how.</p>
+
+<div data-type="example" id="creating_a_final_method" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 5-26. </span>Creating a <code class="calibre15">final</code> method</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">class</code> <code class="nc">User</code>
+  <code class="p">{</code>
+    <code class="k">final</code> <code class="k">function</code> <code class="nf">copyright</code><code class="p">()</code>
+    <code class="p">{</code>
+      <code class="k">echo</code> <code class="s">"This class was written by Joe Smith"</code><code class="p">;</code>
+    <code class="p">}</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Once you have digested the contents of this chapter, you should have a strong feel for what PHP can do for you. You should be able to use functions with ease and, if you wish, write object-oriented code. In <a data-type="xref" href="ch06.xhtml#php_arrays" class="calibre6">Chapter 6</a>, we’ll finish off our initial exploration of PHP by looking at the workings of PHP arrays.<a contenteditable="false" data-primary="" data-startref="inher05" data-type="indexterm" id="idm45694748772744" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="Oinh05" data-type="indexterm" id="idm45694748771432" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="PHPobj05" data-type="indexterm" id="idm45694748770056" class="calibre6"/></p>
+</div></section>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Questions" class="calibre4"><div class="preface" id="questions-id00015">
+<h1 class="calibre11">Questions</h1>
+
+<ol class="calibre25">
+	<li class="calibre26">
+	<p class="author1">What is the main benefit of using a function?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How many values can a function return?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is the difference between accessing a variable by name and by reference?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is the meaning of <em class="hyperlink">scope</em> in PHP?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you incorporate one PHP file within another?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How is an object different from a function?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How do you create a new object in PHP?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What syntax would you use to create a subclass from an existing one?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you cause an object to be initialized when you create it?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Why is it a good idea to explicitly declare properties within a class?</p>
+	</li>
+</ol>
+
+<p class="author1">See <a data-type="xref" href="app01_split_004.xhtml#chapter_5_answers" class="calibre6">“Chapter 5 Answers”</a> in the <a data-type="xref" href="app01_split_000.xhtml#solutions_to_the_chapter_questions" class="calibre6">Appendix A</a> for the answers to these <span class="keep-together">questions</span>.</p>
+</div></section>
+</div></section></div></body></html>

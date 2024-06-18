@@ -1,0 +1,424 @@
+<html><head></head><body><div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 11. PDF"><div class="chapter" id="pdf">
+<h1><span class="label">Chapter 11. </span>PDF</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary=" PDF files" id="ix_pdf_files_ch11"/>Adobe’s Portable Document Format (PDF) is a popular way to get a consistent look, both on screen and in print, for documents. This chapter shows you how to dynamically create PDF files with text, graphics, links, and more. Doing so opens the door to many applications. You can create almost any kind of business document, including form letters, invoices, and receipts. In addition, you can automate most paperwork by overlaying text onto a scan of the paper form and saving the result as a PDF file.</p>
+<section data-type="sect1" data-pdf-bookmark="PDF Extensions"><div class="sect1" id="pdf_extensions">
+<h1>PDF Extensions</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="PDF files" data-secondary="PHP extensions for" id="idm45922757808584"/>PHP has several libraries for generating PDF documents. This chapter’s examples use the popular <a contenteditable="false" data-type="indexterm" data-primary="website resources" data-secondary="FPDF library" id="idm45922757806968"/><a contenteditable="false" data-type="indexterm" data-primary="FPDF library" id="idm45922757805592"/><a href="http://www.fpdf.org">FPDF library</a>, a set of PHP code you include in your scripts with the <code>require()</code> function—it doesn’t require any server-side configuration or support, so you can use it even without support from your host. The basic concepts, structure, and features of a PDF file should be common to all the PDF libraries, however.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p><a contenteditable="false" data-type="indexterm" data-primary="website resources" data-secondary="TCPDF library" id="idm45922757802248"/><a contenteditable="false" data-type="indexterm" data-primary="TCPDF library" id="idm45922757800648"/>Another PDF-generating library, <a href="https://tcpdf.org">TCPDF</a>, is better at handling HTML special characters and UTF-8 multilanguage output than FPDF. Look it up if you need that capability. The methods you’ll use are <a contenteditable="false" data-type="indexterm" data-primary="writeHTMLCell method, TCPDF" id="idm45922757798552"/><code>writeHTMLCell()</code> and <a contenteditable="false" data-type="indexterm" data-primary="writeHTML method, TCPDF" id="idm45922757797064"/><code>writeHTML()</code>.</p>
+</div>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="Documents and Pages"><div class="sect1" id="documents_and_pages">
+<h1>Documents and Pages</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="PDF files" data-secondary="creating" id="ix_pdf_files_create"/>A PDF document is made up of a number of pages, each of which contains text and/or images. This section shows you how to create a document, add pages in that document, write text to the pages, and send the pages back to the browser when you’re done.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>The examples in this chapter assume that you have at least the Adobe PDF document viewer installed as an add-on to your web browser. These examples will not work otherwise. You can get the add-on from the <a href="https://oreil.ly/xXA3k">Adobe website</a>.</p>
+</div>
+<section data-type="sect2" data-pdf-bookmark="A Simple Example"><div class="sect2" id="a_simple_example">
+<h2>A Simple Example</h2>
+<p>Let’s start with a simple PDF document. <a data-type="xref" href="#example_oneone_onedot_quotation_markhel">Example 11-1</a> writes the text “Hello Out There!” to a page and then displays the resulting PDF document.</p>
+<div data-type="example" id="example_oneone_onedot_quotation_markhel">
+<h5><span class="label">Example 11-1. </span>“Hello Out There!” in PDF</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?php</code>
+
+<code class="k">require</code><code class="p">(</code><code class="s2">"../fpdf/fpdf.php"</code><code class="p">);</code> <code class="c1">// path to fpdf.php</code>
+
+<code class="nv">$pdf</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">FPDF</code><code class="p">();</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">addPage</code><code class="p">();</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"Arial"</code><code class="p">,</code> <code class="s1">'B'</code><code class="p">,</code> <code class="mi">16</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">40</code><code class="p">,</code> <code class="mi">10</code><code class="p">,</code> <code class="s2">"Hello Out There!"</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">output</code><code class="p">();</code></pre>
+</div>
+<p><a data-type="xref" href="#example_oneone_onedot_quotation_markhel">Example 11-1</a> follows the basic steps involved in creating a PDF document: creating a new PDF object instance, creating a page, setting a valid font for the PDF text, and writing the text to a “cell” on the page. <a data-type="xref" href="#quotation_markhello_out_thereexclamatio">Figure 11-1</a> shows the output of <a data-type="xref" href="#example_oneone_onedot_quotation_markhel">Example 11-1</a>.</p>
+<figure><div id="quotation_markhello_out_thereexclamatio" class="figure">
+<img src="Images/php4_1101.png" alt="“Hello Out There!” PDF example" width="999" height="302"/>
+<h6><span class="label">Figure 11-1. </span>“Hello Out There!” PDF example</h6>
+</div></figure>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Initializing the Document"><div class="sect2" id="initializing_the_document">
+<h2>Initializing the Document</h2>
+<p>In <a data-type="xref" href="#example_oneone_onedot_quotation_markhel">Example 11-1</a>, we started by making a reference to the FPDF library with the <a contenteditable="false" data-type="indexterm" data-primary="require function" id="idm45922757989240"/><code>require()</code> function. Then the code created a new instance of the FPDF object. Note that all the calls to the new FPDF instance are object-oriented calls to methods in that object. (Refer to <a data-type="xref" href="ch06.xhtml#objects-id00032">Chapter 6</a> if you have trouble with the examples in this chapter.) After you have created the new instance of the FPDF object, you’ll need to add at least one page to the object, so the <a contenteditable="false" data-type="indexterm" data-primary="AddPage method, FPDF" id="idm45922757986408"/><code>AddPage()</code> method is called. Next, you need to set the font for the output you are about to generate with the <a contenteditable="false" data-type="indexterm" data-primary="SetFont method, FPDF" id="idm45922757984776"/><code>SetFont()</code> call. Then, using the <a contenteditable="false" data-type="indexterm" data-primary="cell method, FPDF" id="idm45922757983256"/><code>cell()</code> method call, you can send the output to your created document. To send all your work to the browser, simply use the <a contenteditable="false" data-type="indexterm" data-primary="output method, FPDF" id="idm45922757981576"/><code>output()</code> method.</p>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Outputting Basic Text Cells"><div class="sect2" id="outputting_basic_text_cells">
+<h2>Outputting Basic Text Cells</h2>
+<p>In the FPDF library, a <em>cell</em> is a rectangular area on the page that you can create and control. This cell can have a height, width, and border, and of course it can contain text. The basic syntax for the <code>cell()</code> method is as follows:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nx">cell</code><code class="p">(</code><strong><code class="nx">float</code></strong><code> </code><code class="nx">w</code><code> </code><code class="p">[,</code><code> </code><strong><code class="nx">float</code></strong><code> </code><code class="nx">h</code><code> </code><code class="p">[,</code><code> </code><strong><code class="nx">string</code></strong><code> </code><code class="nx">txt</code><code> </code><code class="p">[,</code><code> </code><strong><code class="nx">mixed</code></strong><code> </code><code class="nx">border</code><code>
+ </code><code class="p">[,</code><code> </code><strong><code class="nx">int</code></strong><code> </code><code class="nx">ln</code><code> </code><code class="p">[,</code><code> </code><strong><code class="nx">string</code></strong><code> </code><code class="nx">align</code><code> </code><code class="p">[,</code><code> </code><strong><code class="nx">int</code></strong><code> </code><code class="nx">fill</code><code> </code><code class="p">[,</code><code> </code><strong><code class="nx">mixed</code></strong><code> </code><code class="nb">link</code><code class="p">]]]]]]])</code></pre>
+<p>The first option is the width, then the height, and then the text to be output. This is followed by the border, the new line control, its alignment, any fill color for the text, and finally whether you want the text to be an HTML link. So, for example, if we want to change our original example to have a border and be center-aligned, we would change the cell code to the following:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">90</code><code class="p">,</code> <code class="mi">10</code><code class="p">,</code> <code class="s2">"Hello Out There!"</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'C'</code><code class="p">);</code></pre>
+<p>You’ll use the <code>cell()</code> method extensively when generating PDF documents with FPDF, so you’d be well served by taking some time to learn the ins and outs of this method. We will cover most of them in this chapter.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_pdf_files_create" id="idm45922757881304"/></p>
+</div></section>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="Text"><div class="sect1" id="text">
+<h1>Text</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="text" data-secondary="in PDF files" data-secondary-sortas="PDF files" id="ix_text_pdf_files"/><a contenteditable="false" data-type="indexterm" data-primary="PDF files" data-secondary="text in" id="ix_pdf_files_text"/>Text is the heart of a PDF file. Accordingly, there are many options for changing its appearance and layout. In this section, we’ll discuss the coordinate system used in PDF documents, functions for inserting text and changing text attributes, and font usage.</p>
+<section data-type="sect2" data-pdf-bookmark="Coordinates"><div class="sect2" id="coordinates">
+<h2>Coordinates</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="page layout, for PDF file" id="ix_page_layout_pdf_files"/><a contenteditable="false" data-type="indexterm" data-primary="coordinates, for PDF file" id="ix_coordinates_pdf_files"/><a contenteditable="false" data-type="indexterm" data-primary="text" data-secondary="in PDF files" data-tertiary="coordinates for" data-secondary-sortas="PDF files" id="idm45922757668520"/><a contenteditable="false" data-type="indexterm" data-primary="PDF files" data-secondary="text in" data-tertiary="coordinates for" id="ix_pdf_files_text_coord"/>The origin (0, 0) in a PDF document with the FPDF library is in the top-left corner of the defined page. All of the measurements are specified in points, millimeters, inches, or centimeters. A point (the default) is equal to 1/72 of an inch, or 0.35 mm. In <a data-type="xref" href="#example_oneone_twodot_demonstrating_coo">Example 11-2</a>, we change the defaults of the page dimensions to inches with the <a contenteditable="false" data-type="indexterm" data-primary="FPDF constructor" id="idm45922757663352"/><code>FPDF()</code> class instantiation-constructor method. The other options with this call are the orientation of the page (portrait or landscape) and the page size (typically Legal or Letter). The full options of this instantiation are shown in <a data-type="xref" href="#fpdf_options">Table 11-1</a>.</p>
+<table class="border" id="fpdf_options">
+<caption><span class="label">Table 11-1. </span>FPDF options</caption>
+<thead>
+<tr>
+<th><code>FPDF()</code> constructor parameters</th>
+<th>Parameter options</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Orientation</td>
+<td><code>P</code> (portrait; default)<br/><code>L</code> (landscape)<code/></td>
+</tr>
+<tr>
+<td>Units of measurement</td>
+<td><code>pt</code> (point, or 1/72 of an inch; default)<br/><code>in</code> (inch)<br/><code>mm</code> (millimeter)<br/><code>cm</code> (centimeter)<code/></td>
+</tr>
+<tr>
+<td>Page size</td>
+<td><code>Letter</code> (default)<br/><code>Legal</code><br/><code>A5</code><br/><code>A3</code><br/><code>A4</code> or a customizable size (see FPDF documentation)</td>
+</tr>
+</tbody>
+</table>
+<p>Also in <a data-type="xref" href="#example_oneone_twodot_demonstrating_coo">Example 11-2</a>, we use the <a contenteditable="false" data-type="indexterm" data-primary="ln method, FPDF" id="idm45922757625640"/><code>ln()</code> method call to manage what line of the page we are on. The <code>ln()</code> method can take an optional argument, instructing it how many units (i.e., the unit of measurement defined in the constructor call) to move. In our case, we’ve defined the page to be in inches, so we’re moving through the document in measurement units of inches. Further, since we’ve defined the page to be in inches, the coordinates for the <a contenteditable="false" data-type="indexterm" data-primary="cell method, FPDF" id="idm45922757623336"/><code>cell()</code> method are also rendered in inches.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>This is not really the ideal approach for building a PDF page because you don’t have as fine-grained control with inches as you would with points or millimeters. We’ve used inches in this instance so that the examples can be seen more clearly.</p>
+</div>
+<p><a data-type="xref" href="#example_oneone_twodot_demonstrating_coo">Example 11-2</a> puts text in the corners and center of a page.</p>
+<div data-type="example" id="example_oneone_twodot_demonstrating_coo">
+<h5><span class="label">Example 11-2. </span>Demonstrating coordinates and line management</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?php</code>
+<code class="k">require</code><code class="p">(</code><code class="s2">"../fpdf/fpdf.php"</code><code class="p">);</code>
+
+<code class="nv">$pdf</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">FPDF</code><code class="p">(</code><code class="s1">'P'</code><code class="p">,</code> <code class="s1">'in'</code><code class="p">,</code> <code class="s1">'Letter'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">addPage</code><code class="p">();</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s1">'Arial'</code><code class="p">,</code> <code class="s1">'B'</code><code class="p">,</code> <code class="mi">24</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s2">"Top Left!"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="s1">'L'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">6</code><code class="p">,</code> <code class="mf">0.5</code><code class="p">,</code> <code class="s2">"Top Right!"</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'R'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">(</code><code class="mf">4.5</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s2">"This is the middle!"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'C'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">(</code><code class="mf">5.3</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s2">"Bottom Left!"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'L'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s2">"Bottom Right!"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'R'</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">output</code><code class="p">();</code></pre>
+</div>
+<p>The output of <a data-type="xref" href="#example_oneone_twodot_demonstrating_coo">Example 11-2</a> is shown in <a data-type="xref" href="#coordinate_and_line_control_demo_output">Figure 11-2</a>.</p>
+<figure><div id="coordinate_and_line_control_demo_output" class="figure">
+<img src="Images/php4_1102.png" alt="Coordinate and line control demo output" width="597" height="757"/>
+<h6><span class="label">Figure 11-2. </span>Coordinate and line control demo output</h6>
+</div></figure>
+<p>So let’s analyze this code a little. After we define the page with the constructor, we see these lines of code:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s2">"Top Left!"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="s1">'L'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">6</code><code class="p">,</code> <code class="mf">0.5</code><code class="p">,</code> <code class="s2">"Top Right!"</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'R'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">(</code><code class="mf">4.5</code><code class="p">);</code></pre>
+<p>The first <a contenteditable="false" data-type="indexterm" data-primary="cell method, FPDF" id="idm45922757221352"/><code>cell()</code> method call tells the PDF class to start at the top coordinates (0,0) and write out the left-justified text “Top Left!” with no border, and to insert a line break at the end of the output. The next <code>cell()</code> method call prompts the creation of a cell six inches wide, again starting on the lefthand side of the page, with a half-inch-high border and the right-justified text “Top Right!” We then tell the PDF class to move down 4½ inches on the page with the <code>ln(4.5)</code> statement, and continue the output generation from that point. As you can see, there are a lot of possible combinations with the <code>cell()</code> and <a contenteditable="false" data-type="indexterm" data-primary="ln method, FPDF" id="idm45922757436344"/><code>ln()</code> methods alone. But that is not all that the FPDF library can do.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_pdf_files_text_coord" id="idm45922757434792"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_text_pdf_files_coord" id="idm45922757433416"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_coordinates_pdf_files" id="idm45922757432040"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_page_layout_pdf_files" id="idm45922757430696"/></p>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Text Attributes"><div class="sect2" id="text_attributes">
+<h2>Text Attributes</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="font attributes, for PDF file" id="ix_font_attr_pdf_files"/><a contenteditable="false" data-type="indexterm" data-primary="PDF files" data-secondary="text in" data-tertiary="font attributes of" id="ix_pdf_files_text_attributes"/><a contenteditable="false" data-type="indexterm" data-primary="text" data-secondary="in PDF files" data-tertiary="font attributes" data-secondary-sortas="PDF files" id="ix_text_pdf_files_attributes"/>There are three common ways to alter the appearance of text: bold, underline, and italics. In <a data-type="xref" href="#example_oneone_twodot_demonstrating_fon">Example 11-3</a> the <a contenteditable="false" data-type="indexterm" data-primary="SetFont method, FPDF" id="idm45922757420904"/><code>SetFont()</code> method (introduced earlier in the chapter) is used to alter the formatting of the outgoing text. Note that these alterations in the text’s appearance are not exclusive (i.e., you can use them in any combination) and that the font name is changed in the last <code>SetFont()</code> call.</p>
+<div data-type="example" id="example_oneone_twodot_demonstrating_fon">
+<h5><span class="label">Example 11-3. </span>Demonstrating font attributes</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?php</code>
+<code class="k">require</code><code class="p">(</code><code class="s2">"../fpdf/fpdf.php"</code><code class="p">);</code>
+
+<code class="nv">$pdf</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">FPDF</code><code class="p">();</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">addPage</code><code class="p">();</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"Arial"</code><code class="p">,</code> <code class="s1">''</code><code class="p">,</code> <code class="mi">12</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">5</code><code class="p">,</code> <code class="s2">"Regular normal Arial Text here, size 12"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="s1">'L'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">();</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"Arial"</code><code class="p">,</code> <code class="s1">'IBU'</code><code class="p">,</code> <code class="mi">20</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">15</code><code class="p">,</code> <code class="s2">"This is Bold, Underlined, Italicised Text size 20"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'L'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">();</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"Times"</code><code class="p">,</code> <code class="s1">'IU'</code><code class="p">,</code> <code class="mi">15</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">5</code><code class="p">,</code> <code class="s2">"This is Underlined Italicised 15pt Times"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'L'</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">output</code><code class="p">();</code></pre>
+</div>
+<p>Also, in this code the constructor has been called with no attributes passed into it, using the default values of portrait, points, and letter. The output of <a data-type="xref" href="#example_oneone_twodot_demonstrating_fon">Example 11-3</a> is shown in <a data-type="xref" href="#changing_font_typescomma_sizescomma_and">Figure 11-3</a>.</p>
+<figure><div id="changing_font_typescomma_sizescomma_and" class="figure">
+<img src="Images/php4_1103.png" alt="Changing font types, sizes, and attributes" width="857" height="248"/>
+<h6><span class="label">Figure 11-3. </span>Changing font types, sizes, and attributes</h6>
+</div></figure>
+<p>The available font styles that come with FPDF are:</p>
+<ul>
+<li><p><code>Courier</code> (fixed-width)</p></li>
+<li><p><code>Helvetica</code> or <code>Arial</code> (synonymous; sans serif)</p></li>
+<li><p><code>Times</code> (serif)</p></li>
+<li><p><code>Symbol</code> (symbols)</p></li>
+<li><p><code>ZapfDingbats</code> (symbols)</p></li>
+</ul>
+<p>You can include any other font family for which you have the definition file by using the <a contenteditable="false" data-type="indexterm" data-primary="AddFont method, FPDF" id="idm45922757290280"/><code>AddFont()</code> method.</p>
+<p><a contenteditable="false" data-type="indexterm" data-primary="colors" data-secondary="text in PDF files" id="idm45922757288440"/><a contenteditable="false" data-type="indexterm" data-primary="PDF files" data-secondary="text in" data-tertiary="color of" id="idm45922757286872"/><a contenteditable="false" data-type="indexterm" data-primary="text" data-secondary="in PDF files" data-tertiary="color of" data-secondary-sortas="PDF files" id="idm45922757285224"/>Of course, this wouldn’t be any fun at all if you couldn’t change the color of the text that you’re outputting to the PDF definition. Enter the <a contenteditable="false" data-type="indexterm" data-primary="SetTextColor method, FPDF" id="idm45922757283016"/><code>SetTextColor()</code> method. This method takes the existing font definition and simply changes the color of the text. Be sure to call this method before you use the <a contenteditable="false" data-type="indexterm" data-primary="cell method, FPDF" id="idm45922757281368"/><code>cell()</code> method so that the content of the cell can be changed. The color parameters are combinations of red, green, and blue numeric constants from <code>0</code> (none) to <code>255</code> (full color). If you do not pass in the second and third parameters, then the first number will be a shade of gray with red, green, and blue values equal to the single passed value. <a data-type="xref" href="#example_oneone_fourdot_demonstrating_co">Example 11-4</a> shows how this can be employed.</p>
+<div data-type="example" id="example_oneone_fourdot_demonstrating_co">
+<h5><span class="label">Example 11-4. </span>Demonstrating color attributes</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?php</code>
+<code class="k">require</code><code class="p">(</code><code class="s2">"../fpdf/fpdf.php"</code><code class="p">);</code>
+
+<code class="nv">$pdf</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">FPDF</code><code class="p">();</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">addPage</code><code class="p">();</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"Times"</code><code class="p">,</code> <code class="s1">'U'</code><code class="p">,</code> <code class="mi">15</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setTextColor</code><code class="p">(</code><code class="mi">128</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">5</code><code class="p">,</code> <code class="s2">"Times font, Underlined and shade of Grey Text"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'L'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">(</code><code class="mi">6</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setTextColor</code><code class="p">(</code><code class="mi">255</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">5</code><code class="p">,</code> <code class="s2">"Times font, Underlined and Red Text"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'L'</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">output</code><code class="p">();</code></pre>
+</div>
+<p><a data-type="xref" href="#adding_color_to_the_text_output">Figure 11-4</a> is the result of the code in <a data-type="xref" href="#example_oneone_fourdot_demonstrating_co">Example 11-4</a>.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_text_pdf_files_attributes" id="idm45922756958296"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_pdf_files_text_attributes" id="idm45922756956952"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_font_attr_pdf_files" id="idm45922756955560"/></p>
+<figure><div id="adding_color_to_the_text_output" class="figure">
+<img src="Images/php4_1104.png" alt="Adding color to the text output" width="629" height="173"/>
+<h6><span class="label">Figure 11-4. </span>Adding color to the text output</h6>
+</div></figure>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Page Headers, Footers, and Class Extension"><div class="sect2" id="page_headerscomma_footerscomma_and_clas">
+<h2>Page Headers, Footers, and Class Extension</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="headers, in PDF files" id="ix_headers_pdf_files"/><a contenteditable="false" data-type="indexterm" data-primary="footers, in PDF files" id="ix_footers_pdf_files"/><a contenteditable="false" data-type="indexterm" data-primary="PDF files" data-secondary="text in" data-tertiary="headers and footers" id="ix_pdf_files_text_headers"/><a contenteditable="false" data-type="indexterm" data-primary="text" data-secondary="in PDF files" data-tertiary="headers and footers" data-secondary-sortas="PDF files" id="ix_text_pdf_files_headers"/>So far we’ve looked only at what can be output to the PDF page in small quantities. We did this intentionally, to show you the variety of what you can do within a controlled environment. <a contenteditable="false" data-type="indexterm" data-primary="FPDF library" id="idm45922756943288"/>Now we need to expand what the FPDF library can do. Remember that this library actually is just a class definition provided for your use and extension, the latter of which we’ll look at now. Since FPDF is indeed a class definition, all we have to do to extend it is to use the object command that is native to PHP, like this:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="k">class</code> <code class="nc">MyPDF</code> <code class="k">extends</code> <code class="nx">FPDF</code></pre>
+<p>Here we take the <code>FPDF</code> class and extend it with a new name of <code>MyPDF</code>. Then we can extend any of the methods in the object. We can even add more methods to our class extension if we so desire, but more on that later. The first two methods that we’ll look at are extensions of existing empty methods that are predefined in the parent of the <code>FPDF</code> class: <a contenteditable="false" data-type="indexterm" data-primary="header method, FPDF" id="idm45922756914904"/><code>header()</code> and <a contenteditable="false" data-type="indexterm" data-primary="footer method, FPDF" id="idm45922756913608"/><code>footer()</code>. These methods, as their names imply, generate page headers and footers for each page in your PDF document. <a data-type="xref" href="#example_oneone_fivedot_defining_header">Example 11-5</a>, which is rather long, shows the definition of these two methods. You will notice only a few newly used methods; the most significant is <a contenteditable="false" data-type="indexterm" data-primary="AliasNbPages method, FPDF" id="idm45922756933976"/><code>AliasNbPages()</code>, which is used simply to track the overall page count in the PDF document before it is sent to the browser.</p>
+<div data-type="example" id="example_oneone_fivedot_defining_header">
+<h5><span class="label">Example 11-5. </span>Defining header and footer methods</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?php</code>
+<code class="k">require</code><code class="p">(</code><code class="s2">"../fpdf/fpdf.php"</code><code class="p">);</code>
+
+<code class="k">class</code> <code class="nc">MyPDF</code> <code class="k">extends</code> <code class="nx">FPDF</code>
+<code class="p">{</code>
+ <code class="k">function</code> <code class="nf">header</code><code class="p">()</code>
+ <code class="p">{</code>
+ <code class="k">global</code> <code class="nv">$title</code><code class="p">;</code>
+
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"Times"</code><code class="p">,</code> <code class="s1">''</code><code class="p">,</code> <code class="mi">12</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setDrawColor</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">180</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setFillColor</code><code class="p">(</code><code class="mi">230</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">230</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setTextColor</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">255</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setLineWidth</code><code class="p">(</code><code class="mi">1</code><code class="p">);</code>
+
+ <code class="nv">$width</code> <code class="o">=</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">getStringWidth</code><code class="p">(</code><code class="nv">$title</code><code class="p">)</code> <code class="o">+</code> <code class="mi">150</code><code class="p">;</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="nv">$width</code><code class="p">,</code> <code class="mi">9</code><code class="p">,</code> <code class="nv">$title</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="s1">'C'</code><code class="p">,</code> <code class="mi">1</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">(</code><code class="mi">10</code><code class="p">);</code>
+ <code class="p">}</code>
+
+ <code class="k">function</code> <code class="nf">footer</code><code class="p">()</code>
+ <code class="p">{</code>
+ <code class="c1">//Position at 1.5 cm from bottom</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setY</code><code class="p">(</code><code class="o">-</code><code class="mi">15</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"Arial"</code><code class="p">,</code> <code class="s1">'I'</code><code class="p">,</code> <code class="mi">8</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">10</code><code class="p">,</code>
+ <code class="s2">"This is the page footer -&gt; Page </code><code class="si">{</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">pageNo</code><code class="p">()</code><code class="si">}</code><code class="s2">/{nb}"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'C'</code><code class="p">);</code>
+ <code class="p">}</code>
+<code class="p">}</code>
+
+<code class="nv">$title</code> <code class="o">=</code> <code class="s2">"FPDF Library Page Header"</code><code class="p">;</code>
+
+<code class="nv">$pdf</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">MyPDF</code><code class="p">(</code><code class="s1">'P'</code><code class="p">,</code> <code class="s1">'mm'</code><code class="p">,</code> <code class="s1">'Letter'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">aliasNbPages</code><code class="p">();</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">addPage</code><code class="p">();</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"Times"</code><code class="p">,</code> <code class="s1">''</code><code class="p">,</code> <code class="mi">24</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s2">"some text at the top of the page"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'L'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">(</code><code class="mi">225</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s2">"More text toward the bottom"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">'C'</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">addPage</code><code class="p">();</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"Arial"</code><code class="p">,</code> <code class="s1">'B'</code><code class="p">,</code> <code class="mi">15</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s2">"Top of page 2 after header"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="s1">'C'</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">output</code><code class="p">();</code></pre>
+</div>
+<p>The results of <a data-type="xref" href="#example_oneone_fivedot_defining_header">Example 11-5</a> are shown in <a data-type="xref" href="#fpdf_header_and_footer_addition">Figure 11-5</a>. This is a shot of both pages side by side to show you the page count in the footers and the page number at the top of the page(s) after page 1. The header has a cell with some coloring (for cosmetic effect); of course, you don’t have to use colors if you don’t want to.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_pdf_files_text" id="idm45922756827032"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_text_pdf_files" id="idm45922756825688"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_text_pdf_files_headers" id="idm45922756680920"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_pdf_files_text_headers" id="idm45922756679480"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_footers_pdf_files" id="idm45922756678088"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_headers_pdf_files" id="idm45922756676712"/></p>
+<figure><div id="fpdf_header_and_footer_addition" class="figure">
+<img src="Images/php4_1105.png" alt="FPDF header and footer addition" width="1332" height="834"/>
+<h6><span class="label">Figure 11-5. </span>FPDF header and footer addition</h6>
+</div></figure>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Images and Links"><div class="sect2" id="images_and_links">
+<h2>Images and Links</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="graphics" data-secondary="in PDF files" data-secondary-sortas="PDF files" id="ix_graphics_pdf_files"/><a contenteditable="false" data-type="indexterm" data-primary="PDF files" data-secondary="links in" id="ix_pdf_files_links"/><a contenteditable="false" data-type="indexterm" data-primary="PDF files" data-secondary="graphics in" id="ix_pdf_files_graphics"/>The FPDF library can also handle image insertion and control links within the PDF document or externally to outside web addresses. Let’s first look at how FPDF allows you to insert graphics into your document. Perhaps you’re building a PDF document that uses your company logo and you want to make a banner to print at the top of each page. We can use the <a contenteditable="false" data-type="indexterm" data-primary="AliasNbPages method, FPDF" id="idm45922756665672"/><code>header()</code> and <a contenteditable="false" data-type="indexterm" data-primary="footer method, FPDF" id="idm45922756664184"/><code>footer()</code> methods that we defined in the previous section to do this. Once we have an image file to use, we simply call the <a contenteditable="false" data-type="indexterm" data-primary="image method, FPDF" id="idm45922756662504"/><code>image()</code> method to place the image in the PDF document.</p>
+<p>The new <code>header()</code> method code looks like this:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">header</code><code class="p">()</code>
+<code class="p">{</code>
+ <code class="k">global</code> <code class="nv">$title</code><code class="p">;</code>
+
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"Times"</code><code class="p">,</code> <code class="s1">''</code><code class="p">,</code> <code class="mi">12</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setDrawColor</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">180</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setFillColor</code><code class="p">(</code><code class="mi">230</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">230</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setTextColor</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">255</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setLineWidth</code><code class="p">(</code><code class="mf">0.5</code><code class="p">);</code>
+
+ <code class="nv">$width</code> <code class="o">=</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">getStringWidth</code><code class="p">(</code><code class="nv">$title</code><code class="p">)</code> <code class="o">+</code> <code class="mi">120</code><code class="p">;</code>
+
+
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">image</code><code class="p">(</code><code class="s2">"php_logo_big.jpg"</code><code class="p">,</code> <code class="mi">10</code><code class="p">,</code> <code class="mf">10.5</code><code class="p">,</code> <code class="mi">15</code><code class="p">,</code> <code class="mf">8.5</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="nv">$width</code><code class="p">,</code> <code class="mi">9</code><code class="p">,</code> <code class="nv">$title</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="s1">'C'</code><code class="p">);</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">(</code><code class="mi">10</code><code class="p">);</code>
+<code class="p">}</code></pre>
+<p>As you can see, the <code>image()</code> method’s parameters are the filename of the image to use, the <em>x</em> coordinate at which to start the image output, the <em>y</em> coordinate, and the width and height of the image. If you don’t specify the width and height, then FPDF will do its best to render the image at the <em>x</em> and <em>y</em> coordinates that you specified. The code has changed a little in other areas as well. We removed the fill color parameter from the <code>cell()</code> method call even though we still have the fill color method called. This makes the box area around the header cell white so that we can insert the image without hassle.</p>
+<p>The output of this new header with the image inserted is shown in <a data-type="xref" href="#pdf_page_header_with_inserted_image_fil">Figure 11-6</a>.</p>
+<figure><div id="pdf_page_header_with_inserted_image_fil" class="figure">
+<img src="Images/php4_1106.png" alt="PDF page header with inserted image file" width="569" height="122"/>
+<h6><span class="label">Figure 11-6. </span>PDF page header with inserted image file</h6>
+</div></figure>
+<p>This section also has links in its title, so now let’s turn our attention to how to use FPDF to add links to PDF documents. FPDF can create two kinds of links: an <em>internal</em> link (i.e., one within the PDF document to another location within the same document, such as two pages later) and an <em>external</em> link to a web URL.</p>
+<p><a contenteditable="false" data-type="indexterm" data-primary="internal links, PDF files" id="idm45922756576216"/>An internal link is created in two parts. First you define the starting point, or origin, for the link, and then you set the anchor, or destination, for where the link will go when it is clicked. To set a link’s origin, use the <a contenteditable="false" data-type="indexterm" data-primary="addLink method, FPDF" id="idm45922756574776"/><code>addLink()</code> method. This method will return a handle that you need to use when creating the destination portion of the link. To set the destination, use the <a contenteditable="false" data-type="indexterm" data-primary="setLink method, FPDF" id="idm45922756573096"/><code>setLink()</code> method, which takes the origin’s link handle as its parameter so that it can perform the join between the two steps.</p>
+<p><a contenteditable="false" data-type="indexterm" data-primary="external links, PDF files" id="idm45922756571160"/><a contenteditable="false" data-type="indexterm" data-primary="URLs" data-secondary="in PDF files" data-secondary-sortas="PDF files" id="idm45922756569864"/>An external URL type link can be created in two ways. If you are using an image as a link, you will need to use the <a contenteditable="false" data-type="indexterm" data-primary="image method, FPDF" id="idm45922756567960"/><code>image()</code> method. If you want to use straight text as a link, you’ll need to use the <code>cell()</code> or <a contenteditable="false" data-type="indexterm" data-primary="write method, FPDF" id="idm45922756566024"/><code>write()</code> method. We use the <code>write()</code> method in this example.</p>
+<p>Both internal and external links are shown in <a data-type="xref" href="#example_oneone_sixdot_creating_internal">Example 11-6</a>.</p>
+<div data-type="example" id="example_oneone_sixdot_creating_internal">
+<h5><span class="label">Example 11-6. </span>Creating internal and external links</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?php</code>
+<code class="k">require</code><code class="p">(</code><code class="s2">"../fpdf/fpdf.php"</code><code class="p">);</code>
+
+<code class="nv">$pdf</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">FPDF</code><code class="p">();</code>
+
+<code class="c1">// First page</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">addPage</code><code class="p">();</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"Times"</code><code class="p">,</code> <code class="s1">''</code><code class="p">,</code> <code class="mi">14</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">write</code><code class="p">(</code><code class="mi">5</code><code class="p">,</code> <code class="s2">"For a link to the next page - Click"</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s1">''</code><code class="p">,</code> <code class="s1">'U'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setTextColor</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">255</code><code class="p">);</code>
+<code class="nv">$linkToPage2</code> <code class="o">=</code> <code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">addLink</code><code class="p">();</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">write</code><code class="p">(</code><code class="mi">5</code><code class="p">,</code> <code class="s2">"here"</code><code class="p">,</code> <code class="nv">$linkToPage2</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s1">''</code><code class="p">);</code>
+
+<code class="c1">// Second page</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">addPage</code><code class="p">();</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setLink</code><code class="p">(</code><code class="nv">$linkToPage2</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">image</code><code class="p">(</code><code class="s2">"php-tiny.jpg"</code><code class="p">,</code> <code class="mi">10</code><code class="p">,</code> <code class="mi">10</code><code class="p">,</code> <code class="mi">30</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="s1">''</code><code class="p">,</code> <code class="s2">"http://www.php.net"</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">(</code><code class="mi">20</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setTextColor</code><code class="p">(</code><code class="mi">1</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">5</code><code class="p">,</code> <code class="s2">"Click the following link, or click on the image"</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="s1">'L'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s1">''</code><code class="p">,</code> <code class="s1">'U'</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setTextColor</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code><code class="mi">0</code><code class="p">,</code><code class="mi">255</code><code class="p">);</code>
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">write</code><code class="p">(</code><code class="mi">5</code><code class="p">,</code> <code class="s2">"www.oreilly.com"</code><code class="p">,</code> <code class="s2">"http://www.oreilly.com"</code><code class="p">);</code>
+
+<code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">output</code><code class="p">();</code></pre>
+</div>
+<p>The two-page output that this code produces is shown in Figures <a data-type="xref" data-xrefstyle="select:labelnumber" href="#first_page_of_linked_pdf_document">11-7</a> and <a data-type="xref" data-xrefstyle="select:labelnumber" href="#second_page_of_linked_pdf_document_with">11-8</a>.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_pdf_files_graphics" id="idm45922756415144"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_graphics_pdf_files" id="idm45922756413768"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_pdf_files_links" id="idm45922756412392"/></p>
+<figure><div id="first_page_of_linked_pdf_document" class="figure">
+<img src="Images/php4_1107.png" alt="First page of linked PDF document" width="440" height="86"/>
+<h6><span class="label">Figure 11-7. </span>First page of linked PDF document</h6>
+</div></figure>
+<figure><div id="second_page_of_linked_pdf_document_with" class="figure">
+<img src="Images/php4_1108.png" alt="Second page of linked PDF document with URL links" width="653" height="233"/>
+<h6><span class="label">Figure 11-8. </span>Second page of linked PDF document with URL links</h6>
+</div></figure>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Tables and Data"><div class="sect2" id="tables_and_data">
+<h2>Tables and Data</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="databases" data-secondary="PDF files, adding data to" id="ix_data_pdf_files"/><a contenteditable="false" data-type="indexterm" data-primary="tables, in PDF files" id="ix_tables_pdf_files"/><a contenteditable="false" data-type="indexterm" data-primary="PDF files" data-secondary="data from database in" id="ix_pdf_files_data"/><a contenteditable="false" data-type="indexterm" data-primary="PDF files" data-secondary="tables in" id="ix_pdf_files_tables"/>So far we’ve looked only at PDF materials that are static in nature. But PHP, being what it is, does so much more than static processes. In this section, we’ll combine some data from a database (using a MySQL example of the database information from <a data-type="xref" href="ch09.xhtml#databases-id00007">Chapter 9</a>) and FPDF’s ability to generate tables.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>Be sure to reference the database file structures available in <a data-type="xref" href="ch09.xhtml#databases-id00007">Chapter 9</a> to follow along in this section.</p>
+</div>
+<p><a data-type="xref" href="#example_oneone_sevendot_generating_a_ta">Example 11-7</a> is, again, a little lengthy. However, it is well commented, so read through it here first; we’ll cover the highlights after the listing.</p>
+<div data-type="example" id="example_oneone_sevendot_generating_a_ta">
+<h5><span class="label">Example 11-7. </span>Generating a table</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?php</code><code>
+</code><strong><code class="k">require</code></strong><code class="p">(</code><code class="s2">"</code><code class="s2">../fpdf/fpdf.php</code><code class="s2">"</code><code class="p">);</code><code>
+
+</code><strong><code class="k">class</code></strong><code> </code><code class="nc">TablePDF</code><code> </code><strong><code class="k">extends</code></strong><code> </code><code class="nx">FPDF</code><code>
+</code><code class="p">{</code><code>
+ </code><strong><code class="k">function</code></strong><code> </code><code class="nf">buildTable</code><code class="p">(</code><code class="nv">$header</code><code class="p">,</code><code> </code><code class="nv">$data</code><code class="p">)</code><code>
+ </code><code class="p">{</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setFillColor</code><code class="p">(</code><code class="mi">255</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">);</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setTextColor</code><code class="p">(</code><code class="mi">255</code><code class="p">);</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setDrawColor</code><code class="p">(</code><code class="mi">128</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">);</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setLineWidth</code><code class="p">(</code><code class="mf">0.3</code><code class="p">);</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s1">''</code><code class="p">,</code><code> </code><code class="s1">'B'</code><code class="p">);</code><code>
+
+</code><code class="c1">//Header
+</code><code class="c1">// make an array for the column widths
+</code><code> </code><code class="nv">$widths</code><code> </code><code class="o">=</code><code> </code><strong><code class="k">array</code></strong><code class="p">(</code><code class="mi">85</code><code class="p">,</code><code> </code><code class="mi">40</code><code class="p">,</code><code> </code><code class="mi">15</code><code class="p">);</code><code>
+</code><code class="c1">// send the headers to the PDF document
+</code><code> </code><strong><code class="k">for</code></strong><code class="p">(</code><code class="nv">$i</code><code> </code><code class="o">=</code><code> </code><code class="mi">0</code><code class="p">;</code><code> </code><code class="nv">$i</code><code> </code><code class="o">&lt;</code><code> </code><em><code class="nb">count</code></em><code class="p">(</code><code class="nv">$header</code><code class="p">);</code><code> </code><code class="nv">$i</code><code class="o">++</code><code class="p">)</code><code> </code><code class="p">{</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="nv">$widths</code><code class="p">[</code><code class="nv">$i</code><code class="p">],</code><code> </code><code class="mi">7</code><code class="p">,</code><code> </code><code class="nv">$header</code><code class="p">[</code><code class="nv">$i</code><code class="p">],</code><code> </code><code class="mi">1</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="s1">'C'</code><code class="p">,</code><code> </code><code class="mi">1</code><code class="p">);</code><code>
+ </code><code class="p">}</code><code>
+
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">();</code><code>
+
+</code><code class="c1">// Color and font restoration
+</code><code> </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setFillColor</code><code class="p">(</code><code class="mi">175</code><code class="p">);</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setTextColor</code><code class="p">(</code><code class="mi">0</code><code class="p">);</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s1">''</code><code class="p">);</code><code>
+
+</code><code class="c1">// now spool out the data from the $data array
+</code><code> </code><code class="nv">$fill</code><code> </code><code class="o">=</code><code> </code><code class="mi">0</code><code class="p">;</code><code class="c1">// used to alternate row color backgrounds
+</code><code> </code><code class="nv">$url</code><code> </code><code class="o">=</code><code> </code><code class="s2">"</code><code class="s2">http://www.oreilly.com</code><code class="s2">"</code><code class="p">;</code><code>
+
+ </code><strong><code class="k">foreach</code></strong><code class="p">(</code><code class="nv">$data</code><code> </code><strong><code class="k">as</code></strong><code> </code><code class="nv">$row</code><code class="p">)</code><code>
+ </code><code class="p">{</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="nv">$widths</code><code class="p">[</code><code class="mi">0</code><code class="p">],</code><code> </code><code class="mi">6</code><code class="p">,</code><code> </code><code class="nv">$row</code><code class="p">[</code><code class="mi">0</code><code class="p">],</code><code> </code><code class="s1">'LR'</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="s1">'L'</code><code class="p">,</code><code> </code><code class="nv">$fill</code><code class="p">);</code><code>
+
+</code><code class="c1">// set colors to show a URL style link
+</code><code> </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setTextColor</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="mi">255</code><code class="p">);</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s1">''</code><code class="p">,</code><code> </code><code class="s1">'U'</code><code class="p">);</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="nv">$widths</code><code class="p">[</code><code class="mi">1</code><code class="p">],</code><code> </code><code class="mi">6</code><code class="p">,</code><code> </code><code class="nv">$row</code><code class="p">[</code><code class="mi">1</code><code class="p">],</code><code> </code><code class="s1">'LR'</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="s1">'L'</code><code class="p">,</code><code> </code><code class="nv">$fill</code><code class="p">,</code><code> </code><code class="nv">$url</code><code class="p">);</code><code>
+
+</code><code class="c1">// restore normal color settings
+</code><code> </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setTextColor</code><code class="p">(</code><code class="mi">0</code><code class="p">);</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s1">''</code><code class="p">);</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><code class="nv">$widths</code><code class="p">[</code><code class="mi">2</code><code class="p">],</code><code> </code><code class="mi">6</code><code class="p">,</code><code> </code><code class="nv">$row</code><code class="p">[</code><code class="mi">2</code><code class="p">],</code><code> </code><code class="s1">'LR'</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="s1">'C'</code><code class="p">,</code><code> </code><code class="nv">$fill</code><code class="p">);</code><code>
+
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">ln</code><code class="p">();</code><code>
+
+ </code><code class="nv">$fill</code><code> </code><code class="o">=</code><code> </code><code class="p">(</code><code class="nv">$fill</code><code class="p">)</code><code> </code><code class="o">?</code><code> </code><code class="mi">0</code><code> </code><code class="o">:</code><code> </code><code class="mi">1</code><code class="p">;</code><code>
+ </code><code class="p">}</code><code>
+ </code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">cell</code><code class="p">(</code><em><code class="nb">array_sum</code></em><code class="p">(</code><code class="nv">$widths</code><code class="p">),</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="s1">''</code><code class="p">,</code><code> </code><code class="s1">'T'</code><code class="p">);</code><code>
+ </code><code class="p">}</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="c1">//connect to database
+</code><code class="nv">$dbconn</code><code> </code><code class="o">=</code><code> </code><strong><code class="k">new</code></strong><code> </code><code class="nx">mysqli</code><code class="p">(</code><code class="s1">'localhost'</code><code class="p">,</code><code> </code><code class="s1">'dbusername'</code><code class="p">,</code><code> </code><code class="s1">'dbpassword'</code><code class="p">,</code><code> </code><code class="s1">'library'</code><code class="p">);</code><code>
+</code><code class="nv">$sql</code><code> </code><code class="o">=</code><code> </code><code class="s2">"</code><code class="s2">SELECT * FROM books ORDER BY title</code><code class="s2">"</code><code class="p">;</code><code>
+</code><code class="nv">$result</code><code> </code><code class="o">=</code><code> </code><code class="nv">$dbconn</code><code class="o">-&gt;</code><code class="na">query</code><code class="p">(</code><code class="nv">$sql</code><code class="p">);</code><code>
+
+</code><code class="c1">// build the data array from the database records.
+</code><strong><code class="k">while</code></strong><code> </code><code class="p">(</code><code class="nv">$row</code><code> </code><code class="o">=</code><code> </code><code class="nv">$result</code><code class="o">-&gt;</code><code class="na">fetch_assoc</code><code class="p">())</code><code> </code><code class="p">{</code><code>
+ </code><code class="nv">$data</code><code class="p">[]</code><code> </code><code class="o">=</code><code> </code><strong><code class="k">array</code></strong><code class="p">(</code><code class="nv">$row</code><code class="p">[</code><code class="s1">'title'</code><code class="p">],</code><code> </code><code class="nv">$row</code><code class="p">[</code><code class="s1">'ISBN'</code><code class="p">],</code><code> </code><code class="nv">$row</code><code class="p">[</code><code class="s1">'pub_year'</code><code class="p">]);</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="c1">// start and build the PDF document
+</code><code class="nv">$pdf</code><code> </code><code class="o">=</code><code> </code><strong><code class="k">new</code></strong><code> </code><code class="nx">TablePDF</code><code class="p">();</code><code>
+
+</code><code class="c1">// Column titles
+</code><code class="nv">$header</code><code> </code><code class="o">=</code><code> </code><strong><code class="k">array</code></strong><code class="p">(</code><code class="s2">"</code><code class="s2">Title</code><code class="s2">"</code><code class="p">,</code><code> </code><code class="s2">"</code><code class="s2">ISBN</code><code class="s2">"</code><code class="p">,</code><code> </code><code class="s2">"</code><code class="s2">Year</code><code class="s2">"</code><code class="p">);</code><code>
+
+</code><code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">setFont</code><code class="p">(</code><code class="s2">"</code><code class="s2">Arial</code><code class="s2">"</code><code class="p">,</code><code> </code><code class="s1">''</code><code class="p">,</code><code> </code><code class="mi">14</code><code class="p">);</code><code>
+
+</code><code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">addPage</code><code class="p">();</code><code>
+</code><code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">buildTable</code><code class="p">(</code><code class="nv">$header</code><code class="p">,</code><code> </code><code class="nv">$data</code><code class="p">);</code><code>
+
+</code><code class="nv">$pdf</code><code class="o">-&gt;</code><code class="na">output</code><code class="p">();</code></pre>
+</div>
+<p>We are using the database connection and building two arrays to send to the <a contenteditable="false" data-type="indexterm" data-primary="buildTable method, FPDF" id="idm45922756150568"/><code>build</code>​<span class="keep-together"><code>Table()</code></span> custom method of this extended class. Inside the <code>buildTable()</code> method, we set colors and font attributes for the table header. Then, we send out the headers based on the first passed-in array. There is another array called <code>$width</code> used to set the column widths in the calls to <code>cell()</code>.</p>
+<p>After the table header is sent out, we use the <code>$data</code> array containing the database information and walk through that array with a <code>foreach</code> loop. Notice here that the <code>cell()</code> method is using <code>'LR'</code> for its <code>border</code> parameter. This inserts borders on the left and right of the cell in question, thus effectively adding the sides to the table rows. We also add a URL link to the second column just to show you that it can be done in concert with the table row construction. Lastly, we use a <code>$fill</code> variable to flip back and forth so that the background color will alternate as the table is built row by row.</p>
+<p>The last call to the <code>cell()</code> method in this <code>buildTable()</code> method is used to draw the bottom of the table and close off the columns.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_pdf_files_ch11" id="idm45922755873080"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_pdf_files_tables" id="idm45922755871704"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_tables_pdf_files" id="idm45922756197560"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_pdf_files_data" id="idm45922756196184"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_data_pdf_files" id="idm45922756194808"/></p>
+<p>The result of this code is shown in <a data-type="xref" href="#fpdf_generated_table_based_on_database">Figure 11-9</a>.</p>
+<figure><div id="fpdf_generated_table_based_on_database" class="figure">
+<img src="Images/php4_1109.png" alt="FPDF-generated table based on database information with active URL links" width="459" height="380"/>
+<h6><span class="label">Figure 11-9. </span>FPDF-generated table based on database information with active URL links</h6>
+</div></figure>
+</div></section>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="What’s Next"><div class="sect1" id="whatapostrophes_next-id00069">
+<h1>What’s Next</h1>
+<p>There are quite a few other features of FPDF that are not covered in this chapter. Be sure to go to the <a href="http://www.fpdf.org">library’s website</a> to see other examples of what it can help you accomplish. There are code snippets and fully functional scripts available there as well as a discussion forum—all designed to help you become an FPDF expert.</p>
+<p>In the next chapter we’ll be switching gears a little to explore the interactions between PHP and XML. We will be covering some of the techniques that can be used to “consume” XML and how to parse it with a built-in library called SimpleXML.</p>
+</div></section>
+</div></section></div>
+
+
+
+  </body></html>

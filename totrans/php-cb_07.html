@@ -1,0 +1,2095 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xml:lang="en"
+      lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<title>PHP Cookbook</title>
+<link rel="stylesheet" type="text/css" href="override_v1.css"/>
+<link rel="stylesheet" type="text/css" href="epub.css"/>
+</head>
+<body>
+<div id="book-content">
+<div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 7. Arrays"><div class="chapter" id="chapter_arrays">
+<h1><span class="label">Chapter 7. </span>Arrays</h1>
+
+
+<p><em>Arrays</em> are ordered maps—constructs that associate specific values to easily identified keys. These maps are effective ways to build both simple lists and more complex collections of objects. They’re also easy to manipulate—adding or removing items from an array is straightforward and supported through multiple functional interfaces.</p>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Types of Arrays"><div class="sect2" id="idm45875163178256">
+<h2>Types of Arrays</h2>
+
+<p>There are two forms of arrays <a data-type="indexterm" data-primary="arrays" id="idm45875163176688"></a>in PHP—numeric and associative. When you define an array without explicitly setting keys, PHP will internally assign an integer index to each member of the array. Arrays are indexed starting with 0 and increase by steps of 1 automatically.</p>
+
+<p>Associative arrays can have keys of <a data-type="indexterm" data-primary="arrays" data-secondary="associative" id="idm45875163175472"></a><a data-type="indexterm" data-primary="associative arrays" id="idm45875163174496"></a>either strings or integers, but generally use strings. String keys are effective ways to “look up” a particular value stored in an array.</p>
+
+<p>Arrays are implemented internally as <a data-type="indexterm" data-primary="arrays" data-secondary="implementing" id="idm45875163173312"></a><a data-type="indexterm" data-primary="arrays" data-secondary="hash tables" id="idm45875163172336"></a><a data-type="indexterm" data-primary="hash tables, arrays" id="idm45875163171392"></a>hash tables, allowing for effective direct associations between keys and values. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$colors</code> <code class="o">=</code> <code class="p">[];</code>
+<code class="nv">$colors</code><code class="p">[</code><code class="s1">'apple'</code><code class="p">]</code>  <code class="o">=</code> <code class="s1">'red'</code><code class="p">;</code>
+<code class="nv">$colors</code><code class="p">[</code><code class="s1">'pear'</code><code class="p">]</code>   <code class="o">=</code> <code class="s1">'green'</code><code class="p">;</code>
+<code class="nv">$colors</code><code class="p">[</code><code class="s1">'banana'</code><code class="p">]</code> <code class="o">=</code> <code class="s1">'yellow'</code><code class="p">;</code>
+
+<code class="nv">$numbers</code> <code class="o">=</code> <code class="p">[</code><code class="mi">22</code><code class="p">,</code> <code class="mi">15</code><code class="p">,</code> <code class="mi">42</code><code class="p">,</code> <code class="mi">105</code><code class="p">];</code>
+
+<code class="k">echo</code> <code class="nv">$colors</code><code class="p">[</code><code class="s1">'pear'</code><code class="p">];</code> <code class="c1">// green</code>
+<code class="k">echo</code> <code class="nv">$numbers</code><code class="p">[</code><code class="mi">2</code><code class="p">];</code> <code class="c1">// 42</code></pre>
+
+<p>Unlike simpler hash tables, though, PHP arrays also implement an iterable interface allowing you to loop through all of their elements one at a time. Iteration is fairly obvious when keys are numeric, but even with associative arrays, the elements have a fixed order because they’re stored in memory. <a data-type="xref" href="#iterating_through_array">Recipe 7.3</a> details different ways to act on each element in both types of arrays.</p>
+
+<p>In many circumstances, you might also be met with objects or classes that look and feel like an array but are not actually arrays. In fact, any object that implements the <a href="https://oreil.ly/kdN4_"><code>ArrayAccess</code> interface</a> can be used as an array.<sup><a data-type="noteref" id="idm45875163152816-marker" href="ch07.html#idm45875163152816">1</a></sup> These more advanced implementations push the limits of what is possible with arrays beyond mere lists and hash tables.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Syntax"><div class="sect2" id="idm45875163150272">
+<h2>Syntax</h2>
+
+<p>PHP supports two different syntaxes <a data-type="indexterm" data-primary="arrays" data-secondary="syntax" id="aryyx"></a>for defining arrays. Those who have worked in PHP for some time will recognize the <a href="https://oreil.ly/v75i9"><code>array()</code></a> construct that allows for the literal definition of an array at runtime as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$movies</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code><code class="s1">'Fahrenheit 451'</code><code class="p">,</code> <code class="s1">'Without Remorse'</code><code class="p">,</code> <code class="s1">'Black Panther'</code><code class="p">);</code></pre>
+
+<p>An alternative and terser syntax is to use square brackets to define the array. The preceding example could be <a data-type="indexterm" data-primary="arrays" data-secondary="square brackets" id="idm45875163141008"></a>rewritten as follows with the same behavior:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$movies</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'Fahrenheit 451'</code><code class="p">,</code> <code class="s1">'Without Remorse'</code><code class="p">,</code> <code class="s1">'Black Panther'</code><code class="p">];</code></pre>
+
+<p>Both formats can be used to create nested arrays (where an array contains another array) and can be used interchangeably as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code><code class="mi">1</code><code class="p">,</code> <code class="mi">2</code><code class="p">,</code> <code class="k">array</code><code class="p">(</code><code class="mi">3</code><code class="p">,</code> <code class="mi">4</code><code class="p">),</code> <code class="p">[</code><code class="mi">5</code><code class="p">,</code> <code class="mi">6</code><code class="p">]);</code></pre>
+
+<p>Though mixing and matching syntaxes as in the preceding example is possible, it is highly encouraged to remain consistent within your application and to use one form or the other—not both. All of the examples in this chapter will use the short array syntax (square brackets).</p>
+
+<p>All arrays in PHP map from keys to <a data-type="indexterm" data-primary="numeric arrays" id="idm45875163013600"></a><a data-type="indexterm" data-primary="arrays" data-secondary="numeric" id="idm45875163012992"></a>values. In the preceding examples, the arrays merely specified values and let PHP assign keys automatically. These are considered <em>numeric</em> arrays as the keys will be integers, starting at 0. More complex arrays, like the nested construct illustrated in <a data-type="xref" href="#complex_associative_array">Example 7-1</a>, assign both values and keys. This is done by mapping from a key to a value with a two-character arrow operator (<code>=&gt;</code>).</p>
+<div id="complex_associative_array" data-type="example">
+<h5><span class="label">Example 7-1. </span>Associative array with nested values</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code>
+    <code class="s1">'a'</code> <code class="o">=&gt;</code> <code class="s1">'A'</code><code class="p">,</code>
+    <code class="s1">'b'</code> <code class="o">=&gt;</code> <code class="p">[</code><code class="s1">'b'</code><code class="p">,</code> <code class="s1">'B'</code><code class="p">],</code>
+    <code class="s1">'c'</code> <code class="o">=&gt;</code> <code class="k">array</code><code class="p">(</code><code class="s1">'c'</code><code class="p">,</code> <code class="p">[</code><code class="s1">'c'</code><code class="p">,</code> <code class="s1">'K'</code><code class="p">])</code>
+<code class="p">);</code></pre></div>
+
+<p>While not a syntactic requirement, many <a data-type="indexterm" data-primary="arrays" data-secondary="arrow operators" id="idm45875162887984"></a><a data-type="indexterm" data-primary="arrow operators, arrays" id="idm45875162914368"></a>coding environments and integrated development environments (IDEs) will automatically align the arrow operators in multiline array literals. This makes the code easier to read and is a standard adopted by this book as well.</p>
+
+<p>The recipes that follow illustrate <a data-type="indexterm" data-primary="arrays" data-secondary="syntax" data-startref="aryyx" id="idm45875162913248"></a>various ways developers can work with arrays—both numeric and associative—to accomplish common tasks in PHP.</p>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.1 Associating Multiple Elements per Key in an Array"><div class="sect1" id="idm45875163149680">
+<h1>7.1 Associating Multiple Elements per Key in an Array</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875162910560">
+<h2>Problem</h2>
+
+<p>You want to associate multiple <a data-type="indexterm" data-primary="arrays" data-secondary="associative" data-tertiary="multiple items" id="ayssvpl"></a><a data-type="indexterm" data-primary="associative arrays" data-secondary="multiple items" id="asscrypl"></a>items with a single array key.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875162881472">
+<h2>Solution</h2>
+
+<p>Make each array value an array on its own—for example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$cars</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="s1">'fast'</code>     <code class="o">=&gt;</code> <code class="p">[</code><code class="s1">'ferrari'</code><code class="p">,</code> <code class="s1">'lamborghini'</code><code class="p">],</code>
+    <code class="s1">'slow'</code>     <code class="o">=&gt;</code> <code class="p">[</code><code class="s1">'honda'</code><code class="p">,</code> <code class="s1">'toyota'</code><code class="p">],</code>
+    <code class="s1">'electric'</code> <code class="o">=&gt;</code> <code class="p">[</code><code class="s1">'rivian'</code><code class="p">,</code> <code class="s1">'tesla'</code><code class="p">],</code>
+    <code class="s1">'big'</code>      <code class="o">=&gt;</code> <code class="p">[</code><code class="s1">'hummer'</code><code class="p">]</code>
+<code class="p">];</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875164808640">
+<h2>Discussion</h2>
+
+<p>PHP places no requirement on the type of data used <a data-type="indexterm" data-primary="arrays" data-secondary="data types" id="idm45875162848064"></a>for a value in an array. However, keys are required to be either strings or integers. In addition, it is a hard requirement that every key in an array be unique. If you attempt to set multiple values for the same key, you will overwrite existing data, as <a data-type="indexterm" data-primary="arrays" data-secondary="data" data-tertiary="overwriting by assignment" id="idm45875162846960"></a>shown in <a data-type="xref" href="#array_key_overwrite">Example 7-2</a>.</p>
+<div id="array_key_overwrite" data-type="example">
+<h5><span class="label">Example 7-2. </span>Overwriting array data by assignment</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$basket</code> <code class="o">=</code> <code class="p">[];</code>
+
+<code class="nv">$basket</code><code class="p">[</code><code class="s1">'color'</code><code class="p">]</code>    <code class="o">=</code> <code class="s1">'brown'</code><code class="p">;</code>
+<code class="nv">$basket</code><code class="p">[</code><code class="s1">'size'</code><code class="p">]</code>     <code class="o">=</code> <code class="s1">'large'</code><code class="p">;</code>
+<code class="nv">$basket</code><code class="p">[</code><code class="s1">'contents'</code><code class="p">]</code> <code class="o">=</code> <code class="s1">'apple'</code><code class="p">;</code>
+<code class="nv">$basket</code><code class="p">[</code><code class="s1">'contents'</code><code class="p">]</code> <code class="o">=</code> <code class="s1">'orange'</code><code class="p">;</code>
+<code class="nv">$basket</code><code class="p">[</code><code class="s1">'contents'</code><code class="p">]</code> <code class="o">=</code> <code class="s1">'pineapple'</code><code class="p">;</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$basket</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//    [color] =&gt; brown</code>
+<code class="c1">//    [size] =&gt; large</code>
+<code class="c1">//    [contents] =&gt; pineapple</code>
+<code class="c1">// )</code></pre></div>
+
+<p>As PHP only allows one value per unique key in an array, writing further data to that key overwrites its value in the same way that you might reassign the value of a variable in your application. If you do need to store multiple values in one key, use a nested array.</p>
+
+<p>The Solution example illustrates how <em>every</em> key could point to its own array. However, PHP does not require this to be true—all but one key could point to a scalar and just the key that needs multiple items could point to an array. In <a data-type="xref" href="#array_key_array">Example 7-3</a>, you’ll use a <a data-type="indexterm" data-primary="nested arrays" id="idm45875162781856"></a><a data-type="indexterm" data-primary="arrays" data-secondary="nested" id="idm45875162781184"></a>nested array to store multiple items rather than accidentally overwriting a single value stored in <a data-type="indexterm" data-primary="arrays" data-secondary="keys, writing to" id="idm45875162780000"></a>a specific key.</p>
+<div id="array_key_array" data-type="example">
+<h5><span class="label">Example 7-3. </span>Writing an array to a key</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$basket</code> <code class="o">=</code> <code class="p">[];</code>
+
+<code class="nv">$basket</code><code class="p">[</code><code class="s1">'color'</code><code class="p">]</code>    <code class="o">=</code> <code class="s1">'brown'</code><code class="p">;</code>
+<code class="nv">$basket</code><code class="p">[</code><code class="s1">'size'</code><code class="p">]</code>     <code class="o">=</code> <code class="s1">'large'</code><code class="p">;</code>
+<code class="nv">$basket</code><code class="p">[</code><code class="s1">'contents'</code><code class="p">]</code> <code class="o">=</code> <code class="p">[];</code>
+<code class="nv">$basket</code><code class="p">[</code><code class="s1">'contents'</code><code class="p">][]</code> <code class="o">=</code> <code class="s1">'apple'</code><code class="p">;</code>
+<code class="nv">$basket</code><code class="p">[</code><code class="s1">'contents'</code><code class="p">][]</code> <code class="o">=</code> <code class="s1">'orange'</code><code class="p">;</code>
+<code class="nv">$basket</code><code class="p">[</code><code class="s1">'contents'</code><code class="p">][]</code> <code class="o">=</code> <code class="s1">'pineapple'</code><code class="p">;</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$basket</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//    [color] =&gt; brown</code>
+<code class="c1">//    [size] =&gt; large</code>
+<code class="c1">//    [contents] =&gt; Array</code>
+<code class="c1">//        (</code>
+<code class="c1">//            [0] =&gt; apple</code>
+<code class="c1">//            [1] =&gt; orange</code>
+<code class="c1">//            [2] =&gt; pineapple</code>
+<code class="c1">//        )</code>
+<code class="c1">// )</code>
+
+<code class="k">echo</code> <code class="nv">$basket</code><code class="p">[</code><code class="s1">'contents'</code><code class="p">][</code><code class="mi">2</code><code class="p">];</code> <code class="c1">// pineapple</code></pre></div>
+
+<p>To leverage the elements of a nested array, you loop over them just as you would the parent array. For example, if you wanted to <a data-type="indexterm" data-primary="arrays" data-secondary="data" data-tertiary="loops and" id="idm45875162627840"></a><a data-type="indexterm" data-primary="loops" data-secondary="array data" id="idm45875162672672"></a>print all of the data stored in the <code>$basket</code> array from <a data-type="xref" href="#array_key_array">Example 7-3</a>, you would need two loops, as in <a data-type="xref" href="#printing_arrays_in_a_loop">Example 7-4</a>.</p>
+<div id="printing_arrays_in_a_loop" data-type="example">
+<h5><span class="label">Example 7-4. </span>Accessing array data in a loop</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">foreach</code><code> </code><code class="p">(</code><code class="nv">$basket</code><code> </code><code class="k">as</code><code> </code><code class="nv">$key</code><code> </code><code class="o">=&gt;</code><code> </code><code class="nv">$value</code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_arrays_CO1-1" href="#callout_arrays_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+    </code><code class="k">if</code><code> </code><code class="p">(</code><code class="nb">is_array</code><code class="p">(</code><code class="nv">$value</code><code class="p">))</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_arrays_CO1-2" href="#callout_arrays_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+        </code><code class="k">echo</code><code> </code><code class="s2">"</code><code class="si">{</code><code class="nv">$key</code><code class="si">}</code><code class="s2"> =&gt; [</code><code class="s2">"</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code>
+
+        </code><code class="k">foreach</code><code> </code><code class="p">(</code><code class="nv">$value</code><code> </code><code class="k">as</code><code> </code><code class="nv">$item</code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_arrays_CO1-3" href="#callout_arrays_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+            </code><code class="k">echo</code><code> </code><code class="s2">"</code><code class="se">\t</code><code class="si">{</code><code class="nv">$item</code><code class="si">}</code><code class="s2">"</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code>
+        </code><code class="p">}</code><code>
+
+        </code><code class="k">echo</code><code> </code><code class="s1">']'</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code>
+    </code><code class="p">}</code><code> </code><code class="k">else</code><code> </code><code class="p">{</code><code>
+        </code><code class="k">echo</code><code> </code><code class="s2">"</code><code class="si">{</code><code class="nv">$key</code><code class="si">}</code><code class="s2">: </code><code class="si">$value</code><code class="s2">"</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code>
+    </code><code class="p">}</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="c1">// color: brown
+</code><code class="c1">// size: large
+</code><code class="c1">// contents =&gt; [
+</code><code class="c1">//     apple
+</code><code class="c1">//     orange
+</code><code class="c1">//     pineapple
+</code><code class="c1">// ]</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_arrays_CO1-1" href="#co_arrays_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The parent array is associative, and you need both its keys and values.</p></dd>
+<dt><a class="co" id="callout_arrays_CO1-2" href="#co_arrays_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>You use one branch of logic for nested arrays, another for scalars.</p></dd>
+<dt><a class="co" id="callout_arrays_CO1-3" href="#co_arrays_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Since you know the nested array is numeric, ignore the keys and iterate over only the values.</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875162516320">
+<h2>See Also</h2>
+
+<p><a data-type="xref" href="#iterating_through_array">Recipe 7.3</a> for further examples <a data-type="indexterm" data-primary="arrays" data-secondary="associative" data-tertiary="multiple items" data-startref="ayssvpl" id="idm45875162514384"></a><a data-type="indexterm" data-primary="associative arrays" data-secondary="multiple items" data-startref="asscrypl" id="idm45875162468496"></a>of iterating through arrays.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.2 Initializing an Array with a Range of Numbers"><div class="sect1" id="idm45875162467024">
+<h1>7.2 Initializing an Array with a Range of Numbers</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875162465904">
+<h2>Problem</h2>
+
+<p>You want to build an array of <a data-type="indexterm" data-primary="arrays" data-secondary="integers, consecutive" id="arytgsct"></a><a data-type="indexterm" data-primary="integers" data-secondary="arrays, consecutive" id="tgrysc"></a>consecutive integers.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875162462208">
+<h2>Solution</h2>
+
+<p>Use the <code>range()</code> function <a data-type="indexterm" data-primary="range() function" id="rgfctn"></a><a data-type="indexterm" data-primary="functions" data-secondary="range()" id="ftnsrge"></a>as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="mi">1</code><code class="p">,</code> <code class="mi">10</code><code class="p">);</code>
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; 1</code>
+<code class="c1">//     [1] =&gt; 2</code>
+<code class="c1">//     [2] =&gt; 3</code>
+<code class="c1">//     [3] =&gt; 4</code>
+<code class="c1">//     [4] =&gt; 5</code>
+<code class="c1">//     [5] =&gt; 6</code>
+<code class="c1">//     [6] =&gt; 7</code>
+<code class="c1">//     [7] =&gt; 8</code>
+<code class="c1">//     [8] =&gt; 9</code>
+<code class="c1">//     [9] =&gt; 10</code>
+<code class="c1">// )</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875162444448">
+<h2>Discussion</h2>
+
+<p>PHP’s <code>range()</code> function automatically iterates over a given sequence, assigning a value to a key based on the definition of that sequence. By default, and as illustrated in the Solution example, the function steps through sequences one at a time. But this isn’t the limit of the function’s behavior—passing a third parameter to the function will change its step size.</p>
+
+<p>You could iterate over all even integers from 2 to 100 as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code> <code class="mi">100</code><code class="p">,</code> <code class="mi">2</code><code class="p">);</code></pre>
+
+<p>Likewise, you could iterate over all <em>odd</em> integers from 1 to 100 by changing the starting point of the sequence to 1. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="mi">1</code><code class="p">,</code> <code class="mi">100</code><code class="p">,</code> <code class="mi">2</code><code class="p">);</code></pre>
+
+<p>The start and end parameters of <code>range()</code> (the first two parameters, respectively) can be integers, floating-point numbers, or even strings. This flexibility allows you to do some pretty amazing things in code. For example, rather than counting natural numbers (integers), you could produce an array of floating-point numbers as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="mi">1</code><code class="p">,</code> <code class="mi">5</code><code class="p">,</code> <code class="mf">0.25</code><code class="p">);</code></pre>
+
+<p>When passing string characters to <code>range()</code>, PHP will begin enumerating ASCII characters. You can leverage this functionality to quickly build an array representative of the English alphabet, as shown in <a data-type="xref" href="#array_range_alphabet">Example 7-5</a>.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>PHP will internally use any and all printable ASCII characters, based on their decimal representation, to complete a request to <code>range()</code>. This is an efficient way to enumerate printable characters, but you need to keep in mind where special characters such as <code>=</code>, <code>?</code>, and <code>)</code> fall within the ASCII table, particularly if your program is <a data-type="indexterm" data-primary="arrays" data-secondary="alphabetical characters" id="idm45875162282032"></a>expecting alphanumeric values in the array.</p>
+</div>
+<div id="array_range_alphabet" data-type="example">
+<h5><span class="label">Example 7-5. </span>Creating an array of alphabetical characters</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$uppers</code><code> </code><code class="o">=</code><code> </code><code class="nb">range</code><code class="p">(</code><code class="s1">'A'</code><code class="p">,</code><code> </code><code class="s1">'Z'</code><code class="p">);</code><code> </code><a class="co" id="co_arrays_CO2-1" href="#callout_arrays_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="nv">$lowers</code><code> </code><code class="o">=</code><code> </code><code class="nb">range</code><code class="p">(</code><code class="s1">'a'</code><code class="p">,</code><code> </code><code class="s1">'z'</code><code class="p">);</code><code> </code><a class="co" id="co_arrays_CO2-2" href="#callout_arrays_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$special</code><code> </code><code class="o">=</code><code> </code><code class="nb">range</code><code class="p">(</code><code class="s1">'!'</code><code class="p">,</code><code> </code><code class="s1">')'</code><code class="p">);</code><code> </code><a class="co" id="co_arrays_CO2-3" href="#callout_arrays_CO2-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_arrays_CO2-1" href="#co_arrays_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Returns all uppercase characters from <code>A</code> through <code>Z</code></p></dd>
+<dt><a class="co" id="callout_arrays_CO2-2" href="#co_arrays_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Returns all lowercase characters from <code>a</code> through <code>z</code></p></dd>
+<dt><a class="co" id="callout_arrays_CO2-3" href="#co_arrays_CO2-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Returns an array of special characters: <code>[!, ", #, $, %, &amp;, ', (, )]</code></p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875162421328">
+<h2>See Also</h2>
+
+<p>PHP documentation <a data-type="indexterm" data-primary="arrays" data-secondary="integers, consecutive" data-startref="arytgsct" id="idm45875162224816"></a><a data-type="indexterm" data-primary="integers" data-secondary="arrays, consecutive" data-startref="tgrysc" id="idm45875162223728"></a><a data-type="indexterm" data-primary="range() function" data-startref="rgfctn" id="idm45875162222640"></a><a data-type="indexterm" data-primary="functions" data-secondary="range()" data-startref="ftnsrge" id="idm45875162221760"></a>on <a href="https://oreil.ly/qH_iW"><code>range()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.3 Iterating Through Items in an Array"><div class="sect1" id="iterating_through_array">
+<h1>7.3 Iterating Through Items in an Array</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875162217856">
+<h2>Problem</h2>
+
+<p>You want to perform an action on <a data-type="indexterm" data-primary="arrays" data-secondary="iteration" id="rrytrt"></a><a data-type="indexterm" data-primary="iteration" data-secondary="array items" id="trtrytm"></a>every element in an array.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875162213680">
+<h2>Solution</h2>
+
+<p>For numeric arrays, use <code>foreach</code> as <a data-type="indexterm" data-primary="foreach() function" id="idm45875162211792"></a><a data-type="indexterm" data-primary="functions" data-secondary="foreach()" id="idm45875162211056"></a>follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">foreach</code> <code class="p">(</code><code class="nv">$array</code> <code class="k">as</code> <code class="nv">$value</code><code class="p">)</code> <code class="p">{</code>
+    <code class="c1">// Act on each $value</code>
+<code class="p">}</code></pre>
+
+<p>For associative arrays, use <code>foreach()</code> with optional keys as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">foreach</code> <code class="p">(</code><code class="nv">$array</code> <code class="k">as</code> <code class="nv">$key</code> <code class="o">=&gt;</code> <code class="nv">$value</code><code class="p">)</code> <code class="p">{</code>
+    <code class="c1">// Act on each $value and/or $key</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875162213376">
+<h2>Discussion</h2>
+
+<p>PHP has the concept of <em>iterable objects</em> and, <a data-type="indexterm" data-primary="iterable objects" id="idm45875162138224"></a><a data-type="indexterm" data-primary="objects" data-secondary="iterable" id="idm45875162137488"></a>internally, that’s precisely what an array is. Other data structures can also implement iterable behavior,<sup><a data-type="noteref" id="idm45875162170640-marker" href="ch07.html#idm45875162170640">2</a></sup> but <em>any</em> iterable expression can be provided to <code>foreach</code> and will return the items it contains one at a time in a loop.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>PHP does not implicitly unset the variable used within a <code>foreach</code> loop when you exit the loop. You can still explicitly reference the <em>last</em> value stored in <code>$value</code> in the Solution examples in the program outside the loop!</p>
+</div>
+
+<p>The most important thing to remember, though, <a data-type="indexterm" data-primary="language constructs" id="idm45875162165648"></a>is that <code>foreach</code> is a <em>language construct</em>, not a function. As a construct, it acts on a given expression and applies the defined loop over every item within that expression. By default, that loop does not modify the contents of an array. If you want to make the values of an array mutable, you must pass them into the loop by reference by prefixing the variable name with an <code>&amp;</code> character as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="mi">1</code><code class="p">,</code> <code class="mi">2</code><code class="p">,</code> <code class="mi">3</code><code class="p">];</code>
+
+<code class="k">foreach</code> <code class="p">(</code><code class="nv">$array</code> <code class="k">as</code> <code class="o">&amp;</code><code class="nv">$value</code><code class="p">)</code> <code class="p">{</code>
+    <code class="nv">$value</code> <code class="o">+=</code> <code class="mi">1</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code> <code class="c1">// 2, 3, 4</code></pre>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>Versions of PHP prior to 8.0 supported <a data-type="indexterm" data-primary="each() function" id="idm45875162106144"></a><a data-type="indexterm" data-primary="functions" data-secondary="each()" id="idm45875162105536"></a>an <code>each()</code> function that would maintain an array cursor and return the current key/value pair of the array before advancing that cursor. This function was deprecated in PHP 7.2 and fully removed as of the 8.0 release, but you will likely find legacy examples of its use in books and online. Upgrade any occurrences of <code>each()</code> to an implementation of <code>foreach</code> to ensure forward compatibility of your code.</p>
+</div>
+
+<p>An alternative approach to <a data-type="indexterm" data-primary="for loop" id="idm45875162102672"></a><a data-type="indexterm" data-primary="loops" data-secondary="for" id="idm45875162101968"></a><a data-type="indexterm" data-primary="iteration" data-secondary="for loops" id="idm45875162101024"></a>using a <code>foreach</code> loop is to create an explicit <code>for</code> loop over the keys of the array. Numeric arrays are easiest as their keys are already incrementing integers starting at 0. Iterating over a numeric array is relatively straightforward as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'red'</code><code class="p">,</code> <code class="s1">'green'</code><code class="p">,</code> <code class="s1">'blue'</code><code class="p">];</code>
+
+<code class="nv">$arrayLength</code> <code class="o">=</code> <code class="nb">count</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+<code class="k">for</code> <code class="p">(</code><code class="nv">$i</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code> <code class="nv">$i</code> <code class="o">&lt;</code> <code class="nv">$array_length</code><code class="p">;</code> <code class="nv">$i</code><code class="o">++</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">echo</code> <code class="nv">$array</code><code class="p">[</code><code class="nv">$i</code><code class="p">]</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="p">}</code></pre>
+<div data-type="tip"><h6>Tip</h6>
+<p>While it’s possible to place a call to <code>count()</code> to identify the upper bounds of a <code>for</code> loop directly within the expression, it’s better to store the length of an array outside the expression itself. Otherwise, your <code>count()</code> will be reinvoked on every <a data-type="indexterm" data-primary="count() function" id="idm45875162046704"></a><a data-type="indexterm" data-primary="functions" data-secondary="count()" id="idm45875162046000"></a>iteration of the loop to check that you’re still in bounds. For small arrays, this won’t matter; as you start working with larger collections, though, the performance drain of repeated <code>count()</code> checks will become problematic.</p>
+</div>
+
+<p>Iterating over an associative array with a <code>for</code> loop is a tiny bit different. Instead of iterating over the elements of the array directly, you’ll want to iterate over the keys of the array directly. Then use each key to extract the corresponding value from the array as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="s1">'os'</code>   <code class="o">=&gt;</code> <code class="s1">'linux'</code><code class="p">,</code>
+    <code class="s1">'mfr'</code>  <code class="o">=&gt;</code> <code class="s1">'system76'</code><code class="p">,</code>
+    <code class="s1">'name'</code> <code class="o">=&gt;</code> <code class="s1">'thelio'</code><code class="p">,</code>
+<code class="p">];</code>
+
+<code class="nv">$keys</code> <code class="o">=</code> <code class="nb">array_keys</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+<code class="nv">$arrayLength</code> <code class="o">=</code> <code class="nb">count</code><code class="p">(</code><code class="nv">$keys</code><code class="p">);</code>
+<code class="k">for</code> <code class="p">(</code><code class="nv">$i</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code> <code class="nv">$i</code> <code class="o">&lt;</code> <code class="nv">$arrayLength</code><code class="p">;</code> <code class="nv">$i</code><code class="o">++</code><code class="p">)</code> <code class="p">{</code>
+    <code class="nv">$key</code> <code class="o">=</code> <code class="nv">$keys</code><code class="p">[</code><code class="nv">$i</code><code class="p">];</code>
+    <code class="nv">$value</code> <code class="o">=</code> <code class="nv">$array</code><code class="p">[</code><code class="nv">$key</code><code class="p">];</code>
+
+    <code class="k">echo</code> <code class="s2">"</code><code class="si">{</code><code class="nv">$key</code><code class="si">}</code><code class="s2"> =&gt; </code><code class="si">{</code><code class="nv">$value</code><code class="si">}</code><code class="s2">"</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875162139872">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a data-type="indexterm" data-primary="arrays" data-secondary="iteration" data-startref="rrytrt" id="idm45875162007344"></a><a data-type="indexterm" data-primary="iteration" data-secondary="array items" data-startref="trtrytm" id="idm45875161978576"></a>the <a href="https://oreil.ly/lmeAe"><code>foreach</code></a> and <a href="https://oreil.ly/chSRT"><code>for</code></a> language constructs.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.4 Deleting Elements from Associative and 
+Numeric Arrays"><div class="sect1" id="deleting_array_elements">
+<h1>7.4 Deleting Elements from Associative and 
+<span class="keep-together">Numeric Arrays</span></h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875161925184">
+<h2>Problem</h2>
+
+<p>You want to remove one or more <a data-type="indexterm" data-primary="associative arrays" data-secondary="deleting elements" id="ssvyltel"></a><a data-type="indexterm" data-primary="numeric arrays" data-secondary="deleting elements" id="nmryltm"></a><a data-type="indexterm" data-primary="arrays" data-secondary="associative" data-tertiary="deleting elements" id="rrysstmt"></a><a data-type="indexterm" data-primary="arrays" data-secondary="numeric" data-tertiary="deleting elements" id="rrysmrcglm"></a>elements from an array.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875161918032">
+<h2>Solution</h2>
+
+<p>Delete an element by targeting its <a data-type="indexterm" data-primary="unset() function" id="idm45875161916464"></a><a data-type="indexterm" data-primary="functions" data-secondary="unset()" id="idm45875161915760"></a>key or numeric index directly with <code>unset()</code>:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">unset</code><code class="p">(</code><code class="nv">$array</code><code class="p">[</code><code class="s1">'key'</code><code class="p">]);</code>
+
+<code class="nb">unset</code><code class="p">(</code><code class="nv">$array</code><code class="p">[</code><code class="mi">3</code><code class="p">]);</code></pre>
+
+<p>Delete more than one element at a time by passing multiple keys or indexes into <code>unset()</code> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">unset</code><code class="p">(</code><code class="nv">$array</code><code class="p">[</code><code class="s1">'first'</code><code class="p">],</code> <code class="nv">$array</code><code class="p">[</code><code class="s1">'second'</code><code class="p">]);</code>
+
+<code class="nb">unset</code><code class="p">(</code><code class="nv">$array</code><code class="p">[</code><code class="mi">3</code><code class="p">],</code> <code class="nv">$array</code><code class="p">[</code><code class="mi">4</code><code class="p">],</code> <code class="nv">$array</code><code class="p">[</code><code class="mi">5</code><code class="p">]);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875161833184">
+<h2>Discussion</h2>
+
+<p>In PHP, <code>unset()</code> actually destroys any reference to the memory containing the specified variable. In the context of this Solution, that variable is an element of an array, so unsetting it removes that element from the array itself. In an associative array, this takes the form of deleting the specified key and the value it represented.</p>
+
+<p>In a numeric array, <code>unset()</code> does far more. It both removes the specified element and effectively converts the numeric array into an associative array with integer keys. On the one hand, this is likely the behavior you wanted in the first place, as demonstrated in <a data-type="xref" href="#unset_numeric_array">Example 7-6</a>.</p>
+<div id="unset_numeric_array" data-type="example">
+<h5><span class="label">Example 7-6. </span>Unsetting elements in a numeric array</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code><code> </code><code class="o">=</code><code> </code><code class="nb">range</code><code class="p">(</code><code class="s1">'a'</code><code class="p">,</code><code> </code><code class="s1">'z'</code><code class="p">);</code><code>
+
+</code><code class="k">echo</code><code> </code><code class="nb">count</code><code class="p">(</code><code class="nv">$array</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_arrays_CO3-1" href="#callout_arrays_CO3-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="k">echo</code><code> </code><code class="nv">$array</code><code class="p">[</code><code class="mi">12</code><code class="p">]</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_arrays_CO3-2" href="#callout_arrays_CO3-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="k">echo</code><code> </code><code class="nv">$array</code><code class="p">[</code><code class="mi">25</code><code class="p">]</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_arrays_CO3-3" href="#callout_arrays_CO3-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+
+</code><code class="nb">unset</code><code class="p">(</code><code class="nv">$array</code><code class="p">[</code><code class="mi">22</code><code class="p">]);</code><code>
+</code><code class="k">echo</code><code> </code><code class="nb">count</code><code class="p">(</code><code class="nv">$array</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_arrays_CO3-4" href="#callout_arrays_CO3-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+</code><code class="k">echo</code><code> </code><code class="nv">$array</code><code class="p">[</code><code class="mi">12</code><code class="p">]</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_arrays_CO3-5" href="#callout_arrays_CO3-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a><code>
+</code><code class="k">echo</code><code> </code><code class="nv">$array</code><code class="p">[</code><code class="mi">25</code><code class="p">]</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_arrays_CO3-6" href="#callout_arrays_CO3-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_arrays_CO3-1" href="#co_arrays_CO3-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The array by default represents all English characters from <code>a</code> through <code>z</code>, so this line prints <code>26</code>.</p></dd>
+<dt><a class="co" id="callout_arrays_CO3-2" href="#co_arrays_CO3-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>The 13th letter in the alphabet is <code>m</code>. (Remember that arrays start at index <code>0</code>.)</p></dd>
+<dt><a class="co" id="callout_arrays_CO3-3" href="#co_arrays_CO3-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>The 26th letter in the alphabet is <code>z</code>.</p></dd>
+<dt><a class="co" id="callout_arrays_CO3-4" href="#co_arrays_CO3-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>With the element removed, the array has decreased in size to <code>25</code>!</p></dd>
+<dt><a class="co" id="callout_arrays_CO3-5" href="#co_arrays_CO3-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p>The 13th letter in the alphabet is <em>still</em> <code>m</code>.</p></dd>
+<dt><a class="co" id="callout_arrays_CO3-6" href="#co_arrays_CO3-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></dt>
+<dd><p>The 26th letter in the alphabet is <em>still</em> <code>z</code>. Further, this index is still valid, as removing an element doesn’t re-index the array.</p></dd>
+</dl></div>
+
+<p>You can typically ignore the indexes of numeric arrays because they’re set by PHP automatically. This makes the behavior of <code>unset()</code> implicitly converting these indexes into numeric keys somewhat surprising. With a numeric array, attempting to access an index greater than the length of the array results in an error. Once you’ve used <code>unset()</code> with the array and decreased its size, however, you will often end up with an array that has numeric keys greater than the size of the array, as was illustrated in <a data-type="xref" href="#unset_numeric_array">Example 7-6</a>.</p>
+
+<p>If you want to return to the world of numeric arrays after removing an element, you can re-index the array entirely. PHP’s <code>array_values()</code> function returns a new, numerically indexed array that contains only the values of the specified array. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code><code> </code><code class="o">=</code><code> </code><code class="p">[</code><code class="s1">'first'</code><code class="p">,</code><code> </code><code class="s1">'second'</code><code class="p">,</code><code> </code><code class="s1">'third'</code><code class="p">,</code><code> </code><code class="s1">'fourth'</code><code class="p">];</code><code> </code><a class="co" id="co_arrays_CO4-1" href="#callout_arrays_CO4-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="nb">unset</code><code class="p">(</code><code class="nv">$array</code><code class="p">[</code><code class="mi">2</code><code class="p">]);</code><code> </code><a class="co" id="co_arrays_CO4-2" href="#callout_arrays_CO4-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$array</code><code> </code><code class="o">=</code><code> </code><code class="nb">array_values</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code><code> </code><a class="co" id="co_arrays_CO4-3" href="#callout_arrays_CO4-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_arrays_CO4-1" href="#co_arrays_CO4-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The default array has numeric indexes: <code>[0 =&gt; first, 1 =&gt; second, 2 =&gt; third, 3 =&gt; fourth]</code>.</p></dd>
+<dt><a class="co" id="callout_arrays_CO4-2" href="#co_arrays_CO4-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Unsetting an element removes it from the array but leaves the indexes (keys) unchanged: <code>[0 =&gt; first, 1 =&gt; second, 3 =&gt; fourth]</code>.</p></dd>
+<dt><a class="co" id="callout_arrays_CO4-3" href="#co_arrays_CO4-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>The call to <code>array_values()</code> gives you a <em>new</em> array with brand-new, properly incrementing numeric indexes: <code>[0 =&gt; first, 1 =&gt; second, 2 =&gt; fourth]</code>.</p></dd>
+</dl>
+
+<p>An additional option for <a data-type="indexterm" data-primary="array_splice() function" id="rryplcf"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_splice()" id="fctryspl"></a>removing elements from an array is to use the <code>array_splice()</code> function.<sup><a data-type="noteref" id="idm45875161556000-marker" href="ch07.html#idm45875161556000">3</a></sup> This function will remove a portion of an array and replace it with something else.<sup><a data-type="noteref" id="idm45875161553616-marker" href="ch07.html#idm45875161553616">4</a></sup> Consider <a data-type="xref" href="#array_splice_example">Example 7-7</a>, where <code>array_splice()</code> is used to replace elements of an array with <em>nothing</em>, thus removing them.</p>
+<div id="array_splice_example" data-type="example">
+<h5><span class="label">Example 7-7. </span>Removing elements of an array with <code>array_splice()</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$celestials</code><code> </code><code class="o">=</code><code> </code><code class="p">[</code><code>
+    </code><code class="s1">'sun'</code><code class="p">,</code><code>
+    </code><code class="s1">'mercury'</code><code class="p">,</code><code>
+    </code><code class="s1">'venus'</code><code class="p">,</code><code>
+    </code><code class="s1">'earth'</code><code class="p">,</code><code>
+    </code><code class="s1">'mars'</code><code class="p">,</code><code>
+    </code><code class="s1">'asteroid belt'</code><code class="p">,</code><code>
+    </code><code class="s1">'jupiter'</code><code class="p">,</code><code>
+    </code><code class="s1">'saturn'</code><code class="p">,</code><code>
+    </code><code class="s1">'uranus'</code><code class="p">,</code><code>
+    </code><code class="s1">'neptune'</code><code class="p">,</code><code>
+    </code><code class="s1">'pluto'</code><code class="p">,</code><code>
+    </code><code class="s1">'voyagers 1 &amp; 2'</code><code class="p">,</code><code>
+</code><code class="p">];</code><code>
+
+</code><code class="nb">array_splice</code><code class="p">(</code><code class="nv">$celestials</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="mi">1</code><code class="p">);</code><code> </code><a class="co" id="co_arrays_CO5-1" href="#callout_arrays_CO5-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nb">array_splice</code><code class="p">(</code><code class="nv">$celestials</code><code class="p">,</code><code> </code><code class="mi">4</code><code class="p">,</code><code> </code><code class="mi">1</code><code class="p">);</code><code> </code><a class="co" id="co_arrays_CO5-2" href="#callout_arrays_CO5-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="nb">array_splice</code><code class="p">(</code><code class="nv">$celestials</code><code class="p">,</code><code> </code><code class="mi">8</code><code class="p">);</code><code> </code><a class="co" id="co_arrays_CO5-3" href="#callout_arrays_CO5-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+
+</code><code class="nb">print_r</code><code class="p">(</code><code class="nv">$celestials</code><code class="p">);</code><code>
+
+</code><code class="c1">// Array
+</code><code class="c1">// (
+</code><code class="c1">//     [0] =&gt; mercury
+</code><code class="c1">//     [1] =&gt; venus
+</code><code class="c1">//     [2] =&gt; earth
+</code><code class="c1">//     [3] =&gt; mars
+</code><code class="c1">//     [4] =&gt; jupiter
+</code><code class="c1">//     [5] =&gt; saturn
+</code><code class="c1">//     [6] =&gt; uranus
+</code><code class="c1">//     [7] =&gt; neptune
+</code><code class="c1">// )</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_arrays_CO5-1" href="#co_arrays_CO5-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>First, remove the sun to clean up a list of planets in the solar system.</p></dd>
+<dt><a class="co" id="callout_arrays_CO5-2" href="#co_arrays_CO5-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Once the sun is removed, the indexes of all objects shift. You still want to remove the asteroid belt from the list, so use its newly shifted index.</p></dd>
+<dt><a class="co" id="callout_arrays_CO5-3" href="#co_arrays_CO5-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Finally, truncate the array by <a data-type="indexterm" data-primary="array_splice() function" data-startref="rryplcf" id="idm45875161467104"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_splice()" data-startref="fctryspl" id="idm45875161466128"></a>removing everything from Pluto to the end of the array.</p></dd>
+</dl></div>
+
+<p>Unlike <code>unset()</code>, the modified array created by <code>array_splice()</code> does <em>not</em> retain the numeric indexes/keys in numeric arrays! This might be a good way to avoid needing an extra call to <code>array_values()</code> after removing an item from an array. It’s also an effective way to remove <em>continuous</em> elements from a numerically indexed array without needing <a data-type="indexterm" data-primary="associative arrays" data-secondary="deleting elements" data-startref="ssvyltel" id="idm45875161420656"></a><a data-type="indexterm" data-primary="numeric arrays" data-secondary="deleting elements" data-startref="nmryltm" id="idm45875161419408"></a><a data-type="indexterm" data-primary="arrays" data-secondary="associative" data-tertiary="deleting elements" data-startref="rrysstmt" id="idm45875161418192"></a><a data-type="indexterm" data-primary="arrays" data-secondary="numeric" data-tertiary="deleting elements" data-startref="rrysmrcglm" id="idm45875161416704"></a>to explicitly specify each element.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875161856928">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/-ebRG"><code>unset()</code></a>, <a href="https://oreil.ly/g-M9G"><code>array_splice()</code></a>, and <a href="https://oreil.ly/9FvTV"><code>array_values()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.5 Changing the Size of an Array"><div class="sect1" id="idm45875161411056">
+<h1>7.5 Changing the Size of an Array</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875161409872">
+<h2>Problem</h2>
+
+<p>You want to increase or decrease <a data-type="indexterm" data-primary="arrays" data-secondary="size, changing" id="rryzcg"></a>the size of an array.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875161406912">
+<h2>Solution</h2>
+
+<p>Add elements to the end of the array <a data-type="indexterm" data-primary="arrays" data-secondary="elements" data-tertiary="adding" id="aryseld"></a><a data-type="indexterm" data-primary="array_push() function" id="rryshfc"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_push()" id="ftnsrsh"></a>by using <code>array_push()</code>:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'apple'</code><code class="p">,</code> <code class="s1">'banana'</code><code class="p">,</code> <code class="s1">'coconut'</code><code class="p">];</code>
+<code class="nb">array_push</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="s1">'grape'</code><code class="p">);</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; apple</code>
+<code class="c1">//     [1] =&gt; banana</code>
+<code class="c1">//     [2] =&gt; coconut</code>
+<code class="c1">//     [3] =&gt; grape</code>
+<code class="c1">// )</code></pre>
+
+<p>Remove elements from an array by using <code>array_splice()</code>:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'apple'</code><code class="p">,</code> <code class="s1">'banana'</code><code class="p">,</code> <code class="s1">'coconut'</code><code class="p">,</code> <code class="s1">'grape'</code><code class="p">];</code>
+<code class="nb">array_splice</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="mi">2</code><code class="p">);</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; apple</code>
+<code class="c1">//     [1] =&gt; grape</code>
+<code class="c1">// )</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875161347680">
+<h2>Discussion</h2>
+
+<p>Unlike many other languages, PHP doesn’t require you to declare the size of an array. Arrays are dynamic—you can add or remove data from them whenever you want with no real downside.</p>
+
+<p>The first Solution example merely adds a single element to the end of an array. While this approach is straightforward, it’s not the most efficient. Instead, you can push an individual item into an array <em>directly</em> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'apple'</code><code class="p">,</code> <code class="s1">'banana'</code><code class="p">,</code> <code class="s1">'coconut'</code><code class="p">];</code>
+<code class="nv">$array</code><code class="p">[]</code> <code class="o">=</code> <code class="s1">'grape'</code><code class="p">;</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; apple</code>
+<code class="c1">//     [1] =&gt; banana</code>
+<code class="c1">//     [2] =&gt; coconut</code>
+<code class="c1">//     [3] =&gt; grape</code>
+<code class="c1">// )</code></pre>
+
+<p>The key difference between the preceding example and the one documented in the Solution is that of a function call. In PHP, function calls have more overhead than language constructs (like assignment operators). The preceding example is slightly more efficient, but only if it’s used several times in an application.</p>
+
+<p>If you are instead adding <em>multiple</em> items to the end of an array, the <code>array_push()</code> function will be more efficient. It accepts and appends many items at once, thus avoiding multiple assignments. <a data-type="xref" href="#array_push_multiples">Example 7-8</a> illustrates the difference between approaches.</p>
+<div id="array_push_multiples" data-type="example">
+<h5><span class="label">Example 7-8. </span>Appending multiple elements with <code>array_push()</code> versus assignment</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$first</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'apple'</code><code class="p">];</code>
+<code class="nb">array_push</code><code class="p">(</code><code class="nv">$first</code><code class="p">,</code> <code class="s1">'banana'</code><code class="p">,</code> <code class="s1">'coconut'</code><code class="p">,</code> <code class="s1">'grape'</code><code class="p">);</code>
+
+<code class="nv">$second</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'apple'</code><code class="p">];</code>
+<code class="nv">$second</code><code class="p">[]</code> <code class="o">=</code> <code class="s1">'banana'</code><code class="p">;</code>
+<code class="nv">$second</code><code class="p">[]</code> <code class="o">=</code> <code class="s1">'coconut'</code><code class="p">;</code>
+<code class="nv">$second</code><code class="p">[]</code> <code class="o">=</code> <code class="s1">'grape'</code><code class="p">;</code>
+
+<code class="k">echo</code> <code class="s1">'The arrays are '</code> <code class="o">.</code> <code class="p">(</code><code class="nv">$first</code> <code class="o">===</code> <code class="nv">$second</code> <code class="o">?</code> <code class="s1">'equal'</code> <code class="o">:</code> <code class="s1">'different'</code><code class="p">);</code>
+
+<code class="c1">// The arrays are equal</code></pre></div>
+
+<p>If, rather than appending elements, you <a data-type="indexterm" data-primary="arrays" data-secondary="elements" data-tertiary="prepending" id="idm45875161197344"></a>want to <em>prepend</em> them, you would use <code>array_unshift()</code> to place the specified items at the beginning of the array as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'grape'</code><code class="p">];</code>
+<code class="nb">array_unshift</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="s1">'apple'</code><code class="p">,</code> <code class="s1">'banana'</code><code class="p">,</code> <code class="s1">'coconut'</code><code class="p">);</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; apple</code>
+<code class="c1">//     [1] =&gt; banana</code>
+<code class="c1">//     [2] =&gt; coconut</code>
+<code class="c1">//     [3] =&gt; grape</code>
+<code class="c1">// )</code></pre>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>PHP retains the order of elements <a data-type="indexterm" data-primary="array_unshift() function" id="idm45875161135424"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_unshift()" id="idm45875161134816"></a>passed to <code>array_unshift()</code> when prepending them to the target array. The first parameter will become the first element, the second the second, and so on until you reach the array’s <em>original</em> first element.</p>
+</div>
+
+<p>Remember, arrays in PHP do not have a set size and can easily be manipulated in different ways. All of the preceding functional examples (<code>array_push()</code>, <code>array_​splice()</code>, and <code>array_unshift()</code>) work well on numeric arrays and <em>do not change the order or structure</em> of their numerical indexes. You could just as easily add an element to the end of a numeric array by referencing a new index directly. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'apple'</code><code class="p">,</code> <code class="s1">'banana'</code><code class="p">,</code> <code class="s1">'coconut'</code><code class="p">];</code>
+<code class="nv">$array</code><code class="p">[</code><code class="mi">3</code><code class="p">]</code> <code class="o">=</code> <code class="s1">'grape'</code><code class="p">;</code></pre>
+
+<p>So long as the index your code references is continuous with the rest of the array, the preceding example will work flawlessly. If, however, your count is off and you introduce a gap in the index, you have effectively converted your numeric array to an associative one, just with numeric keys.</p>
+
+<p>While all of the functions used in this recipe will work with associative arrays, they work primarily against numeric keys and will result in strange behavior when used against non-numeric ones. It would be wise to use these functions <em>only</em> with numeric arrays and to manipulate the sizes of associative arrays directly based <a data-type="indexterm" data-primary="arrays" data-secondary="size, changing" data-startref="rryzcg" id="idm45875161041216"></a><a data-type="indexterm" data-primary="arrays" data-secondary="elements" data-tertiary="adding" data-startref="aryseld" id="idm45875161040064"></a><a data-type="indexterm" data-primary="array_push() function" data-startref="rryshfc" id="idm45875161038576"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_push()" data-startref="ftnsrsh" id="idm45875161087824"></a>on their keys.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875161336128">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/DhVgq"><code>array_push()</code></a>, <a href="https://oreil.ly/eLoTZ"><code>array_splice()</code></a>, and <a href="https://oreil.ly/BYisR"><code>array_unshift()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.6 Appending One Array to Another"><div class="sect1" id="idm45875161082352">
+<h1>7.6 Appending One Array to Another</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875161080144">
+<h2>Problem</h2>
+
+<p>You want to combine two arrays <a data-type="indexterm" data-primary="arrays" data-secondary="appending to another" id="aryppdnt"></a><a data-type="indexterm" data-primary="appending arrays to other arrays" id="appdrryth"></a><a data-type="indexterm" data-primary="array_merge() function" id="rygfct"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_merge()" id="ftnsrryge"></a>into a single, new array.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875161074112">
+<h2>Solution</h2>
+
+<p>Use <code>array_merge()</code> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$first</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'a'</code><code class="p">,</code> <code class="s1">'b'</code><code class="p">,</code> <code class="s1">'c'</code><code class="p">];</code>
+<code class="nv">$second</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'x'</code><code class="p">,</code> <code class="s1">'y'</code><code class="p">,</code> <code class="s1">'z'</code><code class="p">];</code>
+
+<code class="nv">$merged</code> <code class="o">=</code> <code class="nb">array_merge</code><code class="p">(</code><code class="nv">$first</code><code class="p">,</code> <code class="nv">$second</code><code class="p">);</code></pre>
+
+<p>In addition, you can also leverage the spread operator (<code>…​</code>) to combine arrays directly. Rather than a call to <code>array_merge()</code>, the preceding example then becomes this:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$merged</code> <code class="o">=</code> <code class="p">[</code><code class="o">...</code><code class="nv">$first</code><code class="p">,</code> <code class="o">...</code><code class="nv">$second</code><code class="p">];</code></pre>
+
+<p>The spread operator works for both numeric and associative arrays.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875160983728">
+<h2>Discussion</h2>
+
+<p>PHP’s <code>array_merge()</code> function is an obvious way to combine two arrays into one. It does, however, have slightly different behavior for numeric versus associative arrays.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>Any discussion of merging arrays will inevitably use the term <em>combine</em>. Note that <a href="https://oreil.ly/wcM69"><code>array_combine()</code></a> is itself a function in PHP. However, it doesn’t merge two arrays as shown in this recipe. Instead, it creates a new array by using the two specified arrays—the first for the <em>keys</em> and the second for the <em>values</em> of the new array. It’s a useful function but is not something you can use for merging two arrays.</p>
+</div>
+
+<p>For numeric arrays (like those in the Solution example), all elements of the second array are appended to those of the first array. The function ignores the indexes of both, and the newly produced array has continuous indexes (starting from <code>0</code>) as if you’d built it directly.</p>
+
+<p>For associative arrays, the keys (and values) of the second array are added to those of the first. If the two arrays have the same keys, the values of the second array will overwrite those of the first. <a data-type="xref" href="#array_merge_associative">Example 7-9</a> illustrates how the data in one array <a data-type="indexterm" data-primary="associative arrays" data-secondary="data, overwriting" id="idm45875160965232"></a><a data-type="indexterm" data-primary="arrays" data-secondary="associative" data-tertiary="overwriting data" id="idm45875160964288"></a>overwrites that of the other.</p>
+<div id="array_merge_associative" data-type="example">
+<h5><span class="label">Example 7-9. </span>Overwriting associative array data with <code>array_merge()</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$first</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="s1">'title'</code>  <code class="o">=&gt;</code> <code class="s1">'Practical Handbook'</code><code class="p">,</code>
+    <code class="s1">'author'</code> <code class="o">=&gt;</code> <code class="s1">'Bob Mills'</code><code class="p">,</code>
+    <code class="s1">'year'</code>   <code class="o">=&gt;</code> <code class="mi">2018</code>
+<code class="p">];</code>
+<code class="nv">$second</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="s1">'year'</code>   <code class="o">=&gt;</code> <code class="mi">2023</code><code class="p">,</code>
+    <code class="s1">'region'</code> <code class="o">=&gt;</code> <code class="s1">'United States'</code>
+<code class="p">];</code>
+
+<code class="nv">$merged</code> <code class="o">=</code> <code class="nb">array_merge</code><code class="p">(</code><code class="nv">$first</code><code class="p">,</code> <code class="nv">$second</code><code class="p">);</code>
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$merged</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [title] =&gt; Practical Handbook</code>
+<code class="c1">//     [author] =&gt; Bob Mills</code>
+<code class="c1">//     [year] =&gt; 2023</code>
+<code class="c1">//     [region] =&gt; United States</code>
+<code class="c1">// )</code></pre></div>
+
+<p>There might be cases where you want to retain the data held in duplicate keys when you merge two or more arrays. In those circumstances, use <code>array_merge_​re⁠cur⁠sive()</code>. Unlike the <a data-type="indexterm" data-primary="array_merge_recursive() function" id="idm45875160848992"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_merge_recursive()" id="idm45875160848384"></a>preceding example, this function will create an array containing the data defined in duplicate keys rather than overwriting one value with another. <a data-type="xref" href="#array_merge_recursive">Example 7-10</a> rewrites the preceding example to <a data-type="indexterm" data-primary="arrays" data-secondary="merging duplicate keys and" id="idm45875160846608"></a>illustrate how this happens.</p>
+<div id="array_merge_recursive" data-type="example">
+<h5><span class="label">Example 7-10. </span>Merging arrays with duplicate keys</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$first</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="s1">'title'</code>  <code class="o">=&gt;</code> <code class="s1">'Practical Handbook'</code><code class="p">,</code>
+    <code class="s1">'author'</code> <code class="o">=&gt;</code> <code class="s1">'Bob Mills'</code><code class="p">,</code>
+    <code class="s1">'year'</code>   <code class="o">=&gt;</code> <code class="mi">2018</code>
+<code class="p">];</code>
+<code class="nv">$second</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="s1">'year'</code>   <code class="o">=&gt;</code> <code class="mi">2023</code><code class="p">,</code>
+    <code class="s1">'region'</code> <code class="o">=&gt;</code> <code class="s1">'United States'</code>
+<code class="p">];</code>
+
+<code class="nv">$merged</code> <code class="o">=</code> <code class="nb">array_merge_recursive</code><code class="p">(</code><code class="nv">$first</code><code class="p">,</code> <code class="nv">$second</code><code class="p">);</code>
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$merged</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [title] =&gt; Practical Handbook</code>
+<code class="c1">//     [author] =&gt; Bob Mills</code>
+<code class="c1">//     [year] =&gt; Array</code>
+<code class="c1">//         (</code>
+<code class="c1">//             [0] =&gt; 2018</code>
+<code class="c1">//             [1] =&gt; 2023</code>
+<code class="c1">//         )</code>
+<code class="c1">//</code>
+<code class="c1">//     [region] =&gt; United States</code>
+<code class="c1">// )</code></pre></div>
+
+<p>While the preceding examples combine only two arrays, there is no upper limit to the number of arrays you can merge with either <code>array_merge()</code> or <code>array_merge_​re⁠cur⁠sive()</code>. Keep in mind how duplicate keys are handled by both functions as you begin merging more than two arrays at a time to avoid potentially losing data.</p>
+
+<p>A third and final way to combine two arrays into one is with the literal addition operator: <code>+</code>. On paper, this has the appearance of adding two arrays together. What it really does is add any new key from the second array to the keys of the first. Unlike <code>array_merge()</code>, this operation will not overwrite data. If the second array has keys that duplicate any in the first array, those keys are ignored, and the data from the first array is used.</p>
+
+<p>This operator also works <em>explicitly</em> with array keys, meaning it’s not a good fit for numeric arrays. Two same-sized numeric arrays, when treated like associative arrays, will have the exact same keys because they have the same indexes. This means the second array’s data will be <a data-type="indexterm" data-primary="arrays" data-secondary="appending to another" data-startref="aryppdnt" id="idm45875160782608"></a><a data-type="indexterm" data-primary="appending arrays to other arrays" data-startref="appdrryth" id="idm45875160778208"></a><a data-type="indexterm" data-primary="array_merge() function" data-startref="rygfct" id="idm45875160777248"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_merge()" data-startref="ftnsrryge" id="idm45875160776304"></a>ignored entirely!</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875160972080">
+<h2>See Also</h2>
+
+<p>Documentation for <a href="https://oreil.ly/s38Xa"><code>array_merge()</code></a> and <a href="https://oreil.ly/aFQxS"><code>array_merge_recursive()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.7 Creating an Array from a Fragment of an 
+Existing Array"><div class="sect1" id="slicing_arrays">
+<h1>7.7 Creating an Array from a Fragment of an 
+<span class="keep-together">Existing Array</span></h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875160769472">
+<h2>Problem</h2>
+
+<p>You want to select a subsection of <a data-type="indexterm" data-primary="arrays" data-secondary="creating from array fragment" id="rrycrtg"></a>an existing array and use it independently.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875160766496">
+<h2>Solution</h2>
+
+<p>Use <code>array_slice()</code> to select <a data-type="indexterm" data-primary="array_slice() function" id="ryslcf"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_slice()" id="ftnrrysc"></a>a sequence of elements from an existing array as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="s1">'A'</code><code class="p">,</code> <code class="s1">'Z'</code><code class="p">);</code>
+<code class="nv">$slice</code> <code class="o">=</code> <code class="nb">array_slice</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="mi">7</code><code class="p">,</code> <code class="mi">4</code><code class="p">);</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$slice</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; H</code>
+<code class="c1">//     [1] =&gt; I</code>
+<code class="c1">//     [2] =&gt; J</code>
+<code class="c1">//     [3] =&gt; K</code>
+<code class="c1">// )</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875160713856">
+<h2>Discussion</h2>
+
+<p>The <code>array_slice()</code> function quickly extracts a continuous sequence of items from the given array based on a defined offset (position within the array) and length of elements to retrieve. Unlike <code>array_splice()</code>, it copies the sequence of items from the array, leaving the original array unchanged.</p>
+
+<p>It’s important to understand the full function signature to appreciate the power of this function:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">array_slice</code><code class="p">(</code>
+    <code class="k">array</code> <code class="nv">$array</code><code class="p">,</code>
+    <code class="nx">int</code>   <code class="nv">$offset</code><code class="p">,</code>
+    <code class="o">?</code><code class="nv">$int</code> <code class="nv">$length</code> <code class="o">=</code> <code class="k">null</code><code class="p">,</code>
+    <code class="nv">$bool</code> <code class="nv">$preserve_keys</code> <code class="o">=</code> <code class="k">false</code>
+<code class="p">)</code><code class="o">:</code> <code class="k">array</code></pre>
+
+<p>Only the first two parameters—the target array and the initial offset—are required. If the offset is positive (or <code>0</code>), the new sequence will start at that position from the beginning of the array. If the offset is negative, the sequence will start that many positions back from the <em>end</em> of the array.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>The array offset is explicitly referencing the <em>position</em> within an array, not in terms of keys or indexes. The <code>array_slice()</code> function works on associative arrays as easily as it does on numeric arrays because it uses the relative positions of elements in the array to define a new sequence and ignores the array’s actual keys.</p>
+</div>
+
+<p>When you define the optional <code>$length</code> argument, this defines the maximum number of items in the new sequence. Note that the new sequence is limited by the number of items in the original array, so if the length overruns the end of the array, your sequence will be shorter than you expected. <a data-type="xref" href="#slice_length_overrun">Example 7-11</a> presents a quick example of this behavior.</p>
+<div id="slice_length_overrun" data-type="example">
+<h5><span class="label">Example 7-11. </span>Using <code>array_slice()</code> with a too-short array</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="s1">'a'</code><code class="p">,</code> <code class="s1">'e'</code><code class="p">);</code>
+<code class="nv">$newArray</code> <code class="o">=</code> <code class="nb">array_slice</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="mi">4</code><code class="p">,</code> <code class="mi">100</code><code class="p">);</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$newArray</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; e</code>
+<code class="c1">// )</code></pre></div>
+
+<p>If the length specified is <em>negative</em>, then the sequence will stop that many elements away from the end of the target array. If the length is not specified (or is <code>null</code>), then the sequence will include everything from the original offset through the end of the target array.</p>
+
+<p>The final parameter, <code>$preserve_keys</code>, tells PHP whether to <a data-type="indexterm" data-primary="preserve_keys" id="idm45875160587136"></a>reset the integer indexes of the slice of the array. By default, PHP will return a newly indexed array with integer keys starting at <code>0</code>. <a data-type="xref" href="#array_slice_keys">Example 7-12</a> shows how the behavior of the function differs based on this parameter.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>The <code>array_slice()</code> function will always preserve string keys in an associative array regardless of the value of <code>$preserve_keys</code>.</p>
+</div>
+<div id="array_slice_keys" data-type="example">
+<h5><span class="label">Example 7-12. </span>Key preservation behavior in <code>array_slice()</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="s1">'a'</code><code class="p">,</code> <code class="s1">'e'</code><code class="p">);</code>
+
+<code class="nv">$standard</code> <code class="o">=</code> <code class="nb">array_slice</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="mi">2</code><code class="p">);</code>
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$standard</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; b</code>
+<code class="c1">//     [1] =&gt; c</code>
+<code class="c1">// )</code>
+
+<code class="nv">$preserved</code> <code class="o">=</code> <code class="nb">array_slice</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="mi">2</code><code class="p">,</code> <code class="k">true</code><code class="p">);</code>
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$preserved</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [1] =&gt; b</code>
+<code class="c1">//     [2] =&gt; c</code>
+<code class="c1">// )</code></pre></div>
+
+<p>Remember, numeric arrays in PHP can be thought of as associative arrays with integer keys that start at <code>0</code> and increment consecutively. With that in mind, it’s easy to see how <code>array_slice()</code> behaves on associative arrays with both string and integer keys—it operates based on position rather than key, as shown in <a data-type="xref" href="#array_slice_mixed_keys">Example 7-13</a>.</p>
+<div id="array_slice_mixed_keys" data-type="example">
+<h5><span class="label">Example 7-13. </span>Using <code>array_slice()</code> on an array with mixed keys</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'a'</code> <code class="o">=&gt;</code> <code class="s1">'apple'</code><code class="p">,</code> <code class="s1">'b'</code> <code class="o">=&gt;</code> <code class="s1">'banana'</code><code class="p">,</code> <code class="mi">25</code> <code class="o">=&gt;</code> <code class="s1">'cola'</code><code class="p">,</code> <code class="s1">'d'</code> <code class="o">=&gt;</code> <code class="s1">'donut'</code><code class="p">];</code>
+<code class="nb">print_r</code><code class="p">(</code><code class="nb">array_slice</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">3</code><code class="p">));</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [a] =&gt; apple</code>
+<code class="c1">//     [b] =&gt; banana</code>
+<code class="c1">//     [0] =&gt; cola</code>
+<code class="c1">// )</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nb">array_slice</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="mi">0</code><code class="p">,</code> <code class="mi">3</code><code class="p">,</code> <code class="k">true</code><code class="p">));</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [a] =&gt; apple</code>
+<code class="c1">//     [b] =&gt; banana</code>
+<code class="c1">//     [25] =&gt; cola</code>
+<code class="c1">// )</code></pre></div>
+
+<p>In <a data-type="xref" href="#deleting_array_elements">Recipe 7.4</a>, you were introduced to <code>array_splice()</code> for deleting a sequence of elements from an array. Conveniently, this function uses a method signature similar to that of <code>array_slice()</code>:</p>
+
+<pre data-type="programlisting" data-code-language="php"> <code class="nb">array_splice</code><code class="p">(</code>
+    <code class="k">array</code> <code class="o">&amp;</code><code class="nv">$array</code><code class="p">,</code>
+    <code class="nx">int</code>   <code class="nv">$offset</code><code class="p">,</code>
+    <code class="o">?</code><code class="nx">int</code>  <code class="nv">$length</code> <code class="o">=</code> <code class="k">null</code><code class="p">,</code>
+    <code class="nx">mixed</code> <code class="nv">$replacement</code> <code class="o">=</code> <code class="p">[]</code>
+<code class="p">)</code><code class="o">:</code> <code class="k">array</code></pre>
+
+<p>The key difference between these functions is that one modifies the source array whereas the other does not. You might use <code>array_slice()</code> to work on a subset of a larger sequence in isolation or instead to fully separate two sequences from one another. In either case, the functions <a data-type="indexterm" data-primary="arrays" data-secondary="creating from array fragment" data-startref="rrycrtg" id="idm45875160367792"></a><a data-type="indexterm" data-primary="array_slice() function" data-startref="ryslcf" id="idm45875160366704"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_slice()" data-startref="ftnrrysc" id="idm45875160365760"></a>exhibit similar behavior and use cases.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875160731184">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/9iBvj"><code>array_slice()</code></a> and <a href="https://oreil.ly/k-h7n"><code>array_splice()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.8 Converting Between Arrays and Strings"><div class="sect1" id="idm45875160315920">
+<h1>7.8 Converting Between Arrays and Strings</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875160314800">
+<h2>Problem</h2>
+
+<p>You want to convert a string into an <a data-type="indexterm" data-primary="arrays" data-secondary="strings, converting between" id="rrysgvw"></a><a data-type="indexterm" data-primary="strings" data-secondary="arrays, converting between" id="sgryvw"></a>array or combine the elements of an array into a string.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875160311072">
+<h2>Solution</h2>
+
+<p>Use <code>str_split()</code> to convert a string <a data-type="indexterm" data-primary="str_split() function" id="stplct"></a><a data-type="indexterm" data-primary="functions" data-secondary="str_split()" id="fcnstsp"></a>to an array:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$string</code> <code class="o">=</code> <code class="s1">'To be or not to be'</code><code class="p">;</code>
+<code class="nv">$array</code> <code class="o">=</code> <code class="nb">str_split</code><code class="p">(</code><code class="nv">$string</code><code class="p">);</code></pre>
+
+<p>Use <code>join()</code> to combine the elements of an array into a string:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'H'</code><code class="p">,</code> <code class="s1">'e'</code><code class="p">,</code> <code class="s1">'l'</code><code class="p">,</code> <code class="s1">'l'</code><code class="p">,</code> <code class="s1">'o'</code><code class="p">,</code> <code class="s1">' '</code><code class="p">,</code> <code class="s1">'w'</code><code class="p">,</code> <code class="s1">'o'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">,</code> <code class="s1">'l'</code><code class="p">,</code> <code class="s1">'d'</code><code class="p">];</code>
+<code class="nv">$string</code> <code class="o">=</code> <code class="nb">join</code><code class="p">(</code><code class="s1">''</code><code class="p">,</code> <code class="nv">$array</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875160254480">
+<h2>Discussion</h2>
+
+<p>The <code>str_split()</code> function is a powerful way to convert any string of characters into an array of like-sized chunks. By default, it will break the string into one-character chunks, but you can just as easily break a string into any number of characters. The last chunk in the sequence is only guaranteed to be <em>up to</em> the specified length. For example, <a data-type="xref" href="#str_split_length">Example 7-14</a> attempts to break a string down into five-character chunks, but note that the last chunk is fewer than five characters in length.</p>
+<div id="str_split_length" data-type="example">
+<h5><span class="label">Example 7-14. </span>Using <code>str_split()</code> with arbitrary chunk sizes</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$string</code> <code class="o">=</code> <code class="s1">'To be or not to be'</code><code class="p">;</code>
+<code class="nv">$array</code> <code class="o">=</code> <code class="nb">str_split</code><code class="p">(</code><code class="nv">$string</code><code class="p">,</code> <code class="mi">5</code><code class="p">);</code>
+<code class="nb">var_dump</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+
+<code class="c1">// array(4) {</code>
+<code class="c1">//   [0]=&gt;</code>
+<code class="c1">//   string(5) "To be"</code>
+<code class="c1">//   [1]=&gt;</code>
+<code class="c1">//   string(5) " or n"</code>
+<code class="c1">//   [2]=&gt;</code>
+<code class="c1">//   string(5) "ot to"</code>
+<code class="c1">//   [3]=&gt;</code>
+<code class="c1">//   string(3) " be"</code>
+<code class="c1">// }</code></pre></div>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>Remember that <code>str_split()</code> works on bytes. When you’re dealing with multibyte encoded strings, you will need to use <a href="https://oreil.ly/ocQi1"><code>mb_​str_​split()</code></a> instead.</p>
+</div>
+
+<p>In some cases, you might want to split a string into separate words rather than individual characters. PHP’s <code>explode()</code> function allows you to specify the separator on which to split things. This is handy for splitting a sentence into an array of its component words, as demonstrated by <a data-type="xref" href="#split_string_into_words">Example 7-15</a>.</p>
+<div id="split_string_into_words" data-type="example">
+<h5><span class="label">Example 7-15. </span>Splitting a string into an array of words</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$string</code> <code class="o">=</code> <code class="s1">'To be or not to be'</code><code class="p">;</code>
+<code class="nv">$words</code> <code class="o">=</code> <code class="nb">explode</code><code class="p">(</code><code class="s1">' '</code><code class="p">,</code> <code class="nv">$string</code><code class="p">);</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$words</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; To</code>
+<code class="c1">//     [1] =&gt; be</code>
+<code class="c1">//     [2] =&gt; or</code>
+<code class="c1">//     [3] =&gt; not</code>
+<code class="c1">//     [4] =&gt; to</code>
+<code class="c1">//     [5] =&gt; be</code>
+<code class="c1">// )</code></pre></div>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>While <code>explode()</code> appears to <a data-type="indexterm" data-primary="explode() function" id="idm45875160123552"></a><a data-type="indexterm" data-primary="functions" data-secondary="explode()" id="idm45875160122880"></a>function similarly to <code>str_split()</code>, it cannot explode a string with an empty delimiter (the first parameter to the function). If you try to pass an empty string, you will be met with a <code>ValueError</code>. If you want to work with an array of characters, stick with <code>str_split()</code>.</p>
+</div>
+
+<p>Combining an array of strings into a single string requires the use of the <code>join()</code> function, which itself is merely an alias of <code>implode()</code>. That said, it’s far more powerful than just being the inverse of <code>str_split()</code>, as you can optionally define a separator to be placed between newly concatenated code chunks.</p>
+
+<p>The separator is optional, but the long legacy of <code>implode()</code> in PHP has led to two somewhat unintuitive function signatures as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">implode</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$separator</code><code class="p">,</code> <code class="k">array</code> <code class="nv">$array</code><code class="p">)</code><code class="o">:</code> <code class="nx">string</code>
+
+<code class="nb">implode</code><code class="p">(</code><code class="k">array</code> <code class="nv">$array</code><code class="p">)</code><code class="o">:</code> <code class="nx">string</code></pre>
+
+<p>If you want to merely combine an array of characters into a string, you can do so with the equivalent methods shown in <a data-type="xref" href="#combining_characters_into_string">Example 7-16</a>.</p>
+<div id="combining_characters_into_string" data-type="example">
+<h5><span class="label">Example 7-16. </span>Creating a string from an array of characters</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'H'</code><code class="p">,</code> <code class="s1">'e'</code><code class="p">,</code> <code class="s1">'l'</code><code class="p">,</code> <code class="s1">'l'</code><code class="p">,</code> <code class="s1">'o'</code><code class="p">,</code> <code class="s1">' '</code><code class="p">,</code> <code class="s1">'w'</code><code class="p">,</code> <code class="s1">'o'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">,</code> <code class="s1">'l'</code><code class="p">,</code> <code class="s1">'d'</code><code class="p">];</code>
+
+<code class="nv">$option1</code> <code class="o">=</code> <code class="nb">implode</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+
+<code class="nv">$option2</code> <code class="o">=</code> <code class="nb">implode</code><code class="p">(</code><code class="s1">''</code><code class="p">,</code> <code class="nv">$array</code><code class="p">);</code>
+
+<code class="k">echo</code> <code class="s1">'The two are '</code> <code class="o">.</code> <code class="p">(</code><code class="nv">$option1</code> <code class="o">===</code> <code class="nv">$option2</code> <code class="o">?</code> <code class="s1">'identical'</code> <code class="o">:</code> <code class="s1">'different'</code><code class="p">);</code>
+
+<code class="c1">// The two are identical</code></pre></div>
+
+<p>Because you can explicitly specify the separator—the glue used to join each chunk of text—there are few limits to what <code>implode()</code> allows you to do. Assume your array is a list of words rather than a list of characters. You can use <code>implode()</code> to link them together as a <a data-type="indexterm" data-primary="arrays" data-secondary="strings, converting between" data-startref="rrysgvw" id="idm45875160068368"></a><a data-type="indexterm" data-primary="strings" data-secondary="arrays, converting between" data-startref="sgryvw" id="idm45875159990992"></a><a data-type="indexterm" data-primary="str_split() function" data-startref="stplct" id="idm45875159989840"></a><a data-type="indexterm" data-primary="functions" data-secondary="str_split()" data-startref="fcnstsp" id="idm45875159988896"></a>printable and comma-delimited list, as in the following example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fruit</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'apple'</code><code class="p">,</code> <code class="s1">'orange'</code><code class="p">,</code> <code class="s1">'pear'</code><code class="p">,</code> <code class="s1">'peach'</code><code class="p">];</code>
+
+<code class="k">echo</code> <code class="nb">implode</code><code class="p">(</code><code class="s1">', '</code><code class="p">,</code> <code class="nv">$fruit</code><code class="p">);</code>
+
+<code class="c1">// apple, orange, pear, peach</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875159967904">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/mpdcI"><code>implode()</code></a>, <a href="https://oreil.ly/PScj_"><code>explode()</code></a>, and <a href="https://oreil.ly/2dTMD"><code>str_split()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.9 Reversing an Array"><div class="sect1" id="reversing_an_array">
+<h1>7.9 Reversing an Array</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875159937712">
+<h2>Problem</h2>
+
+<p>You want to reverse the order <a data-type="indexterm" data-primary="arrays" data-secondary="elements" data-tertiary="reversing order" id="rylevsd"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_reverse()" id="fnsryvr"></a><a data-type="indexterm" data-primary="array_reverse() function" id="ryvsftn"></a>of elements in an array.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875159956608">
+<h2>Solution</h2>
+
+<p>Use <code>array_reverse()</code> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'five'</code><code class="p">,</code> <code class="s1">'four'</code><code class="p">,</code> <code class="s1">'three'</code><code class="p">,</code> <code class="s1">'two'</code><code class="p">,</code> <code class="s1">'one'</code><code class="p">,</code> <code class="s1">'zero'</code><code class="p">];</code>
+
+<code class="nv">$reversed</code> <code class="o">=</code> <code class="nb">array_reverse</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875159911248">
+<h2>Discussion</h2>
+
+<p>The <code>array_reverse()</code> function creates a new array where each element is in the reverse order of the input array. By default, this function does not preserve numeric keys from the source array but instead re-indexes each element. Non-numeric keys (in associative arrays) are left unchanged by this re-indexing; however, their order is still reversed as expected. <a data-type="xref" href="#reverse_associative_array">Example 7-17</a> demonstrates <a data-type="indexterm" data-primary="associative arrays" data-secondary="reversing" id="idm45875159862688"></a><a data-type="indexterm" data-primary="arrays" data-secondary="associative" data-tertiary="reversing" id="idm45875159861712"></a>how associative arrays are 
+<span class="keep-together">reordered</span> by <code>array_reverse()</code>.</p>
+<div id="reverse_associative_array" data-type="example">
+<h5><span class="label">Example 7-17. </span>Reversing associative arrays</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'a'</code> <code class="o">=&gt;</code> <code class="s1">'A'</code><code class="p">,</code> <code class="s1">'b'</code> <code class="o">=&gt;</code> <code class="s1">'B'</code><code class="p">,</code> <code class="s1">'c'</code> <code class="o">=&gt;</code> <code class="s1">'C'</code><code class="p">];</code>
+<code class="nv">$reversed</code> <code class="o">=</code> <code class="nb">array_reverse</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$reversed</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [c] =&gt; C</code>
+<code class="c1">//     [b] =&gt; B</code>
+<code class="c1">//     [a] =&gt; A</code>
+<code class="c1">// )</code></pre></div>
+
+<p>Since associative arrays can have numeric keys to begin with, the re-indexing behavior might produce unexpected results. Thankfully, it can be disabled by passing an optional Boolean parameter as the second argument when reversing an array. <a data-type="xref" href="#reversing_with_keys">Example 7-18</a> shows how this indexing behavior impacts such arrays (and how it can be disabled).</p>
+<div id="reversing_with_keys" data-type="example">
+<h5><span class="label">Example 7-18. </span>Reversing an associative array with numeric keys</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code><code> </code><code class="o">=</code><code> </code><code class="p">[</code><code class="s1">'a'</code><code> </code><code class="o">=&gt;</code><code> </code><code class="s1">'A'</code><code class="p">,</code><code> </code><code class="s1">'b'</code><code> </code><code class="o">=&gt;</code><code> </code><code class="s1">'B'</code><code class="p">,</code><code> </code><code class="mi">42</code><code> </code><code class="o">=&gt;</code><code> </code><code class="s1">'C'</code><code class="p">,</code><code> </code><code class="s1">'d'</code><code> </code><code class="o">=&gt;</code><code> </code><code class="s1">'D'</code><code class="p">];</code><code>
+</code><code class="nb">print_r</code><code class="p">(</code><code class="nb">array_reverse</code><code class="p">(</code><code class="nv">$array</code><code class="p">));</code><code> </code><a class="co" id="co_arrays_CO6-1" href="#callout_arrays_CO6-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="c1">// Array
+</code><code class="c1">// (
+</code><code class="c1">//     [d] =&gt; D
+</code><code class="c1">//     [0] =&gt; C
+</code><code class="c1">//     [b] =&gt; B
+</code><code class="c1">//     [a] =&gt; A
+</code><code class="c1">// )
+</code><code>
+</code><code class="nb">print_r</code><code class="p">(</code><code class="nb">array_reverse</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code><code> </code><code class="k">true</code><code class="p">));</code><code> </code><a class="co" id="co_arrays_CO6-2" href="#callout_arrays_CO6-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="c1">// Array
+</code><code class="c1">// (
+</code><code class="c1">//     [d] =&gt; D
+</code><code class="c1">//     [42] =&gt; C
+</code><code class="c1">//     [b] =&gt; B
+</code><code class="c1">//     [a] =&gt; A
+</code><code class="c1">// )</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_arrays_CO6-1" href="#co_arrays_CO6-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The default value of the second parameter is <code>false</code>, which means numeric keys will not be preserved after the array is reversed.</p></dd>
+<dt><a class="co" id="callout_arrays_CO6-2" href="#co_arrays_CO6-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Passing <code>true</code> as a second parameter will still allow the array to reverse but will retain numeric keys in <a data-type="indexterm" data-primary="arrays" data-secondary="elements" data-tertiary="reversing order" data-startref="rylevsd" id="idm45875159737776"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_reverse()" data-startref="fnsryvr" id="idm45875159736256"></a><a data-type="indexterm" data-primary="array_reverse() function" data-startref="ryvsftn" id="idm45875159735040"></a>the new array.</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875159698096">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/mI5eG"><code>array_reverse()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.10 Sorting an Array"><div class="sect1" id="idm45875159695696">
+<h1>7.10 Sorting an Array</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875159694448">
+<h2>Problem</h2>
+
+<p>You want to sort the elements <a data-type="indexterm" data-primary="arrays" data-secondary="elements" data-tertiary="sorting" id="ryelert"></a><a data-type="indexterm" data-primary="sorting" data-secondary="array elements" id="rtgryel"></a><a data-type="indexterm" data-primary="sort() function" id="srtfct"></a><a data-type="indexterm" data-primary="functions" data-secondary="sort()" id="fnsrt"></a>of an array.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875159687808">
+<h2>Solution</h2>
+
+<p>To sort items based on default comparison rules in PHP, use <code>sort()</code> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$states</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'Oregon'</code><code class="p">,</code> <code class="s1">'California'</code><code class="p">,</code> <code class="s1">'Alaska'</code><code class="p">,</code> <code class="s1">'Washington'</code><code class="p">,</code> <code class="s1">'Hawaii'</code><code class="p">];</code>
+<code class="nb">sort</code><code class="p">(</code><code class="nv">$states</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875159673920">
+<h2>Discussion</h2>
+
+<p>PHP’s native sorting system is built atop Quicksort, a common and relatively fast sorting algorithm. By default, it uses rules defined by PHP’s comparison operators to determine the order of each element in the array.<sup><a data-type="noteref" id="idm45875159668272-marker" href="ch07.html#idm45875159668272">5</a></sup> You can, however, sort with different rules by passing a flag as the optional second parameter of <code>sort()</code>. Available sorting flags are described in <a data-type="xref" href="#sort_type_flags">Table 7-1</a>.</p>
+<table id="sort_type_flags">
+<caption><span class="label">Table 7-1. </span>Sorting type flags</caption>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>SORT_REGULAR</code></p></td>
+<td><p>Compare items normally by using default comparison operations</p></td>
+</tr>
+<tr>
+<td><p><code>SORT_NUMERIC</code></p></td>
+<td><p>Compare items numerically</p></td>
+</tr>
+<tr>
+<td><p><code>SORT_STRING</code></p></td>
+<td><p>Compare items as strings</p></td>
+</tr>
+<tr>
+<td><p><code>SORT_LOCALE_STRING</code></p></td>
+<td><p>Compare items as strings by using the current system locale</p></td>
+</tr>
+<tr>
+<td><p><code>SORT_NATURAL</code></p></td>
+<td><p>Compare items by using “natural ordering”</p></td>
+</tr>
+<tr>
+<td><p><code>SORT_FLAG_CASE</code></p></td>
+<td><p>Combine with <code>SORT_STRING</code> or <code>SORT_NATURAL</code> by using a bitwise OR operator to compare strings without case-sensitivity</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>Sorting type flags are useful when the default sorting comparisons produce a sorted array that makes no sense. For example, sorting an array of integers as if they were strings would sort things incorrectly. Using the <code>SORT_NUMERIC</code> flag will ensure that integers <a data-type="indexterm" data-primary="SORT_NUMERIC" id="idm45875159602624"></a>are sorted in the correct order. <a data-type="xref" href="#sorting_integers">Example 7-19</a> demonstrates how the two sorting types differ.</p>
+<div id="sorting_integers" data-type="example">
+<h5><span class="label">Example 7-19. </span>Sorting integers with a regular versus numeric sort type</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$numbers</code> <code class="o">=</code> <code class="p">[</code><code class="mi">1</code><code class="p">,</code> <code class="mi">10</code><code class="p">,</code> <code class="mi">100</code><code class="p">,</code> <code class="mi">5</code><code class="p">,</code> <code class="mi">50</code><code class="p">,</code> <code class="mi">500</code><code class="p">];</code>
+<code class="nb">sort</code><code class="p">(</code><code class="nv">$numbers</code><code class="p">,</code> <code class="nx">SORT_STRING</code><code class="p">);</code>
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$numbers</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; 1</code>
+<code class="c1">//     [1] =&gt; 10</code>
+<code class="c1">//     [2] =&gt; 100</code>
+<code class="c1">//     [3] =&gt; 5</code>
+<code class="c1">//     [4] =&gt; 50</code>
+<code class="c1">//     [5] =&gt; 500</code>
+<code class="c1">// )</code>
+
+<code class="nb">sort</code><code class="p">(</code><code class="nv">$numbers</code><code class="p">,</code> <code class="nx">SORT_NUMERIC</code><code class="p">);</code>
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$numbers</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; 1</code>
+<code class="c1">//     [1] =&gt; 5</code>
+<code class="c1">//     [2] =&gt; 10</code>
+<code class="c1">//     [3] =&gt; 50</code>
+<code class="c1">//     [4] =&gt; 100</code>
+<code class="c1">//     [5] =&gt; 500</code>
+<code class="c1">// )</code></pre></div>
+
+<p>The <code>sort()</code> function ignores array keys and indexes and sorts the elements of the array purely by their values. Thus, attempting to use <code>sort()</code> to sort an associative array will destroy the keys in that array. If you want to retain the keys in an array while still sorting by values, use <code>asort()</code>.</p>
+
+<p>To do this, invoke <code>asort()</code> exactly the <a data-type="indexterm" data-primary="asort() function" id="idm45875159544368"></a><a data-type="indexterm" data-primary="functions" data-secondary="asort()" id="idm45875159543632"></a>same way as you do <code>sort()</code>; you can even use the same flags as defined in <a data-type="xref" href="#sort_type_flags">Table 7-1</a>. The resulting array will, however, retain the same keys as before, even though elements are in a different order. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$numbers</code> <code class="o">=</code> <code class="p">[</code><code class="mi">1</code><code class="p">,</code> <code class="mi">10</code><code class="p">,</code> <code class="mi">100</code><code class="p">,</code> <code class="mi">5</code><code class="p">,</code> <code class="mi">50</code><code class="p">,</code> <code class="mi">500</code><code class="p">];</code>
+<code class="nb">asort</code><code class="p">(</code><code class="nv">$numbers</code><code class="p">,</code> <code class="nx">SORT_NUMERIC</code><code class="p">);</code>
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$numbers</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; 1</code>
+<code class="c1">//     [3] =&gt; 5</code>
+<code class="c1">//     [1] =&gt; 10</code>
+<code class="c1">//     [4] =&gt; 50</code>
+<code class="c1">//     [2] =&gt; 100</code>
+<code class="c1">//     [5] =&gt; 500</code>
+<code class="c1">// )</code></pre>
+
+<p>Both <code>sort()</code> and <code>asort()</code> will produce arrays sorted in ascending order. If you want to get an array in descending order, you have two options:</p>
+
+<ul>
+<li>
+<p>Sort the array in ascending order, then reverse it as demonstrated in <a data-type="xref" href="#reversing_an_array">Recipe 7.9</a>.</p>
+</li>
+<li>
+<p>Leverage <code>rsort()</code> or <code>arsort()</code> for numeric and associative arrays, respectively.</p>
+</li>
+</ul>
+
+<p>To reduce overall code complexity, the latter option is often preferable. The functions have the same signatures as <code>sort()</code> and <code>asort()</code> but merely reverse the order in which elements will be <a data-type="indexterm" data-primary="arrays" data-secondary="elements" data-tertiary="sorting" data-startref="ryelert" id="idm45875159469552"></a><a data-type="indexterm" data-primary="sorting" data-secondary="array elements" data-startref="rtgryel" id="idm45875159468032"></a><a data-type="indexterm" data-primary="sort() function" data-startref="srtfct" id="idm45875159466816"></a><a data-type="indexterm" data-primary="functions" data-secondary="sort()" data-startref="fnsrt" id="idm45875159465872"></a>positioned in the resulting array.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875159679888">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/G14ve"><code>arsort()</code></a>, <a href="https://oreil.ly/jkl5w"><code>asort()</code></a>, <a href="https://oreil.ly/Z6p49"><code>rsort()</code></a>, and <a href="https://oreil.ly/sHWtt"><code>sort()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.11 Sorting an Array Based on a Function"><div class="sect1" id="idm45875159459552">
+<h1>7.11 Sorting an Array Based on a Function</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875159458304">
+<h2>Problem</h2>
+
+<p>You want to sort an array based on a <a data-type="indexterm" data-primary="arrays" data-secondary="sorting, user-defined functions" id="rysrtudc"></a><a data-type="indexterm" data-primary="functions" data-secondary="user-defined" data-tertiary="sorting arrays" id="fcudfrys"></a><a data-type="indexterm" data-primary="user-defined functions" data-secondary="sorting arrays" id="udfurty"></a>user-defined function or comparator.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875159452672">
+<h2>Solution</h2>
+
+<p>Use <code>usort()</code> with a <a data-type="indexterm" data-primary="usort() function" id="srtfc"></a><a data-type="indexterm" data-primary="functions" data-secondary="usort()" id="fcusrt"></a>custom sorting callback as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$bonds</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="p">[</code><code class="s1">'first'</code> <code class="o">=&gt;</code> <code class="s1">'Sean'</code><code class="p">,</code>    <code class="s1">'last'</code> <code class="o">=&gt;</code> <code class="s1">'Connery'</code><code class="p">],</code>
+    <code class="p">[</code><code class="s1">'first'</code> <code class="o">=&gt;</code> <code class="s1">'Daniel'</code><code class="p">,</code>  <code class="s1">'last'</code> <code class="o">=&gt;</code> <code class="s1">'Craig'</code><code class="p">],</code>
+    <code class="p">[</code><code class="s1">'first'</code> <code class="o">=&gt;</code> <code class="s1">'Pierce'</code><code class="p">,</code>  <code class="s1">'last'</code> <code class="o">=&gt;</code> <code class="s1">'Brosnan'</code><code class="p">],</code>
+    <code class="p">[</code><code class="s1">'first'</code> <code class="o">=&gt;</code> <code class="s1">'Roger'</code><code class="p">,</code>   <code class="s1">'last'</code> <code class="o">=&gt;</code> <code class="s1">'Moore'</code><code class="p">],</code>
+    <code class="p">[</code><code class="s1">'first'</code> <code class="o">=&gt;</code> <code class="s1">'Timothy'</code><code class="p">,</code> <code class="s1">'last'</code> <code class="o">=&gt;</code> <code class="s1">'Dalton'</code><code class="p">],</code>
+    <code class="p">[</code><code class="s1">'first'</code> <code class="o">=&gt;</code> <code class="s1">'George'</code><code class="p">,</code>  <code class="s1">'last'</code> <code class="o">=&gt;</code> <code class="s1">'Lazenby'</code><code class="p">],</code>
+<code class="p">];</code>
+
+<code class="k">function</code> <code class="nf">sorter</code><code class="p">(</code><code class="k">array</code> <code class="nv">$a</code><code class="p">,</code> <code class="k">array</code> <code class="nv">$b</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">return</code> <code class="p">[</code><code class="nv">$a</code><code class="p">[</code><code class="s1">'last'</code><code class="p">],</code> <code class="nv">$a</code><code class="p">[</code><code class="s1">'first'</code><code class="p">]]</code> <code class="o">&lt;=&gt;</code> <code class="p">[</code><code class="nv">$b</code><code class="p">[</code><code class="s1">'last'</code><code class="p">],</code> <code class="nv">$b</code><code class="p">[</code><code class="s1">'first'</code><code class="p">]];</code>
+<code class="p">}</code>
+
+<code class="nb">usort</code><code class="p">(</code><code class="nv">$bonds</code><code class="p">,</code> <code class="s1">'sorter'</code><code class="p">);</code>
+
+<code class="k">foreach</code> <code class="p">(</code><code class="nv">$bonds</code> <code class="k">as</code> <code class="nv">$bond</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">echo</code> <code class="s2">"</code><code class="si">{</code><code class="nv">$bond</code><code class="p">[</code><code class="s1">'last'</code><code class="p">]</code><code class="si">}</code><code class="s2">. </code><code class="si">{</code><code class="nv">$bond</code><code class="p">[</code><code class="s1">'first'</code><code class="p">]</code><code class="si">}</code><code class="s2"> </code><code class="si">{</code><code class="nv">$bond</code><code class="p">[</code><code class="s1">'last'</code><code class="p">]</code><code class="si">}</code><code class="s2">"</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875159080640">
+<h2>Discussion</h2>
+
+<p>The <code>usort()</code> function leverages a user-defined function as the comparison operation behind its sorting algorithm. You can pass in any callable as the second parameter, and every element of the array will be checked through this function to determine its appropriate order. The Solution example references a callback by its name, but you could just as easily pass an anonymous function as well.</p>
+
+<p>The Solution example further leverages PHP’s newer spaceship operator to conduct a complex comparison between your array elements.<sup><a data-type="noteref" id="idm45875159078400-marker" href="ch07.html#idm45875159078400">6</a></sup> In this particular case, you want to sort James Bond actors first by last name, then by first name. The same function could be used for any collection of names.</p>
+
+<p>A more powerful example is to apply custom sorting to dates in PHP. Dates are relatively easy to sort as they’re part of a continuous series. But it’s possible to define 
+<span class="keep-together">custom</span> behavior that breaks those expectations. <a data-type="xref" href="#custom_sorting_datetime">Example 7-20</a> attempts to sort an array of dates first based on the day of the week, then by the year, then by the month.</p>
+<div id="custom_sorting_datetime" data-type="example">
+<h5><span class="label">Example 7-20. </span>User-defined sorting applied to dates</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$dates</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2022-12-25'</code><code class="p">),</code>
+    <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2022-04-17'</code><code class="p">),</code>
+    <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2022-11-24'</code><code class="p">),</code>
+    <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2023-01-01'</code><code class="p">),</code>
+    <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2022-07-04'</code><code class="p">),</code>
+    <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2023-02-14'</code><code class="p">),</code>
+<code class="p">];</code>
+
+<code class="k">function</code> <code class="nf">sorter</code><code class="p">(</code><code class="nx">DateTime</code> <code class="nv">$a</code><code class="p">,</code> <code class="nx">DateTime</code> <code class="nv">$b</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">return</code>
+        <code class="p">[</code><code class="nv">$a</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'N'</code><code class="p">),</code> <code class="nv">$a</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'Y'</code><code class="p">),</code> <code class="nv">$a</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'j'</code><code class="p">)]</code>
+        <code class="o">&lt;=&gt;</code>
+        <code class="p">[</code><code class="nv">$b</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'N'</code><code class="p">),</code> <code class="nv">$b</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'Y'</code><code class="p">),</code> <code class="nv">$b</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'j'</code><code class="p">)];</code>
+<code class="p">}</code>
+
+<code class="nb">usort</code><code class="p">(</code><code class="nv">$dates</code><code class="p">,</code> <code class="s1">'sorter'</code><code class="p">);</code>
+
+<code class="k">foreach</code> <code class="p">(</code><code class="nv">$dates</code> <code class="k">as</code> <code class="nv">$date</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">echo</code> <code class="nv">$date</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'l, F jS, Y'</code><code class="p">)</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="c1">// Monday, July 4th, 2022</code>
+<code class="c1">// Tuesday, February 14th, 2023</code>
+<code class="c1">// Thursday, November 24th, 2022</code>
+<code class="c1">// Sunday, April 17th, 2022</code>
+<code class="c1">// Sunday, December 25th, 2022</code>
+<code class="c1">// Sunday, January 1st, 2023</code></pre></div>
+
+<p>Like many other array functions discussed in this chapter, <code>usort()</code> ignores array keys/indexes and re-indexes the array as part of its operation. If you need to retain the index or key associations of elements, use <code>uasort()</code> instead. This function has the same signature as <code>usort()</code> but leaves the array keys untouched after sorting.</p>
+
+<p>Array keys often hold important information about the data within the array, so retaining them during a sorting operation can prove critical at times. In addition, you might want to actually sort by the keys of the array rather than by the value of each element. In those circumstances, leverage <code>uksort()</code>.</p>
+
+<p>The <code>uksort()</code> function will sort an array by its keys, using a function you define. Like <code>uasort()</code>, it respects the keys and <a data-type="indexterm" data-primary="arrays" data-secondary="sorting, user-defined functions" data-startref="rysrtudc" id="idm45875159067616"></a><a data-type="indexterm" data-primary="functions" data-secondary="user-defined" data-tertiary="sorting arrays" data-startref="fcudfrys" id="idm45875159066512"></a><a data-type="indexterm" data-primary="user-defined functions" data-secondary="sorting arrays" data-startref="udfurty" id="idm45875159065024"></a><a data-type="indexterm" data-primary="usort() function" data-startref="srtfc" id="idm45875159063808"></a><a data-type="indexterm" data-primary="functions" data-secondary="usort()" data-startref="fcusrt" id="idm45875159062864"></a>leaves them in place after the array is sorted.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875159061520">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/TuK1L"><code>usort()</code></a>, <a href="https://oreil.ly/igH5E"><code>uasort()</code></a>, and <a href="https://oreil.ly/MEyff"><code>uksort()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.12 Randomizing the Elements in an Array"><div class="sect1" id="idm45875159057392">
+<h1>7.12 Randomizing the Elements in an Array</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875159056144">
+<h2>Problem</h2>
+
+<p>You want to scramble the elements of <a data-type="indexterm" data-primary="arrays" data-secondary="elements" data-tertiary="randomizing" id="ryslmdzg"></a><a data-type="indexterm" data-primary="shuffle() function" id="sfffc"></a><a data-type="indexterm" data-primary="functions" data-secondary="shuffle()" id="ftnff"></a>your array so that their order is entirely 
+<span class="keep-together">random</span>.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875159050096">
+<h2>Solution</h2>
+
+<p>Use <code>shuffle()</code>  as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="s1">'a'</code><code class="p">,</code> <code class="s1">'e'</code><code class="p">);</code>
+<code class="nb">shuffle</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875159035728">
+<h2>Discussion</h2>
+
+<p>The <code>shuffle()</code> function acts on an existing array that is passed into the function by reference. It completely ignores the keys of the array and sorts element values at random, updating the array in place. After shuffling, array keys are re-indexed starting from 0.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>While you won’t receive an error if you shuffle an associative array, all information on keys will be lost during the operation. You should only ever shuffle numeric arrays.</p>
+</div>
+
+<p>Internally, <code>shuffle()</code> uses the <a href="https://oreil.ly/86yIo">Mersenne Twister</a> pseudorandom number generator to identify a new, seemingly random order for each element in the array. This pseudorandom number generator is not suitable when true randomness is required (e.g., cryptography or security scenarios), but it is an effective way to quickly shuffle <a data-type="indexterm" data-primary="arrays" data-secondary="elements" data-tertiary="randomizing" data-startref="ryslmdzg" id="idm45875159031424"></a><a data-type="indexterm" data-primary="shuffle() function" data-startref="sfffc" id="idm45875159029904"></a><a data-type="indexterm" data-primary="functions" data-secondary="shuffle()" data-startref="ftnff" id="idm45875159028960"></a>the contents of an array.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875159027360">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/AkcpO"><code>shuffle()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.13 Applying a Function to Every Element of an Array"><div class="sect1" id="apply_function_to_each_element">
+<h1>7.13 Applying a Function to Every Element of an Array</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875158999744">
+<h2>Problem</h2>
+
+<p>You want to transform an array by <a data-type="indexterm" data-primary="array_walk() function" id="rywkf"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_walk()" id="fctrwk"></a><a data-type="indexterm" data-primary="arrays" data-secondary="elements" data-tertiary="modifying each with function" id="rrylmdyfc"></a><a data-type="indexterm" data-primary="functions" data-secondary="array element modification" id="ftrymdfc"></a>applying a function to modify every element of the array in turn.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875158993200">
+<h2>Solution</h2>
+
+<p>To modify the array in place, use <code>array_walk()</code> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$values</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code> <code class="mi">5</code><code class="p">);</code>
+
+<code class="nb">array_walk</code><code class="p">(</code><code class="nv">$values</code><code class="p">,</code> <code class="k">function</code><code class="p">(</code><code class="o">&amp;</code><code class="nv">$value</code><code class="p">,</code> <code class="nv">$key</code><code class="p">)</code> <code class="p">{</code>
+    <code class="nv">$value</code> <code class="o">*=</code> <code class="nv">$value</code><code class="p">;</code>
+<code class="p">});</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$values</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; 4</code>
+<code class="c1">//     [1] =&gt; 9</code>
+<code class="c1">//     [2] =&gt; 16</code>
+<code class="c1">//     [3] =&gt; 25</code>
+<code class="c1">// )</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875158970064">
+<h2>Discussion</h2>
+
+<p>Looping through collections of data is a common requirement for PHP applications. For example, you may want to use collections to define repeated tasks. Or you may want to perform a particular operation on every item in a collection, like squaring values, as shown in the Solution example.</p>
+
+<p>The <code>array_walk()</code> function is an effective way to both define the transformation you want applied and to apply it to the value of every element of the array. The callback function (the second parameter) accepts three arguments: the value and key for an element in the array and an optional <code>$arg</code> argument. This final argument is defined during the initial invocation of <code>array_walk()</code> and is passed to every use of the callback. It’s an efficient way to pass a constant value to the callback, as shown in <a data-type="xref" href="#array_walk_with_arg">Example 7-21</a>.</p>
+<div id="array_walk_with_arg" data-type="example">
+<h5><span class="label">Example 7-21. </span>Invoking <code>array_walk()</code> with an extra argument</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">mutate</code><code class="p">(</code><code class="o">&amp;</code><code class="nv">$value</code><code class="p">,</code> <code class="nv">$key</code><code class="p">,</code> <code class="nv">$arg</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="nv">$value</code> <code class="o">*=</code> <code class="nv">$arg</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nv">$values</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code> <code class="mi">5</code><code class="p">);</code>
+
+<code class="nb">array_walk</code><code class="p">(</code><code class="nv">$values</code><code class="p">,</code> <code class="s1">'mutate'</code><code class="p">,</code> <code class="mi">10</code><code class="p">);</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$values</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; 20</code>
+<code class="c1">//     [1] =&gt; 30</code>
+<code class="c1">//     [2] =&gt; 40</code>
+<code class="c1">//     [3] =&gt; 50</code>
+<code class="c1">// )</code></pre></div>
+
+<p>Using <code>array_walk()</code> to modify an array in place requires passing array values <em>by reference</em> into the callback (note the extra <code>&amp;</code> in front of the argument name). This function could also be used to merely walk over each element in the array and perform some other function <em>without</em> modifying the source array. In fact, that’s the most common use of this function.</p>
+
+<p>In addition to walking over every element of an array, you can walk over the <em>leaf</em> nodes in a nested array by using <code>array_walk_recursive()</code>. Unlike the preceding examples, <code>array_walk_recursive()</code> will traverse nested arrays until it finds a non-array element before applying your specified callback function. <a data-type="xref" href="#array_walk_recursive">Example 7-22</a> handily demonstrates the difference between the recursive and nonrecursive function calls against a nested array. Specifically, if you are dealing with a nested array, <code>array_walk()</code> will throw an error and fail to do anything at all.</p>
+<div id="array_walk_recursive" data-type="example">
+<h5><span class="label">Example 7-22. </span>Comparing <code>array_walk()</code> with <code>array_walk_recursive()</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="s1">'even'</code> <code class="o">=&gt;</code> <code class="p">[</code><code class="mi">2</code><code class="p">,</code> <code class="mi">4</code><code class="p">,</code> <code class="mi">6</code><code class="p">],</code>
+    <code class="s1">'odd'</code>  <code class="o">=&gt;</code> <code class="mi">1</code><code class="p">,</code>
+<code class="p">];</code>
+
+<code class="k">function</code> <code class="nf">mutate</code><code class="p">(</code><code class="o">&amp;</code><code class="nv">$value</code><code class="p">,</code> <code class="nv">$key</code><code class="p">,</code> <code class="nv">$arg</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="nv">$value</code> <code class="o">*=</code> <code class="nv">$arg</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nb">array_walk_recursive</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="s1">'mutate'</code><code class="p">,</code> <code class="mi">10</code><code class="p">);</code>
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [even] =&gt; Array</code>
+<code class="c1">//         (</code>
+<code class="c1">//             [0] =&gt; 20</code>
+<code class="c1">//             [1] =&gt; 40</code>
+<code class="c1">//             [2] =&gt; 60</code>
+<code class="c1">//         )</code>
+<code class="c1">//</code>
+<code class="c1">//     [odd] =&gt; 10</code>
+<code class="c1">// )</code>
+
+
+<code class="nb">array_walk</code><code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="s1">'mutate'</code><code class="p">,</code> <code class="mi">10</code><code class="p">);</code>
+
+<code class="c1">// PHP Warning: Uncaught TypeError: Unsupported operand types: array * int</code></pre></div>
+
+<p>In many situations, you might want to create a new copy of a mutated array without losing track of its original state. In those circumstances, <code>array_map()</code> might be a safer choice than <code>array_walk()</code>. Rather than modifying the source array, <code>array_map()</code> empowers you to apply a function to every element in the source array and return an entirely new array. The advantage is that you’ll have both the original and the modified arrays available for further use. The following example leverages the same logic as the Solution example <em>without</em> changing the source array:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$values</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code> <code class="mi">5</code><code class="p">);</code>
+
+<code class="nv">$mutated</code> <code class="o">=</code> <code class="nb">array_map</code><code class="p">(</code><code class="k">function</code><code class="p">(</code><code class="nv">$value</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">return</code> <code class="nv">$value</code> <code class="o">*</code> <code class="nv">$value</code><code class="p">;</code>
+<code class="p">},</code> <code class="nv">$values</code><code class="p">);</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$mutated</code><code class="p">);</code>
+
+<code class="c1">// Array</code>
+<code class="c1">// (</code>
+<code class="c1">//     [0] =&gt; 4</code>
+<code class="c1">//     [1] =&gt; 9</code>
+<code class="c1">//     [2] =&gt; 16</code>
+<code class="c1">//     [3] =&gt; 25</code>
+<code class="c1">// )</code></pre>
+
+<p>Here are some key differences to note between these two families of array functions:</p>
+
+<ul>
+<li>
+<p><code>array_walk()</code> expects the array first and the callback second.</p>
+</li>
+<li>
+<p><code>array_map()</code> expects the callback first and the array second.</p>
+</li>
+<li>
+<p><code>array_walk()</code> returns a Boolean flag, while <code>array_map()</code> returns a new array.</p>
+</li>
+<li>
+<p><code>array_map()</code> does not pass keys into the callback.</p>
+</li>
+<li>
+<p><code>array_map()</code> does not pass additional arguments <a data-type="indexterm" data-primary="array_walk() function" data-startref="rywkf" id="idm45875158651536"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_walk()" data-startref="fctrwk" id="idm45875158650560"></a><a data-type="indexterm" data-primary="arrays" data-secondary="elements" data-tertiary="modifying each with function" data-startref="rrylmdyfc" id="idm45875158649344"></a><a data-type="indexterm" data-primary="functions" data-secondary="array element modification" data-startref="ftrymdfc" id="idm45875158647888"></a>into the callback.</p>
+</li>
+<li>
+<p>There is no recursive form of <code>array_map()</code>.</p>
+</li>
+</ul>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875158960176">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/fzU_0"><code>array_map()</code></a>, <a href="https://oreil.ly/OTpL4"><code>array_walk()</code></a>, and <a href="https://oreil.ly/qCt7G"><code>array_walk_recursive()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.14 Reducing an Array to a Single Value"><div class="sect1" id="idm45875158641008">
+<h1>7.14 Reducing an Array to a Single Value</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875158639760">
+<h2>Problem</h2>
+
+<p>You want to iteratively reduce a <a data-type="indexterm" data-primary="arrays" data-secondary="reducing to single value" id="rysdcgvu"></a><a data-type="indexterm" data-primary="array_reduce() function" id="ryrdcc"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_reduce()" id="fcnryd"></a>collection of values to a single value.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875158634672">
+<h2>Solution</h2>
+
+<p>Use <code>array_reduce()</code> with a callback as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$values</code> <code class="o">=</code> <code class="nb">range</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">10</code><code class="p">);</code>
+
+<code class="nv">$sum</code> <code class="o">=</code> <code class="nb">array_reduce</code><code class="p">(</code><code class="nv">$values</code><code class="p">,</code> <code class="k">function</code><code class="p">(</code><code class="nv">$carry</code><code class="p">,</code> <code class="nv">$item</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">return</code> <code class="nv">$carry</code> <code class="o">+</code> <code class="nv">$item</code><code class="p">;</code>
+<code class="p">},</code> <code class="mi">0</code><code class="p">);</code>
+
+<code class="c1">// $sum = 55</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875158534784">
+<h2>Discussion</h2>
+
+<p>The <code>array_reduce()</code> function walks through every element of an array and modifies its own internal state to eventually arrive at a single answer. The Solution example walks through each element of a list of numbers and adds them all to the initial value of <code>0</code>, returning the final sum of all of the numbers in question.</p>
+
+<p>The callback function accepts two parameters. The first is the value you’re carrying over from the last operation. The second is the value of the current item in the array over which you’re iterating. Whatever the callback returns will be passed into the callback as the <code>$carry</code> parameter for the next element in the array.</p>
+
+<p>When you first start out, you pass an optional initial value (<code>null</code> by default) 
+<span class="keep-together">into the</span> callback as the <code>$carry</code> parameter. If the reduction operation you’re applying to 
+<span class="keep-together">the array</span> is straightforward, you can often provide a better initial value, as done in the Solution example.</p>
+
+<p>The biggest drawback of <code>array_reduce()</code> is that it does not handle array keys. In order to leverage any keys in the array as part of the reduction operation, you need to define your own version of the function.</p>
+
+<p><a data-type="xref" href="#associative_array_reduce">Example 7-23</a> shows how <a data-type="indexterm" data-primary="array_keys() function" id="idm45875158615456"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_keys()" id="idm45875158614720"></a>you can instead iterate over the array returned by <code>array_keys()</code> to leverage elements’ keys and values in the reduction. You pass both the array and callback into the closure processed by <code>array_reduce()</code> so you can 
+<span class="keep-together">both reference</span> the <em>element</em> in the array defined by that key and apply your custom function to it. In the main program, you are then free to reduce an associative array the same way you would a numeric one—except you have an extra argument in your callback containing each element’s key.</p>
+<div id="associative_array_reduce" data-type="example">
+<h5><span class="label">Example 7-23. </span>Associative alternative to <code>array_reduce()</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">array_reduce_assoc</code><code class="p">(</code>
+    <code class="k">array</code> <code class="nv">$array</code><code class="p">,</code>
+    <code class="nx">callable</code> <code class="nv">$callback</code><code class="p">,</code>
+    <code class="nx">mixed</code> <code class="nv">$initial</code> <code class="o">=</code> <code class="k">null</code>
+<code class="p">)</code><code class="o">:</code> <code class="nx">mixed</code>
+<code class="p">{</code>
+    <code class="k">return</code> <code class="nb">array_reduce</code><code class="p">(</code>
+        <code class="nb">array_keys</code><code class="p">(</code><code class="nv">$array</code><code class="p">),</code>
+        <code class="k">function</code><code class="p">(</code><code class="nv">$carry</code><code class="p">,</code> <code class="nv">$item</code><code class="p">)</code> <code class="k">use</code> <code class="p">(</code><code class="nv">$array</code><code class="p">,</code> <code class="nv">$callback</code><code class="p">)</code> <code class="p">{</code>
+            <code class="k">return</code> <code class="nv">$callback</code><code class="p">(</code><code class="nv">$carry</code><code class="p">,</code> <code class="nv">$array</code><code class="p">[</code><code class="nv">$item</code><code class="p">],</code> <code class="nv">$item</code><code class="p">);</code>
+        <code class="p">},</code>
+        <code class="nv">$initial</code>
+    <code class="p">);</code>
+<code class="p">}</code>
+
+<code class="nv">$array</code> <code class="o">=</code> <code class="p">[</code><code class="mi">1</code> <code class="o">=&gt;</code> <code class="mi">10</code><code class="p">,</code> <code class="mi">2</code> <code class="o">=&gt;</code> <code class="mi">10</code><code class="p">,</code> <code class="mi">3</code> <code class="o">=&gt;</code> <code class="mi">5</code><code class="p">];</code>
+
+<code class="nv">$sumMultiples</code> <code class="o">=</code> <code class="nx">array_reduce_assoc</code><code class="p">(</code>
+    <code class="nv">$array</code><code class="p">,</code>
+    <code class="k">function</code><code class="p">(</code><code class="nv">$carry</code><code class="p">,</code> <code class="nv">$item</code><code class="p">,</code> <code class="nv">$key</code><code class="p">)</code> <code class="p">{</code>
+        <code class="k">return</code> <code class="nv">$carry</code> <code class="o">+</code> <code class="p">(</code><code class="nv">$item</code> <code class="o">*</code> <code class="nv">$key</code><code class="p">);</code>
+    <code class="p">},</code>
+    <code class="mi">0</code>
+<code class="p">);</code>
+
+<code class="c1">// $sumMultiples = 45</code></pre></div>
+
+<p>The preceding code will return the sum <a data-type="indexterm" data-primary="arrays" data-secondary="reducing to single value" data-startref="rysdcgvu" id="idm45875158514864"></a><a data-type="indexterm" data-primary="array_reduce() function" data-startref="ryrdcc" id="idm45875158472704"></a><a data-type="indexterm" data-primary="functions" data-secondary="array_reduce()" data-startref="fcnryd" id="idm45875158471824"></a>of the keys of <code>$array</code> multiplied by their corresponding values—specifically, <code>1 * 10 + 2 * 10 + 3 * 5 = 45</code>.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875158469520">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/iu_XM"><code>array_reduce()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="7.15 Iterating over Infinite or Very Large/Expensive Arrays"><div class="sect1" id="iterating_over_large_arrays">
+<h1>7.15 Iterating over Infinite or Very Large/Expensive Arrays</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875158465568">
+<h2>Problem</h2>
+
+<p>You want to iterate over a list of <a data-type="indexterm" data-primary="iteration" data-secondary="very large arrays" id="trtrysg"></a><a data-type="indexterm" data-primary="arrays" data-secondary="iteration" data-tertiary="very large" id="rrysttvyg"></a>items that is too large to be held in memory or is too slow to generate.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875158461120">
+<h2>Solution</h2>
+
+<p>Use a generator to yield <a data-type="indexterm" data-primary="generators, large array iteration" id="gtrgrytr"></a>one chunk of data at a time to your program, as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">weekday</code><code class="p">()</code>
+<code class="p">{</code>
+    <code class="k">static</code> <code class="nv">$day</code> <code class="o">=</code> <code class="s1">'Monday'</code><code class="p">;</code>
+
+    <code class="k">while</code> <code class="p">(</code><code class="k">true</code><code class="p">)</code> <code class="p">{</code>
+        <code class="k">yield</code> <code class="nv">$day</code><code class="p">;</code>
+
+        <code class="k">switch</code><code class="p">(</code><code class="nv">$day</code><code class="p">)</code> <code class="p">{</code>
+            <code class="k">case</code> <code class="s1">'Monday'</code><code class="o">:</code>
+                <code class="nv">$day</code> <code class="o">=</code> <code class="s1">'Tuesday'</code><code class="p">;</code>
+                <code class="k">break</code><code class="p">;</code>
+            <code class="k">case</code> <code class="s1">'Tuesday'</code><code class="o">:</code>
+                <code class="nv">$day</code> <code class="o">=</code> <code class="s1">'Wednesday'</code><code class="p">;</code>
+                <code class="k">break</code><code class="p">;</code>
+            <code class="k">case</code> <code class="s1">'Wednesday'</code><code class="o">:</code>
+                <code class="nv">$day</code> <code class="o">=</code> <code class="s1">'Thursday'</code><code class="p">;</code>
+                <code class="k">break</code><code class="p">;</code>
+            <code class="k">case</code> <code class="s1">'Thursday'</code><code class="o">:</code>
+                <code class="nv">$day</code> <code class="o">=</code> <code class="s1">'Friday'</code><code class="p">;</code>
+                <code class="k">break</code><code class="p">;</code>
+            <code class="k">case</code> <code class="s1">'Friday'</code><code class="o">:</code>
+                <code class="nv">$day</code> <code class="o">=</code> <code class="s1">'Monday'</code><code class="p">;</code>
+                <code class="k">break</code><code class="p">;</code>
+        <code class="p">}</code>
+    <code class="p">}</code>
+<code class="p">}</code>
+
+<code class="nv">$weekdays</code> <code class="o">=</code> <code class="nx">weekday</code><code class="p">();</code>
+<code class="k">foreach</code> <code class="p">(</code><code class="nv">$weekdays</code> <code class="k">as</code> <code class="nv">$day</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">echo</code> <code class="nv">$day</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875158456096">
+<h2>Discussion</h2>
+
+<p>Generators are a memory-efficient way to handle large pieces of data in PHP. In the Solution example, a generator produces weekdays (Monday through Friday) in order as an infinite series. An infinite series will not fit in the memory available to PHP, but the generator construct allows you to build it up one piece at a time.</p>
+
+<p>Rather than instantiate a too-large array, you generate the first piece of data and return it via the <code>yield</code> keyword to whomever called the generator. This freezes the state of the generator and yields executional control back to the main application. Unlike a typical function that returns data once, a generator can provide data multiple times so long as it is still valid.</p>
+
+<p>In the Solution example, the <code>yield</code> appears inside an infinite <code>while</code> loop, so it will continue enumerating weekdays forever. If you wanted the generator to exit, you would do so using an empty <code>return</code> statement at the end (or merely break the loop and implicitly return).</p>
+<div data-type="tip"><h6>Tip</h6>
+<p>Returning data from a generator is different from a usual function call. You typically return data with the <code>yield</code> keyword and exit a generator with an empty <code>return</code> statement. However, if the generator <em>does</em> have a final return, you must access that data by calling <code>::getReturn()</code> on the generator object. This additional method call often sticks out as odd, so unless your generator has a reason to return data outside its typical <code>yield</code> operation, you should try to avoid it.</p>
+</div>
+
+<p>Since the generator can provide data forever, you can iterate over that data by using a standard <code>foreach</code> loop. Similarly, you could leverage a limited <code>for</code> loop to avoid an infinite series. The following code leverages such a limited loop and the Solution’s original generator:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$weekdays</code> <code class="o">=</code> <code class="nx">weekday</code><code class="p">();</code>
+<code class="k">for</code> <code class="p">(</code><code class="nv">$i</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code> <code class="nv">$i</code> <code class="o">&lt;</code> <code class="mi">14</code><code class="p">;</code> <code class="nv">$i</code><code class="o">++</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">echo</code> <code class="nv">$weekdays</code><code class="o">-&gt;</code><code class="na">current</code><code class="p">()</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+    <code class="nv">$weekdays</code><code class="o">-&gt;</code><code class="na">next</code><code class="p">();</code>
+<code class="p">}</code></pre>
+
+<p>Though the generator is defined as a function, internally PHP recognizes it as a generator and converts it to an instance of the <a href="https://oreil.ly/R_geQ"><code>Generator</code> class</a>. This class gives you access to the <code>::current()</code> and <code>::next()</code> methods and permits you to step over the generated data one piece at a time.</p>
+
+<p>The control flow within the application passes back and forth between the main program and the generator’s <code>yield</code> statement. The first time you access the generator, it runs internally up to <code>yield</code> and then returns control (and possibly data) to the main application. Subsequent calls to the generator start <em>after</em> the <code>yield</code> keyword. Loops are required <a data-type="indexterm" data-primary="iteration" data-secondary="very large arrays" data-startref="trtrysg" id="idm45875158217264"></a><a data-type="indexterm" data-primary="arrays" data-secondary="iteration" data-tertiary="very large" data-startref="rrysttvyg" id="idm45875158216016"></a><a data-type="indexterm" data-primary="generators, large array iteration" data-startref="gtrgrytr" id="idm45875158214528"></a>to force the generator back to the beginning in order to <code>yield</code> again.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875158213104">
+<h2>See Also</h2>
+
+<p>Overview on <a href="https://oreil.ly/cR4-V">generators</a>.</p>
+</div></section>
+</div></section>
+<div data-type="footnotes"><p data-type="footnote" id="idm45875163152816"><sup><a href="ch07.html#idm45875163152816-marker">1</a></sup> Class inheritance is discussed in <a data-type="xref" href="ch08.html#chapter_classes">Chapter 8</a>, and object interfaces are explicitly covered in <a data-type="xref" href="ch08.html#class_interfaces">Recipe 8.7</a>.</p><p data-type="footnote" id="idm45875162170640"><sup><a href="ch07.html#idm45875162170640-marker">2</a></sup> See <a data-type="xref" href="#iterating_over_large_arrays">Recipe 7.15</a> for examples of very large iterable data structures.</p><p data-type="footnote" id="idm45875161556000"><sup><a href="ch07.html#idm45875161556000-marker">3</a></sup> Take care not to confuse <code>array_splice()</code> with <code>array_slice()</code>. The two functions have vastly different uses, and the latter is covered in <a data-type="xref" href="#slicing_arrays">Recipe 7.7</a>.</p><p data-type="footnote" id="idm45875161553616"><sup><a href="ch07.html#idm45875161553616-marker">4</a></sup> The <code>array_splice()</code> function will also <em>return</em> the elements it extracted from the target array, in the event you need to use that data for some other operation. See <a data-type="xref" href="#slicing_arrays">Recipe 7.7</a> for further discussion of this behavior.</p><p data-type="footnote" id="idm45875159668272"><sup><a href="ch07.html#idm45875159668272-marker">5</a></sup> Review <a data-type="xref" href="ch02.html#comparison_operators_intro">“Comparison Operators”</a> for further details on comparison operators and their usage.</p><p data-type="footnote" id="idm45875159078400"><sup><a href="ch07.html#idm45875159078400-marker">6</a></sup> The spaceship operator is explained at length in <a data-type="xref" href="ch02.html#spaceship_operator">Recipe 2.4</a>, which also introduces an example use of <code>usort()</code>.</p></div></div></section></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1398 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xml:lang="en"
+      lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<title>PHP Cookbook</title>
+<link rel="stylesheet" type="text/css" href="override_v1.css"/>
+<link rel="stylesheet" type="text/css" href="epub.css"/>
+</head>
+<body>
+<div id="book-content">
+<div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 9. Security and Encryption"><div class="chapter" id="chapter_encryption">
+<h1><span class="label">Chapter 9. </span>Security and Encryption</h1>
+
+
+<p>PHP is a remarkably easy-to-use language because of the forgiving nature of the runtime. Even when you make a mistake, PHP will try to infer what you <em>meant</em> to do and, often, keep executing your program just fine. Unfortunately, this strength is also seen by some developers as a key weakness. By being forgiving, PHP allows for a sheer amount of “bad” code to continue functioning as if it were correct.</p>
+
+<p>Worse still, much of this “bad” code finds its way into tutorials, leading developers to copy and paste it into their own projects and perpetuate the cycle. This forgiving runtime and long history of PHP have led to the perception that PHP itself is insecure. In reality, it’s easy to use <em>any</em> programming language insecurely.</p>
+
+<p>Natively, PHP supports the ability to quickly and easily filter malicious input and sanitize user data. In a web context, this utility is critical to keeping user information safe from malicious inputs or attacks. PHP also exposes well-defined functions for both securely hashing and securely validating passwords during authentication.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>PHP’s default password hashing and validation functions both leverage secure hashing algorithms and constant-time, secure implementations. This protects your application against niche attacks like those using timing information in an attempt to extract information. Attempting to implement hashing (or validation) yourself would likely expose your application to risks for which PHP has already accounted.</p>
+</div>
+
+<p>The language also makes <a data-type="indexterm" data-primary="cryptography" id="idm45875152083360"></a>cryptography—for both encryption and signatures—simple for developers. Native, high-level interfaces protect you from the kinds of mistakes easily made elsewhere.<sup><a data-type="noteref" id="idm45875152082528-marker" href="ch09.html#idm45875152082528">1</a></sup> In fact, PHP is one of the <em>easiest</em> languages in which developers can leverage strong, modern cryptography without relying on a third-party extension or implementation!</p>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Legacy Encryption"><div class="sect2" id="idm45875152080144">
+<h2>Legacy Encryption</h2>
+
+<p>Earlier versions of PHP shipped with <a data-type="indexterm" data-primary="encryption" data-secondary="legacy encryption" id="idm45875152078496"></a><a data-type="indexterm" data-primary="legacy encryption" id="idm45875152077520"></a><a data-type="indexterm" data-primary="mcrypt" id="idm45875152076848"></a>an extension called <a href="https://oreil.ly/I7stH">mcrypt</a>. This extension exposed the lower-level mcrypt library, allowing developers to easily leverage a variety of block ciphers and hash algorithms. It was removed in PHP 7.2 in favor of the newer sodium extension, but it can still <a data-type="indexterm" data-primary="PECL (PHP Extension Community Library)" id="idm45875152075360"></a>be manually installed via the PHP Extension Community Library (PECL).<sup><a data-type="noteref" id="idm45875152074560-marker" href="ch09.html#idm45875152074560">2</a></sup></p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>While still available, the mcrypt library has not been updated in over a decade and should not be used in new projects. For any new encryption needs, use either PHP’s bindings against OpenSSL or the native sodium extension.</p>
+</div>
+
+<p>PHP also supports direct use of <a data-type="indexterm" data-primary="OpenSSL library" id="idm45875152071680"></a>the OpenSSL library <a href="https://oreil.ly/cYNB2">through an extension</a>. This is helpful when building a system that must interoperate with legacy cryptographic libraries. However, the extension does not expose the full-feature offering of OpenSSL to PHP; it would be useful to review the <a href="https://oreil.ly/Y8xEK">functions</a> and features exposed to identify whether PHP’s implementation would be useful to your application.</p>
+
+<p>In any case, the newer sodium interfaces support a wide range of cryptographic operations in PHP and should be preferred over either OpenSSL or mcrypt.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Sodium"><div class="sect2" id="idm45875152068816">
+<h2>Sodium</h2>
+
+<p>PHP formally added the <a href="https://oreil.ly/gH1Va">sodium</a> extension (also known as <em>Libsodium</em>) <a data-type="indexterm" data-primary="Libsodium" id="idm45875152065728"></a>as a <a data-type="indexterm" data-primary="sodium" id="sd_ium"></a>core extension in version 7.2, released in late 2017.<sup><a data-type="noteref" id="idm45875152063760-marker" href="ch09.html#idm45875152063760">3</a></sup> This library supports high-level abstractions for encryption, cryptographic signatures, password hashing, and more. It is itself an open source fork of an earlier project, the <a href="https://nacl.cr.yp.to">Networking and Cryptography Library (NaCl)</a> by Daniel J. Bernstein.</p>
+
+<p>Both projects add easy-to-use, high-speed tools for developers who need to work with encryption. The opinionated nature of their exposed interfaces aims to make cryptography <em>safe</em> and proactively avoid the pitfalls presented by other low-level tools. Shipping with well-defined opinionated interfaces helps developers make the right choices about algorithm implementations and defaults because those very choices (and potential mistakes) are entirely abstracted away and presented in safe, straightforward functions for everyday use.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>The only problem with sodium and its exposed <a data-type="indexterm" data-primary="sodium prefix" id="idm45875152059936"></a><a data-type="indexterm" data-primary="SODIUM_ prefix" id="idm45875152059232"></a>interfaces is a lack of brevity. Every function is prefixed with <code>sodium_</code>, and every constant with <code>SODIUM_</code>. The high level of descriptiveness in both function and constant names makes it easy to understand what is happening in code. However, this also leads to incredibly long and potentially distracting function names, like <code>sodium_​crypto_​sign_​keypair_​from_​secretkey_​and_​publickey()</code>.</p>
+</div>
+
+<p>While sodium is bundled as a core extension for PHP, it also exposes bindings for <a href="https://oreil.ly/L9JPp">several other languages</a> as well. It is fully interoperable with everything from .NET to Go to Java to Python.</p>
+
+<p>Unlike many other cryptographic <a data-type="indexterm" data-primary="authenticated encryption" id="idm45875152055568"></a><a data-type="indexterm" data-primary="encryption" data-secondary="authenticated" id="idm45875152054800"></a>libraries, sodium focuses primarily on <em>authenticated</em> encryption. Every piece of data is automatically paired with an authentication tag that the library can later use to validate the integrity of the underlying plaintext. If this tag is missing or invalid, the library throws an error to alert the developer that the associated plaintext is unreliable.</p>
+
+<p>This use of authentication <a data-type="indexterm" data-primary="GCM (Galois/Counter Mode)" id="idm45875152052880"></a><a data-type="indexterm" data-primary="AES (Advanced Encryption Standard)" id="idm45875152052112"></a>isn’t unique—the Galois/Counter Mode (GCM) of the Advanced Encryption Standard (AES) does effectively the same thing. However, other libraries often leave <a data-type="indexterm" data-primary="authentication" id="idm45875152051296"></a><a data-type="indexterm" data-primary="authentication" data-secondary="tags, validation" id="idm45875152050624"></a>authentication and validation of an authentication tag as an exercise for the developer. There are a number of tutorials, books, and Stack Overflow discussions that point to a proper implementation of AES but omit the validation of the GCM tag affixed to a message! The sodium extension abstracts both authentication and validation away and provides a clear, concise implementation, as illustrated in <a data-type="xref" href="#symmetric_crypto_intro">Example 9-1</a>.</p>
+<div id="symmetric_crypto_intro" data-type="example">
+<h5><span class="label">Example 9-1. </span>Authenticated encryption and decryption in sodium</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$nonce</code><code> </code><code class="o">=</code><code> </code><code class="nb">random_bytes</code><code class="p">(</code><code class="nx">SODIUM_CRYPTO_SECRETBOX_NONCEBYTES</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO1-1" href="#callout_security_and_encryption_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="nv">$key</code><code> </code><code class="o">=</code><code> </code><code class="nb">random_bytes</code><code class="p">(</code><code class="nx">SODIUM_CRYPTO_SECRETBOX_KEYBYTES</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO1-2" href="#callout_security_and_encryption_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$message</code><code> </code><code class="o">=</code><code> </code><code class="s1">'This is a super secret communication!'</code><code class="p">;</code><code>
+
+</code><code class="nv">$ciphertext</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretbox</code><code class="p">(</code><code class="nv">$message</code><code class="p">,</code><code> </code><code class="nv">$nonce</code><code class="p">,</code><code> </code><code class="nv">$key</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO1-3" href="#callout_security_and_encryption_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+
+</code><code class="nv">$output</code><code> </code><code class="o">=</code><code> </code><code class="nb">bin2hex</code><code class="p">(</code><code class="nv">$nonce</code><code> </code><code class="o">.</code><code> </code><code class="nv">$ciphertext</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO1-4" href="#callout_security_and_encryption_CO1-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+
+</code><code class="c1">// Decoding and decryption reverses the preceding steps
+</code><code class="nv">$bytes</code><code> </code><code class="o">=</code><code> </code><code class="nb">hex2bin</code><code class="p">(</code><code class="nv">$input</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO1-5" href="#callout_security_and_encryption_CO1-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a><code>
+</code><code class="nv">$nonce</code><code> </code><code class="o">=</code><code> </code><code class="nb">substr</code><code class="p">(</code><code class="nv">$bytes</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="nx">SODIUM_CRYPTO_SECRETBOX_NONCEBYTES</code><code class="p">);</code><code>
+</code><code class="nv">$ciphertext</code><code> </code><code class="o">=</code><code> </code><code class="nb">substr</code><code class="p">(</code><code class="nv">$bytes</code><code class="p">,</code><code> </code><code class="nx">SODIUM_CRYPTO_SECRETBOX_NONCEBYTES</code><code class="p">);</code><code>
+
+</code><code class="nv">$plaintext</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretbox_open</code><code class="p">(</code><code class="nv">$ciphertext</code><code class="p">,</code><code> </code><code class="nv">$nonce</code><code class="p">,</code><code> </code><code class="nv">$key</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO1-6" href="#callout_security_and_encryption_CO1-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a><code>
+
+</code><code class="k">if</code><code> </code><code class="p">(</code><code class="nv">$plaintext</code><code> </code><code class="o">===</code><code> </code><code class="k">false</code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_security_and_encryption_CO1-7" href="#callout_security_and_encryption_CO1-7"><img src="assets/7.png" alt="7" width="12" height="12"/></a><code>
+    </code><code class="k">throw</code><code> </code><code class="k">new</code><code> </code><code class="nx">Exception</code><code class="p">(</code><code class="s1">'Unable to decrypt!'</code><code class="p">);</code><code>
+</code><code class="p">}</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO1-1" href="#co_security_and_encryption_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Encryption algorithms are deterministic—the same input will always produce the same output. To ensure that encrypting the same data with the same key returns <em>different</em> outputs, you need to use a sufficiently random <em>nonce</em> (number used once) to initialize the algorithm each time.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO1-2" href="#co_security_and_encryption_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>For symmetric encryption, you leverage a <a data-type="indexterm" data-primary="encryption" data-secondary="symmetric" id="idm45875151929696"></a><a data-type="indexterm" data-primary="symmetric encryption" id="idm45875151928720"></a>single, shared key used to both encrypt and decrypt data. While the key in this example is random, you would likely store this encryption key somewhere outside the application for safekeeping.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO1-3" href="#co_security_and_encryption_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Encrypting is incredibly straightforward. Sodium chooses the algorithm and cipher mode for you—all you provide is the message, the random nonce, and the symmetric key. The underlying library does the rest!</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO1-4" href="#co_security_and_encryption_CO1-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>When exporting the encrypted value (either to send to another party or to store on disk), you need to keep track of both the random nonce and the subsequent ciphertext. The nonce itself is not secret, so storing it in plaintext alongside the encrypted value is safe (and encouraged). Converting the raw bytes from binary to hexadecimal is an effective way to prepare data for an API request or to store in a database field.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO1-5" href="#co_security_and_encryption_CO1-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p>Since the output of encryption is encoded in hexadecimal, you must first decode things back to raw bytes and then separate the nonce and ciphertext components before proceeding with decryption.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO1-6" href="#co_security_and_encryption_CO1-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></dt>
+<dd><p>To extract the plaintext value back out of an encrypted field, provide the ciphertext with its associated nonce and the original encryption key. The library pulls the plaintext bytes back out and returns them to you.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO1-7" href="#co_security_and_encryption_CO1-7"><img src="assets/7.png" alt="7" width="12" height="12"/></a></dt>
+<dd><p>Internally, the encryption library also adds (and validates) an authentication tag on every encrypted message. If the authentication tag fails to validate during decryption, sodium will return a literal <code>false</code> rather than the original plaintext. This is a sign to you that the message has been tampered with (either intentionally or accidentally) and should not be trusted.</p></dd>
+</dl></div>
+
+<p>Sodium also introduces an efficient means to <a data-type="indexterm" data-primary="public-key cryptography" id="idm45875151861888"></a><a data-type="indexterm" data-primary="cryptography" data-secondary="public-key" id="idm45875151861280"></a>handle public-key cryptography. In this paradigm, encryption uses one key (a known or publicly exposed key), while decryption uses an entirely different key known only to the recipient of the message. This two-part key system is ideal when exchanging data between two separate parties over a potentially untrusted medium (like exchanging banking information between a user and their bank over the public internet). In fact, the HTTPS connections used for most websites on the modern internet leverage public-key cryptography under the hood within the browser.</p>
+
+<p>In legacy systems like RSA, you need to keep track of relatively large cryptographic keys in order to exchange information safely. In 2022, the minimum recommended key size for RSA was 3,072 bits; in many situations, developers will default to 4,096 bits to retain the keys’ safety against future computing enhancements. Juggling keys of this size can be difficult in some situations. In addition, traditional RSA can only encrypt 256 bytes of data. If you want to encrypt a larger message, you are forced to do the following:</p>
+<ol>
+<li>
+<p>Create a 256-bit random key.</p>
+</li>
+<li>
+<p>Use that 256-bit key to <em>symmetrically</em> encrypt a message.</p>
+</li>
+<li>
+<p>Use RSA to encrypt the symmetric key.</p>
+</li>
+<li>
+<p>Share both the encrypted message and the encrypted key that protects it.</p>
+</li>
+
+</ol>
+
+<p>This is a workable solution, but the steps involved can easily become complicated and introduce unnecessary complexity for a development team building a project that <em>just happens</em> to include encryption. Thankfully, sodium fixes this almost entirely!</p>
+
+<p>Sodium’s public-key interfaces leverage <a data-type="indexterm" data-primary="ECC (elliptic-curve cryptography)" id="idm45875151854128"></a>elliptic-curve cryptography (ECC) rather than RSA. RSA uses prime numbers and exponentiation to create the known (public) and unknown (private) components of the two-key system used for encryption. ECC instead uses the geometry and particular forms of arithmetic against a well-defined elliptic curve. Whereas RSA’s public and private components are numbers used for exponentiation, ECC’s public and private components are literal <em>x</em> and <em>y</em> coordinates on a geometric curve.</p>
+
+<p>With ECC, a 256-bit key has <a href="https://oreil.ly/o2kne">strength equivalent to that of a 3,072-bit RSA key</a>. Further, sodium’s choice of cryptographic primitives means that its keys are just numbers (rather than <em>x</em> and <em>y</em> coordinates as with most other ECC implementations)—a 256-bit ECC key for sodium is simply a 32-byte integer!</p>
+
+<p>In addition, sodium entirely abstracts the “create a random symmetric key and separately encrypt it” workflow from developers, making asymmetric encryption just as simple in PHP as <a data-type="xref" href="#symmetric_crypto_intro">Example 9-1</a> demonstrated for symmetric encryption. <a data-type="xref" href="#asymmetric_crypto_intro">Example 9-2</a> illustrates exactly how this form of encryption works, along with the key exchange required between participants.</p>
+<div id="asymmetric_crypto_intro" data-type="example">
+<h5><span class="label">Example 9-2. </span>Asymmetric encryption and decryption in sodium</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$bobKeypair</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_keypair</code><code class="p">();</code><code> </code><a class="co" id="co_security_and_encryption_CO2-1" href="#callout_security_and_encryption_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nv">$bobPublic</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_publickey</code><code class="p">(</code><code class="nv">$bobKeypair</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO2-2" href="#callout_security_and_encryption_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="nv">$bobSecret</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_secretkey</code><code class="p">(</code><code class="nv">$bobKeypair</code><code class="p">);</code><code>
+
+</code><code class="nv">$nonce</code><code> </code><code class="o">=</code><code> </code><code class="nb">random_bytes</code><code class="p">(</code><code class="nx">SODIUM_CRYPTO_SECRETBOX_NONCEBYTES</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO2-3" href="#callout_security_and_encryption_CO2-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+
+</code><code class="nv">$message</code><code> </code><code class="o">=</code><code> </code><code class="s1">'Attack at dawn.'</code><code class="p">;</code><code>
+
+</code><code class="nv">$alicePublic</code><code> </code><code class="o">=</code><code> </code><code class="s1">'...'</code><code class="p">;</code><code> </code><a class="co" id="co_security_and_encryption_CO2-4" href="#callout_security_and_encryption_CO2-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+
+</code><code class="nv">$keyExchange</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_keypair_from_secretkey_and_publickey</code><code class="p">(</code><code> </code><a class="co" id="co_security_and_encryption_CO2-5" href="#callout_security_and_encryption_CO2-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a><code>
+    </code><code class="nv">$bobSecret</code><code class="p">,</code><code>
+    </code><code class="nv">$alicePublic</code><code>
+</code><code class="p">);</code><code>
+
+</code><code class="nv">$ciphertext</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box</code><code class="p">(</code><code class="nv">$message</code><code class="p">,</code><code> </code><code class="nv">$nonce</code><code class="p">,</code><code> </code><code class="nv">$keyExchange</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO2-6" href="#callout_security_and_encryption_CO2-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a><code>
+
+</code><code class="nv">$output</code><code> </code><code class="o">=</code><code> </code><code class="nb">bin2hex</code><code class="p">(</code><code class="nv">$nonce</code><code> </code><code class="o">.</code><code> </code><code class="nv">$ciphertext</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO2-7" href="#callout_security_and_encryption_CO2-7"><img src="assets/7.png" alt="7" width="12" height="12"/></a><code>
+
+</code><code class="c1">// Decrypting the message reverses the key exchange process
+</code><code class="nv">$keyExchange2</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_keypair_from_secretkey_and_publickey</code><code class="p">(</code><code> </code><a class="co" id="co_security_and_encryption_CO2-8" href="#callout_security_and_encryption_CO2-8"><img src="assets/8.png" alt="8" width="12" height="12"/></a><code>
+    </code><code class="nv">$aliceSecret</code><code class="p">,</code><code>
+    </code><code class="nv">$bobPublic</code><code>
+</code><code class="p">);</code><code>
+
+</code><code class="nv">$plaintext</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_open</code><code class="p">(</code><code class="nv">$ciphertext</code><code class="p">,</code><code> </code><code class="nv">$nonce</code><code class="p">,</code><code> </code><code class="nv">$keyExchange2</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO2-9" href="#callout_security_and_encryption_CO2-9"><img src="assets/9.png" alt="9" width="12" height="12"/></a><code>
+
+</code><code class="k">if</code><code> </code><code class="p">(</code><code class="nv">$plaintext</code><code> </code><code class="o">===</code><code> </code><code class="k">false</code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_security_and_encryption_CO2-10" href="#callout_security_and_encryption_CO2-10"><img src="assets/10.png" alt="10" width="12" height="12"/></a><code>
+    </code><code class="k">throw</code><code> </code><code class="k">new</code><code> </code><code class="nx">Exception</code><code class="p">(</code><code class="s1">'Unable to decrypt!'</code><code class="p">);</code><code>
+</code><code class="p">}</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO2-1" href="#co_security_and_encryption_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>In practice, both parties would generate their public/private key pairs locally and distribute their public keys directly. The <code>sodium_crypto_box_keypair()</code> function creates a random key pair each time so, conceivably, you would only need to do this once, so long as the secret key remains private.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO2-2" href="#co_security_and_encryption_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Both the public and secret components of the key pair can be extracted separately. This makes it easy to extract and communicate only the public key to a third party but also makes the secret key separately available for use in the later key-exchange operation.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO2-3" href="#co_security_and_encryption_CO2-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>As with symmetric encryption, you need a random nonce for each asymmetric encryption operation.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO2-4" href="#co_security_and_encryption_CO2-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Alice’s public key was potentially distributed via a direct communication channel or is otherwise already known.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO2-5" href="#co_security_and_encryption_CO2-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p>The key exchange here isn’t being used to agree upon a new key; it’s merely combining Bob’s secret key with Alice’s public key to prepare for Bob to encrypt a message that can only be read by Alice.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO2-6" href="#co_security_and_encryption_CO2-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></dt>
+<dd><p>Again, sodium chooses the algorithms and cipher modes involved. All you need to do is provide the data, random nonce, and keys, and the library does the rest.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO2-7" href="#co_security_and_encryption_CO2-7"><img src="assets/7.png" alt="7" width="12" height="12"/></a></dt>
+<dd><p>When sending the message, it’s useful to concatenate the nonce and ciphertext, then encode the raw bytes as something more readily sent over an HTTP channel. Hexadecimal is a common choice, but Base64 encoding is equally valid.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO2-8" href="#co_security_and_encryption_CO2-8"><img src="assets/8.png" alt="8" width="12" height="12"/></a></dt>
+<dd><p>On the receiving end, Alice needs to combine her own secret key with Bob’s public key in order to decrypt a message that could have only been encrypted by Bob.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO2-9" href="#co_security_and_encryption_CO2-9"><img src="assets/9.png" alt="9" width="12" height="12"/></a></dt>
+<dd><p>Extracting the plaintext is as straightforward <a data-type="indexterm" data-primary="sodium" data-startref="sd_ium" id="idm45875151638752"></a>as encryption was in step 6!</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO2-10" href="#co_security_and_encryption_CO2-10"><img src="assets/10.png" alt="10" width="12" height="12"/></a></dt>
+<dd><p>As with symmetric encryption, this operation is authenticated. If the encryption fails for any reason (e.g., Bob’s public key was invalid) or the authentication tag fails to validate, sodium returns a literal <code>false</code> to indicate the untrustworthiness of the message.</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Randomness"><div class="sect2" id="idm45875152068192">
+<h2>Randomness</h2>
+
+<p>In the world of encryption, leveraging a <a data-type="indexterm" data-primary="encryption" data-secondary="randomness" id="ecyptrmn"></a><a data-type="indexterm" data-primary="randomness, encryption" id="rdmnscyp"></a>proper source of randomness is critical to protecting any sort of data. Older tutorials heavily reference PHP’s <a href="https://oreil.ly/HeBSd"><code>mt_rand()</code></a> function, which is a pseudorandom number generator based on the Mersenne Twister algorithm.</p>
+
+<p>Unfortunately, while the output of this function appears random to a casual observer, it is not a cryptographically safe source of randomness. Instead, leverage PHP’s <a href="https://oreil.ly/_eYh6"><code>random_bytes()</code></a> and <a href="https://oreil.ly/YWQs8"><code>random_int()</code></a> functions for anything critical. Both of these functions leverage the cryptographically secure source of randomness built into your local operating system.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>A <em>cryptographically secure pseudorandom number generator</em> (CSPRNG) is one with an output that is indistinguishable <a data-type="indexterm" data-primary="CSPRNG (cryptographically secure pseudorandom number generator)" id="idm45875151626672"></a>from random noise. Algorithms like the Mersenne Twister are “random enough” to fool a human into thinking they’re safe. In reality, they’re easy for a computer to predict or even crack, given a series of previous outputs. If an attacker can reliably predict the output of your random number generator, they can conceivably decrypt anything you try to protect based on that generator!</p>
+</div>
+
+<p>The following recipes cover some of the most <a data-type="indexterm" data-primary="encryption" data-secondary="randomness" data-startref="ecyptrmn" id="idm45875151625328"></a><a data-type="indexterm" data-primary="randomness, encryption" data-startref="rdmnscyp" id="idm45875151624080"></a>important security- and encryption-related concepts in PHP. You’ll learn about input validation, proper password storage, and the use of PHP’s sodium interface.</p>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="9.1 Filtering, Validating, and Sanitizing User Input"><div class="sect1" id="recipe_sanitize_input">
+<h1>9.1 Filtering, Validating, and Sanitizing User Input</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875151621088">
+<h2>Problem</h2>
+
+<p>You want to validate a specific value <a data-type="indexterm" data-primary="user input" data-secondary="filtering" id="sptftg"></a><a data-type="indexterm" data-primary="user input" data-secondary="validating" id="srptvdt"></a><a data-type="indexterm" data-primary="user input" data-secondary="sanitizing" id="sptszg"></a><a data-type="indexterm" data-primary="filtering user input" id="fltgspt"></a><a data-type="indexterm" data-primary="validation" data-secondary="user input" id="vldtspt"></a><a data-type="indexterm" data-primary="sanitizing user input" id="szgsrp"></a>provided by an otherwise untrusted user prior to using it elsewhere in your application.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875151612480">
+<h2>Solution</h2>
+
+<p>Use the <code>filter_var()</code> function to <a data-type="indexterm" data-primary="filter_var() function" id="fltvrf"></a><a data-type="indexterm" data-primary="functions" data-secondary="filter_var()" id="fctnsftv"></a>validate that the value matches a specific expectation, as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$email</code> <code class="o">=</code> <code class="nv">$_GET</code><code class="p">[</code><code class="s1">'email'</code><code class="p">];</code>
+
+<code class="nv">$filtered</code> <code class="o">=</code> <code class="nb">filter_var</code><code class="p">(</code><code class="nv">$email</code><code class="p">,</code> <code class="nx">FILTER_VALIDATE_EMAIL</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875151602416">
+<h2>Discussion</h2>
+
+<p>PHP’s filtering extension empowers you to either validate that data matches a specific format or type or sanitize any data that fails that validation. The subtle difference between the two options—validation versus sanitization—is that sanitization removes invalid characters from a value, whereas validation explicitly returns <code>false</code> if the final, sanitized input is not of a valid type.</p>
+
+<p>In the Solution example, untrusted user input is explicitly validated as a valid email address. <a data-type="xref" href="#filter_validate_email">Example 9-3</a> demonstrates the behavior of this form of validation across multiple potential inputs.</p>
+<div id="filter_validate_email" data-type="example">
+<h5><span class="label">Example 9-3. </span>Testing email validation</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code><code> </code><code class="nf">validate</code><code class="p">(</code><code class="nx">string</code><code> </code><code class="nv">$data</code><code class="p">)</code><code class="o">:</code><code> </code><code class="nx">mixed</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">return</code><code> </code><code class="nb">filter_var</code><code class="p">(</code><code class="nv">$data</code><code class="p">,</code><code> </code><code class="nx">FILTER_VALIDATE_EMAIL</code><code class="p">);</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nx">validate</code><code class="p">(</code><code class="s1">'blah@example.com'</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO3-1" href="#callout_security_and_encryption_CO3-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nx">validate</code><code class="p">(</code><code class="s1">'1234'</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO3-2" href="#callout_security_and_encryption_CO3-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="nx">validate</code><code class="p">(</code><code class="s1">'1234@example.com&lt;test&gt;'</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO3-3" href="#callout_security_and_encryption_CO3-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO3-1" href="#co_security_and_encryption_CO3-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Returns <code>blah@example.com</code></p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO3-2" href="#co_security_and_encryption_CO3-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Returns <code>false</code></p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO3-3" href="#co_security_and_encryption_CO3-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Returns <code>false</code></p></dd>
+</dl></div>
+
+<p>The alternative to the preceding example is to <em>sanitize</em> user input such that invalid characters are stripped from the entry. The result of this sanitization is guaranteed to match a specific character set, but there is no guarantee that the result is a valid input. For example, <a data-type="xref" href="#filter_sanitize_email">Example 9-4</a> properly sanitizes every possible input string even though two results are invalid email addresses.</p>
+<div id="filter_sanitize_email" data-type="example">
+<h5><span class="label">Example 9-4. </span>Testing email sanitization</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code><code> </code><code class="nf">sanitize</code><code class="p">(</code><code class="nx">string</code><code> </code><code class="nv">$data</code><code class="p">)</code><code class="o">:</code><code> </code><code class="nx">mixed</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">return</code><code> </code><code class="nb">filter_var</code><code class="p">(</code><code class="nv">$data</code><code class="p">,</code><code> </code><code class="nx">FILTER_SANITIZE_EMAIL</code><code class="p">);</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nx">sanitize</code><code class="p">(</code><code class="s1">'blah@example.com'</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO4-1" href="#callout_security_and_encryption_CO4-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nx">sanitize</code><code class="p">(</code><code class="s1">'1234'</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO4-2" href="#callout_security_and_encryption_CO4-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="nx">sanitize</code><code class="p">(</code><code class="s1">'1234@example.com&lt;test&gt;'</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO4-3" href="#callout_security_and_encryption_CO4-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO4-1" href="#co_security_and_encryption_CO4-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Returns <code>blah@example.com</code></p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO4-2" href="#co_security_and_encryption_CO4-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Returns <code>1234</code></p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO4-3" href="#co_security_and_encryption_CO4-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Returns <code>1234@example.comtest</code></p></dd>
+</dl></div>
+
+<p>Whether you want to sanitize or validate your input data depends highly on what you intend to use the resulting data for. If you merely want to keep invalid characters out of a data storage engine, sanitization might be the right approach. If you want to ensure that data is both within the expected character set <em>and</em> a valid entry, data validation is a safer tool.</p>
+
+<p>Both approaches are supported equally well by <code>filter_var()</code> based on various types of filters in PHP. Specifically, PHP supports validation filters (enumerated in <a data-type="xref" href="#filter_type_validation">Table 9-1</a>), sanitization filters (enumerated in <a data-type="xref" href="#filter_type_sanitization">Table 9-2</a>), and filters falling under neither category (see <a data-type="xref" href="#filter_type_misc">Table 9-3</a>). The <code>filter_var()</code> function also supports an optional third parameter for flags that enable more granular control of the overall output of a filter operation.</p>
+<table id="filter_type_validation">
+<caption><span class="label">Table 9-1. </span>Validation filters supported by PHP</caption>
+<thead>
+<tr>
+<th>ID</th>
+<th>Options</th>
+<th>Flags</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>FILTER_​VALI⁠DATE_​BOOLEAN</code></p></td>
+<td><p><code>default</code></p></td>
+<td><p><code>FILTER_NULL_ON_FAILURE</code></p></td>
+<td><p>Returns <code>true</code> for truthy values (<code>1</code>, <code>true</code>, <code>on</code>, and <code>yes</code>), <code>false</code> otherwise</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​VALI⁠DATE_​DOMAIN</code></p></td>
+<td><p><code>default</code></p></td>
+<td><p><code>FILTER_FLAG_HOSTNAME</code>, <code>FIL⁠TER_NULL_ON_FAILURE</code></p></td>
+<td><p>Validates whether domain name lengths are valid against various RFCs</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​VALI⁠DATE_​EMAIL</code></p></td>
+<td><p><code>default</code></p></td>
+<td><p><code>FILTER_FLAG_EMAIL_UNICODE</code>, <code>FIL⁠TER_​NULL_ON_FAILURE</code></p></td>
+<td><p>Validates an email address against the syntax documented in <a href="https://oreil.ly/iHPaR">RFC 822</a></p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​VALI⁠DATE_​FLOAT</code></p></td>
+<td><p><code>default</code>, 
+<span class="keep-together"><code>decimal</code></span>, <code>min_range</code>, <code>max_range</code></p></td>
+<td><p><code>FIL⁠TER_​FLAG_ALLOW_THOUSANDS</code>, <code>FILTER_NULL_ON_FAILURE</code></p></td>
+<td><p>Validates value as a float, optionally from a specified range, and converts to that type on success</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​VALI⁠DATE_​INT</code></p></td>
+<td><p><code>default</code>, <code>max_range</code>, <code>min_range</code></p></td>
+<td><p><code>FILTER_FLAG_ALLOW_OCTAL</code>, <code>FIL⁠TER_FLAG_ALLOW_HEX</code>, <code>FIL⁠TER_NULL_ON_FAILURE</code></p></td>
+<td><p>Validates value as an integer, optionally from a specified range, and converts to that type on success</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​VALI⁠DATE_​IP</code></p></td>
+<td><p><code>default</code></p></td>
+<td><p><code>FILTER_FLAG_IPV4</code>, <code>FILTER_FLAG_IPV6</code>, <code>FIL⁠TER_FLAG_NO_PRIV_RANGE</code>, <code>FIL⁠TER_FLAG_NO_RES_RANGE</code>, <code>FIL⁠TER_NULL_ON_FAILURE</code></p></td>
+<td><p>Validates value as an IP address</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​VALI⁠DATE_​MAC</code></p></td>
+<td><p><code>default</code></p></td>
+<td><p><code>FILTER_NULL_ON_FAILURE</code></p></td>
+<td><p>Validates value as a MAC address</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​VALI⁠DATE_​REGEXP</code></p></td>
+<td><p><code>default</code>, <code>regexp</code></p></td>
+<td><p><code>FILTER_NULL_ON_FAILURE</code></p></td>
+<td><p>Validates value against a Perl-compatible regular expression</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​VALI⁠DATE_​URL</code></p></td>
+<td><p><code>default</code></p></td>
+<td><p><code>FILTER_FLAG_SCHEME_REQUIRED</code>, <code>FIL⁠TER_FLAG_HOST_REQUIRED</code>, <code>FIL⁠TER_FLAG_PATH_REQUIRED</code>, <code>FIL⁠TER_FLAG_QUERY_REQUIRED</code>, <code>FIL⁠TER_NULL_ON_FAILURE</code></p></td>
+<td><p>Validates as a URL according to <a href="https://oreil.ly/KiLd3">RFC 2396</a></p></td>
+</tr>
+</tbody>
+</table>
+<table id="filter_type_sanitization" class="pagebreak-before">
+<caption><span class="label">Table 9-2. </span>Sanitization filters supported by PHP</caption>
+<thead>
+<tr>
+<th>ID</th>
+<th>Flags</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>FILTER_​SANI⁠TIZE_EMAIL</code></p></td>
+<td></td>
+<td><p>Removes all characters except letters, digits, and + ! # $ % &amp; ' * + - = ? ^ _ ` { \ | } ~ @ . [ ]<br/></p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​SANI⁠TIZE_​ENCODED</code></p></td>
+<td><p><code>FILTER_FLAG_STRIP_LOW</code>, <code>FIL⁠TER_FLAG_STRIP_HIGH</code>, <code>FIL⁠TER_FLAG_STRIP_BACKTICK</code>, <code>FIL⁠TER_FLAG_ENCODE_HIGH</code>, <code>FIL⁠TER_FLAG_ENCODE_LOW</code></p></td>
+<td><p>URL-encodes string, optionally stripping or encoding special characters</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​SANI⁠TIZE_ADD_SLASHES</code></p></td>
+<td></td>
+<td><p>Applies <code>addslashes()</code></p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​SANI⁠TIZE_​NUM⁠BER_FLOAT</code></p></td>
+<td><p><code>FILTER_FLAG_ALLOW_FRACTION</code>, <code>FILTER_FLAG_ALLOW_THOUSANDS</code>, <code>FILTER_FLAG_ALLOW_SCIENTIFIC</code></p></td>
+<td><p>Removes all characters except digits, plus and minus signs, and optionally periods, commas, and uppercase and lowercase <em>E</em>s</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​SANI⁠TIZE_​NUM⁠BER_INT</code></p></td>
+<td></td>
+<td><p>Removes all characters except digits and plus and minus signs</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​SANI⁠TIZE_​SPE⁠CIAL_CHARS</code></p></td>
+<td><p><code>FILTER_FLAG_STRIP_LOW</code>, <code>FIL⁠TER_FLAG_STRIP_HIGH</code>, <code>FIL⁠TER_FLAG_STRIP_BACKTICK</code>, <code>FIL⁠TER_FLAG_ENCODE_HIGH</code></p></td>
+<td><p>HTML-encodes <code>' " &lt; &gt; &amp;</code> and characters with ASCII values less than 32, optionally strips or encodes other special characters</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​SANI⁠TIZE_FULL_​SPECIAL_CHARS</code></p></td>
+<td><p><code>FILTER_FLAG_NO_ENCODE_QUOTES</code></p></td>
+<td><p>Equivalent to calling <code>htmlspecialchars()</code> with <code>ENT_QUOTES</code> set</p></td>
+</tr>
+<tr>
+<td><p><code>FILTER_​SANI⁠TIZE_URL</code></p></td>
+<td></td>
+<td><p>Removes all characters except those valid in URLs</p></td>
+</tr>
+</tbody>
+</table>
+<table id="filter_type_misc">
+<caption><span class="label">Table 9-3. </span>Miscellaneous filters supported by PHP</caption>
+<thead>
+<tr>
+<th>ID</th>
+<th>Options</th>
+<th>Flags</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>FILTER_CALLBACK</code></p></td>
+<td><p><code>callable</code> function or method</p></td>
+<td><p>All flags are ignored.</p></td>
+<td><p>Calls a user-defined function to filter data</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>The validation filters also accept an array of options at runtime. This gives you the ability to code specific ranges (for numeric checks) and even fallback default values should a particular user input not pass validation.</p>
+
+<p>For example, say you are building a shopping cart that allows the user to specify the number of items they want to purchase. Clearly, this must be a value greater than zero and less than the total inventory you have available. An approach like that illustrated in <a data-type="xref" href="#filter_validate_default">Example 9-5</a> will force the value to be an integer between certain bounds or the value will fall back to 1. In this way, a user cannot accidentally order more items than you have, a negative number of items, a partial number of items, or some non-numeric amount.</p>
+<div id="filter_validate_default" data-type="example">
+<h5><span class="label">Example 9-5. </span>Validating an integer value with bounds and a default</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code><code> </code><code class="nf">sanitizeQuantity</code><code class="p">(</code><code class="nx">mixed</code><code> </code><code class="nv">$orderSize</code><code class="p">)</code><code class="o">:</code><code> </code><code class="nx">int</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">return</code><code> </code><code class="nb">filter_var</code><code class="p">(</code><code>
+        </code><code class="nv">$orderSize</code><code class="p">,</code><code>
+        </code><code class="nx">FILTER_VALIDATE_INT</code><code class="p">,</code><code>
+        </code><code class="p">[</code><code>
+            </code><code class="s1">'options'</code><code> </code><code class="o">=&gt;</code><code> </code><code class="p">[</code><code>
+                </code><code class="s1">'min_range'</code><code> </code><code class="o">=&gt;</code><code> </code><code class="mi">1</code><code class="p">,</code><code>
+                </code><code class="s1">'max_range'</code><code> </code><code class="o">=&gt;</code><code> </code><code class="mi">25</code><code class="p">,</code><code>
+                </code><code class="s1">'default'</code><code>   </code><code class="o">=&gt;</code><code> </code><code class="mi">1</code><code class="p">,</code><code>
+            </code><code class="p">]</code><code>
+        </code><code class="p">]</code><code>
+    </code><code class="p">);</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="k">echo</code><code> </code><code class="nx">sanitizeQuantity</code><code class="p">(</code><code class="mi">12</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_security_and_encryption_CO5-1" href="#callout_security_and_encryption_CO5-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="k">echo</code><code> </code><code class="nx">sanitizeQuantity</code><code class="p">(</code><code class="o">-</code><code class="mi">5</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_security_and_encryption_CO5-2" href="#callout_security_and_encryption_CO5-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="k">echo</code><code> </code><code class="nx">sanitizeQuantity</code><code class="p">(</code><code class="mi">100</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_security_and_encryption_CO5-3" href="#callout_security_and_encryption_CO5-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+</code><code class="k">echo</code><code> </code><code class="nx">sanitizeQuantity</code><code class="p">(</code><code class="s1">'banana'</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_security_and_encryption_CO5-4" href="#callout_security_and_encryption_CO5-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO5-1" href="#co_security_and_encryption_CO5-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The quantity checks out and returns <code>12</code>.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO5-2" href="#co_security_and_encryption_CO5-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Negative integers fail to validate, so this returns the default of <code>1</code>.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO5-3" href="#co_security_and_encryption_CO5-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>The input is above the max range, so this returns the default of <code>1</code>.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO5-4" href="#co_security_and_encryption_CO5-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Non-numeric inputs will always return <a data-type="indexterm" data-primary="user input" data-secondary="filtering" data-startref="sptftg" id="idm45875151175664"></a><a data-type="indexterm" data-primary="user input" data-secondary="validating" data-startref="srptvdt" id="idm45875151174480"></a><a data-type="indexterm" data-primary="user input" data-secondary="sanitizing" data-startref="sptszg" id="idm45875151173264"></a><a data-type="indexterm" data-primary="filtering user input" data-startref="fltgspt" id="idm45875151172048"></a><a data-type="indexterm" data-primary="validation" data-secondary="user input" data-startref="vldtspt" id="idm45875151171104"></a><a data-type="indexterm" data-primary="sanitizing user input" data-startref="szgsrp" id="idm45875151169888"></a><a data-type="indexterm" data-primary="filter_var() function" data-startref="fltvrf" id="idm45875151168944"></a><a data-type="indexterm" data-primary="functions" data-secondary="filter_var()" data-startref="fctnsftv" id="idm45875151168000"></a>the default of <code>1</code>.</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875151166112">
+<h2>See Also</h2>
+
+<p>Documentation on PHP’s <a href="https://oreil.ly/UX_Hs">data filtering extension</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="9.2 Keeping Sensitive Credentials Out of Application Code"><div class="sect1" id="idm45875151163856">
+<h1>9.2 Keeping Sensitive Credentials Out of Application Code</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875151162672">
+<h2>Problem</h2>
+
+<p>Your application needs to leverage <a data-type="indexterm" data-primary="credentials, sensitive" id="crdtlsstv"></a>a password or API key, and you want to avoid having that sensitive credential written in code or committed to version control.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875151159984">
+<h2>Solution</h2>
+
+<p>Store the credential in an environment variable exposed by the server running the application. Then reference that environment variable in code. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$db</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">PDO</code><code class="p">(</code><code class="nv">$database_connection</code><code class="p">,</code> <code class="nb">getenv</code><code class="p">(</code><code class="s1">'DB_USER'</code><code class="p">),</code> <code class="nb">getenv</code><code class="p">(</code><code class="s1">'DB_PASS'</code><code class="p">));</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875151154912">
+<h2>Discussion</h2>
+
+<p>A common mistake made in many developers’ early careers is to hardcode credentials for sensitive systems into constants or other places in application code. While this makes those credentials readily available to application logic, it also introduces severe risk to your application.</p>
+
+<p>You could accidentally use production credentials from a development account. An attacker might find credentials indexed in an accidentally public repository. An employee might abuse their knowledge of credentials beyond their intended use.</p>
+
+<p>In production, the best credentials are those unknown to and untouched by humans. It’s a good idea to keep those credentials only in the production environment and use <em>separate accounts</em> for development and testing. Leveraging environment variables within your code makes your application flexible enough to run anywhere, as it uses not hardcoded credentials but those bound to the environment itself.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>PHP’s built-in information <a data-type="indexterm" data-primary="phpinfo() function" id="idm45875151148256"></a><a data-type="indexterm" data-primary="functions" data-secondary="phpinfo()" id="idm45875151147520"></a>system, <code>phpinfo()</code>, will automatically enumerate all environment variables for debugging purposes. Once you begin leveraging the system environment to house sensitive credentials, take extra care to avoid using detailed diagnostic tools like <code>phpinfo()</code> in publicly accessible parts of your application!</p>
+</div>
+
+<p>The method of <em>populating</em> environment variables <a data-type="indexterm" data-primary="environment variables, populating" id="idm45875151144400"></a><a data-type="indexterm" data-primary="variables" data-secondary="environment, populating" id="idm45875151143696"></a>will differ from one system to another. In Apache-powered systems, you can set environment variables by using the <code>SetEnv</code> keyword <a data-type="indexterm" data-primary="SetEnv keyword" id="idm45875151142112"></a><a data-type="indexterm" data-primary="keywords" data-secondary="SetEnv" id="idm45875151141376"></a>within the <code>&lt;VirtualHost&gt;</code> directive as follows:</p>
+
+<pre data-type="programlisting" data-code-language="aconf"><code class="nt">&lt;VirtualHost</code><code class="w"> </code><code class="s">myhost</code><code class="nt">&gt;</code><code class="w"></code>
+...<code class="w"></code>
+<code class="nb">SetEnv</code><code class="w"> </code>DB_USER<code class="w"> </code><code class="s2">"database"</code><code class="w"></code>
+<code class="nb">SetEnv</code><code class="w"> </code>DB_PASS<code class="w"> </code><code class="s2">"password1234"</code><code class="w"></code>
+...<code class="w"></code>
+<code class="nt">&lt;/VirtualHost&gt;</code><code class="w"></code></pre>
+
+<p>In NGINX-powered systems, you can set environment variables for PHP only if it’s running as a FastCGI process. Similar to Apache’s <code>SetEnv</code>, this is done with a keyword within a <code>location</code> directive in the NGINX configuration as follows:</p>
+
+<pre data-type="programlisting" data-code-language="aconf"><code class="nb">location</code><code class="w"> </code>/<code class="w"> </code>{<code class="w"></code>
+<code class="w">    </code>...<code class="w"></code>
+<code class="w">    </code><code class="nb">fastcgi_param</code><code class="w"> </code>DB_USER<code class="w"> </code>database<code class="w"></code>
+<code class="w">    </code><code class="nb">fastcgi_param</code><code class="w"> </code>DB_PASS<code class="w"> </code>password1234<code class="w"></code>
+<code class="w">    </code>...<code class="w"></code>
+<code class="err">}</code><code class="w"></code></pre>
+
+<p>Separately, Docker-powered systems set environment variables in either their Compose files (for Docker Swarm) or the system deployment configuration (for Kubernetes). In all of these situations, you are defining a credential within the environment itself rather than within your application.</p>
+
+<p>An additional option is to use <a href="https://oreil.ly/a4TQp">PHP dotenv</a>.<sup><a data-type="noteref" id="idm45875151024592-marker" href="ch09.html#idm45875151024592">4</a></sup> This third-party package allows you to define your environment configuration in a flat file named <em>.env</em> and it automatically populates both environment variables and the <code>$_SERVER</code> superglobal. The biggest advantage of this approach is that dotfiles (files prefixed with a <code>.</code>) are easy to exclude from version control and are typically hidden on a server to begin with. You can use a <em>.env</em> locally to define development credentials and keep a separate <em>.env</em> on the server to define production credentials.</p>
+
+<p>In both cases, you never have to directly manage an Apache or NGINX configuration file at all!</p>
+
+<p>A <em>.env</em> file defining the database credentials used in the Solution example would look something like the following:</p>
+
+<pre data-type="programlisting" data-code-language="aconf"><code class="nb">DB_USER</code>=database<code class="w"></code>
+<code class="nb">DB_PASS</code>=password1234<code class="w"></code></pre>
+
+<p>In your application code, you would then load the library dependency and invoke its loader as follows:</p>
+
+<pre data-type="programlisting" data-code-language="aconf"><code class="err">$</code><code class="nb">dotenv</code><code class="w"> </code>=<code class="w"> </code>Dotenv\Dotenv::createImmutable(__DIR__);<code class="w"></code>
+<code class="err">$</code><code class="nb">dotenv</code>-&gt;load();<code class="w"></code></pre>
+
+<p>Once the library is loaded, you can leverage <code>getenv()</code> to reference the environment variables wherever you <a data-type="indexterm" data-primary="credentials, sensitive" data-startref="crdtlsstv" id="idm45875151003520"></a>need access.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875151154320">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/t6ncZ"><code>getenv()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="9.3 Hashing and Validating Passwords"><div class="sect1" id="idm45875151000112">
+<h1>9.3 Hashing and Validating Passwords</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875150964112">
+<h2>Problem</h2>
+
+<p>You want to authenticate users <a data-type="indexterm" data-primary="passwords" data-secondary="hashing" id="psswsh"></a><a data-type="indexterm" data-primary="passwords" data-secondary="validating" id="psswvd"></a><a data-type="indexterm" data-primary="hashing  passwords" id="hshng"></a><a data-type="indexterm" data-primary="validation" data-secondary="passwords" id="vldtnwwds"></a>leveraging passwords only they know and prevent your application from storing sensitive data.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875150957664">
+<h2>Solution</h2>
+
+<p>Use <code>password_hash()</code> to store secure <a data-type="indexterm" data-primary="password_hash() function" id="pswrdfc"></a><a data-type="indexterm" data-primary="functions" data-secondary="password_hash()" id="ftnspswhs"></a>hashes of passwords:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$hash</code> <code class="o">=</code> <code class="nb">password_hash</code><code class="p">(</code><code class="nv">$password</code><code class="p">,</code> <code class="nx">PASSWORD_DEFAULT</code><code class="p">);</code></pre>
+
+<p>Use <code>password_verify()</code> to verify that a <a data-type="indexterm" data-primary="password_verify() function" id="idm45875150890128"></a><a data-type="indexterm" data-primary="functions" data-secondary="password_verify()" id="idm45875150889520"></a>plaintext password produces a given, stored hash as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">if</code> <code class="p">(</code><code class="nb">password_verify</code><code class="p">(</code><code class="nv">$password</code><code class="p">,</code> <code class="nv">$hash</code><code class="p">))</code> <code class="p">{</code>
+    <code class="c1">// Create a valid session for the user ...</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875150957360">
+<h2>Discussion</h2>
+
+<p>Storing passwords in <a data-type="indexterm" data-primary="passwords" data-secondary="plaintext" id="idm45875150902160"></a>plaintext is always a bad idea. If your application or data store is ever breached, those plaintext passwords can and will be abused by attackers. To keep your users safe and protect them from potential abuse in the case of a breach, you must always hash those passwords when storing them in your database.</p>
+
+<p>Conveniently, PHP ships with a native function to do just that—<code>password_hash()</code>. This function takes a plaintext password and automatically generates a deterministic but seemingly random hash from that data. Rather than storing the plaintext password, you store this hash. Later, when the user chooses to log into your application, you can compare the plaintext password against the stored hash (using a safe comparison function like <code>hash_equals()</code>) and assert whether they match.</p>
+
+<p>PHP generally supports three hashing algorithms, enumerated in <a data-type="xref" href="#password_hashing_algorithms">Table 9-4</a>. At the time of this writing, the default algorithm is bcrypt (which is based on the Blowfish cipher), but you can choose a particular algorithm at runtime by passing a second parameter into <code>password_hash()</code>.</p>
+<table id="password_hashing_algorithms">
+<caption><span class="label">Table 9-4. </span>Password hashing algorithms</caption>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>PASSWORD_DEFAULT</code></p></td>
+<td><p>Use the default bcrypt algorithm. The default algorithm could change in a future release.</p></td>
+</tr>
+<tr>
+<td><p><code>PASSWORD_BCRYPT</code></p></td>
+<td><p>Use the <code>CRYPT_BLOWFISH</code> algorithm.</p></td>
+</tr>
+<tr>
+<td><p><code>PASSWORD_ARGON2I</code></p></td>
+<td><p>Use the Argon2i hashing algorithm. (Only available if PHP has been compiled with Argon2 support.)</p></td>
+</tr>
+<tr>
+<td><p><code>PASSWORD_ARGON2ID</code></p></td>
+<td><p>Use the Argon2id hashing algorithm. (Only available if PHP has been compiled with Argon2 support.)</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>Each hashing algorithm supports a set of options that can determine the difficulty of calculating a hash on the server. The default (or bcrypt) algorithm supports an integer “cost” factor—the higher the number, the more computationally expensive the operation will be. The Argon2 family of algorithms supports two cost factors—one for the memory cost and one for the amount of time it will take to compute a hash.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>Increasing the cost for computing a hash is a means of protecting the application from brute-force authentication attacks. If it takes 1 second to calculate a hash, it will take <em>at least</em> 1 second for a legitimate party to authenticate (this is trivial). However, an attacker can attempt to authenticate <em>at most</em> once per second. This renders brute-force attacks relatively costly both in terms of time and computing capacity.</p>
+</div>
+
+<p>When you first build your application, it is a good idea to test the server environment that will run it and set your cost factors appropriately. Identifying cost factors requires testing the performance of <code>password_hash()</code> on the live environment, as demonstrated in <a data-type="xref" href="#password_hash_cost_test">Example 9-6</a>. This script will test the hashing performance of the system with increasingly large cost factors and identify a cost factor that achieves the desired time target.</p>
+<div id="password_hash_cost_test" data-type="example">
+<h5><span class="label">Example 9-6. </span>Testing the cost factors for <code>password_hash()</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$timeTarget</code> <code class="o">=</code> <code class="mf">0.5</code><code class="p">;</code> <code class="c1">// 500 milliseconds</code>
+
+<code class="nv">$cost</code> <code class="o">=</code> <code class="mi">8</code><code class="p">;</code>
+<code class="k">do</code> <code class="p">{</code>
+    <code class="nv">$cost</code><code class="o">++</code><code class="p">;</code>
+    <code class="nv">$start</code> <code class="o">=</code> <code class="nb">microtime</code><code class="p">(</code><code class="k">true</code><code class="p">);</code>
+    <code class="nb">password_hash</code><code class="p">(</code><code class="s1">'test'</code><code class="p">,</code> <code class="nx">PASSWORD_BCRYPT</code><code class="p">,</code> <code class="p">[</code><code class="s1">'cost'</code> <code class="o">=&gt;</code> <code class="nv">$cost</code><code class="p">]);</code>
+    <code class="nv">$end</code> <code class="o">=</code> <code class="nb">microtime</code><code class="p">(</code><code class="k">true</code><code class="p">);</code>
+<code class="p">}</code> <code class="k">while</code><code class="p">((</code><code class="nv">$end</code> <code class="o">-</code> <code class="nv">$start</code><code class="p">)</code> <code class="o">&lt;</code> <code class="nv">$timeTarget</code><code class="p">);</code>
+
+<code class="k">echo</code> <code class="s2">"Appropriate cost factor: </code><code class="si">{</code><code class="nv">$cost</code><code class="si">}</code><code class="s2">"</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code></pre></div>
+
+<p>The output of <code>password_hash()</code> is intended to be fully forward compatible. Rather than merely generate a hash, the function will also internally generate a salt to make the hash unique. Then the function returns a string representing the following:</p>
+
+<ul>
+<li>
+<p>The algorithm used</p>
+</li>
+<li>
+<p>The cost factors or options</p>
+</li>
+<li>
+<p>The generated random salt</p>
+</li>
+<li>
+<p>The resulting hash</p>
+</li>
+</ul>
+
+<p><a data-type="xref" href="#password_hash_output">Figure 9-1</a> shows an example of this string output.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>A unique, random salt is generated internally by PHP every time you call <code>password_hash()</code>. This has the effect of producing distinct hashes for identical plaintext passwords. In this way, hashed values can’t be used to identify which accounts are using the same 
+<span class="keep-together">passwords</span>.</p>
+</div>
+
+<figure><div id="password_hash_output" class="figure">
+<img src="assets/phpc_0901.png" alt="Illustration of the output of +password_hash()+" width="600" height="92"/>
+<h6><span class="label">Figure 9-1. </span>Example output of <code>password_hash()</code></h6>
+</div></figure>
+
+<p>The advantage of encoding all of this information into the output of <code>pass⁠word_​hash()</code> is that you don’t need to maintain this data in the application. At a future date, you might change the hashing algorithm or modify the cost factors used for hashing. By encoding the settings originally used to generate a hash, PHP can reliably re-create a hash for comparison.</p>
+
+<p>When a user logs in, they provide only their plaintext password. The application needs to recompute a hash of this password and compare the newly computed value with the one stored in the database. Given that the information you need to calculate a hash is stored alongside the hash, this becomes relatively straightforward.</p>
+
+<p>Rather than implement the comparison yourself, though, you can leverage PHP’s <code>password_verify()</code> function that does <a data-type="indexterm" data-primary="passwords" data-secondary="hashing" data-startref="psswsh" id="idm45875150795200"></a><a data-type="indexterm" data-primary="passwords" data-secondary="validating" data-startref="psswvd" id="idm45875150793920"></a><a data-type="indexterm" data-primary="hashing passwords" data-startref="hshng" id="idm45875150792704"></a><a data-type="indexterm" data-primary="validation" data-secondary="passwords" data-startref="vldtnwwds" id="idm45875150791760"></a><a data-type="indexterm" data-primary="password_hash() function" data-startref="pswrdfc" id="idm45875150790544"></a><a data-type="indexterm" data-primary="functions" data-secondary="password_hash()" data-startref="ftnspswhs" id="idm45875150789632"></a>all this in a safe and secure way.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875150788032">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/gZwBC"><code>password_hash()</code></a> and <a href="https://oreil.ly/gf3O9"><code>password_​verify()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="9.4 Encrypting and Decrypting Data"><div class="sect1" id="idm45875150784752">
+<h1>9.4 Encrypting and Decrypting Data</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875150783504">
+<h2>Problem</h2>
+
+<p>You want to protect sensitive data <a data-type="indexterm" data-primary="encryption" id="ecyptn"></a><a data-type="indexterm" data-primary="decryption" id="dcyptn"></a>leveraging encryption and reliably decrypt that information at a later time.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875150779872">
+<h2>Solution</h2>
+
+<p>Use sodium’s <code>sodium_crypto_secretbox()</code> to encrypt <a data-type="indexterm" data-primary="sodium_crypto_secretbox()" id="idm45875150777840"></a>the data with a known symmetric (aka shared) key, as shown in <a data-type="xref" href="#sodium_symmetric_solution_example">Example 9-7</a>.</p>
+<div id="sodium_symmetric_solution_example" data-type="example">
+<h5><span class="label">Example 9-7. </span>Sodium symmetric encryption example</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$key</code><code> </code><code class="o">=</code><code> </code><code class="nb">hex2bin</code><code class="p">(</code><code class="s1">'faae9fa60060e32b3bbe5861c2ff290f'</code><code> </code><code class="o">.</code><code>
+               </code><code class="s1">'2cd4008409aeb7c59cb3bad8a8e89512'</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO6-1" href="#callout_security_and_encryption_CO6-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="nv">$message</code><code> </code><code class="o">=</code><code> </code><code class="s1">'Look to my coming on the first light of '</code><code> </code><code class="o">.</code><code>
+           </code><code class="s1">'the fifth day, at dawn look to the east.'</code><code class="p">;</code><code>
+
+</code><code class="nv">$nonce</code><code> </code><code class="o">=</code><code> </code><code class="nb">random_bytes</code><code class="p">(</code><code class="nx">SODIUM_CRYPTO_SECRETBOX_NONCEBYTES</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO6-2" href="#callout_security_and_encryption_CO6-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$ciphertext</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretbox</code><code class="p">(</code><code class="nv">$message</code><code class="p">,</code><code> </code><code class="nv">$nonce</code><code class="p">,</code><code> </code><code class="nv">$key</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO6-3" href="#callout_security_and_encryption_CO6-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+</code><code class="nv">$output</code><code> </code><code class="o">=</code><code> </code><code class="nb">bin2hex</code><code class="p">(</code><code class="nv">$nonce</code><code> </code><code class="o">.</code><code> </code><code class="nv">$ciphertext</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO6-4" href="#callout_security_and_encryption_CO6-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO6-1" href="#co_security_and_encryption_CO6-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The key must be a random value of length <code>SODIUM_CRYPTO_SECRETBOX_KEYBYTES</code> (32 bytes). If you are creating a new, random string, you can leverage <code>sodium_crypto_secretbox_keygen()</code> to create one. Just be sure to store it somewhere so you can decrypt the message later.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO6-2" href="#co_security_and_encryption_CO6-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Every encryption operation should use a unique, random nonce. PHP’s <code>ran⁠dom_​bytes()</code> can reliably create one of the appropriate length by using built-in 
+<span class="keep-together">constants</span>.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO6-3" href="#co_security_and_encryption_CO6-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>The encryption operation leverages both the random nonce and the fixed secret key to protect the message and returns raw bytes as a result.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO6-4" href="#co_security_and_encryption_CO6-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Often you want to exchange encrypted information over a network protocol, so encoding the raw bytes as hexadecimal can make it more portable. You’ll also need the nonce to decrypt the exchanged data, so you store it alongside the ciphertext.</p></dd>
+</dl></div>
+
+<p>When you need to decrypt <a data-type="indexterm" data-primary="sodium_crypto_secretbox_open()" id="idm45875150674512"></a>the data, use <code>sodium_crypto_secretbox_open()</code> to both extract and validate the data, as shown in <a data-type="xref" href="#sodium_symmetric_decryption">Example 9-8</a>.</p>
+<div id="sodium_symmetric_decryption" data-type="example">
+<h5><span class="label">Example 9-8. </span>Sodium symmetric decryption</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$key</code><code> </code><code class="o">=</code><code> </code><code class="nb">hex2bin</code><code class="p">(</code><code class="s1">'faae9fa60060e32b3bbe5861c2ff290f'</code><code> </code><code class="o">.</code><code>
+               </code><code class="s1">'2cd4008409aeb7c59cb3bad8a8e89512'</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO7-1" href="#callout_security_and_encryption_CO7-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="nv">$encrypted</code><code> </code><code class="o">=</code><code> </code><code class="s1">'8b9225c935592a5e95a9204add5d09db'</code><code> </code><code class="o">.</code><code>
+             </code><code class="s1">'b7b6473a0aa59c107b65f7d5961b720e'</code><code> </code><code class="o">.</code><code>
+             </code><code class="s1">'7fc285bd94de531e05497143aee854e2'</code><code> </code><code class="o">.</code><code>
+             </code><code class="s1">'918ba941140b70c324efb27c86313806'</code><code> </code><code class="o">.</code><code>
+             </code><code class="s1">'e04f8e79da037df9e7cb24aa4bc0550c'</code><code> </code><code class="o">.</code><code>
+             </code><code class="s1">'d7b2723cbb560088f972a408ffc973a6'</code><code> </code><code class="o">.</code><code>
+             </code><code class="s1">'2be668e1ba1313e555ef4a95f0c1abd6'</code><code> </code><code class="o">.</code><code>
+             </code><code class="s1">'f3d73921fafdd372'</code><code class="p">;</code><code> </code><a class="co" id="co_security_and_encryption_CO7-2" href="#callout_security_and_encryption_CO7-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="nv">$raw</code><code> </code><code class="o">=</code><code> </code><code class="nb">hex2bin</code><code class="p">(</code><code class="nv">$encrypted</code><code class="p">);</code><code>
+
+</code><code class="nv">$nonce</code><code> </code><code class="o">=</code><code> </code><code class="nb">substr</code><code class="p">(</code><code class="nv">$raw</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="nx">SODIUM_CRYPTO_SECRETBOX_NONCEBYTES</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO7-3" href="#callout_security_and_encryption_CO7-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+</code><code class="nv">$ciphertext</code><code> </code><code class="o">=</code><code> </code><code class="nb">substr</code><code class="p">(</code><code class="nv">$raw</code><code class="p">,</code><code> </code><code class="nx">SODIUM_CRYPTO_SECRETBOX_NONCEBYTES</code><code class="p">);</code><code>
+
+</code><code class="nv">$plaintext</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretbox_open</code><code class="p">(</code><code class="nv">$ciphertext</code><code class="p">,</code><code> </code><code class="nv">$nonce</code><code class="p">,</code><code> </code><code class="nv">$key</code><code class="p">);</code><code>
+</code><code class="k">if</code><code> </code><code class="p">(</code><code class="nv">$plaintext</code><code> </code><code class="o">===</code><code> </code><code class="k">false</code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_security_and_encryption_CO7-4" href="#callout_security_and_encryption_CO7-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+    </code><code class="k">echo</code><code> </code><code class="s1">'Error decrypting message!'</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code>
+</code><code class="p">}</code><code> </code><code class="k">else</code><code> </code><code class="p">{</code><code>
+    </code><code class="k">echo</code><code> </code><code class="nv">$plaintext</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code>
+</code><code class="p">}</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO7-1" href="#co_security_and_encryption_CO7-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Use the same key for decryption that you used for encryption.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO7-2" href="#co_security_and_encryption_CO7-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>The resulting ciphertext from <a data-type="xref" href="#sodium_symmetric_solution_example">Example 9-7</a> is reused here and is extracted from a hexadecimal-encoded string.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO7-3" href="#co_security_and_encryption_CO7-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Because you concatenated the ciphertext and nonce, you must split the two components apart for use with <code>sodium_crypto_secretbox_open()</code>.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO7-4" href="#co_security_and_encryption_CO7-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>This entire encryption/decryption operation is authenticated. If anything changed in the underlying data, the authentication step will fail and the function will return a literal <code>false</code> to flag the manipulation. If it returns anything else, the decryption succeeded and you can trust the output!</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875150454832">
+<h2>Discussion</h2>
+
+<p>The <code>secretbox</code> family of functions exposed by sodium implements authenticated encryption/decryption by using a fixed symmetric key. Every time you encrypt a message, you should do so with a random nonce to fully protect the privacy of the encrypted message.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>The nonce used in encryption itself isn’t a secret or sensitive value. However, you should take care never to reuse a nonce with the same symmetric encryption key. Nonces are “numbers used once” and are intended to add randomness to the encryption algorithm such that the same value encrypted twice with the same key can produce different ciphertexts. Reusing a nonce with a specific key compromises the security of the data you’re aiming to protect.</p>
+</div>
+
+<p>The symmetry here is that the same key is used both to encrypt and decrypt a message. This is most valuable when the same system is responsible for both operations—for example, when a PHP application needs to encrypt data to be stored in a database and then decrypt that data when reading it back out.</p>
+
+<p>The encryption leverages the <a href="https://oreil.ly/DSUAQ">XSalsa20 stream cipher</a> to protect data. This cipher uses a 32-byte (256-bit) key and a 24-byte (192-bit) nonce. None of this information is necessary for developers to keep track of, though, as it’s safely abstracted behind the <code>secretbox</code> functions and constants. Rather than keep track of key sizes and encryption modes, you merely need to create or <em>open</em> a box with the matched key and nonce for the message.</p>
+
+<p>Another advantage of this approach is authentication. Every encryption operation will also generate a message authentication tag leveraging the <a href="https://oreil.ly/tSgmq">Poly1305 algorithm</a>. Upon decryption, sodium will validate that the authentication tag matches the protected data. If there is not a match, it’s possible that the message was either accidentally corrupted or intentionally manipulated. In either case, the ciphertext is unreliable (as would be any decrypted plaintext), and the open function will return a Boolean <code>false</code>.</p>
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3" data-pdf-bookmark="Asymmetric encryption"><div class="sect3" id="idm45875150447584">
+<h3>Asymmetric encryption</h3>
+
+<p>Symmetric encryption is easiest <a data-type="indexterm" data-primary="encryption" data-secondary="asymmetric" id="cypsymm"></a><a data-type="indexterm" data-primary="asymmetric encryption" id="symmtcypt"></a>when the same party is both encrypting and decrypting data. In many modern tech environments, these parties might be independent and communicating over less-than-trustworthy media. This necessitates a different form of encryption, as the two parties cannot directly share a symmetric encryption key. Instead, each can create pairs of public and private keys and leverage key exchange to agree upon an encryption key.</p>
+
+<p>Key exchange is a complicated topic. Luckily, sodium exposes simple interfaces for performing the operation in PHP. In the examples that follow, two parties will do the following:</p>
+<ol>
+<li>
+<p>Create public/private key pairs</p>
+</li>
+<li>
+<p>Exchange their public keys directly</p>
+</li>
+<li>
+<p>Use these asymmetric keys to agree upon a symmetric key</p>
+</li>
+<li>
+<p>Exchange encrypted data</p>
+</li>
+
+</ol>
+
+<p><a data-type="xref" href="#asymmetric_key_creation">Example 9-9</a> illustrates how each party will create their own public/private key pairs. Though the code example is in a single block, each party would create their keys independently and only ever exchange their public keys with one another.</p>
+<div id="asymmetric_key_creation" data-type="example">
+<h5><span class="label">Example 9-9. </span>Asymmetric key creation</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$aliceKeypair</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_keypair</code><code class="p">();</code><code>
+</code><code class="nv">$alicePublic</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_publickey</code><code class="p">(</code><code class="nv">$aliceKeypair</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO8-1" href="#callout_security_and_encryption_CO8-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nv">$alicePrivate</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_secretkey</code><code class="p">(</code><code class="nv">$aliceKeypair</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO8-2" href="#callout_security_and_encryption_CO8-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$bethKeypair</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_keypair</code><code class="p">();</code><code> </code><a class="co" id="co_security_and_encryption_CO8-3" href="#callout_security_and_encryption_CO8-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+</code><code class="nv">$bethPublic</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_publickey</code><code class="p">(</code><code class="nv">$bethKeypair</code><code class="p">);</code><code>
+</code><code class="nv">$bethPrivate</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_secretkey</code><code class="p">(</code><code class="nv">$bethKeypair</code><code class="p">);</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO8-1" href="#co_security_and_encryption_CO8-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Alice creates a key pair and extracts her public and private key from it separately. She shares her public key with Beth.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO8-2" href="#co_security_and_encryption_CO8-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Alice keeps her private key secret. This is the key she will use to encrypt data <em>for</em> Beth and decrypt data <em>from</em> her. Similarly, Alice would use her private key to encrypt data for anyone else who has shared their public key with her.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO8-3" href="#co_security_and_encryption_CO8-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Beth independently does the same thing as Alice and shares her own public key.</p></dd>
+</dl></div>
+
+<p>Once Alice and Beth have shared their public keys, they are free to communicate privately. The <code>cryptobox</code> family of functions in sodium leverages these asymmetric keys to compute a symmetric key that can be used for confidential communication. This symmetric key is not exposed directly to either party, but allows the parties to easily communicate with one another.</p>
+
+<p>Note that anything Alice encrypts for Beth can <em>only</em> be decrypted by Beth. Even Alice cannot decrypt these messages, as she does not have Beth’s private key! <a data-type="xref" href="#asymmetric_encryption_simple_message">Example 9-10</a> illustrates how Alice can encrypt a simple message leveraging both her own private key and Beth’s advertised public key.</p>
+<div id="asymmetric_encryption_simple_message" data-type="example">
+<h5><span class="label">Example 9-10. </span>Asymmetric encryption</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$message</code><code> </code><code class="o">=</code><code> </code><code class="s1">'Follow the white rabbit'</code><code class="p">;</code><code>
+</code><code class="nv">$nonce</code><code> </code><code class="o">=</code><code> </code><code class="nb">random_bytes</code><code class="p">(</code><code class="nx">SODIUM_CRYPTO_BOX_NONCEBYTES</code><code class="p">);</code><code>
+</code><code class="nv">$encryptionKey</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_keypair_from_secretkey_and_publickey</code><code class="p">(</code><code>
+    </code><code class="nv">$alicePrivate</code><code class="p">,</code><code>
+    </code><code class="nv">$bethPublic</code><code>
+</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO9-1" href="#callout_security_and_encryption_CO9-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="nv">$ciphertext</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box</code><code class="p">(</code><code class="nv">$message</code><code class="p">,</code><code> </code><code class="nv">$nonce</code><code class="p">,</code><code> </code><code class="nv">$encryptionKey</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO9-2" href="#callout_security_and_encryption_CO9-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$toBeth</code><code> </code><code class="o">=</code><code> </code><code class="nb">bin2hex</code><code class="p">(</code><code class="nv">$nonce</code><code> </code><code class="o">.</code><code> </code><code class="nv">$ciphertext</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO9-3" href="#callout_security_and_encryption_CO9-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO9-1" href="#co_security_and_encryption_CO9-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The encryption key used here is actually a key pair composed of information from both Alice’s and Beth’s individual key pairs.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO9-2" href="#co_security_and_encryption_CO9-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>As with symmetric encryption, you leverage a nonce in order to introduce randomness into the encrypted output.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO9-3" href="#co_security_and_encryption_CO9-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>You concatenate the random nonce and the encrypted ciphertext so Alice can send both to Beth at the same time.</p></dd>
+</dl></div>
+
+<p>The key pairs involved are points on an elliptic curve, specifically Curve25519. The initial operation <a data-type="indexterm" data-primary="key exchange" id="idm45875150292784"></a>sodium uses for asymmetric encryption is a <em>key exchange</em> between two of these points to define a fixed but secret number. This operation uses the <a href="https://oreil.ly/OAqeF">X25519 key exchange algorithm</a> and produces a number based on Alice’s private key and Beth’s public key.</p>
+
+<p>That number is then used as a key with the XSalsa20 stream cipher (the same one used for symmetric encryption) to encrypt the message. As with symmetric encryption discussed for the <code>secret box</code> family of functions, a <code>cryptobox</code> will leverage a Poly1305 message authentication tag to protect the message against tampering or 
+<span class="keep-together">corruption</span>.</p>
+
+<p>At this point, Beth, by leveraging her own private key, Alice’s public key, and the message nonce, can reproduce all of these steps on her own to decrypt the message. She performs a similar X25519 key exchange to derive the same shared key and then uses that for decryption.</p>
+
+<p>Thankfully, sodium abstracts the key exchange and derivation for us, making asymmetric decryption relatively straightforward. See <a data-type="xref" href="#asymmetric_decryption">Example 9-11</a>.</p>
+<div id="asymmetric_decryption" data-type="example">
+<h5><span class="label">Example 9-11. </span>Asymmetric decryption</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fromAlice</code><code> </code><code class="o">=</code><code> </code><code class="nb">hex2bin</code><code class="p">(</code><code class="nv">$toBeth</code><code class="p">);</code><code>
+</code><code class="nv">$nonce</code><code> </code><code class="o">=</code><code> </code><code class="nb">substr</code><code class="p">(</code><code class="nv">$fromAlice</code><code class="p">,</code><code> </code><code class="mi">0</code><code class="p">,</code><code> </code><code class="nx">SODIUM_CRYPTO_BOX_NONCEBYTES</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO10-1" href="#callout_security_and_encryption_CO10-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nv">$ciphertext</code><code> </code><code class="o">=</code><code> </code><code class="nb">substr</code><code class="p">(</code><code class="nv">$fromAlice</code><code class="p">,</code><code> </code><code class="nx">SODIUM_CRYPTO_BOX_NONCEBYTES</code><code class="p">);</code><code>
+
+</code><code class="nv">$decryptionKey</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_keypair_from_secretkey_and_publickey</code><code class="p">(</code><code>
+    </code><code class="nv">$bethPrivate</code><code class="p">,</code><code>
+    </code><code class="nv">$alicePublic</code><code>
+</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO10-2" href="#callout_security_and_encryption_CO10-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$decrypted</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_box_open</code><code class="p">(</code><code class="nv">$ciphertext</code><code class="p">,</code><code> </code><code class="nv">$nonce</code><code class="p">,</code><code> </code><code class="nv">$decryptionKey</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO10-3" href="#callout_security_and_encryption_CO10-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+</code><code class="k">if</code><code> </code><code class="p">(</code><code class="nv">$decrypted</code><code> </code><code class="o">===</code><code> </code><code class="k">false</code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_security_and_encryption_CO10-4" href="#callout_security_and_encryption_CO10-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+    </code><code class="k">echo</code><code> </code><code class="s1">'Error decrypting message!'</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code>
+</code><code class="p">}</code><code> </code><code class="k">else</code><code> </code><code class="p">{</code><code>
+    </code><code class="k">echo</code><code> </code><code class="nv">$decrypted</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code>
+</code><code class="p">}</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO10-1" href="#co_security_and_encryption_CO10-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Similar to the <code>secretbox</code> operation, you first extract the nonce and ciphertext from the hexadecimal-encoded payload provided by Alice.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO10-2" href="#co_security_and_encryption_CO10-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Beth uses her own private key along with Alice’s public key to create a key pair appropriate for decrypting the message.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO10-3" href="#co_security_and_encryption_CO10-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>The key exchange and decryption operations are abstracted away with a simple “open” interface to read the message.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO10-4" href="#co_security_and_encryption_CO10-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>As with symmetric encryption, sodium’s asymmetric interfaces will validate the Poly1305 authentication tag on the message before decrypting and returning the plaintext.</p></dd>
+</dl></div>
+
+<p>Either mechanism—symmetric or asymmetric encryption—is well supported and cleanly abstracted by sodium’s functional interfaces. This helps avoid errors commonly encountered when implementing older mechanisms (like AES or RSA). Libsodium (the C-level library powering the sodium extension) is widely supported in other languages as well, providing solid interoperability between PHP, Ruby, Python, JavaScript, and even <a data-type="indexterm" data-primary="encryption" data-startref="ecyptn" id="idm45875150116368"></a><a data-type="indexterm" data-primary="decryption" data-startref="dcyptn" id="idm45875150115520"></a><a data-type="indexterm" data-primary="encryption" data-secondary="asymmetric" data-startref="cypsymm" id="idm45875150114576"></a><a data-type="indexterm" data-primary="asymmetric encryption" data-startref="symmtcypt" id="idm45875150113360"></a>lower-level languages like C and Go.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875150446928">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/3IZZM"><code>sodium_​crypto_​secretbox()</code></a>, <a href="https://oreil.ly/qNDqx"><code>sodium_​crypto_​secret⁠box_​open()</code></a>, <a href="https://oreil.ly/-apZN"><code>sodium_​crypto_​box()</code></a>, and <a href="https://oreil.ly/5lT_D"><code>sodium_crypto_box_open()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="9.5 Storing Encrypted Data in a File"><div class="sect1" id="storing_encrypted_data_in_a_file">
+<h1>9.5 Storing Encrypted Data in a File</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875150105856">
+<h2>Problem</h2>
+
+<p>You want to encrypt (or decrypt) a file <a data-type="indexterm" data-primary="encryption" data-secondary="data storage" id="ecyptdg"></a><a data-type="indexterm" data-primary="storage, encrypted data" id="sgcypdt"></a>that is too large to fit in memory.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875150101904">
+<h2>Solution</h2>
+
+<p>Use the <em>push</em> streaming interfaces exposed <a data-type="indexterm" data-primary="sodium" data-secondary="push streaming interfaces" id="idm45875150099936"></a>by sodium to encrypt one chunk of the file at a time, as shown in <a data-type="xref" href="#libsodium_stream_encrypt">Example 9-12</a>.</p>
+<div id="libsodium_stream_encrypt" data-type="example">
+<h5><span class="label">Example 9-12. </span>Sodium stream encryption</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">define</code><code class="p">(</code><code class="s1">'CHUNK_SIZE'</code><code class="p">,</code><code> </code><code class="mi">4096</code><code class="p">);</code><code>
+
+</code><code class="nv">$key</code><code> </code><code class="o">=</code><code> </code><code class="nb">hex2bin</code><code class="p">(</code><code class="s1">'67794ec75c56ba386f944634203d4e86'</code><code> </code><code class="o">.</code><code>
+               </code><code class="s1">'37e43c97857e3fa482bb9dfec1e44e70'</code><code class="p">);</code><code>
+
+</code><code class="p">[</code><code class="nv">$state</code><code class="p">,</code><code> </code><code class="nv">$header</code><code class="p">]</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretstream_xchacha20poly1305_init_push</code><code class="p">(</code><code class="nv">$key</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO11-1" href="#callout_security_and_encryption_CO11-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="nv">$input</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'plaintext.txt'</code><code class="p">,</code><code> </code><code class="s1">'rb'</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO11-2" href="#callout_security_and_encryption_CO11-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="nv">$output</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'encrypted.txt'</code><code class="p">,</code><code> </code><code class="s1">'wb'</code><code class="p">);</code><code>
+
+</code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$output</code><code class="p">,</code><code> </code><code class="nv">$header</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO11-3" href="#callout_security_and_encryption_CO11-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+
+</code><code class="nv">$fileSize</code><code> </code><code class="o">=</code><code> </code><code class="nb">fstat</code><code class="p">(</code><code class="nv">$input</code><code class="p">)[</code><code class="s1">'size'</code><code class="p">];</code><code> </code><a class="co" id="co_security_and_encryption_CO11-4" href="#callout_security_and_encryption_CO11-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+
+</code><code class="k">for</code><code> </code><code class="p">(</code><code class="nv">$i</code><code> </code><code class="o">=</code><code> </code><code class="mi">0</code><code class="p">;</code><code> </code><code class="nv">$i</code><code> </code><code class="o">&lt;</code><code> </code><code class="nv">$fileSize</code><code class="p">;</code><code> </code><code class="nv">$i</code><code> </code><code class="o">+=</code><code> </code><code class="p">(</code><code class="nx">CHUNK_SIZE</code><code> </code><code class="o">-</code><code> </code><code class="mi">17</code><code class="p">))</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_security_and_encryption_CO11-5" href="#callout_security_and_encryption_CO11-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a><code>
+    </code><code class="nv">$plain</code><code> </code><code class="o">=</code><code> </code><code class="nb">fread</code><code class="p">(</code><code class="nv">$input</code><code class="p">,</code><code> </code><code class="p">(</code><code class="nx">CHUNK_SIZE</code><code> </code><code class="o">-</code><code> </code><code class="mi">17</code><code class="p">));</code><code>
+    </code><code class="nv">$cipher</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretstream_xchacha20poly1305_push</code><code class="p">(</code><code class="nv">$state</code><code class="p">,</code><code> </code><code class="nv">$plain</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO11-6" href="#callout_security_and_encryption_CO11-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a><code>
+
+    </code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$output</code><code class="p">,</code><code> </code><code class="nv">$cipher</code><code class="p">);</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nb">sodium_memzero</code><code class="p">(</code><code class="nv">$state</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO11-7" href="#callout_security_and_encryption_CO11-7"><img src="assets/7.png" alt="7" width="12" height="12"/></a><code>
+
+</code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$input</code><code class="p">);</code><a class="co" id="co_security_and_encryption_CO11-8" href="#callout_security_and_encryption_CO11-8"><img src="assets/8.png" alt="8" width="12" height="12"/></a><code>
+</code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$output</code><code class="p">);</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO11-1" href="#co_security_and_encryption_CO11-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Initializing the stream operation yields two values—a header and the current state of the stream. The header itself contains a random nonce and is required in order to decrypt anything encrypted with the stream.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO11-2" href="#co_security_and_encryption_CO11-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Open both the input and output files as binary streams. Working with files is one of the few times you want to emit raw bytes rather than leverage hexadecimal or Base64 encoding to wrap an encrypted output.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO11-3" href="#co_security_and_encryption_CO11-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>To ensure that you can decrypt the file, first store the fixed-length header for later retrieval.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO11-4" href="#co_security_and_encryption_CO11-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Before you begin iterating over chunks of bytes in the file, you need to determine how large the input file really is.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO11-5" href="#co_security_and_encryption_CO11-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p>As with other sodium operations, the stream encryption cipher is built atop Poly1305 authentication tags (which are 17 bytes in length). As a result, you read 17 bytes less than the standard 4,096-byte block, so the output will be a total of 4,081 bytes written to the file.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO11-6" href="#co_security_and_encryption_CO11-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></dt>
+<dd><p>The sodium API encrypts the plaintext and automatically updates the state variable (<code>$state</code> is passed by reference and updated in place).</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO11-7" href="#co_security_and_encryption_CO11-7"><img src="assets/7.png" alt="7" width="12" height="12"/></a></dt>
+<dd><p>After you’re done with encryption, explicitly zero out the memory of the state variable. PHP’s garbage collector will clean up the references, but you want to ensure that no coding errors elsewhere in the system can inadvertently leak this value.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO11-8" href="#co_security_and_encryption_CO11-8"><img src="assets/8.png" alt="8" width="12" height="12"/></a></dt>
+<dd><p>Finally, close the file handles since the encryption is complete.</p></dd>
+</dl></div>
+
+<p>To decrypt the file, use sodium’s <em>pull</em> streaming <a data-type="indexterm" data-primary="sodium" data-secondary="pull streaming interface" id="idm45875149879424"></a>interfaces, as shown in <a data-type="xref" href="#sodium_stream_decryption">Example 9-13</a>.</p>
+<div id="sodium_stream_decryption" data-type="example">
+<h5><span class="label">Example 9-13. </span>Sodium stream decryption</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">define</code><code class="p">(</code><code class="s1">'CHUNK_SIZE'</code><code class="p">,</code><code> </code><code class="mi">4096</code><code class="p">);</code><code>
+
+</code><code class="nv">$key</code><code> </code><code class="o">=</code><code> </code><code class="nb">hex2bin</code><code class="p">(</code><code class="s1">'67794ec75c56ba386f944634203d4e86'</code><code> </code><code class="o">.</code><code>
+               </code><code class="s1">'37e43c97857e3fa482bb9dfec1e44e70'</code><code class="p">);</code><code>
+
+</code><code class="nv">$input</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'encrypted.txt'</code><code class="p">,</code><code> </code><code class="s1">'rb'</code><code class="p">);</code><code>
+</code><code class="nv">$output</code><code> </code><code class="o">=</code><code> </code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'decrypted.txt'</code><code class="p">,</code><code> </code><code class="s1">'wb'</code><code class="p">);</code><code>
+
+</code><code class="nv">$header</code><code> </code><code class="o">=</code><code> </code><code class="nb">fread</code><code class="p">(</code><code class="nv">$input</code><code class="p">,</code><code> </code><code class="nx">SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO12-1" href="#callout_security_and_encryption_CO12-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="nv">$state</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretstream_xchacha20poly1305_init_pull</code><code class="p">(</code><code class="nv">$header</code><code class="p">,</code><code> </code><code class="nv">$key</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO12-2" href="#callout_security_and_encryption_CO12-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$fileSize</code><code> </code><code class="o">=</code><code> </code><code class="nb">fstat</code><code class="p">(</code><code class="nv">$input</code><code class="p">)[</code><code class="s1">'size'</code><code class="p">];</code><code>
+</code><code class="k">try</code><code> </code><code class="p">{</code><code>
+    </code><code class="k">for</code><code> </code><code class="p">(</code><code>
+        </code><code class="nv">$i</code><code> </code><code class="o">=</code><code> </code><code class="nx">SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES</code><code class="p">;</code><code>
+        </code><code class="nv">$i</code><code> </code><code class="o">&lt;</code><code> </code><code class="nv">$fileSize</code><code class="p">;</code><code>
+        </code><code class="nv">$i</code><code> </code><code class="o">+=</code><code> </code><code class="nx">CHUNK_SIZE</code><code>
+    </code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_security_and_encryption_CO12-3" href="#callout_security_and_encryption_CO12-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+        </code><code class="nv">$cipher</code><code> </code><code class="o">=</code><code> </code><code class="nb">fread</code><code class="p">(</code><code class="nv">$input</code><code class="p">,</code><code> </code><code class="nx">CHUNK_SIZE</code><code class="p">);</code><code>
+
+        </code><code class="p">[</code><code class="nv">$plain</code><code class="p">,</code><code> </code><code class="p">]</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_secretstream_xchacha20poly1305_pull</code><code class="p">(</code><code>
+            </code><code class="nv">$state</code><code class="p">,</code><code>
+            </code><code class="nv">$cipher</code><code>
+        </code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO12-4" href="#callout_security_and_encryption_CO12-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+
+        </code><code class="k">if</code><code> </code><code class="p">(</code><code class="nv">$plain</code><code> </code><code class="o">===</code><code> </code><code class="k">false</code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_security_and_encryption_CO12-5" href="#callout_security_and_encryption_CO12-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a><code>
+            </code><code class="k">throw</code><code> </code><code class="k">new</code><code> </code><code class="nx">Exception</code><code class="p">(</code><code class="s1">'Error decrypting file!'</code><code class="p">);</code><code>
+        </code><code class="p">}</code><code>
+        </code><code class="nb">fwrite</code><code class="p">(</code><code class="nv">$output</code><code class="p">,</code><code> </code><code class="nv">$plain</code><code class="p">);</code><code>
+    </code><code class="p">}</code><code>
+</code><code class="p">}</code><code> </code><code class="k">finally</code><code> </code><code class="p">{</code><code>
+    </code><code class="nb">sodium_memzero</code><code class="p">(</code><code class="nv">$state</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO12-6" href="#callout_security_and_encryption_CO12-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a><code>
+
+    </code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$input</code><code class="p">);</code><code>
+    </code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$output</code><code class="p">);</code><code>
+</code><code class="p">}</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO12-1" href="#co_security_and_encryption_CO12-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Before you can begin decryption, you must explicitly retrieve the header value from the file you encrypted in the first place.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO12-2" href="#co_security_and_encryption_CO12-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Armed with the encryption header and key, you can initialize the stream state as desired.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO12-3" href="#co_security_and_encryption_CO12-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Keep in mind that the file is prefixed with a header, so you skip those bytes and then pull chunks of 4,096 bytes at a time. This will include 4,079 bytes of ciphertext and 17 bytes of authentication tag.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO12-4" href="#co_security_and_encryption_CO12-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>The actual stream decryption operation returns a tuple of the plaintext and an optional status tag (e.g., to identify that a key needs to be rotated).</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO12-5" href="#co_security_and_encryption_CO12-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p>If the authentication tag on the encrypted message fails to validate, however, this function will return <code>false</code> to indicate the authentication failure. Should this occur, halt decryption immediately.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO12-6" href="#co_security_and_encryption_CO12-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></dt>
+<dd><p>Again, once the operation is complete, you should zero out the memory storing the stream state, as well as close out the file handles.</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875149695040">
+<h2>Discussion</h2>
+
+<p>The stream cipher interfaces exposed by sodium are not actual streams to PHP.<sup><a data-type="noteref" id="idm45875149639856-marker" href="ch09.html#idm45875149639856">5</a></sup> Specifically, they are stream <em>ciphers</em> that work like block ciphers with an internal counter. XChaCha20 is the cipher used by the <code>sodium_crypto_secret⁠stream_​xcha⁠cha​20​poly1305_*()</code> family of functions leveraged to push data into and pull data from an encrypted stream in this recipe. The implementation in PHP explicitly breaks a long message (a file) into a series of related messages. Each of these messages is encrypted with the underlying cipher and tagged individually but in a specific order.</p>
+
+<p>These messages cannot be truncated, removed, reordered, or manipulated in any way without the decryption operation detecting that tampering. There is also no practical limit to the total number of messages that can be encrypted as part of this stream, which means there is no limit to the size of a file that can be passed through the Solution examples.</p>
+
+<p>The Solution uses a chunk size of 4,096 bytes (4 KB), but other examples could use 1,024, 8,096, or any other number of bytes. The only limitation here is the amount of memory available to PHP—iterating over smaller chunks of a file will use less memory during encryption and decryption. <a data-type="xref" href="#libsodium_stream_encrypt">Example 9-12</a> illustrates how <code>sodium_​crypto_​secretstream_​xchacha20​poly1305_​push()</code> encrypts one chunk of data at a time, “pushing” that data through the encryption algorithm and updating the algorithm’s internal state. The paired <code>sodium_​crypto_​secretstream_​xcha⁠cha20poly1305_​pull()</code> does the same thing in reverse, pulling corresponding plaintext back out of the stream and updating the algorithm’s state.</p>
+
+<p>Another way to see this in action is with the low-level primitive <code>sodium_​crypto_​stream_xchacha20_xor()</code> function. This function leverages the XChaCha20 encryption algorithm directly to generate a stream of seemingly random bytes based on a given key and random nonce. It then performs an XOR operation between that stream of bytes and a given message to produce a ciphertext.<sup><a data-type="noteref" id="idm45875149634064-marker" href="ch09.html#idm45875149634064">6</a></sup> <a data-type="xref" href="#simple_crypto_stream">Example 9-14</a> illustrates one way in which this function might be used—encrypting phone numbers in a 
+<span class="keep-together">database</span>.</p>
+<div id="simple_crypto_stream" data-type="example">
+<h5><span class="label">Example 9-14. </span>Simple stream encryption for data protection</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">savePhoneNumber</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$userId</code><code class="p">,</code> <code class="nx">string</code> <code class="nv">$phone</code><code class="p">)</code><code class="o">:</code> <code class="nx">void</code>
+<code class="p">{</code>
+    <code class="nv">$db</code> <code class="o">=</code> <code class="nx">getDatabase</code><code class="p">();</code>
+
+    <code class="nv">$statement</code> <code class="o">=</code> <code class="nv">$db</code><code class="o">-&gt;</code><code class="na">prepare</code><code class="p">(</code>
+        <code class="s1">'INSERT INTO phones (user, number, nonce) VALUES (?, ?, ?)'</code><code class="p">;</code>
+    <code class="p">);</code>
+
+    <code class="nv">$key</code> <code class="o">=</code> <code class="nb">hex2bin</code><code class="p">(</code><code class="nb">getenv</code><code class="p">(</code><code class="s1">'ENCRYPTION_KEY'</code><code class="p">));</code>
+    <code class="nv">$nonce</code> <code class="o">=</code> <code class="nb">random_bytes</code><code class="p">(</code><code class="nx">SODIUM_CRYPTO_STREAM_XCHACHA20_NONCEBYTES</code><code class="p">);</code>
+
+    <code class="nv">$encrypted</code> <code class="o">=</code> <code class="nx">sodium_crypto_stream_xchacha20_xor</code><code class="p">(</code><code class="nv">$phone</code><code class="p">,</code> <code class="nv">$nonce</code><code class="p">,</code> <code class="nv">$key</code><code class="p">);</code>
+
+    <code class="nv">$statement</code><code class="o">-&gt;</code><code class="na">execute</code><code class="p">([</code><code class="nv">$userId</code><code class="p">,</code> <code class="nb">bin2hex</code><code class="p">(</code><code class="nv">$encrypted</code><code class="p">),</code> <code class="nb">bin2hex</code><code class="p">(</code><code class="nv">$nonce</code><code class="p">)]);</code>
+<code class="p">}</code></pre></div>
+
+<p>The advantage of using a cryptographic stream in this way is that the ciphertext exactly matches the length of the plaintext. However, this also means there is no authentication tag available (meaning the ciphertext could be corrupted or manipulated by a third party and jeopardize the reliability of any decrypted ciphertext).</p>
+
+<p>As a result, <a data-type="xref" href="#simple_crypto_stream">Example 9-14</a> is not likely something you will ever use directly. However, it does illustrate how the more verbose <code>sodium_​crypto_​secretstream_​xcha⁠cha20poly1305_push()</code> works under the hood. Both functions use the same algorithm, but the “secret stream” variant generates its own nonce and keeps track of its internal state over repeated uses (in order to encrypt <em>multiple</em> chunks of data). When using the simpler XOR version you would need to manage <a data-type="indexterm" data-primary="encryption" data-secondary="data storage" data-startref="ecyptdg" id="idm45875149591648"></a><a data-type="indexterm" data-primary="storage, encrypted data" data-startref="sgcypdt" id="idm45875149590432"></a>that state and repeated calls manually!</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875149589232">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/chGJC"><code>sodium_crypto_secretstream_xchacha20poly1305_init_​push()</code></a>,  <a href="https://oreil.ly/ogGvJ"><code>sodium_​crypto_​secretstream_​xcha⁠cha20poly1305_​init_​pull()</code></a>, and <a href="https://oreil.ly/yQBBC"><code>sodium_​crypto_​stream_​xchacha20_​xor()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="9.6 Cryptographically Signing a Message to Be Sent to Another Application"><div class="sect1" id="idm45875149577840">
+<h1>9.6 Cryptographically Signing a Message to Be Sent to Another Application</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875149576592">
+<h2>Problem</h2>
+
+<p>You want to sign a message or piece <a data-type="indexterm" data-primary="cryptographic signatures" id="cyptgsg"></a><a data-type="indexterm" data-primary="signatures, cryptographic" id="sgnnmss"></a><a data-type="indexterm" data-primary="messages, cryptographic signatures" id="msgggypg"></a>of data before sending it to another application such that the other application can validate your signature on the data.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875149572112">
+<h2>Solution</h2>
+
+<p>Use <code>sodium_crypto_sign()</code> to attach a <a data-type="indexterm" data-primary="sodium_crypto_sign()" id="idm45875149570368"></a>cryptographic signature to a plaintext message, as shown in <a data-type="xref" href="#cryptographic_signatures_messages">Example 9-15</a>.</p>
+<div id="cryptographic_signatures_messages" data-type="example">
+<h5><span class="label">Example 9-15. </span>Cryptographic signatures on messages</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$signSeed</code><code> </code><code class="o">=</code><code> </code><code class="nb">hex2bin</code><code class="p">(</code><code class="s1">'eb656c282f46b45a814fcc887977675d'</code><code> </code><code class="o">.</code><code>
+                    </code><code class="s1">'c627a5b1507ae2a68faecee147b77621'</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO13-1" href="#callout_security_and_encryption_CO13-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nv">$signKeys</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_sign_seed_keypair</code><code class="p">(</code><code class="nv">$signSeed</code><code class="p">);</code><code>
+
+</code><code class="nv">$signSecret</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_sign_secretkey</code><code class="p">(</code><code class="nv">$signKeys</code><code class="p">);</code><code>
+</code><code class="nv">$signPublic</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_sign_publickey</code><code class="p">(</code><code class="nv">$signKeys</code><code class="p">);</code><code>
+
+</code><code class="nv">$message</code><code> </code><code class="o">=</code><code> </code><code class="s1">'Hello world!'</code><code class="p">;</code><code>
+</code><code class="nv">$signed</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_sign</code><code class="p">(</code><code class="nv">$message</code><code class="p">,</code><code> </code><code class="nv">$signSecret</code><code class="p">);</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO13-1" href="#co_security_and_encryption_CO13-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>In practice, your signing seed should be a random value kept secret by you. It could also be a secure hash derived from a known password.</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875149521264">
+<h2>Discussion</h2>
+
+<p>Cryptographic signatures are a way to verify that a particular message (or string of data) originated from a given source. So long as the private key used to sign a message is kept secret, anyone with access to the publicly known key can validate that the information came from the owner of the key.</p>
+
+<p>Likewise, only the custodian of that key can sign the data. This helps verify that the custodian signed off on the message. It also forms the basis for nonrepudiation: the owner of the key cannot claim that someone else used their key without rendering their key (and any signatures it created) invalid.</p>
+
+<p>In the Solution example, a signature is calculated based on the secret key and the contents of the message. The bytes of the signature are then prepended to the message itself, and both elements together are passed along to any party who wishes to verify the signature.</p>
+
+<p>It is also possible to generate a <em>detached</em> signature, effectively producing the raw bytes of the signature without concatenating it to the message. This is useful if the message and signature are meant to be sent independently to the third-party verifier—for example, as different elements in an API request.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>While raw bytes are fantastic for information stored on disk or in a database, they can cause problems with remote APIs. It would make sense to Base64-encode the entire payload (the signature and message) when sending it to a remote party. Otherwise, you might want to encode the signature separately (e.g., as hexadecimal) when sending the two components together.</p>
+</div>
+
+<p>Rather than using <code>sodium_crypto_sign()</code> as in the <a data-type="indexterm" data-primary="sodium_crypto_sign_detached()" id="idm45875149516096"></a>Solution example, you can use <code>sodium_crypto_sign_detached()</code> as in <a data-type="xref" href="#detached_signatures">Example 9-16</a>.</p>
+<div id="detached_signatures" data-type="example">
+<h5><span class="label">Example 9-16. </span>Creating a detached message signature</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$signSeed</code> <code class="o">=</code> <code class="nb">hex2bin</code><code class="p">(</code><code class="s1">'eb656c282f46b45a814fcc887977675d'</code> <code class="o">.</code>
+                    <code class="s1">'c627a5b1507ae2a68faecee147b77621'</code><code class="p">);</code>
+<code class="nv">$signKeys</code> <code class="o">=</code> <code class="nb">sodium_crypto_sign_seed_keypair</code><code class="p">(</code><code class="nv">$signSeed</code><code class="p">);</code>
+
+<code class="nv">$signSecret</code> <code class="o">=</code> <code class="nb">sodium_crypto_sign_secretkey</code><code class="p">(</code><code class="nv">$signKeys</code><code class="p">);</code>
+<code class="nv">$signPublic</code> <code class="o">=</code> <code class="nb">sodium_crypto_sign_publickey</code><code class="p">(</code><code class="nv">$signKeys</code><code class="p">);</code>
+
+<code class="nv">$message</code> <code class="o">=</code> <code class="s1">'Hello world!'</code><code class="p">;</code>
+<code class="nv">$signature</code> <code class="o">=</code> <code class="nb">sodium_crypto_sign_detached</code><code class="p">(</code><code class="nv">$message</code><code class="p">,</code> <code class="nv">$signSecret</code><code class="p">);</code></pre></div>
+
+<p>Signatures will always be 64 <a data-type="indexterm" data-primary="cryptographic signatures" data-startref="cyptgsg" id="idm45875149448624"></a><a data-type="indexterm" data-primary="signatures, cryptographic" data-startref="sgnnmss" id="idm45875149214480"></a><a data-type="indexterm" data-primary="messages, cryptographic signatures" data-startref="msgggypg" id="idm45875149213584"></a>bytes long, regardless of whether they’re attached to the plaintext they sign.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875149386512">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/3eqTz"><code>sodium_crypto_sign()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="9.7 Verifying a Cryptographic Signature"><div class="sect1" id="idm45875149384080">
+<h1>9.7 Verifying a Cryptographic Signature</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875149382832">
+<h2>Problem</h2>
+
+<p>You want to verify the signature <a data-type="indexterm" data-primary="cryptographic signatures" data-secondary="verification" id="cypgphgv"></a><a data-type="indexterm" data-primary="verification, cryptographic signatures" id="vfctypgph"></a>on a piece of data sent to you by a third party.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875149378896">
+<h2>Solution</h2>
+
+<p>Use <code>sodium_crypto_sign_open()</code> to validate the signature on a message, as shown in <a data-type="xref" href="#cryptographic_signature_verification">Example 9-17</a>.</p>
+<div id="cryptographic_signature_verification" data-type="example">
+<h5><span class="label">Example 9-17. </span>Cryptographic signature verification</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$signPublic</code><code> </code><code class="o">=</code><code> </code><code class="nb">hex2bin</code><code class="p">(</code><code class="s1">'d58c47ddb986dcb2632aa5395e8962d3'</code><code> </code><code class="o">.</code><code>
+                      </code><code class="s1">'e636ee236b38a8dc880e409c19374a5f'</code><code class="p">);</code><code>
+
+</code><code class="nv">$message</code><code> </code><code class="o">=</code><code> </code><code class="nb">sodium_crypto_sign_open</code><code class="p">(</code><code class="nv">$signed</code><code class="p">,</code><code> </code><code class="nv">$signPublic</code><code class="p">);</code><code> </code><a class="co" id="co_security_and_encryption_CO14-1" href="#callout_security_and_encryption_CO14-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="k">if</code><code> </code><code class="p">(</code><code class="nv">$message</code><code> </code><code class="o">===</code><code> </code><code class="k">false</code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_security_and_encryption_CO14-2" href="#callout_security_and_encryption_CO14-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+    </code><code class="k">throw</code><code> </code><code class="k">new</code><code> </code><code class="nx">Exception</code><code class="p">(</code><code class="s1">'Invalid signature on message!'</code><code class="p">);</code><code>
+</code><code class="p">}</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_security_and_encryption_CO14-1" href="#co_security_and_encryption_CO14-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The data in <code>$signed</code> is a concatenated raw signature and plaintext message, as in the return of <code>sodium_crypto_sign()</code>.</p></dd>
+<dt><a class="co" id="callout_security_and_encryption_CO14-2" href="#co_security_and_encryption_CO14-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>If the signature is invalid, the function returns <code>false</code> as an error. If the signature is valid, the function instead returns the plaintext message.</p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875149318032">
+<h2>Discussion</h2>
+
+<p>Signature verification is straightforward when the literal returns from <code>sodium_crypto_sign()</code> are involved. Merely pass the data and the public key of the signing party into <code>sodium_​crypto_​sign_open()</code>, and you will have either a Boolean error or the original plaintext back as a result.</p>
+
+<p>If you’re working with a web API, there’s a good chance that the message and signature were passed to you separately (e.g., if someone were using <code>sodium_​crypto_​sign_​detached()</code>). In that case, you need to concatenate the signature and the message together before passing them into <code>sodium_​crypto_​sign_​open()</code>, as in <a data-type="xref" href="#sodium_crypto_sign_open">Example 9-18</a>.</p>
+<div id="sodium_crypto_sign_open" data-type="example">
+<h5><span class="label">Example 9-18. </span>Detached signature verification</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$signPublic</code> <code class="o">=</code> <code class="nb">hex2bin</code><code class="p">(</code><code class="s1">'d58c47ddb986dcb2632aa5395e8962d3'</code> <code class="o">.</code>
+                      <code class="s1">'e636ee236b38a8dc880e409c19374a5f'</code><code class="p">);</code>
+
+<code class="nv">$signature</code> <code class="o">=</code> <code class="nb">hex2bin</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s1">'signature'</code><code class="p">]);</code>
+<code class="nv">$payload</code> <code class="o">=</code> <code class="nv">$signature</code> <code class="o">.</code> <code class="nv">$_POST</code><code class="p">[</code><code class="s1">'message'</code><code class="p">];</code>
+
+<code class="nv">$message</code> <code class="o">=</code> <code class="nb">sodium_crypto_sign_open</code><code class="p">(</code><code class="nv">$payload</code><code class="p">,</code> <code class="nv">$signPublic</code><code class="p">);</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="nv">$message</code> <code class="o">===</code> <code class="k">false</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">throw</code> <code class="k">new</code> <code class="nx">Exception</code><code class="p">(</code><code class="s1">'Invalid signature on message!'</code><code class="p">);</code>
+<code class="p">}</code></pre></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875149269984">
+<h2>See Also</h2>
+
+<p>Documentation <a data-type="indexterm" data-primary="cryptographic signatures" data-secondary="verification" data-startref="cypgphgv" id="idm45875149249648"></a><a data-type="indexterm" data-primary="verification, cryptographic signatures" data-startref="vfctypgph" id="idm45875149248464"></a>on <a href="https://oreil.ly/UG5ja"><code>sodium_crypto_sign_open()</code></a>.</p>
+</div></section>
+</div></section>
+<div data-type="footnotes"><p data-type="footnote" id="idm45875152082528"><sup><a href="ch09.html#idm45875152082528-marker">1</a></sup> The <a href="https://oreil.ly/uvYXZ">OpenJDK Psychic Signatures bug of 2022</a> illustrated how an error in cryptographic authentication could expose not just applications <em>but an entire language implementation</em> to potential abuse by malicious actors. This bug was due to an implementation error, further underscoring how critical it is to rely on solid, proven, well-tested primitives when using cryptographic systems.</p><p data-type="footnote" id="idm45875152074560"><sup><a href="ch09.html#idm45875152074560-marker">2</a></sup> For more on native extensions, see <a data-type="xref" href="ch15.html#chapter_extensions">Chapter 15</a>.</p><p data-type="footnote" id="idm45875152063760"><sup><a href="ch09.html#idm45875152063760-marker">3</a></sup> For a full breakdown of the process through which this extension was added to PHP core, reference the <a href="https://oreil.ly/6X4AF">original RFC</a>.</p><p data-type="footnote" id="idm45875151024592"><sup><a href="ch09.html#idm45875151024592-marker">4</a></sup> Loading PHP packages via Composer is discussed at length in <a data-type="xref" href="ch15.html#installing_composer_packages">Recipe 15.3</a>.</p><p data-type="footnote" id="idm45875149639856"><sup><a href="ch09.html#idm45875149639856-marker">5</a></sup> PHP streams, covered extensively in <a data-type="xref" href="ch11.html#chapter_streams">Chapter 11</a>, expose effective ways to work with large chunks of data without exhausting available system memory.</p><p data-type="footnote" id="idm45875149634064"><sup><a href="ch09.html#idm45875149634064-marker">6</a></sup> For more on operators and XOR in particular, review <a data-type="xref" href="ch02.html#chapter_operators">Chapter 2</a>.</p></div></div></section></div>
+</div>
+</body>
+</html>

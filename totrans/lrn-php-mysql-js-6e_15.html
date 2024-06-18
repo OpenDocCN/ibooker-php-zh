@@ -1,0 +1,801 @@
+<html><head></head><body><div id="sbo-rt-content" class="calibre1"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 12. Form Handling" class="calibre4"><div class="preface" id="form_handling">
+<h1 class="calibre10"><span class="keep-together">Chapter 12. </span>Form Handling</h1>
+
+<p class="author1">One of the<a contenteditable="false" data-primary="HTML forms" data-see="form handling" data-type="indexterm" id="idm45694713234392" class="calibre6"/><a contenteditable="false" data-primary="HTML (Hypertext Markup Language)" data-see="also form handling" data-type="indexterm" id="idm45694713232984" class="calibre6"/> main ways that website users interact with PHP and MySQL is through HTML forms. These were introduced very early on in the development of the World Wide Web, in 1993—even before the advent of ecommerce—and have remained a mainstay ever since, due to their simplicity and ease of use, although formatting them can be a nightmare.</p>
+
+<p class="author1">Of course, enhancements have been made over the years to add extra functionality to HTML form handling, so this chapter will bring you up to speed on the state of the art and show you the best ways to implement forms for good usability and security. Plus, as you will see a little later on, the HTML5 specification has further improved the use of forms.</p>
+
+<section data-type="sect1" data-pdf-bookmark="Building Forms" class="calibre4"><div class="preface" id="building_forms">
+<h1 class="calibre11">Building Forms</h1>
+
+<p class="author1">Handling<a contenteditable="false" data-primary="form handling" data-secondary="building forms" data-type="indexterm" id="idm45694713228312" class="calibre6"/> forms is a multipart process. First is the creation of a form into which a user can enter the required details. This data is then sent to the web server, where it is interpreted, often with some error checking. If the PHP code identifies one or more fields that require reentering, the form may be redisplayed with an error message. When the code is satisfied with the accuracy of the input, it takes some action that may often involve a database, such as entering details about a purchase.</p>
+
+<p class="author1">To build a form, you must have at least the following elements:</p>
+
+<ul class="printings">
+	<li class="calibre9">
+	<p class="author1">An opening <code class="calibre15">&lt;form&gt;</code> and closing <code class="calibre15">&lt;/form&gt;</code> tag</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">A submission type specifying either a GET or POST method</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">One or more <code class="calibre15">input</code> fields</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">The destination URL to which the form data is to be submitted</p>
+	</li>
+</ul>
+
+<p class="author1"><a data-type="xref" href="#formtestdotphpem_dasha_simple_php_form_h" class="calibre6">Example 12-1</a> shows a very simple form created with PHP, which you should type in and save as <em class="hyperlink">formtest.php</em>.</p>
+
+<div data-type="example" id="formtestdotphpem_dasha_simple_php_form_h" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 12-1. </span>formtest.php—a simple PHP form handler</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// formtest.php</code>
+  <code class="k">echo</code> <code class="s">&lt;&lt;&lt;_END</code>
+<code class="s">    &lt;html&gt;</code>
+<code class="s">      &lt;head&gt;</code>
+<code class="s">        &lt;title&gt;Form Test&lt;/title&gt;</code>
+<code class="s">      &lt;/head&gt;</code>
+<code class="s">      &lt;body&gt;</code>
+<code class="s">      &lt;form method="post" action="formtest.php"&gt;</code>
+<code class="s">        What is your name?</code>
+<code class="s">        &lt;input type="text" name="name"&gt;</code>
+<code class="s">        &lt;input type="submit"&gt;</code>
+<code class="s">      &lt;/form&gt;</code>
+<code class="s">      &lt;/body&gt;</code>
+<code class="s">    &lt;/html&gt;</code>
+<code class="s">_END;</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">The first thing to notice about this example is that, as you have already seen in this book, rather than dropping in and out of PHP code, the <code class="calibre15">echo &lt;&lt;&lt;_END..._END</code> construct is used whenever multiline HTML must be output.</p>
+
+<p class="author1">Inside of this multiline output is some standard code for commencing an HTML document, displaying its title, and starting the body of the document. This<a contenteditable="false" data-primary="POST method (HTTP)" data-secondary="in form handling" data-type="indexterm" id="idm45694713206024" class="calibre6"/><a contenteditable="false" data-primary="HTTP (Hypertext Transfer Protocol)" data-secondary="POST method" data-type="indexterm" id="idm45694713185864" class="calibre6"/> is followed by the form, which is set to send its data using the POST method to the PHP program <em class="hyperlink">formtest.php</em>, which is the name of the program itself.</p>
+
+<p class="author1">The rest of the program just closes all the items it opened: the form, the body of the HTML document, and the PHP <code class="calibre15">echo &lt;&lt;&lt;_END</code> statement. The result of opening this program in a web browser is shown in <a data-type="xref" href="#result_of_opening_formtestdotphp_in" class="calibre6">Figure 12-1</a>.</p>
+
+<figure class="calibre23"><div id="result_of_opening_formtestdotphp_in" class="figure"><img alt="The result of opening formtest.php in a web browser" src="Images/pmj6_1201.png" class="calibre74"/>
+<h6 class="calibre24"><span class="keep-together">Figure 12-1. </span>The result of opening formtest.php in a web browser</h6>
+</div></figure>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Retrieving Submitted Data" class="calibre4"><div class="preface" id="retrieving_submitted_data">
+<h1 class="calibre11">Retrieving Submitted Data</h1>
+
+<p class="author1"><a data-type="xref" href="#formtestdotphpem_dasha_simple_php_form_h" class="calibre6">Example 12-1</a> is only<a contenteditable="false" data-primary="form handling" data-secondary="retrieving submitted data" data-type="indexterm" id="idm45694713177304" class="calibre6"/> one part of the multipart form-handling process. If you enter a name and click the Submit Query button, absolutely nothing will happen other than the form being redisplayed (and the entered data lost). So now it’s time to add some PHP code to process the data submitted by the form.</p>
+
+<p class="author1"><a data-type="xref" href="#updated_version_of_formtestdotphp" class="calibre6">Example 12-2</a> expands on the previous program to include data processing. Type it or modify <em class="hyperlink">formtest.php</em> by adding in the new lines, save it as <em class="hyperlink">formtest2.php</em>, and try the program for yourself. The result of running this program and entering a name is shown in <a data-type="xref" href="#formtestdotphp_with_data_handling" class="calibre6">Figure 12-2</a>.</p>
+
+<div data-type="example" id="updated_version_of_formtestdotphp" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 12-2. </span>Updated version of formtest.php</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// formtest2.php</code>
+  <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="k">empty</code><code class="p">((</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'name'</code><code class="p">])))</code> <code class="nv">$name</code> <code class="o">=</code> <code class="nv">$_POST</code><code class="p">[</code><code class="s">'name'</code><code class="p">];</code>
+  <code class="k">else</code> <code class="nv">$name</code> <code class="o">=</code> <code class="s">"(Not Entered)"</code><code class="p">;</code>
+
+  <code class="k">echo</code> <code class="s">&lt;&lt;&lt;_END</code>
+<code class="s">    &lt;html&gt;</code>
+<code class="s">      &lt;head&gt;</code>
+<code class="s">        &lt;title&gt;Form Test&lt;/title&gt;</code>
+<code class="s">      &lt;/head&gt;</code>
+<code class="s">      &lt;body&gt;</code>
+<code class="s">        Your name is: $name&lt;br&gt;</code>
+<code class="s">        &lt;form method="post" action="formtest2.php"&gt;</code>
+<code class="s">          What is your name?</code>
+<code class="s">          &lt;input type="text" name="name"&gt;</code>
+<code class="s">          &lt;input type="submit"&gt;</code>
+<code class="s">        &lt;/form&gt;</code>
+<code class="s">      &lt;/body&gt;</code>
+<code class="s">    &lt;/html&gt;</code>
+<code class="s">_END;</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<figure class="calibre23"><div id="formtestdotphp_with_data_handling" class="figure"><img alt="formtest.php with data handling" src="Images/pmj6_1202.png" class="calibre74"/>
+<h6 class="calibre24"><span class="keep-together">Figure 12-2. </span>formtest.php with data handling</h6>
+</div></figure>
+
+<p class="author1">The only changes are a couple of lines at the start that check the <code class="calibre15">name</code> field of the <code class="calibre15">$_POST</code> associative array and echo it back to the user. <a data-type="xref" href="ch11.xhtml#accessing_mysql_using_php" class="calibre6">Chapter 11</a> introduced the <code class="calibre15">$_POST</code> associative array, which contains an element for each field in an HTML form. In <a data-type="xref" href="#updated_version_of_formtestdotphp" class="calibre6">Example 12-2</a>, the input name used was <code class="calibre15">name</code> and the form method was POST, so the element <code class="calibre15">name</code> of the <code class="calibre15">$_POST</code> array contains the value in <code class="calibre15">$_POST['name']</code>.</p>
+
+<p class="author1">The PHP <code class="calibre15">isset</code> function is used to test whether <code class="calibre15">$_POST['name']</code> has been assigned a value. If nothing was posted, the program assigns the value <code class="calibre15">(Not entered)</code>; otherwise, it stores the value that was entered. Then a single line has been added after the <code class="calibre15">&lt;body&gt;</code> statement to display that value, which is stored in <code class="calibre15">$name</code>.</p>
+
+<section data-type="sect2" data-pdf-bookmark="Default Values" class="calibre4"><div class="preface" id="default_values">
+<h2 class="calibre28">Default Values</h2>
+
+<p class="author1">Sometimes it’s convenient<a contenteditable="false" data-primary="form handling" data-secondary="supplying default values" data-type="indexterm" id="idm45694712960872" class="calibre6"/> to offer your site visitors a default value in a web form. For example, suppose you put up a loan repayment calculator widget on a real estate website. It could make sense to enter default values of, say, 15 years and 3% interest so that the user can simply type either the principal sum to borrow or the amount that they can afford to pay each month.</p>
+
+<p class="author1">In this case, the HTML for those two values would be something like <a data-type="xref" href="#setting_default_values" class="calibre6">Example 12-3</a>.</p>
+
+<div data-type="example" id="setting_default_values" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 12-3. </span>Setting default values</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;form</code> <code class="na">method=</code><code class="s">"post"</code> <code class="na">action=</code><code class="s">"calc.php"</code><code class="nt">&gt;&lt;pre&gt;</code>
+      Loan Amount <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"text"</code> <code class="na">name=</code><code class="s">"principal"</code><code class="nt">&gt;</code>
+  Number of Years <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"text"</code> <code class="na">name=</code><code class="s">"years"</code>    <code class="na">value=</code><code class="s">"15"</code><code class="nt">&gt;</code>
+    Interest Rate <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"text"</code> <code class="na">name=</code><code class="s">"interest"</code> <code class="na">value=</code><code class="s">"3"</code><code class="nt">&gt;</code>
+                  <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"submit"</code><code class="nt">&gt;</code>
+<code class="nt">&lt;/pre&gt;&lt;/form&gt;</code></pre>
+</div>
+
+<p class="author1">Take a look at the third and fourth inputs. By populating the <code class="calibre15">value</code> attribute, you display a default value in the field, which the users can then change if they wish. With sensible default values, you can often make your web forms more user-friendly by minimizing unnecessary typing. The result of the previous code looks like <a data-type="xref" href="#using_default_values_for_selected_form_f" class="calibre6">Figure 12-3</a>. Of course, this was created to illustrate default values, and, because the program <em class="hyperlink">calc.php</em> has not been written, the form will return a 404 error message if you submit it.</p>
+
+<p class="author1">Default values are also used for hidden fields if you want to pass extra information from your web page to your program, in addition to what users enter. We’ll look at hidden fields later in this chapter.</p>
+
+<figure class="calibre23"><div id="using_default_values_for_selected_form_f" class="figure"><img alt="Using default values for selected form fields" src="Images/pmj6_1203.png" class="calibre75"/>
+<h6 class="calibre24"><span class="keep-together">Figure 12-3. </span>Using default values for selected form fields</h6>
+</div></figure>
+
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Input Types" class="calibre4"><div class="preface" id="input_types">
+<h2 class="calibre28">Input Types</h2>
+
+<p class="author1">HTML forms are very versatile and allow you to submit a wide range of input types, from text boxes and text areas to checkboxes, radio buttons, and more.</p>
+
+<section data-type="sect3" data-pdf-bookmark="Text boxes" class="calibre4"><div class="preface" id="text_boxes">
+<h3 class="calibre43">Text boxes</h3>
+
+<p class="author1">The<a contenteditable="false" data-primary="form handling" data-secondary="text boxes" data-type="indexterm" id="idm45694712513720" class="calibre6"/><a contenteditable="false" data-primary="text boxes" data-type="indexterm" id="idm45694712512312" class="calibre6"/> input type you will probably use most often is the text box. It accepts a wide range of alphanumeric text and other characters in a single-line box. The general format of a text box input is as follows:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">"text"</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">"</code><em class="calibre30"><code class="s1">name</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">size=</code><code class="s">"</code><em class="calibre30"><code class="s1">size</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">maxlength=</code><code class="s">"</code><em class="calibre30"><code class="s1">length</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">value=</code><code class="s">"</code><em class="calibre30"><code class="s1">value</code></em><code class="s">"</code><code class="nt">&gt;</code></pre>
+
+<p class="author1">We’ve already covered the <code class="calibre15">name</code> and <code class="calibre15">value</code> attributes, but two more are introduced here: <code class="calibre15">size</code> and <code class="calibre15">maxlength</code>. The <code class="calibre15">size</code> attribute specifies the width of the box (in characters of the current font) as it should appear on the screen, and <code class="calibre15">maxlength</code> specifies the maximum number of characters that a user is allowed to enter into the field.</p>
+
+<p class="author1">The only required attributes are <code class="calibre15">type</code>, which tells the web browser what type of input to expect, and <code class="calibre15">name</code>, for giving the input a name that will be used to process the field upon receipt of the submitted form.</p>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Text areas" class="calibre4"><div class="preface" id="text_areas">
+<h3 class="calibre43">Text areas</h3>
+
+<p class="author1">When<a contenteditable="false" data-primary="form handling" data-secondary="text areas" data-type="indexterm" id="idm45694712481992" class="calibre6"/> you need to accept input of more than a short line of text, use a text area. This is similar to a text box, but, because it allows multiple lines, it has some different attributes. Its general format looks like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;textarea</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">"</code><em class="calibre30"><code class="s1">name</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">cols=</code><code class="s">"</code><em class="calibre30"><code class="s1">width</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">rows=</code><code class="s">"</code><em class="calibre30"><code class="s1">height</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">wrap=</code><code class="s">"</code><em class="calibre30"><code class="s1">type</code></em><code class="s">"</code><code class="nt">&gt;</code><code class="calibre15">
+</code><code class="nt">&lt;/textarea&gt;</code></pre>
+
+<p class="author1">The first thing to notice is that <code class="calibre15">&lt;textarea&gt;</code> has its own tag and is not a subtype of the <code class="calibre15">&lt;input&gt;</code> tag. It therefore requires a closing <code class="calibre15">&lt;/textarea&gt;</code> to end input.</p>
+
+<p class="author1">Instead of a default attribute, if you have default text to display, you must put it before the closing <code class="calibre15">&lt;/textarea&gt;</code>, and it will then be displayed and be editable by the user:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;textarea</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">"</code><em class="calibre30"><code class="s1">name</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">cols=</code><code class="s">"</code><em class="calibre30"><code class="s1">width</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">rows=</code><code class="s">"</code><em class="calibre30"><code class="s1">height</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">wrap=</code><code class="s">"</code><em class="calibre30"><code class="s1">type</code></em><code class="s">"</code><code class="nt">&gt;</code><code class="calibre15">
+  This is some default text.
+</code><code class="nt">&lt;/textarea&gt;</code></pre>
+
+<p class="author1">To control the width and height, use the <code class="calibre15">cols</code> and <code class="calibre15">rows</code> attributes. Both use the character spacing of the current font to determine the size of the area. If you omit these values, a default input box will be created that will vary in dimensions depending on the browser used, so you should always define them to be certain about how your form will appear.</p>
+
+<p class="author1">Last, you can control how the text entered into the box will wrap (and how any such wrapping will be sent to the server) using the <code class="calibre15">wrap</code> attribute. <a data-type="xref" href="#wrap_types_available_in_a_textarea_i" class="calibre6">Table 12-1</a> shows the wrap types available. If you leave out the <code class="calibre15">wrap</code> attribute, soft wrapping is used.</p>
+
+<table id="wrap_types_available_in_a_textarea_i" class="calibre33">
+	<caption class="calibre34"><span class="keep-together">Table 12-1. </span>The wrap types available in a <em class="hyperlink">&lt;textarea&gt;</em> input</caption>
+	<thead class="calibre35">
+		<tr class="calibre36">
+			<th class="calibre37">Type</th>
+			<th class="calibre37">Action</th>
+		</tr>
+	</thead>
+	<tbody class="calibre38">
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">off</code></td>
+			<td class="calibre39">Text does not wrap, and lines appear exactly as the user types them.</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">soft</code></td>
+			<td class="calibre39">Text wraps but is sent to the server as one long string without carriage returns and line feeds.</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">hard</code></td>
+			<td class="calibre39">Text wraps and is sent to the server in wrapped format with soft or hard returns and line feeds.</td>
+		</tr>
+	</tbody>
+</table>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Checkboxes" class="calibre4"><div class="preface" id="checkboxes">
+<h3 class="calibre43">Checkboxes</h3>
+
+<p class="author1">When<a contenteditable="false" data-primary="form handling" data-secondary="checkboxes" data-type="indexterm" id="FHcheck11" class="calibre6"/><a contenteditable="false" data-primary="checkboxes" data-type="indexterm" id="check11" class="calibre6"/> you want to offer a number of different options to a user, from which they can select one or more items, checkboxes are the way to go. Here is the format to use:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">"checkbox"</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">"</code><em class="calibre30"><code class="s1">name</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">value=</code><code class="s">"</code><em class="calibre30"><code class="s1">value</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">checked=</code><code class="s">"checked"</code><code class="nt">&gt;</code></pre>
+
+<p class="author1">By default, checkboxes are square. If you include the <code class="calibre15">checked</code> attribute, the box is already checked when the browser is displayed. The string you assign to the attribute should either be surrounded with double or single quotes or the value <code class="calibre15">"checked"</code>, or there should be no value assigned (just <code class="calibre15">checked</code>). If you don’t include the attribute, the box is shown unchecked. Here is an example of creating an unchecked box:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+I Agree <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"checkbox"</code> <code class="na">name=</code><code class="s">"agree"</code><code class="nt">&gt;</code></pre>
+
+<p class="author1">If the user doesn’t check the box, no value will be submitted. But if they do, a value of <code class="calibre15">"on"</code> will be submitted for the field named <code class="calibre15">agree</code>. If you prefer to have your own value submitted instead of the word <em class="hyperlink">on</em> (such as the number 1), you could use the following syntax:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+I Agree <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"checkbox"</code> <code class="na">name=</code><code class="s">"agree"</code> <code class="na">value=</code><code class="s">"1"</code><code class="nt">&gt;</code></pre>
+
+<p class="author1">On the other hand, if you wish to offer a newsletter to your readers when submitting a form, you might want to have the checkbox already checked as the default value:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+Subscribe? <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"checkbox"</code> <code class="na">name=</code><code class="s">"news"</code> <code class="na">checked=</code><code class="s">"checked"</code><code class="nt">&gt;</code></pre>
+
+<p class="author1">If you want to allow groups of items to be selected at one time, assign them all the same name. However, only the last item checked will be submitted, unless you pass an array as the name. For example, <a data-type="xref" href="#offering_multiple_checkbox_choices" class="calibre6">Example 12-4</a> allows the user to select their favorite ice creams (see <a data-type="xref" href="#using_checkboxes_to_make_quick_selection" class="calibre6">Figure 12-4</a> for how it displays in a browser).</p>
+
+<div data-type="example" id="offering_multiple_checkbox_choices" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 12-4. </span>Offering multiple checkbox choices</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+   Vanilla <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"checkbox"</code> <code class="na">name=</code><code class="s">"ice"</code> <code class="na">value=</code><code class="s">"Vanilla"</code><code class="nt">&gt;</code>
+ Chocolate <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"checkbox"</code> <code class="na">name=</code><code class="s">"ice"</code> <code class="na">value=</code><code class="s">"Chocolate"</code><code class="nt">&gt;</code>
+Strawberry <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"checkbox"</code> <code class="na">name=</code><code class="s">"ice"</code> <code class="na">value=</code><code class="s">"Strawberry"</code><code class="nt">&gt;</code></pre>
+</div>
+
+<figure class="calibre23"><div id="using_checkboxes_to_make_quick_selection" class="figure"><img alt="Using checkboxes to make quick selections" src="Images/pmj6_1204.png" class="calibre76"/>
+<h6 class="calibre24"><span class="keep-together">Figure 12-4. </span>Using checkboxes to make quick selections</h6>
+</div></figure>
+
+<p class="author1">If only one of the checkboxes is selected, such as the second one, only that item will be submitted (the field named <code class="calibre15">ice</code> would be assigned the value <code class="calibre15">"Chocolate"</code>). But if two or more are selected, only the last value will be submitted, with prior values being ignored.</p>
+
+<p class="author1">If you <em class="hyperlink">want</em> exclusive behavior—so that only one item can be submitted—then you should use radio buttons instead (see the next section). Otherwise, to allow multiple submissions, you have to slightly alter the HTML, as in <a data-type="xref" href="#submitting_multiple_values_with_an_array" class="calibre6">Example 12-5</a> (note the addition of the square brackets, <code class="calibre15">[]</code>, following the values of <code class="calibre15">ice</code>).</p>
+
+<div data-type="example" id="submitting_multiple_values_with_an_array" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 12-5. </span>Submitting multiple values with an array</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+   Vanilla <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"checkbox"</code> <code class="na">name=</code><code class="s">"ice[]"</code> <code class="na">value=</code><code class="s">"Vanilla"</code><code class="nt">&gt;</code>
+ Chocolate <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"checkbox"</code> <code class="na">name=</code><code class="s">"ice[]"</code> <code class="na">value=</code><code class="s">"Chocolate"</code><code class="nt">&gt;</code>
+Strawberry <code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"checkbox"</code> <code class="na">name=</code><code class="s">"ice[]"</code> <code class="na">value=</code><code class="s">"Strawberry"</code><code class="nt">&gt;</code></pre>
+</div>
+
+<p class="author1">Now when the form is submitted, if any of these items have been checked, an array called <code class="calibre15">ice</code> will be submitted that contains all the selected values. You can extract either the single submitted value or the array of values to a variable like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$ice</code> <code class="o">=</code> <code class="nv">$_POST</code><code class="p">[</code><code class="s">'ice'</code><code class="p">];</code></pre>
+
+<p class="author1">If the field <code class="calibre15">ice</code> has been posted as a single value, <code class="calibre15">$ice</code> will be a single string, such as <code class="calibre15">"Strawberry"</code>. But if <code class="calibre15">ice</code> was defined in the form as an array (like in <a data-type="xref" href="#submitting_multiple_values_with_an_array" class="calibre6">Example 12-5</a>), <code class="calibre15">$ice</code> will be an array, and its number of elements will be the number of values submitted. <a data-type="xref" href="#seven_possible_sets_of_values_for_th" class="calibre6">Table 12-2</a> shows the seven possible sets of values that could be submitted by this HTML for one, two, or all three selections. In each case, an array of one, two, or three items is created.</p>
+
+<table id="seven_possible_sets_of_values_for_th" class="calibre33">
+	<caption class="calibre34"><span class="keep-together">Table 12-2. </span>The seven possible sets of values for the array <code class="calibre60">$ice</code></caption>
+	<thead class="calibre35">
+		<tr class="calibre36">
+			<th class="calibre37">One value submitted</th>
+			<th class="calibre37">Two values submitted</th>
+			<th class="calibre37">Three values submitted</th>
+		</tr>
+	</thead>
+	<tbody class="calibre38">
+		<tr class="calibre36">
+			<td class="calibre39">
+			<pre data-code-language="php" data-programming-language="perl" class="calibre77">
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">0</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Vanilla</code>
+
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">0</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Chocolate</code>
+
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">0</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Strawberry</code></pre>
+			</td>
+			<td class="calibre39">
+			<pre data-code-language="php" data-programming-language="perl" class="calibre77">
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">0</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Vanilla</code>
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">1</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Chocolate</code>
+
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">0</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Vanilla</code>
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">1</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Strawberry</code>
+
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">0</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Chocolate</code>
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">1</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Strawberry</code></pre>
+			</td>
+			<td class="calibre39">
+			<pre data-code-language="php" data-programming-language="perl" class="calibre77">
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">0</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Vanilla</code>
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">1</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Chocolate</code>
+<code class="nv2">$ice</code><code class="p3">[</code><code class="mi2">2</code><code class="p3">]</code> <code class="o2">=&gt;</code> <code class="nx2">Strawberry</code></pre>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p class="author1">If <code class="calibre15">$ice</code> is an array, the PHP code to display its contents is quite simple and might look like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">foreach</code><code class="p">(</code><code class="nv">$ice</code> <code class="k">as</code> <code class="nv">$item</code><code class="p">)</code> <code class="k">echo</code> <code class="s">"</code><code class="err">$item</code><code class="s">&lt;br&gt;"</code><code class="p">;</code></pre>
+
+<p class="author1">This uses the standard PHP <code class="calibre15">foreach</code> construct to iterate through the array <code class="calibre15">$ice</code> and pass each element’s value into the variable <code class="calibre15">$item</code>, which is then displayed via the <code class="calibre15">echo</code> command. The <code class="calibre15">&lt;br&gt;</code> is just an HTML formatting device to force a new line after each flavor in the display.<a contenteditable="false" data-primary="" data-startref="FHcheck11" data-type="indexterm" id="idm45694711948648" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="check11" data-type="indexterm" id="idm45694712001320" class="calibre6"/></p>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Radio buttons" class="calibre4"><div class="preface" id="radio_buttons">
+<h3 class="calibre43">Radio buttons</h3>
+
+<p class="author1">Radio buttons<a contenteditable="false" data-primary="form handling" data-secondary="radio buttons" data-type="indexterm" id="idm45694711998616" class="calibre6"/><a contenteditable="false" data-primary="radio buttons" data-type="indexterm" id="idm45694711997208" class="calibre6"/> are named after the push-in preset buttons found on many older radios, where any previously depressed button pops back up when another is pressed. They are used when you want only a single value to be returned from a selection of two or more options. All the buttons in a group must use the same name, and, because only a single value is returned, you do not have to pass an array.</p>
+
+<p class="author1">For example, if your website offers a choice of delivery times for items purchased from your store, you might use HTML like that in <a data-type="xref" href="#using_radio_buttons" class="calibre6">Example 12-6</a> (see <a data-type="xref" href="#selecting_a_single_value_with_radio_butt" class="calibre6">Figure 12-5</a> to see how it displays). By default, radio buttons are round.</p>
+
+<div data-type="example" id="using_radio_buttons" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 12-6. </span>Using radio buttons</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+8am-Noon<code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"radio"</code> <code class="na">name=</code><code class="s">"time"</code> <code class="na">value=</code><code class="s">"1"</code><code class="nt">&gt;</code>
+Noon-4pm<code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"radio"</code> <code class="na">name=</code><code class="s">"time"</code> <code class="na">value=</code><code class="s">"2"</code> <code class="na">checked=</code><code class="s">"checked"</code><code class="nt">&gt;</code>
+ 4pm-8pm<code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"radio"</code> <code class="na">name=</code><code class="s">"time"</code> <code class="na">value=</code><code class="s">"3"</code><code class="nt">&gt;</code></pre>
+</div>
+
+<figure class="calibre23"><div id="selecting_a_single_value_with_radio_butt" class="figure"><img alt="Selecting a single value with radio buttons" src="Images/pmj6_1205.png" class="calibre76"/>
+<h6 class="calibre24"><span class="keep-together">Figure 12-5. </span>Selecting a single value with radio buttons</h6>
+</div></figure>
+
+<p class="author1">Here, the second option of Noon–4pm has been selected by default. This default choice ensures that at least one delivery time will be chosen by the user, which they can change to one of the other two options if they prefer. Had one of the items not been already checked, the user might forget to select an option, and no value would be submitted at all for the delivery time.</p>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Hidden fields" class="calibre4"><div class="preface" id="hidden_fields">
+<h3 class="calibre43">Hidden fields</h3>
+
+<p class="author1">Sometimes<a contenteditable="false" data-primary="form handling" data-secondary="hidden fields" data-type="indexterm" id="idm45694711829128" class="calibre6"/><a contenteditable="false" data-primary="hidden fields" data-type="indexterm" id="idm45694711827720" class="calibre6"/> it is convenient to have hidden form fields so that you can keep track of the state of form entry. For example, you might wish to know whether a form has already been submitted. You can achieve this by adding some HTML in your PHP code, such as the following:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code> <code class="s">'&lt;input type="hidden" name="submitted" value="yes"&gt;'</code></pre>
+
+<p class="author1">This is a simple PHP <code class="calibre15">echo</code> statement that adds an <code class="calibre15">input</code> field to the HTML form. Let’s assume the form was created outside the program and displayed to the user. The first time the PHP program receives the input, this line of code has not run, so there will be no field named <code class="calibre15">submitted</code>. The PHP program re-creates the form, adding the <code class="calibre15">input</code> field. So when the visitor resubmits the form, the PHP program receives it with the <code class="calibre15">submitted</code> field set to <code class="calibre15">"yes"</code>. The code can simply check whether the field is present:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'submitted'</code><code class="p">]))</code>
+<code class="p">{</code><code class="o">...</code></pre>
+
+<p class="author1">Hidden fields can also be useful for storing other details, such as a session ID string that you might create to identify a user, and so on.</p>
+
+<div data-type="warning" epub:type="warning" class="calibre21"><h6 class="calibre22">Warning</h6>
+<p class="author1">Never<a contenteditable="false" data-primary="security issues" data-secondary="hidden fields" data-type="indexterm" id="idm45694711818808" class="calibre6"/> treat hidden fields as secure—because they are not. Someone could easily view the HTML containing them by using a browser’s View Source feature. A malicious attacker could also craft a post that removes, adds, or changes a hidden field.</p>
+</div>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="&lt;select&gt;" class="calibre4"><div class="preface" id="less_thanselectgreater_than">
+<h3 class="calibre43">&lt;select&gt;</h3>
+
+<p class="author1">The <code class="calibre15">&lt;select&gt;</code> tag<a contenteditable="false" data-primary="form handling" data-secondary="drop-down lists" data-type="indexterm" id="idm45694711754600" class="calibre6"/><a contenteditable="false" data-primary="drop-down lists" data-type="indexterm" id="idm45694711753304" class="calibre6"/><a contenteditable="false" data-primary="&lt;select&gt; tags" data-primary-sortas="select tags" data-type="indexterm" id="idm45694711752200" class="calibre6"/> lets you create a drop-down list of options, offering either single or multiple selections. It conforms to the following syntax:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;select</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">"</code><em class="calibre30"><code class="s1">name</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">size=</code><code class="s">"</code><em class="calibre30"><code class="s1">size</code></em><code class="s">"</code><code class="calibre15"> </code><code class="na">multiple=</code><code class="s">"multiple"</code><code class="nt">&gt;</code></pre>
+
+<p class="author1">The attribute <code class="calibre15">size</code> is the number of lines to display before the dropdown is expanded. Clicking on the display causes a list to drop down, showing all the options. If you use the <code class="calibre15">multiple</code> attribute, a user can select multiple options from the list by pressing the Ctrl key when clicking. So, to ask a user for their favorite vegetable from a choice of five, you might use HTML like that in <a data-type="xref" href="#using_select" class="calibre6">Example 12-7</a>, which offers a single selection.</p>
+
+<div data-type="example" id="using_select" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 12-7. </span>Using <code class="calibre15">&lt;select&gt;</code></h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+Vegetables
+<code class="nt">&lt;select</code> <code class="na">name=</code><code class="s">"veg"</code> <code class="na">size=</code><code class="s">"1"</code><code class="nt">&gt;</code>
+  <code class="nt">&lt;option</code> <code class="na">value=</code><code class="s">"Peas"</code><code class="nt">&gt;</code>Peas<code class="nt">&lt;/option&gt;</code>
+  <code class="nt">&lt;option</code> <code class="na">value=</code><code class="s">"Beans"</code><code class="nt">&gt;</code>Beans<code class="nt">&lt;/option&gt;</code>
+  <code class="nt">&lt;option</code> <code class="na">value=</code><code class="s">"Carrots"</code><code class="nt">&gt;</code>Carrots<code class="nt">&lt;/option&gt;</code>
+  <code class="nt">&lt;option</code> <code class="na">value=</code><code class="s">"Cabbage"</code><code class="nt">&gt;</code>Cabbage<code class="nt">&lt;/option&gt;</code>
+  <code class="nt">&lt;option</code> <code class="na">value=</code><code class="s">"Broccoli"</code><code class="nt">&gt;</code>Broccoli<code class="nt">&lt;/option&gt;</code>
+<code class="nt">&lt;/select&gt;</code></pre>
+</div>
+
+<p class="author1">This HTML offers five choices, with the first one, <em class="hyperlink">Peas</em>, preselected (due to it being the first item). <a data-type="xref" href="#creating_a_drop-down_list_with_select" class="calibre6">Figure 12-6</a> shows the output where the list has been clicked to drop it down, and the option <em class="hyperlink">Carrots</em> has been highlighted. If you want to have a different default option offered first (such as <em class="hyperlink">Beans</em>), use the <code class="calibre15">selected</code> attribute, like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;option</code> <code class="na">selected=</code><code class="s">"selected"</code> <code class="na">value=</code><code class="s">"Beans"</code><code class="nt">&gt;</code>Beans<code class="nt">&lt;/option&gt;</code></pre>
+
+<figure class="calibre23"><div id="creating_a_drop-down_list_with_select" class="figure"><img alt="Creating a drop-down list with select" src="Images/pmj6_1206.png" class="calibre78"/>
+<h6 class="calibre24"><span class="keep-together">Figure 12-6. </span>Creating a drop-down list with <code class="calibre15">&lt;select&gt;</code></h6>
+</div></figure>
+
+<p class="author1">You can also allow users to select more than one item, as in <a data-type="xref" href="#using_select_with_the_multiple_attribute" class="calibre6">Example 12-8</a>.</p>
+
+<div data-type="example" id="using_select_with_the_multiple_attribute" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 12-8. </span>Using <code class="calibre15">&lt;select&gt;</code> with the <code class="calibre15">multiple</code> attribute</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+Vegetables
+<code class="nt">&lt;select</code> <code class="na">name=</code><code class="s">"veg"</code> <code class="na">size=</code><code class="s">"5"</code> <code class="na">multiple=</code><code class="s">"multiple"</code><code class="nt">&gt;</code>
+  <code class="nt">&lt;option</code> <code class="na">value=</code><code class="s">"Peas"</code><code class="nt">&gt;</code>Peas<code class="nt">&lt;/option&gt;</code>
+  <code class="nt">&lt;option</code> <code class="na">value=</code><code class="s">"Beans"</code><code class="nt">&gt;</code>Beans<code class="nt">&lt;/option&gt;</code>
+  <code class="nt">&lt;option</code> <code class="na">value=</code><code class="s">"Carrots"</code><code class="nt">&gt;</code>Carrots<code class="nt">&lt;/option&gt;</code>
+  <code class="nt">&lt;option</code> <code class="na">value=</code><code class="s">"Cabbage"</code><code class="nt">&gt;</code>Cabbage<code class="nt">&lt;/option&gt;</code>
+  <code class="nt">&lt;option</code> <code class="na">value=</code><code class="s">"Broccoli"</code><code class="nt">&gt;</code>Broccoli<code class="nt">&lt;/option&gt;</code>
+<code class="nt">&lt;/select&gt;</code></pre>
+</div>
+
+<p class="author1">This HTML is not very different; the <code class="calibre15">size</code> has been changed to <code class="calibre15">"5"</code>, and the attribute <code class="calibre15">multiple</code> has been added. But, as you can see from <a data-type="xref" href="#using_a_select_with_the_multiple_attribu" class="calibre6">Figure 12-7</a>, it is now possible for the user to select more than one option by using the Ctrl key when clicking. You can leave out the <code class="calibre15">size</code> attribute if you wish, and the output will be the same; however, with a larger list, the drop-down box may display more items, so I recommend that you pick a suitable number of rows and stick with it. I also recommend not using multiple select boxes smaller than two rows in height—some browsers may not correctly display the scroll bars needed to access them.</p>
+
+<figure class="calibre23"><div id="using_a_select_with_the_multiple_attribu" class="figure"><img alt="Using a select with the multiple attribute" src="Images/pmj6_1207.png" class="calibre78"/>
+<h6 class="calibre24"><span class="keep-together">Figure 12-7. </span>Using a <code class="calibre15">&lt;select&gt;</code> with the <code class="calibre15">multiple</code> attribute</h6>
+</div></figure>
+
+<p class="author1">You can also use the <code class="calibre15">selected</code> attribute within a multiple select and can, in fact, have more than one option preselected if you wish.</p>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Labels" class="calibre4"><div class="preface" id="labels">
+<h3 class="calibre43">Labels</h3>
+
+<p class="author1">You<a contenteditable="false" data-primary="form handling" data-secondary="interacting with entire element" data-type="indexterm" id="idm45694711540088" class="calibre6"/><a contenteditable="false" data-primary="&lt;label&gt; tags" data-primary-sortas="label tags" data-type="indexterm" id="idm45694711538712" class="calibre6"/> can provide an even better user experience by utilizing the <code class="calibre15">&lt;label&gt;</code> tag. With it, you can surround a form element, making it selectable by clicking any visible part contained between the opening and closing <code class="calibre15">&lt;label&gt;</code> tags.</p>
+
+<p class="author1">For instance, going back to the example of choosing a delivery time, you could allow the user to click the radio button itself <em class="hyperlink">and</em> the associated text, like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;label&gt;</code>8am-Noon<code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"radio"</code> <code class="na">name=</code><code class="s">"time"</code> <code class="na">value=</code><code class="s">"1"</code><code class="nt">&gt;&lt;/label&gt;</code></pre>
+
+<p class="author1">The text will not be underlined like a hyperlink when you do this, but as the mouse pointer passes over it, it will change to an arrow instead of a text cursor, indicating that the whole item is clickable.</p>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="The submit button" class="calibre4"><div class="preface" id="submit_button">
+<h3 class="calibre43">The submit button</h3>
+
+<p class="author1">To<a contenteditable="false" data-primary="form handling" data-secondary="submit button text and graphics" data-type="indexterm" id="idm45694711527720" class="calibre6"/> match the type of form being submitted, you can change the text of the submit button to anything you like by using the <code class="calibre15">value</code> attribute, like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"submit"</code> <code class="na">value=</code><code class="s">"Search"</code><code class="nt">&gt;</code></pre>
+
+<p class="author1">You can also replace the standard text button with a graphic image of your choice, using HTML such as this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">"image"</code> <code class="na">name=</code><code class="s">"submit"</code> <code class="na">src=</code><code class="s">"image.gif"</code><code class="nt">&gt;</code></pre>
+</div></section>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Sanitizing Input" class="calibre4"><div class="preface" id="sanitizing_input">
+<h2 class="calibre28">Sanitizing Input</h2>
+
+<p class="author1">Now<a contenteditable="false" data-primary="form handling" data-secondary="sanitizing input" data-type="indexterm" id="FHsanitiz11" class="calibre6"/><a contenteditable="false" data-primary="sanitization" data-type="indexterm" id="sanit11" class="calibre6"/><a contenteditable="false" data-primary="security issues" data-secondary="sanitizing form input" data-type="indexterm" id="SIinput11" class="calibre6"/> we return to PHP programming. It can never be emphasized enough that handling user data is a security minefield, and it is essential to learn to treat all such data with the utmost caution from the start. It’s actually not that difficult to sanitize user input from potential hacking attempts, but it must be done.</p>
+
+<p class="author1">The first thing to remember is that regardless of what constraints you have placed in an HTML form to limit the types and sizes of inputs, it is a trivial matter for a hacker to use their browser’s View Source feature to extract the form and modify it to provide malicious input to your website.</p>
+
+<p class="author1">Therefore, you must never trust any variable that you fetch from either the <code class="calibre15">$_GET</code> or <code class="calibre15">$_POST</code> arrays until you have sanitized it. If you don’t, users may try to inject JavaScript into the data to interfere with your site’s operation, or even attempt to add MySQL commands to compromise your database.</p>
+
+<p class="author1">So, instead of just using code such as the following when reading in user input:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$variable</code> <code class="o">=</code> <code class="nv">$_POST</code><code class="p">[</code><code class="s">'user_input'</code><code class="p">];</code></pre>
+
+<p class="author1">you should also use one or more of the following lines of code. For example, to prevent escape characters from being injected into a string that will be presented to MySQL, use the following to escape all necessary characters and also add quotes to the start and end of the string. Remember that this function takes into account the current character set of a MySQL connection, so it must be used with a PDO connection object (in this instance, <code class="calibre15">$pdo</code>), as discussed in <a data-type="xref" href="ch11.xhtml#accessing_mysql_using_php" class="calibre6">Chapter 11</a>:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$variable</code> <code class="o">=</code> <code class="nv">$pdo</code><code class="o">-&gt;</code><code class="na">quote</code><code class="p">(</code><code class="nv">$variable</code><code class="p">);</code></pre>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">Remember that the safest way to secure MySQL from hacking attempts is to use placeholders and prepared statements, as described in <a data-type="xref" href="ch11.xhtml#accessing_mysql_using_php" class="calibre6">Chapter 11</a>. If you do so for all accesses to MySQL, it becomes unnecessary to escape data being transferred into or out of the database. You will, however, still need to sanitize input when including it within HTML.</p>
+</div>
+
+<p class="author1">To<a contenteditable="false" data-primary="stripslashes function (PHP)" data-type="indexterm" id="idm45694711363864" class="calibre6"/><a contenteditable="false" data-primary="magic quotes feature (PHP)" data-type="indexterm" id="idm45694711362760" class="calibre6"/><a contenteditable="false" data-primary="PHP programming language" data-secondary="magic quotes feature" data-type="indexterm" id="idm45694711361688" class="calibre6"/><a contenteditable="false" data-primary="security issues" data-secondary="magic quotes feature" data-type="indexterm" id="idm45694711360344" class="calibre6"/> get rid of unwanted slashes, you should first check whether PHP’s magic quotes feature is enabled (which will escape quotes by adding slashes), and if so call the <code class="calibre15">stripslashes</code> function like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="nb">get_magic_quotes_gpc</code><code class="p">())</code>
+  <code class="nv">$variable</code> <code class="o">=</code> <code class="nb">stripslashes</code><code class="p">(</code><code class="nv">$variable</code><code class="p">);</code></pre>
+
+<p class="author1">And to remove any HTML from a string, use the following:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$variable</code> <code class="o">=</code> <code class="nb">htmlentities</code><code class="p">(</code><code class="nv">$variable</code><code class="p">);</code></pre>
+
+<p class="author1">For example, this would change a string of interpretable HTML code like <code class="calibre15">&lt;b&gt;hi&lt;/b&gt;</code> into <code class="calibre15">&amp;lt;b&amp;gt;hi&amp;lt;/b&amp;gt;</code>, which then displays as text and won’t be interpreted as HTML tags.</p>
+
+<p class="author1">Finally, if<a contenteditable="false" data-primary="htmlentities function (PHP)" data-type="indexterm" id="idm45694711334472" class="calibre6"/> you wish to strip HTML entirely from an input, use the following (but ensure you use it before calling <code class="calibre15">htmlentities</code>, which replaces any angle brackets used as part of HTML tags):</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$variable</code> <code class="o">=</code> <code class="nb">strip_tags</code><code class="p">(</code><code class="nv">$variable</code><code class="p">);</code></pre>
+
+<p class="author1">In fact, until<a contenteditable="false" data-primary="sanitizeString function (PHP)" data-type="indexterm" id="idm45694711286232" class="calibre6"/><a contenteditable="false" data-primary="sanitizeMySQL function (PHP)" data-type="indexterm" id="idm45694711330824" class="calibre6"/> you know exactly what sanitization you require for a program, <a data-type="xref" href="#sanitizestring_and_sanitizemysql_fun" class="calibre6">Example 12-9</a> shows a pair of functions that brings all these checks together to provide a very good level of security.</p>
+
+<div data-type="example" id="sanitizestring_and_sanitizemysql_fun" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 12-9. </span>The <code class="calibre15">sanitizeString</code> and <code class="calibre15">sanitizeMySQL</code> functions</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+<code class="n"> </code> <code class="k">function</code> <code class="nf">sanitizeString</code><code class="p">(</code><code class="nv">$var</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">if</code> <code class="p">(</code><code class="nb">get_magic_quotes_gpc</code><code class="p">())</code>
+<code class="n"> </code> <code class="n"> </code> <code class="n"> </code> <code class="nv">$var</code> <code class="o">=</code> <code class="nb">stripslashes</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$var</code> <code class="o">=</code> <code class="nb">strip_tags</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$var</code> <code class="o">=</code> <code class="nb">htmlentities</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">return</code> <code class="nv">$var</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+
+<code class="n"> </code> <code class="k">function</code> <code class="nf">sanitizeMySQL</code><code class="p">(</code><code class="nv">$pdo</code><code class="p">,</code> <code class="nv">$var</code><code class="p">)</code>
+<code class="n"> </code> <code class="p">{</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$var</code> <code class="o">=</code> <code class="nv">$pdo</code><code class="o">-&gt;</code><code class="na">quote</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="nv">$var</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>
+<code class="n"> </code> <code class="n"> </code> <code class="k">return</code> <code class="nv">$var</code><code class="p">;</code>
+<code class="n"> </code> <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/>
+</pre>
+</div>
+
+<p class="author1">Add this code to the end of your PHP programs, and you can then call it for each user input to sanitize, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$var</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'user_input'</code><code class="p">]);</code></pre>
+
+<p class="author1">Or, when you have an open MySQL connection and a PDO connection object (in this case, called <code class="calibre15">$pdo</code>):</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$var</code> <code class="o">=</code> <code class="n">sanitizeMySQL</code><code class="p">(</code><code class="nv">$pdo</code><code class="p">,</code> <code class="nv">$_POST</code><code class="p">[</code><code class="s">'user_input'</code><code class="p">]);</code></pre>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="An Example Program" class="calibre4"><div class="preface" id="example_program">
+<h1 class="calibre11">An Example Program</h1>
+
+<p class="author1">Let’s look<a contenteditable="false" data-primary="form handling" data-secondary="example program" data-type="indexterm" id="FHexample11" class="calibre6"/> at how a real-life PHP program integrates with an HTML form by creating the program <em class="hyperlink">convert.php</em> listed in <a data-type="xref" href="#program_to_convert_values_between_fahr" class="calibre6">Example 12-10</a>. Type it as shown and try it for yourself.</p>
+
+<div data-type="example" id="program_to_convert_values_between_fahr" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 12-10. </span>A program to convert values between Fahrenheit and Celsius</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code> <code class="c">// convert.php</code>
+  <code class="nv">$f</code> <code class="o">=</code> <code class="nv">$c</code> <code class="o">=</code> <code class="s">''</code><code class="p">;</code>
+
+  <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'f'</code><code class="p">]))</code> <code class="nv">$f</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'f'</code><code class="p">]);</code>
+  <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'c'</code><code class="p">]))</code> <code class="nv">$c</code> <code class="o">=</code> <code class="n">sanitizeString</code><code class="p">(</code><code class="nv">$_POST</code><code class="p">[</code><code class="s">'c'</code><code class="p">]);</code>
+
+  <code class="k">if</code> <code class="p">(</code><code class="nb">is_numeric</code><code class="p">(</code><code class="nv">$f</code><code class="p">))</code>
+  <code class="p">{</code>
+    <code class="nv">$c</code> <code class="o">=</code> <code class="nb">intval</code><code class="p">((</code><code class="mi">5</code> <code class="o">/</code> <code class="mi">9</code><code class="p">)</code> <code class="o">*</code> <code class="p">(</code><code class="nv">$f</code> <code class="o">-</code> <code class="mi">32</code><code class="p">));</code>
+    <code class="nv">$out</code> <code class="o">=</code> <code class="s">"</code><code class="err">$f</code><code class="s"> &amp;deg;f equals </code><code class="err">$c</code><code class="s"> &amp;deg;c"</code><code class="p">;</code>
+  <code class="p">}</code>
+  <code class="k">elseif</code><code class="p">(</code><code class="nb">is_numeric</code><code class="p">(</code><code class="nv">$c</code><code class="p">))</code>
+  <code class="p">{</code>
+    <code class="nv">$f</code> <code class="o">=</code> <code class="nb">intval</code><code class="p">((</code><code class="mi">9</code> <code class="o">/</code> <code class="mi">5</code><code class="p">)</code> <code class="o">*</code> <code class="nv">$c</code> <code class="o">+</code> <code class="mi">32</code><code class="p">);</code>
+    <code class="nv">$out</code> <code class="o">=</code> <code class="s">"</code><code class="err">$c</code><code class="s"> &amp;deg;c equals </code><code class="err">$f</code><code class="s"> &amp;deg;f"</code><code class="p">;</code>
+  <code class="p">}</code>
+  <code class="k">else</code> <code class="nv">$out</code> <code class="o">=</code> <code class="s">""</code><code class="p">;</code>
+
+  <code class="k">echo</code> <code class="s">&lt;&lt;&lt;_END</code>
+<code class="s">&lt;html&gt;</code>
+<code class="s">  &lt;head&gt;</code>
+<code class="s">    &lt;title&gt;Temperature Converter&lt;/title&gt;</code>
+<code class="s">  &lt;/head&gt;</code>
+<code class="s">  &lt;body&gt;</code>
+<code class="s">    &lt;pre&gt;</code>
+<code class="s">      Enter either Fahrenheit or Celsius and click on Convert</code>
+
+<code class="s">      &lt;b&gt;$out&lt;/b&gt;</code>
+<code class="s">      &lt;form method="post" action=""&gt;</code>
+<code class="s">        Fahrenheit &lt;input type="text" name="f" size="7"&gt;</code>
+<code class="s">           Celsius &lt;input type="text" name="c" size="7"&gt;</code>
+<code class="s">                   &lt;input type="submit" value="Convert"&gt;</code>
+<code class="s">      &lt;/form&gt;</code>
+<code class="s">    &lt;/pre&gt;</code>
+<code class="s">  &lt;/body&gt;</code>
+<code class="s">&lt;/html&gt;</code>
+<code class="s">_END;</code>
+
+  <code class="k">function</code> <code class="nf">sanitizeString</code><code class="p">(</code><code class="nv">$var</code><code class="p">)</code>
+  <code class="p">{</code>
+    <code class="k">if</code> <code class="p">(</code><code class="nb">get_magic_quotes_gpc</code><code class="p">())</code>
+<code class="n"/>      <code class="nv">$var</code> <code class="o">=</code> <code class="nb">stripslashes</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>
+    <code class="nv">$var</code> <code class="o">=</code> <code class="nb">strip_tags</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>
+    <code class="nv">$var</code> <code class="o">=</code> <code class="nb">htmlentities</code><code class="p">(</code><code class="nv">$var</code><code class="p">);</code>
+    <code class="k">return</code> <code class="nv">$var</code><code class="p">;</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">When you call up <em class="hyperlink">convert.php</em> in a browser, the result should look something like <a data-type="xref" href="#temperature_conversion_program_in_ac" class="calibre6">Figure 12-8</a>.</p>
+
+<figure class="calibre23"><div id="temperature_conversion_program_in_ac" class="figure"><img alt="The temperature conversion program in action" src="Images/pmj6_1208.png" class="calibre79"/>
+<h6 class="calibre24"><span class="keep-together">Figure 12-8. </span>The temperature conversion program in action</h6>
+</div></figure>
+
+<p class="author1">To break the program down, the first line initializes the variables <code class="calibre15">$c</code> and <code class="calibre15">$f</code> in case they do not get posted to the program. The next two lines fetch the values of either the field named <code class="calibre15">f</code> or the one named <code class="calibre15">c</code>, for an input Fahrenheit or Celsius value. If the user inputs both, the Celsius is simply ignored and the Fahrenheit value is converted. As a security measure, the new function <code class="calibre15">sanitizeString</code> from <a data-type="xref" href="#sanitizestring_and_sanitizemysql_fun" class="calibre6">Example 12-9</a> is also used.</p>
+
+<p class="author1">So, having either submitted values or empty strings in both <code class="calibre15">$f</code> and <code class="calibre15">$c</code>, the next portion of code constitutes an <code class="calibre15">if...elseif...else</code> structure that first tests whether <code class="calibre15">$f</code> has a numeric value. If not, it checks <code class="calibre15">$c</code>; if <code class="calibre15">$c</code> does not have a numeric value either, the variable <code class="calibre15">$out</code> is set to the empty string (more on that in a moment).</p>
+
+<p class="author1">If <code class="calibre15">$f</code> is found to have a numeric value, the variable <code class="calibre15">$c</code> is assigned a simple mathematical expression that converts the value of <code class="calibre15">$f</code> from Fahrenheit to Celsius. The formula used is Celsius = (5 / 9) × (Fahrenheit – 32). The variable <code class="calibre15">$out</code> is then set to a message string explaining the conversion.</p>
+
+<p class="author1">On the other hand, if <code class="calibre15">$c</code> is found to have a numeric value, a complementary operation is performed to convert the value of <code class="calibre15">$c</code> from Celsius to Fahrenheit and assign the result to <code class="calibre15">$f</code>. The formula used is Fahrenheit = (9 / 5) × Celsius + 32. As with the previous section, the string <code class="calibre15">$out</code> is then set to contain a message about the conversion.</p>
+
+<p class="author1">In both conversions, the PHP <code class="calibre15">intval</code> function is called to convert the result of the conversion to an integer value. It’s not necessary but looks better.</p>
+
+<p class="author1">With all the arithmetic done, the program now outputs the HTML, which starts with the basic head and title and then contains some introductory text before displaying the value of <code class="calibre15">$out</code>. If no temperature conversion was made, <code class="calibre15">$out</code> will have a value of <code class="calibre15">NULL</code> and nothing will be displayed, which is exactly what we want when the form hasn’t yet been submitted. But if a conversion was made, <code class="calibre15">$out</code> contains the result, which is displayed.</p>
+
+<p class="author1">After this, we come to the form, which is set to submit using the POST method<a contenteditable="false" data-primary="POST method (HTTP)" data-secondary="in form handling" data-type="indexterm" id="idm45694710875000" class="calibre6"/><a contenteditable="false" data-primary="HTTP (Hypertext Transfer Protocol)" data-secondary="POST method" data-type="indexterm" id="idm45694710873624" class="calibre6"/> to the program itself (represented by a pair of double quotation marks so that the file can be saved with any name). Within the form, there are two inputs for either a Fahrenheit or a Celsius value to be entered. A submit button with the text Convert is then displayed, and the form is closed.</p>
+
+<p class="author1">After outputting the HTML to close the document, we come finally to the function <code class="calibre15">sanitizeString</code> from <a data-type="xref" href="#sanitizestring_and_sanitizemysql_fun" class="calibre6">Example 12-9</a>. Try playing with the example by inputting different values into the fields; for a bit of fun, can you find a value for which Fahrenheit and Celsius are the same?</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">All the examples in this chapter have used the POST method to send form data. I recommend this, as it’s the neatest and most secure method. However, the forms can easily be changed to use the GET method, as long as values are fetched from the <code class="calibre15">$_GET</code> array instead of the <code class="calibre15">$_POST</code> array. Reasons to do this might include making the result of a search bookmarkable or directly linkable from another page.<a contenteditable="false" data-primary="" data-startref="FHexample11" data-type="indexterm" id="idm45694710867496" class="calibre6"/></p>
+</div>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="HTML5 Enhancements" class="calibre4"><div class="preface" id="whatapostrophes_new_in_html5question_mar">
+<h1 class="calibre11">HTML5 Enhancements</h1>
+
+<p class="author1">With HTML5, developers<a contenteditable="false" data-primary="HTML5" data-secondary="form handling enhancements" data-type="indexterm" id="HT5form11" class="calibre6"/> can draw on a number of useful enhancements to form handling to make using forms easier than ever, including new attributes; color, date, and time pickers; and new input types. You can always refer to <em class="hyperlink">caniuse.com</em> to check how widely a feature has been implemented by the various browsers.</p>
+
+<section data-type="sect2" data-pdf-bookmark="The autocomplete Attribute" class="calibre4"><div class="preface" id="autocomplete_attribute">
+<h2 class="calibre28">The autocomplete Attribute</h2>
+
+<p class="author1">You<a contenteditable="false" data-primary="autocomplete attribute" data-type="indexterm" id="idm45694710859656" class="calibre6"/><a contenteditable="false" data-primary="form handling" data-secondary="autocompleting fields" data-type="indexterm" id="idm45694710858136" class="calibre6"/><a contenteditable="false" data-primary="colors" data-secondary="in forms" data-type="indexterm" id="idm45694710856760" class="calibre6"/> can apply the <code class="calibre15">autocomplete</code> attribute to the <span class="keep-together"><code class="calibre15">&lt;form&gt;</code></span> element, or to any of the <code class="calibre15">color</code>, <code class="calibre15">date</code>, <code class="calibre15">email</code>, <code class="calibre15">password</code>, <code class="calibre15">range</code>, <code class="calibre15">search</code>, <code class="calibre15">tel</code>, <code class="calibre15">text</code>, or <code class="calibre15">url</code> types of the <code class="calibre15">&lt;input&gt;</code> element.</p>
+
+<p class="author1">With autocomplete enabled, previous user inputs are recalled and automatically entered into fields as suggestions. You can also disable this feature by turning autocomplete off. Here’s how to turn autocomplete on for an entire form but disable it for specific fields (highlighted in bold):</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;form</code><code class="calibre15"> </code><code class="na">action=</code><code class="s">'myform.php'</code><code class="calibre15"> </code><code class="na">method=</code><code class="s">'post'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">autocomplete=</code><code class="s2">'on'</code></strong><code class="nt">&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'text'</code><code class="calibre15">     </code><code class="na">name=</code><code class="s">'username'</code><code class="nt">&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'password'</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">'password'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">autocomplete=</code><code class="s2">'off'</code></strong><code class="nt">&gt;</code><code class="calibre15">
+</code><code class="nt">&lt;/form&gt;</code></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The autofocus Attribute" class="calibre4"><div class="preface" id="autofocus_attribute">
+<h2 class="calibre28">The autofocus Attribute</h2>
+
+<p class="author1">The <code class="calibre15">autofocus</code> attribute<a contenteditable="false" data-primary="autofocus attribute" data-type="indexterm" id="idm45694710819256" class="calibre6"/><a contenteditable="false" data-primary="form handling" data-secondary="immediate element focus" data-type="indexterm" id="idm45694710818232" class="calibre6"/><a contenteditable="false" data-primary="&lt;button&gt; element" data-primary-sortas="button element" data-type="indexterm" id="idm45694710816856" class="calibre6"/><a contenteditable="false" data-primary="&lt;input&gt; element" data-primary-sortas="input element" data-type="indexterm" id="idm45694710815480" class="calibre6"/><a contenteditable="false" data-primary="&lt;textarea&gt; element" data-primary-sortas="textarea element" data-type="indexterm" id="idm45694710814104" class="calibre6"/> gives immediate focus to an element when a page loads. It can be applied to any <code class="calibre15">&lt;input&gt;</code>, <code class="calibre15">&lt;textarea&gt;</code>, or <code class="calibre15">&lt;button&gt;</code> element, like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'text'</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">'query'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">autofocus=</code><code class="s2">'autofocus'</code></strong><code class="nt">&gt;</code></pre>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">Browsers that use touch interfaces (such as Android or iOS) usually ignore the <code class="calibre15">autofocus</code> attribute, leaving it to the user to tap on a field to give it focus; otherwise, the zooming, focusing, and pop-up keyboards this attribute would generate could quickly become very annoying.</p>
+</div>
+
+<p class="author1">Because this feature will cause the focus to move into an input element, the Backspace key will no longer take the user back a web page (although Alt-Left arrow and Alt-Right arrow will still move backward and forward within the browsing history).</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The placeholder Attribute" class="calibre4"><div class="preface" id="placeholder_attribute">
+<h2 class="calibre28">The placeholder Attribute</h2>
+
+<p class="author1">The <code class="calibre15">placeholder</code> attribute lets<a contenteditable="false" data-primary="placeholder attribute" data-type="indexterm" id="idm45694710729528" class="calibre6"/><a contenteditable="false" data-primary="form handling" data-secondary="helpful hints, adding" data-type="indexterm" id="idm45694710728392" class="calibre6"/> you place into any blank input field a helpful hint to explain to users what they should enter. You use it like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'text'</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">'name'</code><code class="calibre15"> </code><code class="na">size=</code><code class="s">'50'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">placeholder=</code><code class="s2">'First &amp; Last name'</code></strong><code class="nt">&gt;</code></pre>
+
+<p class="author1">The input field will display the placeholder text as a prompt until the user starts typing, at which point the placeholder will disappear.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The required Attribute" class="calibre4"><div class="preface" id="required_attribute">
+<h2 class="calibre28">The required Attribute</h2>
+
+<p class="author1">The <code class="calibre15">required</code> attribute ensures<a contenteditable="false" data-primary="form handling" data-secondary="required fields" data-type="indexterm" id="idm45694710685160" class="calibre6"/><a contenteditable="false" data-primary="required attribute" data-type="indexterm" id="idm45694710683752" class="calibre6"/> that a field has been completed before a form is submitted. Use it like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'text'</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">'creditcard'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">required=</code><code class="s2">'required'</code></strong><code class="nt">&gt;</code></pre>
+
+<p class="author1">When the browser detects an attempted form submission where there’s an uncompleted <code class="calibre15">required</code> input, a message is displayed, prompting the user to complete the field.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Override Attributes" class="calibre4"><div class="preface" id="override_attributes">
+<h2 class="calibre28">Override Attributes</h2>
+
+<p class="author1">With<a contenteditable="false" data-primary="form handling" data-secondary="overriding form settings" data-type="indexterm" id="idm45694710657496" class="calibre6"/><a contenteditable="false" data-primary="override attributes" data-type="indexterm" id="idm45694710656120" class="calibre6"/><a contenteditable="false" data-primary="formaction attribute" data-type="indexterm" id="idm45694710655016" class="calibre6"/> override attributes, you can override form settings on an element-by-element basis. So, for example, using the <code class="calibre15">formaction</code> attribute, you can specify that a submit button should submit a form to a different URL from the one specified in the form itself, like the following (in which the default and overridden action URLs are bold):</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;form</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">action=</code><code class="s2">'url1.php'</code></strong><code class="calibre15"> </code><code class="na">method=</code><code class="s">'post'</code><code class="nt">&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'text'</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">'field'</code><code class="nt">&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'submit'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">formaction=</code><code class="s2">'url2.php'</code></strong><code class="nt">&gt;</code><code class="calibre15">
+</code><code class="nt">&lt;/form&gt;</code></pre>
+
+<p class="author1">HTML5 also brings support for the <code class="calibre15">formenctype</code>, <code class="calibre15">formmethod</code>, <code class="calibre15">formnovalidate</code>, and <code class="calibre15">formtarget</code> override attributes, which you can use in exactly the same manner as <span class="keep-together"><code class="calibre15">formaction</code></span> to override one of these settings.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The width and height Attributes" class="calibre4"><div class="preface" id="width_and_height_attributes">
+<h2 class="calibre28">The width and height Attributes</h2>
+
+<p class="author1">Using<a contenteditable="false" data-primary="form handling" data-secondary="input image dimensions" data-type="indexterm" id="idm45694710597544" class="calibre6"/><a contenteditable="false" data-primary="width attribute" data-type="indexterm" id="idm45694710596136" class="calibre6"/><a contenteditable="false" data-primary="height attribute" data-type="indexterm" id="idm45694710595032" class="calibre6"/> these new attributes, you can alter the displayed dimensions of an input image, like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'image'</code><code class="calibre15"> </code><code class="na">src=</code><code class="s">'picture.png'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">width=</code><code class="s2">'120'</code><code class="calibre17"> </code><code class="na1">height=</code><code class="s2">'80'</code></strong><code class="nt">&gt;</code></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The min and max Attributes" class="calibre4"><div class="preface" id="min_and_max_attributes">
+<h2 class="calibre28">The min and max Attributes</h2>
+
+<p class="author1">With<a contenteditable="false" data-primary="form handling" data-secondary="specifying min/max input values" data-type="indexterm" id="idm45694710534568" class="calibre6"/><a contenteditable="false" data-primary="min attribute" data-type="indexterm" id="idm45694710533192" class="calibre6"/><a contenteditable="false" data-primary="max attribute" data-type="indexterm" id="idm45694710532088" class="calibre6"/> the <code class="calibre15">min</code> and <code class="calibre15">max</code> attributes, you can specify minimum and maximum values for inputs. You use the attributes like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'time'</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">'alarm'</code><code class="calibre15"> </code><code class="na">value=</code><code class="s">'07:00'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">min=</code><code class="s2">'05:00'</code><code class="calibre17"> </code><code class="na1">max=</code><code class="s2">'09:00'</code></strong><code class="nt">&gt;</code></pre>
+
+<p class="author1">The browser will then either offer up and down selectors for the range of values allowed or simply disallow values outside of that range.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The step Attribute" class="calibre4"><div class="preface" id="idm45694710503208">
+<h2 class="calibre28">The step Attribute</h2>
+
+<p class="author1">Often<a contenteditable="false" data-primary="form handling" data-secondary="stepping through number values" data-type="indexterm" id="idm45694710501976" class="calibre6"/><a contenteditable="false" data-primary="step attribute" data-type="indexterm" id="idm45694710500600" class="calibre6"/> used with <code class="calibre15">min</code> and <code class="calibre15">max</code>, the <code class="calibre15">step</code> attribute supports stepping through number or date values, like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'time'</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">'meeting'</code><code class="calibre15"> </code><code class="na">value=</code><code class="s">'12:00'</code><code class="calibre15">
+  </code><code class="na">min=</code><code class="s">'09:00'</code><code class="calibre15"> </code><code class="na">max=</code><code class="s">'16:00'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">step=</code><code class="s2">'3600'</code></strong><code class="nt">&gt;</code></pre>
+
+<p class="author1">When you are stepping through date or time values, each unit represents 1 second.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The form Attribute" class="calibre4"><div class="preface" id="form_attribute">
+<h2 class="calibre28">The form Attribute</h2>
+
+<p class="author1">With<a contenteditable="false" data-primary="form handling" data-secondary="specifying form to which input applies" data-type="indexterm" id="idm45694710458728" class="calibre6"/><a contenteditable="false" data-primary="form attribute" data-type="indexterm" id="idm45694710457352" class="calibre6"/> HTML5, you no longer have to place <code class="calibre15">&lt;input&gt;</code> elements within <code class="calibre15">&lt;form&gt;</code> elements, because you can specify the form to which an input applies by supplying a <code class="calibre15">form</code> attribute. The following code shows a form being created, but with its input outside of the <code class="calibre15">&lt;form&gt;</code> and <code class="calibre15">&lt;/form&gt;</code> tags:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;form</code><code class="calibre15"> </code><code class="na">action=</code><code class="s">'myscript.php'</code><code class="calibre15"> </code><code class="na">method=</code><code class="s">'post'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">id=</code><code class="s2">'form1'</code></strong><code class="nt">&gt;</code><code class="calibre15">
+</code><code class="nt">&lt;/form&gt;</code><code class="calibre15">
+
+</code><code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'text'</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">'username'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">form=</code><code class="s2">'form1'</code></strong><code class="nt">&gt;</code></pre>
+
+<p class="author1">To do this, you must give the form an ID using the <code class="calibre15">id</code> attribute and refer to this ID in the <code class="calibre15">form</code> attribute of the <code class="calibre15">input</code> element. This is most useful for adding hidden input fields, because you can’t control how the field is laid out inside the form, or for using JavaScript to modify forms and inputs on the fly.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The list Attribute" class="calibre4"><div class="preface" id="list_attribute">
+<h2 class="calibre28">The list Attribute</h2>
+
+<p class="author1">HTML5 supports<a contenteditable="false" data-primary="form handling" data-secondary="supplying lists" data-type="indexterm" id="idm45694710400136" class="calibre6"/><a contenteditable="false" data-primary="list attribute" data-type="indexterm" id="idm45694710398728" class="calibre6"/> attaching lists to inputs to enable users to easily select from a predefined list, which you can use like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="calibre15">Select destination:
+</code><code class="nt">&lt;input</code><code class="calibre15"> </code><code class="na">type=</code><code class="s">'url'</code><code class="calibre15"> </code><code class="na">name=</code><code class="s">'site'</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">list=</code><code class="s2">'links'</code></strong><code class="nt">&gt;</code><code class="calibre15">
+
+</code><code class="nt">&lt;</code><strong class="calibre31"><code class="na1">datalist</code><code class="calibre17"> </code><code class="na1">id=</code><code class="s2">'links'</code></strong><code class="nt">&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;option</code><code class="calibre15"> </code><code class="na">label=</code><code class="s">'Google'</code><code class="calibre15"> </code><code class="na">value=</code><code class="s">'http://google.com'</code><code class="nt">&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;option</code><code class="calibre15"> </code><code class="na">label=</code><code class="s">'Yahoo!'</code><code class="calibre15"> </code><code class="na">value=</code><code class="s">'http://yahoo.com'</code><code class="nt">&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;option</code><code class="calibre15"> </code><code class="na">label=</code><code class="s">'Bing'</code><code class="calibre15">   </code><code class="na">value=</code><code class="s">'http://bing.com'</code><code class="nt">&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;option</code><code class="calibre15"> </code><code class="na">label=</code><code class="s">'Ask'</code><code class="calibre15">    </code><code class="na">value=</code><code class="s">'http://ask.com'</code><code class="nt">&gt;</code><code class="calibre15">
+</code><code class="nt">&lt;</code><strong class="calibre31"><code class="na1">/datalist</code></strong><code class="nt">&gt;</code></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The color Input Type" class="calibre4"><div class="preface" id="color_input_type">
+<h2 class="calibre28">The color Input Type</h2>
+
+<p class="author1">The <code class="calibre15">color</code> input<a contenteditable="false" data-primary="form handling" data-secondary="color selection" data-type="indexterm" id="idm45694710365000" class="calibre6"/><a contenteditable="false" data-primary="color input type" data-type="indexterm" id="idm45694710322056" class="calibre6"/><a contenteditable="false" data-primary="colors" data-secondary="in forms" data-type="indexterm" id="idm45694710320952" class="calibre6"/> type calls up a color picker so that you can simply click the color of your choice. You use it like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="calibre15">Choose a color </code><code class="nt">&lt;input</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">type=</code><code class="s2">'color'</code></strong><code class="calibre15"> </code><code class="na">name=</code><code class="s">'color'</code><code class="nt">&gt;</code><code class="calibre15">
+</code></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The number and range Input Types" class="calibre4"><div class="preface" id="number_and_range_input_types">
+<h2 class="calibre28">The number and range Input Types</h2>
+
+<p class="author1">The <code class="calibre15">number</code> and <code class="calibre15">range</code> input types<a contenteditable="false" data-primary="form handling" data-secondary="restricting input to numbers/ranges" data-type="indexterm" id="idm45694714795608" class="calibre6"/><a contenteditable="false" data-primary="number input type" data-type="indexterm" id="idm45694710289768" class="calibre6"/><a contenteditable="false" data-primary="range input type" data-type="indexterm" id="idm45694710288664" class="calibre6"/> restrict input to a number and optionally also specify an allowed range like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">'number'</code> <code class="na">name=</code><code class="s">'age'</code><code class="nt">&gt;</code>
+<code class="nt">&lt;input</code> <code class="na">type=</code><code class="s">'range'</code> <code class="na">name=</code><code class="s">'num'</code> <code class="na">min=</code><code class="s">'0'</code> <code class="na">max=</code><code class="s">'100'</code> <code class="na">value=</code><code class="s">'50'</code> <code class="na">step=</code><code class="s">'1'</code><code class="nt">&gt;</code>
+</pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Date and Time Pickers" class="calibre4"><div class="preface" id="date_and_time_pickers">
+<h2 class="calibre28">Date and Time Pickers</h2>
+
+<p class="author1">When<a contenteditable="false" data-primary="form handling" data-secondary="date/time pickers" data-type="indexterm" id="idm45694710244936" class="calibre6"/><a contenteditable="false" data-primary="date pickers, in forms" data-type="indexterm" id="idm45694710243528" class="calibre6"/><a contenteditable="false" data-primary="time pickers, in forms" data-type="indexterm" id="idm45694710242424" class="calibre6"/> you choose an input type of <code class="calibre15">date</code>, <code class="calibre15">month</code>, <code class="calibre15">week</code>, <code class="calibre15">time</code>, <code class="calibre15">datetime</code>, or <code class="calibre15">datetime-local</code>, a picker will pop up on supported browsers from which the user can make a selection, like this one, which inputs the time:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;input</code><code class="calibre15"> </code><strong class="calibre31"><code class="na1">type=</code><code class="s2">'time'</code></strong><code class="calibre15"> </code><code class="na">name=</code><code class="s">'time'</code><code class="calibre15"> </code><code class="na">value=</code><code class="s">'12:34'</code><code class="nt">&gt;</code></pre>
+
+<p class="author1">The next chapter will show you how to use cookies and authentication to store users’ preferences and keep them logged in, and how to maintain a complete user session.<a contenteditable="false" data-primary="" data-startref="HT5form11" data-type="indexterm" id="idm45694710203224" class="calibre6"/></p>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Questions" class="calibre4"><div class="preface" id="questions-id00032">
+<h1 class="calibre11">Questions</h1>
+
+<ol class="calibre25">
+	<li class="calibre26">
+	<p class="author1">You can submit form data using either the POST or the GET method. Which associative arrays are used to pass this data to PHP?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is the difference between a text box and a text area?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">If a form has to offer three choices to a user, each of which is mutually exclusive so that only one of the three can be selected, which input type would you use, given a choice between checkboxes and radio buttons?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you submit a group of selections from a web form using a single field name?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you submit a form field without displaying it in the browser?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Which HTML tag is used to encapsulate a form element and supporting text or graphics, making the entire unit selectable with a mouse-click?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Which PHP function converts HTML into a format that can be displayed but will not be interpreted as HTML by a browser?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What form attribute can be used to help users complete input fields?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you ensure that an input is completed before a form gets submitted?</p>
+	</li>
+</ol>
+
+<p class="author1">See <a data-type="xref" href="app01_split_011.xhtml#chapter_12_answers" class="calibre6">“Chapter 12 Answers”</a> in the <a data-type="xref" href="app01_split_000.xhtml#solutions_to_the_chapter_questions" class="calibre6">Appendix A</a> for the answers to these <span class="keep-together">questions</span>.</p>
+</div></section>
+</div></section></div></body></html>

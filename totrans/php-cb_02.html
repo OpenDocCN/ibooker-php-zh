@@ -1,0 +1,982 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xml:lang="en"
+      lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<title>PHP Cookbook</title>
+<link rel="stylesheet" type="text/css" href="override_v1.css"/>
+<link rel="stylesheet" type="text/css" href="epub.css"/>
+</head>
+<body>
+<div id="book-content">
+<div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 2. Operators"><div class="chapter" id="chapter_operators">
+<h1><span class="label">Chapter 2. </span>Operators</h1>
+
+
+<p>While <a data-type="xref" href="ch01.html#chapter_variables">Chapter 1</a> introduced the foundational building blocks of PHP—variables to store arbitrary values—these building blocks are useless without some kind of glue to hold them <a data-type="indexterm" data-primary="operators" id="idm45875188708416"></a>together. This glue is the set of <a href="https://oreil.ly/Vepfg"><em>operators</em></a> established by PHP. Operators are the way you tell PHP what to do with certain values—specifically how to change one or more values into a new, discrete value.</p>
+
+<p>In almost every case, an operator in PHP is represented by a single character or by repeated uses of that same character. In a handful of cases, operators can also be represented by literal English words, which helps disambiguate what the operator is trying to accomplish.</p>
+
+<p>This book does not attempt to cover every operator leveraged by PHP; for exhaustive explanations of each, refer to the <a href="https://oreil.ly/YGWyE">PHP Manual itself</a>. Instead, the following few sections cover some of the most important logical, bitwise, and comparison operators before diving into more concrete problems, solutions, and examples.</p>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Logical Operators"><div class="sect2" id="idm45875188705056">
+<h2>Logical Operators</h2>
+
+<p><em>Logical operations</em> are the components <a data-type="indexterm" data-primary="operators" data-secondary="logical" id="optlgc"></a><a data-type="indexterm" data-primary="logical operators" id="lgclprt"></a>of PHP that create truth tables and define basic and/or/not grouping criteria. <a data-type="xref" href="#table_logical_operators">Table 2-1</a> enumerates all of the character-based logical operators supported by PHP.</p>
+<table id="table_logical_operators">
+<caption><span class="label">Table 2-1. </span>Logical operators</caption>
+<thead>
+<tr>
+<th>Expression</th>
+<th>Operator name</th>
+<th>Result</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p>$x &amp;&amp; $y</p></td>
+<td><p>and</p></td>
+<td><p><code>true</code> if both <code>$x</code> and <code>$y</code> are <code>true</code></p></td>
+<td><p><code>true &amp;&amp; true == true</code></p></td>
+</tr>
+<tr>
+<td><p>$x || $y</p></td>
+<td><p>or</p></td>
+<td><p><code>true</code> if either <code>$x</code> or <code>$y</code> is <code>true</code></p></td>
+<td><p><code>true || false == true</code></p></td>
+</tr>
+<tr>
+<td><p>!$x</p></td>
+<td><p>not</p></td>
+<td><p><code>true</code> if <code>$x</code> is <code>false</code> (and vice versa)</p></td>
+<td><p><code>!true == false</code></p></td>
+</tr>
+</tbody>
+</table>
+
+<p>The logical operators <code>&amp;&amp;</code> and <code>||</code> have English word counterparts: <code>and</code> and <code>or</code>, respectively. The statement <code>($x and $y)</code> is functionally equivalent to <code>($x &amp;&amp; $y)</code>. The word <code>or</code> can likewise be used in place of the <code>||</code> operator without changing the functionality of the expression.</p>
+
+<p>The word <code>xor</code> can also be used to represent a special <em>exclusive or</em> operator in PHP that evaluates to <code>true</code> if one of the two <a data-type="indexterm" data-primary="operators" data-secondary="logical" data-startref="optlgc" id="idm45875184693264"></a><a data-type="indexterm" data-primary="logical operators" data-startref="lgclprt" id="idm45875184691984"></a>values in the expression is <code>true</code>, but not when both are <code>true</code>. Unfortunately,  the logical XOR operation has no character equivalent in PHP.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Bitwise Operators"><div class="sect2" id="idm45875188704592">
+<h2>Bitwise Operators</h2>
+
+<p>PHP supports operations against specific <a data-type="indexterm" data-primary="operators" data-secondary="bitwise" id="optbtw"></a><a data-type="indexterm" data-primary="bitwise operators" id="btwprt"></a>bits in an integer, a feature that makes the language quite versatile. Supporting bitwise operations means PHP is not limited to web applications but can operate on binary files and data structures with ease! It’s worth mentioning these operators in the same section as the preceding logical operators as they appear somewhat similar in terms of terminology with <code>and</code>, <code>or</code>, and <code>xor</code>.</p>
+
+<p>Whereas logical operators return <code>true</code> or <code>false</code> based on the comparison between two whole values, bitwise operators actually perform bitwise arithmetic on integers and return the result of that full calculation over the integer or integers provided. For a specific example of how this can be useful, skip ahead to <a data-type="xref" href="#bitwise_arithmetic">Recipe 2.6</a>.</p>
+
+<p><a data-type="xref" href="#table_bitwise_operators">Table 2-2</a> illustrates the various bitwise operators in PHP, what they do, and a quick example of how they work on simple integers.</p>
+<table id="table_bitwise_operators">
+<caption><span class="label">Table 2-2. </span>Bitwise operators</caption>
+<thead>
+<tr>
+<th>Expression</th>
+<th>Operator name</th>
+<th>Result</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>$x &amp; $y</code></p></td>
+<td><p>and</p></td>
+<td><p>Returns bits set in both <code>$x</code> and <code>$y</code></p></td>
+<td><p><code>5 &amp; 1 == 1</code></p></td>
+</tr>
+<tr>
+<td><p><code>$x | $y</code></p></td>
+<td><p>or</p></td>
+<td><p>Returns bits set in either <code>$x</code> or <code>$y</code></p></td>
+<td><p><code>4 | 1 == 5</code></p></td>
+</tr>
+<tr>
+<td><p><code>$x ^ $y</code></p></td>
+<td><p>xor</p></td>
+<td><p>Returns bits set in only <code>$x</code> or <code>$y</code></p></td>
+<td><p><code>5 ^ 3 == 6</code></p></td>
+</tr>
+<tr>
+<td><p><code>~ $x</code></p></td>
+<td><p>not</p></td>
+<td><p>Inverts bits that are set in <code>$x</code></p></td>
+<td><p><code>~ 4 == -5</code></p></td>
+</tr>
+<tr>
+<td><p><code>$x &lt;&lt; $y</code></p></td>
+<td><p>shift left</p></td>
+<td><p>Shift the bits of <code>$x</code> to the left by <code>$y</code> steps</p></td>
+<td><p><code>4 &lt;&lt; 2 == 16</code></p></td>
+</tr>
+<tr>
+<td><p><code>$x &gt;&gt; $y</code></p></td>
+<td><p>shift right</p></td>
+<td><p>Shift the bits of <code>$x</code> to the right by <code>$y</code> steps</p></td>
+<td><p><code>4 &gt;&gt; 2 == 1</code></p></td>
+</tr>
+</tbody>
+</table>
+
+<p>In PHP, the largest integer you can have <a data-type="indexterm" data-primary="integers" data-secondary="processor size and" id="idm45875191985424"></a>depends on the size of the processor running the application. In any case, the constant <code>PHP_INT_MAX</code> will tell you how large integers can be—2147483647 on 32-bit machines and 9223372036854775807 on 64-bit machines. In both cases, this number is represented, in binary, as a long string of 1s equal in length to one less than the bit size. On a 32-bit machine, 2147483647 is represented by 31 1s. The leading <a data-type="indexterm" data-primary="integers" data-secondary="sign" id="idm45875191983824"></a>bit (a <code>0</code> by default) is used to identify the <em>sign</em> of the integer. If the bit is <code>0</code>, the integer is positive; if the bit is <code>1</code>, the integer is negative.</p>
+
+<p>On any machine, the number 4 is represented in binary as <code>100</code>, with enough 0s to the left of the most significant <a data-type="indexterm" data-primary="integers" data-secondary="negative" id="idm45875191980176"></a><a data-type="indexterm" data-primary="negative integers" id="idm45875191979200"></a>digit to fill the bit size of the processor. On a 32-bit system, this would be 29 0s. To make the integer <em>negative</em>, you would represent it instead as a 1 followed by 28 0s followed by <code>100</code>.</p>
+
+<p>For simplicity, consider a 16-bit system. The integer 4 would be represented as <code>0000000000000100</code>. Likewise, a negative 4 would be represented as <code>100000000​0000100</code>. If you were to apply <a data-type="indexterm" data-primary="bitwise operators" data-secondary="not" id="idm45875191975904"></a><a data-type="indexterm" data-primary="operators" data-secondary="bitwise" data-tertiary="not" id="idm45875191974896"></a><a data-type="indexterm" data-primary="not operator" id="idm45875191973680"></a>the bitwise <em>not</em> operator (<code>~</code>) on a positive 4 in a 16-bit system, all of the 0s would become 1s and vice versa. This would turn your number into <code>1111111111111011</code>, which on <a data-type="indexterm" data-primary="operators" data-secondary="bitwise" data-startref="optbtw" id="idm45875191971472"></a><a data-type="indexterm" data-primary="bitwise operators" data-startref="btwprt" id="idm45875191970192"></a>a 16-bit system is −5.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Comparison Operators"><div class="sect2" id="comparison_operators_intro">
+<h2>Comparison Operators</h2>
+
+<p>The core of any programming language <a data-type="indexterm" data-primary="comparison operators" id="idm45875191967344"></a><a data-type="indexterm" data-primary="operators" data-secondary="comparison" id="idm45875191966640"></a>is the level of control that language has to branch based on specific conditions. In PHP, much of this branching logic is controlled by comparing two or more values with one another. It is the set of <a href="https://oreil.ly/QuPhV">comparison operators provided by PHP</a>, provide most of the advanced branching functionality used to build complex applications.</p>
+
+<p><a data-type="xref" href="#table_comparison_operators">Table 2-3</a> lists the scalar comparison operators considered to be the most vital to understand PHP. The other operators (greater than, less than, and variants) are somewhat standard among programming languages and are not necessary to any of the recipes in this chapter.</p>
+<table id="table_comparison_operators">
+<caption><span class="label">Table 2-3. </span>Comparison operators</caption>
+<thead>
+<tr>
+<th>Expression</th>
+<th>Operation</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>$x == $y</code></p></td>
+<td><p>Equal</p></td>
+<td><p>Returns <code>true</code> if both values are the same after coercing into the same type</p></td>
+</tr>
+<tr>
+<td><p><code>$x === $y</code></p></td>
+<td><p>Identical</p></td>
+<td><p>Returns <code>true</code> if both values are the same <em>and</em> are of the same type</p></td>
+</tr>
+<tr>
+<td><p><code>$x &lt;=&gt; $y</code></p></td>
+<td><p>Spaceship</p></td>
+<td><p>Returns <code>0</code> is both values are equal, <code>1</code> if <code>$x</code> is greater, or <code>-1</code> if <code>$y</code> is greater</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>When dealing with objects, the equality and identity operators work somewhat differently. Two objects are considered equal (<code>==</code>) if they have the same internal structure (same attributes and values) and are of the same type (class). Objects are considered identical (<code>===</code>) if and only if they are references to the same instance of a class. These are stricter requirements than those for comparing scalar values.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Type Casting"><div class="sect2" id="typecasting_intro">
+<h2>Type Casting</h2>
+
+<p>While the name of a type is not formally <a data-type="indexterm" data-primary="type casting" id="typct"></a><a data-type="indexterm" data-primary="values" data-secondary="type casting" id="vutypt"></a>an operator, you can use it to explicitly cast a value as that type. Simply write the name of the type within parentheses before the value to force a conversion. <a data-type="xref" href="#type_juggling">Example 2-1</a> converts a simple integer value to various other types prior to using the value.</p>
+<div id="type_juggling" data-type="example">
+<h5><span class="label">Example 2-1. </span>Casting values as other types</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$value</code> <code class="o">=</code> <code class="mi">1</code><code class="p">;</code>
+
+<code class="nv">$bool</code> <code class="o">=</code> <code class="p">(</code><code class="nx">bool</code><code class="p">)</code> <code class="nv">$value</code><code class="p">;</code>
+<code class="nv">$float</code> <code class="o">=</code> <code class="p">(</code><code class="nx">float</code><code class="p">)</code> <code class="nv">$value</code><code class="p">;</code>
+<code class="nv">$string</code> <code class="o">=</code> <code class="p">(</code><code class="nx">string</code><code class="p">)</code> <code class="nv">$value</code><code class="p">;</code>
+
+<code class="nb">var_dump</code><code class="p">([</code><code class="nv">$bool</code><code class="p">,</code> <code class="nv">$float</code><code class="p">,</code> <code class="nv">$string</code><code class="p">]);</code>
+
+<code class="c1">// array(3) {</code>
+<code class="c1">//   [0]=&gt;</code>
+<code class="c1">//   bool(true)</code>
+<code class="c1">//   [1]=&gt;</code>
+<code class="c1">//   float(1)</code>
+<code class="c1">//   [2]=&gt;</code>
+<code class="c1">//   string(1) "1"</code>
+<code class="c1">// }</code></pre></div>
+
+<p>PHP supports the following type casts:</p>
+<dl>
+<dt><code>(int)</code></dt>
+<dd>
+<p>Cast to <code>int</code></p>
+</dd>
+<dt><code>(bool)</code></dt>
+<dd>
+<p>Cast to <code>bool</code></p>
+</dd>
+<dt><code>(float)</code></dt>
+<dd>
+<p>Cast to <code>float</code></p>
+</dd>
+<dt><code>(string)</code></dt>
+<dd>
+<p>Cast to <code>string</code></p>
+</dd>
+<dt><code>(array)</code></dt>
+<dd>
+<p>Cast to <code>array</code></p>
+</dd>
+<dt><code>(object)</code></dt>
+<dd>
+<p>Cast to <code>object</code></p>
+</dd>
+</dl>
+
+<p>It’s also possible to use <code>(integer)</code> as an alias of <code>(int)</code>, <code>(boolean)</code> as an alias of <code>(bool)</code>, <code>(real)</code> or <code>(double)</code> as aliases of <code>(float)</code>, and <code>(binary)</code> as an alias of <code>(string)</code>. These aliases will make the same type casts as in the preceding list, but given that they don’t use the name of the type to which you’re casting, this approach is <a data-type="indexterm" data-primary="type casting" data-startref="typct" id="idm45875186817552"></a><a data-type="indexterm" data-primary="values" data-secondary="type casting" data-startref="vutypt" id="idm45875186816576"></a>not recommended.</p>
+
+<p>The recipes in this chapter introduce ways to leverage PHP’s most important comparison and logical operators.</p>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="2.1 Using a Ternary Operator Instead of an If-Else Block"><div class="sect1" id="ternary_operator">
+<h1>2.1 Using a Ternary Operator Instead of an If-Else Block</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875186813328">
+<h2>Problem</h2>
+
+<p>You want to provide an either-or branching <a data-type="indexterm" data-primary="operators" data-secondary="ternary" id="ptrrny"></a><a data-type="indexterm" data-primary="ternary operators" id="trryprt"></a>condition to assign a specific value to a variable in a single line of code.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875186809424">
+<h2>Solution</h2>
+
+<p>Using a <em>ternary operator</em> (<code><em>a</em> ? <em>b</em> : <em>c</em></code>) allows nesting an either-or condition and both possible branched values in a single statement. The following example shows how to define a variable with a value from the <code>$_GET</code> superglobal and fall back on a default if it is empty:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$username</code> <code class="o">=</code> <code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s1">'username'</code><code class="p">])</code> <code class="o">?</code> <code class="nv">$_GET</code><code class="p">[</code><code class="s1">'username'</code><code class="p">]</code> <code class="o">:</code> <code class="s1">'default'</code><code class="p">;</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875186859824">
+<h2>Discussion</h2>
+
+<p>A ternary expression has three arguments and is evaluated from left to right, checking the <em>truthiness</em> of the leftmost <a data-type="indexterm" data-primary="truthiness" id="idm45875186850112"></a>statement (whether it evaluates to <code>true</code> regardless of the types involved in the expression) and returning the next value if <code>true</code> or the final value if <code>false</code>. You can visualize this logical flow with the following illustration:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$_value_</code> <code class="o">=</code> <code class="p">(</code><code class="nx">_expression</code> <code class="nx">to</code> <code class="nx">evaluate_</code><code class="p">)</code> <code class="o">?</code> <code class="p">(</code><code class="k">if</code> <code class="k">true</code><code class="p">)</code> <code class="o">:</code> <code class="p">(</code><code class="k">if</code> <code class="k">false</code><code class="p">);</code></pre>
+
+<p>The ternary pattern is a simple way to return a default value when checking either system values or even parameters from a web request (those stored in the <code>$_GET</code> or <code>$_POST</code> superglobals). It is also a powerful way to switch logic in page templates based on the return of a particular function call.</p>
+
+<p>The following example assumes a web application that welcomes logged-in users by name (checking their authentication state with a call to <code>is_logged_in()</code>) or welcomes a guest if the user has yet to authenticate. As this example is coded directly into the HTML markup of a web page, using a longer <code>if</code>/<code>else</code> statement would be 
+<span class="keep-together">inappropriate</span>:</p>
+
+<pre data-type="programlisting" data-code-language="html"><code class="p">&lt;</code><code class="nt">h1</code><code class="p">&gt;</code>Welcome, <code class="cp">&lt;?php echo is_logged_in() ? $_SESSION['user'] : 'Guest'; ?&gt;</code>!<code class="p">&lt;/</code><code class="nt">h1</code><code class="p">&gt;</code></pre>
+
+<p>Ternary operations can also be simplified if the value being checked is both <em>truthy</em> (evaluates to <code>true</code> when coerced into a Boolean value) and is the value you want by default. The Solution example checks that a username is set <em>and</em> assigns that value to a given variable if so. Since non-empty strings evaluate to <code>true</code>, you can shorten the solution to the following:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$username</code> <code class="o">=</code> <code class="nv">$_GET</code><code class="p">[</code><code class="s1">'username'</code><code class="p">]</code> <code class="o">?:</code> <code class="s1">'default'</code><code class="p">;</code></pre>
+
+<p>When a ternary is shortened from its <code><em>a</em> ? <em>b</em> : <em>c</em></code> format to a simple <code><em>a</em> ?: <em>c</em></code>, PHP will evaluate the expression to check <code><em>a</em></code> as if it were a Boolean value. If it’s true, PHP merely returns the expression itself. If it’s false, PHP returns the fallback value <code><em>c</em></code> instead.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>PHP compares truthiness similarly to the way it compares emptiness, as discussed in <a data-type="xref" href="ch01.html#chapter_variables">Chapter 1</a>. Strings that are set (not empty or <code>null</code>), integers that are nonzero, and arrays that are non-empty are all generally considered truthy, which is to say they evaluate to <code>true</code> when cast as a Boolean. You can read more about the ways types are intermixed and considered equivalent in <a href="https://oreil.ly/nXsr8">the PHP Manual section on type comparisons</a>.</p>
+</div>
+
+<p>The ternary operator is an advanced form of comparison operator that, while it provides for concise code, can sometimes be overused to create logic that is too difficult to follow. Consider <a data-type="xref" href="#nested_ternary">Example 2-2</a>, which <a data-type="indexterm" data-primary="ternary operators" data-secondary="nested expressions" id="idm45875191606208"></a>nests one ternary operation within another.</p>
+<div id="nested_ternary" data-type="example">
+<h5><span class="label">Example 2-2. </span>Nested ternary expression</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$val</code> <code class="o">=</code> <code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s1">'username'</code><code class="p">])</code> <code class="o">?</code> <code class="nv">$_GET</code><code class="p">[</code><code class="s1">'username'</code><code class="p">]</code> <code class="o">:</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s1">'userid'</code><code class="p">])</code>
+       <code class="o">?</code> <code class="nv">$_GET</code><code class="p">[</code><code class="s1">'user_id'</code><code class="p">]</code> <code class="o">:</code> <code class="k">null</code><code class="p">);</code></pre></div>
+
+<p>This example should be rewritten as <a data-type="indexterm" data-primary="if/else statements" id="idm45875188453200"></a><a data-type="indexterm" data-primary="statements" data-secondary="if/else" id="idm45875188473264"></a>a simple <code>if</code>/<code>else</code> statement instead to provide more clarity as to how the code branches. Nothing is <em>functionally</em> wrong with the code, but nested ternaries can be difficult to read or reason about and often lead to logic errors down the road. The preceding ternary could be rewritten as shown in <a data-type="xref" href="#multiple_if_else">Example 2-3</a>:</p>
+<div id="multiple_if_else" data-type="example">
+<h5><span class="label">Example 2-3. </span>Multiple <code>if/else</code> statements</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s1">'username'</code><code class="p">]))</code> <code class="p">{</code>
+    <code class="nv">$val</code> <code class="o">=</code> <code class="nv">$_GET</code><code class="p">[</code><code class="s1">'username'</code><code class="p">];</code>
+<code class="p">}</code> <code class="k">elseif</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s1">'userid'</code><code class="p">]))</code> <code class="p">{</code>
+    <code class="nv">$val</code> <code class="o">=</code> <code class="nv">$_GET</code><code class="p">[</code><code class="s1">'userid'</code><code class="p">];</code>
+<code class="p">}</code> <code class="k">else</code> <code class="p">{</code>
+    <code class="nv">$val</code> <code class="o">=</code> <code class="k">null</code><code class="p">;</code>
+<code class="p">}</code></pre></div>
+
+<p>While <a data-type="xref" href="#multiple_if_else">Example 2-3</a> is more verbose than <a data-type="xref" href="#nested_ternary">Example 2-2</a>, you can more easily track where the logic needs to branch. The code is also more maintainable, as new branching logic can be added where necessary. Adding another logical branch to <a data-type="xref" href="#nested_ternary">Example 2-2</a> would further complicate the already complex ternary and make the program <a data-type="indexterm" data-primary="operators" data-secondary="ternary" data-startref="ptrrny" id="idm45875188232288"></a><a data-type="indexterm" data-primary="ternary operators" data-startref="trryprt" id="idm45875188231072"></a>even harder to maintain in the long run.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875186851840">
+<h2>See Also</h2>
+
+<p>Documentation on the <a href="https://oreil.ly/Y5WCn">ternary operator</a> and its variations.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="2.2 Coalescing Potentially Null Values"><div class="sect1" id="idm45875188227728">
+<h1>2.2 Coalescing Potentially Null Values</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875188226448">
+<h2>Problem</h2>
+
+<p>You want to assign a specific value <a data-type="indexterm" data-primary="null values, coalescing" id="nlvlcsc"></a><a data-type="indexterm" data-primary="values" data-secondary="null, coalescing" id="vlullcls"></a>to a variable only if it’s set and not <code>null</code> and otherwise use a static default value.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875188222160">
+<h2>Solution</h2>
+
+<p>Using a null-coalescing operator (<code>??</code>) as follows <a data-type="indexterm" data-primary="operators" data-secondary="null-coalescing" id="idm45875186715392"></a><a data-type="indexterm" data-primary="null-coalesing operators" id="idm45875186714384"></a>will use the first value only if it is set and not <code>null</code>:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$username</code> <code class="o">=</code> <code class="nv">$_GET</code><code class="p">[</code><code class="s1">'username'</code><code class="p">]</code> <code class="o">??</code> <code class="s1">'not logged in'</code><code class="p">;</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875186663136">
+<h2>Discussion</h2>
+
+<p>PHP’s null-coalescing operator is a newer feature <a data-type="indexterm" data-primary="syntactic sugar" id="idm45875186661760"></a>introduced in PHP 7.0. It’s been referred to as <em>syntactic sugar</em> to replace the shorthand version of PHP’s ternary operator, <code>?:</code>, discussed in <a data-type="xref" href="#ternary_operator">Recipe 2.1</a>.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p><em>Syntactic sugar</em> is shorthand for performing a common yet verbose operation in code. The developers of languages introduce such features to save keystrokes and render routine, oft-repeated blocks of code via simpler and more concise syntax.</p>
+</div>
+
+<p>Both of the following lines of code are functionally equivalent, but the ternary form will trigger a notice if the expression being evaluated is undefined:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$a</code> <code class="o">=</code> <code class="nv">$b</code> <code class="o">?:</code> <code class="nv">$c</code><code class="p">;</code>
+<code class="nv">$a</code> <code class="o">=</code> <code class="nv">$b</code> <code class="o">??</code> <code class="nv">$c</code><code class="p">;</code></pre>
+
+<p>While these preceding two examples are <em>functionally</em> identical, a notable difference in their behavior occurs if the value being evaluated (<code>$b</code>) is not defined. With the null-coalescing operator, everything is golden. With the ternary shorthand, PHP will trigger a notice during execution that the value is undefined before returning the fallback value.</p>
+
+<p>With discrete variables, the differing functionality of these operators isn’t entirely obvious, but when the evaluated component is, perhaps, an indexed array, the potential impact becomes more apparent. Assume that, instead of a discrete variable, you are trying to extract an element from the superglobal <code>$_GET</code> variable that holds request parameters. In the following example, both the ternary and the null-coalescing operators will return the fallback value, but the ternary version will complain about an undefined index:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$username</code> <code class="o">=</code> <code class="nv">$_GET</code><code class="p">[</code><code class="s1">'username'</code><code class="p">]</code> <code class="o">??</code> <code class="s1">'anonymous'</code><code class="p">;</code>
+<code class="nv">$username</code> <code class="o">=</code> <code class="nv">$_GET</code><code class="p">[</code><code class="s1">'username'</code><code class="p">]</code> <code class="o">?:</code> <code class="s1">'anonymous'</code><code class="p">;</code> <code class="c1">// Notice: undefined index ...</code></pre>
+
+<p>If errors and notices are suppressed during execution,<sup><a data-type="noteref" id="idm45875191836944-marker" href="ch02.html#idm45875191836944">1</a></sup> there is no functional difference between either operator option. It is, however, best practice to avoid writing code that triggers errors or notices, as these can accidentally raise alerts in production or potentially fill system logs and make it more difficult to find legitimate issues with your code. While the shorthand ternary operator is remarkably useful, the null-coalescing operator is purpose-built for <a data-type="indexterm" data-primary="null values, coalescing" data-startref="nlvlcsc" id="idm45875191797664"></a><a data-type="indexterm" data-primary="values" data-secondary="null, coalescing" data-startref="vlullcls" id="idm45875191796720"></a>this kind of operation and should nearly always be used instead.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875191795248">
+<h2>See Also</h2>
+
+<p>The announcement of the new operator <a href="https://oreil.ly/6vmP_">when it was first added to PHP 7.0</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="2.3 Comparing Identical Values"><div class="sect1" id="equality_operators">
+<h1>2.3 Comparing Identical Values</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875191791488">
+<h2>Problem</h2>
+
+<p>You want to compare two values of <a data-type="indexterm" data-primary="values" data-secondary="comparing" id="vlusmp"></a><a data-type="indexterm" data-primary="comparing values" id="cmpgvl"></a>the same type to ensure that they’re identical.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875191787584">
+<h2>Solution</h2>
+
+<p>Use three equals signs to compare values without dynamically casting their types:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">if</code> <code class="p">(</code><code class="nv">$a</code> <code class="o">===</code> <code class="nv">$b</code><code class="p">)</code> <code class="p">{</code>
+    <code class="c1">// ...</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875191826064">
+<h2>Discussion</h2>
+
+<p>In PHP, the equals sign has three functions. A single equals sign (<code>=</code>) is used for <em>assignment</em>, which is <a data-type="indexterm" data-primary="= (equals sign)" id="idm45875191823536"></a><a data-type="indexterm" data-primary="assignment, = (equals sign) and" id="idm45875191822800"></a>setting the value of a variable. Two equals signs (<code>==</code>) are used in an expression to determine whether the values on either side are equal. <a data-type="xref" href="#table_equality">Table 2-4</a> shows how certain values are considered equal because PHP coerces one type into another while evaluating the statement. Finally, three equals signs (<code>===</code>) are used in an <a data-type="indexterm" data-primary="values" data-secondary="identical" id="idm45875191820368"></a>expression to determine whether the values on either side are <em>identical</em>.</p>
+<table id="table_equality">
+<caption><span class="label">Table 2-4. </span>Value equality in PHP</caption>
+<thead>
+<tr>
+<th>Expression</th>
+<th>Result</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>0 == "a"</code></p></td>
+<td><p><code>false</code></p></td>
+<td><p>(Only for PHP 8.0 and above) The string <code>"a"</code> is cast as an integer, which means it’s cast to <code>0</code>.</p></td>
+</tr>
+<tr>
+<td><p><code>"1" == "01"</code></p></td>
+<td><p><code>true</code></p></td>
+<td><p>Both sides of the expression are cast to integers, and <code>1 == 1</code>.</p></td>
+</tr>
+<tr>
+<td><p><code>100 = "1e2</code>"</p></td>
+<td><p><code>true</code></p></td>
+<td><p>The right side of the expression is evaluated as an exponential representation of <code>100</code> and cast as an integer.</p></td>
+</tr>
+</tbody>
+</table>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>The first example in <a data-type="xref" href="#table_equality">Table 2-4</a> evaluates as <code>true</code> in PHP versions below 8.0. In those earlier versions, comparing the equality of a string (or numeric string) to a number would convert the string first to a number (in this case, converting <code>"a"</code> to <code>0</code>). This behavior changed in PHP 8.0 such that only numeric strings are cast to numbers, so the result of that first expression is now <code>false</code>.</p>
+</div>
+
+<p>PHP’s ability to dynamically convert between <a data-type="indexterm" data-primary="types" data-secondary="converting between" id="idm45875186954800"></a>types at runtime can be useful, but in some cases it is not what you want to have happen at all. The Boolean literal <code>false</code> is returned by some methods to represent an error or failure, while an integer <code>0</code> might be a valid return of a function. Consider the function in <a data-type="xref" href="#count_books_of_type">Example 2-4</a> that returns a count of books of a specific category, or <code>false</code> if a connection to the database holding that data fails.</p>
+<div id="count_books_of_type" data-type="example">
+<h5><span class="label">Example 2-4. </span>Count items in a database or return <code>false</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">count_books_of_type</code><code class="p">(</code><code class="nv">$category</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="nv">$sql</code> <code class="o">=</code> <code class="s2">"SELECT COUNT(*) FROM books WHERE category = :category"</code><code class="p">;</code>
+
+    <code class="k">try</code> <code class="p">{</code>
+        <code class="nv">$dbh</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">PDO</code><code class="p">(</code><code class="nx">DB_CONNECTION_STRING</code><code class="p">,</code> <code class="nx">DB_LOGIN</code><code class="p">,</code> <code class="nx">DB_PASS</code><code class="p">);</code>
+        <code class="nv">$statement</code> <code class="o">=</code> <code class="nv">$dbh</code><code class="o">-&gt;</code><code class="na">prepare</code><code class="p">(</code><code class="nv">$sql</code><code class="p">);</code>
+
+        <code class="nv">$statement</code><code class="o">-&gt;</code><code class="na">execute</code><code class="p">(</code><code class="k">array</code><code class="p">(</code><code class="s1">':category'</code> <code class="o">=&gt;</code> <code class="nv">$category</code><code class="p">));</code>
+        <code class="k">return</code> <code class="nv">$statement</code><code class="o">-&gt;</code><code class="na">fetchColumn</code><code class="p">();</code>
+    <code class="p">}</code> <code class="k">catch</code> <code class="p">(</code><code class="nx">PDOException</code> <code class="nv">$e</code><code class="p">)</code> <code class="p">{</code>
+        <code class="k">return</code> <code class="k">false</code><code class="p">;</code>
+    <code class="p">}</code>
+<code class="p">}</code></pre></div>
+
+<p>If everything in <a data-type="xref" href="#count_books_of_type">Example 2-4</a> runs as expected, the code will then return an integer count of the number of books in a particular category. <a data-type="xref" href="#print_query_results_to_headline">Example 2-5</a> might leverage this function to print a headline on a web page.</p>
+<div id="print_query_results_to_headline" data-type="example">
+<h5><span class="label">Example 2-5. </span>Using the results of a database-bound function</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$books_found</code> <code class="o">=</code> <code class="nx">count_books_of_type</code><code class="p">(</code><code class="s1">'fiction'</code><code class="p">);</code>
+
+<code class="k">switch</code> <code class="p">(</code><code class="nv">$books_found</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">case</code> <code class="mi">0</code><code class="o">:</code>
+        <code class="k">echo</code> <code class="s1">'No fiction books found'</code><code class="p">;</code>
+        <code class="k">break</code><code class="p">;</code>
+    <code class="k">case</code> <code class="mi">1</code><code class="o">:</code>
+        <code class="k">echo</code> <code class="s1">'Found one fiction book'</code><code class="p">;</code>
+        <code class="k">break</code><code class="p">;</code>
+    <code class="k">default</code><code class="o">:</code>
+        <code class="k">echo</code> <code class="s1">'Found '</code> <code class="o">.</code> <code class="nv">$books_found</code> <code class="o">.</code> <code class="s1">' fiction books'</code><code class="p">;</code>
+<code class="p">}</code></pre></div>
+
+<p>Internally, PHP’s <code>switch</code> statement is using a <a data-type="indexterm" data-primary="switch statement" id="idm45875184416016"></a><a data-type="indexterm" data-primary="statements" data-secondary="switch" id="idm45875184415408"></a>loose type comparison (our <code>==</code> operator). If <code>count_books_of_type()</code> returns <code>false</code> instead of an actual result, this <code>switch</code> statement will print out that no fiction books were found rather than reporting an error. In this particular use case, that might be acceptable behavior—but when your application needs to reflect a material difference between <code>false</code> and <code>0</code>, loose equality comparisons are inadequate.</p>
+
+<p>Instead, PHP permits the use of <em>three</em> equals signs (<code>===</code>) to check whether both values under evaluation are identical—that is, they <a data-type="indexterm" data-primary="= (equals sign)" id="idm45875184410240"></a><a data-type="indexterm" data-primary="assignment, = (equals sign) and" id="idm45875184409536"></a>are both the same value and the same type. Even though the integer <code>5</code> and the string <code>"5"</code> have the same value, evaluating <code>5 === "5"</code> will result in <code>false</code> because the two values are not the same type. Thus, while <code>0 == false</code> evaluates to <code>true</code>, <code>0 === false</code> will always evaluate to <code>false</code>.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>Determining whether two values are identical becomes more complicated when dealing with objects, either defined with custom classes or PHP-provided ones. In the case of two objects, <code>$obj1</code> and <code>$obj2</code>, they <a data-type="indexterm" data-primary="values" data-secondary="comparing" data-startref="vlusmp" id="idm45875185641328"></a><a data-type="indexterm" data-primary="comparing values" data-startref="cmpgvl" id="idm45875185640048"></a>will only evaluate as identical if they are actually the same <em>instance</em> of a class. For more on object instantiation and classes, see <a data-type="xref" href="ch08.html#chapter_classes">Chapter 8</a>.</p>
+</div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875191825472">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/T6GXm">comparison operators</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="2.4 Using the Spaceship Operator to Sort Values"><div class="sect1" id="spaceship_operator">
+<h1>2.4 Using the Spaceship Operator to Sort Values</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875185633936">
+<h2>Problem</h2>
+
+<p>You want to provide a custom ordering <a data-type="indexterm" data-primary="operators" data-secondary="spaceship" id="optpchp"></a><a data-type="indexterm" data-primary="spaceship operators" id="spcppt"></a><a data-type="indexterm" data-primary="sorting" data-secondary="spaceship operator and" id="srtgpppr"></a>function to sort an arbitrary list of objects by using <a href="https://oreil.ly/xGbc9">PHP’s native <code>usort()</code></a>.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875185627840">
+<h2>Solution</h2>
+
+<p>Assuming you want to sort by multiple properties of the list of objects, use PHP’s spaceship operator (<code>&lt;=&gt;</code>) to define a custom sorting function and supply that as the callback to <code>usort()</code>.</p>
+
+<p>Consider the following class definition for a person in your application that allows creating records with just first and last names:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">class</code> <code class="nc">Person</code> <code class="p">{</code>
+    <code class="k">public</code> <code class="nv">$firstName</code><code class="p">;</code>
+    <code class="k">public</code> <code class="nv">$lastName</code><code class="p">;</code>
+
+    <code class="k">public</code> <code class="k">function</code> <code class="fm">__construct</code><code class="p">(</code><code class="nv">$first</code><code class="p">,</code> <code class="nv">$last</code><code class="p">)</code>
+    <code class="p">{</code>
+        <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">firstName</code> <code class="o">=</code> <code class="nv">$first</code><code class="p">;</code>
+        <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">lastName</code> <code class="o">=</code> <code class="nv">$last</code><code class="p">;</code>
+    <code class="p">}</code>
+<code class="p">};</code></pre>
+
+<p>You can then create a list of people, perhaps US presidents, using this class and adding each person to your list in turn, as in <a data-type="xref" href="#adding_presidents_to_list">Example 2-6</a>.</p>
+<div id="adding_presidents_to_list" data-type="example">
+<h5><span class="label">Example 2-6. </span>Adding multiple object instances to a list</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$presidents</code> <code class="o">=</code> <code class="p">[];</code>
+
+<code class="nv">$presidents</code><code class="p">[]</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">Person</code><code class="p">(</code><code class="s1">'George'</code><code class="p">,</code> <code class="s1">'Washington'</code><code class="p">);</code>
+<code class="nv">$presidents</code><code class="p">[]</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">Person</code><code class="p">(</code><code class="s1">'John'</code><code class="p">,</code> <code class="s1">'Adams'</code><code class="p">);</code>
+<code class="nv">$presidents</code><code class="p">[]</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">Person</code><code class="p">(</code><code class="s1">'Thomas'</code><code class="p">,</code> <code class="s1">'Jefferson'</code><code class="p">);</code>
+<code class="c1">// ...</code>
+<code class="nv">$presidents</code><code class="p">[]</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">Person</code><code class="p">(</code><code class="s1">'Barack'</code><code class="p">,</code> <code class="s1">'Obama'</code><code class="p">);</code>
+<code class="nv">$presidents</code><code class="p">[]</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">Person</code><code class="p">(</code><code class="s1">'Donald'</code><code class="p">,</code> <code class="s1">'Trump'</code><code class="p">);</code>
+<code class="nv">$presidents</code><code class="p">[]</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">Person</code><code class="p">(</code><code class="s1">'Joseph'</code><code class="p">,</code> <code class="s1">'Biden'</code><code class="p">);</code></pre></div>
+
+<p>The spaceship operator can then be leveraged to identify how to sort this data, assuming you want to order by last name first, then by first name, as shown in <a data-type="xref" href="#sorting_with_spaceship">Example 2-7</a>.</p>
+<div id="sorting_with_spaceship" data-type="example">
+<h5><span class="label">Example 2-7. </span>Sorting presidents with the spaceship operator</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">presidential_sorter</code><code class="p">(</code><code class="nv">$left</code><code class="p">,</code> <code class="nv">$right</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="k">return</code> <code class="p">[</code><code class="nv">$left</code><code class="o">-&gt;</code><code class="na">lastName</code><code class="p">,</code> <code class="nv">$left</code><code class="o">-&gt;</code><code class="na">firstName</code><code class="p">]</code>
+        <code class="o">&lt;=&gt;</code>
+        <code class="p">[</code><code class="nv">$right</code><code class="o">-&gt;</code><code class="na">lastName</code><code class="p">,</code> <code class="nv">$right</code><code class="o">-&gt;</code><code class="na">firstName</code><code class="p">];</code>
+<code class="p">}</code>
+
+<code class="nb">usort</code><code class="p">(</code><code class="nv">$presidents</code><code class="p">,</code> <code class="s1">'presidential_sorter'</code><code class="p">);</code></pre></div>
+
+<p>The result of the preceding call to <code>usort()</code> is that the <code>$presidents</code> array will be properly sorted in place and ready for use.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875191226736">
+<h2>Discussion</h2>
+
+<p>The spaceship operator is a special addition as of PHP 7.0 that helps identify the relationship between the values on either side of it:</p>
+
+<ul>
+<li>
+<p>If the first value is less than the second, the expression evaluates to <code>-1</code>.</p>
+</li>
+<li>
+<p>If the first value is greater than the second, the expression evaluates to <code>+1</code>.</p>
+</li>
+<li>
+<p>If both values are the same, the expression evaluates to <code>0</code>.</p>
+</li>
+</ul>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>Like PHP’s equality operator, the spaceship operator will attempt to coerce the types of each value in the comparison to be the same. It is possible to support a number for one value and a string for the other and get a valid result. Use type coercion with special operators like this at your own risk.</p>
+</div>
+
+<p>The simplest use of the spaceship operator compares simple types with one another, making it easy to order a simple array or list of primitive values (like characters, integers, floating-point numbers, or dates). This simple case, if using <code>usort()</code>, would require a sorting function like the following:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">sorter</code><code class="p">(</code><code class="nv">$a</code><code class="p">,</code> <code class="nv">$b</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">return</code> <code class="p">(</code><code class="nv">$a</code> <code class="o">&lt;</code> <code class="nv">$b</code><code class="p">)</code> <code class="o">?</code> <code class="o">-</code><code class="mi">1</code> <code class="o">:</code> <code class="p">((</code><code class="nv">$a</code> <code class="o">&gt;</code> <code class="nv">$b</code><code class="p">)</code> <code class="o">?</code> <code class="mi">1</code> <code class="o">:</code> <code class="mi">0</code><code class="p">);</code>
+<code class="p">}</code></pre>
+
+<p>The spaceship operator simplifies the nested ternary in the preceding code by replacing the <code>return</code> statement entirely with <code>return $a &lt;=&gt; $b</code>, but without modifying the functionality of the sorting function at all.</p>
+
+<p>More complex examples, like that used in the Solution to sort based on multiple properties of a custom object definition, would necessitate rather verbose sorting function definitions. The spaceship operator simplifies comparison logic, empowering developers to specify otherwise <a data-type="indexterm" data-primary="operators" data-secondary="spaceship" data-startref="optpchp" id="idm45875188022192"></a><a data-type="indexterm" data-primary="spaceship operators" data-startref="spcppt" id="idm45875188021040"></a><a data-type="indexterm" data-primary="sorting" data-secondary="spaceship operator and" data-startref="srtgpppr" id="idm45875188020096"></a>complex logic in a single, easy-to-read line.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875188018624">
+<h2>See Also</h2>
+
+<p>The <a href="https://oreil.ly/O1X8R">original RFC for PHP’s spaceship operator</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="2.5 Suppressing Diagnostic Errors with an Operator"><div class="sect1" id="idm45875188016352">
+<h1>2.5 Suppressing Diagnostic Errors with an Operator</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875187985888">
+<h2>Problem</h2>
+
+<p>You want to explicitly ignore or suppress errors triggered by a specific expression in your application.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875187984144">
+<h2>Solution</h2>
+
+<p>Prefix the expression with the <code>@</code> operator to temporarily set the error reporting level to 0 for that line of code. This might help suppress errors related to missing files when attempting to open them directly, as in the following example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code> <code class="o">=</code> <code class="o">@</code><code class="nb">fopen</code><code class="p">(</code><code class="s1">'file_that_does_not_exist.txt'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875187975952">
+<h2>Discussion</h2>
+
+<p>The Solution example attempts to open the file <em>file_that_does_not_exist.txt</em> for reading. In normal operations, a call to <code>fopen()</code> would return <code>false</code> because the file does not exist <em>and</em> emit a PHP warning for the purposes of diagnosing the issue. Prefixing the expression with the <code>@</code> operator doesn’t change the return value at all, but it suppresses the emitted warning entirely.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>The <code>@</code> operator suppresses <a data-type="indexterm" data-primary="@ operator" id="idm45875187967344"></a><a data-type="indexterm" data-primary="operators" data-secondary="@" id="idm45875187966608"></a>error reporting for the line to which it is applied. If a developer attempts to suppress errors on an <code>include</code> statement, they will very easily hide any warnings, notices, or errors caused by the included file not existing (or having improper access controls). The suppression will <em>also</em> apply to all lines of code within the included file, meaning any errors (syntax-related or otherwise) in the included code will be ignored. Thus, while <code>@include('some-file.php')</code> is perfectly valid code, suppressing errors on <code>include</code> statements should be avoided!</p>
+</div>
+
+<p>This particular operator is useful when suppressing errors or warnings on file access operations (as in the Solution example). It’s also useful in suppressing notices in array-access operations, as in the following, where a specific <code>GET</code> parameter might not be set in a request:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$filename</code> <code class="o">=</code> <code class="o">@</code><code class="nv">$_GET</code><code class="p">[</code><code class="s1">'filename'</code><code class="p">];</code></pre>
+
+<p>The <code>$filename</code> variable will be set to the value of the request’s <code>filename</code> query parameter if it’s set. Otherwise, it will be a literal <code>null</code>. If a developer were to omit the <code>@</code> operator, the value of <code>$filename</code> would still be <code>null</code>, but PHP would emit a notice that the index of <code>filename</code> does not exist in the array.</p>
+
+<p>As of <a href="https://oreil.ly/4Ec5B">PHP 8.0</a>, this operator will no longer suppress <em>fatal</em> errors in PHP that otherwise halt script execution.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875187471536">
+<h2>See Also</h2>
+
+<p>Official PHP documentation on <a href="https://oreil.ly/bZkLY">error control operators</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="2.6 Comparing Bits Within Integers"><div class="sect1" id="bitwise_arithmetic">
+<h1>2.6 Comparing Bits Within Integers</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875187451648">
+<h2>Problem</h2>
+
+<p>You want to use simple flags to <a data-type="indexterm" data-primary="integers" data-secondary="bitwise operators" id="itgbtwp"></a><a data-type="indexterm" data-primary="bitwise operators" data-secondary="integers" id="btwptg"></a>identify state and behavior in your application, where one member might have multiple flags applied.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875187447360">
+<h2>Solution</h2>
+
+<p>Use a <a href="https://oreil.ly/aevr7">bitmask</a> to specify which flags are available and bitwise operators on the subsequent flags to identify which are set. The following example defines four discrete flags by using a binary notation of the integer each represents and combines them to indicate <em>multiple</em> flags being set at once. PHP’s bitwise operators are then used to identify which flag is set and which branch of conditional logic should be executed:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">const</code> <code class="no">FLAG_A</code> <code class="o">=</code> <code class="mi">0</code><code class="nx">b0001</code><code class="p">;</code> <code class="c1">// 1</code>
+<code class="k">const</code> <code class="no">FLAG_B</code> <code class="o">=</code> <code class="mi">0</code><code class="nx">b0010</code><code class="p">;</code> <code class="c1">// 2</code>
+<code class="k">const</code> <code class="no">FLAG_C</code> <code class="o">=</code> <code class="mi">0</code><code class="nx">b0100</code><code class="p">;</code> <code class="c1">// 4</code>
+<code class="k">const</code> <code class="no">FLAG_D</code> <code class="o">=</code> <code class="mi">0</code><code class="nx">b1000</code><code class="p">;</code> <code class="c1">// 8</code>
+
+<code class="c1">// Set a composite flag for an application</code>
+<code class="nv">$application</code> <code class="o">=</code> <code class="nx">FLAG_A</code> <code class="o">|</code> <code class="nx">FLAG_B</code><code class="p">;</code> <code class="c1">// 0b0011 or 3</code>
+
+<code class="c1">// Set a composite flag for a user</code>
+<code class="nv">$user</code> <code class="o">=</code> <code class="nx">FLAG_B</code> <code class="o">|</code> <code class="nx">FLAG_C</code> <code class="o">|</code> <code class="nx">FLAG_D</code><code class="p">;</code> <code class="c1">// 0b1110 or 14</code>
+
+<code class="c1">// Switch based on the user's applied flags</code>
+<code class="k">if</code> <code class="p">(</code><code class="nv">$user</code> <code class="o">&amp;</code> <code class="nx">FLAG_B</code><code class="p">)</code> <code class="p">{</code>
+    <code class="c1">// ...</code>
+<code class="p">}</code> <code class="k">else</code> <code class="p">{</code>
+    <code class="c1">// ...</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875187424304">
+<h2>Discussion</h2>
+
+<p>A bitmask is structured by configuring each flag to be a constant integer power of 2. This has the benefit of only setting a single bit in the binary representation of the number such that composite flags are then identified by which bits are set. In the Solution example, each flag is written explicitly as a binary number to illustrate which bits are set (<code>1</code>) versus unset (<code>0</code>), with the integer representation of the same number in a comment at the end of the line.</p>
+
+<p>Our example’s <code>FLAG_B</code> is the integer 2, which is represented in binary as <code>0010</code> (the third bit is set). Likewise, <code>FLAG_C</code> is the integer 4 with a binary representation of <code>0100</code> (the second bit is set). To specify that <em>both</em> flags are set, you add the two together to set both the second and third bits: <code>0110</code> or the integer 6.</p>
+
+<p>For this specific example, addition is an easy model to keep in mind, but it’s not exactly what is going on. To combine flags, you merely want to combine the bits that are set, not necessarily add them together. Combining <code>FLAG_A</code> with itself should result in <em>only</em> <code>FLAG_A</code>; adding the integer representation (1) to itself would change the meaning of the flag entirely.</p>
+
+<p>Rather than addition, use the bitwise operations <em>or</em> (<code>|</code>) and <em>and</em> (<code>&amp;</code>) to both combine bits and filter on assigned flags. Combining two flags together requires using the <code>|</code> operator to create a new integer with bits that are set in <em>either</em> of the flags being used. Consider <a data-type="xref" href="#composite_binary_flags_or">Table 2-5</a> to create a composite of <code>FLAG_A | FLAG_C</code>.</p>
+<table id="composite_binary_flags_or">
+<caption><span class="label">Table 2-5. </span>Composite binary flags with bitwise <em>or</em></caption>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Binary representation</th>
+<th>Integer representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>FLAG_A</code></p></td>
+<td><p><code>0001</code></p></td>
+<td><p><code>1</code></p></td>
+</tr>
+<tr>
+<td><p><code>FLAG_C</code></p></td>
+<td><p><code>0100</code></p></td>
+<td><p><code>4</code></p></td>
+</tr>
+<tr>
+<td><p><code>FLAG_A | FLAG_C</code></p></td>
+<td><p><code>0101</code></p></td>
+<td><p><code>5</code></p></td>
+</tr>
+</tbody>
+</table>
+
+<p>Comparing composite flags against your definitions then requires the <code>&amp;</code> operator, which returns a new number that has bits set on <em>both</em> sides of the operation. Comparing a flag to itself will always return 1, which is type cast to <code>true</code> in conditional checks. Comparing two values that have any of the same bits set will return a value <em>greater</em> than 0, which is type cast to <code>true</code>. Consider the simple case of evaluating where <code>FLAG_A &amp; FLAG_C</code> in <a data-type="xref" href="#composite_binary_flags_and">Table 2-6</a>.</p>
+<table id="composite_binary_flags_and">
+<caption><span class="label">Table 2-6. </span>Composite binary flags with bitwise <em>and</em></caption>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Binary representation</th>
+<th>Integer representation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>FLAG_A</code></p></td>
+<td><p><code>0001</code></p></td>
+<td><p><code>1</code></p></td>
+</tr>
+<tr>
+<td><p><code>FLAG_C</code></p></td>
+<td><p><code>0100</code></p></td>
+<td><p><code>4</code></p></td>
+</tr>
+<tr>
+<td><p><code>FLAG_A &amp; FLAG_C</code></p></td>
+<td><p><code>0000</code></p></td>
+<td><p><code>0</code></p></td>
+</tr>
+</tbody>
+</table>
+
+<p>Instead of comparing primitive flags against one another, you can and should build composite values and then compare them to your sets of flags. The following example visualizes the role-based access controls of a content management system for publishing news articles. Users can view articles, create articles, edit articles, or delete articles; their level of access is determined by the program itself and the permissions granted to their user account:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">const</code> <code class="no">VIEW_ARTICLES</code>   <code class="o">=</code> <code class="mi">0</code><code class="nx">b0001</code><code class="p">;</code>
+<code class="k">const</code> <code class="no">CREATE_ARTICLES</code> <code class="o">=</code> <code class="mi">0</code><code class="nx">b0010</code><code class="p">;</code>
+<code class="k">const</code> <code class="no">EDIT_ARTICLES</code>   <code class="o">=</code> <code class="mi">0</code><code class="nx">b0100</code><code class="p">;</code>
+<code class="k">const</code> <code class="no">DELETE_ARTICLES</code> <code class="o">=</code> <code class="mi">0</code><code class="nx">b1000</code><code class="p">;</code></pre>
+
+<p>A typical, anonymous visitor will never be logged in and will then be granted a default permission of being able to view content. Logged-in users might be able to create articles but not edit them without an editor’s permission. Likewise, editors can review and modify content (or delete it) but cannot independently create articles. Finally, administrators might be allowed to do everything. Each of the roles is composited from the preceding permission primitives as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">const</code> <code class="no">ROLE_ANONYMOUS</code> <code class="o">=</code> <code class="nx">VIEW_ARTICLES</code><code class="p">;</code>
+<code class="k">const</code> <code class="no">ROLE_AUTHOR</code>    <code class="o">=</code> <code class="nx">VIEW_ARTICLES</code> <code class="o">|</code> <code class="nx">CREATE_ARTICLES</code><code class="p">;</code>
+<code class="k">const</code> <code class="no">ROLE_EDITOR</code>    <code class="o">=</code> <code class="nx">VIEW_ARTICLES</code> <code class="o">|</code> <code class="nx">EDIT_ARTICLES</code> <code class="o">|</code> <code class="nx">DELETE_ARTICLES</code><code class="p">;</code>
+<code class="k">const</code> <code class="no">ROLE_ADMIN</code>     <code class="o">=</code> <code class="nx">VIEW_ARTICLES</code> <code class="o">|</code> <code class="nx">CREATE_ARTICLES</code> <code class="o">|</code> <code class="nx">EDIT_ARTICLES</code>
+                       <code class="o">|</code> <code class="nx">DELETE_ARTICLES</code><code class="p">;</code></pre>
+
+<p>Once composite roles are defined from primitive permissions, the application can structure logic around checking the user’s active role. While permissions were composited together with the <code>|</code> operator, the <code>&amp;</code> operator will allow you to switch based on these flags, as demonstrated by the functions defined in <a data-type="xref" href="#leveraging_bitmask_flags">Example 2-8</a>.</p>
+<div id="leveraging_bitmask_flags" data-type="example">
+<h5><span class="label">Example 2-8. </span>Leveraging bitmask flags for access control</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">get_article</code><code class="p">(</code><code class="nv">$article_id</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="nv">$role</code> <code class="o">=</code> <code class="nx">get_user_role</code><code class="p">();</code>
+
+    <code class="k">if</code> <code class="p">(</code><code class="nv">$role</code> <code class="o">&amp;</code> <code class="nx">VIEW_ARTICLES</code><code class="p">)</code> <code class="p">{</code>
+        <code class="c1">// ...</code>
+    <code class="p">}</code> <code class="k">else</code> <code class="p">{</code>
+        <code class="k">throw</code> <code class="k">new</code> <code class="nx">UnauthorizedException</code><code class="p">();</code>
+    <code class="p">}</code>
+<code class="p">}</code>
+
+<code class="k">function</code> <code class="nf">create_article</code><code class="p">(</code><code class="nv">$content</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="nv">$role</code> <code class="o">=</code> <code class="nx">get_user_role</code><code class="p">();</code>
+
+    <code class="k">if</code> <code class="p">(</code><code class="nv">$role</code> <code class="o">&amp;</code> <code class="nx">CREATE_ARTICLES</code><code class="p">)</code> <code class="p">{</code>
+        <code class="c1">// ...</code>
+    <code class="p">}</code> <code class="k">else</code> <code class="p">{</code>
+        <code class="k">throw</code> <code class="k">new</code> <code class="nx">UnauthorizedException</code><code class="p">();</code>
+    <code class="p">}</code>
+<code class="p">}</code>
+
+<code class="k">function</code> <code class="nf">edit_article</code><code class="p">(</code><code class="nv">$article_id</code><code class="p">,</code> <code class="nv">$content</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="nv">$role</code> <code class="o">=</code> <code class="nx">get_user_role</code><code class="p">();</code>
+
+    <code class="k">if</code> <code class="p">(</code><code class="nv">$role</code> <code class="o">&amp;</code> <code class="nx">EDIT_ARTICLES</code><code class="p">)</code> <code class="p">{</code>
+        <code class="c1">// ...</code>
+    <code class="p">}</code> <code class="k">else</code> <code class="p">{</code>
+        <code class="k">throw</code> <code class="k">new</code> <code class="nx">UnauthorizedException</code><code class="p">();</code>
+    <code class="p">}</code>
+<code class="p">}</code>
+
+<code class="k">function</code> <code class="nf">delete_article</code><code class="p">(</code><code class="nv">$article_id</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="nv">$role</code> <code class="o">=</code> <code class="nx">get_user_role</code><code class="p">();</code>
+
+    <code class="k">if</code> <code class="p">(</code><code class="nv">$role</code> <code class="o">&amp;</code> <code class="nx">DELETE_ARTICLES</code><code class="p">)</code> <code class="p">{</code>
+        <code class="c1">// ...</code>
+    <code class="p">}</code> <code class="k">else</code> <code class="p">{</code>
+        <code class="k">throw</code> <code class="k">new</code> <code class="nx">UnauthorizedException</code><code class="p">();</code>
+    <code class="p">}</code>
+<code class="p">}</code></pre></div>
+
+<p>Bitmasks are a powerful way to implement simple flags in any language. Take caution, though, if the number of flags needed is ever planned to increase, because each new flag represents an additional power of 2, meaning the value of all flags grows rapidly in size. However, bitmasks are commonly used in both PHP applications and by the language itself. PHP’s own error reporting setting, discussed further in <a data-type="xref" href="ch12.html#chapter_errors">Chapter 12</a>, leverages bitwise values to identify the level of error reporting used by the <a data-type="indexterm" data-primary="integers" data-secondary="bitwise operators" data-startref="itgbtwp" id="idm45875190119728"></a><a data-type="indexterm" data-primary="bitwise operators" data-secondary="integers" data-startref="btwptg" id="idm45875190118608"></a>engine itself.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875187423712">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/JmF85">bitwise operators</a>.</p>
+</div></section>
+</div></section>
+<div data-type="footnotes"><p data-type="footnote" id="idm45875191836944"><sup><a href="ch02.html#idm45875191836944-marker">1</a></sup> Error handling and suppressing errors, warnings, and notices are discussed at length in <a data-type="xref" href="ch12.html#chapter_errors">Chapter 12</a>.</p></div></div></section></div>
+</div>
+</body>
+</html>

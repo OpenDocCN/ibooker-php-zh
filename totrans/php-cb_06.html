@@ -1,0 +1,1506 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xml:lang="en"
+      lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<title>PHP Cookbook</title>
+<link rel="stylesheet" type="text/css" href="override_v1.css"/>
+<link rel="stylesheet" type="text/css" href="epub.css"/>
+</head>
+<body>
+<div id="book-content">
+<div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 6. Dates and Times"><div class="chapter" id="chapter_datetime">
+<h1><span class="label">Chapter 6. </span>Dates and Times</h1>
+
+
+<p>Manipulating dates and times is one of the most complicated tasks you can do in any language, let alone in PHP. This is simply because time is relative—<em>now</em> will differ from one user to the next and potentially trigger different behavior in your 
+<span class="keep-together">application</span>.</p>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Object Orientation"><div class="sect2" id="idm45875165409920">
+<h2>Object Orientation</h2>
+
+<p>PHP developers will work primarily with <code>DateTime</code> objects in code. These objects work by wrapping a particular instance <a data-type="indexterm" data-primary="DateTime objects" id="idm45875165408144"></a><a data-type="indexterm" data-primary="objects" data-secondary="DateTime" id="idm45875165407440"></a><a data-type="indexterm" data-primary="object orientation" id="idm45875165406496"></a>in time and provide a wide variety of functionality. You can take the differences between two <code>DateTime</code> objects, convert between arbitrary time zones, or add/subtract windows of time from an otherwise static object.</p>
+
+<p>Additionally, PHP supports a <code>DateTimeImmutable</code> object which <a data-type="indexterm" data-primary="DateTimeImmutable object" id="idm45875165403888"></a><a data-type="indexterm" data-primary="objects" data-secondary="DateTimeImmutable" id="idm45875165403184"></a>is functionally identical to <code>DateTime</code> but cannot be modified directly. Most methods on a <code>DateTime</code> object will both return the same object and mutate its internal state. The same methods on <code>DateTimeImmutable</code> leave the internal state in place but return <em>new instances</em> representing the result of the change.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>Both date/time classes extend <a data-type="indexterm" data-primary="DateTimeInterface base class" id="idm45875165399440"></a><a data-type="indexterm" data-primary="classes" data-secondary="DateTimeInterface" id="idm45875165398672"></a>an abstract <code>DateTimeInterface</code> base class, making the two classes nearly interchangeable within PHP’s date and time functionality. Everywhere you see <code>DateTime</code> in this chapter you could use a <code>DateTimeImmutable</code> instance instead and achieve similar if not identical functionality.</p>
+</div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Time Zones"><div class="sect2" id="idm45875165395968">
+<h2>Time Zones</h2>
+
+<p>One of the most challenging problems <a data-type="indexterm" data-primary="time zones" id="idm45875165394592"></a>any developer will face is working with time zones, particularly when daylight saving time is involved. On the one hand, it’s easy to simplify and assume every timestamp within an application is referencing the same time zone. This is rarely true.</p>
+
+<p>Luckily, PHP makes handling time zones remarkably easy. Every <code>DateTime</code> has a time zone embedded automatically, usually based on the default defined within the system on which PHP is running. You can also explicitly set a time zone whenever you create a <code>DateTime</code> making the region and time you’re referencing entirely unambiguous. Converting between time zones is also simple and powerful and covered at length in <a data-type="xref" href="#calculating_across_timezones">Recipe 6.9</a>.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Unix Timestamps"><div class="sect2" id="idm45875165391392">
+<h2>Unix Timestamps</h2>
+
+<p>Many computer systems use Unix <a data-type="indexterm" data-primary="timestamps" data-secondary="Unix" id="idm45875165390064"></a><a data-type="indexterm" data-primary="Unix" data-secondary="timestamps" id="idm45875165389088"></a>timestamps internally to represent dates and times. These timestamps represent the number of seconds that have occurred between the Unix Epoch (January 1, 1970 at 00:00:00 GMT) and a given time. They are memory-efficient and frequently used by databases and programmatic APIs. However, counting the number of seconds since a fixed date/time isn’t exactly user-friendly, so you need a reliable way to convert between Unix timestamps and human-readable date/time representations within your applications.</p>
+
+<p>PHP’s native formatting capabilities make this straightforward. Additional functions, like <a href="https://oreil.ly/RBqxh"><code>time()</code></a>, produce Unix timestamps directly as well.</p>
+
+<p>The following recipes cover these topics at length, in addition to several other common date/time-related tasks.</p>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="6.1 Finding the Current Date and Time"><div class="sect1" id="current_date_and_time">
+<h1>6.1 Finding the Current Date and Time</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875165384224">
+<h2>Problem</h2>
+
+<p>You want to know the current <a data-type="indexterm" data-primary="date and time" data-secondary="current" id="dttmcrr"></a>date and time.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875165381216">
+<h2>Solution</h2>
+
+<p>To print the current date and time <a data-type="indexterm" data-primary="date() function" id="idm45875165379600"></a><a data-type="indexterm" data-primary="functions" data-secondary="date()" id="idm45875165279552"></a>following a particular format, use <code>date()</code>. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$now</code> <code class="o">=</code> <code class="nb">date</code><code class="p">(</code><code class="s1">'r'</code><code class="p">);</code></pre>
+
+<p>The output of <code>date()</code> depends on the system it’s being run on and the current actual time. Using <code>r</code> as a format string, this function would return something like the 
+<span class="keep-together">following</span>:</p>
+
+<pre data-type="programlisting" data-code-language="text">Wed, 09 Nov 2022 14:15:12 -0800</pre>
+
+<p>Similarly, a newly instantiated <code>DateTime</code> object <a data-type="indexterm" data-primary="objects" data-secondary="DateTime" id="idm45875165264992"></a><a data-type="indexterm" data-primary="DateTime objects, ::format() method, secondary-sortas=format() method" id="idm45875165264480"></a>will also represent the current date and time. The <code>::format()</code> method on this object exhibits the same behavior as <code>date()</code>, meaning the following two statements are functionally identical:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$now</code> <code class="o">=</code> <code class="nb">date</code><code class="p">(</code><code class="s1">'r'</code><code class="p">);</code>
+
+<code class="nv">$now</code> <code class="o">=</code> <code class="p">(</code><code class="k">new</code> <code class="nx">DateTime</code><code class="p">())</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'r'</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875165171296">
+<h2>Discussion</h2>
+
+<p>PHP’s <code>date()</code> function, as well as a <code>DateTime</code> object instantiated with no parameters, will automatically inherit the current date and time of the system on which they’re run. The additional <code>r</code> passed into both is a format character that defines how to convert the given date/time information into a string—in this case, specifically as a date formatted according to <a href="https://oreil.ly/WrB1I">RFC 2822</a>. You can learn more about date formatting in <a data-type="xref" href="#formatting_dates_and_times">Recipe 6.2</a>.</p>
+
+<p>A powerful alternative is to leverage PHP’s <code>getdate()</code> function <a data-type="indexterm" data-primary="getdate() function" id="idm45875165206416"></a><a data-type="indexterm" data-primary="functions" data-secondary="getdate()" id="idm45875165205680"></a>to retrieve an associative array of all of the parts of the current system date and time. This array will contain the keys and values in <a data-type="xref" href="#key_elements_getdate">Table 6-1</a>.</p>
+<table id="key_elements_getdate">
+<caption><span class="label">Table 6-1. </span>Key elements returned by <code>getdate()</code></caption>
+<thead>
+<tr>
+<th>Key</th>
+<th>Description of value</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>seconds</code></p></td>
+<td><p>Seconds</p></td>
+<td><p><code>0</code> to <code>59</code></p></td>
+</tr>
+<tr>
+<td><p><code>minutes</code></p></td>
+<td><p>Minutes</p></td>
+<td><p><code>0</code> to <code>59</code></p></td>
+</tr>
+<tr>
+<td><p><code>hours</code></p></td>
+<td><p>Hours</p></td>
+<td><p><code>0</code> to <code>23</code></p></td>
+</tr>
+<tr>
+<td><p><code>mday</code></p></td>
+<td><p>Day of the month</p></td>
+<td><p><code>1</code> through <code>31</code></p></td>
+</tr>
+<tr>
+<td><p><code>wday</code></p></td>
+<td><p>Day of the week</p></td>
+<td><p><code>0</code> (Sunday) through <code>6</code> (Saturday)</p></td>
+</tr>
+<tr>
+<td><p><code>mon</code></p></td>
+<td><p>Month</p></td>
+<td><p><code>1</code> through <code>12</code></p></td>
+</tr>
+<tr>
+<td><p><code>year</code></p></td>
+<td><p>Full, four-digit year</p></td>
+<td><p><code>2023</code></p></td>
+</tr>
+<tr>
+<td><p><code>yday</code></p></td>
+<td><p>Day of the year</p></td>
+<td><p><code>0</code> through 365</p></td>
+</tr>
+<tr>
+<td><p><code>weekday</code></p></td>
+<td><p>Day of the week</p></td>
+<td><p><code>Sunday</code> through <code>Saturday</code></p></td>
+</tr>
+<tr>
+<td><p><code>month</code></p></td>
+<td><p>Month of the year</p></td>
+<td><p><code>January</code> through <code>December</code></p></td>
+</tr>
+<tr>
+<td><p><code>0</code></p></td>
+<td><p>Unix timestamp</p></td>
+<td><p><code>0</code> to <code>2147483647</code></p></td>
+</tr>
+</tbody>
+</table>
+
+<p>In some applications, you might only need the day of the week rather than a fully operational <code>DateTime</code> object. Consider <a data-type="xref" href="#getdate_vs_datetime">Example 6-1</a>, which illustrates how you might achieve this with either <code>DateTime</code> or <code>getdate()</code>.</p>
+<div id="getdate_vs_datetime" data-type="example">
+<h5><span class="label">Example 6-1. </span>Comparing <code>DateTime</code> with <code>getdate()</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">print</code> <code class="p">(</code><code class="k">new</code> <code class="nx">DateTime</code><code class="p">())</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'l'</code><code class="p">)</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+
+<code class="k">print</code> <code class="nb">getdate</code><code class="p">()[</code><code class="s1">'weekday'</code><code class="p">]</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code></pre></div>
+
+<p>These two lines of code are functionally equivalent. For a simple task such as “print today’s date,” either would be adequate for the job. The <code>DateTime</code> object provides functionality for converting time zones or forecasting future dates (both of which are covered further in other recipes). The associative array returned by <code>getdate()</code> lacks this functionality but <a data-type="indexterm" data-primary="date and time" data-secondary="current" data-startref="dttmcrr" id="idm45875165106672"></a>makes up for that shortcoming through its simple, easy-to-recognize array keys.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875165105296">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/rJ9fn">date and time functions</a>, the <a href="https://oreil.ly/t28Zh"><code>DateTime</code> class</a>, and the <a href="https://oreil.ly/Kv7l8"><code>getdate()</code> function</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="6.2 Formatting Dates and Times"><div class="sect1" id="formatting_dates_and_times">
+<h1>6.2 Formatting Dates and Times</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875165099488">
+<h2>Problem</h2>
+
+<p>You want to print a date to a string in <a data-type="indexterm" data-primary="date and time" data-secondary="formatting" id="dttmfmt"></a><a data-type="indexterm" data-primary="time" data-see="date and time" id="idm45875165096912"></a>a particular format.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875165095584">
+<h2>Solution</h2>
+
+<p>Use the <code>::format()</code> method on <a data-type="indexterm" data-primary="DateTime objects" data-secondary="::format() method" data-secondary-sortas="format() method" id="fmtthd"></a>a given <code>DateTime</code> object to specify the format <a data-type="indexterm" data-primary="date and time" data-secondary="format" id="idm45875165091488"></a>of the returned string, as shown in <a data-type="xref" href="#date_time_format_examples">Example 6-2</a>.</p>
+<div id="date_time_format_examples" data-type="example">
+<h5><span class="label">Example 6-2. </span>Date and time format examples</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$birthday</code><code> </code><code class="o">=</code><code> </code><code class="k">new</code><code> </code><code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2017-08-01'</code><code class="p">);</code><code>
+
+</code><code class="k">print</code><code> </code><code class="nv">$birthday</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'l, F j, Y'</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_dates_and_times_CO1-1" href="#callout_dates_and_times_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="k">print</code><code> </code><code class="nv">$birthday</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'n/j/y'</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_dates_and_times_CO1-2" href="#callout_dates_and_times_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="k">print</code><code> </code><code class="nv">$birthday</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="nx">DateTime</code><code class="o">::</code><code class="na">RSS</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_dates_and_times_CO1-3" href="#callout_dates_and_times_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_dates_and_times_CO1-1" href="#co_dates_and_times_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p><code>Tuesday, August 1, 2017</code></p></dd>
+<dt><a class="co" id="callout_dates_and_times_CO1-2" href="#co_dates_and_times_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p><code>8/1/17</code></p></dd>
+<dt><a class="co" id="callout_dates_and_times_CO1-3" href="#co_dates_and_times_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p><code>Tue, 01 Aug 2017 00:00:00 +0000</code></p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875165025856">
+<h2>Discussion</h2>
+
+<p>Both the <code>date()</code> function and the <code>DateTime</code> object’s <code>::format()</code> method accept a variety of input strings that ultimately define the final structure of the string produced by PHP. Each format string is composed of individual characters that represent specific parts of a <a data-type="indexterm" data-primary="date and time" data-secondary="format" data-tertiary="characters" id="idm45875164988320"></a>date or time value, as you can see in <a data-type="xref" href="#datetime_format_characters">Table 6-2</a>.</p>
+<table id="datetime_format_characters">
+<caption><span class="label">Table 6-2. </span>PHP format characters</caption>
+<thead>
+<tr>
+<th>Character</th>
+<th>Description</th>
+<th>Example values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><strong>Day</strong></p></td>
+<td><p> </p></td>
+<td><p> </p></td>
+</tr>
+<tr>
+<td><p><code>d</code></p></td>
+<td><p>Day of the month, two digits with leading 0</p></td>
+<td><p><code>01</code> to <code>31</code></p></td>
+</tr>
+<tr>
+<td><p><code>D</code></p></td>
+<td><p>A textual representation of a day, three letters</p></td>
+<td><p><code>Mon</code> through <code>Sun</code></p></td>
+</tr>
+<tr>
+<td><p><code>j</code></p></td>
+<td><p>Day of the month without leading 0</p></td>
+<td><p><code>1</code> to <code>31</code></p></td>
+</tr>
+<tr>
+<td><p><code>l</code></p></td>
+<td><p>The name of the day of the week</p></td>
+<td><p><code>Sunday</code> through <code>Saturday</code></p></td>
+</tr>
+<tr>
+<td><p><code>N</code></p></td>
+<td><p>ISO 8601 numeric representation of the day of the week</p></td>
+<td><p><code>1</code> (for Monday) through <code>7</code> (for Sunday)</p></td>
+</tr>
+<tr>
+<td><p><code>S</code></p></td>
+<td><p>English ordinal suffix for the day of the month, two characters</p></td>
+<td><p><code>st</code>, <code>nd</code>, <code>rd</code>, or <code>th</code>. Works well with <code>j</code></p></td>
+</tr>
+<tr>
+<td><p><code>w</code></p></td>
+<td><p>Numeric representation of the day of the week</p></td>
+<td><p><code>0</code> (for Sunday) through <code>6</code> (for Saturday)</p></td>
+</tr>
+<tr>
+<td><p><code>z</code></p></td>
+<td><p>The day of the year (starting from 0)</p></td>
+<td><p><code>0</code> through <code>365</code></p></td>
+</tr>
+<tr>
+<td><p><strong>Month</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><p><code>F</code></p></td>
+<td><p>The full name of the month</p></td>
+<td><p><code>January</code> through <code>December</code></p></td>
+</tr>
+<tr>
+<td><p><code>m</code></p></td>
+<td><p>Numeric representation of a month, with leading 0</p></td>
+<td><p><code>01</code> through <code>12</code></p></td>
+</tr>
+<tr>
+<td><p><code>M</code></p></td>
+<td><p>A textual representation of a month, three letters</p></td>
+<td><p><code>Jan</code> through <code>Dec</code></p></td>
+</tr>
+<tr>
+<td><p><code>n</code></p></td>
+<td><p>Numeric representation of a month, without leading 0</p></td>
+<td><p><code>1</code> through <code>12</code></p></td>
+</tr>
+<tr>
+<td><p><code>t</code></p></td>
+<td><p>Number of days in the given month</p></td>
+<td><p><code>28</code> through <code>31</code></p></td>
+</tr>
+<tr>
+<td><p><strong>Year</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><p><code>L</code></p></td>
+<td><p>Whether it’s a leap year</p></td>
+<td><p><code>1</code> if it is a leap year, <code>0</code> otherwise.</p></td>
+</tr>
+<tr>
+<td><p><code>o</code></p></td>
+<td><p>ISO 8601 week-numbering year. This has the same value as <code>Y</code>, except that if the ISO week belongs to the previous or next year, that year is used instead</p></td>
+<td><p><code>1999</code> or <code>2003</code></p></td>
+</tr>
+<tr>
+<td><p><code>Y</code></p></td>
+<td><p>A full numeric representation of a year, four digits</p></td>
+<td><p><code>1999</code> or <code>2003</code></p></td>
+</tr>
+<tr>
+<td><p><code>y</code></p></td>
+<td><p>A two-digit representation of a year</p></td>
+<td><p><code>99</code> or <code>03</code></p></td>
+</tr>
+<tr>
+<td><p><strong>Time</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><p><code>a</code></p></td>
+<td><p>Lowercase ante meridiem or post meridiem</p></td>
+<td><p><code>am</code> or <code>pm</code></p></td>
+</tr>
+<tr>
+<td><p><code>A</code></p></td>
+<td><p>Uppercase ante meridiem or post meridiem</p></td>
+<td><p><code>AM</code> or <code>PM</code></p></td>
+</tr>
+<tr>
+<td><p><code>g</code></p></td>
+<td><p>12-hour format of an hour without leading 0</p></td>
+<td><p><code>1</code> through <code>12</code></p></td>
+</tr>
+<tr>
+<td><p><code>G</code></p></td>
+<td><p>24-hour format of an hour without leading 0</p></td>
+<td><p><code>0</code> through <code>23</code></p></td>
+</tr>
+<tr>
+<td><p><code>h</code></p></td>
+<td><p>12-hour format of an hour with leading 0</p></td>
+<td><p><code>01</code> through <code>12</code></p></td>
+</tr>
+<tr>
+<td><p><code>H</code></p></td>
+<td><p>24-hour format of an hour with leading 0</p></td>
+<td><p><code>00</code> through <code>23</code></p></td>
+</tr>
+<tr>
+<td><p><code>i</code></p></td>
+<td><p>Minutes with leading 0</p></td>
+<td><p><code>00</code> to <code>59</code></p></td>
+</tr>
+<tr>
+<td><p><code>s</code></p></td>
+<td><p>Seconds with leading 0</p></td>
+<td><p><code>00</code> through <code>59</code></p></td>
+</tr>
+<tr>
+<td><p><code>u</code></p></td>
+<td><p>Microseconds</p></td>
+<td><p><code>654321</code></p></td>
+</tr>
+<tr>
+<td><p><code>v</code></p></td>
+<td><p>Milliseconds</p></td>
+<td><p><code>654</code></p></td>
+</tr>
+<tr>
+<td><p><strong>Time zone</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><p><code>e</code></p></td>
+<td><p>Time zone identifier</p></td>
+<td><p><code>UTC</code>, <code>GMT</code>, <code>Atlantic/Azores</code></p></td>
+</tr>
+<tr>
+<td><p><code>I</code></p></td>
+<td><p>Whether the date is in daylight saving time</p></td>
+<td><p><code>1</code> if daylight saving time, <code>0</code> otherwise.</p></td>
+</tr>
+<tr>
+<td><p><code>O</code></p></td>
+<td><p>Difference from Greenwich time (GMT) without colon between hours and minutes</p></td>
+<td><p><code>+0200</code></p></td>
+</tr>
+<tr>
+<td><p><code>P</code></p></td>
+<td><p>Difference from Greenwich time (GMT) with colon between hours and minutes</p></td>
+<td><p><code>+02:00</code></p></td>
+</tr>
+<tr>
+<td><p><code>p</code></p></td>
+<td><p>The same as P, but returns Z instead of +00:00</p></td>
+<td><p><code>+02:00</code></p></td>
+</tr>
+<tr>
+<td><p><code>T</code></p></td>
+<td><p>Time zone abbreviation, if known; otherwise the GMT offset.</p></td>
+<td><p><code>EST</code>, <code>MDT</code>, <code>+05</code></p></td>
+</tr>
+<tr>
+<td><p><code>Z</code></p></td>
+<td><p>Time zone offset in seconds</p></td>
+<td><p><code>-43200</code> through <code>50400</code></p></td>
+</tr>
+<tr>
+<td><p><strong>Other</strong></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><p><code>U</code></p></td>
+<td><p>Unix timestamp</p></td>
+<td><p><code>0</code> through <code>2147483647</code></p></td>
+</tr>
+</tbody>
+</table>
+
+<p>Combining these characters into a format string determines exactly how PHP will convert a given date/time construct into a string.</p>
+
+<p>Similarly, PHP defines several predefined constants representing <a data-type="indexterm" data-primary="DateTime objects, ::format() method, secondary-sortas=format() method, startref=fmtthd" id="idm45875164980416"></a><a data-type="indexterm" data-primary="date and time" data-secondary="constants, predefined" id="idm45875164854240"></a>well-known and widely used formats. <a data-type="xref" href="#datetime_format_constants">Table 6-3</a> shows some of the most useful.</p>
+<table id="datetime_format_constants">
+<caption><span class="label">Table 6-3. </span>Predefined date constants</caption>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Class constant</th>
+<th>Format characters</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>DATE_ATOM</code></p></td>
+<td><p><code>DateTime::ATOM</code></p></td>
+<td><p><code>Y-m-d\TH:i:sP</code></p></td>
+<td><p><code>2023-08-01T13:22:14-08:00</code></p></td>
+</tr>
+<tr>
+<td><p><code>DATE_COOKIE</code></p></td>
+<td><p><code>DateTime::COOKIE</code></p></td>
+<td><p><code>l, d-M-Y H:i:s T</code></p></td>
+<td><p><code>Tuesday, 01-Aug-2023 13:22:14 GMT-0800</code></p></td>
+</tr>
+<tr>
+<td><p><code>DATE_ISO8601`footnote:[Unfortunately, `DATE_ISO8601</code> isn’t compatible with the ISO 8601 standard. If you need that level of compatibility, use <code>DATE_ATOM</code> instead.]</p></td>
+<td><p><code>DateTime::ISO8601</code></p></td>
+<td><p><code>Y-m-d\TH:i:sO</code></p></td>
+<td><p><code>2013-08-01T21:21:14\+0000</code></p></td>
+</tr>
+<tr>
+<td><p><code>DATE_RSS</code></p></td>
+<td><p><code>DateTime::RSS</code></p></td>
+<td><p><code>D, d M Y H:i:s O</code></p></td>
+<td><p><code>Tue, 01 Aug 2023 13:22:14 -0800</code></p></td>
+</tr>
+</tbody>
+</table>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875164834176">
+<h2>See Also</h2>
+
+<p>Full documentation <a data-type="indexterm" data-primary="date and time" data-secondary="formatting" data-startref="dttmfmt" id="idm45875164832912"></a>on <a href="https://oreil.ly/oQpYP">format characters</a> and <a href="https://oreil.ly/XJiZy">predefined <code>DateTime</code> constants</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="6.3 Converting Dates and Times to Unix Timestamps"><div class="sect1" id="idm45875164829392">
+<h1>6.3 Converting Dates and Times to Unix Timestamps</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875164828144">
+<h2>Problem</h2>
+
+<p>You want to convert a particular date <a data-type="indexterm" data-primary="date and time" data-secondary="converting to Unix timestamps" id="dttmvuxt"></a><a data-type="indexterm" data-primary="Unix" data-secondary="timestamps" data-tertiary="converting date and time to" id="uxtmpsvd"></a><a data-type="indexterm" data-primary="timestamps" data-secondary="Unix" id="tmstpsux"></a>or time to a Unix timestamp and convert a given Unix timestamp into a local date or time.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875164822288">
+<h2>Solution</h2>
+
+<p>To convert a given date/time into a timestamp, use the <code>U</code> format <a data-type="indexterm" data-primary="U format character" id="idm45875164820336"></a><a data-type="indexterm" data-primary="formatting" data-secondary="U format character" id="idm45875164819600"></a>character (see <a data-type="xref" href="#datetime_format_characters">Table 6-2</a>) with <code>DateTime::format()</code> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$date</code> <code class="o">=</code> <code class="s1">'2023-11-09T13:15:00-0700'</code><code class="p">;</code>
+<code class="nv">$dateObj</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="nv">$date</code><code class="p">);</code>
+
+<code class="k">echo</code> <code class="nv">$dateObj</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'U'</code><code class="p">);</code>
+<code class="c1">// 1699560900</code></pre>
+
+<p>To convert a given timestamp into a <code>DateTime</code> object, also use the <code>U</code> format character but instead with <code>DateTime::createFromFormat()</code> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$timestamp</code> <code class="o">=</code> <code class="s1">'1648241792'</code><code class="p">;</code>
+<code class="nv">$dateObj</code> <code class="o">=</code> <code class="nx">DateTime</code><code class="o">::</code><code class="na">createFromFormat</code><code class="p">(</code><code class="s1">'U'</code><code class="p">,</code> <code class="nv">$timestamp</code><code class="p">);</code>
+
+<code class="k">echo</code> <code class="nv">$dateObj</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="nx">DateTime</code><code class="o">::</code><code class="na">ISO8601</code><code class="p">);</code>
+<code class="c1">// 2022-03-25T20:56:32+0000</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875164734112">
+<h2>Discussion</h2>
+
+<p>The <code>::createFromFormat()</code> method is a <a data-type="indexterm" data-primary="DateTime objects" data-secondary="::createFromFormat() method" data-secondary-sortas="createFromFormat() method" id="idm45875164757824"></a>static inverse of <code>DateTime</code>’s <code>::format()</code> method. Both functions use identical format strings to specify the format being used<sup><a data-type="noteref" id="idm45875164755616-marker" href="ch06.html#idm45875164755616">1</a></sup> but represent opposite transformations between a formatted string and the underlying state of a <code>DateTime</code> object. The Solution example explicitly leverages the <code>U</code> format character to tell PHP that the input data is a Unix timestamp.</p>
+
+<p>If the input string doesn’t actually match your format, PHP will return a literal <code>false</code> as in the following example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$timestamp</code> <code class="o">=</code> <code class="s1">'2023-07-23'</code><code class="p">;</code>
+<code class="nv">$dateObj</code> <code class="o">=</code> <code class="nx">DateTime</code><code class="o">::</code><code class="na">createFromFormat</code><code class="p">(</code><code class="s1">'U'</code><code class="p">,</code> <code class="nv">$timestamp</code><code class="p">);</code>
+
+<code class="k">echo</code> <code class="nb">gettype</code><code class="p">(</code><code class="nv">$dateObj</code><code class="p">);</code> <code class="c1">// false</code></pre>
+
+<p>When parsing user input, it is a good idea to explicitly check the return of <code>::createFromFormat()</code> to ensure that the date input was valid. For more on validating dates, see <a data-type="xref" href="#validating_a_date">Recipe 6.7</a>.</p>
+
+<p>Rather than work with a full <code>DateTime</code> object, you can work with <em>parts</em> of a date/time directly. PHP’s <a href="https://oreil.ly/YFKz0"><code>mktime()</code> function</a> will always return a Unix timestamp, and the only required parameter is the hour.</p>
+
+<p>For example, assume you want the Unix timestamp representing July 4, 2023 at noon in GMT (no time zone offset). You could <a data-type="indexterm" data-primary="timestamps" data-secondary="creating" id="idm45875164699680"></a>do this in two ways, as demonstrated in <a data-type="xref" href="#mktime_example">Example 6-3</a>.</p>
+<div id="mktime_example" data-type="example">
+<h5><span class="label">Example 6-3. </span>Creating a timestamp directly</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$date</code><code> </code><code class="o">=</code><code> </code><code class="k">new</code><code> </code><code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2023-07-04T12:00:00'</code><code class="p">);</code><code>
+</code><code class="nv">$timestamp</code><code> </code><code class="o">=</code><code> </code><code class="nv">$date</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'U'</code><code class="p">);</code><code> </code><a class="co" id="co_dates_and_times_CO2-1" href="#callout_dates_and_times_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="nv">$timestamp</code><code> </code><code class="o">=</code><code> </code><code class="nb">mktime</code><code class="p">(</code><code class="nx">month</code><code class="o">:</code><code> </code><code class="mi">7</code><code class="p">,</code><code> </code><code class="nx">day</code><code class="o">:</code><code> </code><code class="mi">4</code><code class="p">,</code><code> </code><code class="nx">year</code><code class="o">:</code><code> </code><code class="mi">2023</code><code class="p">,</code><code> </code><code class="nx">hour</code><code class="o">:</code><code> </code><code class="mi">12</code><code class="p">);</code><code> </code><a class="co" id="co_dates_and_times_CO2-2" href="#callout_dates_and_times_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_dates_and_times_CO2-1" href="#co_dates_and_times_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>This output will be exactly <code>1688472000</code>.</p></dd>
+<dt><a class="co" id="callout_dates_and_times_CO2-2" href="#co_dates_and_times_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>This output will be <em>close</em> to <code>1688472000</code> but will vary in the last three digits.</p></dd>
+</dl></div>
+
+<p>While this simpler example appears elegant and avoids instantiating an object only to turn it back into a number, it has an important problem. Failing to specify a parameter (in this case, minutes or seconds) will cause <code>mktime()</code> to use the current system values for those parameters by default. If you were to run this example code at 3:05 in the afternoon, the output might be <code>1688472300</code>.</p>
+
+<p>This Unix timestamp translates to 12:05:00 rather than 12:00:00 when converted back to a <code>DateTime</code>, representing a (potentially negligible) difference from what the application expects.</p>
+
+<p>It’s important to remember that, if you choose to leverage the functional interface of <code>mktime()</code>, you either provide a value for <em>every</em> component of the date/time or you build your application in <a data-type="indexterm" data-primary="date and time" data-secondary="converting to Unix timestamps" data-startref="dttmvuxt" id="idm45875164573168"></a><a data-type="indexterm" data-primary="Unix" data-secondary="timestamps" data-tertiary="converting date and time to" data-startref="uxtmpsvd" id="idm45875164572080"></a><a data-type="indexterm" data-primary="timestamps" data-secondary="Unix" data-startref="tmstpsux" id="idm45875164570752"></a>such a way that slight deviations are expected and handled.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875164759344">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/otv8q"><code>DateTime::createFromFormat()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="6.4 Converting from Unix Timestamps to Date and 
+Time Parts"><div class="sect1" id="idm45875164567360">
+<h1>6.4 Converting from Unix Timestamps to Date and 
+<span class="keep-together">Time Parts</span></h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875164565584">
+<h2>Problem</h2>
+
+<p>You want to extract a particular <a data-type="indexterm" data-primary="Unix" data-secondary="timestamps" data-tertiary="converting to date and time parts" id="uxtmspvd"></a><a data-type="indexterm" data-primary="timestamps" data-secondary="Unix" data-tertiary="converting to date and time parts" id="tmpsuxv"></a>date or time part (day or hour) from a Unix 
+<span class="keep-together">timestamp</span>.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875164560272">
+<h2>Solution</h2>
+
+<p>Pass the Unix timestamp as a <a data-type="indexterm" data-primary="Unix" data-secondary="timestamps" data-tertiary="passing as parameter" id="idm45875164558912"></a><a data-type="indexterm" data-primary="timestamps" data-secondary="Unix" data-tertiary="passing as parameter" id="idm45875164557664"></a>parameter to <code>getdate()</code> and reference the required keys in the resulting associative array. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$date</code> <code class="o">=</code> <code class="mi">1688472300</code><code class="p">;</code>
+<code class="nv">$time_parts</code> <code class="o">=</code> <code class="nb">getdate</code><code class="p">(</code><code class="nv">$date</code><code class="p">);</code>
+
+<code class="k">print</code> <code class="nv">$time_parts</code><code class="p">[</code><code class="s1">'weekday'</code><code class="p">]</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code> <code class="c1">// Tuesday</code>
+<code class="k">print</code> <code class="nv">$time_parts</code><code class="p">[</code><code class="s1">'hours'</code><code class="p">]</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>   <code class="c1">// 12</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875164369872">
+<h2>Discussion</h2>
+
+<p>The only parameter you can provide to <code>getdate()</code> is a Unix timestamp. If this parameter is omitted, PHP will leverage the current system date and time. When you provide a timestamp, PHP parses that timestamp internally and allows for the extraction of all expected date and time elements.</p>
+
+<p>Alternatively, you can pass a timestamp into the constructor for a <code>DateTime</code> instance in two ways to build a full object from it:</p>
+<ol>
+<li>
+<p>Prefixing the timestamp with an <code>@</code> character tells PHP to interpret the entry as a Unix timestamp—for example, <code>new DateTime('@1688472300')</code>.</p>
+</li>
+<li>
+<p>You can use the <code>U</code> format character when importing a timestamp into a <code>DateTime</code> object—for example, <code>DateTime::createFromFormat('U', '1688472300')</code>.</p>
+</li>
+
+</ol>
+
+<p>In any case, once your timestamp is properly parsed and loaded into a <code>DateTime</code> object, you can use its <code>::format()</code> method to extract any component you desire. <a data-type="xref" href="#datetime_conversion_revisited">Example 6-4</a> is an alternative implementation of the Solution example that leverages <code>DateTime</code> rather than <code>getdate()</code>.</p>
+<div id="datetime_conversion_revisited" data-type="example">
+<h5><span class="label">Example 6-4. </span>Extracting date and time parts from Unix timestamps</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$date</code> <code class="o">=</code> <code class="s1">'1688472300'</code><code class="p">;</code>
+
+<code class="nv">$parsed</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s2">"@</code><code class="si">{</code><code class="nv">$date</code><code class="si">}</code><code class="s2">"</code><code class="p">);</code>
+<code class="k">print</code> <code class="nv">$parsed</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'l'</code><code class="p">)</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="k">print</code> <code class="nv">$parsed</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'g'</code><code class="p">)</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+
+<code class="nv">$parsed2</code> <code class="o">=</code> <code class="nx">DateTime</code><code class="o">::</code><code class="na">createFromFormat</code><code class="p">(</code><code class="s1">'U'</code><code class="p">,</code> <code class="nv">$date</code><code class="p">);</code>
+<code class="k">print</code> <code class="nv">$parsed2</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'l'</code><code class="p">)</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="k">print</code> <code class="nv">$parsed2</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'g'</code><code class="p">)</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code></pre></div>
+
+<p>Either of the approaches in <a data-type="xref" href="#datetime_conversion_revisited">Example 6-4</a> is a valid replacement of <code>getdate()</code> that also provides the benefit of giving you a fully functional <code>DateTime</code> instance. You could print the date (or time) in any format, manipulate the underlying value directly, or even convert between time zones if necessary. Each of these potential <a data-type="indexterm" data-primary="Unix" data-secondary="timestamps" data-tertiary="converting to date and time parts" data-startref="uxtmspvd" id="idm45875164484112"></a><a data-type="indexterm" data-primary="timestamps" data-secondary="Unix" data-tertiary="converting to date and time parts" data-startref="tmpsuxv" id="idm45875164482720"></a>further uses for <code>DateTime</code> is covered in further recipes.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875164480720">
+<h2>See Also</h2>
+
+<p><a data-type="xref" href="#current_date_and_time">Recipe 6.1</a> for further discussion of <code>getdate()</code>. Read ahead in <a data-type="xref" href="#add_or_subtract_a_date">Recipe 6.8</a> to learn how to manipulate <code>DateTime</code> objects and in <a data-type="xref" href="#calculating_across_timezones">Recipe 6.9</a> to see how time zones can be managed directly.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="6.5 Computing the Difference Between Two Dates"><div class="sect1" id="idm45875164475872">
+<h1>6.5 Computing the Difference Between Two Dates</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875164474656">
+<h2>Problem</h2>
+
+<p>You want to find out how much time has <a data-type="indexterm" data-primary="dates, difference between two" id="dtsdffw"></a>passed between two dates or times.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875164471952">
+<h2>Solution</h2>
+
+<p>Encapsulate each date/time in a <code>DateTime</code> object. Leverage the <code>::diff()</code> method on one to calculate the relative difference between it and the other <code>DateTime</code>. The result will be a <code>DateInterval</code> object as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$firstDate</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2002-06-14'</code><code class="p">);</code>
+<code class="nv">$secondDate</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2022-11-09'</code><code class="p">);</code>
+
+<code class="nv">$interval</code> <code class="o">=</code> <code class="nv">$secondDate</code><code class="o">-&gt;</code><code class="na">diff</code><code class="p">(</code><code class="nv">$firstDate</code><code class="p">);</code>
+
+<code class="k">print</code> <code class="nv">$interval</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'%y years %d days %m months'</code><code class="p">);</code>
+<code class="c1">// 20 years 25 days 4 months</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875164340832">
+<h2>Discussion</h2>
+
+<p>The <code>::diff()</code> method of the <code>DateTime</code> object effectively subtracts one date/time (the argument passed into the method) from another (the one represented by the object itself). The result is a representation of the relative duration of time between the two objects.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>The <code>::diff()</code> method ignores daylight saving time. To properly account for the potential one-hour difference intrinsic to that system, converting both date/time objects into UTC first is a good idea.</p>
+</div>
+
+<p>It is also important to note that, while it might appear similar in the Solution example, the <code>::format()</code> method of the <code>DateInterval</code> object takes a whole different set of format characters than those used by <code>DateTime</code>. Every format character must be prefixed by a literal <code>%</code> character, but the format string itself can include nonformatting characters (like <em>years</em> and <em>months</em> in the Solution example).</p>
+
+<p>Available format characters are enumerated in  <a data-type="xref" href="#dateinterval_format_characters">Table 6-4</a>. In every case except for the format characters of <code>a</code> and <code>r</code>, using the lowercase for a format character will return a numeric value without any leading 0. The enumerated uppercase format characters return at least two digits with a leading 0. Remember, every format character must be prefixed with <a data-type="indexterm" data-primary="DateInterval object" data-secondary="format characters" id="idm45875164322288"></a>a literal <code>%</code>.</p>
+<table id="dateinterval_format_characters">
+<caption><span class="label">Table 6-4. </span><code>DateInterval</code> format characters</caption>
+<thead>
+<tr>
+<th>Character</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>%</code></p></td>
+<td><p>Literal <code>%</code></p></td>
+<td><p><code>%</code></p></td>
+</tr>
+<tr>
+<td><p><code>Y</code></p></td>
+<td><p>Years</p></td>
+<td><p><code>03</code></p></td>
+</tr>
+<tr>
+<td><p><code>M</code></p></td>
+<td><p>Months</p></td>
+<td><p><code>02</code></p></td>
+</tr>
+<tr>
+<td><p><code>D</code></p></td>
+<td><p>Days</p></td>
+<td><p><code>09</code></p></td>
+</tr>
+<tr>
+<td><p><code>H</code></p></td>
+<td><p>Hours</p></td>
+<td><p><code>08</code></p></td>
+</tr>
+<tr>
+<td><p><code>I</code></p></td>
+<td><p>Minutes</p></td>
+<td><p><code>01</code></p></td>
+</tr>
+<tr>
+<td><p><code>S</code></p></td>
+<td><p>Seconds</p></td>
+<td><p><code>04</code></p></td>
+</tr>
+<tr>
+<td><p><code>F</code></p></td>
+<td><p>Microseconds</p></td>
+<td><p><code>007705</code></p></td>
+</tr>
+<tr>
+<td><p><code>R</code></p></td>
+<td><p>Sign “-” when negative, “+” when positive</p></td>
+<td><p><code>-</code> or <code>+</code></p></td>
+</tr>
+<tr>
+<td><p><code>r</code></p></td>
+<td><p>Sign “-” when negative, empty when positive</p></td>
+<td><p><code>-</code></p></td>
+</tr>
+<tr>
+<td><p><code>a</code></p></td>
+<td><p>Total number of days</p></td>
+<td><p><code>548</code></p></td>
+</tr>
+</tbody>
+</table>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875164340528">
+<h2>See Also</h2>
+
+<p>Full documentation <a data-type="indexterm" data-primary="dates, difference between two" data-startref="dtsdffw" id="idm45875164279936"></a>on the <a href="https://oreil.ly/r0FBV"><code>DateInterval</code> class</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="6.6 Parsing Dates and Times from Arbitrary Strings"><div class="sect1" id="parsing_arbitrary_dates">
+<h1>6.6 Parsing Dates and Times from Arbitrary Strings</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875164276048">
+<h2>Problem</h2>
+
+<p>You need to convert an arbitrary, <a data-type="indexterm" data-primary="strings" data-secondary="converting to DateTime object" id="sgsvdj"></a><a data-type="indexterm" data-primary="DateTime objects" data-secondary="converting strings to" id="dtbjvg"></a><a data-type="indexterm" data-primary="strings" data-secondary="parsing date and time from" id="sgsrsdmf"></a><a data-type="indexterm" data-primary="date and time" data-secondary="parsing from strings" id="dttmpsg"></a>user-defined string into a valid <code>DateTime</code> object for further use or manipulation.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875164269120">
+<h2>Solution</h2>
+
+<p>Use PHP’s powerful <code>strtotime()</code> function <a data-type="indexterm" data-primary="strtotime() function" id="idm45875164267344"></a><a data-type="indexterm" data-primary="functions" data-secondary="strtotime()" id="idm45875164266608"></a><a data-type="indexterm" data-primary="Unix" data-secondary="timestamps" data-tertiary="converting text to" id="idm45875164265664"></a><a data-type="indexterm" data-primary="timestamps" data-secondary="Unix" data-tertiary="converting text to" id="idm45875164264448"></a>to convert the text entry into a Unix timestamp, and then pass that into the constructor of a new <code>DateTime</code> object. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$entry</code> <code class="o">=</code> <code class="nb">strtotime</code><code class="p">(</code><code class="s1">'last Wednesday'</code><code class="p">);</code>
+<code class="nv">$parsed</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s2">"@</code><code class="si">{</code><code class="nv">$entry</code><code class="si">}</code><code class="s2">"</code><code class="p">);</code>
+
+<code class="nv">$entry</code> <code class="o">=</code> <code class="nb">strtotime</code><code class="p">(</code><code class="s1">'now + 2 days'</code><code class="p">);</code>
+<code class="nv">$parsed</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s2">"@</code><code class="si">{</code><code class="nv">$entry</code><code class="si">}</code><code class="s2">"</code><code class="p">);</code>
+
+<code class="nv">$entry</code> <code class="o">=</code> <code class="nb">strtotime</code><code class="p">(</code><code class="s1">'June 23, 2023'</code><code class="p">);</code>
+<code class="nv">$parsed</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s2">"@</code><code class="si">{</code><code class="nv">$entry</code><code class="si">}</code><code class="s2">"</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875164208080">
+<h2>Discussion</h2>
+
+<p>The power of <code>strtotime()</code> comes from the underlying <a href="https://oreil.ly/2f4o_">date and time import formats</a> supported by the language. These include the kinds of formats you might expect computers to use (like YYYY-MM-DD for a year, month, and day). But it extends to <em>relative</em> specifiers and complex, compound formats as well.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>The convention of prefixing a <a data-type="indexterm" data-primary="Unix" data-secondary="timestamps" data-tertiary="@ prefix" data-tertiary-sortas="a prefix" id="idm45875164153376"></a><a data-type="indexterm" data-primary="timestamps" data-secondary="Unix" data-tertiary="@ prefix" data-tertiary-sortas="a prefix" id="idm45875164151856"></a>Unix timestamp with a literal <code>@</code> character when passing it into a <code>DateTime</code> constructor itself comes from the compound date/time formats supported by PHP.</p>
+</div>
+
+<p>The relative formats are the most powerful, supporting human-readable strings like these:</p>
+
+<ul>
+<li>
+<p><code>yesterday</code></p>
+</li>
+<li>
+<p><code>first day of</code></p>
+</li>
+<li>
+<p><code>now</code></p>
+</li>
+<li>
+<p><code>ago</code></p>
+</li>
+</ul>
+
+<p>Armed with these formats, you can parse almost any string imaginable with PHP. However, there are some limits. In the Solution example, I used <code>now + 2 days</code> to specify “2 days from now.” <a data-type="xref" href="#strtotime_parse_error">Example 6-5</a> demonstrates that the latter results in a parser error in PHP, even though it reads well in English.</p>
+<div id="strtotime_parse_error" data-type="example">
+<h5><span class="label">Example 6-5. </span>Limitations in <code>strtotime()</code> parsing</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$date</code> <code class="o">=</code> <code class="nb">strtotime</code><code class="p">(</code><code class="s1">'2 days from now'</code><code class="p">);</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="nv">$date</code> <code class="o">===</code> <code class="k">false</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">throw</code> <code class="k">new</code> <code class="nx">InvalidArgumentException</code><code class="p">(</code><code class="s1">'Error parsing the string!'</code><code class="p">);</code>
+<code class="p">}</code></pre></div>
+
+<p>It should always be noted that, no matter how clever you can make a computer, you are always limited by the quality of input provided by end users. There is no way you can foresee every possible way of specifying a date or time; <code>strtotime()</code> gets close, but you’ll need to handle input errors as well.</p>
+
+<p>Another potential way to parse user-provided <a data-type="indexterm" data-primary="date_parse() function" id="idm45875164097600"></a><a data-type="indexterm" data-primary="functions" data-secondary="date_parse()" id="idm45875164096560"></a>dates is PHP’s <code>date_parse()</code> function. Unlike <code>strtotime()</code>, this function expects a reasonably well-formatted input string. It also doesn’t handle relative time quite the same way. <a data-type="xref" href="#date_parse_with_relatives">Example 6-6</a> illustrates several strings that can be parsed by <code>date_parse()</code>.</p>
+<div id="date_parse_with_relatives" data-type="example">
+<h5><span class="label">Example 6-6. </span><code>date_parse()</code> examples</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$first</code><code> </code><code class="o">=</code><code> </code><code class="nb">date_parse</code><code class="p">(</code><code class="s1">'January 4, 2022'</code><code class="p">);</code><code> </code><a class="co" id="co_dates_and_times_CO3-1" href="#callout_dates_and_times_CO3-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="nv">$second</code><code> </code><code class="o">=</code><code> </code><code class="nb">date_parse</code><code class="p">(</code><code class="s1">'Feb 14'</code><code class="p">);</code><code> </code><a class="co" id="co_dates_and_times_CO3-2" href="#callout_dates_and_times_CO3-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="nv">$third</code><code> </code><code class="o">=</code><code> </code><code class="nb">date_parse</code><code class="p">(</code><code class="s1">'2022-11-12 5:00PM'</code><code class="p">);</code><code> </code><a class="co" id="co_dates_and_times_CO3-3" href="#callout_dates_and_times_CO3-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+
+</code><code class="nv">$fourth</code><code> </code><code class="o">=</code><code> </code><code class="nb">date_parse</code><code class="p">(</code><code class="s1">'1-1-2001 + 12 years'</code><code class="p">);</code><code> </code><a class="co" id="co_dates_and_times_CO3-4" href="#callout_dates_and_times_CO3-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_dates_and_times_CO3-1" href="#co_dates_and_times_CO3-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Parses January 4, 2022</p></dd>
+<dt><a class="co" id="callout_dates_and_times_CO3-2" href="#co_dates_and_times_CO3-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Parses February 14, but with a <code>null</code> year</p></dd>
+<dt><a class="co" id="callout_dates_and_times_CO3-3" href="#co_dates_and_times_CO3-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Parses both the date and the time, but with no time zone</p></dd>
+<dt><a class="co" id="callout_dates_and_times_CO3-4" href="#co_dates_and_times_CO3-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Parses the date and stores an additional relative field</p></dd>
+</dl></div>
+
+<p>Rather than return a timestamp, <code>date_parse()</code> will extract the relevant date/time parts from the input string and store them in an associative array with keys for the following:</p>
+
+<ul>
+<li>
+<p><code>year</code></p>
+</li>
+<li>
+<p><code>month</code></p>
+</li>
+<li>
+<p><code>day</code></p>
+</li>
+<li>
+<p><code>hour</code></p>
+</li>
+<li>
+<p><code>minute</code></p>
+</li>
+<li>
+<p><code>second</code></p>
+</li>
+<li>
+<p><code>fraction</code></p>
+</li>
+</ul>
+
+<p>In addition, passing a time-relative specification in the string (like the <code>+ 12 years</code> in <a data-type="xref" href="#date_parse_with_relatives">Example 6-6</a>) will add a <code>relative</code> key to the array with information about the relative offset.</p>
+
+<p>All of this is useful in determining whether a user-provided date is useful as an actual date. The <code>date_parse()</code> function will also return warnings and errors if it encounters any parsing issues, making it even easier to check whether a date is valid. For more on checking date validity, read <a data-type="xref" href="#validating_a_date">Recipe 6.7</a>.</p>
+
+<p>Revisiting <a data-type="xref" href="#strtotime_parse_error">Example 6-5</a> and leveraging <code>date_parse()</code> shows a little more about why PHP has trouble parsing <code>2 days from now</code> as a relative date. Consider the following example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$date</code> <code class="o">=</code> <code class="nb">date_parse</code><code class="p">(</code><code class="s1">'2 days from now'</code><code class="p">);</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="nv">$date</code><code class="p">[</code><code class="s1">'error_count'</code><code class="p">]</code> <code class="o">&gt;</code> <code class="mi">0</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">foreach</code> <code class="p">(</code><code class="nv">$date</code><code class="p">[</code><code class="s1">'errors'</code><code class="p">]</code> <code class="k">as</code> <code class="nv">$error</code><code class="p">)</code> <code class="p">{</code>
+        <code class="k">print</code> <code class="nv">$error</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+    <code class="p">}</code>
+<code class="p">}</code></pre>
+
+<p>The preceding code will print <code>The time zone could not be found in the database</code>, which suggests PHP is <em>trying</em> to parse the date but is failing to identify what <code>from</code> really means in the statement <code>from now</code>. In fact, inspecting the <code>$date</code> array itself will show it returns a <code>relative</code> key. This relative offset properly represents the specified two days, meaning <code>date_parse()</code> (and even <code>strtotime()</code>) was able to read the relative date offset (<code>2 days</code>) but choked on the last part.</p>
+
+<p>This additional error provides further context for debugging and could, perhaps, inform some kind of error message that the application should provide to the end user. In any case, it’s more helpful than <a data-type="indexterm" data-primary="strings" data-secondary="converting to DateTime object" data-startref="sgsvdj" id="idm45875163958128"></a><a data-type="indexterm" data-primary="DateTime objects" data-secondary="converting strings to" data-startref="dtbjvg" id="idm45875163956912"></a><a data-type="indexterm" data-primary="strings" data-secondary="parsing date and time from" data-startref="sgsrsdmf" id="idm45875163955696"></a><a data-type="indexterm" data-primary="date and time" data-secondary="parsing from strings" data-startref="dttmpsg" id="idm45875163954464"></a>the mere <code>false</code> return of <code>strtotime()</code> on its own.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875164156368">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/2CECz"><code>date_parse()</code></a> and <a href="https://oreil.ly/S7qkH"><code>strtotime()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="6.7 Validating a Date"><div class="sect1" id="validating_a_date">
+<h1>6.7 Validating a Date</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875163941664">
+<h2>Problem</h2>
+
+<p>You want to ensure that a date is valid. For <a data-type="indexterm" data-primary="date and time" data-secondary="validating dates" id="dtmvdts"></a>example, you want to ensure that a user-defined birthdate is a real date on the calendar and not something like November 31, 2022.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875163938672">
+<h2>Solution</h2>
+
+<p>Use PHP’s <code>checkdate()</code> function as <a data-type="indexterm" data-primary="checkdate() function" id="idm45875163936928"></a><a data-type="indexterm" data-primary="functions" data-secondary="checkdate()" id="idm45875163936192"></a>follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$entry</code> <code class="o">=</code> <code class="s1">'November 31, 2022'</code><code class="p">;</code>
+<code class="nv">$parsed</code> <code class="o">=</code> <code class="nb">date_parse</code><code class="p">(</code><code class="nv">$entry</code><code class="p">);</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nb">checkdate</code><code class="p">(</code><code class="nv">$parsed</code><code class="p">[</code><code class="s1">'month'</code><code class="p">],</code> <code class="nv">$parsed</code><code class="p">[</code><code class="s1">'day'</code><code class="p">],</code> <code class="nv">$parsed</code><code class="p">[</code><code class="s1">'year'</code><code class="p">]))</code> <code class="p">{</code>
+    <code class="k">throw</code> <code class="k">new</code> <code class="nx">InvalidArgumentException</code><code class="p">(</code><code class="s1">'Specified date is invalid!'</code><code class="p">);</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875163891024">
+<h2>Discussion</h2>
+
+<p>The <code>date_parse()</code> function was already covered in <a data-type="xref" href="#parsing_arbitrary_dates">Recipe 6.6</a>, but using it with <code>checkdate()</code> is new. This second function attempts to validate that the date is valid according to the calendar.</p>
+
+<p>It checks that the month (first parameter) is between 1 and 12, that the year (third parameter) is between 1 and 32,767 (the maximum value of a 2-byte integer in PHP), and that the number of days is valid for that given month and year.</p>
+
+<p>The <code>checkdate()</code> function properly handles months with 28, 30, or 31 days. <a data-type="xref" href="#leapyear_validation">Example 6-7</a> shows it also accounts for <a data-type="indexterm" data-primary="date and time" data-secondary="validating dates" data-startref="dtmvdts" id="idm45875163870544"></a><a data-type="indexterm" data-primary="leap year, validating" id="idm45875163869328"></a>leap year, validating that February 29 exists in the appropriate years.</p>
+<div id="leapyear_validation" data-type="example">
+<h5><span class="label">Example 6-7. </span>Validating leap year</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$valid</code> <code class="o">=</code> <code class="nb">checkdate</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code> <code class="mi">29</code><code class="p">,</code> <code class="mi">2024</code><code class="p">);</code> <code class="c1">// true</code>
+
+<code class="nv">$invalid</code> <code class="o">=</code> <code class="nb">checkdate</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code> <code class="mi">29</code><code class="p">,</code> <code class="mi">2023</code><code class="p">);</code> <code class="c1">// false</code></pre></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875163788672">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/T2io8"><code>checkdate()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="6.8 Adding to or Subtracting from a Date"><div class="sect1" id="add_or_subtract_a_date">
+<h1>6.8 Adding to or Subtracting from a Date</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875163854304">
+<h2>Problem</h2>
+
+<p>You want to apply a specific <a data-type="indexterm" data-primary="date and time" data-secondary="adding/subtracting from a date" id="dtmsbcd"></a>offset (either additive or subtractive) against a fixed date. For example, you want to calculate a future date by adding days to today’s date.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875163824208">
+<h2>Solution</h2>
+
+<p>Use the <code>::add()</code> or <code>::sub()</code> methods of <a data-type="indexterm" data-primary="DateTime objects" data-secondary="::add() method" data-secondary-sortas="add() method" id="ddmthd"></a><a data-type="indexterm" data-primary="DateTime objects" data-secondary="::sub() method" data-secondary-sortas="sub() method" id="sbmthd"></a>a given <code>DateTime</code> object to add or subtract a <code>DateInterval</code>, respectively, as shown in <a data-type="xref" href="#example_datetime_addition">Example 6-8</a>.</p>
+<div id="example_datetime_addition" data-type="example">
+<h5><span class="label">Example 6-8. </span>Simple <code>DateTime</code> addition</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$date</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'December 25, 2023'</code><code class="p">);</code>
+
+<code class="c1">// When do the 12 days of Christmas end?</code>
+<code class="nv">$twelve_days</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateInterval</code><code class="p">(</code><code class="s1">'P12D'</code><code class="p">);</code>
+<code class="nv">$date</code><code class="o">-&gt;</code><code class="na">add</code><code class="p">(</code><code class="nv">$twelve_days</code><code class="p">);</code>
+
+<code class="k">print</code> <code class="s1">'The holidays end on '</code> <code class="o">.</code> <code class="nv">$date</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'F j, Y'</code><code class="p">);</code>
+
+<code class="c1">// The holidays end on January 6, 2024</code></pre></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875163748624">
+<h2>Discussion</h2>
+
+<p>Both the <code>::add()</code> and <code>::sub()</code> methods on a <code>DateTime</code> object modify the object itself by either adding or subtracting the given interval. Intervals are specified using a period designation that identifies the amount of time that interval represents. <a data-type="xref" href="#table_dateinterval_durations">Table 6-5</a> illustrates <a data-type="indexterm" data-primary="DateInterval object" data-secondary="period designations" id="idm45875163737520"></a>the format characters used to denote an interval.</p>
+<table id="table_dateinterval_durations">
+<caption><span class="label">Table 6-5. </span>Period designations used by <code>DateInterval</code></caption>
+<thead>
+<tr>
+<th>Character</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><strong>Period designators</strong></p></td>
+<td><p> </p></td>
+</tr>
+<tr>
+<td><p><code>Y</code></p></td>
+<td><p>Years</p></td>
+</tr>
+<tr>
+<td><p><code>M</code></p></td>
+<td><p>Months</p></td>
+</tr>
+<tr>
+<td><p><code>D</code></p></td>
+<td><p>Days</p></td>
+</tr>
+<tr>
+<td><p><code>W</code></p></td>
+<td><p>Weeks</p></td>
+</tr>
+<tr>
+<td><p><strong>Time designators</strong></p></td>
+<td><p> </p></td>
+</tr>
+<tr>
+<td><p><code>H</code></p></td>
+<td><p>Hours</p></td>
+</tr>
+<tr>
+<td><p><code>M</code></p></td>
+<td><p>Minutes</p></td>
+</tr>
+<tr>
+<td><p><code>S</code></p></td>
+<td><p>Seconds</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>Every formatted date interval period starts with the letter <code>P</code>. This is followed by the number of years/months/days/weeks in that period. Any time elements in a duration are prefixed with the letter <code>T</code>.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>The period designations for months <a data-type="indexterm" data-primary="date and time" data-secondary="minutes" id="idm45875163695152"></a><a data-type="indexterm" data-primary="date and time" data-secondary="months" id="idm45875163694176"></a>and minutes are both the letter <code>M</code>. This can lead to confusion when trying to identify 15 <em>minutes</em> versus 15 <em>months</em> in a time designation. If you intend to use minutes, ensure that your duration has properly used the <code>T</code> prefix to avoid a frustrating error in your application.</p>
+</div>
+
+<p>For example, a period of 3 weeks and 2 days would be represented as <code>P3W2D</code>. A period of 4 months, 2 hours, and 10 seconds would be represented as <code>P4MT2H10S</code>. Similarly, a period of 1 month, 2 hours, and 30 minutes would be represented as <code>P1MT2H30M</code>.</p>
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3" data-pdf-bookmark="Mutability"><div class="sect3" id="idm45875163689536">
+<h3>Mutability</h3>
+
+<p>Note that, in <a data-type="xref" href="#example_datetime_addition">Example 6-8</a>, the <a data-type="indexterm" data-primary="DateTime objects" data-secondary="mutability" id="idm45875163686880"></a><a data-type="indexterm" data-primary="mutability, DateTimeImmutable object" id="idm45875163685904"></a>original <code>DateTime</code> object is itself modified when you call <code>::add()</code>. In a simple example, this is fine. If you’re attempting to calculate <em>multiple</em> dates offset from the same starting date, the mutability of the <code>DateTime</code> object causes problems.</p>
+
+<p>Instead, you can leverage the <a data-type="indexterm" data-primary="DateTimeImmutable object" id="idm45875163682960"></a>nearly identical <code>DateTimeImmutable</code> object. This class implements the same interface as <code>DateTime</code>, but the <code>::add()</code> and <code>::sub()</code> methods will instead return <em>new instances</em> of the class rather than mutating the internal state of the object itself.</p>
+
+<p>Consider the comparison between both object <a data-type="indexterm" data-primary="DateTime objects" data-secondary="DateTimeImmutable, comparing" id="idm45875163679728"></a><a data-type="indexterm" data-primary="DateTime objects" data-secondary="comparing" id="idm45875163678784"></a>types in <a data-type="xref" href="#comparing_datetime_object_types">Example 6-9</a>.</p>
+<div id="comparing_datetime_object_types" data-type="example">
+<h5><span class="label">Example 6-9. </span>Comparing <code>DateTime</code> and <code>DateTimeImmutable</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$date</code><code> </code><code class="o">=</code><code> </code><code class="k">new</code><code> </code><code class="nx">DateTime</code><code class="p">(</code><code class="s1">'December 25, 2023'</code><code class="p">);</code><code>
+</code><code class="nv">$christmas</code><code> </code><code class="o">=</code><code> </code><code class="k">new</code><code> </code><code class="nx">DateTimeImmutable</code><code class="p">(</code><code class="s1">'December 25, 2023'</code><code class="p">);</code><code>
+
+</code><code class="c1">// When do the 12 days of Christmas end?
+</code><code class="nv">$twelve_days</code><code> </code><code class="o">=</code><code> </code><code class="k">new</code><code> </code><code class="nx">DateInterval</code><code class="p">(</code><code class="s1">'P12D'</code><code class="p">);</code><code>
+</code><code class="nv">$date</code><code class="o">-&gt;</code><code class="na">add</code><code class="p">(</code><code class="nv">$twelve_days</code><code class="p">);</code><code> </code><a class="co" id="co_dates_and_times_CO4-1" href="#callout_dates_and_times_CO4-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nv">$end</code><code> </code><code class="o">=</code><code> </code><code class="nv">$christmas</code><code class="o">-&gt;</code><code class="na">add</code><code class="p">(</code><code class="nv">$twelve_days</code><code class="p">);</code><code> </code><a class="co" id="co_dates_and_times_CO4-2" href="#callout_dates_and_times_CO4-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+
+</code><code class="k">print</code><code> </code><code class="s1">'The holidays end on '</code><code> </code><code class="o">.</code><code> </code><code class="nv">$date</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'F j, Y'</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code>
+</code><code class="k">print</code><code> </code><code class="s1">'The holidays end on '</code><code> </code><code class="o">.</code><code> </code><code class="nv">$end</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'F j, Y'</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code>
+
+</code><code class="c1">// When is next Christmas?
+</code><code class="nv">$next_year</code><code> </code><code class="o">=</code><code> </code><code class="k">new</code><code> </code><code class="nx">DateInterval</code><code class="p">(</code><code class="s1">'P1Y'</code><code class="p">);</code><code>
+</code><code class="nv">$date</code><code class="o">-&gt;</code><code class="na">add</code><code class="p">(</code><code class="nv">$next_year</code><code class="p">);</code><code>
+</code><code class="nv">$next_christmas</code><code> </code><code class="o">=</code><code> </code><code class="nv">$christmas</code><code class="o">-&gt;</code><code class="na">add</code><code class="p">(</code><code class="nv">$next_year</code><code class="p">);</code><code>
+
+</code><code class="k">print</code><code> </code><code class="s1">'Next Christmas is on '</code><code> </code><code class="o">.</code><code> </code><code class="nv">$date</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'F j, Y'</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code>
+</code><code class="k">print</code><code> </code><code class="s1">'Next Christmas is on '</code><code> </code><code class="o">.</code><code> </code><code class="nv">$next_christmas</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'F j, Y'</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_dates_and_times_CO4-3" href="#callout_dates_and_times_CO4-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+
+</code><code class="k">print</code><code> </code><code class="s1">'This Christmas is on '</code><code> </code><code class="o">.</code><code> </code><code class="nv">$christmas</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="s1">'F j, Y'</code><code class="p">)</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_dates_and_times_CO4-4" href="#callout_dates_and_times_CO4-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_dates_and_times_CO4-1" href="#co_dates_and_times_CO4-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Since <code>$date</code> is a mutable object, invoking its <code>::add()</code> method will modify the object directly.</p></dd>
+<dt><a class="co" id="callout_dates_and_times_CO4-2" href="#co_dates_and_times_CO4-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>As <code>$christmas</code> is immutable, invoking <code>::add()</code> will return a new object that must be stored in a variable.</p></dd>
+<dt><a class="co" id="callout_dates_and_times_CO4-3" href="#co_dates_and_times_CO4-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Printing data from the resulting object from adding time to a <code>DateTime​Immu⁠ta⁠ble</code> will present the correct data, as the <em>new</em> object was created with the right date and time.</p></dd>
+<dt><a class="co" id="callout_dates_and_times_CO4-4" href="#co_dates_and_times_CO4-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Even after invoking <code>:add()</code>, a <code>DateTimeImmutable</code> object will always contain the same data as it is, in fact, immutable.</p></dd>
+</dl></div>
+
+<p>The advantage of immutable objects is that you can treat them as constant and rest assured that no one is going to rewrite the calendar when you’re not looking. The only disadvantage is with memory utilization. Since <code>DateTime</code> modifies a single object, memory doesn’t necessarily increase as you keep making changes. Every time you “modify” a <code>DateTimeImmutable</code> object, however, PHP creates a new object and consumes additional memory.</p>
+
+<p>In a typical web application, the memory overhead here will be negligible. There is no reason <em>not</em> to use a <code>DateTimeImmutable</code> object.</p>
+</div></section>
+
+
+
+
+
+
+
+
+
+
+<section data-type="sect3" data-pdf-bookmark="Simpler modification"><div class="sect3" id="idm45875163455600">
+<h3>Simpler modification</h3>
+
+<p>In a similar track, both <code>DateTime</code> and <code>DateTimeImmutable</code> implement a <code>::modify()</code> method that works with human-readable strings rather than interval objects. This allows you to find relative dates like “last Friday” or “next week” from a given object.</p>
+
+<p>A good example is Thanksgiving which, in the US, falls on the fourth Thursday in November. You can easily calculate the exact date in a given year with the function defined in <a data-type="xref" href="#datetime_find_thanksgiving">Example 6-10</a>.</p>
+<div id="datetime_find_thanksgiving" data-type="example">
+<h5><span class="label">Example 6-10. </span>Finding Thanksgiving with <code>DateTime</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">findThanksgiving</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$year</code><code class="p">)</code><code class="o">:</code> <code class="nx">DateTime</code>
+<code class="p">{</code>
+    <code class="nv">$november</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s2">"November 1, </code><code class="si">{</code><code class="nv">$year</code><code class="si">}</code><code class="s2">"</code><code class="p">);</code>
+    <code class="nv">$november</code><code class="o">-&gt;</code><code class="na">modify</code><code class="p">(</code><code class="s1">'fourth Thursday'</code><code class="p">);</code>
+
+    <code class="k">return</code> <code class="nv">$november</code><code class="p">;</code>
+<code class="p">}</code></pre></div>
+
+<p>The same functionality can be implemented using immutable <a data-type="indexterm" data-primary="date and time" data-secondary="adding/subtracting from a date" data-startref="dtmsbcd" id="idm45875163259776"></a><a data-type="indexterm" data-primary="DateTimeImmutable object" data-secondary="::add() method" data-secondary-sortas="add() method" id="idm45875163423632"></a><a data-type="indexterm" data-primary="DateTimeImmutable objects" data-secondary="::sub() method" data-secondary-sortas="sub() method" data-startref="sbmthd" id="idm45875163422544"></a><a data-type="indexterm" data-primary="DateTime objects" data-secondary="::add() method" data-secondary-sortas="add() method" data-startref="ddmthd" id="idm45875163421088"></a><a data-type="indexterm" data-primary="DateTime objects" data-secondary="::sub() method" data-secondary-sortas="sub() method" data-startref="sbmthd" id="idm45875163419600"></a><a data-type="indexterm" data-primary="Thanksgiving, DateTimeImmutable object" id="idm45875163418112"></a>date objects, as shown in <a data-type="xref" href="#datetimeimmutable_find_thanksgiving">Example 6-11</a>.</p>
+<div id="datetimeimmutable_find_thanksgiving" data-type="example">
+<h5><span class="label">Example 6-11. </span>Finding Thanksgiving with <code>DateTimeImmutable</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">findThanksgiving</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$year</code><code class="p">)</code><code class="o">:</code> <code class="nx">DateTimeImmutable</code>
+<code class="p">{</code>
+    <code class="nv">$november</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTimeImmutable</code><code class="p">(</code><code class="s2">"November 1, </code><code class="si">{</code><code class="nv">$year</code><code class="si">}</code><code class="s2">"</code><code class="p">);</code>
+    <code class="k">return</code> <code class="nv">$november</code><code class="o">-&gt;</code><code class="na">modify</code><code class="p">(</code><code class="s1">'fourth Thursday'</code><code class="p">);</code>
+<code class="p">}</code></pre></div>
+</div></section>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875163392656">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/KvluE"><code>DateInterval</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="6.9 Calculating Times Across Time Zones"><div class="sect1" id="calculating_across_timezones">
+<h1>6.9 Calculating Times Across Time Zones</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875163376928">
+<h2>Problem</h2>
+
+<p>You want to determine a specific <a data-type="indexterm" data-primary="time zones" data-secondary="calculating time across" id="tzcctcs"></a><a data-type="indexterm" data-primary="date and time" data-secondary="time zones, calculating times" id="dtmmzccg"></a>time across more than one time zone.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875163372784">
+<h2>Solution</h2>
+
+<p>Use the <code>::setTimezone()</code> method of <a data-type="indexterm" data-primary="DateTime objects" data-secondary="::setTimezone() method" data-secondary-sortas="setTimezone() method" id="idm45875163371040"></a>the <code>DateTime</code> class to change a time zone as 
+<span class="keep-together">follows</span>:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$now</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">();</code>
+<code class="nv">$now</code><code class="o">-&gt;</code><code class="na">setTimezone</code><code class="p">(</code><code class="k">new</code> <code class="nx">DateTimeZone</code><code class="p">(</code><code class="s1">'America/Los_Angeles'</code><code class="p">));</code>
+
+<code class="k">print</code> <code class="nv">$now</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="nx">DATE_RSS</code><code class="p">)</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+
+<code class="nv">$now</code><code class="o">-&gt;</code><code class="na">setTimezone</code><code class="p">(</code><code class="k">new</code> <code class="nx">DateTimeZone</code><code class="p">(</code><code class="s1">'Europe/Paris'</code><code class="p">));</code>
+
+<code class="k">print</code> <code class="nv">$now</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="nx">DATE_RSS</code><code class="p">)</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875163287936">
+<h2>Discussion</h2>
+
+<p>Time zones are among the most frustrating things application developers need to worry about. Thankfully, PHP allows for converting from one time zone to another relatively easily. The <code>::setTimezone()</code> method used in the Solution example illustrates how an arbitrary <code>DateTime</code> can be converted from one time zone to another merely by specifying the desired time zone.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>Keep in mind that both <code>DateTime</code> and <code>DateTimeImmutable</code> implement a <code>::setTimezone()</code> method. The difference between their implementations is that <code>DateTime</code> will modify the state of the underlying object, while <code>DateTimeImmutable</code> will always return a <em>new</em> object instead.</p>
+</div>
+
+<p>It is important to know which time zones are available for use in code. The list is too long to enumerate, but developers can leverage <code>DateTimeZone::listIdentifiers()</code> to list all available named time zones. If your application only cares about a specific region, you can further pare down the list by using one of the predefined group constants that ship with the class.</p>
+
+<p>For example, <code>DateTimeZone::listIdentifiers(DateTimeZone::AMERICA)</code> returns an array that lists all time zones available across the Americas. On a particular test system, this array has a list of 145 time zones, each pointing to a major local city to help identify the time zone they represent. You can generate a list of possible time zone identifiers for each of the following regional constants:</p>
+
+<ul>
+<li>
+<p><code>DateTimeZone::AFRICA</code></p>
+</li>
+<li>
+<p><code>DateTimeZone::AMERICA</code></p>
+</li>
+<li>
+<p><code>DateTimeZone::ANTARCTICA</code></p>
+</li>
+<li>
+<p><code>DateTimeZone::ARCTIC</code></p>
+</li>
+<li>
+<p><code>DateTimeZone::ASIA</code></p>
+</li>
+<li>
+<p><code>DateTimeZone::ATLANTIC</code></p>
+</li>
+<li>
+<p><code>DateTimeZone::AUSTRALIA</code></p>
+</li>
+<li>
+<p><code>DateTimeZone::EUROPE</code></p>
+</li>
+<li>
+<p><code>DateTimeZone::INDIAN</code></p>
+</li>
+<li>
+<p><code>DateTimeZone::PACIFIC</code></p>
+</li>
+<li>
+<p><code>DateTimeZone::UTC</code></p>
+</li>
+<li>
+<p><code>DateTimeZone::ALL</code></p>
+</li>
+</ul>
+
+<p>Similarly, you can use bitwise operators to construct unions from these constants to retrieve lists of all time zones across two or more regions. For example, <code>DateTimeZone::ANTARCTICA | DateTimeZone::ARCTIC</code> would represent all time zones near either the South or North Pole.</p>
+
+<p>The base <code>DateTime</code> class empowers you to instantiate an object with a specific time zone as opposed to accepting the system defaults. Merely pass a <code>DateTimeZone</code> instance as an optional second parameter to the constructor, and the new object will be set to the correct time zone automatically.</p>
+
+<p>For example, the datetime <code>2022-12-15T17:35:53</code>, formatted according to <a href="https://oreil.ly/rip_R">ISO 8601</a>, represents 5:35 p.m. on December 15, 2022, but does not reflect a specific time zone. When instantiating a <code>DateTime</code> object, you can easily specify this is a time in Tokyo, Japan, as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$date</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2022-12-15T17:35:53'</code><code class="p">,</code> <code class="k">new</code> <code class="nx">DateTimeZone</code><code class="p">(</code><code class="s1">'Asia/Tokyo'</code><code class="p">));</code>
+
+<code class="k">echo</code> <code class="nv">$date</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="nx">DateTime</code><code class="o">::</code><code class="na">ATOM</code><code class="p">);</code>
+<code class="c1">// 2022-12-15T17:35:53+09:00</code></pre>
+
+<p>If time zone information is missing in the datetime string being parsed, providing that time zone makes things explicit. Had you <em>not</em> added a time zone identifier in the preceding example, PHP would <a data-type="indexterm" data-primary="time zones" data-secondary="calculating time across" data-startref="tzcctcs" id="idm45875163231616"></a><a data-type="indexterm" data-primary="date and time" data-secondary="time zones, calculating times" data-startref="dtmmzccg" id="idm45875163213696"></a>have assumed the system’s configured time zone instead.<sup><a data-type="noteref" id="idm45875163212384-marker" href="ch06.html#idm45875163212384">2</a></sup></p>
+
+<p>If time zone information <em>is</em> present in the datetime string, PHP will ignore any explicit time zone specified in the second parameter and parse the string as provided.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875163280592">
+<h2>See Also</h2>
+
+<p>Documentation on the <a href="https://oreil.ly/dk2gQ"><code>::setTimezone()</code> method</a> and the <a href="https://oreil.ly/MkdHB"><code>DateTimeZone</code> class</a>.</p>
+</div></section>
+</div></section>
+<div data-type="footnotes"><p data-type="footnote" id="idm45875164755616"><sup><a href="ch06.html#idm45875164755616-marker">1</a></sup> Format strings and available format characters are covered in <a data-type="xref" href="#formatting_dates_and_times">Recipe 6.2</a>.</p><p data-type="footnote" id="idm45875163212384"><sup><a href="ch06.html#idm45875163212384-marker">2</a></sup> You can check the current time zone setting for your system with <code>date_default_timezone_get()</code>.</p></div></div></section></div>
+</div>
+</body>
+</html>

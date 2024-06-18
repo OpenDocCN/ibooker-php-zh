@@ -1,0 +1,679 @@
+<html><head></head><body><div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 12. XML"><div class="chapter" id="xml">
+<h1><span class="label">Chapter 12. </span>XML</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" id="ix_xml_ch12"/>XML, the Extensible Markup Language, is a standardized data format. It looks a little like HTML, with tags (<code>&lt;example&gt;like this&lt;/example&gt;</code>) and entities (<code>&amp;amp;</code>). Unlike HTML, however, XML is designed to be easy to programmatically parse, and there are rules for what you can and cannot do in an XML document. XML is now the standard data format in fields as diverse as publishing, engineering, and medicine. It’s used for remote procedure calls, databases, purchase orders, and much more.</p>
+<p>There are many scenarios where you might want to use XML. Because it is a common format for data transfer, other programs can emit XML files for you to either extract information from (<em>parse</em>) or display in HTML (<em>transform</em>). This chapter shows you how to use the XML parser bundled with PHP, as well as how to use the optional XSLT extension to transform XML. We also briefly cover generating XML.</p>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="in remote procedure calls" data-secondary-sortas="remote" id="idm45922755941752"/><a contenteditable="false" data-type="indexterm" data-primary="RPC (remote procedure call)" id="idm45922755940120"/>Recently, <a contenteditable="false" data-type="indexterm" data-primary="XML-RPC" id="idm45922755938872"/>XML has been used in remote procedure calls (XML-RPC). A client encodes a function name and parameter values in XML and sends them via HTTP to a server. The server decodes the function name and values, decides what to do, and returns a response value encoded in XML. XML-RPC has proved a useful way to integrate application components written in different languages. We’ll show you how to write XML-RPC servers and clients in <a data-type="xref" href="ch16.xhtml#web_services">Chapter 16</a>, but for now let’s look at the basics of XML.</p>
+<section data-type="sect1" data-pdf-bookmark="Lightning Guide to XML"><div class="sect1" id="lightning_guide_to_xml">
+<h1>Lightning Guide to XML</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="syntax rules for" id="ix_xml_syntax"/>Most XML consists of elements (like HTML tags), entities, and regular data. For example:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="nt">&lt;book</code> <code class="na">isbn=</code><code class="s">"1-56592-610-2"</code><code class="nt">&gt;</code>
+ <code class="nt">&lt;title&gt;</code>Programming PHP<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;authors&gt;</code>
+ <code class="nt">&lt;author&gt;</code>Rasmus Lerdorf<code class="nt">&lt;/author&gt;</code>
+ <code class="nt">&lt;author&gt;</code>Kevin Tatroe<code class="nt">&lt;/author&gt;</code>
+ <code class="nt">&lt;author&gt;</code>Peter MacIntyre<code class="nt">&lt;/author&gt;</code>
+ <code class="nt">&lt;/authors&gt;</code>
+<code class="nt">&lt;/book&gt;</code></pre>
+<p>In HTML, you often have an open tag without a close tag. The most common example of this is:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="nt">&lt;br&gt;</code></pre>
+<p>In XML, that is illegal. XML requires that every open tag be closed. For tags that don’t enclose anything, such as the line break <code>&lt;br&gt;</code>, XML adds this syntax:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="nt">&lt;br</code> <code class="nt">/&gt;</code></pre>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="nesting XML tags" id="idm45922756107816"/>Tags can be nested but cannot overlap. For example, this is valid:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="nt">&lt;book&gt;&lt;title&gt;</code>Programming PHP<code class="nt">&lt;/title&gt;&lt;/book&gt;</code></pre>
+<p>This, however, is not valid, because the <code>&lt;book&gt;</code> and <code>&lt;title&gt;</code> tags overlap:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="nt">&lt;book&gt;&lt;title&gt;</code>Programming PHP<code class="nt">&lt;/book&gt;&lt;/title&gt;</code></pre>
+<p>XML also requires that the document begin with a processing instruction that identifies the version of XML being used (and possibly other things, such as the text encoding used). For example:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?</code><code class="nx">xml</code> <code class="nx">version</code><code class="o">=</code><code class="s2">"1.0"</code> <code class="cp">?&gt;</code></pre>
+<p>The final requirement of a well-formed XML document is that there be only one element at the top level of the file. For example, this is well formed:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?</code><code class="nx">xml</code> <code class="nx">version</code><code class="o">=</code><code class="s2">"1.0"</code> <code class="cp">?&gt;</code>
+<code class="nt">&lt;library&gt;</code>
+ <code class="nt">&lt;title&gt;</code>Programming PHP<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;title&gt;</code>Programming Perl<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;title&gt;</code>Programming C#<code class="nt">&lt;/title&gt;</code>
+<code class="nt">&lt;/library&gt;</code></pre>
+<p>This is not well formed, as there are three elements at the top level of the file:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?</code><code class="nx">xml</code> <code class="nx">version</code><code class="o">=</code><code class="s2">"1.0"</code> <code class="cp">?&gt;</code>
+<code class="nt">&lt;title&gt;</code>Programming PHP<code class="nt">&lt;/title&gt;</code>
+<code class="nt">&lt;title&gt;</code>Programming Perl<code class="nt">&lt;/title&gt;</code>
+<code class="nt">&lt;title&gt;</code>Programming C#<code class="nt">&lt;/title&gt;</code></pre>
+<p>XML documents generally are not completely ad hoc. The specific tags, attributes, and entities in an XML document, and the rules governing how they nest, compose the structure of the document. There are two ways to write down this structure: the <a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="DTD for" id="idm45922755798056"/><a contenteditable="false" data-type="indexterm" data-primary="DTD (document type definition)" id="idm45922755796840"/><em>document type definition</em> (DTD) and the <a contenteditable="false" data-type="indexterm" data-primary="schema, XML" id="idm45922755408376"/><em>schema</em>. DTDs and schemas are used to validate documents—that is, to ensure that they follow the rules for their type of <span class="keep-together">document</span>.</p>
+<p>Most XML documents don’t include a DTD; in these cases, the document is considered valid merely if it’s valid XML. <a contenteditable="false" data-type="indexterm" data-primary="&lt;!DOCTYPE...&gt; tag, in XML document" id="idm45922755405464"/><a contenteditable="false" data-type="indexterm" data-primary="&lt;!DOCTYPE...&gt; tag, in XML document" data-primary-sortas="DOCTYPE" id="idm45922756086568"/>Others identify the DTD as an external entity with a line that gives the name and location (file or URL) of the DTD:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;!DOCTYPE rss PUBLIC 'My DTD Identifier' 'http://www.example.com/my.dtd'&gt;</code></pre>
+<p>Sometimes it’s convenient to encapsulate one XML document in another. For example, an XML document representing a mail message might have an <code>attachment</code> element that surrounds an attached file. If the attached file is XML, it’s a nested XML document. What if the mail message document has a <code>body</code> element (the subject of the message), and the attached file is an XML representation of a dissection that also has a <code>body</code> element, but this element has completely different DTD rules? How can you possibly validate or make sense of the document if the meaning of <code>body</code> changes partway through?</p>
+<p><a contenteditable="false" data-type="indexterm" data-primary="namespaces, in XML" id="idm45922755661304"/>This problem is solved with the use of namespaces. Namespaces let you qualify the XML tag—for example, <code>email:body</code> and <code>human:body</code>.</p>
+<p>There’s a lot more to XML than we have time to go into here. <a contenteditable="false" data-type="indexterm" data-primary="Learning XML (O'Reilly)" id="idm45922755658632"/><a contenteditable="false" data-type="indexterm" data-primary="Ray, Erik (author)" data-secondary="Learning XML (O'Reilly)" id="idm45922755654168"/><a contenteditable="false" data-type="indexterm" data-primary="XML in a Nutshell (O'Reilly)" id="idm45922755652792"/><a contenteditable="false" data-type="indexterm" data-primary="Harold, Elliotte Rusty (author)" data-secondary="XML in a Nutshell (O'Reilly)" id="idm45922755651720"/><a contenteditable="false" data-type="indexterm" data-primary="Means, W. Scott (author)" data-secondary="XML in a Nutshell (O'Reilly)" id="idm45922755650408"/>For a gentle introduction to XML, read <a class="orm:hideurl" href="http://oreil.ly/Learning_XML"><em>Learning XML</em></a> (O’Reilly) by Erik Ray. For a complete reference to XML syntax and standards, see <a class="orm:hideurl" href="http://oreil.ly/XML_Nutshell"><em>XML in a Nutshell</em></a> (O’Reilly) by Elliotte Rusty Harold and W. Scott Means.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_xml_syntax" id="idm45922755387480"/></p>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="Generating XML"><div class="sect1" id="generating_xml">
+<h1>Generating XML</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="generating" id="idm45922755384936"/>Just as PHP can be used to generate dynamic HTML, it can also be used to generate dynamic XML. You can generate XML for other programs to make use of based on forms, database queries, or anything else you can do in PHP. One application for dynamic XML is <a contenteditable="false" data-type="indexterm" data-primary="RSS (Rich Site Summary)" id="idm45922755370424"/><em>Rich Site Summary</em> (RSS), a file format for syndicating news sites. You can read an article’s information from a database or from HTML files and emit an XML summary file based on that information.</p>
+<p>Generating an XML document from a PHP script is simple. Simply change the MIME type of the document, using the <a contenteditable="false" data-type="indexterm" data-primary="header function" id="idm45922755368056"/><code>header()</code> function, to <code>"text/xml"</code>. To emit the <a contenteditable="false" data-type="indexterm" data-primary="&lt;?xml…?&gt; tag, preceding XML document" id="idm45922755366088"/><a contenteditable="false" data-type="indexterm" data-primary="&lt;?xml…?&gt; tag, preceding XML document" data-primary-sortas="xml tag" id="idm45922755364984"/><code>&lt;?xml ... ?&gt;</code> declaration without it being interpreted as a malformed PHP tag, simply <code>echo</code> the line from within PHP code:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="k">echo</code> <code class="s1">'&lt;?xml version="1.0" encoding="ISO-8859-1" ?&gt;'</code><code class="p">;</code></pre>
+<p><a data-type="xref" href="#example_onetwo_onedot_generating_an_xml">Example 12-1</a> generates an RSS document using PHP. An RSS file is an XML document containing several <code>channel</code> elements, each of which contains some news <code>item</code> elements. Each news <code>item</code> can have a title, a description, and a link to the article itself. More properties of an <code>item</code> are supported by RSS than <a data-type="xref" href="#example_onetwo_onedot_generating_an_xml">Example 12-1</a> creates. Just as there are no special functions for generating HTML from PHP, there are no special functions for generating XML. You just <code>echo</code> it!</p>
+<div data-type="example" id="example_onetwo_onedot_generating_an_xml">
+<h5><span class="label">Example 12-1. </span>Generating an XML document</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?php</code>
+<code class="nb">header</code><code class="p">(</code><code class="s1">'Content-Type: text/xml'</code><code class="p">);</code>
+<code class="k">echo</code> <code class="s2">"&lt;?xml version=</code><code class="se">\"</code><code class="s2">1.0</code><code class="se">\"</code><code class="s2"> encoding=</code><code class="se">\"</code><code class="s2">ISO-8859-1</code><code class="se">\"</code><code class="s2"> ?&gt;"</code><code class="p">;</code>
+<code class="cp">?&gt;</code>
+<code class="cp">&lt;!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN"</code>
+<code class="cp"> "http://my.netscape.com/publish/formats/rss-0.91.dtd"&gt;</code>
+
+<code class="nt">&lt;rss</code> <code class="na">version=</code><code class="s">"0.91"</code><code class="nt">&gt;</code>
+ <code class="nt">&lt;channel&gt;</code>
+ <code class="cp">&lt;?php</code>
+ <code class="c1">// news items to produce RSS for</code>
+ <code class="nv">$items</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code>
+ <code class="k">array</code><code class="p">(</code>
+ <code class="s1">'title'</code> <code class="o">=&gt;</code> <code class="s2">"Man Bites Dog"</code><code class="p">,</code>
+ <code class="s1">'link'</code> <code class="o">=&gt;</code> <code class="s2">"http://www.example.com/dog.php"</code><code class="p">,</code>
+ <code class="s1">'desc'</code> <code class="o">=&gt;</code> <code class="s2">"Ironic turnaround!"</code>
+ <code class="p">),</code>
+ <code class="k">array</code><code class="p">(</code>
+ <code class="s1">'title'</code> <code class="o">=&gt;</code> <code class="s2">"Medical Breakthrough!"</code><code class="p">,</code>
+ <code class="s1">'link'</code> <code class="o">=&gt;</code> <code class="s2">"http://www.example.com/doc.php"</code><code class="p">,</code>
+ <code class="s1">'desc'</code> <code class="o">=&gt;</code> <code class="s2">"Doctors announced a cure for me."</code>
+ <code class="p">)</code>
+ <code class="p">);</code>
+
+ <code class="k">foreach</code><code class="p">(</code><code class="nv">$items</code> <code class="k">as</code> <code class="nv">$item</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="s2">"&lt;item&gt;</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+ <code class="k">echo</code> <code class="s2">" &lt;title&gt;</code><code class="si">{</code><code class="nv">$item</code><code class="p">[</code><code class="s1">'title'</code><code class="p">]</code><code class="si">}</code><code class="s2">&lt;/title&gt;</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+ <code class="k">echo</code> <code class="s2">" &lt;link&gt;</code><code class="si">{</code><code class="nv">$item</code><code class="p">[</code><code class="s1">'link'</code><code class="p">]</code><code class="si">}</code><code class="s2">&lt;/link&gt;</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+ <code class="k">echo</code> <code class="s2">" &lt;description&gt;</code><code class="si">{</code><code class="nv">$item</code><code class="p">[</code><code class="s1">'desc'</code><code class="p">]</code><code class="si">}</code><code class="s2">&lt;/description&gt;</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+ <code class="k">echo</code> <code class="s2">" &lt;language&gt;en-us&lt;/language&gt;</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+ <code class="k">echo</code> <code class="s2">"&lt;/item&gt;</code><code class="se">\n\n</code><code class="s2">"</code><code class="p">;</code>
+ <code class="p">}</code> <code class="cp">?&gt;</code>
+ <code class="nt">&lt;/channel&gt;</code>
+<code class="nt">&lt;/rss&gt;</code></pre>
+</div>
+<p>This script generates output such as the following:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?</code><code class="nx">xml</code> <code class="nx">version</code><code class="o">=</code><code class="s2">"1.0"</code> <code class="nx">encoding</code><code class="o">=</code><code class="s2">"ISO-8859-1"</code> <code class="cp">?&gt;</code>
+<code class="cp">&lt;!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN"</code>
+<code class="cp"> "http://my.netscape.com/publish/formats/rss-0.91.dtd"&gt;</code>
+<code class="nt">&lt;rss</code> <code class="na">version=</code><code class="s">"0.91"</code><code class="nt">&gt;</code>
+ <code class="nt">&lt;channel&gt;</code>
+<code class="nt">&lt;item&gt;</code>
+ <code class="nt">&lt;title&gt;</code>Man Bites Dog<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;link&gt;</code>http://www.example.com/dog.php<code class="nt">&lt;/link&gt;</code>
+ <code class="nt">&lt;description&gt;</code>Ironic turnaround!<code class="nt">&lt;/description&gt;</code>
+ <code class="nt">&lt;language&gt;</code>en-us<code class="nt">&lt;/language&gt;</code>
+<code class="nt">&lt;/item&gt;</code>
+
+
+<code class="nt">&lt;item&gt;</code>
+ <code class="nt">&lt;title&gt;</code>Medical Breakthrough!<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;link&gt;</code>http://www.example.com/doc.php<code class="nt">&lt;/link&gt;</code>
+ <code class="nt">&lt;description&gt;</code>Doctors announced a cure for me.<code class="nt">&lt;/description&gt;</code>
+ <code class="nt">&lt;language&gt;</code>en-us<code class="nt">&lt;/language&gt;</code>
+<code class="nt">&lt;/item&gt;</code>
+ <code class="nt">&lt;/channel&gt;</code>
+<code class="nt">&lt;/rss&gt;</code></pre>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="Parsing XML"><div class="sect1" id="parsing_xml">
+<h1>Parsing XML</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="event-based library for" id="ix_xml_parsing_event-based"/><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" id="ix_xml_parsing"/>Say you have a set of XML files, each containing information about a book, and you want to build an index showing the document title and its author for the collection. You need to parse the XML files to recognize the <code>title</code> and <code>author</code> elements and their contents. You could do this by hand with regular expressions and string functions such as <code>strtok()</code>, but it’s a lot more complex than it seems. In addition, such methods are prone to breakage even with valid XML documents. The easiest and quickest solution is to use one of the XML parsers that ship with PHP.</p>
+<p>PHP includes three XML parsers: one event-driven library based on the Expat C library, one DOM-based library, and one for parsing simple XML documents named, appropriately, SimpleXML.</p>
+<p>The most commonly used parser is the event-based library, which lets you parse but not validate XML documents. This means you can find out which XML tags are present and what they surround, but you can’t find out if they’re the right XML tags in the right structure for this type of document. In practice, this isn’t generally a big problem. PHP’s event-based XML parser calls various handler functions you provide while it reads the document as it encounters certain <em>events</em>, such as the beginning or end of an element.</p>
+<p>In the following sections, we discuss the handlers you can provide, the functions to set the handlers, and the events that trigger the calls to those handlers. We also provide sample functions for creating a parser to generate a map of the XML document in memory, tied together in a sample application that pretty-prints XML.</p>
+<section data-type="sect2" data-pdf-bookmark="Element Handlers"><div class="sect2" id="element_handlers">
+<h2>Element Handlers</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="element handlers" id="idm45922755192760"/>When the parser encounters the beginning or end of an element, it calls the start and end element handlers. You set the handlers through the <a contenteditable="false" data-type="indexterm" data-primary="xml_set_element_handler function" id="idm45922755190920"/><code>xml_set_element_handler()</code> function:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_set_element_handler</code><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">start_element</code></em><code class="p">,</code><code> </code><em><code class="nx">end_element</code></em><code class="p">);</code></pre>
+<p>The <em>start_element</em> and <em>end_element</em> parameters are the names of the handler <span class="keep-together">functions.</span></p>
+<p>The start element handler is called when the XML parser encounters the beginning of an element:</p>
+<pre data-type="programlisting" data-code-language="php"><em><code class="nx">startElementHandler</code></em><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">element</code></em><code class="p">,</code><code> </code><em><code class="o">&amp;</code><code class="nx">attributes</code></em><code class="p">);</code></pre>
+<p>The start element handler is passed three parameters: a reference to the XML parser calling the handler, the name of the element that was opened, and an array containing any attributes the parser encountered for the element. The <code>$attribute</code> array is passed by reference for speed.</p>
+<p><a data-type="xref" href="#example_onetwo_twodot_start_element_han">Example 12-2</a> contains the code for a start element handler, <code>startElement()</code>. This handler simply prints the element name in bold and the attributes in gray.</p>
+<div data-type="example" id="example_onetwo_twodot_start_element_han">
+<h5><span class="label">Example 12-2. </span>Start element handler</h5>
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">startElement</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$name</code><code class="p">,</code> <code class="nv">$attributes</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$outputAttributes</code> <code class="o">=</code> <code class="k">array</code><code class="p">();</code>
+
+ <code class="k">if</code> <code class="p">(</code><code class="nb">count</code><code class="p">(</code><code class="nv">$attributes</code><code class="p">))</code> <code class="p">{</code>
+ <code class="k">foreach</code><code class="p">(</code><code class="nv">$attributes</code> <code class="k">as</code> <code class="nv">$key</code> <code class="o">=&gt;</code> <code class="nv">$value</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$outputAttributes</code><code class="p">[]</code> <code class="o">=</code> <code class="s2">"&lt;font color=</code><code class="se">\"</code><code class="s2">gray</code><code class="se">\"</code><code class="s2">&gt;</code><code class="si">{</code><code class="nv">$key</code><code class="si">}</code><code class="s2">=</code><code class="se">\"</code><code class="si">{</code><code class="nv">$value</code><code class="si">}</code><code class="se">\"</code><code class="s2">&lt;/font&gt;"</code><code class="p">;</code>
+ <code class="p">}</code>
+ <code class="p">}</code>
+
+ <code class="k">echo</code> <code class="s2">"&amp;lt;&lt;b&gt;</code><code class="si">{</code><code class="nv">$name</code><code class="si">}</code><code class="s2">&lt;/b&gt; "</code> <code class="o">.</code> <code class="nb">join</code><code class="p">(</code><code class="s1">' '</code><code class="p">,</code> <code class="nv">$outputAttributes</code><code class="p">)</code> <code class="o">.</code> <code class="s1">'&amp;gt;'</code><code class="p">;</code>
+<code class="p">}</code></pre>
+</div>
+<p>The end element handler is called when the parser encounters the end of an element:</p>
+<pre data-type="programlisting" data-code-language="php"><em><code class="nx">endElementHandler</code></em><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">element</code></em><code class="p">);</code></pre>
+<p>It takes two parameters: a reference to the XML parser calling the handler, and the name of the element that is closing.</p>
+<p><a data-type="xref" href="#example_onetwo_threedot_end_element_han">Example 12-3</a> shows an end element handler that formats the element.</p>
+<div data-type="example" id="example_onetwo_threedot_end_element_han">
+<h5><span class="label">Example 12-3. </span>End element handler</h5>
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">endElement</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$name</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="s2">"&amp;lt;&lt;b&gt;/</code><code class="si">{</code><code class="nv">$name</code><code class="si">}</code><code class="s2">&lt;/b&gt;&amp;gt;"</code><code class="p">;</code>
+<code class="p">}</code></pre>
+</div>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Character Data Handler"><div class="sect2" id="character_data_handler">
+<h2>Character Data Handler</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="character data handler" id="idm45922754875240"/><a contenteditable="false" data-type="indexterm" data-primary="CDATA (character data), XML" id="idm45922754873432"/>All of the text between elements (<em>character data</em>, or <em>CDATA</em> in XML terminology) is handled by the character data handler. The handler you set with the <a contenteditable="false" data-type="indexterm" data-primary="xml_set_character_data_handler function" id="idm45922754858312"/><code>xml_set_</code>​<span class="keep-together"><code>character</code></span><code>_data_handler()</code> function is called after each block of character data:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_set_character_data_handler</code><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">handler</code></em><code class="p">);</code></pre>
+<p>The character data handler takes in a reference to the XML parser that triggered the handler and a string containing the character data itself:</p>
+<pre data-type="programlisting" data-code-language="php"><em><code class="nx">characterDataHandler</code></em><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">cdata</code></em><code class="p">);</code></pre>
+<p>Here’s a simple character data handler that simply prints the data:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">characterData</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$data</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="nv">$data</code><code class="p">;</code>
+<code class="p">}</code></pre>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Processing Instructions"><div class="sect2" id="processing_instructions">
+<h2>Processing Instructions</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="processing instructions" id="idm45922754773560"/>Processing instructions are used in XML to embed scripts or other code into a document. <a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="PHP code in" id="idm45922754715864"/>PHP itself can be seen as a processing instruction and, with the <a contenteditable="false" data-type="indexterm" data-primary="&lt;?php…?&gt; tag, enclosing PHP code" data-primary-sortas="php tag" id="idm45922754714392"/><a contenteditable="false" data-type="indexterm" data-primary="&lt;?php…?&gt; tag, enclosing PHP code" id="idm45922754713048"/><code>&lt;?php ... ?&gt;</code> tag style, follows the XML format for demarking the code. The XML parser calls the processing instruction handler when it encounters a processing instruction. Set the handler with the <a contenteditable="false" data-type="indexterm" data-primary="xml_set_processing_instruction_handler function" id="idm45922754727256"/><code>xml_set_processing_instruction_handler()</code> function:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_set_processing_instruction_handler</code><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">handler</code></em><code class="p">);</code></pre>
+<p>A processing instruction looks like:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?</code><code> </code><em><code class="nx">target</code><code> </code><code class="nx">instructions</code></em><code> </code><code class="cp">?&gt;</code></pre>
+<p>The processing instruction handler takes in a reference to the XML parser that triggered the handler, the name of the target (for example, <code>'php'</code>), and the processing instructions:</p>
+<pre data-type="programlisting" data-code-language="php"><em><code class="nx">processingInstructionHandler</code></em><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">target</code></em><code class="p">,</code><code> </code><em><code class="nx">instructions</code></em><code class="p">);</code></pre>
+<p>What you do with a processing instruction is up to you. One trick is to embed PHP code in an XML document and, as you parse that document, execute the PHP code with the <a contenteditable="false" data-type="indexterm" data-primary="eval function" id="idm45922754651528"/><code>eval()</code> function. <a data-type="xref" href="#example_onetwo_fourdot_processing_instr">Example 12-4</a> does just that. Of course, you have to trust the documents you’re processing if you include the <code>eval()</code> code in them. <code>eval()</code> will run any code given to it—even code that destroys files or mails passwords to a cracker. In practice, executing arbitrary code like this is extremely dangerous.</p>
+<div data-type="example" id="example_onetwo_fourdot_processing_instr">
+<h5><span class="label">Example 12-4. </span>Processing instruction handler</h5>
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">processing_instruction</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$target</code><code class="p">,</code> <code class="nv">$code</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">if</code> <code class="p">(</code><code class="nv">$target</code> <code class="o">===</code> <code class="s1">'php'</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">eval</code><code class="p">(</code><code class="nv">$code</code><code class="p">);</code>
+ <code class="p">}</code>
+<code class="p">}</code></pre>
+</div>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Entity Handlers"><div class="sect2" id="entity_handlers">
+<h2>Entity Handlers</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="entities" data-secondary="XML" id="ix_entities_xml_parsing"/><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="entity handlers" id="ix_xml_parsing_entity"/>Entities in XML are placeholders. XML provides five standard entities (<code>&amp;amp;</code>, <code>&amp;gt;</code>, <code>&amp;lt;</code>, <code>&amp;quot;</code>, and <code>&amp;apos;</code>), but XML documents can define their own entities. Most entity definitions do not trigger events, and the XML parser expands most entities in documents before calling the other handlers.</p>
+<p>Two types of entities, external and unparsed, have special support in PHP’s XML library. An <em>external</em> entity is one whose replacement text is identified by a filename or URL rather than explicitly given in the XML file. You can define a handler to be called for occurrences of external entities in character data, but it’s up to you to parse the contents of the file or URL yourself if that’s what you want.</p>
+<p><a contenteditable="false" data-type="indexterm" data-primary="unparsed entities, XML" id="idm45922754592536"/>An <em>unparsed</em> entity must be accompanied by a notation declaration, and while you can define handlers for declarations of unparsed entities and notations, occurrences of unparsed entities are deleted from the text before the character data handler is called.</p>
+<section data-type="sect3" data-pdf-bookmark="External entities"><div class="sect3" id="external_entities">
+<h3>External entities</h3>
+<p><a contenteditable="false" data-type="indexterm" data-primary="external entities, XML" id="idm45922754588760"/>External entity references allow XML documents to include other XML documents. Typically, an external entity reference handler opens the referenced file, parses the file, and includes the results in the current document. Set the handler with <a contenteditable="false" data-type="indexterm" data-primary="xml_set_external_entity_ref_handler function" id="idm45922754587272"/><code>xml_set_external_entity_ref_handler()</code>, which takes in a reference to the XML parser and the name of the handler function:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_set_external_entity_ref_handler</code><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">handler</code></em><code class="p">);</code></pre>
+<p>The external entity reference handler takes five parameters: the parser triggering the handler, the entity’s name, the base Uniform Resource Identifier (URI) for resolving the identifier of the entity (which is currently always empty), the system identifier (such as the filename), and the public identifier for the entity, as defined in the entity’s declaration. For example:</p>
+<pre data-type="programlisting" data-code-language="php"><em><code class="nx">externalEntityHandler</code></em><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">entity</code></em><code class="p">,</code><code> </code><em><code class="nx">base</code></em><code class="p">,</code><code> </code><em><code class="nb">system</code></em><code class="p">,</code><code> </code><em><code class="k">public</code></em><code class="p">);</code></pre>
+<p>If your external entity reference handler returns <code>false</code> (which it will if it returns no value), XML parsing stops with an <code>XML_ERROR_EXTERNAL_ENTITY_HANDLING</code> error. If it returns <code>true</code>, parsing continues.</p>
+<p><a data-type="xref" href="#example_onetwo_fivedot_external_entity">Example 12-5</a> shows how you would parse externally referenced XML documents. Define two functions, <code>createParser()</code> and <code>parse()</code>, to do the actual work of creating and feeding the XML parser. You can use them both to parse the top-level document and any documents included via external references. Such functions are described in the section “Using the Parser”. The external entity reference handler simply identifies the right file to send to those functions.</p>
+<div data-type="example" id="example_onetwo_fivedot_external_entity">
+<h5><span class="label">Example 12-5. </span>External entity reference handler</h5>
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">externalEntityReference</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$names</code><code class="p">,</code> <code class="nv">$base</code><code class="p">,</code> <code class="nv">$systemID</code><code class="p">,</code> <code class="nv">$publicID</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">if</code> <code class="p">(</code><code class="nv">$systemID</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="k">list</code> <code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$fp</code><code class="p">)</code> <code class="o">=</code> <code class="nx">createParser</code><code class="p">(</code><code class="nv">$systemID</code><code class="p">))</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="s2">"Error opening external entity </code><code class="si">{</code><code class="nv">$systemID</code><code class="si">}</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+
+ <code class="k">return</code> <code class="k">false</code><code class="p">;</code>
+ <code class="p">}</code>
+
+ <code class="k">return</code> <code class="nx">parse</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$fp</code><code class="p">);</code>
+ <code class="p">}</code>
+
+ <code class="k">return</code> <code class="k">false</code><code class="p">;</code>
+<code class="p">}</code></pre>
+</div>
+</div></section>
+<section data-type="sect3" data-pdf-bookmark="Unparsed entities"><div class="sect3" id="unparsed_entities">
+<h3>Unparsed entities</h3>
+<p><a contenteditable="false" data-type="indexterm" data-primary="unparsed entities, XML" id="idm45922754469608"/>An unparsed entity declaration must be accompanied by a notation declaration:</p>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;!DOCTYPE doc [</code>
+<code class="cp"> &lt;!NOTATION jpeg SYSTEM "image/jpeg"&gt;</code>
+ <code class="cp">&lt;!ENTITY logo SYSTEM "php-tiny.jpg" NDATA jpeg&gt;</code>
+]&gt;</pre>
+<p>Register a notation declaration handler with <a contenteditable="false" data-type="indexterm" data-primary="xml_set_notation_decl_handler function" id="idm45922754464760"/><code>xml_set_notation_decl_handler()</code>:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_set_notation_decl_handler</code><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">handler</code></em><code class="p">);</code></pre>
+<p>The handler will be called with five parameters:</p>
+<pre data-type="programlisting" data-code-language="php"><em><code class="nx">notationHandler</code></em><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">notation</code></em><code class="p">,</code><code> </code><em><code class="nx">base</code></em><code class="p">,</code><code> </code><em><code class="nb">system</code></em><code class="p">,</code><code> </code><em><code class="k">public</code></em><code class="p">);</code></pre>
+<p>The <em>base</em> parameter is the base URI for resolving the identifier of the notation (which is currently always empty). Either the <em>system</em> identifier or the <em>public</em> identifier for the notation will be set, but not both.</p>
+<p>Use the <a contenteditable="false" data-type="indexterm" data-primary="xml_set_unparsed_entity_decl_handler function" id="idm45922754360072"/><code>xml_set_unparsed_entity_decl_handler()</code> function to register an unparsed entity declaration:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_set_unparsed_entity_decl_handler</code><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">handler</code></em><code class="p">);</code></pre>
+<p>The handler will be called with six parameters:</p>
+<pre data-type="programlisting" data-code-language="php"><em><code class="nx">unparsedEntityHandler</code></em><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">entity</code></em><code class="p">,</code><code> </code><em><code class="nx">base</code></em><code class="p">,</code><code> </code><em><code class="nb">system</code></em><code class="p">,</code><code> </code><em><code class="k">public</code></em><code class="p">,</code><code> </code><em><code class="nx">notation</code></em><code class="p">);</code></pre>
+<p>The <em>notation</em> parameter identifies the notation declaration with which this unparsed entity is associated.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_xml_parsing_entity" id="idm45922754300568"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_entities_xml_parsing" id="idm45922754299288"/></p>
+</div></section>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Default Handler"><div class="sect2" id="default_handler">
+<h2>Default Handler</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="default handler" id="idm45922754296392"/>For any other event, such as the XML declaration and the XML document type, the default handler is called. Call the <a contenteditable="false" data-type="indexterm" data-primary="xml_set_default_handler function" id="idm45922754294520"/><code>xml_set_default_handler()</code> function to set the default handler:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_set_default_handler</code><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">handler</code></em><code class="p">);</code></pre>
+<p>The handler will be called with two parameters:</p>
+<pre data-type="programlisting" data-code-language="php"><em><code class="nx">defaultHandler</code></em><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">text</code></em><code class="p">);</code></pre>
+<p>The <em>text</em> parameter will have different values depending on the kind of event triggering the default handler. <a data-type="xref" href="#example_onetwo_sixdot_default_handler">Example 12-6</a> just prints out the given string when the default handler is called.</p>
+<div data-type="example" id="example_onetwo_sixdot_default_handler">
+<h5><span class="label">Example 12-6. </span>Default handler</h5>
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">default</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$data</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="s2">"&lt;font color=</code><code class="se">\"</code><code class="s2">red</code><code class="se">\"</code><code class="s2">&gt;XML: Default handler called with '</code><code class="si">{</code><code class="nv">$data</code><code class="si">}</code><code class="s2">'&lt;/font&gt;</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+<code class="p">}</code></pre>
+</div>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Options"><div class="sect2" id="options-id00037">
+<h2>Options</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="options" id="idm45922754161240"/>The XML parser has several options you can set to control the source and target encodings and case folding. Use <a contenteditable="false" data-type="indexterm" data-primary="xml_parser_set_option function" id="idm45922754159368"/><code>xml_parser_set_option()</code> to set an option:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_parser_set_option</code><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">option</code></em><code class="p">,</code><code> </code><em><code class="nx">value</code></em><code class="p">);</code></pre>
+<p>Similarly, use <a contenteditable="false" data-type="indexterm" data-primary="xml_parser_get_option function" id="idm45922754144568"/><code>xml_parser_get_option()</code> to interrogate a parser about its options:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$value</code><code> </code><code class="o">=</code><code> </code><code class="nb">xml_parser_get_option</code><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">option</code></em><code class="p">);</code></pre>
+<section data-type="sect3" data-pdf-bookmark="Character encoding"><div class="sect3" id="character_encoding">
+<h3>Character encoding</h3>
+<p><a contenteditable="false" data-type="indexterm" data-primary="character encoding option, XML parser" id="idm45922754103416"/>The XML parser used by PHP supports Unicode data in a number of different character encodings. Internally, PHP’s strings are always encoded in UTF-8, but documents parsed by the XML parser can be in ISO-8859-1, US-ASCII, or UTF-8. UTF-16 is not supported.</p>
+<p>When creating an XML parser, you can give it an encoding format to use for the file to be parsed. If omitted, the source is assumed to be in ISO-8859-1. If a character outside the possible range in the source encoding is encountered, the XML parser will return an error and immediately stop processing the document.</p>
+<p>The target encoding for the parser is the encoding in which the XML parser passes data to the handler functions; normally, this is the same as the source encoding. At any time during the XML parser’s lifetime, the target encoding can be changed. The parser demotes any characters outside the target encoding’s character range by replacing them with a question mark character (<code>?</code>).</p>
+<p>Use the constant <a contenteditable="false" data-type="indexterm" data-primary="XML_OPTION_TARGET_ENCODING" id="idm45922754099512"/><code>XML_OPTION_TARGET_ENCODING</code> to get or set the encoding of the text passed to callbacks. Allowable values are <code>"ISO-8859-1"</code> (the default), <code>"US-ASCII"</code>, and <code>"UTF-8"</code>.</p>
+</div></section>
+<section data-type="sect3" data-pdf-bookmark="Case folding"><div class="sect3" id="case_folding">
+<h3>Case folding</h3>
+<p><a contenteditable="false" data-type="indexterm" data-primary="case folding option, XML parser" id="idm45922754076120"/>By default, element and attribute names in XML documents are converted to all uppercase. You can turn off this behavior (and get case-sensitive element names) by setting the <a contenteditable="false" data-type="indexterm" data-primary="XML_OPTION_CASE_FOLDING option" id="idm45922754074728"/><code>XML_OPTION_CASE_FOLDING</code> option to <code>false</code> with the <code>xml_parser​_set_option()</code> function:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_parser_set_option</code><code class="p">(</code><code class="nx">XML_OPTION_CASE_FOLDING</code><code class="p">,</code> <code class="k">false</code><code class="p">);</code></pre>
+</div></section>
+<section data-type="sect3" data-pdf-bookmark="Skipping whitespace-only"><div class="sect3" id="skipping_whitespace_only">
+<h3>Skipping whitespace-only</h3>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML_Option_SKIP_WHITE option" id="idm45922754068280"/>Set the <code>XML_OPTION_SKIP_WHITE</code> option to ignore values consisting entirely of whitespace characters.</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_parser_set_option</code><code class="p">(</code><code class="nx">XML_OPTION_SKIP_WHITE</code><code class="p">,</code> <code class="k">true</code><code class="p">);</code></pre>
+</div></section>
+<section data-type="sect3" data-pdf-bookmark="Truncating tag names"><div class="sect3" id="truncating_tag_names">
+<h3>Truncating tag names</h3>
+<p>When creating a parser, you can optionally have it truncate characters at the start of each tag name. To truncate the start of each tag by a number of characters, provide that value in the <a contenteditable="false" data-type="indexterm" data-primary="XML_OPTION_SKIP_TAGSTART option" id="idm45922754043208"/><code>XML_OPTION_SKIP_TAGSTART</code> option:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_parser_set_option</code><code class="p">(</code><code class="nx">XML_OPTION_SKIP_TAGSTART</code><code class="p">,</code> <code class="mi">4</code><code class="p">);</code>
+<code class="c1">// &lt;xsl:name&gt; truncates to "name"</code>
+</pre>
+<p>In this case, the tag name will be truncated by four characters.</p>
+</div></section>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Using the Parser"><div class="sect2" id="using_the_parser">
+<h2>Using the Parser</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="using the parser" id="idm45922754013304"/>To use the XML parser, create a parser with <a contenteditable="false" data-type="indexterm" data-primary="xml_parser_create function" id="idm45922754011336"/><code>xml_parser_create()</code>, set handlers and options on the parser, and then hand chunks of data to the parser with the <a contenteditable="false" data-type="indexterm" data-primary="xml_parse function" id="idm45922754023816"/><code>xml_parse()</code> function until either the data runs out or the parser returns an error. Once the processing is complete, free the parser by calling <a contenteditable="false" data-type="indexterm" data-primary="xml_parser_free function" id="idm45922754022152"/><code>xml_parser_free()</code>.</p>
+<p>The <code>xml_parser_create()</code> function returns an XML parser:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$parser</code><code> </code><code class="o">=</code><code> </code><code class="nb">xml_parser_create</code><code class="p">([</code><em><code class="nx">encoding</code></em><code class="p">]);</code></pre>
+<p>The optional <em>encoding</em> parameter specifies the text encoding (<code>"ISO-8859-1"</code>, <span class="keep-together"><code>"US-ASCII"</code></span>, or <code>"UTF-8"</code>) of the file being parsed.</p>
+<p>The <code>xml_parse()</code> function returns <code>true</code> if the parse was successful and <code>false</code> if it was not:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$success</code><code> </code><code class="o">=</code><code> </code><code class="nb">xml_parse</code><code class="p">(</code><em><code class="nx">parser</code></em><code class="p">,</code><code> </code><em><code class="nx">data</code></em><code class="p">[,</code><code> </code><em><code class="k">final</code></em><code> </code><code class="p">]);</code></pre>
+<p>The <em>data</em> argument is a string of XML to process. The optional <em>final</em> parameter should be <code>true</code> for the last piece of data to be parsed.</p>
+<p>To easily deal with nested documents, write functions that create the parser and set its options and handlers for you. This puts the options and handler settings in one place, rather than duplicating them in the external entity reference handler. <a data-type="xref" href="#example_onetwo_sevendot_creating_a_pars">Example 12-7</a> shows such a function.</p>
+<div data-type="example" id="example_onetwo_sevendot_creating_a_pars">
+<h5><span class="label">Example 12-7. </span>Creating a parser</h5>
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">createParser</code><code class="p">(</code><code class="nv">$filename</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$fh</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="nv">$filename</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code>
+ <code class="nv">$parser</code> <code class="o">=</code> <code class="nb">xml_parser_create</code><code class="p">();</code>
+
+ <code class="nb">xml_set_element_handler</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="s2">"startElement"</code><code class="p">,</code> <code class="s2">"endElement"</code><code class="p">);</code>
+ <code class="nb">xml_set_character_data_handler</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="s2">"characterData"</code><code class="p">);</code>
+ <code class="nb">xml_set_processing_instruction_handler</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="s2">"processingInstruction"</code><code class="p">);</code>
+ <code class="nb">xml_set_default_handler</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="s2">"default"</code><code class="p">);</code>
+
+ <code class="k">return</code> <code class="k">array</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$fh</code><code class="p">);</code>
+<code class="p">}</code>
+
+<code class="k">function</code> <code class="nf">parse</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$fh</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$blockSize</code> <code class="o">=</code> <code class="mi">4</code> <code class="o">*</code> <code class="mi">1024</code><code class="p">;</code> <code class="c1">// read in 4 KB chunks</code>
+
+ <code class="k">while</code> <code class="p">(</code><code class="nv">$data</code> <code class="o">=</code> <code class="nb">fread</code><code class="p">(</code><code class="nv">$fh</code><code class="p">,</code> <code class="nv">$blockSize</code><code class="p">))</code> <code class="p">{</code>
+ <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nb">xml_parse</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$data</code><code class="p">,</code> <code class="nb">feof</code><code class="p">(</code><code class="nv">$fh</code><code class="p">)))</code> <code class="p">{</code>
+ <code class="c1">// an error occurred; tell the user where</code>
+ <code class="k">echo</code> <code class="s1">'Parse error: '</code> <code class="o">.</code> <code class="nb">xml_error_string</code><code class="p">(</code><code class="nv">$parser</code><code class="p">)</code> <code class="o">.</code> <code class="s2">" at line "</code> <code class="o">.</code>
+ <code class="nb">xml_get_current_line_number</code><code class="p">(</code><code class="nv">$parser</code><code class="p">);</code>
+
+ <code class="k">return</code> <code class="k">false</code><code class="p">;</code>
+ <code class="p">}</code>
+ <code class="p">}</code>
+
+ <code class="k">return</code> <code class="k">true</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="k">list</code> <code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$fh</code><code class="p">)</code> <code class="o">=</code> <code class="nx">createParser</code><code class="p">(</code><code class="s2">"test.xml"</code><code class="p">))</code> <code class="p">{</code>
+ <code class="nx">parse</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$fh</code><code class="p">);</code>
+ <code class="nb">fclose</code><code class="p">(</code><code class="nv">$fh</code><code class="p">);</code>
+
+ <code class="nb">xml_parser_free</code><code class="p">(</code><code class="nv">$parser</code><code class="p">);</code>
+<code class="p">}</code></pre>
+</div>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Errors"><div class="sect2" id="errors">
+<h2>Errors</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="errors from" id="idm45922753885080"/>The <code>xml_parse()</code> function returns <code>true</code> if the parse completed successfully, and <code>false</code> if there was an error. If something did go wrong, use <a contenteditable="false" data-type="indexterm" data-primary="xml_get_error_code function" id="idm45922753747176"/><code>xml_get_error_code()</code> to fetch a code identifying the error:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$error</code> <code class="o">=</code> <code class="nb">xml_get_error_code</code><code class="p">(</code><code class="nv">$parser</code><code class="p">);</code></pre>
+<p>The error code corresponds to one of these error constants:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nx">XML_ERROR_NONE</code>
+<code class="nx">XML_ERROR_NO_MEMORY</code>
+<code class="nx">XML_ERROR_SYNTAX</code>
+<code class="nx">XML_ERROR_NO_ELEMENTS</code>
+<code class="nx">XML_ERROR_INVALID_TOKEN</code>
+<code class="nx">XML_ERROR_UNCLOSED_TOKEN</code>
+<code class="nx">XML_ERROR_PARTIAL_CHAR</code>
+<code class="nx">XML_ERROR_TAG_MISMATCH</code>
+<code class="nx">XML_ERROR_DUPLICATE_ATTRIBUTE</code>
+<code class="nx">XML_ERROR_JUNK_AFTER_DOC_ELEMENT</code>
+<code class="nx">XML_ERROR_PARAM_ENTITY_REF</code>
+<code class="nx">XML_ERROR_UNDEFINED_ENTITY</code>
+<code class="nx">XML_ERROR_RECURSIVE_ENTITY_REF</code>
+<code class="nx">XML_ERROR_ASYNC_ENTITY</code>
+<code class="nx">XML_ERROR_BAD_CHAR_REF</code>
+<code class="nx">XML_ERROR_BINARY_ENTITY_REF</code>
+<code class="nx">XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF</code>
+<code class="nx">XML_ERROR_MISPLACED_XML_PI</code>
+<code class="nx">XML_ERROR_UNKNOWN_ENCODING</code>
+<code class="nx">XML_ERROR_INCORRECT_ENCODING</code>
+<code class="nx">XML_ERROR_UNCLOSED_CDATA_SECTION</code>
+<code class="nx">XML_ERROR_EXTERNAL_ENTITY_HANDLING</code></pre>
+<p>The constants generally aren’t very useful. Use <a contenteditable="false" data-type="indexterm" data-primary="xml_error_string function" id="idm45922753739672"/><code>xml_error_string()</code> to turn an error code into a string that you can use when you report the error:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$message</code><code> </code><code class="o">=</code><code> </code><code class="nb">xml_error_string</code><code class="p">(</code><em><code class="nx">code</code></em><code class="p">);</code></pre>
+<p>For example:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$error</code> <code class="o">=</code> <code class="nb">xml_get_error_code</code><code class="p">(</code><code class="nv">$parser</code><code class="p">);</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="nv">$error</code> <code class="o">!=</code> <code class="nx">XML_ERROR_NONE</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">die</code><code class="p">(</code><code class="nb">xml_error_string</code><code class="p">(</code><code class="nv">$error</code><code class="p">));</code>
+<code class="p">}</code></pre>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Methods as Handlers"><div class="sect2" id="methods_as_handlers">
+<h2>Methods as Handlers</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="methods as handlers for" id="idm45922753661528"/>Because functions and variables are global in PHP, any component of an application that requires several functions and variables is a candidate for object-oriented design. XML parsing typically requires you to keep track of where you are in the parsing (e.g., “just saw an opening <code>title</code> element, so keep track of character data until you see a closing <code>title</code> element”) with variables, and of course you must write several handler functions to manipulate the state and actually do something. Wrapping these functions and variables into a class enables you to keep them separate from the rest of your program and easily reuse the functionality later.</p>
+<p>Use the <a contenteditable="false" data-type="indexterm" data-primary="xml_set_object function" id="idm45922753651864"/><code>xml_set_object()</code> function to register an object with a parser. After you do so, the XML parser looks for the handlers as methods on that object, rather than as global functions:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nb">xml_set_object</code><code class="p">(</code><em><code class="nx">object</code></em><code class="p">);</code></pre>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Sample Parsing Application"><div class="sect2" id="sample_parsing_application">
+<h2>Sample Parsing Application</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="sample application" id="ix_xml_parsing_sample_app"/>Let’s develop a program to parse an XML file and display different types of information from it. The XML file given in <a data-type="xref" href="#example_onetwo_eightdot_booksdotxml_fil">Example 12-8</a> contains information on a set of books.</p>
+<div data-type="example" id="example_onetwo_eightdot_booksdotxml_fil">
+<h5><span class="label">Example 12-8. </span>books.xml file</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?</code><code class="nx">xml</code> <code class="nx">version</code><code class="o">=</code><code class="s2">"1.0"</code> <code class="cp">?&gt;</code>
+<code class="nt">&lt;library&gt;</code>
+ <code class="nt">&lt;book&gt;</code>
+ <code class="nt">&lt;title&gt;</code>Programming PHP<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;authors&gt;</code>
+ <code class="nt">&lt;author&gt;</code>Rasmus Lerdorf<code class="nt">&lt;/author&gt;</code>
+ <code class="nt">&lt;author&gt;</code>Kevin Tatroe<code class="nt">&lt;/author&gt;</code>
+ <code class="nt">&lt;author&gt;</code>Peter MacIntyre<code class="nt">&lt;/author&gt;</code>
+ <code class="nt">&lt;/authors&gt;</code>
+ <code class="nt">&lt;isbn&gt;</code>1-56592-610-2<code class="nt">&lt;/isbn&gt;</code>
+ <code class="nt">&lt;comment&gt;</code>A great book!<code class="nt">&lt;/comment&gt;</code>
+ <code class="nt">&lt;/book&gt;</code>
+ <code class="nt">&lt;book&gt;</code>
+ <code class="nt">&lt;title&gt;</code>PHP Pocket Reference<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;authors&gt;</code>
+ <code class="nt">&lt;author&gt;</code>Rasmus Lerdorf<code class="nt">&lt;/author&gt;</code>
+ <code class="nt">&lt;/authors&gt;</code>
+ <code class="nt">&lt;isbn&gt;</code>1-56592-769-9<code class="nt">&lt;/isbn&gt;</code>
+ <code class="nt">&lt;comment&gt;</code>It really does fit in your pocket<code class="nt">&lt;/comment&gt;</code>
+ <code class="nt">&lt;/book&gt;</code>
+ <code class="nt">&lt;book&gt;</code>
+ <code class="nt">&lt;title&gt;</code>Perl Cookbook<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;authors&gt;</code>
+ <code class="nt">&lt;author&gt;</code>Tom Christiansen<code class="nt">&lt;/author&gt;</code>
+ <code class="nt">&lt;author</code> <code class="na">whereabouts=</code><code class="s">"fishing"</code><code class="nt">&gt;</code>Nathan Torkington<code class="nt">&lt;/author&gt;</code>
+ <code class="nt">&lt;/authors&gt;</code>
+ <code class="nt">&lt;isbn&gt;</code>1-56592-243-3<code class="nt">&lt;/isbn&gt;</code>
+ <code class="nt">&lt;comment&gt;</code>Hundreds of useful techniques, most
+ applicable to PHP as well as Perl<code class="nt">&lt;/comment&gt;</code>
+ <code class="nt">&lt;/book&gt;</code>
+<code class="nt">&lt;/library&gt;</code></pre>
+</div>
+<p>The PHP application parses the file and presents the user with a list of books, showing just the titles and authors. This menu is shown in <a data-type="xref" href="#book_menu">Figure 12-1</a>. The titles are links to a page showing the complete information for a book. A page of detailed information for <em>Programming PHP</em> is shown in <a data-type="xref" href="#book_details">Figure 12-2</a>.</p>
+<p>We define a class, <code>BookList</code>, whose constructor parses the XML file and builds a list of records. There are two methods on a <code>BookList</code> that generate output from that list of records. The <code>showMenu()</code> method generates the book menu, and the <code>showBook()</code> method displays detailed information on a particular book.</p>
+<p>Parsing the file involves keeping track of the record, which element we’re in, and which elements correspond to records (<code>book</code>) and fields (<code>title</code>, <code>author</code>, <code>isbn</code>, and <code>comment</code>). The <code>$record</code> property holds the current record as it’s being built, and <span class="keep-together"><code>$currentField</code></span> holds the name of the field we’re currently processing (e.g., <code>title</code>). The <code>$records</code> property is an array of all the records we’ve read so far.</p>
+<figure><div id="book_menu" class="figure">
+<img src="Images/php4_1201.png" alt="Book menu" width="668" height="365"/>
+<h6><span class="label">Figure 12-1. </span>Book menu</h6>
+</div></figure>
+<figure><div id="book_details" class="figure">
+<img src="Images/php4_1202.png" alt="Book details" width="652" height="349"/>
+<h6><span class="label">Figure 12-2. </span>Book details</h6>
+</div></figure>
+<p>Two associative arrays, <code>$fieldType</code> and <code>$endsRecord</code>, tell us which elements correspond to fields in a record and which closing element signals the end of a record. Values in <code>$fieldType</code> are either <code>1</code> or <code>2</code>, corresponding to a simple scalar field (e.g., <code>title</code>) or an array of values (e.g., <code>author</code>), respectively. We initialize those arrays in the constructor.</p>
+<p>The handlers themselves are fairly straightforward. When we see the start of an element, we work out whether it corresponds to a field we’re interested in. If it is, we set the <code>$currentField</code> property to be that field name so when we see the character data (e.g., the title of the book), we know which field it’s the value for. When we get character data, we add it to the appropriate field of the current record if <code>$currentField</code> says we’re in a field. When we see the end of an element, we check to see if it’s the end of a record; if so, we add the current record to the array of completed records.</p>
+<p>One PHP script, given in <a data-type="xref" href="#example_onetwo_ninedot_bookparsedotphp">Example 12-9</a>, handles both the book menu and book details pages. The entries in the book menu link back to the menu URL with a <code>GET</code> parameter identifying the ISBN of the book to display.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_xml_parsing_sample_app" id="idm45922753381352"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_xml_parsing_event-based" id="idm45922753379912"/></p>
+<div data-type="example" id="example_onetwo_ninedot_bookparsedotphp">
+<h5><span class="label">Example 12-9. </span>bookparse.php</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="nt">&lt;html&gt;</code>
+ <code class="nt">&lt;head&gt;</code>
+ <code class="nt">&lt;title&gt;</code>My Library<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;/head&gt;</code>
+
+ <code class="nt">&lt;body&gt;</code>
+ <code class="cp">&lt;?php</code>
+ <code class="k">class</code> <code class="nc">BookList</code> <code class="p">{</code>
+ <code class="k">const</code> <code class="no">FIELD_TYPE_SINGLE</code> <code class="o">=</code> <code class="mi">1</code><code class="p">;</code>
+ <code class="k">const</code> <code class="no">FIELD_TYPE_ARRAY</code> <code class="o">=</code> <code class="mi">2</code><code class="p">;</code>
+ <code class="k">const</code> <code class="no">FIELD_TYPE_CONTAINER</code> <code class="o">=</code> <code class="mi">3</code><code class="p">;</code>
+
+ <code class="k">var</code> <code class="nv">$parser</code><code class="p">;</code>
+ <code class="k">var</code> <code class="nv">$record</code><code class="p">;</code>
+ <code class="k">var</code> <code class="nv">$currentField</code> <code class="o">=</code> <code class="s1">''</code><code class="p">;</code>
+ <code class="k">var</code> <code class="nv">$fieldType</code><code class="p">;</code>
+ <code class="k">var</code> <code class="nv">$endsRecord</code><code class="p">;</code>
+ <code class="k">var</code> <code class="nv">$records</code><code class="p">;</code>
+
+ <code class="k">function</code> <code class="nf">__construct</code><code class="p">(</code><code class="nv">$filename</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">parser</code> <code class="o">=</code> <code class="nb">xml_parser_create</code><code class="p">();</code>
+ <code class="nb">xml_set_object</code><code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">parser</code><code class="p">,</code> <code class="nv">$this</code><code class="p">);</code>
+ <code class="nb">xml_set_element_handler</code><code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">parser</code><code class="p">,</code> <code class="s2">"elementStarted"</code><code class="p">,</code> <code class="s2">"elementEnded"</code><code class="p">);</code>
+ <code class="nb">xml_set_character_data_handler</code><code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">parser</code><code class="p">,</code> <code class="s2">"handleCdata"</code><code class="p">);</code>
+
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">fieldType</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code>
+ <code class="s1">'title'</code> <code class="o">=&gt;</code> <code class="nx">self</code><code class="o">::</code><code class="na">FIELD_TYPE_SINGLE</code><code class="p">,</code>
+ <code class="s1">'author'</code> <code class="o">=&gt;</code> <code class="nx">self</code><code class="o">::</code><code class="na">FIELD_TYPE_ARRAY</code><code class="p">,</code>
+ <code class="s1">'isbn'</code> <code class="o">=&gt;</code> <code class="nx">self</code><code class="o">::</code><code class="na">FIELD_TYPE_SINGLE</code><code class="p">,</code>
+ <code class="s1">'comment'</code> <code class="o">=&gt;</code> <code class="nx">self</code><code class="o">::</code><code class="na">FIELD_TYPE_SINGLE</code><code class="p">,</code>
+ <code class="p">);</code>
+
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">endsRecord</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code><code class="s1">'book'</code> <code class="o">=&gt;</code> <code class="k">true</code><code class="p">);</code>
+
+ <code class="nv">$xml</code> <code class="o">=</code> <code class="nb">join</code><code class="p">(</code><code class="s1">''</code><code class="p">,</code> <code class="nb">file</code><code class="p">(</code><code class="nv">$filename</code><code class="p">));</code>
+ <code class="nb">xml_parse</code><code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">parser</code><code class="p">,</code> <code class="nv">$xml</code><code class="p">);</code>
+
+ <code class="nb">xml_parser_free</code><code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">parser</code><code class="p">);</code>
+ <code class="p">}</code>
+
+ <code class="k">function</code> <code class="nf">elementStarted</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$element</code><code class="p">,</code> <code class="o">&amp;</code><code class="nv">$attributes</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$element</code> <code class="o">=</code> <code class="nb">strtolower</code><code class="p">(</code><code class="nv">$element</code><code class="p">);</code>
+
+ <code class="k">if</code> <code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">fieldType</code><code class="p">[</code><code class="nv">$element</code><code class="p">]</code> <code class="o">!=</code> <code class="mi">0</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">currentField</code> <code class="o">=</code> <code class="nv">$element</code><code class="p">;</code>
+ <code class="p">}</code>
+ <code class="k">else</code> <code class="p">{</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">currentField</code> <code class="o">=</code> <code class="s1">''</code><code class="p">;</code>
+ <code class="p">}</code>
+ <code class="p">}</code>
+
+ <code class="k">function</code> <code class="nf">elementEnded</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$element</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$element</code> <code class="o">=</code> <code class="nb">strtolower</code><code class="p">(</code><code class="nv">$element</code><code class="p">);</code>
+
+ <code class="k">if</code> <code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">endsRecord</code><code class="p">[</code><code class="nv">$element</code><code class="p">])</code> <code class="p">{</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">records</code><code class="p">[]</code> <code class="o">=</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">record</code><code class="p">;</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">record</code> <code class="o">=</code> <code class="k">array</code><code class="p">();</code>
+ <code class="p">}</code>
+
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">currentField</code> <code class="o">=</code> <code class="s1">''</code><code class="p">;</code>
+ <code class="p">}</code>
+
+ <code class="k">function</code> <code class="nf">handleCdata</code><code class="p">(</code><code class="nv">$parser</code><code class="p">,</code> <code class="nv">$text</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">if</code> <code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">fieldType</code><code class="p">[</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">currentField</code><code class="p">]</code> <code class="o">==</code> <code class="nx">self</code><code class="o">::</code><code class="na">FIELD_TYPE_SINGLE</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">record</code><code class="p">[</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">currentField</code><code class="p">]</code> <code class="o">.=</code> <code class="nv">$text</code><code class="p">;</code>
+ <code class="p">}</code>
+ <code class="k">else</code> <code class="k">if</code> <code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">fieldType</code><code class="p">[</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">currentField</code><code class="p">]</code> <code class="o">==</code> <code class="nx">self</code><code class="o">::</code><code class="na">FIELD_TYPE_ARRAY</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">record</code><code class="p">[</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">currentField</code><code class="p">][]</code> <code class="o">=</code> <code class="nv">$text</code><code class="p">;</code>
+ <code class="p">}</code>
+ <code class="p">}</code>
+
+ <code class="k">function</code> <code class="nf">showMenu</code><code class="p">()</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="s2">"&lt;table&gt;</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+
+ <code class="k">foreach</code> <code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">records</code> <code class="k">as</code> <code class="nv">$book</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="s2">"&lt;tr&gt;"</code><code class="p">;</code>
+ <code class="k">echo</code> <code class="s2">"&lt;th&gt;&lt;a href=</code><code class="se">\"</code><code class="si">{</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s1">'PHP_SELF'</code><code class="p">]</code><code class="si">}</code><code class="s2">?isbn=</code><code class="si">{</code><code class="nv">$book</code><code class="p">[</code><code class="s1">'isbn'</code><code class="p">]</code><code class="si">}</code><code class="se">\"</code><code class="s2">&gt;"</code><code class="p">;</code>
+ <code class="k">echo</code> <code class="s2">"</code><code class="si">{</code><code class="nv">$book</code><code class="p">[</code><code class="s1">'title'</code><code class="p">]</code><code class="si">}</code><code class="s2">&lt;/a&gt;&lt;/th&gt;"</code><code class="p">;</code>
+ <code class="k">echo</code> <code class="s2">"&lt;td&gt;"</code> <code class="o">.</code> <code class="nb">join</code><code class="p">(</code><code class="s1">', '</code><code class="p">,</code> <code class="nv">$book</code><code class="p">[</code><code class="s1">'author'</code><code class="p">])</code> <code class="o">.</code> <code class="s2">"&lt;/td&gt;</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+ <code class="k">echo</code> <code class="s2">"&lt;/tr&gt;</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+ <code class="p">}</code>
+
+ <code class="k">echo</code> <code class="s2">"&lt;/table&gt;</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+ <code class="p">}</code>
+
+ <code class="k">function</code> <code class="nf">showBook</code><code class="p">(</code><code class="nv">$isbn</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">foreach</code> <code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">records</code> <code class="k">as</code> <code class="nv">$book</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">if</code> <code class="p">(</code><code class="nv">$book</code><code class="p">[</code><code class="s1">'isbn'</code><code class="p">]</code> <code class="o">!==</code> <code class="nv">$isbn</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">continue</code><code class="p">;</code>
+ <code class="p">}</code>
+
+ <code class="k">echo</code> <code class="s2">"&lt;p&gt;&lt;b&gt;</code><code class="si">{</code><code class="nv">$book</code><code class="p">[</code><code class="s1">'title'</code><code class="p">]</code><code class="si">}</code><code class="s2">&lt;/b&gt; by "</code> <code class="o">.</code> <code class="nb">join</code><code class="p">(</code><code class="s1">', '</code><code class="p">,</code> <code class="nv">$book</code><code class="p">[</code><code class="s1">'author'</code><code class="p">])</code> <code class="o">.</code> <code class="s2">"&lt;br /&gt;"</code><code class="p">;</code>
+ <code class="k">echo</code> <code class="s2">"ISBN: </code><code class="si">{</code><code class="nv">$book</code><code class="p">[</code><code class="s1">'isbn'</code><code class="p">]</code><code class="si">}</code><code class="s2">&lt;br /&gt;"</code><code class="p">;</code>
+ <code class="k">echo</code> <code class="s2">"Comment: </code><code class="si">{</code><code class="nv">$book</code><code class="p">[</code><code class="s1">'comment'</code><code class="p">]</code><code class="si">}</code><code class="s2">&lt;/p&gt;</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+ <code class="p">}</code>
+
+ <code class="k">echo</code> <code class="s2">"&lt;p&gt;Back to the &lt;a href=</code><code class="se">\"</code><code class="si">{</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s1">'PHP_SELF'</code><code class="p">]</code><code class="si">}</code><code class="se">\"</code><code class="s2">&gt;list of books&lt;/a&gt;.&lt;/p&gt;"</code><code class="p">;</code>
+ <code class="p">}</code>
+ <code class="p">}</code>
+
+ <code class="nv">$library</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">BookList</code><code class="p">(</code><code class="s2">"books.xml"</code><code class="p">);</code>
+
+ <code class="k">if</code> <code class="p">(</code><code class="nb">isset</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s1">'isbn'</code><code class="p">]))</code> <code class="p">{</code>
+ <code class="c1">// return info on one book</code>
+ <code class="nv">$library</code><code class="o">-&gt;</code><code class="na">showBook</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">[</code><code class="s1">'isbn'</code><code class="p">]);</code>
+ <code class="p">}</code>
+ <code class="k">else</code> <code class="p">{</code>
+ <code class="c1">// show menu of books</code>
+ <code class="nv">$library</code><code class="o">-&gt;</code><code class="na">showMenu</code><code class="p">();</code>
+ <code class="p">}</code> <code class="cp">?&gt;</code>
+ <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code></pre>
+</div>
+</div></section>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="Parsing XML with the DOM"><div class="sect1" id="parsing_xml_with_the_dom">
+<h1>Parsing XML with the DOM</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="DOM parser for" id="idm45922753374040"/><a contenteditable="false" data-type="indexterm" data-primary="DOM parser, for XML" id="idm45922753372360"/>The DOM parser provided in PHP is much simpler to use, but what you take out in complexity comes back in memory usage—in spades. Instead of firing events and allowing you to handle the document as it is being parsed, the DOM parser takes an XML document and returns an entire tree of nodes and elements:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$parser</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DOMDocument</code><code class="p">();</code>
+<code class="nv">$parser</code><code class="o">-&gt;</code><code class="na">load</code><code class="p">(</code><code class="s2">"books.xml"</code><code class="p">);</code>
+<code class="nx">processNodes</code><code class="p">(</code><code class="nv">$parser</code><code class="o">-&gt;</code><code class="na">documentElement</code><code class="p">);</code>
+
+<code class="k">function</code> <code class="nf">processNodes</code><code class="p">(</code><code class="nv">$node</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">foreach</code> <code class="p">(</code><code class="nv">$node</code><code class="o">-&gt;</code><code class="na">childNodes</code> <code class="k">as</code> <code class="nv">$child</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">if</code> <code class="p">(</code><code class="nv">$child</code><code class="o">-&gt;</code><code class="na">nodeType</code> <code class="o">==</code> <code class="nx">XML_TEXT_NODE</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="nv">$child</code><code class="o">-&gt;</code><code class="na">nodeValue</code><code class="p">;</code>
+ <code class="p">}</code>
+ <code class="k">else</code> <code class="k">if</code> <code class="p">(</code><code class="nv">$child</code><code class="o">-&gt;</code><code class="na">nodeType</code> <code class="o">==</code> <code class="nx">XML_ELEMENT_NODE</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nx">processNodes</code><code class="p">(</code><code class="nv">$child</code><code class="p">);</code>
+ <code class="p">}</code>
+ <code class="p">}</code>
+<code class="p">}</code></pre>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="Parsing XML with SimpleXML"><div class="sect1" id="parsing_xml_with_simplexml">
+<h1>Parsing XML with SimpleXML</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="parsing" data-tertiary="SimpleXML for" id="idm45922752802824"/><a contenteditable="false" data-type="indexterm" data-primary="SimpleXML" id="idm45922752801272"/>If you’re consuming very simple XML documents, you might consider the third library provided by PHP, SimpleXML. SimpleXML doesn’t have the ability to generate documents as the DOM extension does, and isn’t as flexible or memory-efficient as the event-driven extension, but it makes it very easy to read, parse, and traverse simple XML documents.</p>
+<p>SimpleXML takes a file, string, or DOM document (produced using the DOM extension) and generates an object. Properties on that object are arrays providing access to elements in each node. With those arrays, you can access elements using numeric indices and attributes using non-numeric indices. Finally, you can use string conversion on any value you retrieve to get the text value of the item.</p>
+<p>For example, we could display all the titles of the books in our <em>books.xml</em> document using:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$document</code> <code class="o">=</code> <code class="nb">simplexml_load_file</code><code class="p">(</code><code class="s2">"books.xml"</code><code class="p">);</code>
+
+<code class="k">foreach</code> <code class="p">(</code><code class="nv">$document</code><code class="o">-&gt;</code><code class="na">book</code> <code class="k">as</code> <code class="nv">$book</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="nv">$book</code><code class="o">-&gt;</code><code class="na">title</code> <code class="o">.</code> <code class="s2">"</code><code class="se">\r\n</code><code class="s2">"</code><code class="p">;</code>
+<code class="p">}</code></pre>
+<p>Using the <a contenteditable="false" data-type="indexterm" data-primary="children method, SimpleXML" id="idm45922752774856"/><code>children()</code> method on the object, you can iterate over the child nodes of a given node; likewise, you can use the <a contenteditable="false" data-type="indexterm" data-primary="attributes method, SimpleXML" id="idm45922752773352"/><code>attributes()</code> method on the object to iterate over the attributes of the node:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$document</code> <code class="o">=</code> <code class="nb">simplexml_load_file</code><code class="p">(</code><code class="s2">"books.xml"</code><code class="p">);</code>
+
+<code class="k">foreach</code> <code class="p">(</code><code class="nv">$document</code><code class="o">-&gt;</code><code class="na">book</code> <code class="k">as</code> <code class="nv">$node</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">foreach</code> <code class="p">(</code><code class="nv">$node</code><code class="o">-&gt;</code><code class="na">attributes</code><code class="p">()</code> <code class="k">as</code> <code class="nv">$attribute</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="s2">"</code><code class="si">{</code><code class="nv">$attribute</code><code class="si">}</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+ <code class="p">}</code>
+<code class="p">}</code></pre>
+<p>Finally, using the <a contenteditable="false" data-type="indexterm" data-primary="asXml method, SimpleXML" id="idm45922752662184"/><code>asXml()</code> method on the object, you can retrieve the XML of the document in XML format. This lets you change values in your document and write it back out to disk easily:<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_xml_parsing" id="idm45922752648808"/></p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$document</code> <code class="o">=</code> <code class="nb">simplexml_load_file</code><code class="p">(</code><code class="s2">"books.xml"</code><code class="p">);</code>
+
+<code class="k">foreach</code> <code class="p">(</code><code class="nv">$document</code><code class="o">-&gt;</code><code class="na">children</code><code class="p">()</code> <code class="k">as</code> <code class="nv">$book</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$book</code><code class="o">-&gt;</code><code class="na">title</code> <code class="o">=</code> <code class="s2">"New Title"</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nb">file_put_contents</code><code class="p">(</code><code class="s2">"books.xml"</code><code class="p">,</code> <code class="nv">$document</code><code class="o">-&gt;</code><code class="na">asXml</code><code class="p">());</code></pre>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="Transforming XML with XSLT"><div class="sect1" id="transforming_xml_with_xslt">
+<h1>Transforming XML with XSLT</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="XSLT (Extensible Stylesheet Language Transformations)" id="ix_xslt_ch12"/><a contenteditable="false" data-type="indexterm" data-primary="XML (Extensible Markup Language)" data-secondary="transforming with XSLT" id="ix_xml_XSLT"/>Extensible Stylesheet Language Transformations (XSLT) is a language for transforming XML documents into different XML, HTML, or any other format. For example, many websites offer several formats of their content—HTML, printable HTML, and WML (Wireless Markup Language) are common. The easiest way to present these multiple views of the same information is to maintain one form of the content in XML and use XSLT to produce the HTML, printable HTML, and WML.</p>
+<p>PHP’s XSLT extension uses the <a contenteditable="false" data-type="indexterm" data-primary="Libxslt library" id="idm45922752738296"/>Libxslt C library to provide XSLT support.</p>
+<p>Three documents are involved in an XSLT transformation: the original XML document, the XSLT document containing transformation rules, and the resulting document. The final document doesn’t have to be in XML; in fact, it’s common to use XSLT to generate HTML from XML. To do an XSLT transformation in PHP, you create an XSLT processor, give it some input to transform, and then destroy the <span class="keep-together">processor.</span></p>
+<p>Create a processor by creating a new <code>XsltProcessor</code> object:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$processor</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">XsltProcessor</code><code class="p">;</code></pre>
+<p>Parse the XML and XSL files into DOM objects:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$xml</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DomDocument</code><code class="p">;</code>
+<code class="nv">$xml</code><code class="o">-&gt;</code><code class="na">load</code><code class="p">(</code><code class="nv">$filename</code><code class="p">);</code>
+
+<code class="nv">$xsl</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DomDocument</code><code class="p">;</code>
+<code class="nv">$xsl</code><code class="o">-&gt;</code><code class="na">load</code><code class="p">(</code><code class="nv">$filename</code><code class="p">);</code></pre>
+<p>Attach the XML rules to the object:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$processor</code><code class="o">-&gt;</code><code class="na">importStyleSheet</code><code class="p">(</code><code class="nv">$xsl</code><code class="p">);</code></pre>
+<p>Process a file with the <a contenteditable="false" data-type="indexterm" data-primary="transformToDoc method, XSLT" id="idm45922752372760"/><code>transformToDoc()</code>, <a contenteditable="false" data-type="indexterm" data-primary="transformToUri method, XSLT" id="idm45922752371400"/><code>transformToUri()</code>, or <a contenteditable="false" data-type="indexterm" data-primary="transformToXml method, XSLT" id="idm45922752369912"/><code>transformToXml()</code> methods:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$result</code> <code class="o">=</code> <code class="nv">$processor</code><code class="o">-&gt;</code><code class="na">transformToXml</code><code class="p">(</code><code class="nv">$xml</code><code class="p">);</code></pre>
+<p>Each takes the DOM object representing the XML document as a parameter.</p>
+<p><a data-type="xref" href="#example_onetwo_onezerodot_xml_document">Example 12-10</a> is the XML document we’re going to transform. It is in a similar format to many of the news documents you find on the web.</p>
+<div data-type="example" id="example_onetwo_onezerodot_xml_document">
+<h5><span class="label">Example 12-10. </span>XML document</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?</code><code class="nx">xml</code> <code class="nx">version</code><code class="o">=</code><code class="s2">"1.0"</code> <code class="cp">?&gt;</code>
+
+<code class="nt">&lt;news</code> <code class="na">xmlns:news=</code><code class="s">"http://slashdot.org/backslash.dtd"</code><code class="nt">&gt;</code>
+ <code class="nt">&lt;story&gt;</code>
+ <code class="nt">&lt;title&gt;</code>O'Reilly Publishes Programming PHP<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;url&gt;</code>http://example.org/article.php?id=20020430/458566<code class="nt">&lt;/url&gt;</code>
+ <code class="nt">&lt;time&gt;</code>2002-04-30 09:04:23<code class="nt">&lt;/time&gt;</code>
+ <code class="nt">&lt;author&gt;</code>Rasmus and some others<code class="nt">&lt;/author&gt;</code>
+ <code class="nt">&lt;/story&gt;</code>
+
+ <code class="nt">&lt;story&gt;</code>
+ <code class="nt">&lt;title&gt;</code>Transforming XML with PHP Simplified<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;url&gt;</code>http://example.org/article.php?id=20020430/458566<code class="nt">&lt;/url&gt;</code>
+ <code class="nt">&lt;time&gt;</code>2002-04-30 09:04:23<code class="nt">&lt;/time&gt;</code>
+ <code class="nt">&lt;author&gt;</code>k.tatroe<code class="nt">&lt;/author&gt;</code>
+ <code class="nt">&lt;teaser&gt;</code>Check it out<code class="nt">&lt;/teaser&gt;</code>
+ <code class="nt">&lt;/story&gt;</code>
+<code class="nt">&lt;/news&gt;</code></pre>
+</div>
+<p><a data-type="xref" href="#example_onetwo_oneonedot_news_xsl_trans">Example 12-11</a> is the XSL document we’ll use to transform the XML document into HTML. Each <code>xsl:template</code> element contains a rule for dealing with part of the input document.</p>
+<div data-type="example" id="example_onetwo_oneonedot_news_xsl_trans">
+<h5><span class="label">Example 12-11. </span>News XSL transform</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?</code><code class="nx">xml</code> <code class="nx">version</code><code class="o">=</code><code class="s2">"1.0"</code> <code class="nx">encoding</code><code class="o">=</code><code class="s2">"utf-8"</code> <code class="cp">?&gt;</code>
+<code class="nt">&lt;xsl:stylesheet</code> <code class="na">version=</code><code class="s">"1.0"</code> <code class="na">xmlns:xsl=</code><code class="s">"http://www.w3.org/1999/XSL/Transform"</code><code class="nt">&gt;</code>
+<code class="nt">&lt;xsl:output</code> <code class="na">method=</code><code class="s">"html"</code> <code class="na">indent=</code><code class="s">"yes"</code> <code class="na">encoding=</code><code class="s">"utf-8"</code> <code class="nt">/&gt;</code>
+
+<code class="nt">&lt;xsl:template</code> <code class="na">match=</code><code class="s">"/news"</code><code class="nt">&gt;</code>
+ <code class="nt">&lt;html&gt;</code>
+ <code class="nt">&lt;head&gt;</code>
+ <code class="nt">&lt;title&gt;</code>Current Stories<code class="nt">&lt;/title&gt;</code>
+ <code class="nt">&lt;/head&gt;</code>
+ <code class="nt">&lt;body</code> <code class="na">bgcolor=</code><code class="s">"white"</code> <code class="nt">&gt;</code>
+ <code class="nt">&lt;xsl:call-template</code> <code class="na">name=</code><code class="s">"stories"</code><code class="nt">/&gt;</code>
+ <code class="nt">&lt;/body&gt;</code>
+ <code class="nt">&lt;/html&gt;</code>
+<code class="nt">&lt;/xsl:template&gt;</code>
+
+<code class="nt">&lt;xsl:template</code> <code class="na">name=</code><code class="s">"stories"</code><code class="nt">&gt;</code>
+ <code class="nt">&lt;xsl:for-each</code> <code class="na">select=</code><code class="s">"story"</code><code class="nt">&gt;</code>
+ <code class="nt">&lt;h1&gt;&lt;xsl:value-of</code> <code class="na">select=</code><code class="s">"title"</code> <code class="nt">/&gt;&lt;/h1&gt;</code>
+
+ <code class="nt">&lt;p&gt;</code>
+ <code class="nt">&lt;xsl:value-of</code> <code class="na">select=</code><code class="s">"author"</code><code class="nt">/&gt;</code> (<code class="nt">&lt;xsl:value-of</code> <code class="na">select=</code><code class="s">"time"</code><code class="nt">/&gt;</code>)<code class="nt">&lt;br</code> <code class="nt">/&gt;</code>
+ <code class="nt">&lt;xsl:value-of</code> <code class="na">select=</code><code class="s">"teaser"</code><code class="nt">/&gt;</code>
+ [ <code class="nt">&lt;a</code> <code class="na">href=</code><code class="s">"{url}"</code><code class="nt">&gt;</code>More<code class="nt">&lt;/a&gt;</code> ]
+ <code class="nt">&lt;/p&gt;</code>
+
+ <code class="nt">&lt;hr</code> <code class="nt">/&gt;</code>
+ <code class="nt">&lt;/xsl:for-each&gt;</code>
+<code class="nt">&lt;/xsl:template&gt;</code>
+
+<code class="nt">&lt;/xsl:stylesheet&gt;</code></pre>
+</div>
+<p><a data-type="xref" href="#example_onetwo_onetwodot_xsl_transforma">Example 12-12</a> is the very small amount of code necessary to transform the XML document into an HTML document using the XSL stylesheet. We create a processor, run the files through it, and print the result.</p>
+<div data-type="example" id="example_onetwo_onetwodot_xsl_transforma">
+<h5><span class="label">Example 12-12. </span>XSL transformation from files</h5>
+<pre data-type="programlisting" data-code-language="html+php"><code class="cp">&lt;?php</code>
+<code class="nv">$processor</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">XsltProcessor</code><code class="p">;</code>
+
+<code class="nv">$xsl</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DOMDocument</code><code class="p">;</code>
+<code class="nv">$xsl</code><code class="o">-&gt;</code><code class="na">load</code><code class="p">(</code><code class="s2">"rules.xsl"</code><code class="p">);</code>
+<code class="nv">$processor</code><code class="o">-&gt;</code><code class="na">importStyleSheet</code><code class="p">(</code><code class="nv">$xsl</code><code class="p">);</code>
+
+<code class="nv">$xml</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">DomDocument</code><code class="p">;</code>
+<code class="nv">$xml</code><code class="o">-&gt;</code><code class="na">load</code><code class="p">(</code><code class="s2">"feed.xml"</code><code class="p">);</code>
+<code class="nv">$result</code> <code class="o">=</code> <code class="nv">$processor</code><code class="o">-&gt;</code><code class="na">transformToXml</code><code class="p">(</code><code class="nv">$xml</code><code class="p">);</code>
+
+<code class="k">echo</code> <code class="s2">"&lt;pre&gt;</code><code class="si">{</code><code class="nv">$result</code><code class="si">}</code><code class="s2">&lt;/pre&gt;"</code><code class="p">;</code></pre>
+</div>
+<p>Although it doesn’t specifically discuss PHP, <a contenteditable="false" data-type="indexterm" data-primary="Tidwell, Doug (author)" data-secondary="XSLT (O'Reilly)" id="idm45922751800584"/><a contenteditable="false" data-type="indexterm" data-primary="XSLT (O’Reilly)" id="idm45922751806552"/>Doug Tidwell’s book <a class="orm:hideurl" href="http://oreil.ly/XSLT_2E"><em>XSLT</em></a> (O’Reilly) provides a detailed guide to the syntax of XSLT stylesheets.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_xml_ch12" id="idm45922751804168"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_xml_XSLT" id="idm45922751802824"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_xslt_ch12" id="idm45922752477336"/></p>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="What’s Next"><div class="sect1" id="whatapostrophes_next-id00070">
+<h1>What’s Next</h1>
+<p>While XML remains a major format for sharing data, a simplified version of JavaScript data encapsulation, known as JSON, has rapidly become the de facto standard for simple, readable, and terse sharing of web service responses and other data. That’s the subject we’ll turn to in the next chapter.</p>
+</div></section>
+</div></section></div>
+
+
+
+  </body></html>

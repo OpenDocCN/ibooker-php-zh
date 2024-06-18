@@ -1,0 +1,919 @@
+<html><head></head><body><div id="sbo-rt-content" class="calibre1"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 21. Accessing CSS from JavaScript" class="calibre4"><div class="preface" id="accessing_css_from_javascript">
+<h1 class="calibre10"><span class="keep-together">Chapter 21. </span>Accessing CSS from JavaScript</h1>
+
+<p class="author1">With<a contenteditable="false" data-primary="properties (CSS)" data-secondary="accessing from JavaScript" data-type="indexterm" id="PRjava20" class="calibre6"/> a good understanding of the DOM and CSS now under your belt, you’ll learn in this chapter how to access both the DOM and CSS directly from JavaScript, enabling you to create highly dynamic and responsive websites.</p>
+
+<p class="author1">I’ll also show you how to use interrupts so you can create animations or provide any code that must continue running (such as a clock). Finally, I’ll explain how you can add new elements to or remove existing ones from the DOM so you don’t have to precreate elements in HTML just in case JavaScript may need to access them later.</p>
+
+<section data-type="sect1" data-pdf-bookmark="Revisiting the getElementById Function" class="calibre4"><div class="preface" id="revisiting_the_getelementbyid_function">
+<h1 class="calibre11">Revisiting the getElementById Function</h1>
+
+<p class="author1">To<a contenteditable="false" data-primary="getElementById function" data-secondary="enhanced version of" data-type="indexterm" id="idm45694687799368" class="calibre6"/> help with the examples in the rest of this book, I would like to provide an enhanced version of the <code class="calibre15">getElementById</code> function, for handling DOM elements and CSS styles quickly and efficiently, without the need for including a framework such as jQuery.</p>
+
+<p class="author1">However, to avoid conflicting with frameworks that use the <code class="calibre15">$</code> character, I’ll use the uppercase <code class="calibre15">O</code>, because it’s the first letter of <em class="hyperlink">Object</em>, which is what will be returned when the function is called (the object represented by the ID passed to the function).</p>
+
+<section data-type="sect2" data-pdf-bookmark="The O Function" class="calibre4"><div class="preface" id="o_function">
+<h2 class="calibre28">The O Function</h2>
+
+<p class="author1">Here’s what<a contenteditable="false" data-primary="getElementById function" data-secondary="O function" data-type="indexterm" id="idm45694687793304" class="calibre6"/> the bare-bones <code class="calibre15">O</code> function looks like:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">function</code> <code class="n">O</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="k">return</code> <code class="nb">document</code><code class="p">.</code><code class="n">getElementById</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">}</code></pre>
+
+<p class="author1">This alone saves 22 characters of typing each time it’s called. But I’ve chosen to extend the function a little by allowing either an ID name or an object to be passed to the function, as shown in the complete version in <a data-type="xref" href="#oleft_parenthesisright_parenthesis_f" class="calibre6">Example 21-1</a>.</p>
+
+<div data-type="example" id="oleft_parenthesisright_parenthesis_f" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 21-1. </span>The <code class="calibre15">O</code> function</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">function</code> <code class="n">O</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="k">return</code> <code class="k">typeof</code> <code class="n">i</code> <code class="o">==</code> <code class="s">'object'</code> <code class="o">?</code> <code class="n">i</code> <code class="o">:</code> <code class="nb">document</code><code class="p">.</code><code class="n">getElementById</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">}</code></pre>
+</div>
+
+<p class="author1">If an object is passed to the function, it just returns that object back again. Otherwise, it assumes that an ID has been passed and returns the object to which the ID refers.</p>
+
+<p class="author1">But why on Earth would I want to add this first statement, which simply returns the object passed to it?</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The S Function" class="calibre4"><div class="preface" id="s_function">
+<h2 class="calibre28">The S Function</h2>
+
+<p class="author1">The<a contenteditable="false" data-primary="getElementById function" data-secondary="S function" data-type="indexterm" id="idm45694687756952" class="calibre6"/> answer to this question becomes clear when you look at a partner function called <code class="calibre15">S</code>, which gives you easy access to the style (or CSS) properties of an object, as shown in <a data-type="xref" href="#sleft_parenthesisright_parenthesis_f" class="calibre6">Example 21-2</a>.</p>
+
+<div data-type="example" id="sleft_parenthesisright_parenthesis_f" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 21-2. </span>The <code class="calibre15">S</code> function</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">function</code> <code class="n">S</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="k">return</code> <code class="n">O</code><code class="p">(</code><code class="n">i</code><code class="p">).</code><code class="n">style</code>
+<code class="p">}</code></pre>
+</div>
+
+<p class="author1">The <code class="calibre15">S</code> in this function name is the first letter of <em class="hyperlink">Style</em>, and the function performs the task of returning the style property (or subobject) of the element referred to. Because the embedded <code class="calibre15">O</code> function accepts either an ID or an object, you can pass either an ID or an object to <code class="calibre15">S</code> as well.</p>
+
+<p class="author1">Let’s look at what’s going on here by taking a <code class="calibre15">&lt;div&gt;</code> element with the ID of <code class="calibre15">myobj</code> and setting its text color to green, like this:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;div</code> <code class="na">id=</code><code class="s">'myobj'</code><code class="nt">&gt;</code>Some text<code class="nt">&lt;/div&gt;</code>
+
+<code class="nt">&lt;script&gt;</code>
+  <code class="n">O</code><code class="p">(</code><code class="s">'myobj'</code><code class="p">).</code><code class="n">style</code><code class="p">.</code><code class="n">color</code> <code class="o">=</code> <code class="s">'green'</code>
+<code class="nt">&lt;/script&gt;</code></pre>
+
+<p class="author1">The preceding code will do the job, but it’s much simpler to call the new <code class="calibre15">S</code> function, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">S</code><code class="p">(</code><code class="s">'myobj'</code><code class="p">).</code><code class="n">color</code> <code class="o">=</code> <code class="s">'green'</code></pre>
+
+<p class="author1">Now consider the case in which the object returned by calling <code class="calibre15">O</code> is stored in, for example, an object called <code class="calibre15">fred</code>, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">fred</code> <code class="o">=</code> <code class="n">O</code><code class="p">(</code><code class="s">'myobj'</code><code class="p">)</code></pre>
+
+<p class="author1">Because of the way the <code class="calibre15">S</code> function works, we can still call it to change the text color to green, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">S</code><code class="p">(</code><code class="n">fred</code><code class="p">).</code><code class="n">color</code> <code class="o">=</code> <code class="s">'green'</code></pre>
+
+<p class="author1">This means that whether you wish to access an object directly or via its ID, you can do so by passing it to either the <code class="calibre15">O</code> or <code class="calibre15">S</code> function as required. Just remember that when you pass an object (rather than an ID), you must not place it in quotation marks.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The C Function" class="calibre4"><div class="preface" id="c_function">
+<h2 class="calibre28">The C Function</h2>
+
+<p class="author1">So<a contenteditable="false" data-primary="getElementById function" data-secondary="C function" data-type="indexterm" id="idm45694687520312" class="calibre6"/> far I’ve provided you with two simple functions that make it easy for you to access any element on a web page and any style property of an element. Sometimes, though, you will want to access more than one element at a time. You can do this by assigning a CSS class name to each such element, like in these examples, which both employ the class <code class="calibre15">myclass</code>:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="nt">&lt;div</code> <code class="na">class=</code><code class="s">'myclass'</code><code class="nt">&gt;</code>Div contents<code class="nt">&lt;/div&gt;</code>
+<code class="nt">&lt;p</code> <code class="na">class=</code><code class="s">'myclass'</code><code class="nt">&gt;</code>Paragraph contents<code class="nt">&lt;/p&gt;</code></pre>
+
+<p class="author1">If you want to access all elements on a page that use a particular class, you can use the <code class="calibre15">C</code> function (for the first letter of <em class="hyperlink">Class</em>), shown in <a data-type="xref" href="#cleft_parenthesisright_parenthesis_f" class="calibre6">Example 21-3</a>, to return an array containing all the objects that match the class name provided.</p>
+
+<div data-type="example" id="cleft_parenthesisright_parenthesis_f" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 21-3. </span>The <code class="calibre15">C</code> function</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">function</code> <code class="n">C</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="k">return</code> <code class="nb">document</code><code class="p">.</code><code class="n">getElementsByClassName</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>
+<code class="p">}</code></pre>
+</div>
+
+<p class="author1">To use this function, simply call it as follows, saving the returned array so that you can access each of the elements individually as required or (more likely to be the case) en masse via a loop:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">myarray</code> <code class="o">=</code> <code class="n">C</code><code class="p">(</code><code class="s">'myclass'</code><code class="p">)</code></pre>
+
+<p class="author1">Now you can do whatever you like with the objects returned, such as (for example) setting their <code class="calibre15">textDecoration</code> style property to <code class="calibre15">underline</code>, as follows:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">for</code> <code class="p">(</code><code class="n">i</code> <code class="o">=</code> <code class="mi">0</code> <code class="p">;</code> <code class="n">i</code> <code class="o">&lt;</code> <code class="n">myarray</code><code class="p">.</code><code class="n">length</code> <code class="p">;</code> <code class="o">++</code><code class="n">i</code><code class="p">)</code>
+  <code class="n">S</code><code class="p">(</code><code class="n">myarray</code><code class="p">[</code><code class="n">i</code><code class="p">]).</code><code class="n">textDecoration</code> <code class="o">=</code> <code class="s">'underline'</code></pre>
+
+<p class="author1">This code iterates through the objects in <code class="calibre15">myarray[]</code> and then uses the <code class="calibre15">S</code> function to reference each one’s style property, setting its <code class="calibre15">textDecoration</code> property to <code class="calibre15">underline</code>.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">It is highly unlikely you will use these <code class="calibre15">O</code>, <code class="calibre15">S</code>, and <code class="calibre15">C</code> functions in development code, because you will probably have a custom-made or third-party framework to provide this functionality, plus a whole lot more. But they serve to keep the examples in this book short and easy to follow, as well as being a simple example of how JavaScript can be enhanced.</p>
+</div>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Including the Functions" class="calibre4"><div class="preface" id="including_the_functions">
+<h2 class="calibre28">Including the Functions</h2>
+
+<p class="author1">I<a contenteditable="false" data-primary="getElementById function" data-secondary="including functions in web pages" data-type="indexterm" id="idm45694687338088" class="calibre6"/> use the <code class="calibre15">O</code> and <code class="calibre15">S</code> functions in the examples for the remainder of this chapter, as they make the code shorter and easier to follow. Therefore, I<a contenteditable="false" data-primary="code examples, obtaining and using" data-type="indexterm" id="idm45694687335544" class="calibre6"/> have saved them in the file <em class="hyperlink">OSC.js</em> (along with the <code class="calibre15">C</code> function, which I think you’ll find extremely useful) in the Chapter 21 folder of the accompanying archive of examples, freely downloadable from the <a href="https://github.com/RobinNixon/lpmj6" class="calibre6">book’s example repository</a>.</p>
+
+<p class="author1">You can include these functions in any web page by using the following statement—preferably in its <code class="calibre15">&lt;head&gt;</code> section, anywhere before any script that relies on calling them:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code> <code class="n">src</code><code class="o">=</code><code class="s">'OSC.js'</code><code class="o">&gt;&lt;</code><code class="err">/script&gt;</code></pre>
+
+<p class="author1">The contents of <em class="hyperlink">OSC.js</em> are shown in <a data-type="xref" href="#oscdotjs_file" class="calibre6">Example 21-4</a>, where everything is neatened into just three lines.</p>
+
+<div data-type="example" id="oscdotjs_file" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 21-4. </span>The OSC.js file</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">function</code> <code class="n">O</code><code class="p">(</code><code class="n">i</code><code class="p">)</code> <code class="p">{</code> <code class="k">return</code> <code class="k">typeof</code> <code class="n">i</code> <code class="o">==</code> <code class="s">'object'</code> <code class="o">?</code> <code class="n">i</code> <code class="o">:</code> <code class="nb">document</code><code class="p">.</code><code class="n">getElementById</code><code class="p">(</code><code class="n">i</code><code class="p">)</code> <code class="p">}</code>
+<code class="k">function</code> <code class="n">S</code><code class="p">(</code><code class="n">i</code><code class="p">)</code> <code class="p">{</code> <code class="k">return</code> <code class="n">O</code><code class="p">(</code><code class="n">i</code><code class="p">).</code><code class="n">style</code>                                            <code class="p">}</code>
+<code class="k">function</code> <code class="n">C</code><code class="p">(</code><code class="n">i</code><code class="p">)</code> <code class="p">{</code> <code class="k">return</code> <code class="nb">document</code><code class="p">.</code><code class="n">getElementsByClassName</code><code class="p">(</code><code class="n">i</code><code class="p">)</code>                    <code class="p">}</code></pre>
+</div>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Accessing CSS Properties from JavaScript" class="calibre4"><div class="preface" id="accessing_css_properties_from_javascript">
+<h1 class="calibre11">Accessing CSS Properties from JavaScript</h1>
+
+<p class="author1">The <code class="calibre15">textDecoration</code> property<a contenteditable="false" data-primary="JavaScript" data-secondary="CSS properties access from" data-type="indexterm" id="JScss20" class="calibre6"/><a contenteditable="false" data-primary="CSS (Cascading Style Sheets)" data-secondary="JavaScript access to CSS properties" data-type="indexterm" id="CSSjava20" class="calibre6"/><a contenteditable="false" data-primary="DOM (Document Object Model)" data-secondary="JavaScript access to CSS properties" data-type="indexterm" id="DOMjava20" class="calibre6"/> I used in an earlier example represents a CSS property that is normally hyphenated like this: <code class="calibre15">text-decoration</code>. But since JavaScript reserves the hyphen character for use as a mathematical operator, whenever you access a hyphenated CSS property, you must omit the hyphen and set the character immediately following it to uppercase.</p>
+
+<p class="author1">Another example of this is the <code class="calibre15">font-size</code> property, which is referenced in JavaScript as <code class="calibre15">fontSize</code> when placed after a period operator, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">myobject</code><code class="p">.</code><code class="n">fontSize</code> <code class="o">=</code> <code class="s">'16pt'</code></pre>
+
+<p class="author1">An alternative to this is to be more long-winded and use the <code class="calibre15">setAttribute</code> function, which <em class="hyperlink">does</em> support (and in fact requires) standard CSS property names, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">myobject</code><code class="p">.</code><code class="n">setAttribute</code><code class="p">(</code><code class="s">'style'</code><code class="p">,</code> <code class="s">'font-size:16pt'</code><code class="p">)</code>
+</pre>
+
+<section data-type="sect2" data-pdf-bookmark="Some Common Properties" class="calibre4"><div class="preface" id="some_common_properties">
+<h2 class="calibre28">Some Common Properties</h2>
+
+<p class="author1">Using JavaScript, you can modify any property of any element in a web document, in a similar manner to using CSS. I’ve already shown you how to access CSS properties using either the JavaScript short form or the <code class="calibre15">setAttribute</code> function to use exact CSS property names, so I won’t bore you by detailing all of the hundreds of properties. Rather, I’d like to show you how to access just a few of the CSS properties as an overview of some of the things you can do.</p>
+
+<p class="author1">First, then, let’s look at modifying a few CSS properties from JavaScript using <a data-type="xref" href="#accessing_css_properties_from_ja-id00108" class="calibre6">Example 21-5</a>, which loads in the three earlier functions, creates a <code class="calibre15">&lt;div&gt;</code> element, and then issues JavaScript statements within a <code class="calibre15">&lt;script&gt;</code> section of HTML to modify some of its attributes (see <a data-type="xref" href="#modifying_styles_from_javascript" class="calibre6">Figure 21-1</a>).</p>
+
+<div data-type="example" id="accessing_css_properties_from_ja-id00108" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 21-5. </span>Accessing CSS properties from JavaScript</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE html&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Accessing CSS Properties<code class="nt">&lt;/title&gt;</code>
+    <code class="nt">&lt;script </code><code class="na">src=</code><code class="s">'OSC.js'</code><code class="nt">&gt;&lt;/script&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    <code class="nt">&lt;div</code> <code class="na">id=</code><code class="s">'object'</code><code class="nt">&gt;</code>Div Object<code class="nt">&lt;/div&gt;</code>
+
+    <code class="nt">&lt;script&gt;</code>
+      <code class="n">S</code><code class="p">(</code><code class="s">'object'</code><code class="p">).</code><code class="n">border</code>     <code class="o">=</code> <code class="s">'solid 1px red'</code>
+      <code class="n">S</code><code class="p">(</code><code class="s">'object'</code><code class="p">).</code><code class="n">width</code>      <code class="o">=</code> <code class="s">'100px'</code>
+      <code class="n">S</code><code class="p">(</code><code class="s">'object'</code><code class="p">).</code><code class="n">height</code>     <code class="o">=</code> <code class="s">'100px'</code>
+      <code class="n">S</code><code class="p">(</code><code class="s">'object'</code><code class="p">).</code><code class="n">background</code> <code class="o">=</code> <code class="s">'#eee'</code>
+      <code class="n">S</code><code class="p">(</code><code class="s">'object'</code><code class="p">).</code><code class="n">color</code>      <code class="o">=</code> <code class="s">'blue'</code>
+      <code class="n">S</code><code class="p">(</code><code class="s">'object'</code><code class="p">).</code><code class="n">fontSize</code>   <code class="o">=</code> <code class="s">'15pt'</code>
+      <code class="n">S</code><code class="p">(</code><code class="s">'object'</code><code class="p">).</code><code class="n">fontFamily</code> <code class="o">=</code> <code class="s">'Helvetica'</code>
+      <code class="n">S</code><code class="p">(</code><code class="s">'object'</code><code class="p">).</code><code class="n">fontStyle</code>  <code class="o">=</code> <code class="s">'italic'</code>
+    <code class="nt">&lt;/script&gt;</code>
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code></pre>
+</div>
+
+<figure class="calibre23"><div id="modifying_styles_from_javascript" class="figure"><img alt="Modifying styles from JavaScript" src="Images/pmj6_2101.png" class="calibre118"/>
+<h6 class="calibre24"><span class="keep-together">Figure 21-1. </span>Modifying styles from JavaScript</h6>
+</div></figure>
+
+<p class="author1">You gain nothing by modifying properties like this, because you could just as easily have included some CSS directly, but shortly we’ll be modifying properties in response to user interaction—and then you’ll see the real power of combining JavaScript and CSS.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Other Properties" class="calibre4"><div class="preface" id="other_properties">
+<h2 class="calibre28">Other Properties</h2>
+
+<p class="author1">JavaScript<a contenteditable="false" data-primary="window properties" data-type="indexterm" id="winprop20" class="calibre6"/><a contenteditable="false" data-primary="browsers" data-secondary="window properties in CSS" data-type="indexterm" id="Bwin20" class="calibre6"/> also opens up access to a very wide range of other properties, such as the width and height of the browser window and of any pop-up or in-browser windows or frames, plus handy information such as the parent window (if there is one) and the history of URLs visited in this session.</p>
+
+<p class="author1">All these properties are accessed from the <code class="calibre15">window</code> object via the period operator (for example, <code class="calibre15">window.name</code>), and <a data-type="xref" href="#common_window_properties" class="calibre6">Table 21-1</a> lists them all, along with descriptions of each.</p>
+
+<table id="common_window_properties" class="calibre33">
+	<caption class="calibre34"><span class="keep-together">Table 21-1. </span>The window properties</caption>
+	<thead class="calibre35">
+		<tr class="calibre36">
+			<th class="calibre37">Property</th>
+			<th class="calibre37">Description</th>
+		</tr>
+	</thead>
+	<tbody class="calibre38">
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">closed</code></td>
+			<td class="calibre39">Returns a Boolean value indicating whether a window has been closed or not</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48"><span class="keep-together">defaultStatus</span></code></td>
+			<td class="calibre39">Sets or returns the default text in the status bar of a window</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">document</code></td>
+			<td class="calibre39">Returns the <code class="calibre48">document</code> object for the window</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">frameElement</code></td>
+			<td class="calibre39">Returns the <code class="calibre48">iframe</code> element in which the current window is inserted</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">frames</code></td>
+			<td class="calibre39">Returns an array of all the frames and iframes in the window</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">history</code></td>
+			<td class="calibre39">Returns the <code class="calibre48">history</code> object for the window</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">innerHeight</code></td>
+			<td class="calibre39">Sets or returns the inner height of a window’s content area</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">innerWidth</code></td>
+			<td class="calibre39">Sets or returns the inner width of a window’s content area</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">length</code></td>
+			<td class="calibre39">Returns the number of frames and iframes in a window</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">localStorage</code></td>
+			<td class="calibre39">Allows saving of key/value pairs in a web browser</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">location</code></td>
+			<td class="calibre39">Returns the <code class="calibre48">location</code> object for the window</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">name</code></td>
+			<td class="calibre39">Sets or returns the name of a window</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">navigator</code></td>
+			<td class="calibre39">Returns the <code class="calibre48">navigator</code> object for the window</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">opener</code></td>
+			<td class="calibre39">Returns a reference to the window that created the window</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">outerHeight</code></td>
+			<td class="calibre39">Sets or returns the outer height of a window, including tool- and scrollbars</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">outerWidth</code></td>
+			<td class="calibre39">Sets or returns the outer width of a window, including tool- and scrollbars</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">pageXOffset</code></td>
+			<td class="calibre39">Returns the number of pixels the document has been scrolled horizontally from the left of the window</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">pageYOffset</code></td>
+			<td class="calibre39">Returns the number of pixels the document has been scrolled vertically from the top of the window</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">parent</code></td>
+			<td class="calibre39">Returns the parent window of a window</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">screen</code></td>
+			<td class="calibre39">Returns the <code class="calibre48">screen</code> object for the window</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">screenLeft</code></td>
+			<td class="calibre39">Returns the <em class="hyperlink">x</em> coordinate of the window relative to the screen</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">screenTop</code></td>
+			<td class="calibre39">Returns the <em class="hyperlink">y</em> coordinate of the window relative to the screen</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">screenX</code></td>
+			<td class="calibre39">Returns the <em class="hyperlink">x</em> coordinate of the window relative to the screen</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">screenY</code></td>
+			<td class="calibre39">Returns the <em class="hyperlink">y</em> coordinate of the window relative to the screen</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">sessionStorage</code></td>
+			<td class="calibre39">Allows saving of key/value pairs in a web browser</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">self</code></td>
+			<td class="calibre39">Returns the current window</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">status</code></td>
+			<td class="calibre39">Sets or returns the text in the status bar of a window</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">top</code></td>
+			<td class="calibre39">Returns the top browser window</td>
+		</tr>
+	</tbody>
+</table>
+
+<p class="author1">There are a few points to note about some of these properties:</p>
+
+<ul class="printings">
+	<li class="calibre9">
+	<p class="author1">The <code class="calibre15">defaultStatus</code> and <code class="calibre15">status</code> properties can be set only if users have modified their browsers to allow it (very unlikely).</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">The <code class="calibre15">history</code> object cannot be read from (so you cannot see where your visitors have been surfing). But it supports the <code class="calibre15">length</code> property to determine how long the history is, and the <code class="calibre15">back</code>, <code class="calibre15">forward</code>, and <code class="calibre15">go</code> methods to navigate to specific pages in the history.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">When you need to know how much space there is available in a current window of the web browser, just read the values in <code class="calibre15">window.innerHeight</code> and <span class="keep-together"><code class="calibre15">window.innerWidth</code></span>. I often use these values for centering in-browser pop-up alert or “confirm dialog” windows.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">The <code class="calibre15">screen</code> object supports the read-only properties <code class="calibre15">availHeight</code>, <code class="calibre15">availWidth</code>, <span class="keep-together"><code class="calibre15">colorDepth</code></span>, <code class="calibre15">height</code>, <code class="calibre15">pixelDepth</code>, and <code class="calibre15">width</code> and is therefore great for determining information about the user’s display.</p>
+	</li>
+</ul>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">Many of these properties can be invaluable when you’re targeting mobile phones and tablet devices, as they will tell you exactly how much screen space you have to work with, the type of browser being used, and more.</p>
+</div>
+
+<p class="author1">These few items of information will get you started and provide you with an idea of the many new and interesting things you can do with JavaScript. There are far more properties and methods available than can be covered in this chapter, but now that you know how to access and use properties, all you need is a resource listing them all. I recommend that you check out <a href="https://tinyurl.com/domexplained" class="calibre6">the online docs</a> as a good starting point.<a contenteditable="false" data-primary="" data-startref="Bwin20" data-type="indexterm" id="idm45694686979400" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="winprop20" data-type="indexterm" id="idm45694686978024" class="calibre6"/></p>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Inline JavaScript" class="calibre4"><div class="preface" id="inline_javascript">
+<h1 class="calibre11">Inline JavaScript</h1>
+
+<p class="author1">Using <code class="calibre15">&lt;script&gt;</code> tags<a contenteditable="false" data-primary="inline JavaScript" data-type="indexterm" id="idm45694686933352" class="calibre6"/> isn’t the only way you can execute JavaScript<a contenteditable="false" data-primary="HTML (Hypertext Markup Language)" data-secondary="accessing JavaScript from within" data-type="indexterm" id="idm45694686932296" class="calibre6"/><a contenteditable="false" data-primary="JavaScript" data-secondary="inline access" data-type="indexterm" id="idm45694686930920" class="calibre6"/> statements; you can also access JavaScript from within HTML tags, which makes for great dynamic interactivity. For example, to add a quick effect when the mouse passes over an object, you can use code such as that in the <code class="calibre15">&lt;img&gt;</code> tag in <a data-type="xref" href="#using_inline_javascript" class="calibre6">Example 21-6</a>, which displays an apple by default but replaces it with an orange when the mouse passes over the object and restores the apple again when the mouse leaves.</p>
+
+<div data-type="example" id="using_inline_javascript" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 21-6. </span>Using inline JavaScript</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE html&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Inline JavaScript<code class="nt">&lt;/title&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    <code class="nt">&lt;img</code> <code class="na">src=</code><code class="s">'apple.png'</code>
+      <code class="na">onmouseover=</code><code class="s">"this.src='orange.png'"</code>
+      <code class="na">onmouseout=</code><code class="s">"this.src='apple.png'"</code><code class="nt">&gt;</code>
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code></pre>
+</div>
+
+<section data-type="sect2" data-pdf-bookmark="The this Keyword" class="calibre4"><div class="preface" id="this_keyword">
+<h2 class="calibre28">The this Keyword</h2>
+
+<p class="author1">In<a contenteditable="false" data-primary="this keyword (JavaScript)" data-type="indexterm" id="idm45694686903480" class="calibre6"/> the preceding example, you see the <code class="calibre15">this</code> keyword in use. It tells the JavaScript to operate on the calling object, namely the <code class="calibre15">&lt;img&gt;</code> tag. You can see the result in <a data-type="xref" href="#inline_mouse_hover_javascript_example" class="calibre6">Figure 21-2</a>, where the mouse has yet to pass over the apple.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">When supplied from an inline JavaScript call, the <code class="calibre15">this</code> keyword represents the calling object. When used in class methods, it represents an object to which the method applies.</p>
+</div>
+
+<figure class="calibre23"><div id="inline_mouse_hover_javascript_example" class="figure"><img alt="Inline mouse hover JavaScript example" src="Images/pmj6_2102.png" class="calibre119"/>
+<h6 class="calibre24"><span class="keep-together">Figure 21-2. </span>Inline mouse hover JavaScript example</h6>
+</div></figure>
+
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Attaching Events to Objects in a Script" class="calibre4"><div class="preface" id="attaching_events_to_objects_in_a_script">
+<h2 class="calibre28">Attaching Events to Objects in a Script</h2>
+
+<p class="author1">The<a contenteditable="false" data-primary="events (JavaScript)" data-secondary="attaching to objects in scripts" data-type="indexterm" id="idm45694686894968" class="calibre6"/> preceding code is the equivalent of providing an ID to the <code class="calibre15">&lt;img&gt;</code> tag and then attaching the actions to the tag’s mouse events, like in <a data-type="xref" href="#non-inline_javascript" class="calibre6">Example 21-7</a>.</p>
+
+<div data-type="example" id="non-inline_javascript" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 21-7. </span>Noninline JavaScript</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE html&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Non-inline JavaScript<code class="nt">&lt;/title&gt;</code>
+    <code class="nt">&lt;script </code><code class="na">src=</code><code class="s">'OSC.js'</code><code class="nt">&gt;&lt;/script&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    <code class="nt">&lt;img</code> <code class="na">id=</code><code class="s">'object'</code> <code class="na">src=</code><code class="s">'apple.png'</code><code class="nt">&gt;</code>
+
+    <code class="nt">&lt;script&gt;</code>
+      <code class="n">O</code><code class="p">(</code><code class="s">'object'</code><code class="p">).</code><code class="n">onmouseover</code> <code class="o">=</code> <code class="k">function</code><code class="p">()</code> <code class="p">{</code> <code class="k">this</code><code class="p">.</code><code class="n">src</code> <code class="o">=</code> <code class="s">'orange.png'</code> <code class="p">}</code>
+      <code class="n">O</code><code class="p">(</code><code class="s">'object'</code><code class="p">).</code><code class="n">onmouseout</code>  <code class="o">=</code> <code class="k">function</code><code class="p">()</code> <code class="p">{</code> <code class="k">this</code><code class="p">.</code><code class="n">src</code> <code class="o">=</code> <code class="s">'apple.png'</code>  <code class="p">}</code>
+    <code class="nt">&lt;/script&gt;</code>
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code></pre>
+</div>
+
+<p class="author1">In the HTML section, this example gives the <code class="calibre15">&lt;img&gt;</code> element an ID of <code class="calibre15">object</code>, and it then proceeds to manipulate it separately in the JavaScript section by attaching anonymous functions to each event.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Attaching to Other Events" class="calibre4"><div class="preface" id="attaching_to_other_events">
+<h2 class="calibre28">Attaching to Other Events</h2>
+
+<p class="author1">Whether<a contenteditable="false" data-primary="events (JavaScript)" data-secondary="attaching to other events" data-type="indexterm" id="idm45694686812152" class="calibre6"/> you’re using inline or separate JavaScript, there are several events to which you can attach actions, providing a wealth of additional features you can offer your users. <a data-type="xref" href="#events_and_when_they_are_triggered" class="calibre6">Table 21-2</a> lists these events and details when they will be triggered.</p>
+
+<table id="events_and_when_they_are_triggered" class="calibre33">
+	<caption class="calibre34"><span class="keep-together">Table 21-2. </span>Events and when they are triggered</caption>
+	<thead class="calibre35">
+		<tr class="calibre36">
+			<th class="calibre37">Event</th>
+			<th class="calibre37">Occurs</th>
+		</tr>
+	</thead>
+	<tbody class="calibre38">
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">onabort</code></td>
+			<td class="calibre39">When an image’s loading is stopped before completion</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">onblur</code></td>
+			<td class="calibre39">When an element loses focus<sup class="calibre120"><a data-type="noteref" id="idm45694686802856-marker" href="ch21.xhtml#idm45694686802856" class="calibre121">a</a></sup></td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">onchange</code></td>
+			<td class="calibre39">When any part of a form has changed</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">onclick</code></td>
+			<td class="calibre39">When an object is clicked</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">ondblclick</code></td>
+			<td class="calibre39">When an object is double-clicked</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">onerror</code></td>
+			<td class="calibre39">When a JavaScript error is encountered</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">onfocus</code></td>
+			<td class="calibre39">When an element gets focus</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">onkeydown</code></td>
+			<td class="calibre39">When a key is being pressed (including Shift, Alt, Ctrl, and Esc)</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">onkeypress</code></td>
+			<td class="calibre39">When a key is being pressed (not including Shift, Alt, Ctrl, and Esc)</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">onkeyup</code></td>
+			<td class="calibre39">When a key is released</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">onload</code></td>
+			<td class="calibre39">When an object has loaded</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">onmousedown</code></td>
+			<td class="calibre39">When the mouse button is pressed over an element</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">onmousemove</code></td>
+			<td class="calibre39">When the mouse is moved over an element</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">onmouseout</code></td>
+			<td class="calibre39">When the mouse leaves an element</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">onmouseover</code></td>
+			<td class="calibre39">When the mouse passes over an element from outside it</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">onmouseup</code></td>
+			<td class="calibre39">When the mouse button is released</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">onreset</code></td>
+			<td class="calibre39">When a form is reset</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">onresize</code></td>
+			<td class="calibre39">When the browser is resized</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">onscroll</code></td>
+			<td class="calibre39">When the document is scrolled</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">onselect</code></td>
+			<td class="calibre39">When some text is selected</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">onsubmit</code></td>
+			<td class="calibre39">When a form is submitted</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">onunload</code></td>
+			<td class="calibre39">When a document is removed</td>
+		</tr>
+	</tbody>
+<tbody class="calibre38"><tr class="calibre36"><td colspan="2" class="calibre39"><p data-type="footnote" id="idm45694686802856" class="calibre122"><sup class="calibre123"><a href="ch21.xhtml#idm45694686802856-marker" class="calibre124">a</a></sup> An element that has <em class="hyperlink">focus</em> is one that has been clicked or otherwise entered into, such as an input field.</p></td></tr></tbody></table>
+
+<div data-type="warning" epub:type="warning" class="calibre21"><h6 class="calibre22">Warning</h6>
+<p class="author1">Make sure you attach events to objects that make sense. For example, an object that is not a form will not respond to the <code class="calibre15">onsubmit</code> event.<a contenteditable="false" data-primary="" data-startref="PRjava20" data-type="indexterm" id="idm45694686770952" class="calibre6"/></p>
+</div>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Adding New Elements" class="calibre4"><div class="preface" id="adding_new_elements">
+<h1 class="calibre11">Adding New Elements</h1>
+
+<p class="author1">With<a contenteditable="false" data-primary="DOM (Document Object Model)" data-secondary="adding elements to" data-type="indexterm" id="idm45694686767288" class="calibre6"/> JavaScript, you are not limited to manipulating the elements and objects supplied to a document in its HTML. In fact, you can create objects at will by inserting them into the DOM.</p>
+
+<p class="author1">For example, suppose you need a new <code class="calibre15">&lt;div&gt;</code> element. <a data-type="xref" href="#inserting_an_element_into_the_dom" class="calibre6">Example 21-8</a> shows one way you can add it to a web page.</p>
+
+<div data-type="example" id="inserting_an_element_into_the_dom" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 21-8. </span>Inserting an element into the DOM</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE html&gt;</code><code class="calibre15">
+</code><code class="nt">&lt;html</code><code class="nt">&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;head</code><code class="nt">&gt;</code><code class="calibre15">
+    </code><code class="nt">&lt;title</code><code class="nt">&gt;</code><code class="calibre15">Adding Elements</code><code class="nt">&lt;/title&gt;</code><code class="calibre15">
+    </code><code class="nt">&lt;script </code><code class="na">src=</code><code class="s">'OSC.js'</code><code class="nt">&gt;</code><code class="nt">&lt;/script&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;/head&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;body</code><code class="nt">&gt;</code><code class="calibre15">
+    This is a document with only this text in it.</code><code class="nt">&lt;br</code><code class="nt">&gt;</code><code class="nt">&lt;br</code><code class="nt">&gt;</code><code class="calibre15">
+
+    </code><code class="nt">&lt;script</code><code class="nt">&gt;</code><code class="calibre15">
+      </code><code class="n">alert</code><code class="p">(</code><code class="s">'Click OK to add an element'</code><code class="p">)</code><code class="calibre15">
+
+      </code><code class="n">newdiv</code><code class="calibre15">    </code><code class="o">=</code><code class="calibre15"> </code><code class="nb">document</code><code class="p">.</code><code class="n">createElement</code><code class="p">(</code><code class="s">'div'</code><code class="p">)</code><code class="calibre15">
+      </code><code class="n">newdiv</code><code class="p">.</code><code class="n">id</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="s">'NewDiv'</code><code class="calibre15">
+      </code><code class="nb">document</code><code class="p">.</code><code class="n">body</code><code class="p">.</code><code class="n">append</code><code class="p">(</code><code class="n">newdiv</code><code class="p">)</code><code class="calibre15">
+
+      </code><code class="n">S</code><code class="p">(</code><code class="n">newdiv</code><code class="p">)</code><code class="p">.</code><code class="n">border</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="s">'solid 1px red'</code><code class="calibre15">
+      </code><code class="n">S</code><code class="p">(</code><code class="n">newdiv</code><code class="p">)</code><code class="p">.</code><code class="n">width</code><code class="calibre15">  </code><code class="o">=</code><code class="calibre15"> </code><code class="s">'100px'</code><code class="calibre15">
+      </code><code class="n">S</code><code class="p">(</code><code class="n">newdiv</code><code class="p">)</code><code class="p">.</code><code class="n">height</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="s">'100px'</code><code class="calibre15">
+      </code><code class="n">newdiv</code><code class="p">.</code><code class="n">innerHTML</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="s">"I'm a new object inserted in the DOM"</code><code class="calibre15">
+      
+      </code><strong class="calibre31"><code class="nx1">setTimeout</code><code class="p1">(</code><code class="k1">function</code><code class="p1">(</code><code class="p1">)</code></strong><code class="calibre15">
+      </code><strong class="calibre31"><code class="p1">{</code></strong><code class="calibre15">
+        </code><code class="n">alert</code><code class="p">(</code><code class="s">'Click OK to remove the element'</code><code class="p">)</code><code class="calibre15">
+      
+        </code><code class="n">newdiv</code><code class="p">.</code><code class="n">parentNode</code><code class="p">.</code><code class="n">removeChild</code><code class="p">(</code><code class="n">newdiv</code><code class="p">)</code><code class="calibre15">
+      </code><strong class="calibre31"><code class="p1">}</code><code class="p1">,</code><code class="calibre17"> </code><code class="mi1">1000</code><code class="p1">)</code></strong><code class="calibre15">
+    </code><code class="nt">&lt;/script&gt;</code><code class="calibre15">
+  </code><code class="nt">&lt;/body&gt;</code><code class="calibre15">
+</code><code class="nt">&lt;/html&gt;</code></pre>
+</div>
+
+<p class="author1"><a data-type="xref" href="#inserting_a_new_element_into_the_dom" class="calibre6">Figure 21-3</a> shows this code being used to add a new <code class="calibre15">&lt;div&gt;</code> element to a web document. First, the new element is created with <code class="calibre15">createElement</code>; then the <code class="calibre15">appendChild</code> function is called, and the element gets inserted into the DOM.</p>
+
+<figure class="calibre23"><div id="inserting_a_new_element_into_the_dom" class="figure"><img alt="Inserting a new element into the DOM" src="Images/pmj6_2103.png" class="calibre125"/>
+<h6 class="calibre24"><span class="keep-together">Figure 21-3. </span>Inserting a new element into the DOM</h6>
+</div></figure>
+
+<p class="author1">After this, various properties are assigned to the element, including some text for its inner HTML. And then, in order to make sure the new element is instantly revealed, a timeout is set to trigger one second in the future, delaying the running of the remaining code to give the DOM time to update and display, before popping up the alert about removing the element again. See <a data-type="xref" href="#using_settimeout" class="calibre6">“Using setTimeout”</a> for more on creating and using timeouts.</p>
+
+<p class="author1">This new element that’s created is exactly the same as if it had been included in the original HTML and has all the same properties and methods available.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">I sometimes use the technique of creating new elements when I want to create in-browser pop-up windows, because it doesn’t rely on there being a spare <code class="calibre15">&lt;div&gt;</code> element available in the DOM.</p>
+</div>
+
+<section data-type="sect2" data-pdf-bookmark="Removing Elements" class="calibre4"><div class="preface" id="removing_elements">
+<h2 class="calibre28">Removing Elements</h2>
+
+<p class="author1">You<a contenteditable="false" data-primary="DOM (Document Object Model)" data-secondary="removing elements from" data-type="indexterm" id="idm45694686586008" class="calibre6"/> can also remove elements from the DOM, including ones that you didn’t insert using JavaScript; it’s even easier than adding an element. It works like this, assuming the element to remove is in the object <code class="calibre15">element</code>:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">element</code><code class="p">.</code><code class="n">parentNode</code><code class="p">.</code><code class="n">removeChild</code><code class="p">(</code><code class="n">element</code><code class="p">)</code></pre>
+
+<p class="author1">This code accesses the element’s <code class="calibre15">parentNode</code> object so that it can remove the element from that node. Then it calls the <code class="calibre15">removeChild</code> method on that parent object, passing the object to be removed.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Alternatives to Adding and Removing Elements" class="calibre4"><div class="preface" id="alternatives_to_adding_and_removing_elem">
+<h2 class="calibre28">Alternatives to Adding and Removing Elements</h2>
+
+<p class="author1">Inserting<a contenteditable="false" data-primary="DOM (Document Object Model)" data-secondary="alternatives to adding/removing elements from" data-type="indexterm" id="idm45694686722680" class="calibre6"/> an element is intended for adding totally new objects into a web page. But if all you intend to do is hide and reveal objects according to an <code class="calibre15">onmouseover</code> or other event, don’t forget that there are a couple of CSS properties you can use for this purpose, without taking such drastic measures as creating and deleting DOM elements.</p>
+
+<p class="author1">For example, when you want to make an element invisible but leave it in place (and with all the elements surrounding it remaining in their positions), you can simply set the object’s <code class="calibre15">visibility</code> property to <code class="calibre15">hidden</code>, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">myobject</code><code class="p">.</code><code class="n">visibility</code> <code class="o">=</code> <code class="s">'hidden'</code></pre>
+
+<p class="author1">And to redisplay the object, you can use the following:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">myobject</code><code class="p">.</code><code class="n">visibility</code> <code class="o">=</code> <code class="s">'visible'</code></pre>
+
+<p class="author1">You can also collapse an element down to occupy zero width and height (with all the objects around it filling in the freed-up space), like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">myobject</code><code class="p">.</code><code class="n">display</code> <code class="o">=</code> <code class="s">'none'</code></pre>
+
+<p class="author1">To then restore the element to its original dimensions, you would use the following:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">myobject</code><code class="p">.</code><code class="n">display</code> <code class="o">=</code> <code class="s">'block'</code></pre>
+
+<p class="author1">And, of course, there’s always the <code class="calibre15">innerHTML</code> property, with which you can change the HTML applied to an element, like this, for example:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">mylement</code><code class="p">.</code><code class="n">innerHTML</code> <code class="o">=</code> <code class="s">'&lt;b&gt;Replacement HTML&lt;/b&gt;'</code></pre>
+
+<p class="author1">Or, to use the <code class="calibre15">O</code> function I outlined earlier:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">O</code><code class="p">(</code><code class="s">'someid'</code><code class="p">).</code><code class="n">innerHTML</code> <code class="o">=</code> <code class="s">'New contents'</code></pre>
+
+<p class="author1">Or you can make an element seem to disappear, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">O</code><code class="p">(</code><code class="s">'someid'</code><code class="p">).</code><code class="n">innerHTML</code> <code class="o">=</code> <code class="s">''</code></pre>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">Don’t forget the other useful CSS properties you can access from JavaScript, such as <code class="calibre15">opacity</code> for setting the visibility of an object to somewhere between visible and invisible, or <code class="calibre15">width</code> and <code class="calibre15">height</code> for resizing an object. And, of course, using the <code class="calibre15">position</code> property with values of <code class="calibre15">absolute</code>, <code class="calibre15">static</code>, <code class="calibre15">fixed</code>, <code class="calibre15">sticky</code>, or <code class="calibre15">relative</code>, you can even locate an object anywhere in (or outside) the browser window that you like.</p>
+</div>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Using Interrupts" class="calibre4"><div class="preface" id="using_interrupts">
+<h1 class="calibre11">Using Interrupts</h1>
+
+<p class="author1">JavaScript<a contenteditable="false" data-primary="interrupts" data-secondary="purpose of" data-type="indexterm" id="idm45694686671704" class="calibre6"/> provides access to <em class="hyperlink">interrupts</em>, a method by which you can ask the browser to call your code after a set period of time, or even to keep calling it at specified intervals. This gives you a means of handling background tasks such as asynchronous communications, or even things like animating web elements.</p>
+
+<p class="author1">There<a contenteditable="false" data-primary="clearInterval function (JavaScript)" data-type="indexterm" id="idm45694686668104" class="calibre6"/> are two types of interrupt: <code class="calibre15">setTimeout</code> and <code class="calibre15">setInterval</code>, which have accompanying <code class="calibre15">clearTimeout</code> and <code class="calibre15">clearInterval</code> functions for turning them off again.</p>
+
+<section data-type="sect2" data-pdf-bookmark="Using setTimeout" class="calibre4"><div class="preface" id="using_settimeout">
+<h2 class="calibre28">Using setTimeout</h2>
+
+<p class="author1">When<a contenteditable="false" data-primary="interrupts" data-secondary="using setTimeout" data-type="indexterm" id="idm45694686655448" class="calibre6"/> you call <code class="calibre15">setTimeout</code>, you pass it some JavaScript code or the name of a function, and a value in milliseconds representing how long to wait before the code should be executed, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">setTimeout</code><code class="p">(</code><code class="n">dothis</code><code class="p">,</code> <code class="mi">5000</code><code class="p">)</code></pre>
+
+<p class="author1">Your <code class="calibre15">dothis</code> function might look like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">function</code> <code class="n">dothis</code><code class="p">()</code>
+<code class="p">{</code>
+  <code class="n">alert</code><code class="p">(</code><code class="s">'This is your wakeup alert!'</code><code class="p">);</code>
+<code class="p">}</code></pre>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">In case you’re wondering, you cannot simply specify <code class="calibre15">alert()</code> (with empty parentheses) as a function to be called by <code class="calibre15">setTimeout</code>, because the function would be executed immediately. Only when you provide a function name without parentheses (for example, <code class="calibre15">alert</code>) can you safely pass the function name so that its code will be executed only when the timeout occurs.</p>
+</div>
+
+<section data-type="sect3" data-pdf-bookmark="Passing a string" class="calibre4"><div class="preface" id="passing_a_string">
+<h3 class="calibre43">Passing a string</h3>
+
+<p class="author1">When you need to provide an argument to a function, you can also pass a string value to the <code class="calibre15">setTimeout</code> function, which will not be executed until the correct time. For example:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">setTimeout</code><code class="p">(</code><code class="s">"alert('Hello!')"</code><code class="p">,</code> <code class="mi">5000</code><code class="p">)</code></pre>
+
+<p class="author1">In fact, you can provide as many lines of JavaScript code as you like if you place a semicolon after each statement, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">setTimeout</code><code class="p">(</code><code class="s">"document.write('Starting'); alert('Hello!')"</code><code class="p">,</code> <code class="mi">5000</code><code class="p">)</code></pre>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Repeating timeouts" class="calibre4"><div class="preface" id="repeating_timeouts">
+<h3 class="calibre43">Repeating timeouts</h3>
+
+<p class="author1">One technique some programmers use to provide repeating interrupts is to call the <code class="calibre15">setTimeout</code> function from the code called by it, as in the following example, which will initiate a never-ending loop of alert windows:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">setTimeout</code><code class="p">(</code><code class="n">dothis</code><code class="p">,</code> <code class="mi">5000</code><code class="p">)</code>
+
+<code class="k">function</code> <code class="n">dothis</code><code class="p">()</code>
+<code class="p">{</code>
+  <code class="n">setTimeout</code><code class="p">(</code><code class="n">dothis</code><code class="p">,</code> <code class="mi">5000</code><code class="p">)</code>
+  <code class="n">alert</code><code class="p">(</code><code class="s">'I am annoying!'</code><code class="p">)</code>
+<code class="p">}</code></pre>
+
+<p class="author1">Now the alert will pop up every five seconds. I don’t recommend you run this actual example (even as a test), or you’ll probably have to close your browser to stop it!</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">Another option is to use the <code class="calibre15">setInterval</code> function, as described shortly. However, chaining <code class="calibre15">setTimeout</code> has the advantage of only issuing the <code class="calibre15">setTimeout</code> function call after all the preceding code has finished executing, while <code class="calibre15">setInterval</code> will interrupt code to run, which sometimes may not give the result you intend.</p>
+</div>
+</div></section>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Canceling a Timeout" class="calibre4"><div class="preface" id="cancelling_a_timeout">
+<h2 class="calibre28">Canceling a Timeout</h2>
+
+<p class="author1">Once<a contenteditable="false" data-primary="interrupts" data-secondary="canceling timeouts" data-type="indexterm" id="idm45694686187160" class="calibre6"/> a timeout has been set up, you can cancel it if you previously saved the value returned from the initial call to <code class="calibre15">setTimeout</code>, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">handle</code> <code class="o">=</code> <code class="n">setTimeout</code><code class="p">(</code><code class="n">dothis</code><code class="p">,</code> <code class="mi">5000</code><code class="p">)</code></pre>
+
+<p class="author1">Armed with the value in <code class="calibre15">handle</code>  (a term used to imply you have a <em class="hyperlink">handle</em> with which to control the function), you can now cancel the interrupt at any point up until its due time, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">clearTimeout</code><code class="p">(</code><code class="n">handle</code><code class="p">)</code></pre>
+
+<p class="author1">When you do this, the interrupt is completely forgotten, and the code assigned to it will not get executed.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Using setInterval" class="calibre4"><div class="preface" id="using_setinterval">
+<h2 class="calibre28">Using setInterval</h2>
+
+<p class="author1">An<a contenteditable="false" data-primary="interrupts" data-secondary="using setInterval" data-type="indexterm" id="idm45694686134888" class="calibre6"/> easier way to set up regular interrupts is to use the <code class="calibre15">setInterval</code> function. It works in the same way as <code class="calibre15">setTimeout</code>, except that having popped up after the interval you specify in milliseconds, it will do so again after that interval again passes, and so on forever, unless you cancel it.</p>
+
+<p class="author1"><a data-type="xref" href="#clock_created_using_interrupts" class="calibre6">Example 21-9</a> uses this function to display a simple clock in the browser, as shown in <a data-type="xref" href="#maintaining_the_correct_time_with_interr" class="calibre6">Figure 21-4</a>.</p>
+
+<div data-type="example" id="clock_created_using_interrupts" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 21-9. </span>A clock created using interrupts</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE html&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Using setInterval<code class="nt">&lt;/title&gt;</code>
+    <code class="nt">&lt;script </code><code class="na">src=</code><code class="s">'OSC.js'</code><code class="nt">&gt;&lt;/script&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    The time is: <code class="nt">&lt;span</code> <code class="na">id=</code><code class="s">'time'</code><code class="nt">&gt;</code>00:00:00<code class="nt">&lt;/span&gt;&lt;br&gt;</code>
+
+    <code class="nt">&lt;script&gt;</code>
+      <code class="n">setInterval</code><code class="p">(</code><code class="s">"showtime(O('time'))"</code><code class="p">,</code> <code class="mi">1000</code><code class="p">)</code>
+
+      <code class="k">function</code> <code class="n">showtime</code><code class="p">(</code><code class="n">object</code><code class="p">)</code>
+      <code class="p">{</code>
+        <code class="k">var</code> <code class="n">date</code> <code class="o">=</code> <code class="k">new</code> <code class="nb">Date</code><code class="p">()</code>
+        <code class="n">object</code><code class="p">.</code><code class="n">innerHTML</code> <code class="o">=</code> <code class="n">date</code><code class="p">.</code><code class="n">toTimeString</code><code class="p">().</code><code class="n">substr</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code><code class="mi">8</code><code class="p">)</code>
+      <code class="p">}</code>
+    <code class="nt">&lt;/script&gt;</code>
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code></pre>
+</div>
+
+<figure class="calibre23"><div id="maintaining_the_correct_time_with_interr" class="figure"><img alt="Maintaining the correct time with interrupts" src="Images/pmj6_2104.png" class="calibre126"/>
+<h6 class="calibre24"><span class="keep-together">Figure 21-4. </span>Maintaining the correct time with interrupts</h6>
+</div></figure>
+
+<p class="author1">Every time <code class="calibre15">ShowTime</code> is called, it sets the object <code class="calibre15">date</code> to the current date and time with a call to <code class="calibre15">Date</code>:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">var</code> <code class="n">date</code> <code class="o">=</code> <code class="k">new</code> <code class="nb">Date</code><code class="p">()</code></pre>
+
+<p class="author1">Then the <code class="calibre15">innerHTML</code> property of the object passed to <code class="calibre15">showtime</code> (namely, <code class="calibre15">object</code>) is set to the current time in hours, minutes, and seconds, as determined by a call to the function <code class="calibre15">toTimeString</code>. This returns a string such as <code class="calibre15">09:57:17 UTC+0530</code>, which is then truncated to just the first eight characters with a call to the <code class="calibre15">substr</code> function:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">object</code><code class="p">.</code><code class="n">innerHTML</code> <code class="o">=</code> <code class="n">date</code><code class="p">.</code><code class="n">toTimeString</code><code class="p">().</code><code class="n">substr</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code><code class="mi">8</code><code class="p">)</code></pre>
+
+<section data-type="sect3" data-pdf-bookmark="Using the function" class="calibre4"><div class="preface" id="using_the_function">
+<h3 class="calibre43">Using the function</h3>
+
+<p class="author1">To use this function, you first have to create an object whose <code class="calibre15">innerHTML</code> property will be used for displaying the time, like with this HTML:</p>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+The time is: <code class="nt">&lt;span</code> <code class="na">id=</code><code class="s">'time'</code><code class="nt">&gt;</code>00:00:00<code class="nt">&lt;/span&gt;</code></pre>
+
+<p class="author1">The value 00:00:00 is simply there to show where and how the time will display. It is not necessary as it will be replaced anyway. Then, from a <code class="calibre15">&lt;script&gt;</code> section of code, call the <code class="calibre15">setInterval</code> function like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">setInterval</code><code class="p">(</code><code class="s">"showtime(O('time'))"</code><code class="p">,</code> <code class="mi">1000</code><code class="p">)</code></pre>
+
+<p class="author1">The script then passes a string to <code class="calibre15">setInterval</code> containing the following statement, which is set to execute once a second (every 1,000 milliseconds):</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">showtime</code><code class="p">(</code><code class="n">O</code><code class="p">(</code><code class="s">'time'</code><code class="p">))</code></pre>
+
+<p class="author1">In the rare situation where somebody has disabled JavaScript (which people sometimes do for security reasons), your JavaScript will not run, and the user will just see the original <code class="calibre15">00:00:00</code>.</p>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Canceling an interval" class="calibre4"><div class="preface" id="cancelling_an_interval">
+<h3 class="calibre43">Canceling an interval</h3>
+
+<p class="author1">To<a contenteditable="false" data-primary="interrupts" data-secondary="canceling intervals" data-type="indexterm" id="idm45694685946856" class="calibre6"/> stop a repeating interval, when you first set up the interval with a call to the function <code class="calibre15">setInterval</code>, you must make a note of the interval’s handle, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">handle</code> <code class="o">=</code> <code class="n">setInterval</code><code class="p">(</code><code class="s">"showtime(O('time'))"</code><code class="p">,</code> <code class="mi">1000</code><code class="p">)</code></pre>
+
+<p class="author1">Now you can stop the clock at any time by issuing the following call:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">clearInterval</code><code class="p">(</code><code class="n">handle</code><code class="p">)</code></pre>
+
+<p class="author1">You can even set up a timer to stop the clock after a certain amount of time, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">setTimeout</code><code class="p">(</code><code class="s">"clearInterval(handle)"</code><code class="p">,</code> <code class="mi">10000</code><code class="p">)</code></pre>
+
+<p class="author1">This statement will issue an interrupt in 10 seconds that will clear the repeating <span class="keep-together">intervals</span>.</p>
+</div></section>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Using Interrupts for Animation" class="calibre4"><div class="preface" id="using_interrupts_for_animation">
+<h2 class="calibre28">Using Interrupts for Animation</h2>
+
+<p class="author1">By<a contenteditable="false" data-primary="interrupts" data-secondary="animation with" data-type="indexterm" id="Ianim20" class="calibre6"/><a contenteditable="false" data-primary="animation" data-secondary="using interrupts for" data-type="indexterm" id="Ainterr20" class="calibre6"/> combining a few CSS properties with a repeating interrupt, you can produce all manner of animations and effects.</p>
+
+<p class="author1">For example, the code in <a data-type="xref" href="#simple_animation" class="calibre6">Example 21-10</a> moves a square shape across the top of the browser window, all the time ballooning in size, as shown in <a data-type="xref" href="#this_object_slides_in_from_the_left_whil" class="calibre6">Figure 21-5</a>; when <code class="calibre15">LEFT</code> is reset to <code class="calibre15">0</code>, the animation restarts.</p>
+
+<div data-type="example" id="simple_animation" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 21-10. </span>A simple animation</h5>
+
+<pre data-code-language="html" data-programming-language="perl" class="calibre29">
+<code class="cp">&lt;!DOCTYPE html&gt;</code>
+<code class="nt">&lt;html&gt;</code>
+  <code class="nt">&lt;head&gt;</code>
+    <code class="nt">&lt;title&gt;</code>Simple Animation<code class="nt">&lt;/title&gt;</code>
+    <code class="nt">&lt;script </code><code class="na">src=</code><code class="s">'OSC.js'</code><code class="nt">&gt;&lt;/script&gt;</code>
+    <code class="nt">&lt;style&gt;</code>
+      <code class="nf">#box</code> <code class="p">{</code>
+        <code class="k">position</code>  <code class="o">:</code><code class="nb">absolute</code><code class="p">;</code>
+        <code class="k">background</code><code class="o">:</code><code class="nb">orange</code><code class="p">;</code>
+        <code class="k">border</code>    <code class="o">:</code><code class="mi">1px</code> <code class="nb">solid</code> <code class="nb">red</code><code class="p">;</code>
+      <code class="p">}</code>
+    <code class="nt">&lt;/style&gt;</code>
+  <code class="nt">&lt;/head&gt;</code>
+  <code class="nt">&lt;body&gt;</code>
+    <code class="nt">&lt;div</code> <code class="na">id=</code><code class="s">'box'</code><code class="nt">&gt;&lt;/div&gt;</code>
+
+    <code class="nt">&lt;script&gt;</code>
+      <code class="n">SIZE</code> <code class="o">=</code> <code class="n">LEFT</code> <code class="o">=</code> <code class="mi">0</code>
+
+      <code class="n">setInterval</code><code class="p">(</code><code class="n">animate</code><code class="p">,</code> <code class="mi">30</code><code class="p">)</code>
+
+      <code class="k">function</code> <code class="n">animate</code><code class="p">()</code>
+      <code class="p">{</code>
+        <code class="n">SIZE</code> <code class="o">+=</code> <code class="mi">10</code>
+        <code class="n">LEFT</code> <code class="o">+=</code> <code class="mi">3</code>
+
+        <code class="k">if</code> <code class="p">(</code><code class="n">SIZE</code> <code class="o">==</code> <code class="mi">200</code><code class="p">)</code> <code class="n">SIZE</code> <code class="o">=</code> <code class="mi">0</code>
+        <code class="k">if</code> <code class="p">(</code><code class="n">LEFT</code> <code class="o">==</code> <code class="mi">600</code><code class="p">)</code> <code class="n">LEFT</code> <code class="o">=</code> <code class="mi">0</code>
+
+        <code class="n">S</code><code class="p">(</code><code class="s">'box'</code><code class="p">).</code><code class="n">width</code>  <code class="o">=</code> <code class="n">SIZE</code> <code class="o">+</code> <code class="s">'px'</code>
+        <code class="n">S</code><code class="p">(</code><code class="s">'box'</code><code class="p">).</code><code class="n">height</code> <code class="o">=</code> <code class="n">SIZE</code> <code class="o">+</code> <code class="s">'px'</code>
+        <code class="n">S</code><code class="p">(</code><code class="s">'box'</code><code class="p">).</code><code class="n">left</code>   <code class="o">=</code> <code class="n">LEFT</code> <code class="o">+</code> <code class="s">'px'</code>
+      <code class="p">}</code>
+    <code class="nt">&lt;/script&gt;</code>
+  <code class="nt">&lt;/body&gt;</code>
+<code class="nt">&lt;/html&gt;</code></pre>
+</div>
+
+<figure class="calibre23"><div id="this_object_slides_in_from_the_left_whil" class="figure"><img alt="This object slides in from the left while changing size" src="Images/pmj6_2105.png" class="calibre127"/>
+<h6 class="calibre24"><span class="keep-together">Figure 21-5. </span>This object slides in from the left while changing size</h6>
+</div></figure>
+
+<p class="author1">In the <code class="calibre15">&lt;head&gt;</code> section of the document, the <code class="calibre15">box</code> object is set to a <code class="calibre15">background</code> color of <code class="calibre15">orange</code> with a <code class="calibre15">border</code> value of <code class="calibre15">1px solid red</code>, and its <code class="calibre15">position</code> property is set to <code class="calibre15">absolute</code> so that the animation code that follows can position it in the precise ways you want.</p>
+
+<p class="author1">Then, in the <code class="calibre15">animate</code> function, the global variables <code class="calibre15">SIZE</code> and <code class="calibre15">LEFT</code> are continuously updated and applied to the <code class="calibre15">width</code>, <code class="calibre15">height</code>, and <code class="calibre15">left</code> style attributes of the <code class="calibre15">box</code> object (with <code class="calibre15">'px'</code> added after each to specify that the values are in pixels), thus animating it at a frequency of once every 30 milliseconds. This results in an animation rate of 33.33 frames per second (1,000/30 milliseconds).<a contenteditable="false" data-primary="" data-startref="Ianim20" data-type="indexterm" id="idm45694685641096" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="Ainterr20" data-type="indexterm" id="idm45694685639720" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="JScss20" data-type="indexterm" id="idm45694685638344" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="CSSjava20" data-type="indexterm" id="idm45694685636968" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="DOMjava20" data-type="indexterm" id="idm45694685635592" class="calibre6"/></p>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Questions" class="calibre4"><div class="preface" id="questions-id00109">
+<h1 class="calibre11">Questions</h1>
+
+<ol class="calibre25">
+	<li class="calibre26">
+	<p class="author1">What are the <code class="calibre15">O</code>, <code class="calibre15">S</code>, and <code class="calibre15">C</code> functions provided to do?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Name two ways to modify a CSS attribute of an object.</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Which properties provide the width and height available in a browser window?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you make something happen when the mouse passes both over and out of an object?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Which JavaScript function creates new elements, and which appends them to the DOM?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you make an element (a) invisible and (b) collapse to zero dimensions?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Which function creates a single event at a future time?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Which function sets up repeating events at set intervals?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you release an element from its location in a web page to enable it to be moved around?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What delay between events should you set (in milliseconds) to achieve an animation rate of 50 frames per second?</p>
+	</li>
+</ol>
+
+<p class="author1">See <a data-type="xref" href="app01_split_020.xhtml#chapter_21_answers" class="calibre6">“Chapter 21 Answers”</a> in the <a data-type="xref" href="app01_split_000.xhtml#solutions_to_the_chapter_questions" class="calibre6">Appendix A</a> for the answers to these <span class="keep-together">questions</span>.</p>
+</div></section>
+</div></section></div></body></html>

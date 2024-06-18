@@ -1,0 +1,182 @@
+<html><head></head><body><div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 18. PHP on Disparate Platforms"><div class="chapter" id="php_on_disparate_platforms">
+<h1><span class="label">Chapter 18. </span>PHP on Disparate Platforms</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="Windows operating system" id="ix_windows_opsys"/><a contenteditable="false" data-type="indexterm" data-primary="operating systems" id="ix_opsys_ch18"/>There are many reasons to use PHP on a Windows system, but the most common is that you want to develop web applications on your Windows desktop. PHP development on Windows is just as doable these days as it is on a <a contenteditable="false" data-type="indexterm" data-primary="Unix-based operating systems" id="ix_unix_opsys"/>Unix platform. <a contenteditable="false" data-type="indexterm" data-primary="operating systems" data-secondary="supported by PHP" id="idm45922744135624"/><a contenteditable="false" data-type="indexterm" data-primary="PHP" data-secondary="operating systems supported by" id="idm45922744134216"/>PHP plays very well on Windows, and PHP’s supporting cast of server and add-on tools is just as Windows-friendly. Having a PHP system working on any of its supported platforms is simply a matter of preference. Setting up and developing with a PHP environment on Windows is very easy to do, as PHP is extremely cross-platform friendly, and installation and configuration are becoming simpler all the time. The relatively recent appearance on the market of Zend Server CE<a contenteditable="false" data-type="indexterm" data-primary="Zend Server CE" id="idm45922744132264"/> (Community Edition) for multiple platforms has been a wonderful help in establishing a common installation platform on all the major operating systems.</p>
+<section data-type="sect1" data-pdf-bookmark="Writing Portable Code for Windows and Unix"><div class="sect1" id="writing_portable_code_for_windows_and_u">
+<h1>Writing Portable Code for Windows and Unix</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="portable code for Windows and Unix" id="ix_portable_code_win"/><a contenteditable="false" data-type="indexterm" data-primary="PHP" data-secondary="portable code for Windows and Unix" id="ix_php_portable_code"/>One of the main reasons for running PHP on Windows is to develop locally before deploying in a production environment. As many production servers are Unix-based, it is important to consider writing your applications so that they can operate on any operating platform with minimal fuss.</p>
+<p>Potential problem areas include applications that rely on external libraries, use native file I/O and security features, access system devices, fork or spawn threads, communicate via sockets, use signals, spawn external executables, or generate platform-specific graphical user interfaces.</p>
+<p>The good news is that cross-platform development has been a major goal as PHP has evolved. For the most part, PHP scripts should be ported from Windows to Unix with few problems. However, there are instances where you can run into trouble when porting your scripts. For instance, some functions that were implemented very early in the life of PHP had to be mimicked for use under Windows. Other functions may be specific to the web server under which PHP is running.</p>
+<section data-type="sect2" data-pdf-bookmark="Determining the Platform"><div class="sect2" id="determining_the_platform">
+<h2>Determining the Platform</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="operating systems" data-secondary="determining platform" id="idm45922744122136"/>To design with portability in mind, you may want to first test for the platform on which the script is running. PHP defines the constant <a contenteditable="false" data-type="indexterm" data-primary="PHP_OS constant" id="idm45922744120072"/><code>PHP_OS</code>, which contains the name of the operating system on which the PHP parser is executing. Possible values for the <code>PHP_OS</code> constant include <code>"HP-UX"</code>, <code>"Darwin"</code> (macOS), <code>"Linux"</code>, <code>"SunOS"</code>, <code>"WIN32"</code>, and <code>"WINNT"</code>. You may also want to consider the <a contenteditable="false" data-type="indexterm" data-primary="php_uname function" id="idm45922744115272"/><code>php_uname()</code> built-in function; it returns even more operating system information.</p>
+<p>The following code shows how to test for a Windows platform:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="k">if</code> <code class="p">(</code><code class="k">PHP_OS</code> <code class="o">==</code> <code class="s1">'WIN32'</code> <code class="o">||</code> <code class="k">PHP_OS</code> <code class="o">==</code> <code class="s1">'WINNT'</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="s2">"You are on a Windows System"</code><code class="p">;</code>
+<code class="p">}</code>
+<code class="k">else</code> <code class="p">{</code>
+ <code class="c1">// some other platform</code>
+ <code class="k">echo</code> <code class="s2">"You are NOT on a Windows System"</code><code class="p">;</code>
+<code class="p">}</code></pre>
+<p>Here is an example of the output for the <code>php_uname()</code> function as executed on a Windows 7 i5 laptop:</p>
+<pre data-type="programlisting">Windows NT PALADIN-LAPTO 6.1 build 7601 (Windows 7 Home Premium Edition Service
+Pack 1) i586</pre>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Handling Paths Across Platforms"><div class="sect2" id="handling_paths_across_platforms">
+<h2>Handling Paths Across Platforms</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="filenames" data-secondary="pathname differences, handling" id="idm45922744072536"/><a contenteditable="false" data-type="indexterm" data-primary="pathname differences, handling" id="idm45922744071144"/><a contenteditable="false" data-type="indexterm" data-primary="operating systems" data-secondary="pathname differences, handling" id="idm45922744070024"/>PHP understands the use of backward or forward slashes on Windows platforms, and can even handle paths that use both. PHP also recognizes the forward slash when accessing Windows Universal Naming Convention (UNC) paths (i.e., <em>//machine_name/path/to/file</em>). For example, these two lines are equivalent:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fh</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s2">"c:/planning/schedule.txt"</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code>
+<code class="nv">$fh</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s2">"c:</code><code class="se">\\</code><code class="s2">planning</code><code class="se">\\</code><code class="s2">schedule.txt"</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code></pre>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Navigating the Server Environment"><div class="sect2" id="navigating_the_server_environment">
+<h2>Navigating the Server Environment</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="operating systems" data-secondary="navigating server environment" id="idm45922744034376"/>The constant superglobal array <a contenteditable="false" data-type="indexterm" data-primary="$_SERVER array" id="idm45922744032888"/><code>$_SERVER</code> provides server and execution environment information. Here is a partial listing of what it contains:</p>
+<pre data-type="programlisting">["PROCESSOR_ARCHITECTURE"] =&gt; string(3) "x86"
+["PROCESSOR_ARCHITEW6432"] =&gt; string(5) "AMD64"
+["PROCESSOR_IDENTIFIER"] =&gt; string(50) "Intel64 Family 6 Model 42 Stepping 7,
+GenuineIntel"
+["PROCESSOR_LEVEL"] =&gt; string(1) "6"
+["PROCESSOR_REVISION"] =&gt; string(4) "2a07"
+["ProgramData"] =&gt; string(14) "C:\ProgramData"
+["ProgramFiles"] =&gt; string(22) "C:\Program Files (x86)"
+["ProgramFiles(x86)"] =&gt; string(22) "C:\Program Files (x86)"
+["ProgramW6432"] =&gt; string(16) "C:\Program Files"
+["PSModulePath"] =&gt; string(51)
+ "C:\Windows\system32\WindowsPowerShell\v1.0\Modules\"
+["PUBLIC"] =&gt; string(15) "C:\Users\Public"
+["SystemDrive"] =&gt; string(2) "C:"
+["SystemRoot"] =&gt; string(10) "C:\Windows"</pre>
+<p>To see all of the information available within this global array, check out its <a href="http://bit.ly/WlqcjH">documentation</a>.</p>
+<p>Once you know the specific information you are looking for, you can request it directly like so:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="k">echo</code><code> </code><code class="s2">"</code><code class="s2">The windows Dir is: </code><code class="si">{</code><code class="nv">$_SERVER</code><code class="p">[</code><code class="s1">'WINDIR'</code><code class="p">]</code><code class="si">}</code><code class="s2">"</code><code class="p">;</code><code>
+</code><strong><code class="nx">The</code><code> </code><code class="nx">windows</code><code> </code><code class="nx">Dir</code><code> </code><code class="nx">is</code><code class="o">:</code><code> </code><code class="nx">C</code><code class="o">:</code><code class="nx">\Windows</code></strong></pre>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Sending Mail"><div class="sect2" id="sending_mail">
+<h2>Sending Mail</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="mail" data-secondary="sending" id="idm45922743978792"/><a contenteditable="false" data-type="indexterm" data-primary="email, sending" id="idm45922743977192"/><a contenteditable="false" data-type="indexterm" data-primary="mail" data-secondary="functions for" id="idm45922743976088"/><a contenteditable="false" data-type="indexterm" data-primary="operating systems" data-secondary="mail, sending" id="idm45922743974712"/>On Unix systems, you can configure the <code>mail()</code> function to use <a contenteditable="false" data-type="indexterm" data-primary="sendmail functions" id="idm45922743972792"/><em>sendmail</em> or <a contenteditable="false" data-type="indexterm" data-primary="Qmail" id="idm45922743957928"/><em>Qmail</em> to send messages. When running PHP under Windows, you can use sendmail by installing it and setting the <a contenteditable="false" data-type="indexterm" data-primary="php.ini file" data-secondary="sendmail_path option" id="idm45922743956248"/><a contenteditable="false" data-type="indexterm" data-primary="sendmail_path option, php.ini file" id="idm45922743954872"/><code>sendmail_path</code> in <em>php.ini</em> to point at the executable. It is likely more convenient, however, to simply point the Windows version of PHP to an SMTP server that will accept you as a known mail client:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="p">[</code><code class="nb">mail</code> <code class="nx">function</code><code class="p">]</code>
+<code class="nx">SMTP</code> <code class="o">=</code> <code class="nb">mail</code><code class="o">.</code><code class="nx">example</code><code class="o">.</code><code class="nx">com</code> <code class="p">;</code><code class="nx">URL</code> <code class="k">or</code> <code class="nx">IP</code> <code class="nx">number</code> <code class="nx">to</code> <code class="nx">known</code> <code class="nb">mail</code> <code class="nx">server</code>
+<code class="nx">sendmail_from</code> <code class="o">=</code> <code class="nx">test</code><code class="o">@</code><code class="nx">example</code><code class="o">.</code><code class="nx">com</code></pre>
+<p>For an even simpler email solution, you can use the comprehensive <a href="https://oreil.ly/PbUPO">PHPMailer library</a>, which not only simplifies sending email from Windows platforms but is completely cross-platform and works on Unix systems as well.</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$mail</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">PHPMailer</code><code class="p">(</code><code class="k">true</code><code class="p">);</code>
+
+<code class="k">try</code> <code class="p">{</code>
+ <code class="c1">//Server settings</code>
+ <code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">SMTPDebug</code> <code class="o">=</code> <code class="nx">SMTP</code><code class="o">::</code><code class="na">DEBUG_SERVER</code><code class="p">;</code>
+ <code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">isSMTP</code><code class="p">();</code>
+ <code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">Host</code> <code class="o">=</code> <code class="s1">'smtp1.example.com'</code><code class="p">;</code>
+ <code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">SMTPSecure</code> <code class="o">=</code> <code class="nx">PHPMailer</code><code class="o">::</code><code class="na">ENCRYPTION_STARTTLS</code><code class="p">;</code>
+ <code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">Port</code> <code class="o">=</code> <code class="mi">587</code><code class="p">;</code>
+
+ <code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">setFrom</code><code class="p">(</code><code class="s1">'from@example.com'</code><code class="p">,</code> <code class="s1">'Mailer'</code><code class="p">);</code>
+ <code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">addAddress</code><code class="p">(</code><code class="s1">'joe@example.net'</code><code class="p">);</code>
+
+ <code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">isHTML</code><code class="p">(</code><code class="k">false</code><code class="p">);</code>
+ <code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">Subject</code> <code class="o">=</code> <code class="s1">'Here is the subject'</code><code class="p">;</code>
+ <code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">Body</code> <code class="o">=</code> <code class="s1">'And here is the body.'</code><code class="p">;</code>
+
+ <code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">send</code><code class="p">();</code>
+ <code class="k">echo</code> <code class="s1">'Message has been sent'</code><code class="p">;</code>
+<code class="p">}</code> <code class="k">catch</code> <code class="p">(</code><code class="nx">Exception</code> <code class="nv">$e</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="s2">"Message could not be sent. Mailer Error: </code><code class="si">{</code><code class="nv">$mail</code><code class="o">-&gt;</code><code class="na">ErrorInfo</code><code class="si">}</code><code class="s2">"</code><code class="p">;</code>
+<code class="p">}</code></pre>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="End-of-Line Handling"><div class="sect2" id="end_of_line_handling">
+<h2>End-of-Line Handling</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="end-of-line handling" id="idm45922743765256"/><a contenteditable="false" data-type="indexterm" data-primary="operating systems" data-secondary="end-of-line handling" id="idm45922743764152"/>Windows text files have lines that end in <code>\r\n</code>, whereas Unix text files have lines that end in <code>\n</code>. PHP processes files in binary mode, so it does not automatically convert from Windows line terminators to their Unix equivalents.</p>
+<p>PHP on Windows sets the standard output, standard input, and standard error file handlers to binary mode and thus does not do any translations for you. This is important for handling the binary input often associated with <code>POST</code> messages from web servers.</p>
+<p>Your program’s output goes to standard output, and you will have to specifically place Windows line terminators in the output stream if you want them there. One way to handle this is to define an end-of-line (EOL) constant and output functions that use it:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="k">if</code> <code class="p">(</code><code class="k">PHP_OS</code> <code class="o">==</code> <code class="s2">"WIN32"</code> <code class="o">||</code> <code class="k">PHP_OS</code> <code class="o">==</code> <code class="s2">"WINNT"</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nb">define</code><code class="p">(</code><code class="s1">'EOL'</code><code class="p">,</code> <code class="s2">"</code><code class="se">\r\n</code><code class="s2">"</code><code class="p">);</code>
+<code class="p">}</code>
+<code class="k">else</code> <code class="k">if</code> <code class="p">(</code><code class="k">PHP_OS</code> <code class="o">==</code> <code class="s2">"Linux"</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nb">define</code><code class="p">(</code><code class="s1">'EOL'</code><code class="p">,</code> <code class="s2">"</code><code class="se">\n</code><code class="s2">"</code><code class="p">);</code>
+<code class="p">}</code>
+<code class="k">else</code> <code class="p">{</code>
+ <code class="nb">define</code><code class="p">(</code><code class="s1">'EOL'</code><code class="p">,</code> <code class="s2">"</code><code class="se">\n</code><code class="s2">"</code><code class="p">);</code>
+<code class="p">}</code>
+
+<code class="k">function</code> <code class="nf">ln</code><code class="p">(</code><code class="nv">$out</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="nv">$out</code> <code class="o">.</code> <code class="nx">EOL</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nx">ln</code><code class="p">(</code><code class="s2">"this line will have the server platform's EOL character"</code><code class="p">);</code></pre>
+<p>A simpler way of handling this is through the <a contenteditable="false" data-type="indexterm" data-primary="PHP_EOL constant" id="idm45922743757544"/><code>PHP_EOL</code> constant, which automatically determines the end-of-line string for the server’s system. (Note, however, that the server system and the desired EOL marker may not be the same in all cases.)</p>
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">ln</code><code class="p">(</code><code class="nv">$out</code><code class="p">)</code> <code class="p">{</code>
+ <code class="k">echo</code> <code class="nv">$out</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="p">}</code></pre>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="End-of-File Handling"><div class="sect2" id="end_of_file_handling">
+<h2>End-of-File Handling</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="files" data-secondary="end-of-file handling" id="idm45922743492760"/><a contenteditable="false" data-type="indexterm" data-primary="end-of-file handling" id="idm45922743445064"/><a contenteditable="false" data-type="indexterm" data-primary="operating systems" data-secondary="end-of-file handling" id="idm45922743443960"/>Windows text files end in a Control-Z (<code>\x1A</code>), whereas Unix stores file-length information separately from the file’s data. PHP recognizes the end-of-file (EOF) character of the platform on which it is running; thus, the <a contenteditable="false" data-type="indexterm" data-primary="feof function" id="idm45922743441848"/><code>feof()</code> function works for reading Windows text files.</p>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Using External Commands"><div class="sect2" id="using_external_commands">
+<h2>Using External Commands</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="operating systems" data-secondary="external commands, using" id="idm45922743438600"/>PHP uses the default <a contenteditable="false" data-type="indexterm" data-primary="shell commands" data-secondary="platform differences in" id="idm45922743436904"/>command shell of Windows for process manipulation. Only rudimentary Unix shell redirections and pipes are available under Windows (e.g., separate redirection of standard output and standard error is not possible), and the quoting rules are entirely different. The Windows shell does not <em>glob</em> (i.e., replace arguments containing wildcard markers with the list of files that match the wildcards). Whereas on Unix you can say <code>system("someprog php*.php")</code>, on Windows you must build the list of filenames yourself using <code>opendir()</code> and <code>readdir()</code>.</p>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="Accessing Platform-Specific Extensions"><div class="sect2" id="accessing_platform_specific_extensions">
+<h2>Accessing Platform-Specific Extensions</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="extensions (libraries)" data-secondary="platform-specific" id="idm45922743480648"/><a contenteditable="false" data-type="indexterm" data-primary="operating systems" data-secondary="extensions common to" id="idm45922743479272"/>There are currently well over 80 extensions for PHP covering a wide range of services and functionality. Only about half of these are available for both Windows and Unix platforms. Only a handful of extensions, such as the COM, .NET, and IIS extensions, are specific to Windows. If an extension you use in your scripts is not currently available under Windows, you need to either port that extension or convert your scripts to use an extension that is available under Windows.</p>
+<p>In some cases, some functions are not available under Windows even though the module as a whole is available.</p>
+<p>Windows PHP does not support signal handling, forking, or multithreaded scripts. A Unix PHP script that uses these features cannot be ported to Windows. Instead, you should rewrite the script to not depend on those features.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_php_portable_code" id="idm45922743476072"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_portable_code_win" id="idm45922743474696"/></p>
+</div></section>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="Interfacing with COM"><div class="sect1" id="interfacing_with_com">
+<h1>Interfacing with COM</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="RPC (remote procedure call)" id="ix_rpc_com"/><a contenteditable="false" data-type="indexterm" data-primary="COM, interfacing with" id="ix_com_interfacing"/><a contenteditable="false" data-type="indexterm" data-primary="operating systems" data-secondary="COM, interfacing with" id="ix_opsys_com_interface"/>COM allows you to control other Windows applications. You can send file data to Excel, have it draw a graph, and export the graph as a GIF image. You could also use Word to format the information you receive from a form and then print an invoice as a record. After a brief introduction to COM terminology, this section shows you how to interact with both Word and Excel.</p>
+<section data-type="sect2" data-pdf-bookmark="Background"><div class="sect2" id="background">
+<h2>Background</h2>
+<p>COM is a remote procedure call (RPC) mechanism with a few object-oriented features. It provides a way for the calling program (the <em>controller</em>) to talk to another program (the COM server, or <em>object</em>), regardless of where it resides. If the underlying code is local to the same machine, the technology is COM; if it’s remote, it’s Distributed COM (DCOM). If the underlying code is a dynamic link library (DLL), and the code is loaded into the same process space, the COM server is referred to as an in-process, or <em>inproc</em>, server. If the code is a complete application that runs in its own process space, it’s known as an out-of-process server, or <em>local server application</em>.</p>
+<p><a contenteditable="false" data-type="indexterm" data-primary="Object Linking and Embedding (OLE)" id="idm45922743688072"/><a contenteditable="false" data-type="indexterm" data-primary="OLE (Object Linking and Embedding)" id="idm45922743687000"/>Object Linking and Embedding (OLE) is the overall marketing term for Microsoft’s early technology that allowed one object to embed another object. For instance, you could embed an Excel spreadsheet in a Word document. Developed during the days of Windows 3.1, OLE 1.0 was limited because it used a technology known as <a contenteditable="false" data-type="indexterm" data-primary="DDE (Dynamic Data Exchange)" id="idm45922743685464"/><a contenteditable="false" data-type="indexterm" data-primary="Dynamic Data Exchange (DDE)" id="idm45922743684392"/>Dynamic Data Exchange (DDE) to communicate between programs. DDE wasn’t very powerful, and if you wanted to edit an Excel spreadsheet embedded in a Word file, Excel had to be open and running.</p>
+<p>OLE 2.0 replaced DDE with COM as the underlying communication method. Using OLE 2.0, you can now paste an Excel spreadsheet right into a Word document and edit the Excel data inline. Using OLE 2.0, the controller can pass complex messages to the COM server. For our examples, the controller will be our PHP script, and the COM server will be one of the typical MS Office applications. In the following sections, we will provide some tools for approaching this type of integration.</p>
+<p>To whet your appetite and show you how powerful COM can be, <a data-type="xref" href="#example_oneeight_onedot_creating_a_word">Example 18-1</a> shows how you would start Word and add “Hello World” to the initially empty document.</p>
+<div data-type="example" id="example_oneeight_onedot_creating_a_word">
+<h5><span class="label">Example 18-1. </span>Creating a Word file in PHP (word_com_sample.php)</h5>
+<pre data-type="programlisting" data-code-language="php"><code class="c1">// starting word</code>
+<code class="nv">$word</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">COM</code><code class="p">(</code><code class="s2">"word.application"</code><code class="p">)</code> <code class="k">or</code> <code class="k">die</code><code class="p">(</code><code class="s2">"Unable to start Word app"</code><code class="p">);</code>
+<code class="k">echo</code> <code class="s2">"Found and Loaded Word, version </code><code class="si">{</code><code class="nv">$word</code><code class="o">-&gt;</code><code class="na">Version</code><code class="si">}</code><code class="se">\n</code><code class="s2">"</code><code class="p">;</code>
+
+<code class="c1">//open an empty document</code>
+<code class="nv">$word</code><code class="o">-&gt;</code><code class="na">Documents</code><code class="o">-&gt;</code><code class="na">add</code><code class="p">();</code>
+
+<code class="c1">//do some weird stuff</code>
+<code class="nv">$word</code><code class="o">-&gt;</code><code class="na">Selection</code><code class="o">-&gt;</code><code class="na">typeText</code><code class="p">(</code><code class="s2">"Hello World"</code><code class="p">);</code>
+<code class="nv">$word</code><code class="o">-&gt;</code><code class="na">Documents</code><code class="p">[</code><code class="mi">1</code><code class="p">]</code><code class="o">-&gt;</code><code class="na">saveAs</code><code class="p">(</code><code class="s2">"c:/php_com_test.doc"</code><code class="p">);</code>
+
+<code class="c1">//closing word</code>
+<code class="nv">$word</code><code class="o">-&gt;</code><code class="na">quit</code><code class="p">();</code>
+
+<code class="c1">//free the object</code>
+<code class="nv">$word</code> <code class="o">=</code> <code class="k">null</code><code class="p">;</code>
+
+<code class="k">echo</code> <code class="s2">"all done!"</code><code class="p">;</code></pre>
+</div>
+<p>This code file will have to be executed from the command line in order to work correctly, as shown in <a data-type="xref" href="#calling_the_word_sample_in_the_command">Figure 18-1</a>. Once you see the output string of <code>all done!</code>, you can look for the file in the Save As folder and open it with Word to see what it looks like.</p>
+<figure><div id="calling_the_word_sample_in_the_command" class="figure">
+<img src="Images/php4_1801.png" alt="Calling the Word sample in the command window" width="677" height="174"/>
+<h6><span class="label">Figure 18-1. </span>Calling the Word sample in the command window</h6>
+</div></figure>
+<p>The actual Word file should look something like <a data-type="xref" href="#the_word_file_as_created_by_php">Figure 18-2</a>.</p>
+<figure><div id="the_word_file_as_created_by_php" class="figure">
+<img src="Images/php4_1802.png" alt="The Word file as created by PHP" width="616" height="340"/>
+<h6><span class="label">Figure 18-2. </span>The Word file as created by PHP</h6>
+</div></figure>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="PHP Functions"><div class="sect2" id="php_functions">
+<h2>PHP Functions</h2>
+<p>PHP provides an interface into COM through a small set of function calls. Most of these are low-level functions that require detailed knowledge of COM that is beyond the scope of this chapter. An object of the <code>COM</code> class represents a connection to a COM server:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$word</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">COM</code><code class="p">(</code><code class="s2">"word.application"</code><code class="p">)</code> <code class="k">or</code> <code class="k">die</code><code class="p">(</code><code class="s2">"Unable to start Word app"</code><code class="p">);</code></pre>
+<p>For most OLE automation, the most difficult task is converting a Visual Basic method call to something similar in PHP. For instance, this is VBScript to insert text into a Word document:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nx">Selection</code><code class="o">.</code><code class="nx">TypeText</code> <code class="nx">Text</code> <code class="o">:=</code> <code class="s2">"This is a test"</code></pre>
+<p>The same line in PHP is:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$word</code><code class="o">-&gt;</code><code class="na">Selection</code><code class="o">-&gt;</code><code class="na">typetext</code><code class="p">(</code><code class="s2">"This is a test"</code><code class="p">);</code></pre>
+</div></section>
+<section data-type="sect2" data-pdf-bookmark="API Specifications"><div class="sect2" id="api_specifications">
+<h2>API Specifications</h2>
+<p><a contenteditable="false" data-type="indexterm" data-primary="operating systems" data-secondary="API specifications" id="idm45922743417272"/>To determine object hierarchy and parameters for a product such as Word, you might visit the Microsoft developer site and search for the specification for the Word object that interests you. Another alternative is to use both Microsoft’s online VB scripting help and Word’s supported macro language. Using these together will help you understand the order of parameters, as well as the desired values for a given task.<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_opsys_ch18" id="idm45922743391400"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_opsys_com_interface" id="idm45922743390024"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_windows_opsys" id="idm45922743400888"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_unix_opsys" id="idm45922743399512"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_com_interfacing" id="idm45922743398136"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_rpc_com" id="idm45922743396760"/></p>
+</div></section>
+</div></section>
+</div></section></div>
+
+
+
+  </body></html>

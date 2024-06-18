@@ -1,0 +1,1699 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xml:lang="en"
+      lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<title>PHP Cookbook</title>
+<link rel="stylesheet" type="text/css" href="override_v1.css"/>
+<link rel="stylesheet" type="text/css" href="epub.css"/>
+</head>
+<body>
+<div id="book-content">
+<div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 3. Functions"><div class="chapter" id="chapter_functions">
+<h1><span class="label">Chapter 3. </span>Functions</h1>
+
+
+<p>Every computer program in every language is built by tying various components of business logic together. Often, these components need to be somewhat reusable, encapsulating common functionality that needs to be referenced in multiple places throughout an application. The easiest way to make these components modular and reusable is to encapsulate their business logic into <em>functions</em>, specific constructs within the <a data-type="indexterm" data-primary="functions" id="idm45875191360800"></a>application that can be referenced elsewhere throughout an application.</p>
+
+<p><a data-type="xref" href="#imperative_code_without_functions">Example 3-1</a> illustrates how a <a data-type="indexterm" data-primary="imperative programming" id="idm45875191358912"></a>simple program might be written to capitalize the first character in a string. Coding without using functions is considered <em>imperative</em> programming, as you define exactly what the program needs to accomplish one command (or line of code) at a time.</p>
+<div id="imperative_code_without_functions" data-type="example">
+<h5><span class="label">Example 3-1. </span>Imperative (function-free) string capitalization</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$str</code> <code class="o">=</code> <code class="s2">"this is an example"</code><code class="p">;</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">&gt;=</code> <code class="mi">97</code> <code class="o">&amp;&amp;</code> <code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">&lt;=</code> <code class="mi">122</code><code class="p">)</code> <code class="p">{</code>
+    <code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">]</code> <code class="o">=</code> <code class="nb">chr</code><code class="p">(</code><code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">-</code> <code class="mi">32</code><code class="p">);</code>
+<code class="p">}</code>
+
+<code class="k">echo</code> <code class="nv">$str</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code> <code class="c1">// This is an example</code>
+
+<code class="nv">$str</code> <code class="o">=</code> <code class="s2">"and this is another"</code><code class="p">;</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">&gt;=</code> <code class="mi">97</code> <code class="o">&amp;&amp;</code> <code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">&lt;=</code> <code class="mi">122</code><code class="p">)</code> <code class="p">{</code>
+    <code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">]</code> <code class="o">=</code> <code class="nb">chr</code><code class="p">(</code><code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">-</code> <code class="mi">32</code><code class="p">);</code>
+<code class="p">}</code>
+
+<code class="k">echo</code> <code class="nv">$str</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code> <code class="c1">// And this is another</code>
+
+<code class="nv">$str</code> <code class="o">=</code> <code class="s2">"3 examples in total"</code><code class="p">;</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">&gt;=</code> <code class="mi">97</code> <code class="o">&amp;&amp;</code> <code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">&lt;=</code> <code class="mi">122</code><code class="p">)</code> <code class="p">{</code>
+    <code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">]</code> <code class="o">=</code> <code class="nb">chr</code><code class="p">(</code><code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">-</code> <code class="mi">32</code><code class="p">);</code>
+<code class="p">}</code>
+
+<code class="k">echo</code> <code class="nv">$str</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code> <code class="c1">// 3 examples in total</code></pre></div>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>The functions <code>ord()</code> and <code>chr()</code> are references <a data-type="indexterm" data-primary="ord() function" id="idm45875185584752"></a><a data-type="indexterm" data-primary="functions" data-secondary="ord()" id="idm45875187917440"></a><a data-type="indexterm" data-primary="chr() function" id="idm45875187916496"></a><a data-type="indexterm" data-primary="functions" data-secondary="chr()" id="idm45875187915824"></a>to native functions defined by PHP itself. The <a href="https://oreil.ly/kSI-4"><code>ord()</code></a> function returns the binary value of a character as an integer. Similarly, <a href="https://oreil.ly/0KUmf"><code>chr()</code></a> converts a binary value (represented as an integer) into its corresponding character.</p>
+</div>
+
+<p>When you write code without defining functions, your code ends up rather repetitive as you’re forced to copy and paste <a data-type="indexterm" data-primary="DRY (don't repeat yourself)" id="idm45875187912736"></a>identical blocks throughout the application. This violates one of the key principles of software development: <em>DRY</em>, or <em>don’t repeat 
+<span class="keep-together">yourself</span></em>.</p>
+
+<p>A common way to describe the <em>opposite</em> of this <a data-type="indexterm" data-primary="WET (write everything twice)" id="idm45875187909552"></a>principle is <em>WET</em>, or <em>write everything twice</em>. Writing the same block of code over again leads to two problems:</p>
+
+<ul>
+<li>
+<p>Your code becomes rather long and difficult to maintain.</p>
+</li>
+<li>
+<p>If the logic within the repeated code block needs to change, you have to update <em>several</em> parts of your program every time.</p>
+</li>
+</ul>
+
+<p>Rather than repeating logic imperatively, as in <a data-type="xref" href="#imperative_code_without_functions">Example 3-1</a>, you can define a function that wraps this logic and later invoke that function directly, as in <a data-type="xref" href="#procedural_code_with_functions">Example 3-2</a>. Defining functions is an evolution of imperative to procedural programming that augments the functions provided by the language itself with those defined by your <a data-type="indexterm" data-primary="strings" data-secondary="capitalization" id="idm45875187903168"></a>
+<span class="keep-together">application</span>.</p>
+<div id="procedural_code_with_functions" data-type="example">
+<h5><span class="label">Example 3-2. </span>Procedural string capitalization</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">capitalize_string</code><code class="p">(</code><code class="nv">$str</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="k">if</code> <code class="p">(</code><code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">&gt;=</code> <code class="mi">97</code> <code class="o">&amp;&amp;</code> <code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">&lt;=</code> <code class="mi">122</code><code class="p">)</code> <code class="p">{</code>
+        <code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">]</code> <code class="o">=</code> <code class="nb">chr</code><code class="p">(</code><code class="nb">ord</code><code class="p">(</code><code class="nv">$str</code><code class="p">[</code><code class="mi">0</code><code class="p">])</code> <code class="o">-</code> <code class="mi">32</code><code class="p">);</code>
+    <code class="p">}</code>
+
+    <code class="k">return</code> <code class="nv">$str</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nv">$str</code> <code class="o">=</code> <code class="s2">"this is an example"</code><code class="p">;</code>
+
+<code class="k">echo</code> <code class="nx">capitalize_string</code><code class="p">(</code><code class="nv">$str</code><code class="p">)</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code> <code class="c1">// This is an example</code>
+
+<code class="nv">$str</code> <code class="o">=</code> <code class="s2">"and this is another"</code><code class="p">;</code>
+
+<code class="k">echo</code> <code class="nx">capitalize_string</code><code class="p">(</code><code class="nv">$str</code><code class="p">)</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code> <code class="c1">// And this is another</code>
+
+<code class="nv">$str</code> <code class="o">=</code> <code class="s2">"3 examples in total"</code><code class="p">;</code>
+
+<code class="k">echo</code> <code class="nx">capitalize_string</code><code class="p">(</code><code class="nv">$str</code><code class="p">)</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code> <code class="c1">// 3 examples in total</code></pre></div>
+
+<p>User-defined functions are incredibly powerful and <a data-type="indexterm" data-primary="functions" data-secondary="user-defined" id="idm45875191750416"></a><a data-type="indexterm" data-primary="user-defined functions" id="idm45875191718560"></a><a data-type="indexterm" data-primary="capitalize_string() function" id="idm45875191717952"></a><a data-type="indexterm" data-primary="functions" data-secondary="capitalize_string()" id="idm45875191717312"></a>quite flexible. The <code>capitalize_string()</code> function in <a data-type="xref" href="#procedural_code_with_functions">Example 3-2</a> is relatively simple—it takes a single string parameter and returns a string. However, there is no indication in the function as defined that the <code>$str</code> parameter must be a string—you could just as easily pass a number or even an array as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$out</code> <code class="o">=</code> <code class="nx">capitalize_string</code><code class="p">(</code><code class="mi">25</code><code class="p">);</code> <code class="c1">// 25</code>
+
+<code class="nv">$out</code> <code class="o">=</code> <code class="nx">capitalize_string</code><code class="p">([</code><code class="s1">'a'</code><code class="p">,</code> <code class="s1">'b'</code><code class="p">]);</code> <code class="c1">// ['A', 'b']</code></pre>
+
+<p>Recall the discussion of PHP’s loose type system from <a data-type="xref" href="ch01.html#chapter_variables">Chapter 1</a>--by default, PHP will try to infer your intent when you pass a parameter into <code>capitalize_string()</code> and, in most cases, will return something useful. In the case of passing an integer, PHP will trigger a warning that you are trying to access elements of an array incorrectly, but it will still return an integer without crashing.</p>
+
+<p>More sophisticated programs can add explicit typing information to both the function parameters and its return to provide safety checks around this kind of usage. Other functions could return <em>multiple</em> values rather than a single item. Strong typing is illustrated explicitly in <a data-type="xref" href="#argument_and_return_typing">Recipe 3.4</a>.</p>
+
+<p>The recipes that follow cover a variety of ways functions can be used in PHP and begins scratching at the surface of building a full application.</p>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.1 Accessing Function Parameters"><div class="sect1" id="idm45875188134736">
+<h1>3.1 Accessing Function Parameters</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875188133344">
+<h2>Problem</h2>
+
+<p>You want to access the values passed <a data-type="indexterm" data-primary="functions" data-secondary="parameters" data-tertiary="accessing" id="fucmccs"></a><a data-type="indexterm" data-primary="parameters" data-secondary="functions" data-tertiary="accessing" id="pmtfccs"></a>into a function when it’s called elsewhere in a program.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875188128624">
+<h2>Solution</h2>
+
+<p>Use the variables defined in the function signature within the body of the function itself as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">multiply</code><code class="p">(</code><code class="nv">$first</code><code class="p">,</code> <code class="nv">$second</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="k">return</code> <code class="nv">$first</code> <code class="o">*</code> <code class="nv">$second</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nx">multiply</code><code class="p">(</code><code class="mi">5</code><code class="p">,</code> <code class="mi">2</code><code class="p">);</code> <code class="c1">// 10</code>
+
+<code class="nv">$one</code> <code class="o">=</code> <code class="mi">7</code><code class="p">;</code>
+<code class="nv">$two</code> <code class="o">=</code> <code class="mi">5</code><code class="p">;</code>
+
+<code class="nx">multiply</code><code class="p">(</code><code class="nv">$one</code><code class="p">,</code> <code class="nv">$two</code><code class="p">);</code> <code class="c1">// 35</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875188084928">
+<h2>Discussion</h2>
+
+<p>The variable names defined in the function signature are available only within the scope of the function itself and will contain values matching the data passed into the function when it’s called. Inside the curly braces that define the function, you can use these variables as if you’ve defined them yourself. Just know that any changes you make to those variables will <em>only</em> be available within the function and won’t impact anything elsewhere in the application by default.</p>
+
+<p><a data-type="xref" href="#local_function_scoping">Example 3-3</a> illustrates how a <a data-type="indexterm" data-primary="variables" data-secondary="names" id="idm45875188073312"></a>specific variable name can be used both within a function and outside a function while referring to two, completely independent values. Said another way, changing the value of <code>$number</code> within the function will only impact the value within the function, not within the <a data-type="indexterm" data-primary="local functions, scoping" id="idm45875188071824"></a><a data-type="indexterm" data-primary="functions" data-secondary="local, scoping" id="idm45875188071152"></a>parent application.</p>
+<div id="local_function_scoping" data-type="example">
+<h5><span class="label">Example 3-3. </span>Local function scoping</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">increment</code><code class="p">(</code><code class="nv">$number</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="nv">$number</code> <code class="o">+=</code> <code class="mi">1</code><code class="p">;</code>
+
+    <code class="k">return</code> <code class="nv">$number</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nv">$number</code> <code class="o">=</code> <code class="mi">6</code><code class="p">;</code>
+
+<code class="k">echo</code> <code class="nx">increment</code><code class="p">(</code><code class="nv">$number</code><code class="p">);</code> <code class="c1">// 7</code>
+<code class="k">echo</code> <code class="nv">$number</code><code class="p">;</code> <code class="c1">// 6</code></pre></div>
+
+<p>By default, PHP passes values into functions rather than passing a reference to the variable. In <a data-type="xref" href="#local_function_scoping">Example 3-3</a>, this means PHP passes the <em>value</em> <code>6</code> into a new <code>$number</code> variable within the <a data-type="indexterm" data-primary="passing" data-secondary="variables" id="idm45875184719472"></a><a data-type="indexterm" data-primary="variables" data-secondary="passing" id="idm45875184718464"></a>function, performs a calculation, and returns the result. The <code>$number</code> variable outside the function is entirely unaffected.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>PHP passes simple values (strings, integers, Booleans, arrays) by value by default. More complex objects, however, are <em>always</em> passed by reference. In the case of objects, the variable inside the function points back to the same object as the variable outside the function rather than to a copy of it.</p>
+</div>
+
+<p>In some cases, you might want to explicitly pass a variable by reference rather than just passing its value. In that case, you need to modify the function signature as this is a change to its very definition rather than something that can be modified when the function is called. <a data-type="xref" href="#variable_pass_by_reference">Example 3-4</a> illustrates <a data-type="indexterm" data-primary="increment() function" id="idm45875184714128"></a><a data-type="indexterm" data-primary="functions" data-secondary="increment()" id="idm45875184713424"></a><a data-type="indexterm" data-primary="variables" data-secondary="passing" data-tertiary="by reference" id="idm45875184712480"></a><a data-type="indexterm" data-primary="passing" data-secondary="variables" data-tertiary="by reference" id="idm45875184711264"></a>how the <code>increment()</code> function would change to pass <code>$number</code> by reference instead of by value.</p>
+<div id="variable_pass_by_reference" data-type="example">
+<h5><span class="label">Example 3-4. </span>Passing variables by reference</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">increment</code><code class="p">(</code><code class="o">&amp;</code><code class="nv">$number</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="nv">$number</code> <code class="o">+=</code> <code class="mi">1</code><code class="p">;</code>
+
+    <code class="k">return</code> <code class="nv">$number</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nv">$number</code> <code class="o">=</code> <code class="mi">6</code><code class="p">;</code>
+
+<code class="k">echo</code> <code class="nx">increment</code><code class="p">(</code><code class="nv">$number</code><code class="p">);</code> <code class="c1">// 7</code>
+<code class="k">echo</code> <code class="nv">$number</code><code class="p">;</code> <code class="c1">// 7</code></pre></div>
+
+<p>In reality, the variable name doesn’t need to match both inside and outside the function. I’m using <code>$number</code> in both cases here to illustrate the difference in scoping. If you stored an integer in <code>$a</code> and passed that variable instead as <code>increment($a)</code>, the result would be <a data-type="indexterm" data-primary="functions" data-secondary="parameters" data-tertiary="accessing" data-startref="fucmccs" id="idm45875183658864"></a><a data-type="indexterm" data-primary="parameters" data-secondary="functions" data-tertiary="accessing" data-startref="pmtfccs" id="idm45875183657408"></a>identical to that in <a data-type="xref" href="#variable_pass_by_reference">Example 3-4</a>.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875183654992">
+<h2>See Also</h2>
+
+<p>PHP reference documentation on <a href="https://oreil.ly/9c1Nr">user-defined functions</a> and <a href="https://oreil.ly/ZfOLR">passing variables by reference</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.2 Setting a Function’s Default Parameters"><div class="sect1" id="function_default_parameters">
+<h1>3.2 Setting a Function’s Default Parameters</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875183650512">
+<h2>Problem</h2>
+
+<p>You want to set a default value for <a data-type="indexterm" data-primary="functions" data-secondary="parameters" data-tertiary="default, setting" id="fcrmdt"></a><a data-type="indexterm" data-primary="parameters" data-secondary="functions" data-tertiary="default, setting" id="pmtfcfs"></a>a function’s parameter so invocations don’t have to pass it.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875183645792">
+<h2>Solution</h2>
+
+<p>Assign a default value within the function signature itself. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">get_book_title</code><code class="p">(</code><code class="nv">$isbn</code><code class="p">,</code> <code class="nv">$error</code> <code class="o">=</code> <code class="s1">'Unable to query'</code><code class="p">)</code>
+<code class="p">{</code>
+    <code class="k">try</code> <code class="p">{</code>
+        <code class="nv">$connection</code> <code class="o">=</code> <code class="nx">get_database_connection</code><code class="p">();</code>
+        <code class="nv">$book</code> <code class="o">=</code> <code class="nx">query_isbn</code><code class="p">(</code><code class="nv">$connection</code><code class="p">,</code> <code class="nv">$isbn</code><code class="p">);</code>
+
+        <code class="k">return</code> <code class="nv">$book</code><code class="o">-&gt;</code><code class="na">title</code><code class="p">;</code>
+    <code class="p">}</code> <code class="k">catch</code> <code class="p">{</code>
+        <code class="k">return</code> <code class="nv">$error</code><code class="p">;</code>
+    <code class="p">}</code>
+<code class="p">}</code>
+
+<code class="nx">get_book_title</code><code class="p">(</code><code class="s1">'978-1-098-12132-7'</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875183564384">
+<h2>Discussion</h2>
+
+<p>The example in the Solution attempts to query a database for the title of a book based on its ISBN. If the query fails for any reason, the function will return the string passed into the <code>$error</code> parameter instead.</p>
+
+<p>To make this parameter optional, the function signature <a data-type="indexterm" data-primary="functions" data-secondary="parameters" data-tertiary="optional" id="idm45875183593568"></a><a data-type="indexterm" data-primary="parameters" data-secondary="functions" data-tertiary="optional" id="idm45875183592320"></a>assigns a default value. When calling <code>get_book_title()</code> with a single parameter, the default <code>$error</code> value is used automatically. You alternatively have the option to pass your own string into this variable when invoking the function, such as <code>get_book_title​(<em>978-1-098-12132-7</em>, <em>Oops!</em>);</code>.</p>
+
+<p>When defining a function with default parameters, it’s a best practice to place all parameters with default values <em>last</em> in the function signature. While defining parameters in any order is <em>possible</em>, doing so makes it difficult to call the function properly.</p>
+
+<p><a data-type="xref" href="#misordered_default_parameters">Example 3-5</a> illustrates the kinds of problems that can come up by placing optional parameters before required ones.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>It is possible to define function parameters with specific defaults in any order. However, declaring mandatory parameters after optional ones is deprecated as of PHP 8.0. Continuing to do so might result in an error in a future version of PHP.</p>
+</div>
+<div id="misordered_default_parameters" data-type="example">
+<h5><span class="label">Example 3-5. </span>Misordered default parameters</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code><code> </code><code class="nf">brew_latte</code><code class="p">(</code><code class="nv">$flavor</code><code> </code><code class="o">=</code><code> </code><code class="s1">'unflavored'</code><code class="p">,</code><code> </code><code class="nv">$shots</code><code class="p">)</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">return</code><code> </code><code class="s2">"</code><code class="s2">Brewing a </code><code class="si">{</code><code class="nv">$shots</code><code class="si">}</code><code class="s2">-shot, </code><code class="si">{</code><code class="nv">$flavor</code><code class="si">}</code><code class="s2"> latte!</code><code class="s2">"</code><code class="p">;</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nx">brew_latte</code><code class="p">(</code><code class="s1">'vanilla'</code><code class="p">,</code><code> </code><code class="mi">2</code><code class="p">);</code><code> </code><a class="co" id="co_functions_CO1-1" href="#callout_functions_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nx">brew_latte</code><code class="p">(</code><code class="mi">3</code><code class="p">);</code><code> </code><a class="co" id="co_functions_CO1-2" href="#callout_functions_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_functions_CO1-1" href="#co_functions_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Proper execution. Returns <code>Brewing a 2-shot, vanilla latte!</code></p></dd>
+<dt><a class="co" id="callout_functions_CO1-2" href="#co_functions_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Triggers an <code>ArgumentCountError</code> exception <a data-type="indexterm" data-primary="functions" data-secondary="parameters" data-tertiary="misordered" id="idm45875188394048"></a><a data-type="indexterm" data-primary="parameters" data-secondary="functions" data-tertiary="misordered" id="idm45875188392768"></a>because <code>$shots</code> is undefined.</p></dd>
+</dl></div>
+
+<p>In some cases, placing the parameters themselves in a particular order might make logical sense (to make the code more readable, for example). Know that if any 
+<span class="keep-together">parameters</span> are required, every parameter to their left is also effectively required even if you try to define a default <a data-type="indexterm" data-primary="functions" data-secondary="parameters" data-tertiary="default, setting" data-startref="fcrmdt" id="idm45875188357984"></a><a data-type="indexterm" data-primary="parameters" data-secondary="functions" data-tertiary="default, setting" data-startref="pmtfcfs" id="idm45875188356464"></a>value.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875188354592">
+<h2>See Also</h2>
+
+<p>Examples of default arguments in the <a href="https://oreil.ly/XVoK1">PHP Manual</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.3 Using Named Function Parameters"><div class="sect1" id="named_function_parameters">
+<h1>3.3 Using Named Function Parameters</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875188350704">
+<h2>Problem</h2>
+
+<p>You want to pass arguments into a <a data-type="indexterm" data-primary="functions" data-secondary="parameters" data-tertiary="named" id="fcpmnm"></a><a data-type="indexterm" data-primary="parameters" data-secondary="functions" data-tertiary="named" id="prmfcnm"></a>function based on the name of the parameter rather than its position.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875188345936">
+<h2>Solution</h2>
+
+<p>Use the named argument syntax while calling a <a data-type="indexterm" data-primary="arguments" data-secondary="named, syntax" id="idm45875188344640"></a><a data-type="indexterm" data-primary="named arguments, syntax" id="idm45875188343664"></a><a data-type="indexterm" data-primary="syntax" data-secondary="named arguments" id="idm45875188342992"></a>function as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">array_fill</code><code class="p">(</code><code class="nx">start_index</code><code class="o">:</code> <code class="mi">0</code><code class="p">,</code> <code class="nb">count</code><code class="o">:</code> <code class="mi">100</code><code class="p">,</code> <code class="nx">value</code><code class="o">:</code> <code class="mi">50</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875190092352">
+<h2>Discussion</h2>
+
+<p>By default, PHP leverages positional parameters <a data-type="indexterm" data-primary="functions" data-secondary="parameters" data-tertiary="positional" id="idm45875190090784"></a><a data-type="indexterm" data-primary="parameters" data-secondary="functions" data-tertiary="positional" id="idm45875190089536"></a>in function definitions. The Solution example references the native <a href="https://oreil.ly/jdZQH"><code>array_fill()</code></a> function that has the following function signature:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">array_fill</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$start_index</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$count</code><code class="p">,</code> <code class="nx">mixed</code> <code class="nv">$value</code><code class="p">)</code><code class="o">:</code> <code class="k">array</code></pre>
+
+<p>Basic PHP coding must supply arguments to <code>array_fill()</code> in the same order in which they’re defined—<code>$start_index</code> followed by <code>$count</code> followed by <code>$value</code>. While the order itself is not a problem, making sense of the meaning of each value when scanning visually through code can be a challenge. Using the basic, ordered parameters, the Solution example would be written as follows, requiring deep familiarity with the function signature to know which integer represents which parameter:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nb">array_fill</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">100</code><code class="p">,</code> <code class="mi">50</code><code class="p">);</code></pre>
+
+<p>Named function parameters disambiguate which value is being assigned to which internal variable. They also allow for arbitrary reordering of parameters when you invoke the function as that invocation is now explicit as to which value is assigned to which parameter.</p>
+
+<p>Another key advantage of named arguments is that optional arguments can be <em>skipped</em> entirely during function invocation. Consider a <a data-type="indexterm" data-primary="functions" data-secondary="verbose activity logging" id="idm45875189982256"></a><a data-type="indexterm" data-primary="verbose activity" id="idm45875189981408"></a>verbose activity logging function like in <a data-type="xref" href="#verbose_logging_function">Example 3-6</a>, where multiple parameters are considered optional as they set defaults.</p>
+<div id="verbose_logging_function" data-type="example">
+<h5><span class="label">Example 3-6. </span>Verbose activity logging function</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nx">activity_log</code><code class="p">(</code>
+    <code class="nx">string</code>    <code class="nv">$update_reason</code><code class="p">,</code>
+    <code class="nx">string</code>    <code class="nv">$note</code>           <code class="o">=</code> <code class="s1">''</code><code class="p">,</code>
+    <code class="nx">string</code>    <code class="nv">$sql_statement</code>  <code class="o">=</code> <code class="s1">''</code><code class="p">,</code>
+    <code class="nx">string</code>    <code class="nv">$user_name</code>      <code class="o">=</code> <code class="s1">'anonymous'</code><code class="p">,</code>
+    <code class="nx">string</code>    <code class="nv">$ip_address</code>     <code class="o">=</code> <code class="s1">'127.0.0.1'</code><code class="p">,</code>
+    <code class="o">?</code><code class="nx">DateTime</code> <code class="nv">$time</code>           <code class="o">=</code> <code class="k">null</code>
+<code class="p">)</code><code class="o">:</code> <code class="nx">void</code></pre></div>
+
+<p>Internally, <a data-type="xref" href="#verbose_logging_function">Example 3-6</a> will use its default values when it’s called with a single argument; if <code>$time</code> is <code>null</code>, the value will be silently replaced with a new <code>DateTime</code> instance representing “now.” However, sometimes you might want to populate one of these optional parameters without wanting to explicitly set <em>all</em> of them.</p>
+
+<p>Say you want to replay previously witnessed events from a static log file. User activity was anonymous (so the defaults for <code>$user_name</code> and <code>$ip_address</code> are adequate), but you need to explicitly set the date at which an event occurred. Without named arguments, an invocation <a data-type="indexterm" data-primary="functions" data-secondary="activity_log() function" id="idm45875190013504"></a><a data-type="indexterm" data-primary="activity_log() function" id="idm45875190012528"></a>in this case would look similar to <a data-type="xref" href="#verbose_logging_utilization">Example 3-7</a>.</p>
+<div id="verbose_logging_utilization" data-type="example">
+<h5><span class="label">Example 3-7. </span>Invoking the verbose <code>activity_log()</code> function</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nx">activity_log</code><code class="p">(</code>
+    <code class="s1">'Testing a new system'</code><code class="p">,</code>
+    <code class="s1">''</code><code class="p">,</code>
+    <code class="s1">''</code><code class="p">,</code>
+    <code class="s1">'anonymous'</code><code class="p">,</code>
+    <code class="s1">'127.0.0.1'</code><code class="p">,</code>
+    <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2021-12-20'</code><code class="p">)</code>
+<code class="p">);</code></pre></div>
+
+<p>With named arguments, you can skip setting parameters to their defaults and explicitly set just the parameters you need to. The preceding code can be simplified to the following:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nx">activity_log</code><code class="p">(</code><code class="s1">'Testing a new system'</code><code class="p">,</code> <code class="nb">time</code><code class="o">:</code> <code class="k">new</code> <code class="nx">DateTime</code><code class="p">(</code><code class="s1">'2021-12-20'</code><code class="p">));</code></pre>
+
+<p>In addition to drastically simplifying the usage of <code>activity_log()</code>, named parameters have the added benefit of keeping your code DRY. The default values for your arguments are stored directly in the function definition rather than being copied to every invocation of the function as well. If you later need to change a default, you can edit the function <a data-type="indexterm" data-primary="functions" data-secondary="parameters" data-tertiary="named" data-startref="fcpmnm" id="idm45875187371456"></a><a data-type="indexterm" data-primary="parameters" data-secondary="functions" data-tertiary="named" data-startref="prmfcnm" id="idm45875187370064"></a>definition alone.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875190091760">
+<h2>See Also</h2>
+
+<p>The original RFC <a href="https://oreil.ly/UdoDP">proposing named parameters</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.4 Enforcing Function Argument and Return Typing"><div class="sect1" id="argument_and_return_typing">
+<h1>3.4 Enforcing Function Argument and Return Typing</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875187326432">
+<h2>Problem</h2>
+
+<p>You want to force your program to <a data-type="indexterm" data-primary="functions" data-secondary="arguments" data-tertiary="enforcing" id="fcrgfr"></a><a data-type="indexterm" data-primary="arguments" data-secondary="functions" data-tertiary="enforcing" id="rguufr"></a><a data-type="indexterm" data-primary="functions" data-secondary="return typing, enforcing" id="fcttyp"></a><a data-type="indexterm" data-primary="return types" data-secondary="enforcing" id="rttypfc"></a>implement type safety and avoid PHP’s native loose type comparisons.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875187306960">
+<h2>Solution</h2>
+
+<p>Add input and return types to function definitions. Optionally, add a strict type declaration to the top of each file to enforce values matching type annotations (and emit a fatal error if they don’t match). For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">declare</code><code class="p">(</code><code class="nx">strict_types</code><code class="o">=</code><code class="mi">1</code><code class="p">);</code><code>
+
+</code><code class="k">function</code><code> </code><code class="nf">add_numbers</code><code class="p">(</code><code class="nx">int</code><code> </code><code class="nv">$left</code><code class="p">,</code><code> </code><code class="nx">int</code><code> </code><code class="nv">$right</code><code class="p">)</code><code class="o">:</code><code> </code><code class="nx">int</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">return</code><code> </code><code class="nv">$left</code><code> </code><code class="o">+</code><code> </code><code class="nv">$right</code><code class="p">;</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nx">add_numbers</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code><code> </code><code class="mi">3</code><code class="p">);</code><code> </code><a class="co" id="co_functions_CO2-1" href="#callout_functions_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nx">add_numbers</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code><code> </code><code class="s1">'3'</code><code class="p">);</code><code> </code><a class="co" id="co_functions_CO2-2" href="#callout_functions_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_functions_CO2-1" href="#co_functions_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>This is a perfectly valid operation and will return the integer <code>5</code>.</p></dd>
+<dt><a class="co" id="callout_functions_CO2-2" href="#co_functions_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>While <code>2 + '3'</code> is valid PHP code, the string <code>'3'</code> violates the function’s type definitions and will trigger a fatal error.</p></dd>
+</dl>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875184653888">
+<h2>Discussion</h2>
+
+<p>PHP natively supports various scalar types <a data-type="indexterm" data-primary="scalar types" id="idm45875184652192"></a><a data-type="indexterm" data-primary="types" data-secondary="scalar" id="idm45875184620432"></a>and allows developers to declare both function input parameters and returns to identify the kinds of values that are allowable for each. In addition, developers can specify their own custom classes and interfaces as types, or leverage class inheritance within the type system.<sup><a data-type="noteref" id="idm45875184619360-marker" href="ch03.html#idm45875184619360">1</a></sup></p>
+
+<p>Parameter types are <a data-type="indexterm" data-primary="parameters" data-secondary="types" id="idm45875184617616"></a><a data-type="indexterm" data-primary="types" data-secondary="parameters" id="idm45875184616608"></a>annotated by placing the type directly before the name of the parameter when defining the function. Similarly, return types are specified by appending the function signature with a <code>:</code> and the type that function would return as in the following:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">name</code><code class="p">(</code><code class="nx">type</code> <code class="nv">$parameter</code><code class="p">)</code><code class="o">:</code> <code class="nx">return_type</code>
+<code class="p">{</code>
+    <code class="c1">// ...</code>
+<code class="p">}</code></pre>
+
+<p><a data-type="xref" href="#php_single_types">Table 3-1</a> enumerates the simplest types leveraged by PHP.</p>
+<table id="php_single_types">
+<caption><span class="label">Table 3-1. </span>Simple single types in PHP</caption>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>array</code></p></td>
+<td><p>The value must be an array (containing any type of values).</p></td>
+</tr>
+<tr>
+<td><p><code>callable</code></p></td>
+<td><p>The value must be a callable function.</p></td>
+</tr>
+<tr>
+<td><p><code>bool</code></p></td>
+<td><p>The value must be a Boolean.</p></td>
+</tr>
+<tr>
+<td><p><code>float</code></p></td>
+<td><p>The value must be a floating-point number.</p></td>
+</tr>
+<tr>
+<td><p><code>int</code></p></td>
+<td><p>The value must be an integer.</p></td>
+</tr>
+<tr>
+<td><p><code>string</code></p></td>
+<td><p>The value must be a string.</p></td>
+</tr>
+<tr>
+<td><p><a href="https://oreil.ly/tiTI1"><code>iterable</code></a></p></td>
+<td><p>The value must be an array or an object that implements <code>Traversable</code>.</p></td>
+</tr>
+<tr>
+<td><p><a href="https://oreil.ly/V8VOc"><code>mixed</code></a></p></td>
+<td><p>The object can be any value.</p></td>
+</tr>
+<tr>
+<td><p><a href="https://oreil.ly/Izmvp"><code>void</code></a></p></td>
+<td><p>A return-only type indicating that the function does not return a value.</p></td>
+</tr>
+<tr>
+<td><p><a href="https://oreil.ly/48KVB"><code>never</code></a></p></td>
+<td><p>A return-only type indicating a function does not return; it either calls <code>exit</code>, throws an exception, or is intentionally an infinite loop.</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>In addition, both built-in and custom classes can be used to define types, as shown in <a data-type="xref" href="#php_object_types">Table 3-2</a>.</p>
+<table id="php_object_types">
+<caption><span class="label">Table 3-2. </span>Object types in PHP</caption>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p>Class/interface name</p></td>
+<td><p>The value must be an instance of the specified class or implementation of an interface.</p></td>
+</tr>
+<tr>
+<td><p><code>self</code></p></td>
+<td><p>The value must be an instance of the same class as the one in which the declaration is used.</p></td>
+</tr>
+<tr>
+<td><p><code>parent</code></p></td>
+<td><p>The value must be an instance of the parent of the class in which the declaration is used.</p></td>
+</tr>
+<tr>
+<td><p><code>object</code></p></td>
+<td><p>The value must be an instance of an object.</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>PHP also permits simple scalar types to be <a data-type="indexterm" data-primary="union types" id="idm45875184571824"></a><a data-type="indexterm" data-primary="types" data-secondary="union types" id="idm45875184571120"></a>expanded by either making them nullable or combining them into <em>union types</em>. To make a specific type <a data-type="indexterm" data-primary="types" data-secondary="nullable" id="idm45875184569664"></a><a data-type="indexterm" data-primary="nullable types" id="idm45875184568688"></a>nullable, you have to prefix the type annotation with a <code>?</code>. This will instruct the compiler to allow values to be either the specified type or <code>null</code>, as in <a data-type="xref" href="#function_using_nullable_types">Example 3-8</a>.</p>
+<div id="function_using_nullable_types" data-type="example">
+<h5><span class="label">Example 3-8. </span>Function utilizing nullable parameters</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">say_hello</code><code class="p">(</code><code class="o">?</code><code class="nx">string</code> <code class="nv">$message</code><code class="p">)</code><code class="o">:</code> <code class="nx">void</code>
+<code class="p">{</code>
+    <code class="k">echo</code> <code class="s1">'Hello, '</code><code class="p">;</code>
+
+    <code class="k">if</code> <code class="p">(</code><code class="nv">$message</code> <code class="o">===</code> <code class="k">null</code><code class="p">)</code> <code class="p">{</code>
+        <code class="k">echo</code> <code class="s1">'world!'</code><code class="p">;</code>
+    <code class="p">}</code> <code class="k">else</code> <code class="p">{</code>
+        <code class="k">echo</code> <code class="nv">$message</code> <code class="o">.</code> <code class="s1">'!'</code><code class="p">;</code>
+    <code class="p">}</code>
+<code class="p">}</code>
+
+<code class="nx">say_hello</code><code class="p">(</code><code class="s1">'Reader'</code><code class="p">);</code> <code class="c1">// Hello, Reader!</code>
+<code class="nx">say_hello</code><code class="p">(</code><code class="k">null</code><code class="p">);</code> <code class="c1">// Hello, world!</code></pre></div>
+
+<p>A union type declaration combines multiple types into a single declaration by concatenating simple types together with the pipe character (<code>|</code>). If you were to rewrite the type declarations on the Solution example with a union type combining strings and integers, the fatal error thrown by passing in a string for addition would resolve itself. Consider the possible rewrite in <a data-type="xref" href="#type_solution_rewrite">Example 3-9</a> that would permit <em>either</em> integers or strings as parameters.</p>
+<div id="type_solution_rewrite" data-type="example">
+<h5><span class="label">Example 3-9. </span>Rewriting the Solution example to leverage union types</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">add_numbers</code><code class="p">(</code><code class="nx">int</code><code class="o">|</code><code class="nx">string</code> <code class="nv">$left</code><code class="p">,</code> <code class="nx">int</code><code class="o">|</code><code class="nx">string</code> <code class="nv">$right</code><code class="p">)</code><code class="o">:</code> <code class="nx">int</code>
+<code class="p">{</code>
+    <code class="k">return</code> <code class="nv">$left</code> <code class="o">+</code> <code class="nv">$right</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nx">add_numbers</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code> <code class="s1">'3'</code><code class="p">);</code> <code class="c1">// 5</code></pre></div>
+
+<p>The biggest problem with this alternative is that adding strings together with the <code>+</code> operator has no meaning in PHP. If both parameters are numeric (either integers or integers represented as strings), the function will work just fine. If either is a non-numeric string, PHP will throw a <code>TypeError</code> as it doesn’t know how to “add” two strings together. These kinds of errors are what you hope to avoid by adding type declarations to your code and enforcing strict typing—they formalize the contract you expect your code to support and encourage programming practices that naturally defend against coding mistakes.</p>
+
+<p>By default, PHP uses its typing system to <em>hint</em> at which types are allowed into and returned from functions. This is useful to prevent passing bad data into a function, but it relies heavily on either developer diligence or additional tooling<sup><a data-type="noteref" id="idm45875190957904-marker" href="ch03.html#idm45875190957904">2</a></sup> to enforce typing. Rather than rely on humans’ ability to check code, PHP allows for a static declaration in each file that all invocations should follow strict typing.</p>
+
+<p>Placing <code>declare(strict_types=1);</code> at the top of a file tells the PHP compiler you intend for all invocations in that file to obey parameter and return type declarations. Note that this directive <a data-type="indexterm" data-primary="invocations" id="idm45875190955664"></a>applies to <em>invocations</em> within the file where it’s used, not to the definitions of functions in that file. If you call functions from another file, PHP will honor the type declarations in that file as well. However, placing this directive in your file will not force other files that reference your functions to <a data-type="indexterm" data-primary="functions" data-secondary="arguments" data-tertiary="enforcing" data-startref="fcrgfr" id="idm45875190954448"></a><a data-type="indexterm" data-primary="arguments" data-secondary="functions" data-tertiary="enforcing" data-startref="rguufr" id="idm45875190952928"></a><a data-type="indexterm" data-primary="functions" data-secondary="return typing, enforcing" data-startref="fcttyp" id="idm45875190951440"></a><a data-type="indexterm" data-primary="return types" data-secondary="enforcing" data-startref="rttypfc" id="idm45875190950256"></a>obey the typing system.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875190948656">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/I9D33">type declarations</a> and the <a href="https://oreil.ly/P2jM_"><code>declare</code> construct</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.5 Defining a Function with a Variable Number of Arguments"><div class="sect1" id="variable_number_of_arguments">
+<h1>3.5 Defining a Function with a Variable Number of Arguments</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875190901744">
+<h2>Problem</h2>
+
+<p>You want to define a function that takes <a data-type="indexterm" data-primary="functions" data-secondary="arguments" data-tertiary="variable number of" id="fcrgvb"></a><a data-type="indexterm" data-primary="arguments" data-secondary="functions" data-tertiary="variable number of" id="rgftvmb"></a>one or more arguments without knowing ahead of time how many values will be passed in.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875190897024">
+<h2>Solution</h2>
+
+<p>Use PHP’s spread operator (<code>…​</code>) to define a <a data-type="indexterm" data-primary="operators" data-secondary="spread operator" id="idm45875190895312"></a><a data-type="indexterm" data-primary="spread operator" id="idm45875190894304"></a>variable number or arguments:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">greatest</code><code class="p">(</code><code class="nx">int</code> <code class="o">...</code><code class="nv">$numbers</code><code class="p">)</code><code class="o">:</code> <code class="nx">int</code>
+<code class="p">{</code>
+    <code class="nv">$greatest</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+    <code class="k">foreach</code> <code class="p">(</code><code class="nv">$numbers</code> <code class="k">as</code> <code class="nv">$number</code><code class="p">)</code> <code class="p">{</code>
+        <code class="k">if</code> <code class="p">(</code><code class="nv">$number</code> <code class="o">&gt;</code> <code class="nv">$greatest</code><code class="p">)</code> <code class="p">{</code>
+            <code class="nv">$greatest</code> <code class="o">=</code> <code class="nv">$number</code><code class="p">;</code>
+        <code class="p">}</code>
+    <code class="p">}</code>
+
+    <code class="k">return</code> <code class="nv">$greatest</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nx">greatest</code><code class="p">(</code><code class="mi">7</code><code class="p">,</code> <code class="mi">5</code><code class="p">,</code> <code class="mi">12</code><code class="p">,</code> <code class="mi">2</code><code class="p">,</code> <code class="mi">99</code><code class="p">,</code> <code class="mi">1</code><code class="p">,</code> <code class="mi">415</code><code class="p">,</code> <code class="mi">3</code><code class="p">,</code> <code class="mi">7</code><code class="p">,</code> <code class="mi">4</code><code class="p">);</code>
+<code class="c1">// 415</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875190863424">
+<h2>Discussion</h2>
+
+<p>The <em>spread operator</em> automatically adds all parameters passed in that particular position or after it to an array. This array can be typed by prefixing the spread operator with a type declaration (review <a data-type="xref" href="#argument_and_return_typing">Recipe 3.4</a> for more on typing), thus requiring every element of the array to match a specific type. Invoking the function defined in the Solution example as <code>greatest(2, "five");</code> will throw a <code>TypeError</code>, as you have explicitly declared an <code>int</code> type for every member of the <code>$numbers</code> array.</p>
+
+<p>Your function can accept more than one positional parameter while still leveraging the spread operator to accept an unlimited number of additional arguments. The function defined in <a data-type="xref" href="#utilizing_the_spread_operator">Example 3-10</a> will print a greeting to the screen for an unlimited number of individuals.</p>
+<div id="utilizing_the_spread_operator" data-type="example">
+<h5><span class="label">Example 3-10. </span>Utilizing the spread operator</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">greet</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$greeting</code><code class="p">,</code> <code class="nx">string</code> <code class="o">...</code><code class="nv">$names</code><code class="p">)</code><code class="o">:</code> <code class="nx">void</code>
+<code class="p">{</code>
+    <code class="k">foreach</code><code class="p">(</code><code class="nv">$names</code> <code class="k">as</code> <code class="nv">$name</code><code class="p">)</code> <code class="p">{</code>
+        <code class="k">echo</code> <code class="nv">$greeting</code> <code class="o">.</code> <code class="s1">', '</code> <code class="o">.</code> <code class="nv">$name</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+    <code class="p">}</code>
+<code class="p">}</code>
+
+<code class="nx">greet</code><code class="p">(</code><code class="s1">'Hello'</code><code class="p">,</code> <code class="s1">'Tony'</code><code class="p">,</code> <code class="s1">'Steve'</code><code class="p">,</code> <code class="s1">'Wanda'</code><code class="p">,</code> <code class="s1">'Peter'</code><code class="p">);</code>
+<code class="c1">// Hello, Tony</code>
+<code class="c1">// Hello, Steve</code>
+<code class="c1">// Hello, Wanda</code>
+<code class="c1">// Hello, Peter</code>
+
+<code class="nx">greet</code><code class="p">(</code><code class="s1">'Welcome'</code><code class="p">,</code> <code class="s1">'Alice'</code><code class="p">,</code> <code class="s1">'Bob'</code><code class="p">);</code>
+<code class="c1">// Welcome, Alice</code>
+<code class="c1">// Welcome, Bob</code></pre></div>
+
+<p>The spread operator has more utility than just function definition. While it can be used to pack multiple arguments into an array, it can also be used to unpack an array into multiple arguments for a more traditional function invocation. <a data-type="xref" href="#ellipsis_unpacking_array">Example 3-11</a> provides a trivial illustration of how this array unpacking works by using the spread operator to pass an array into a function that does not accept an array.</p>
+<div id="ellipsis_unpacking_array" data-type="example">
+<h5><span class="label">Example 3-11. </span>Unpacking an array with the spread operator</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">greet</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$greeting</code><code class="p">,</code> <code class="nx">string</code> <code class="nv">$name</code><code class="p">)</code><code class="o">:</code> <code class="nx">void</code>
+<code class="p">{</code>
+    <code class="k">echo</code> <code class="nv">$greeting</code> <code class="o">.</code> <code class="s1">', '</code> <code class="o">.</code> <code class="nv">$name</code>  <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nv">$params</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'Hello'</code><code class="p">,</code> <code class="s1">'world'</code><code class="p">];</code>
+<code class="nx">greet</code><code class="p">(</code><code class="o">...</code><code class="nv">$params</code><code class="p">);</code>
+<code class="c1">// Hello, world</code></pre></div>
+
+<p>In some cases, a more complex function might return multiple values (as discussed in the next recipe), so passing the return of one function into another becomes simple with the spread operator. In fact, any array or variable that implements PHP’s <a href="https://oreil.ly/jVUvs">Traversable</a> interface can be unpacked into a function invocation in <a data-type="indexterm" data-primary="functions" data-secondary="arguments" data-tertiary="variable number of" data-startref="fcrgvb" id="idm45875188791856"></a><a data-type="indexterm" data-primary="arguments" data-secondary="functions" data-tertiary="variable number of" data-startref="rgftvmb" id="idm45875188790496"></a>this manner.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875188788752">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/9IoHh">variable-length argument lists</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.6 Returning More Than One Value"><div class="sect1" id="idm45875188786448">
+<h1>3.6 Returning More Than One Value</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875188785200">
+<h2>Problem</h2>
+
+<p>You want to return multiple values from a <a data-type="indexterm" data-primary="values" data-secondary="returning multiple" id="vlrtrmpl"></a><a data-type="indexterm" data-primary="returning multiple values" id="rtrnvlpl"></a>single function invocation.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875186620640">
+<h2>Solution</h2>
+
+<p>Rather than returning a single value, return an array of multiple values and unpack them by using <code>list()</code> outside the function:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">describe</code><code class="p">(</code><code class="nx">float</code> <code class="o">...</code><code class="nv">$values</code><code class="p">)</code><code class="o">:</code> <code class="k">array</code>
+<code class="p">{</code>
+    <code class="nv">$min</code> <code class="o">=</code> <code class="nb">min</code><code class="p">(</code><code class="nv">$values</code><code class="p">);</code>
+    <code class="nv">$max</code> <code class="o">=</code> <code class="nb">max</code><code class="p">(</code><code class="nv">$values</code><code class="p">);</code>
+    <code class="nv">$mean</code> <code class="o">=</code> <code class="nb">array_sum</code><code class="p">(</code><code class="nv">$values</code><code class="p">)</code> <code class="o">/</code> <code class="nb">count</code><code class="p">(</code><code class="nv">$values</code><code class="p">);</code>
+
+    <code class="nv">$variance</code> <code class="o">=</code> <code class="mf">0.0</code><code class="p">;</code>
+    <code class="k">foreach</code><code class="p">(</code><code class="nv">$values</code> <code class="k">as</code> <code class="nv">$val</code><code class="p">)</code> <code class="p">{</code>
+        <code class="nv">$variance</code> <code class="o">+=</code> <code class="nb">pow</code><code class="p">((</code><code class="nv">$val</code> <code class="o">-</code> <code class="nv">$mean</code><code class="p">),</code> <code class="mi">2</code><code class="p">);</code>
+    <code class="p">}</code>
+    <code class="nv">$std_dev</code> <code class="o">=</code> <code class="p">(</code><code class="nx">float</code><code class="p">)</code> <code class="nb">sqrt</code><code class="p">(</code><code class="nv">$variance</code><code class="o">/</code><code class="nb">count</code><code class="p">(</code><code class="nv">$values</code><code class="p">));</code>
+
+    <code class="k">return</code> <code class="p">[</code><code class="nv">$min</code><code class="p">,</code> <code class="nv">$max</code><code class="p">,</code> <code class="nv">$mean</code><code class="p">,</code> <code class="nv">$std_dev</code><code class="p">];</code>
+<code class="p">}</code>
+
+<code class="nv">$values</code> <code class="o">=</code> <code class="p">[</code><code class="mf">1.0</code><code class="p">,</code> <code class="mf">9.2</code><code class="p">,</code> <code class="mf">7.3</code><code class="p">,</code> <code class="mf">12.0</code><code class="p">];</code>
+<code class="k">list</code><code class="p">(</code><code class="nv">$min</code><code class="p">,</code> <code class="nv">$max</code><code class="p">,</code> <code class="nv">$mean</code><code class="p">,</code> <code class="nv">$std</code><code class="p">)</code> <code class="o">=</code> <code class="nx">describe</code><code class="p">(</code><code class="o">...</code><code class="nv">$values</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875186585632">
+<h2>Discussion</h2>
+
+<p>PHP is only capable of returning one value <a data-type="indexterm" data-primary="list() construct" id="idm45875186503248"></a>from a function invocation, but that value itself could be an array containing multiple values. When paired with PHP’s <code>list()</code> construct, this array can be easily destructured to individual variables for further use by the program.</p>
+
+<p>While the need to return many different values isn’t common, when the occasion comes up, being able to do so can be incredibly handy. One example is in web authentication. Many modern systems <a data-type="indexterm" data-primary="JWTs (JSON Web Tokens)" id="idm45875186501600"></a>today use JSON Web Tokens (JWTs), which are period-delimited strings of Base64-encoded data. Each component of a JWT represents a separate, discrete thing—a header describing the algorithm used, the data in the token payload, and a verifiable signature on that data.</p>
+
+<p>When reading a JWT as a string, PHP applications <a data-type="indexterm" data-primary="explode() function" id="idm45875186500384"></a><a data-type="indexterm" data-primary="functions" data-secondary="explode()" id="idm45875186499680"></a>often leverage the built-in <code>explode()</code> function to split the string on the periods delimiting each component. A simple use of <code>explode()</code> might appear as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$jwt_parts</code> <code class="o">=</code> <code class="nb">explode</code><code class="p">(</code><code class="s1">'.'</code><code class="p">,</code> <code class="nv">$jwt</code><code class="p">);</code>
+<code class="nv">$header</code> <code class="o">=</code> <code class="nb">base64_decode</code><code class="p">(</code><code class="nv">$jwt_parts</code><code class="p">[</code><code class="mi">0</code><code class="p">]);</code>
+<code class="nv">$payload</code> <code class="o">=</code> <code class="nb">base64_decode</code><code class="p">(</code><code class="nv">$jwt_parts</code><code class="p">[</code><code class="mi">1</code><code class="p">]);</code>
+<code class="nv">$signature</code> <code class="o">=</code> <code class="nb">base64_decode</code><code class="p">(</code><code class="nv">$jwt_parts</code><code class="p">[</code><code class="mi">2</code><code class="p">]);</code></pre>
+
+<p>The preceding code works just fine, but the repeated references to positions within an array can be difficult to follow both during development and debugging later if a problem arises. In addition, developers must manually decode every part of the JWT separately; forgetting <a data-type="indexterm" data-primary="base64_decode() function" id="idm45875183671344"></a><a data-type="indexterm" data-primary="functions" data-secondary="base64_decode()" id="idm45875188917200"></a>to invoke <code>base64_decode()</code> could be fatal to the operation of the program.</p>
+
+<p>An alternative approach is to unpack and automatically decode the JWT within a function and return an array of the components, as shown in <a data-type="xref" href="#decoding_jwt">Example 3-12</a>.</p>
+<div id="decoding_jwt" data-type="example">
+<h5><span class="label">Example 3-12. </span>Decoding a JWT</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">decode_jwt</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$jwt</code><code class="p">)</code><code class="o">:</code> <code class="k">array</code>
+<code class="p">{</code>
+    <code class="nv">$parts</code> <code class="o">=</code> <code class="nb">explode</code><code class="p">(</code><code class="s1">'.'</code><code class="p">,</code> <code class="nv">$jwt</code><code class="p">);</code>
+
+    <code class="k">return</code> <code class="nb">array_map</code><code class="p">(</code><code class="s1">'base64_decode'</code><code class="p">,</code> <code class="nv">$parts</code><code class="p">);</code>
+<code class="p">}</code>
+
+<code class="k">list</code><code class="p">(</code><code class="nv">$header</code><code class="p">,</code> <code class="nv">$payload</code><code class="p">,</code> <code class="nv">$signature</code><code class="p">)</code> <code class="o">=</code> <code class="nx">decode_jwt</code><code class="p">(</code><code class="nv">$jwt</code><code class="p">);</code></pre></div>
+
+<p>A further advantage of using a function to unpack a JWT rather than decomposing each element directly is that you could build in automated signature verification or even filter JWTs for acceptability based on the encryption algorithms declared in the header. While this logic could be applied procedurally while processing a JWT, keeping everything in a single function definition leads to cleaner, more maintainable code.</p>
+
+<p>The biggest drawback to returning multiple values in one function call is in typing. These functions have an <code>array</code> return type, but PHP doesn’t natively allow for specifying the type of the elements within an array. We have potential workarounds to this limitation by way of documenting the function signature and integrating with a static analysis tool like <a href="https://psalm.dev">Psalm</a> or <a href="https://phpstan.org">PHPStan</a>, but we have no native support within the language for typed arrays. As such, if you’re using strict typing (and you <em>should</em> be), returning multiple <a data-type="indexterm" data-primary="values" data-secondary="returning multiple" data-startref="vlrtrmpl" id="idm45875188857616"></a><a data-type="indexterm" data-primary="returning multiple values" data-startref="rtrnvlpl" id="idm45875188856368"></a>values from a single function invocation should be a rare 
+<span class="keep-together">occurrence</span>.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875186585040">
+<h2>See Also</h2>
+
+<p><a data-type="xref" href="#variable_number_of_arguments">Recipe 3.5</a> on passing a variable number of arguments and <a data-type="xref" href="ch01.html#swapping_variables_inplace">Recipe 1.3</a> for more on PHP’s <code>list()</code> construct. Also reference the <a href="https://oreil.ly/RsXGh">phpDocumentor documentation on typed arrays</a> that can be enforced by tools like Psalm.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.7 Accessing Global Variables from Within a Function"><div class="sect1" id="idm45875188838288">
+<h1>3.7 Accessing Global Variables from Within a Function</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875188837072">
+<h2>Problem</h2>
+
+<p>Your function needs to reference a globally <a data-type="indexterm" data-primary="variables" data-secondary="global, accessing" id="vbgbccs"></a><a data-type="indexterm" data-primary="global variables, accessing" id="glbvrcs"></a>defined variable from elsewhere in the application.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875188833072">
+<h2>Solution</h2>
+
+<p>Prefix any global variables with the <code>global</code> keyword to access them within the function’s scope:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$counter</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+
+<code class="k">function</code> <code class="nf">increment_counter</code><code class="p">()</code>
+<code class="p">{</code>
+    <code class="k">global</code> <code class="nv">$counter</code><code class="p">;</code>
+
+    <code class="nv">$counter</code> <code class="o">+=</code> <code class="mi">1</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nx">increment_counter</code><code class="p">();</code>
+
+<code class="k">echo</code> <code class="nv">$counter</code><code class="p">;</code> <code class="c1">// 1</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875184180304">
+<h2>Discussion</h2>
+
+<p>PHP separates operations into various scopes based on the context in which a variable is defined. For most programs, a single scope spans all included or required files. A variable defined in this global scope is available <em>everywhere</em> regardless of which file is currently executing, as demonstrated in <a data-type="xref" href="#globally_defined_variables">Example 3-13</a>.</p>
+<div id="globally_defined_variables" data-type="example">
+<h5><span class="label">Example 3-13. </span>Variables defined in the global scope are available to included scripts</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$apple</code><code> </code><code class="o">=</code><code> </code><code class="s1">'honeycrisp'</code><code class="p">;</code><code>
+
+</code><code class="k">include</code><code> </code><code class="s1">'someotherscript.php'</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO3-1" href="#callout_functions_CO3-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_functions_CO3-1" href="#co_functions_CO3-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The <code>$apple</code> variable is also defined within this script and available for use.</p></dd>
+</dl></div>
+
+<p>User-defined functions, however, define <a data-type="indexterm" data-primary="user-defined functions" id="idm45875184132368"></a><a data-type="indexterm" data-primary="functions" data-secondary="user-defined" id="idm45875184131696"></a>their own scope. A variable defined outside a user-defined function is <em>not available</em> within the body of the function. Likewise, any variable defined within the function is not available outside the function. <a data-type="xref" href="#local_vs_global_scoping">Example 3-14</a> illustrates the boundaries of the parent and function scope in a 
+<span class="keep-together">program</span>.</p>
+<div id="local_vs_global_scoping" data-type="example">
+<h5><span class="label">Example 3-14. </span>Local versus global scoping</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$a</code><code> </code><code class="o">=</code><code> </code><code class="mi">1</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO4-1" href="#callout_functions_CO4-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+</code><code class="k">function</code><code> </code><code class="nf">example</code><code class="p">()</code><code class="o">:</code><code> </code><code class="nx">void</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">echo</code><code> </code><code class="nv">$a</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO4-2" href="#callout_functions_CO4-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+    </code><code class="nv">$a</code><code> </code><code class="o">=</code><code> </code><code class="mi">2</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO4-3" href="#callout_functions_CO4-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+
+    </code><code class="nv">$b</code><code> </code><code class="o">=</code><code> </code><code class="mi">3</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO4-4" href="#callout_functions_CO4-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nx">example</code><code class="p">();</code><code>
+
+</code><code class="k">echo</code><code> </code><code class="nv">$a</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO4-5" href="#callout_functions_CO4-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a><code>
+</code><code class="k">echo</code><code> </code><code class="nv">$b</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO4-6" href="#callout_functions_CO4-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_functions_CO4-1" href="#co_functions_CO4-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The variable <code>$a</code> is initially defined in the parent scope.</p></dd>
+<dt><a class="co" id="callout_functions_CO4-2" href="#co_functions_CO4-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Inside the function scope, <code>$a</code> is not yet defined. Attempting to <code>echo</code> its value will result in a warning.</p></dd>
+<dt><a class="co" id="callout_functions_CO4-3" href="#co_functions_CO4-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Defining a variable called <code>$a</code> within the function will <em>not</em> overwrite the value of the same-named variable outside the function.</p></dd>
+<dt><a class="co" id="callout_functions_CO4-4" href="#co_functions_CO4-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Defining a variable called <code>$b</code> within the function makes it available within the function, but this value will not escape the scope of the function.</p></dd>
+<dt><a class="co" id="callout_functions_CO4-5" href="#co_functions_CO4-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p>Echoing <code>$a</code> outside the function, even after invoking <code>example()</code>, will print the initial value you’ve set, as the function did not change the variable’s value.</p></dd>
+<dt><a class="co" id="callout_functions_CO4-6" href="#co_functions_CO4-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></dt>
+<dd><p>Since <code>$b</code> was defined within the function, it is undefined in the scope of the parent application.</p></dd>
+</dl></div>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>It is possible to pass a variable into <a data-type="indexterm" data-primary="variables" data-secondary="passing" data-tertiary="by reference" id="idm45875184314784"></a><a data-type="indexterm" data-primary="passing" data-secondary="variables" data-tertiary="by reference" id="idm45875184313536"></a><a data-type="indexterm" data-primary="references, passing by" id="idm45875184312320"></a>a function call <em>by reference</em> if the function is defined to accept a variable in such a way. However, this is a decision made by the definition of the function and not a runtime flag available to routines leveraging that function after the fact. <a data-type="xref" href="#variable_pass_by_reference">Example 3-4</a> shows what pass-by-reference might look like.</p>
+</div>
+
+<p>To reference variables defined outside its scope, a function needs to declare those variables as <em>global</em> within its own scope. To reference the parent scope, you can rewrite <a data-type="xref" href="#local_vs_global_scoping">Example 3-14</a> as <a data-type="xref" href="#local_vs_globals_rewrite">Example 3-15</a>.</p>
+<div id="local_vs_globals_rewrite" data-type="example">
+<h5><span class="label">Example 3-15. </span>Local versus global scoping, revisited</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$a</code><code> </code><code class="o">=</code><code> </code><code class="mi">1</code><code class="p">;</code><code>
+
+</code><code class="k">function</code><code> </code><code class="nf">example</code><code class="p">()</code><code class="o">:</code><code> </code><code class="nx">void</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">global</code><code> </code><code class="nv">$a</code><code class="p">,</code><code> </code><code class="nv">$b</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO5-1" href="#callout_functions_CO5-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+
+    </code><code class="k">echo</code><code> </code><code class="nv">$a</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO5-2" href="#callout_functions_CO5-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+    </code><code class="nv">$a</code><code> </code><code class="o">=</code><code> </code><code class="mi">2</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO5-3" href="#callout_functions_CO5-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+
+    </code><code class="nv">$b</code><code> </code><code class="o">=</code><code> </code><code class="mi">3</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO5-4" href="#callout_functions_CO5-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nx">example</code><code class="p">();</code><code>
+
+</code><code class="k">echo</code><code> </code><code class="nv">$a</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO5-5" href="#callout_functions_CO5-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a><code>
+</code><code class="k">echo</code><code> </code><code class="nv">$b</code><code> </code><code class="o">.</code><code> </code><code class="nx">PHP_EOL</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO5-6" href="#callout_functions_CO5-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_functions_CO5-1" href="#co_functions_CO5-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>By declaring both <code>$a</code> and <code>$b</code> to be global variables, you are telling the function to use values from the parent scope rather than its own scope.</p></dd>
+<dt><a class="co" id="callout_functions_CO5-2" href="#co_functions_CO5-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>With a reference to the <em>global</em> <code>$a</code> variable, you can now actually print it to output.</p></dd>
+<dt><a class="co" id="callout_functions_CO5-3" href="#co_functions_CO5-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Likewise, any changes to <code>$a</code> within the scope of the function will impact the variable in the parent scope.</p></dd>
+<dt><a class="co" id="callout_functions_CO5-4" href="#co_functions_CO5-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Similarly, you now define <code>$b</code> but, as it’s global, this definition will bubble out to the parent scope as well.</p></dd>
+<dt><a class="co" id="callout_functions_CO5-5" href="#co_functions_CO5-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p>Echoing <code>$a</code> will now reflect the changes made within the scope of <code>example()</code> as you made the variable global.</p></dd>
+<dt><a class="co" id="callout_functions_CO5-6" href="#co_functions_CO5-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></dt>
+<dd><p>Likewise, <code>$b</code> is now defined globally and can be echoed to output as well.</p></dd>
+</dl></div>
+
+<p>There is no limit on the number of global variables PHP can support aside from the memory available to the system. Additionally, <em>all</em> globals can be listed by enumerating the special <code>$GLOBALS</code> array defined by PHP. This associative array contains references to all variables defined within the global scope. This special array can be useful if you want to reference a specific variable in the global scope <em>without</em> declaring the variable as global, as in <a data-type="xref" href="#global_assoc_array">Example 3-16</a>.</p>
+<div id="global_assoc_array" data-type="example">
+<h5><span class="label">Example 3-16. </span>Using the associative <code>$GLOBALS</code> array</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$var</code> <code class="o">=</code> <code class="s1">'global'</code><code class="p">;</code>
+
+<code class="k">function</code> <code class="nf">example</code><code class="p">()</code><code class="o">:</code> <code class="nx">void</code>
+<code class="p">{</code>
+    <code class="nv">$var</code> <code class="o">=</code> <code class="s1">'local'</code><code class="p">;</code>
+
+    <code class="k">echo</code> <code class="s1">'Local variable: '</code> <code class="o">.</code> <code class="nv">$var</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+    <code class="k">echo</code> <code class="s1">'Global variable: '</code> <code class="o">.</code> <code class="nv">$GLOBALS</code><code class="p">[</code><code class="s1">'var'</code><code class="p">]</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nx">example</code><code class="p">();</code>
+<code class="c1">// Local variable: local</code>
+<code class="c1">// Global variable: global</code></pre></div>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>As of PHP 8.1, it is no longer possible to overwrite the entirety of the <code>$GLOBALS</code> array. In previous versions, you could reset it to an empty array (for example, during test runs of your code). Moving forward, you can edit only the contents of the array rather than manipulating the collection in its entirety.</p>
+</div>
+
+<p>Global variables are a handy way to reference state across your application, but they can lead to confusion and maintainability issues if overused. Some large applications leverage global variables heavily—WordPress, a PHP-based project that powers more than 40% of the internet,<sup><a data-type="noteref" id="idm45875191172432-marker" href="ch03.html#idm45875191172432">3</a></sup> <a href="https://oreil.ly/jztni">uses global variables throughout its codebase</a>. However, most application developers agree that global variables should be used sparingly, if <a data-type="indexterm" data-primary="variables" data-secondary="global, accessing" data-startref="vbgbccs" id="idm45875191170288"></a><a data-type="indexterm" data-primary="global variables, accessing" data-startref="glbvrcs" id="idm45875191169072"></a>at all, to help keep systems clean and easy to maintain.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875184168816">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/tN5tV">variable scope</a> and the <a href="https://oreil.ly/z9JJS">special <code>$GLOBALS</code> array</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.8 Managing State Within a Function Across 
+Multiple Invocations"><div class="sect1" id="idm45875191164464">
+<h1>3.8 Managing State Within a Function Across 
+<span class="keep-together">Multiple Invocations</span></h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875191131760">
+<h2>Problem</h2>
+
+<p>Your function needs to keep track of its change <a data-type="indexterm" data-primary="functions" data-secondary="state, managing" id="fcsttg"></a><a data-type="indexterm" data-primary="state" data-secondary="managing" id="sttmgg"></a>in state over time.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875191127584">
+<h2>Solution</h2>
+
+<p>Use the <code>static</code> keyword to define a <a data-type="indexterm" data-primary="static keyword" id="idm45875191125808"></a><a data-type="indexterm" data-primary="keywords" data-secondary="static" id="idm45875191125072"></a><a data-type="indexterm" data-primary="local variables, static keyword" id="idm45875191124128"></a><a data-type="indexterm" data-primary="variables" data-secondary="local, static keyword" id="idm45875191123488"></a>locally scoped variable that retains its state between function invocations:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">increment</code><code class="p">()</code>
+<code class="p">{</code>
+    <code class="k">static</code> <code class="nv">$count</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+
+    <code class="k">return</code> <code class="nv">$count</code><code class="o">++</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="k">echo</code> <code class="nx">increment</code><code class="p">();</code> <code class="c1">// 0</code>
+<code class="k">echo</code> <code class="nx">increment</code><code class="p">();</code> <code class="c1">// 1</code>
+<code class="k">echo</code> <code class="nx">increment</code><code class="p">();</code> <code class="c1">// 2</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875189787232">
+<h2>Discussion</h2>
+
+<p>A static variable exists only within the scope of the function in which it is declared. However, unlike regular local variables, it holds on to its value every time you return to the scope of the function. In this way, a function can become <em>stateful</em> and keep track of certain data (like the number of times it’s been called) between independent invocations.</p>
+
+<p>In a typical function, using the <code>=</code> operator will assign a value to a variable. When the <code>static</code> keyword is applied, this assignment operation only happens the first time that function is called. Subsequent calls will reference the previous state of the variable and allow the program to either use or modify the stored value as well.</p>
+
+<p>One of the most common use cases of static variables <a data-type="indexterm" data-primary="static variables, use cases, recursive functions and" id="idm45875189759056"></a><a data-type="indexterm" data-primary="variables" data-secondary="static, recursive functions and" id="idm45875189758384"></a><a data-type="indexterm" data-primary="recursive functions, static variables and" id="idm45875189757472"></a><a data-type="indexterm" data-primary="functions" data-secondary="recursive, static variables and" id="idm45875189756832"></a>is to track the state of a recursive function. <a data-type="xref" href="#static_variable">Example 3-17</a> demonstrates a function that recursively calls itself a fixed number of times before exiting.</p>
+<div id="static_variable" data-type="example">
+<h5><span class="label">Example 3-17. </span>Using a static variable to limit recursion depth</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">example</code><code class="p">()</code><code class="o">:</code> <code class="nx">void</code>
+<code class="p">{</code>
+    <code class="k">static</code> <code class="nv">$count</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+
+    <code class="k">if</code> <code class="p">(</code><code class="nv">$count</code> <code class="o">&gt;=</code> <code class="mi">3</code><code class="p">)</code> <code class="p">{</code>
+        <code class="nv">$count</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+        <code class="k">return</code><code class="p">;</code>
+    <code class="p">}</code>
+
+    <code class="nv">$count</code> <code class="o">+=</code> <code class="mi">1</code><code class="p">;</code>
+
+    <code class="k">echo</code> <code class="s1">'Running for loop number '</code> <code class="o">.</code> <code class="nv">$count</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+    <code class="nx">example</code><code class="p">();</code>
+<code class="p">}</code></pre></div>
+
+<p>The <code>static</code> keyword can also be used to keep track of expensive resources that might be needed by a function multiple times but that you might only want a single instance of. Consider a function that logs messages to a database: you might not be able to pass a database connection into the function itself, but you want to ensure that the 
+<span class="keep-together">function</span> only opens a <em>single</em> database connection. Such a logging 
+<span class="keep-together">function</span> might be implemented as in <a data-type="xref" href="#static_database_connection">Example 3-18</a>.</p>
+<div id="static_database_connection" data-type="example">
+<h5><span class="label">Example 3-18. </span>Using a static variable to hold a database connection</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code><code> </code><code class="nf">logger</code><code class="p">(</code><code class="nx">string</code><code> </code><code class="nv">$message</code><code class="p">)</code><code class="o">:</code><code> </code><code class="nx">void</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">static</code><code> </code><code class="nv">$dbh</code><code> </code><code class="o">=</code><code> </code><code class="k">null</code><code class="p">;</code><code>
+    </code><code class="k">if</code><code> </code><code class="p">(</code><code class="nv">$dbh</code><code> </code><code class="o">===</code><code> </code><code class="k">null</code><code class="p">)</code><code> </code><code class="p">{</code><code>
+        </code><code class="nv">$dbh</code><code> </code><code class="o">=</code><code> </code><code class="k">new</code><code> </code><code class="nx">PDO</code><code class="p">(</code><code class="nx">DATABASE_DSN</code><code class="p">,</code><code> </code><code class="nx">DATABASE_USER</code><code class="p">,</code><code> </code><code class="nx">DATABASE_PASSWORD</code><code class="p">);</code><code>
+    </code><code class="p">}</code><code>
+
+    </code><code class="nv">$sql</code><code> </code><code class="o">=</code><code> </code><code class="s1">'INSERT INTO messages (message) VALUES (:message)'</code><code class="p">;</code><code>
+    </code><code class="nv">$statement</code><code> </code><code class="o">=</code><code> </code><code class="nv">$dbh</code><code class="o">-&gt;</code><code class="na">prepare</code><code class="p">(</code><code class="nv">$sql</code><code class="p">);</code><code>
+
+    </code><code class="nv">$statement</code><code class="o">-&gt;</code><code class="na">execute</code><code class="p">([</code><code class="s1">':message'</code><code class="p">,</code><code> </code><code class="nv">$message</code><code class="p">]);</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nx">logger</code><code class="p">(</code><code class="s1">'This is a test'</code><code class="p">);</code><code> </code><a class="co" id="co_functions_CO6-1" href="#callout_functions_CO6-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nx">logger</code><code class="p">(</code><code class="s1">'This is another message'</code><code class="p">);</code><a class="co" id="co_functions_CO6-2" href="#callout_functions_CO6-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_functions_CO6-1" href="#co_functions_CO6-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The first time <code>logger()</code> is called, it will <a data-type="indexterm" data-primary="logger() function" id="idm45875189887600"></a><a data-type="indexterm" data-primary="functions" data-secondary="logger()" id="idm45875189886976"></a>define the value of the static <code>$dbh</code> variable. In this case, it will connect to a database by using the <a href="https://oreil.ly/do1eJ">PHP Data Objects (PDO)</a> interface. This interface is a standard object provided by PHP for accessing databases.</p></dd>
+<dt><a class="co" id="callout_functions_CO6-2" href="#co_functions_CO6-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Every subsequent call to <code>logger()</code> will leverage the initial connection opened to the database and stored in <code>$dbh</code>.</p></dd>
+</dl></div>
+
+<p>Note that PHP automatically manages its memory usage and automatically clears variables from memory when they leave scope. For regular variables within a function, this means the variables are freed from memory as soon as the function completes. Static and global variables are <em>never</em> cleaned up until the program itself exits, as they are always in scope. Take care when using the <code>static</code> keyword to ensure that you aren’t storing unnecessarily large pieces of data in memory. In <a data-type="xref" href="#static_database_connection">Example 3-18</a>, you open a connection to a database that will never be automatically closed by the function you’ve created.</p>
+
+<p>While the <code>static</code> keyword can be a powerful way to reuse state across function calls, it should be used with care to ensure that your application doesn’t do anything unexpected. In many cases, it might be better to explicitly pass variables representing state into the function. Even better would be to encapsulate the function’s state as part <a data-type="indexterm" data-primary="functions" data-secondary="state, managing" data-startref="fcsttg" id="idm45875189839936"></a><a data-type="indexterm" data-primary="state" data-secondary="managing" data-startref="sttmgg" id="idm45875189838688"></a>of an overarching object, which is covered in <a data-type="xref" href="ch08.html#chapter_classes">Chapter 8</a>.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875189836416">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/-yflc">variable scoping, including the <code>static</code> keyword</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.9 Defining Dynamic Functions"><div class="sect1" id="anonymous_functions">
+<h1>3.9 Defining Dynamic Functions</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875189832144">
+<h2>Problem</h2>
+
+<p>You want to define an anonymous function <a data-type="indexterm" data-primary="dynamic functions, defining" id="dynmfc"></a><a data-type="indexterm" data-primary="functions" data-secondary="dynamic, defining" id="fceynmf"></a>and reference it as a variable within your application because you only want to use or call the function a single time.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875189828096">
+<h2>Solution</h2>
+
+<p>Define a closure that can be assigned to a variable and passed into another function as needed:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$greet</code> <code class="o">=</code> <code class="k">function</code><code class="p">(</code><code class="nv">$name</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">echo</code> <code class="s1">'Hello, '</code> <code class="o">.</code> <code class="nv">$name</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="p">};</code>
+
+<code class="nv">$greet</code><code class="p">(</code><code class="s1">'World!'</code><code class="p">);</code>
+<code class="c1">// Hello, World!</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875189800480">
+<h2>Discussion</h2>
+
+<p>Whereas most functions in PHP have defined names, <a data-type="indexterm" data-primary="functions" data-secondary="anonymous" id="idm45875189805248"></a><a data-type="indexterm" data-primary="anonymous functions" id="idm45875189804272"></a><a data-type="indexterm" data-primary="closures" id="idm45875189803600"></a><a data-type="indexterm" data-primary="Lambdas" id="idm45875189802928"></a>the language supports the creation of unnamed (so-called <em>anonymous</em>) functions, also called <em>closures</em> or <em>lambdas</em>. These functions can encapsulate either simple or complex logic and can be assigned directly to variables for reference elsewhere in the program.</p>
+
+<p>Internally, anonymous functions are implemented using PHP’s native <a href="https://oreil.ly/u5qt7"><code>Closure</code></a> class. This class is declared as <code>final</code>, which means no class can extend it directly. Yet, anonymous functions are all instances of this class and can be used either directly as functions or as objects.</p>
+
+<p>By default, closures do not inherit any scope from the parent application and, like regular functions, define variables within their own scope. Variables from the parent scope can be passed directly into a closure by leveraging the <code>use</code> directive when defining a function. <a data-type="xref" href="#closure_with_use">Example 3-19</a> illustrates how variables from one scope can be passed into another dynamically.</p>
+<div id="closure_with_use" data-type="example">
+<h5><span class="label">Example 3-19. </span>Passing a variable between scopes with <code>use()</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$some_value</code> <code class="o">=</code> <code class="mi">42</code><code class="p">;</code>
+
+<code class="nv">$foo</code> <code class="o">=</code> <code class="k">function</code><code class="p">()</code> <code class="p">{</code>
+    <code class="k">echo</code> <code class="nv">$some_value</code><code class="p">;</code>
+<code class="p">};</code>
+
+<code class="nv">$bar</code> <code class="o">=</code> <code class="k">function</code><code class="p">()</code> <code class="k">use</code> <code class="p">(</code><code class="nv">$some_value</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">echo</code> <code class="nv">$some_value</code><code class="p">;</code>
+<code class="p">};</code>
+
+<code class="nv">$foo</code><code class="p">();</code> <code class="c1">// Warning: Undefined variable</code>
+
+<code class="nv">$bar</code><code class="p">();</code> <code class="c1">// 42</code></pre></div>
+
+<p>Anonymous functions are used in many projects to encapsulate a piece of logic for application against a collection of data. The next recipe covers exactly that use case.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>Older versions of PHP used <a href="https://oreil.ly/RRMgO"><code>create_function()</code></a> for similar utility. Developers could create an anonymous function as a string and pass that <a data-type="indexterm" data-primary="create_function() function" id="idm45875184028624"></a><a data-type="indexterm" data-primary="functions" data-secondary="create_function()" id="idm45875184027984"></a>code into <code>create_function()</code> to turn it into a closure instance. Unfortunately, this method used <code>eval()</code> under the hood to evaluate the string—a practice considered highly unsafe. While some older projects might still use <code>create_function()</code>, the function itself was deprecated in PHP 7.2 and removed from the language entirely in <a data-type="indexterm" data-primary="dynamic functions, defining" data-startref="dynmfc" id="idm45875184025552"></a><a data-type="indexterm" data-primary="functions" data-secondary="dynamic, defining" data-startref="fceynmf" id="idm45875184024608"></a>version 8.0.</p>
+</div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875184023136">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/W0QPL">anonymous functions</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.10 Passing Functions as Parameters to Other Functions"><div class="sect1" id="idm45875184020832">
+<h1>3.10 Passing Functions as Parameters to Other Functions</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875184019552">
+<h2>Problem</h2>
+
+<p>You want to define part of a <a data-type="indexterm" data-primary="functions" data-secondary="passing as parameters" id="fctnssrm"></a><a data-type="indexterm" data-primary="passing" data-secondary="functions as parameters" id="pfctprm"></a><a data-type="indexterm" data-primary="parameters" data-secondary="passing functions as" id="prmtfc"></a>function’s implementation and pass that implementation as an argument to another function.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875184014048">
+<h2>Solution</h2>
+
+<p>Define a closure that implements part of the logic you need and pass that directly into another function as if it were any other variable:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$reducer</code> <code class="o">=</code> <code class="k">function</code><code class="p">(</code><code class="o">?</code><code class="nx">int</code> <code class="nv">$carry</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$item</code><code class="p">)</code><code class="o">:</code> <code class="nx">int</code> <code class="p">{</code>
+    <code class="k">return</code> <code class="nv">$carry</code> <code class="o">+</code> <code class="nv">$item</code><code class="p">;</code>
+<code class="p">};</code>
+
+<code class="k">function</code> <code class="nf">reduce</code><code class="p">(</code><code class="k">array</code> <code class="nv">$array</code><code class="p">,</code> <code class="nx">callable</code> <code class="nv">$callback</code><code class="p">,</code> <code class="o">?</code><code class="nx">int</code> <code class="nv">$initial</code> <code class="o">=</code> <code class="k">null</code><code class="p">)</code><code class="o">:</code> <code class="o">?</code><code class="nx">int</code>
+<code class="p">{</code>
+    <code class="nv">$acc</code> <code class="o">=</code> <code class="nv">$initial</code><code class="p">;</code>
+    <code class="k">foreach</code> <code class="p">(</code><code class="nv">$array</code> <code class="k">as</code> <code class="nv">$item</code><code class="p">)</code> <code class="p">{</code>
+        <code class="nv">$acc</code> <code class="o">=</code> <code class="nv">$callback</code><code class="p">(</code><code class="nv">$acc</code><code class="p">,</code> <code class="nv">$item</code><code class="p">);</code>
+    <code class="p">}</code>
+
+    <code class="k">return</code> <code class="nv">$acc</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nv">$list</code> <code class="o">=</code> <code class="p">[</code><code class="mi">1</code><code class="p">,</code> <code class="mi">2</code><code class="p">,</code> <code class="mi">3</code><code class="p">,</code> <code class="mi">4</code><code class="p">,</code> <code class="mi">5</code><code class="p">];</code>
+<code class="nv">$sum</code> <code class="o">=</code> <code class="nx">reduce</code><code class="p">(</code><code class="nv">$list</code><code class="p">,</code> <code class="nv">$reducer</code><code class="p">);</code> <code class="c1">// 15</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875189253888">
+<h2>Discussion</h2>
+
+<p>PHP is considered by many to be a <em>functional language</em>, as functions are first-class elements in the <a data-type="indexterm" data-primary="functional languages" id="idm45875183949840"></a>language and can be bound to variable names, passed as arguments, or even returned from other functions. PHP supports functions as variables through the <a href="https://oreil.ly/m7skJ">callable</a> type as implemented in the language. Many core functions (like <code>usort()</code>, <code>array_map()</code>, and <code>array_reduce()</code>) support passing a callable parameter, which is then used internally to define the function’s overall implementation.</p>
+
+<p>The <code>reduce()</code> function defined <a data-type="indexterm" data-primary="reduce() function" id="idm45875183946288"></a><a data-type="indexterm" data-primary="functions" data-secondary="reduce()" id="idm45875183945552"></a>in the Solution example is a user-written implementation of PHP’s native <code>array_reduce()</code> function. Both have the same behavior, and the Solution could be rewritten to pass <code>$reducer</code> directly into PHP’s native implementation with no change in the result:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$sum</code> <code class="o">=</code> <code class="nb">array_reduce</code><code class="p">(</code><code class="nv">$list</code><code class="p">,</code> <code class="nv">$reducer</code><code class="p">);</code> <code class="c1">// 15</code></pre>
+
+<p>Since functions can be passed around like any other variable, PHP has the ability to define partial implementations of functions. This is achieved by defining a function that, in turn, returns another function that can be used elsewhere in the program.</p>
+
+<p>For example, you can define a function to set up a basic multiplier routine that multiplies any input by a <em>fixed</em> base amount, as in <a data-type="xref" href="#partial_function_multiplier">Example 3-20</a>. The main function returns a new function each time you call it, so you can create functions to double or triple arbitrary values and use them however you want.</p>
+<div id="partial_function_multiplier" data-type="example">
+<h5><span class="label">Example 3-20. </span>Partially applied multiplier function</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">multiplier</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$base</code><code class="p">)</code><code class="o">:</code> <code class="nx">callable</code>
+<code class="p">{</code>
+    <code class="k">return</code> <code class="k">function</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$subject</code><code class="p">)</code> <code class="k">use</code> <code class="p">(</code><code class="nv">$base</code><code class="p">)</code><code class="o">:</code> <code class="nx">int</code> <code class="p">{</code>
+        <code class="k">return</code> <code class="nv">$base</code> <code class="o">*</code> <code class="nv">$subject</code><code class="p">;</code>
+    <code class="p">};</code>
+<code class="p">}</code>
+
+<code class="nv">$double</code> <code class="o">=</code> <code class="nx">multiplier</code><code class="p">(</code><code class="mi">2</code><code class="p">);</code>
+<code class="nv">$triple</code> <code class="o">=</code> <code class="nx">multiplier</code><code class="p">(</code><code class="mi">3</code><code class="p">);</code>
+
+<code class="nv">$double</code><code class="p">(</code><code class="mi">6</code><code class="p">);</code>  <code class="c1">// 12</code>
+<code class="nv">$double</code><code class="p">(</code><code class="mi">10</code><code class="p">);</code> <code class="c1">// 20</code>
+<code class="nv">$triple</code><code class="p">(</code><code class="mi">3</code><code class="p">);</code>  <code class="c1">// 9</code>
+<code class="nv">$triple</code><code class="p">(</code><code class="mi">12</code><code class="p">);</code> <code class="c1">// 36</code></pre></div>
+
+<p>Breaking functions apart like this is known as <a href="https://oreil.ly/-" class="bare"><em class="hyperlink">https://oreil.ly/-</em></a><em>a4l[_currying</em>]. This is the <a data-type="indexterm" data-primary="currying" id="crryg"></a>practice of changing a function with multiple input parameters into a series of functions, that each take a <em>single</em> parameter, with most of those parameters being functions themselves. To fully illustrate how this can work in PHP, let’s look at <a data-type="xref" href="#multiplier_currying_walkthrough">Example 3-21</a> and walk through a <a data-type="indexterm" data-primary="multiplier() function" id="idm45875189403024"></a><a data-type="indexterm" data-primary="functions" data-secondary="multiplier()" id="idm45875189402320"></a>rewrite of the <code>multiplier()</code> function.</p>
+<div id="multiplier_currying_walkthrough" data-type="example">
+<h5><span class="label">Example 3-21. </span>Walk-through of currying in PHP</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code><code> </code><code class="nf">multiply</code><code class="p">(</code><code class="nx">int</code><code> </code><code class="nv">$x</code><code class="p">,</code><code> </code><code class="nx">int</code><code> </code><code class="nv">$y</code><code class="p">)</code><code class="o">:</code><code> </code><code class="nx">int</code><code> </code><a class="co" id="co_functions_CO7-1" href="#callout_functions_CO7-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">return</code><code> </code><code class="nv">$x</code><code> </code><code class="o">*</code><code> </code><code class="nv">$y</code><code class="p">;</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nx">multiply</code><code class="p">(</code><code class="mi">7</code><code class="p">,</code><code> </code><code class="mi">3</code><code class="p">);</code><code> </code><code class="c1">// 21
+</code><code>
+</code><code class="k">function</code><code> </code><code class="nf">curried_multiply</code><code class="p">(</code><code class="nx">int</code><code> </code><code class="nv">$x</code><code class="p">)</code><code class="o">:</code><code> </code><code class="nx">callable</code><code> </code><a class="co" id="co_functions_CO7-2" href="#callout_functions_CO7-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">return</code><code> </code><code class="k">function</code><code class="p">(</code><code class="nx">int</code><code> </code><code class="nv">$y</code><code class="p">)</code><code> </code><code class="k">use</code><code> </code><code class="p">(</code><code class="nv">$x</code><code class="p">)</code><code class="o">:</code><code> </code><code class="nx">int</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_functions_CO7-3" href="#callout_functions_CO7-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+        </code><code class="k">return</code><code> </code><code class="nv">$x</code><code> </code><code class="o">*</code><code> </code><code class="nv">$y</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO7-4" href="#callout_functions_CO7-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+    </code><code class="p">};</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nx">curried_multiply</code><code class="p">(</code><code class="mi">7</code><code class="p">)(</code><code class="mi">3</code><code class="p">);</code><code> </code><code class="c1">// 21 </code><a class="co" id="co_functions_CO7-5" href="#callout_functions_CO7-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_functions_CO7-1" href="#co_functions_CO7-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The most basic form of the function takes two values, multiplies them together, and returns a final result.</p></dd>
+<dt><a class="co" id="callout_functions_CO7-2" href="#co_functions_CO7-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>When you curry the function, you want each <a data-type="indexterm" data-primary="functions" data-secondary="curried" id="fctnsrrd"></a>component function to only take a single value. The new <code>curried_multiply()</code> only accepts one parameter but returns a function that leverages that parameter internally.</p></dd>
+<dt><a class="co" id="callout_functions_CO7-3" href="#co_functions_CO7-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>The internal function references the value passed by your previous function invocation automatically (with the <code>use</code> directive).</p></dd>
+<dt><a class="co" id="callout_functions_CO7-4" href="#co_functions_CO7-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>The resulting function implements the same business logic as the basic form.</p></dd>
+<dt><a class="co" id="callout_functions_CO7-5" href="#co_functions_CO7-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p>Calling a curried function has the appearance of calling <em>multiple</em> functions in series, but the result is the same.</p></dd>
+</dl></div>
+
+<p>The biggest advantage of currying, as in <a data-type="xref" href="#multiplier_currying_walkthrough">Example 3-21</a>, is that a partially applied function can be passed around as a variable and used elsewhere. Similar to using the <code>mul⁠tiplier()</code> function, you can create a doubling or tripling function by <em>partially</em> applying your curried multiplier as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$double</code> <code class="o">=</code> <code class="nx">curried_multiply</code><code class="p">(</code><code class="mi">2</code><code class="p">);</code>
+<code class="nv">$triple</code> <code class="o">=</code> <code class="nx">curried_multiply</code><code class="p">(</code><code class="mi">3</code><code class="p">);</code></pre>
+
+<p>Partially applied, curried functions are themselves <a data-type="indexterm" data-primary="functions" data-secondary="passing as parameters" data-startref="fctnssrm" id="idm45875189288528"></a><a data-type="indexterm" data-primary="passing" data-secondary="functions as parameters" data-startref="pfctprm" id="idm45875189287440"></a><a data-type="indexterm" data-primary="parameters" data-secondary="passing functions as" data-startref="prmtfc" id="idm45875189286224"></a><a data-type="indexterm" data-primary="currying" data-startref="crryg" id="idm45875189285008"></a><a data-type="indexterm" data-primary="functions" data-secondary="curried" data-startref="fctnsrrd" id="idm45875189284064"></a>callable functions but can be passed into other functions as variables and fully invoked later.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875189253296">
+<h2>See Also</h2>
+
+<p>Details on anonymous functions in <a data-type="xref" href="#anonymous_functions">Recipe 3.9</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.11 Using Concise Function Definitions (Arrow Functions)"><div class="sect1" id="idm45875184943456">
+<h1>3.11 Using Concise Function Definitions (Arrow Functions)</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875184942208">
+<h2>Problem</h2>
+
+<p>You want to create a simple, anonymous <a data-type="indexterm" data-primary="functions" data-secondary="arrow functions" id="furrwu"></a><a data-type="indexterm" data-primary="arrow functions" id="arrfct"></a>function that references the parent scope without verbose <code>use</code> declarations.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875184937920">
+<h2>Solution</h2>
+
+<p>Use PHP’s short anonymous function (arrow function) syntax to define a function that inherits its parent’s scope automatically:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$outer</code> <code class="o">=</code> <code class="mi">42</code><code class="p">;</code>
+
+<code class="nv">$anon</code> <code class="o">=</code> <code class="nx">fn</code><code class="p">(</code><code class="nv">$add</code><code class="p">)</code> <code class="o">=&gt;</code> <code class="nv">$outer</code> <code class="o">+</code> <code class="nv">$add</code><code class="p">;</code>
+
+<code class="nv">$anon</code><code class="p">(</code><code class="mi">5</code><code class="p">);</code> <code class="c1">// 47</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875184924848">
+<h2>Discussion</h2>
+
+<p><em>Arrow functions</em> were introduced in PHP 7.4 as a way to write more concise anonymous functions, as in <a data-type="xref" href="#anonymous_functions">Recipe 3.9</a>. Arrow functions automatically capture any 
+<span class="keep-together">referenced</span> variables and import them (by value rather than by reference) into the scope of the function.</p>
+
+<p>A more verbose version of the Solution example could be written as shown in <a data-type="xref" href="#verbose_anonymous_function">Example 3-22</a> while still achieving the same level of functionality.</p>
+<div id="verbose_anonymous_function" data-type="example">
+<h5><span class="label">Example 3-22. </span>Long form of an anonymous function</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$outer</code> <code class="o">=</code> <code class="mi">42</code><code class="p">;</code>
+
+<code class="nv">$anon</code> <code class="o">=</code> <code class="k">function</code><code class="p">(</code><code class="nv">$add</code><code class="p">)</code> <code class="k">use</code> <code class="p">(</code><code class="nv">$outer</code><code class="p">)</code> <code class="p">{</code>
+    <code class="k">return</code> <code class="nv">$outer</code> <code class="o">+</code> <code class="nv">$add</code><code class="p">;</code>
+<code class="p">};</code>
+
+<code class="nv">$anon</code><code class="p">(</code><code class="mi">5</code><code class="p">);</code></pre></div>
+
+<p>Arrow functions always return a value—it is impossible to either implicitly or explicitly return <code>void</code>. These functions follow a very specific syntax and always return the result of their expression: <code><em>fn</em> (<em>arguments</em>) =&gt; <em>expression</em></code>. This structure makes arrow functions useful in a wide variety of situations.</p>
+
+<p>One example is a concise inline definition of a function to be applied to all elements in an array via PHP’s native <code>array_map()</code>. Assume input user data is an array of strings that each represent an integer value and you want to convert the array of strings into an array of integers to enforce proper type safety. This can easily be accomplished via <a data-type="xref" href="#convert_string_array_to_integers">Example 3-23</a>.</p>
+<div id="convert_string_array_to_integers" data-type="example">
+<h5><span class="label">Example 3-23. </span>Convert an array of numeric strings to an array of integers</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$input</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'5'</code><code class="p">,</code> <code class="s1">'22'</code><code class="p">,</code> <code class="s1">'1093'</code><code class="p">,</code> <code class="s1">'2022'</code><code class="p">];</code>
+
+<code class="nv">$output</code> <code class="o">=</code> <code class="nb">array_map</code><code class="p">(</code><code class="nx">fn</code><code class="p">(</code><code class="nv">$x</code><code class="p">)</code> <code class="o">=&gt;</code> <code class="nb">intval</code><code class="p">(</code><code class="nv">$x</code><code class="p">),</code> <code class="nv">$input</code><code class="p">);</code>
+<code class="c1">// $output = [5, 22, 1093, 2022]</code></pre></div>
+
+<p>Arrow functions only permit a single-line expression. If your logic is complicated enough to require multiple expressions, use a standard anonymous function (see <a data-type="xref" href="#anonymous_functions">Recipe 3.9</a>) or define a named function in your code. This being said, an arrow function itself is an expression, so one arrow function can actually return another.</p>
+
+<p>The ability to return an arrow function as the expression of another arrow function leads to a way to use arrow functions in <em>curried</em> or partially applied functions to encourage code reuse. Assume you want to pass a function in the program that performs modulo arithmetic with a fixed modulus. You can do so by defining one arrow function to perform the calculation and wrap it in another that specifies the modulus, assigning the final, curried function to a variable you can use elsewhere, as in <a data-type="xref" href="#curried_arrow_functions">Example 3-24</a>.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>Modulo arithmetic is used to create <em>clock functions</em> that always <a data-type="indexterm" data-primary="modulo arithmetic" id="idm45875185049536"></a><a data-type="indexterm" data-primary="clock functions" id="idm45875185048800"></a><a data-type="indexterm" data-primary="functions" data-secondary="clock functions" id="idm45875185048128"></a>return a specific set of integer values regardless of the integer input. You take the modulus of two integers by dividing them and returning the integer remainder. For example, “12 modulo 3” is written as <code>12 % 3</code> and returns the remainder of <code>12/3</code>, or <code>0</code>. Similarly, “15 modulo 6” is written as <code>15 % 6</code> and returns the remainder of <code>15/6</code>, or <code>3</code>. The return of a modulo operation is never greater than the modulus itself (<code>3</code> or <code>6</code> in the previous two examples, respectively). Modulo arithmetic is commonly used to group large collections of input values together or to power cryptographic operations, which are discussed <a data-type="indexterm" data-primary="currying" data-secondary="arrow functions and" id="crryfct"></a><a data-type="indexterm" data-primary="arrow functions" data-secondary="currying" id="arfry"></a>further in <a data-type="xref" href="ch09.html#chapter_encryption">Chapter 9</a>.</p>
+</div>
+<div id="curried_arrow_functions" data-type="example">
+<h5><span class="label">Example 3-24. </span>Function currying with arrow functions</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$modulo</code> <code class="o">=</code> <code class="nx">fn</code><code class="p">(</code><code class="nv">$x</code><code class="p">)</code> <code class="o">=&gt;</code> <code class="nx">fn</code><code class="p">(</code><code class="nv">$y</code><code class="p">)</code> <code class="o">=&gt;</code> <code class="nv">$y</code> <code class="o">%</code> <code class="nv">$x</code><code class="p">;</code>
+
+<code class="nv">$mod_2</code> <code class="o">=</code> <code class="nv">$modulo</code><code class="p">(</code><code class="mi">2</code><code class="p">);</code>
+<code class="nv">$mod_5</code> <code class="o">=</code> <code class="nv">$modulo</code><code class="p">(</code><code class="mi">5</code><code class="p">);</code>
+
+<code class="nv">$mod_2</code><code class="p">(</code><code class="mi">15</code><code class="p">);</code> <code class="c1">// 1</code>
+<code class="nv">$mod_2</code><code class="p">(</code><code class="mi">20</code><code class="p">);</code> <code class="c1">// 0</code>
+<code class="nv">$mod_5</code><code class="p">(</code><code class="mi">12</code><code class="p">);</code> <code class="c1">// 2</code>
+<code class="nv">$mod_5</code><code class="p">(</code><code class="mi">15</code><code class="p">);</code> <code class="c1">// 0</code></pre></div>
+
+<p>Finally, just like regular functions, arrow functions can accept multiple arguments. Rather than passing a single variable (or implicitly referencing variables defined in the parent scope), you can just as easily define a function with multiple parameters and freely use them within the expression. A trivial equality function might use an <a data-type="indexterm" data-primary="currying" data-secondary="arrow functions and" data-startref="crryfct" id="idm45875186669344"></a><a data-type="indexterm" data-primary="arrow functions" data-secondary="currying" data-startref="arfry" id="idm45875189025616"></a>arrow function as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$eq</code> <code class="o">=</code> <code class="nx">fn</code><code class="p">(</code><code class="nv">$x</code><code class="p">,</code> <code class="nv">$y</code><code class="p">)</code> <code class="o">=&gt;</code> <code class="nv">$x</code> <code class="o">==</code> <code class="nv">$y</code><code class="p">;</code>
+
+<code class="nv">$eq</code><code class="p">(</code><code class="mi">42</code><code class="p">,</code> <code class="s1">'42'</code><code class="p">);</code> <code class="c1">// true</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875188960816">
+<h2>See Also</h2>
+
+<p>Details on anonymous functions in <a data-type="xref" href="#anonymous_functions">Recipe 3.9</a> and <a data-type="indexterm" data-primary="functions" data-secondary="arrow functions" data-startref="furrwu" id="idm45875188989872"></a><a data-type="indexterm" data-primary="arrow functions" data-startref="arrfct" id="idm45875188988624"></a>the PHP Manual documentation on <a href="https://oreil.ly/MLURC">arrow functions</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.12 Creating a Function with No Return Value"><div class="sect1" id="idm45875188940864">
+<h1>3.12 Creating a Function with No Return Value</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875188939648">
+<h2>Problem</h2>
+
+<p>You need to define a function that does not <a data-type="indexterm" data-primary="functions" data-secondary="return values" id="fcrtrvl"></a><a data-type="indexterm" data-primary="return values, none" id="rtrnv"></a>return data to the rest of the program after it completes.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875188935744">
+<h2>Solution</h2>
+
+<p>Use explicit type declarations and <a data-type="indexterm" data-primary="void return type" id="idm45875188934448"></a><a data-type="indexterm" data-primary="return types" data-secondary="void" id="idm45875188933744"></a>reference the <code>void</code> return type:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">const</code> <code class="no">MAIL_SENDER</code> <code class="o">=</code> <code class="s1">'wizard@oz.example'</code><code class="p">;</code>
+<code class="k">const</code> <code class="no">MAIL_SUBJECT</code> <code class="o">=</code> <code class="s1">'Incoming from the Wonderful Wizard'</code><code class="p">;</code>
+
+<code class="k">function</code> <code class="nf">send_email</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$to</code><code class="p">,</code> <code class="nx">string</code> <code class="nv">$message</code><code class="p">)</code><code class="o">:</code> <code class="nx">void</code>
+<code class="p">{</code>
+    <code class="nv">$headers</code> <code class="o">=</code> <code class="p">[</code><code class="s1">'From'</code> <code class="o">=&gt;</code> <code class="nx">MAIL_SENDER</code><code class="p">];</code>
+
+    <code class="nv">$success</code> <code class="o">=</code> <code class="nb">mail</code><code class="p">(</code><code class="nv">$to</code><code class="p">,</code> <code class="nx">MAIL_SUBJECT</code><code class="p">,</code> <code class="nv">$message</code><code class="p">,</code> <code class="nv">$headers</code><code class="p">);</code>
+
+    <code class="k">if</code> <code class="p">(</code><code class="o">!</code><code class="nv">$success</code><code class="p">)</code> <code class="p">{</code>
+        <code class="k">throw</code> <code class="k">new</code> <code class="nx">Exception</code><code class="p">(</code><code class="s1">'The man behind the curtain is on break.'</code><code class="p">);</code>
+    <code class="p">}</code>
+<code class="p">}</code>
+
+<code class="nx">send_email</code><code class="p">(</code><code class="s1">'dorothy@kansas.example'</code><code class="p">,</code> <code class="s1">'Welcome to the Emerald City!'</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875189186256">
+<h2>Discussion</h2>
+
+<p>The Solution example uses PHP’s native <code>mail()</code> function to dispatch a simple message with a static subject to the specified recipient. PHP’s <code>mail()</code> returns either <code>true</code> (on success) or <code>false</code> (when there’s an error). In the Solution example, you merely want to throw an exception when something goes wrong but otherwise want to return silently.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>In many cases, you might want to return a flag—a Boolean value or a string or <code>null</code>—when a function completes to indicate what has happened so the rest of your program can behave appropriately. Functions that return <em>nothing</em> are relatively rare, but they do come up when your program is communicating with an outside party and the result of that communication doesn’t impact the rest of the program. Sending a fire-and-forget connection to a message queue or logging to the system error log are both common use cases for a function that returns <code>void</code>.</p>
+</div>
+
+<p>The <code>void</code> return type is enforced on compile time in PHP, meaning your code will trigger a fatal error if the function body returns <em>anything</em> at all, even if you haven’t executed anything yet. <a data-type="xref" href="#valid_and_invalid_void">Example 3-25</a> illustrates both valid and invalid uses of <code>void</code>.</p>
+<div id="valid_and_invalid_void" data-type="example">
+<h5><span class="label">Example 3-25. </span>Valid and invalid uses of the <code>void</code> return type</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code><code> </code><code class="nf">returns_scalar</code><code class="p">()</code><code class="o">:</code><code> </code><code class="nx">void</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">return</code><code> </code><code class="mi">1</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO8-1" href="#callout_functions_CO8-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="p">}</code><code>
+
+</code><code class="k">function</code><code> </code><code class="nf">no_return</code><code class="p">()</code><code class="o">:</code><code> </code><code class="nx">void</code><code>
+</code><code class="p">{</code><code>
+    </code><a class="co" id="co_functions_CO8-2" href="#callout_functions_CO8-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="p">}</code><code>
+
+</code><code class="k">function</code><code> </code><code class="nf">empty_return</code><code class="p">()</code><code class="o">:</code><code> </code><code class="nx">void</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">return</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO8-3" href="#callout_functions_CO8-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+</code><code class="p">}</code><code>
+
+</code><code class="k">function</code><code> </code><code class="nf">returns_null</code><code class="p">()</code><code class="o">:</code><code> </code><code class="nx">void</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">return</code><code> </code><code class="k">null</code><code class="p">;</code><code> </code><a class="co" id="co_functions_CO8-4" href="#callout_functions_CO8-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+</code><code class="p">}</code></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_functions_CO8-1" href="#co_functions_CO8-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>Returning a scalar type (such as a string, integer, or Boolean) will trigger a fatal error.</p></dd>
+<dt><a class="co" id="callout_functions_CO8-2" href="#co_functions_CO8-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Omitting any kind of return in a function is valid.</p></dd>
+<dt><a class="co" id="callout_functions_CO8-3" href="#co_functions_CO8-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>Explicitly returning no data is valid.</p></dd>
+<dt><a class="co" id="callout_functions_CO8-4" href="#co_functions_CO8-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p>Even though <code>null</code> is “empty,” it still counts as a return and will trigger a fatal error.</p></dd>
+</dl></div>
+
+<p>Unlike most other types in PHP, the <code>void</code> type is only valid for returns. It cannot be used as a parameter type in a function <a data-type="indexterm" data-primary="functions" data-secondary="return values" data-startref="fcrtrvl" id="idm45875185870576"></a><a data-type="indexterm" data-primary="return values, none" data-startref="rtrnv" id="idm45875185869440"></a>definition; attempts to do so will result in a fatal error at compile time.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875185868240">
+<h2>See Also</h2>
+
+<p>The <a href="https://oreil.ly/FvRb_">original RFC introducing the <code>void</code> return type</a> in PHP 7.1.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="3.13 Creating a Function That Does Not Return"><div class="sect1" id="idm45875185865552">
+<h1>3.13 Creating a Function That Does Not Return</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875185864272">
+<h2>Problem</h2>
+
+<p>You need to define a function that <a data-type="indexterm" data-primary="functions" data-secondary="returns, none" id="fcrrnn"></a><a data-type="indexterm" data-primary="returns, none" id="rtrnnn"></a>explicitly exits and to ensure that other parts of your application are aware it will never return.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875185860256">
+<h2>Solution</h2>
+
+<p>Use explicit type annotations and reference the <code>never</code> return type. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">redirect</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$url</code><code class="p">)</code><code class="o">:</code> <code class="nx">never</code>
+<code class="p">{</code>
+    <code class="nb">header</code><code class="p">(</code><code class="s2">"Location: </code><code class="si">$url</code><code class="s2">"</code><code class="p">);</code>
+    <code class="k">exit</code><code class="p">();</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875185805936">
+<h2>Discussion</h2>
+
+<p>Some operations in PHP are intended to be the last action the engine takes before exiting the current process. Calling <code>header()</code> to <a data-type="indexterm" data-primary="functions" data-secondary="header()" id="idm45875185804016"></a><a data-type="indexterm" data-primary="header() function" id="idm45875185803008"></a>define a specific response header must be done prior to printing any body to the response itself. Specifically, calling <code>header()</code> to trigger a redirect is usually the last thing you want your application to do—printing any body text or processing any other operation after you’ve told the requesting client to redirect elsewhere has no meaning or value.</p>
+
+<p>The <code>never</code> return type signals both to PHP <a data-type="indexterm" data-primary="never return type" id="idm45875185837984"></a><a data-type="indexterm" data-primary="return types" data-secondary="never" id="idm45875185837280"></a>and to other parts of your code that the function is <em>guaranteed</em> to halt the program’s execution by way of either <code>exit()</code> or <code>die()</code> or throwing an exception.</p>
+
+<p>If a function that leverages the <code>never</code> return type still returns implicitly, as in <a data-type="xref" href="#never_implicit_return">Example 3-26</a>, PHP will throw a <code>TypeError</code> exception.</p>
+<div id="never_implicit_return" data-type="example">
+<h5><span class="label">Example 3-26. </span>Implicit return in a function that should never return</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">log_to_screen</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$message</code><code class="p">)</code><code class="o">:</code> <code class="nx">never</code>
+<code class="p">{</code>
+    <code class="k">echo</code> <code class="nv">$message</code><code class="p">;</code>
+<code class="p">}</code></pre></div>
+
+<p>Likewise, if a <code>never</code>-typed function <em>explicitly</em> returns a value, PHP will throw a <code>TypeError</code> exception. In both situations, whether an implicit or an explicit return, this exception is enforced at call time (when the function is invoked) rather than when the function is <a data-type="indexterm" data-primary="functions" data-secondary="returns, none" data-startref="fcrrnn" id="idm45875185461280"></a><a data-type="indexterm" data-primary="returns, none" data-startref="rtrnnn" id="idm45875185460096"></a>defined.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875185458896">
+<h2>See Also</h2>
+
+<p>The <a href="https://oreil.ly/wO3zv">original RFC introducing the <code>never</code> return type</a> in PHP 8.1.</p>
+</div></section>
+</div></section>
+<div data-type="footnotes"><p data-type="footnote" id="idm45875184619360"><sup><a href="ch03.html#idm45875184619360-marker">1</a></sup> Custom classes and objects are discussed at length in <a data-type="xref" href="ch08.html#chapter_classes">Chapter 8</a>.</p><p data-type="footnote" id="idm45875190957904"><sup><a href="ch03.html#idm45875190957904-marker">2</a></sup> <a href="https://oreil.ly/G4tHg">PHP CodeSniffer</a> is a popular developer tool for automatically scanning a codebase and ensuring that all code matches a specific coding standard. It can be trivially extended to enforce a strict type declaration in all files as well.</p><p data-type="footnote" id="idm45875191172432"><sup><a href="ch03.html#idm45875191172432-marker">3</a></sup> The market reach of WordPress was about 63% of websites using content management systems and more than 43% of all websites as of March 2023 according to <a href="https://oreil.ly/8Y_Zp">W3Techs</a>.</p></div></div></section></div>
+</div>
+</body>
+</html>

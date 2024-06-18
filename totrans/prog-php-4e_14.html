@@ -1,0 +1,146 @@
+<html><head></head><body><div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 13. JSON"><div class="chapter" id="json">
+<h1><span class="label">Chapter 13. </span>JSON</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="JSON (JavaScript Object Notation)" id="ix_json_ch13"/>Similar to XML, JavaScript Object Notation (JSON) was designed as a standardized data-interchange format. However, unlike XML, JSON is extremely lightweight and human-readable. While it takes many syntax cues from JavaScript, JSON is designed to be language-independent.</p>
+<p>JSON is built on two structures: collections of name/value pairs called <em>objects</em> (equivalent to PHP’s associative arrays) and ordered lists of values called <em>arrays</em> (equivalent to PHP’s indexed arrays). Each value can be one of a number of types: an object, an array, a string, a number, the Boolean values <code>TRUE</code> or <code>FALSE</code>, or <code>NULL</code> (indicating a lack of a value).</p>
+<section data-type="sect1" data-pdf-bookmark="Using JSON"><div class="sect1" id="using_json">
+<h1>Using JSON</h1>
+<p>The <em>json</em> extension, included by default in PHP installations, natively supports converting data to JSON format from PHP variables and vice versa.</p>
+<p>To get a JSON representation of a PHP variable, use <a contenteditable="false" data-type="indexterm" data-primary="json_encode function" id="idm45922752464840"/><code>json_encode()</code>:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$data</code><code> </code><code class="o">=</code><code> </code><code class="k">array</code><code class="p">(</code><code class="mi">1</code><code class="p">,</code><code> </code><code class="mi">2</code><code class="p">,</code><code> </code><code class="s2">"</code><code class="s2">three</code><code class="s2">"</code><code class="p">);</code><code>
+</code><code class="nv">$jsonData</code><code> </code><code class="o">=</code><code> </code><code class="nb">json_encode</code><code class="p">(</code><code class="nv">$data</code><code class="p">);</code><code>
+</code><code class="k">echo</code><code> </code><code class="nv">$jsonData</code><code class="p">;</code><code>
+</code><strong><code class="p">[</code><code class="mi">1</code><code class="p">,</code><code> </code><code class="mi">2</code><code class="p">,</code><code> </code><code class="s2">"</code><code class="s2">three</code><code class="s2">"</code><code class="p">]</code></strong></pre>
+<p>Similarly, if you have a string containing JSON data, you can turn it into a PHP variable using <a contenteditable="false" data-type="indexterm" data-primary="json_decode function" id="idm45922751982472"/><code>json_decode()</code>:</p>
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$jsonData</code><code> </code><code class="o">=</code><code> </code><code class="s2">"</code><code class="s2">[1, 2, [3, 4], </code><code class="se">\"</code><code class="s2">five</code><code class="se">\"</code><code class="s2">]</code><code class="s2">"</code><code class="p">;</code><code>
+</code><code class="nv">$data</code><code> </code><code class="o">=</code><code> </code><code class="nb">json_decode</code><code class="p">(</code><code class="nv">$jsonData</code><code class="p">);</code><code>
+</code><code class="nb">print_r</code><code class="p">(</code><code class="nv">$data</code><code class="p">);</code><code>
+</code><strong><code class="k">Array</code><code class="p">(</code><code> </code><code class="p">[</code><code class="mi">0</code><code class="p">]</code><code> </code><code class="o">=&gt;</code><code> </code><code class="mi">1</code><code> </code><code class="p">[</code><code class="mi">1</code><code class="p">]</code><code> </code><code class="o">=&gt;</code><code> </code><code class="mi">2</code><code> </code><code class="p">[</code><code class="mi">2</code><code class="p">]</code><code> </code><code class="o">=&gt;</code><code> </code><code class="k">Array</code><code class="p">(</code><code> </code><code class="p">[</code><code class="mi">0</code><code class="p">]</code><code> </code><code class="o">=&gt;</code><code> </code><code class="mi">3</code><code> </code><code class="p">[</code><code class="mi">1</code><code class="p">]</code><code> </code><code class="o">=&gt;</code><code> </code><code class="mi">4</code><code> </code><code class="p">)</code><code> </code><code class="p">[</code><code class="mi">3</code><code class="p">]</code><code> </code><code class="o">=&gt;</code><code> </code><code class="nx">five</code><code class="p">)</code></strong></pre>
+<p>If the string is invalid JSON, or if the string is not encoded in UTF-8 format, a single <code>NULL</code> value is returned instead.</p>
+<p>The value types in JSON are converted to PHP equivalents as follows:</p>
+<dl>
+<dt><code>object</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="object value type, JSON" id="idm45922751883288"/>An associative array containing the object’s key-value pairs. Each value is converted into its PHP equivalent as well.</dd>
+<dt><code>array</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="array value type, JSON" id="idm45922751881048"/>An indexed array containing the contained values, each converted into its PHP equivalent as well.</dd>
+<dt><code>string</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="string value type, JSON" id="idm45922751878840"/>Converts directly into a PHP string.</dd>
+<dt><code>number</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="number value type, JSON" id="idm45922751876744"/>Returns a number. If the value is too large to be represented by PHP’s number value, it returns <code>NULL</code>, unless <code>json_decode()</code> is called with the <code>JSON_BIGINT​_AS_STRING</code> (in which case, a string is returned).</dd>
+<dt><code>boolean</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="boolean value type, JSON" id="idm45922751873256"/>The Boolean <code>true</code> value is converted to <code>TRUE</code>; the Boolean <code>false</code> value is converted to <code>FALSE</code>.</dd>
+<dt><code>null</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="null value type, JSON" id="idm45922751869368"/>The <code>null</code> value, and any value that cannot be decoded, is converted to <code>NULL</code>.</dd>
+</dl>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="Serializing PHP Objects"><div class="sect1" id="serializing_php_objects">
+<h1>Serializing PHP Objects</h1>
+<p><a contenteditable="false" data-type="indexterm" data-primary="serialization" id="ix_serialize_json"/><a contenteditable="false" data-type="indexterm" data-primary="JsonSerializable interface" id="ix_json_serializable"/>Despite the similar names, there is no direct translation between PHP objects and JSON objects—what JSON calls an “object” is really an associative array. To convert JSON data into an instance of a PHP object class, you must write code to do so based on the format returned by the API.</p>
+<p>However, the <code>JsonSerializable</code> interface allows you to convert objects <em>into</em> JSON data however you like. If an object class does not implement the interface, <code>json_encode()</code> simply creates a JSON object containing keys and values corresponding to the object’s data members.</p>
+<p>Otherwise, <a contenteditable="false" data-type="indexterm" data-primary="json_encode function" id="idm45922751759592"/><code>json_encode()</code> calls the <code>jsonSerialize()</code> method on the class and uses that to serialize the object’s data.</p>
+<p><a data-type="xref" href="#example_onethree_onedot_book_and_author">Example 13-1</a> adds the <code>JsonSerializable</code> interface to the <code>Book</code> and <code>Author</code> classes.</p>
+<div data-type="example" id="example_onethree_onedot_book_and_author">
+<h5><span class="label">Example 13-1. </span>Book and Author JSON serialization</h5>
+<pre data-type="programlisting" data-code-language="php"><code class="k">class</code> <code class="nc">Book</code> <code class="k">implements</code> <code class="nx">JsonSerializable</code> <code class="p">{</code>
+ <code class="k">public</code> <code class="nv">$id</code><code class="p">;</code>
+ <code class="k">public</code> <code class="nv">$name</code><code class="p">;</code>
+ <code class="k">public</code> <code class="nv">$edition</code><code class="p">;</code>
+
+ <code class="k">public</code> <code class="k">function</code> <code class="nf-Magic">__construct</code><code class="p">(</code><code class="nv">$id</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">id</code> <code class="o">=</code> <code class="nv">$id</code><code class="p">;</code>
+ <code class="p">}</code>
+
+ <code class="k">public</code> <code class="k">function</code> <code class="nf">jsonSerialize</code><code class="p">()</code> <code class="p">{</code>
+ <code class="nv">$data</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code>
+ <code class="s1">'id'</code> <code class="o">=&gt;</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">id</code><code class="p">,</code>
+ <code class="s1">'name'</code> <code class="o">=&gt;</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">name</code><code class="p">,</code>
+ <code class="s1">'edition'</code> <code class="o">=&gt;</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">edition</code><code class="p">,</code>
+ <code class="p">);</code>
+
+ <code class="k">return</code> <code class="nv">$data</code><code class="p">;</code>
+ <code class="p">}</code>
+<code class="p">}</code>
+
+<code class="k">class</code> <code class="nc">Author</code> <code class="k">implements</code> <code class="nx">JsonSerializable</code> <code class="p">{</code>
+ <code class="k">public</code> <code class="nv">$id</code><code class="p">;</code>
+ <code class="k">public</code> <code class="nv">$name</code><code class="p">;</code>
+ <code class="k">public</code> <code class="nv">$books</code> <code class="o">=</code> <code class="k">array</code><code class="p">();</code>
+
+ <code class="k">public</code> <code class="k">function</code> <code class="nf-Magic">__construct</code><code class="p">(</code><code class="nv">$id</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">id</code> <code class="o">=</code> <code class="nv">$id</code><code class="p">;</code>
+ <code class="p">}</code>
+
+ <code class="k">public</code> <code class="k">function</code> <code class="nf">jsonSerialize</code><code class="p">()</code> <code class="p">{</code>
+ <code class="nv">$data</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code>
+ <code class="s1">'id'</code> <code class="o">=&gt;</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">id</code><code class="p">,</code>
+ <code class="s1">'name'</code> <code class="o">=&gt;</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">name</code><code class="p">,</code>
+ <code class="s1">'books'</code> <code class="o">=&gt;</code> <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">books</code><code class="p">,</code>
+ <code class="p">);</code>
+
+ <code class="k">return</code> <code class="nv">$data</code><code class="p">;</code>
+ <code class="p">}</code>
+<code class="p">}</code></pre>
+</div>
+<p>Creating a PHP object from JSON data requires you to write code to perform the translation.</p>
+<p><a data-type="xref" href="#example_onethree_twodot_book_and_author">Example 13-2</a> shows a class implementing factory-style transformation of JSON data into <code>Book</code> and <code>Author</code> instances into PHP objects.</p>
+<div data-type="example" id="example_onethree_twodot_book_and_author">
+<h5><span class="label">Example 13-2. </span>Book and Author JSON serialization by factory</h5>
+<pre data-type="programlisting" data-code-language="php"><code class="k">class</code> <code class="nc">ResourceFactory</code> <code class="p">{</code>
+ <code class="k">static</code> <code class="k">public</code> <code class="k">function</code> <code class="nf">authorFromJSON</code><code class="p">(</code><code class="nv">$jsonData</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$author</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">Author</code><code class="p">(</code><code class="nv">$jsonData</code><code class="p">[</code><code class="s1">'id'</code><code class="p">]);</code>
+ <code class="nv">$author</code><code class="o">-&gt;</code><code class="na">name</code> <code class="o">=</code> <code class="nv">$jsonData</code><code class="p">[</code><code class="s1">'name'</code><code class="p">];</code>
+
+ <code class="k">foreach</code> <code class="p">(</code><code class="nv">$jsonData</code><code class="p">[</code><code class="s1">'books'</code><code class="p">]</code> <code class="k">as</code> <code class="nv">$bookIdentifier</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">books</code><code class="p">[]</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">Book</code><code class="p">(</code><code class="nv">$bookIdentifier</code><code class="p">);</code>
+ <code class="p">}</code>
+
+ <code class="k">return</code> <code class="nv">$author</code><code class="p">;</code>
+ <code class="p">}</code>
+
+ <code class="k">static</code> <code class="k">public</code> <code class="k">function</code> <code class="nf">bookFromJSON</code><code class="p">(</code><code class="nv">$jsonData</code><code class="p">)</code> <code class="p">{</code>
+ <code class="nv">$book</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">Book</code><code class="p">(</code><code class="nv">$jsonData</code><code class="p">[</code><code class="s1">'id'</code><code class="p">]);</code>
+ <code class="nv">$book</code><code class="o">-&gt;</code><code class="na">name</code> <code class="o">=</code> <code class="nv">$jsonData</code><code class="p">[</code><code class="s1">'name'</code><code class="p">];</code>
+ <code class="nv">$book</code><code class="o">-&gt;</code><code class="na">edition</code> <code class="o">=</code> <code class="p">(</code><code class="nx">int</code><code class="p">)</code> <code class="nv">$jsonData</code><code class="p">[</code><code class="s1">'edition'</code><code class="p">];</code>
+
+ <code class="k">return</code> <code class="nv">$book</code><code class="p">;</code>
+ <code class="p">}</code>
+<code class="p">}</code></pre>
+</div>
+<section data-type="sect2" data-pdf-bookmark="Options"><div class="sect2" id="options-id00038">
+<h2>Options</h2>
+<p>The JSON parser functions have several options you can set to control the conversion process.</p>
+<p>For <a contenteditable="false" data-type="indexterm" data-primary="json_decode function" id="idm45922751283784"/><code>json_decode()</code>, the most common options include:</p>
+<dl>
+<dt><code>JSON_BIGINT_AS_STRING</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="JSON_BIGINT_AS_STRING option" id="idm45922751281048"/>When decoding a number that is too large to be represented as a PHP number type, returns that value as a string instead.</dd>
+<dt><code>JSON_OBJECT_AS_ARRAY</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="JSON_OBJECT_AS_ARRAY option" id="idm45922751278840"/>Decodes JSON objects as PHP arrays.</dd>
+</dl>
+<p>For <code>json_encode()</code>, the most common options include:</p>
+<dl>
+<dt><code>JSON_FORCE_OBJECT</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="JSON_FORCE_OBJECT option" id="idm45922751275192"/>Encodes indexed arrays from the PHP values as JSON objects instead of JSON arrays.</dd>
+<dt><code>JSON_NUMERIC_CHECK</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="JSON_NUMERIC_CHECK option" id="idm45922751273080"/>Encodes strings that represent number values as JSON numbers, rather than as JSON strings. In practice, you’re better off converting manually, so you’re aware of what the types are.</dd>
+<dt><code>JSON_PRETTY_PRINT</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="JSON_PRETTY_PRINT option" id="idm45922751270760"/>Uses whitespace to format the returned data to something more human-readable. Not strictly necessary, but makes debugging simpler.</dd>
+</dl>
+<p>Finally, the following options can be used for both <code>json_encode()</code> and <code>json_decode()</code>:<a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_json_ch13" id="idm45922751268088"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_json_serializable" id="idm45922751266680"/><a contenteditable="false" data-type="indexterm" data-primary="" data-startref="ix_serialize_json" id="idm45922751265304"/></p>
+<dl>
+<dt><code>JSON_INVALID_UTF8_IGNORE</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="JSON_INVALID_UTF8_IGNORE option" id="idm45922751262552"/>Ignores invalid UTF-8 characters. If <code>JSON_INVALID_UTF8_SUBSTITUTE</code> is also set, replaces them; otherwise, drops them in the resulting string.</dd>
+<dt><code>JSON_INVALID_UTF8_SUBSTITUTE</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="JSON_INVALID_UTF8_SUBSTITUTE option" id="idm45922751565432"/>Replaces invalid UTF-8 characters with <code>\0xfffd</code> (the Unicode character <code>'REPLACEMENT CHARACTER'</code>).</dd>
+<dt><code>JSON_THROW_ON_ERROR</code></dt>
+<dd><a contenteditable="false" data-type="indexterm" data-primary="JSON_THROW_ON_ERROR option" id="idm45922751562360"/>Throws an error instead of populating the global last error state when an error occurs.</dd>
+</dl>
+</div></section>
+</div></section>
+<section data-type="sect1" data-pdf-bookmark="What’s Next"><div class="sect1" id="whatapostrophes_next-id00071">
+<h1>What’s Next</h1>
+<p>When you’re writing PHP, one of the most important things to consider is the security of your code, from how well the code can absorb and deflect attacks to how you keep your own and your users’ data safe. The next chapter provides guidance and best practices to help you avert security-related disasters.</p>
+</div></section>
+</div></section></div>
+
+
+
+  </body></html>

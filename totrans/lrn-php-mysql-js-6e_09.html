@@ -1,0 +1,654 @@
+<html><head></head><body><div id="sbo-rt-content" class="calibre1"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 6. PHP Arrays" class="calibre4"><div class="preface" id="php_arrays">
+<h1 class="calibre10"><span class="keep-together">Chapter 6. </span>PHP Arrays</h1>
+
+<p class="author1">In <a data-type="xref" href="ch03.xhtml#introduction_to_php" class="calibre6">Chapter 3</a>, I gave<a contenteditable="false" data-primary="PHP programming language" data-secondary="arrays in" data-type="indexterm" id="PHParray06" class="calibre6"/> a very brief introduction to PHP’s arrays—just enough for a little taste of their power. In this chapter, I’ll show you many more things that you can do with arrays, some of which—if you have ever used a strongly typed language such as C—may surprise you with their elegance and simplicity.</p>
+
+<p class="author1">Not only do arrays remove the tedium of writing code to deal with complicated data structures, but they also provide numerous ways to access data while remaining amazingly fast.</p>
+
+<section data-type="sect1" data-pdf-bookmark="Basic Access" class="calibre4"><div class="preface" id="basic_access">
+<h1 class="calibre11">Basic Access</h1>
+
+<p class="author1">We’ve<a contenteditable="false" data-primary="arrays (PHP)" data-secondary="basics of" data-type="indexterm" id="idm45694749064040" class="calibre6"/> already looked at arrays as if they were clusters of matchboxes glued together. Another way to think of an array is like a string of beads, with the beads representing variables that can be numbers, strings, or even other arrays. They are like bead strings because each element has its own location and (with the exception of the first and last ones) each has other elements on either side.</p>
+
+<p class="author1">Some arrays are referenced by numeric indexes; others allow alphanumeric identifiers. Built-in functions let you sort them, add or remove sections, and walk through them to handle each item through a special kind of loop. And by placing one or more arrays inside another, you can create arrays of two, three, or any number of <span class="keep-together">dimensions.</span></p>
+
+<section data-type="sect2" data-pdf-bookmark="Numerically Indexed Arrays" class="calibre4"><div class="preface" id="numerically_indexed_arrays">
+<h2 class="calibre28">Numerically Indexed Arrays</h2>
+
+<p class="author1">Let’s assume<a contenteditable="false" data-primary="arrays (PHP)" data-secondary="numerically indexed" data-type="indexterm" id="idm45694749058680" class="calibre6"/><a contenteditable="false" data-primary="numeric arrays" data-secondary="in PHP" data-type="indexterm" id="idm45694749057272" class="calibre6"/> that you’ve been tasked with creating a simple website for a local office supply company and you’re currently working on the section devoted to paper. One way to manage the various items of stock in this category would be to place them in a numeric array. You can see the simplest way of doing so in <a data-type="xref" href="#adding_items_to_an_array" class="calibre6">Example 6-1</a>.</p>
+
+<div data-type="example" id="adding_items_to_an_array" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-1. </span>Adding items to an array</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$paper</code><code class="p">[]</code> <code class="o">=</code> <code class="s">"Copier"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[]</code> <code class="o">=</code> <code class="s">"Inkjet"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[]</code> <code class="o">=</code> <code class="s">"Laser"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[]</code> <code class="o">=</code> <code class="s">"Photo"</code><code class="p">;</code>
+
+  <code class="nb">print_r</code><code class="p">(</code><code class="nv">$paper</code><code class="p">);</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">In this example, each time you assign a value to the array <code class="calibre15">$paper</code>, the first empty location within that array is used to store the value, and a pointer internal to PHP is incremented to point to the next free location, ready for future insertions. The familiar <code class="calibre15">print_r</code> function (which prints out the contents of a variable, array, or object) is used to verify that the array has been correctly populated. It prints out the following:</p>
+
+<pre data-type="codelisting" class="calibre29">
+<strong class="calibre31">Array
+(
+  [0] =&gt; Copier
+  [1] =&gt; Inkjet
+  [2] =&gt; Laser
+  [3] =&gt; Photo
+)</strong></pre>
+
+<p class="author1">The previous code could also have been written as shown in <a data-type="xref" href="#adding_items_to_an_array_using_explicit" class="calibre6">Example 6-2</a>, where the exact location of each item within the array is specified. But, as you can see, that approach requires extra typing and makes your code harder to maintain if you want to insert supplies into or remove them from the array. So, unless you wish to specify a different order, it’s usually better to simply let PHP handle the actual location <span class="keep-together">numbers.</span></p>
+
+<div data-type="example" id="adding_items_to_an_array_using_explicit" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-2. </span>Adding items to an array using explicit locations</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$paper</code><code class="p">[</code><code class="mi">0</code><code class="p">]</code> <code class="o">=</code> <code class="s">"Copier"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[</code><code class="mi">1</code><code class="p">]</code> <code class="o">=</code> <code class="s">"Inkjet"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[</code><code class="mi">2</code><code class="p">]</code> <code class="o">=</code> <code class="s">"Laser"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[</code><code class="mi">3</code><code class="p">]</code> <code class="o">=</code> <code class="s">"Photo"</code><code class="p">;</code>
+
+  <code class="nb">print_r</code><code class="p">(</code><code class="nv">$paper</code><code class="p">);</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">The output from these examples is identical, but you are not likely to use <code class="calibre15">print_r</code> in a developed website, so <a data-type="xref" href="#adding_items_to_an_array_and_retrieving" class="calibre6">Example 6-3</a> shows how you might print out the various types of paper the website offers using a <code class="calibre15">for</code> loop.</p>
+
+<div data-type="example" id="adding_items_to_an_array_and_retrieving" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-3. </span>Adding items to an array and retrieving them</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$paper</code><code class="p">[]</code> <code class="o">=</code> <code class="s">"Copier"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[]</code> <code class="o">=</code> <code class="s">"Inkjet"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[]</code> <code class="o">=</code> <code class="s">"Laser"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[]</code> <code class="o">=</code> <code class="s">"Photo"</code><code class="p">;</code>
+
+  <code class="k">for</code> <code class="p">(</code><code class="nv">$j</code> <code class="o">=</code> <code class="mi">0</code> <code class="p">;</code> <code class="nv">$j</code> <code class="o">&lt;</code> <code class="mi">4</code> <code class="p">;</code> <code class="o">++</code><code class="nv">$j</code><code class="p">)</code>
+    <code class="k">echo</code> <code class="s">"</code><code class="err">$j</code><code class="s">: </code><code class="err">$paper[$j]</code><code class="s">&lt;br&gt;"</code><code class="p">;</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">This example prints out the following:</p>
+<pre class="calibre29">
+<strong class="calibre31">
+  0: Copier
+  1: Inkjet
+  2: Laser
+  3: Photo</strong>
+</pre>
+
+<p class="author1">So far, you’ve seen a couple of ways in which you can add items to an array and one way of referencing them. PHP offers many more, which I’ll get to shortly. But first, we’ll look at another type of array.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Associative Arrays" class="calibre4"><div class="preface" id="associative_arrays">
+<h2 class="calibre28">Associative Arrays</h2>
+
+<p class="author1">Keeping<a contenteditable="false" data-primary="arrays (PHP)" data-secondary="associative" data-type="indexterm" id="idm45694748504088" class="calibre6"/><a contenteditable="false" data-primary="associative arrays" data-secondary="in PHP" data-type="indexterm" id="idm45694748502680" class="calibre6"/> track of array elements by index works just fine but can require extra work in terms of remembering which number refers to which product. It can also make code hard for other programmers to follow.</p>
+
+<p class="author1">This is where associative arrays come into their own. Using them, you can reference the items in an array by name rather than by number. <a data-type="xref" href="#adding_items_to_an_associative_array_and" class="calibre6">Example 6-4</a> expands on the previous code by giving each element in the array an identifying name and a longer, more explanatory string value.</p>
+
+<div data-type="example" id="adding_items_to_an_associative_array_and" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-4. </span>Adding items to an associative array and retrieving them</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$paper</code><code class="p">[</code><code class="s">'copier'</code><code class="p">]</code> <code class="o">=</code> <code class="s">"Copier &amp; Multipurpose"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[</code><code class="s">'inkjet'</code><code class="p">]</code> <code class="o">=</code> <code class="s">"Inkjet Printer"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[</code><code class="s">'laser'</code><code class="p">]</code>  <code class="o">=</code> <code class="s">"Laser Printer"</code><code class="p">;</code>
+  <code class="nv">$paper</code><code class="p">[</code><code class="s">'photo'</code><code class="p">]</code>  <code class="o">=</code> <code class="s">"Photographic Paper"</code><code class="p">;</code>
+
+  <code class="k">echo</code> <code class="nv">$paper</code><code class="p">[</code><code class="s">'laser'</code><code class="p">];</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">In place of a number (which doesn’t convey any useful information, aside from the position of the item in the array), each item now has a unique name that you can use to reference it elsewhere, as with the <code class="calibre15">echo</code> statement—which simply prints out <code class="calibre15">Laser Printer</code>. The names (<code class="calibre15">copier</code>, <code class="calibre15">inkjet</code>, and so on) are called <em class="hyperlink">indexes</em> or <em class="hyperlink">keys</em>, and the items assigned to them (such as <code class="calibre15">Laser Printer</code>) are called <em class="hyperlink">values</em>.</p>
+
+<p class="author1">This very powerful feature of PHP is often used when you are extracting information from XML and HTML. For example, an HTML parser such as those used by a search engine could place all the elements of a web page into an associative array whose names reflect the page’s structure:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nv">$html</code><code class="p">[</code><code class="s">'title'</code><code class="p">]</code> <code class="o">=</code> <code class="s">"My web page"</code><code class="p">;</code>
+<code class="nv">$html</code><code class="p">[</code><code class="s">'body'</code><code class="p">]</code>  <code class="o">=</code> <code class="s">"... body of web page ..."</code><code class="p">;</code></pre>
+
+<p class="author1">The program would also probably break down all the links found within a page into another array, and all the headings and subheadings into another. When you use associative rather than numeric arrays, the code to refer to all of these items is easy to write and debug.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Assignment Using the array Keyword" class="calibre4"><div class="preface" id="assignment_using_the_array_keyword">
+<h2 class="calibre28">Assignment Using the array Keyword</h2>
+
+<p class="author1">So<a contenteditable="false" data-primary="array keyword (PHP)" data-type="indexterm" id="idm45694748576936" class="calibre6"/><a contenteditable="false" data-primary="arrays (PHP)" data-secondary="assignment using array keyword" data-type="indexterm" id="idm45694748575800" class="calibre6"/><a contenteditable="false" data-primary="assignment" data-secondary="using array keyword in PHP" data-type="indexterm" id="idm45694748462552" class="calibre6"/> far, you’ve seen how to assign values to arrays by just adding new items one at a time. Whether you specify keys, specify numeric identifiers, or let PHP assign numeric identifiers implicitly, this is a long-winded approach. A more compact and faster assignment method uses the <code class="calibre15">array</code> keyword. <a data-type="xref" href="#adding_items_to_an_array_using_the_array" class="calibre6">Example 6-5</a> shows both a numeric and an associative array assigned using this method.</p>
+
+<div data-type="example" id="adding_items_to_an_array_using_the_array" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-5. </span>Adding items to an array using the <code class="calibre15">array</code> keyword</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$p1</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code><code class="s">"Copier"</code><code class="p">,</code> <code class="s">"Inkjet"</code><code class="p">,</code> <code class="s">"Laser"</code><code class="p">,</code> <code class="s">"Photo"</code><code class="p">);</code>
+
+  <code class="k">echo</code> <code class="s">"p1 element: "</code> <code class="o">.</code> <code class="nv">$p1</code><code class="p">[</code><code class="mi">2</code><code class="p">]</code> <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+
+  <code class="nv">$p2</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code><code class="s">'copier'</code> <code class="o">=&gt;</code> <code class="s">"Copier &amp; Multipurpose"</code><code class="p">,</code>
+              <code class="s">'inkjet'</code> <code class="o">=&gt;</code> <code class="s">"Inkjet Printer"</code><code class="p">,</code>
+              <code class="s">'laser'</code>  <code class="o">=&gt;</code> <code class="s">"Laser Printer"</code><code class="p">,</code>
+              <code class="s">'photo'</code>  <code class="o">=&gt;</code> <code class="s">"Photographic Paper"</code><code class="p">);</code>
+
+  <code class="k">echo</code> <code class="s">"p2 element: "</code> <code class="o">.</code> <code class="nv">$p2</code><code class="p">[</code><code class="s">'inkjet'</code><code class="p">]</code> <code class="o">.</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">The first half of this snippet assigns the old, shortened product descriptions to the array <code class="calibre15">$p1</code>. There are four items, so they will occupy slots 0 through 3. Therefore, the <code class="calibre15">echo</code> statement prints out the following:</p>
+
+<p class="author1">
+<strong class="calibre16"><code class="calibre17">    p1 element: Laser</code></strong>
+</p>
+
+<p class="author1">The second half assigns associative identifiers and accompanying longer product descriptions to the array <code class="calibre15">$p2</code> using the format <em class="hyperlink"><code class="calibre18">key</code></em> <code class="calibre15">=&gt;</code> <em class="hyperlink"><code class="calibre18">value</code></em>. The<a contenteditable="false" data-primary="=&gt; operator (PHP), assigning value to array index" data-type="indexterm" id="idm45694748372904" class="calibre6"/> use of <code class="calibre15">=&gt;</code> is similar to the regular <code class="calibre15">=</code> assignment operator, except that you are assigning a value to an <em class="hyperlink">index</em> and not to a <em class="hyperlink">variable</em>. The index is then inextricably linked with that value, unless it is assigned a new value. The <code class="calibre15">echo</code> command therefore prints out this:</p>
+<p class="author1">
+<strong class="calibre16"><code class="calibre17">    p2 element: Inkjet Printer</code></strong>
+</p>
+
+<p class="author1">You can verify that <code class="calibre15">$p1</code> and <code class="calibre15">$p2</code> are different types of array, because both of the following commands, when appended to the code, will cause an <code class="calibre15">Undefined index</code> or <code class="calibre15">Undefined offset</code> error, as the array identifier for each is incorrect:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code> <code class="nv">$p1</code><code class="p">[</code><code class="s">'inkjet'</code><code class="p">];</code> <code class="c">// Undefined index</code>
+<code class="k">echo</code> <code class="nv">$p2</code><code class="p">[</code><code class="mi">3</code><code class="p">];</code>        <code class="c">// Undefined offset</code></pre>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="The foreach...as Loop" class="calibre4"><div class="preface" id="foreach_dotdotdot_as_loop">
+<h1 class="calibre11">The foreach...as Loop</h1>
+
+<p class="author1">The<a contenteditable="false" data-primary="arrays (PHP)" data-secondary="foreach...as loops" data-type="indexterm" id="idm45694748355080" class="calibre6"/><a contenteditable="false" data-primary="foreach...as loops (PHP)" data-type="indexterm" id="idm45694748346728" class="calibre6"/><a contenteditable="false" data-primary="looping (PHP)" data-secondary="foreach...as loops" data-type="indexterm" id="idm45694748345656" class="calibre6"/> creators of PHP have gone to great lengths to make the language easy to use. So, not content with the loop structures already provided, they added another one especially for arrays: the <code class="calibre15">foreach...as</code> loop. Using it, you can step through all the items in an array, one at a time, and do something with them.</p>
+
+<p class="author1">The process starts with the first item and ends with the last one, so you don’t even have to know how many items there are in an array. <a data-type="xref" href="#walking_through_a_numeric_array_using_fo" class="calibre6">Example 6-6</a> shows how <span class="keep-together"><code class="calibre15">foreach...as</code></span> can be used to rewrite <a data-type="xref" href="#adding_items_to_an_array_and_retrieving" class="calibre6">Example 6-3</a>.</p>
+
+<div data-type="example" id="walking_through_a_numeric_array_using_fo" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-6. </span>Walking through a numeric array using <code class="calibre15">foreach...as</code></h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$paper</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code><code class="s">"Copier"</code><code class="p">,</code> <code class="s">"Inkjet"</code><code class="p">,</code> <code class="s">"Laser"</code><code class="p">,</code> <code class="s">"Photo"</code><code class="p">);</code>
+  <code class="nv">$j</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+
+  <code class="k">foreach</code><code class="p">(</code><code class="nv">$paper</code> <code class="k">as</code> <code class="nv">$item</code><code class="p">)</code>
+  <code class="p">{</code>
+    <code class="k">echo</code> <code class="s">"</code><code class="err">$j</code><code class="s">: </code><code class="err">$item</code><code class="s">&lt;br&gt;"</code><code class="p">;</code>
+    <code class="o">++</code><code class="nv">$j</code><code class="p">;</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">When PHP encounters a <code class="calibre15">foreach</code> statement, it takes the first item of the array and places it in the variable following the <code class="calibre15">as</code> keyword; and each time control flow returns to the <code class="calibre15">foreach</code>, the next array element is placed in the <code class="calibre15">as</code> keyword. In this case, the variable <code class="calibre15">$item</code> is set to each of the four values in turn in the array <code class="calibre15">$paper</code>. Once all values have been used, execution of the loop ends. The output from this code is exactly the same as in <a data-type="xref" href="#adding_items_to_an_array_and_retrieving" class="calibre6">Example 6-3</a>.</p>
+
+<p class="author1">Now let’s see how <code class="calibre15">foreach</code> works with an associative array by taking a look at <a data-type="xref" href="#walking_through_an_associative_array_usi" class="calibre6">Example 6-7</a>, which is a rewrite of the second half of <a data-type="xref" href="#adding_items_to_an_array_using_the_array" class="calibre6">Example 6-5</a>.</p>
+
+<div data-type="example" id="walking_through_an_associative_array_usi" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-7. </span>Walking through an associative array using <code class="calibre15">foreach...a</code>s</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$paper</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code><code class="s">'copier'</code> <code class="o">=&gt;</code> <code class="s">"Copier &amp; Multipurpose"</code><code class="p">,</code>
+                 <code class="s">'inkjet'</code> <code class="o">=&gt;</code> <code class="s">"Inkjet Printer"</code><code class="p">,</code>
+                 <code class="s">'laser'</code>  <code class="o">=&gt;</code> <code class="s">"Laser Printer"</code><code class="p">,</code>
+                 <code class="s">'photo'</code>  <code class="o">=&gt;</code> <code class="s">"Photographic Paper"</code><code class="p">);</code>
+
+  <code class="k">foreach</code><code class="p">(</code><code class="nv">$paper</code> <code class="k">as</code> <code class="nv">$item</code> <code class="o">=&gt;</code> <code class="nv">$description</code><code class="p">)</code>
+    <code class="k">echo</code> <code class="s">"</code><code class="err">$item</code><code class="s">: </code><code class="err">$description</code><code class="s">&lt;br&gt;"</code><code class="p">;</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">Remember<a contenteditable="false" data-primary="key/value pairs" data-secondary="associative arrays in PHP" data-type="indexterm" id="idm45694748236024" class="calibre6"/> that associative arrays do not require numeric indexes, so the variable <code class="calibre15">$j</code> is not used in this example. Instead, each item of the array <code class="calibre15">$paper</code> is fed into the key/value pair of variables <code class="calibre15">$item</code> and <code class="calibre15">$description</code>, from which they are printed out. The displayed result of this code is as follows:</p>
+
+<p class="author1">
+<strong class="calibre16"><code class="calibre17">    copier: Copier &amp; Multipurpose<br class="calibre57"/>
+    inkjet: Inkjet Printer<br class="calibre57"/>
+    laser: Laser Printer<br class="calibre57"/>
+    photo: Photographic Paper</code></strong>
+</p>
+
+<p class="author1">Prior <a contenteditable="false" data-primary="each function (PHP)" data-type="indexterm" id="idm45694748230744" class="calibre6"/><a contenteditable="false" data-primary="list function (PHP)" data-type="indexterm" id="idm45694748229640" class="calibre6"/>to version 7.2 of PHP, as an alternative syntax to <code class="calibre15">foreach...as</code>, you could use the <code class="calibre15">list</code> function in conjunction with the <code class="calibre15">each</code> function. However, <code class="calibre15">each</code> was then deprecated and therefore is not recommended for use because it may be removed in a future version. This is a bit of a nightmare for PHP programmers with legacy code to update, especially as the <code class="calibre15">each</code> function is extremely useful. Therefore, I have written a replacement for <code class="calibre15">each</code> called <code class="calibre15">myEach</code>, which works identically and will allow you to easily update old code, as in <a data-type="xref" href="#walking_through_an_associative_a-id00016" class="calibre6">Example 6-8</a>.</p>
+
+<div data-type="example" id="walking_through_an_associative_a-id00016" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-8. </span>Walking through an associative array using <code class="calibre15">myEach</code> and <code class="calibre15">list</code></h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$paper</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code><code class="s">'copier'</code> <code class="o">=&gt;</code> <code class="s">"Copier &amp; Multipurpose"</code><code class="p">,</code>
+                 <code class="s">'inkjet'</code> <code class="o">=&gt;</code> <code class="s">"Inkjet Printer"</code><code class="p">,</code>
+                 <code class="s">'laser'</code>  <code class="o">=&gt;</code> <code class="s">"Laser Printer"</code><code class="p">,</code>
+                 <code class="s">'photo'</code>  <code class="o">=&gt;</code> <code class="s">"Photographic Paper"</code><code class="p">);</code>
+
+  <code class="k">while</code> <code class="p">(</code><code class="k">list</code><code class="p">(</code><code class="nv">$item</code><code class="p">,</code> <code class="nv">$description</code><code class="p">)</code> <code class="o">=</code> <code class="n">myEach</code><code class="p">(</code><code class="nv">$paper</code><code class="p">))</code>
+    <code class="k">echo</code> <code class="s">"</code><code class="err">$item</code><code class="s">: </code><code class="err">$description</code><code class="s">&lt;br&gt;"</code><code class="p">;</code>
+
+  <code class="k">function</code> <code class="nf">myEach</code><code class="p">(</code><code class="o">&amp;</code><code class="nv">$array</code><code class="p">)</code> <code class="c">// Replacement for the deprecated each function</code>
+  <code class="p">{</code>
+    <code class="nv">$key</code>    <code class="o">=</code> <code class="nb">key</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+    <code class="nv">$result</code> <code class="o">=</code> <code class="p">(</code><code class="nv">$key</code> <code class="o">===</code> <code class="k">null</code><code class="p">)</code> <code class="o">?</code> <code class="k">false</code> <code class="o">:</code>
+              <code class="p">[</code><code class="nv">$key</code><code class="p">,</code> <code class="nb">current</code><code class="p">(</code><code class="nv">$array</code><code class="p">),</code> <code class="s">'key'</code><code class="p">,</code> <code class="s">'value'</code> <code class="o">=&gt;</code> <code class="nb">current</code><code class="p">(</code><code class="nv">$array</code><code class="p">)];</code>
+    <code class="nb">next</code><code class="p">(</code><code class="nv">$array</code><code class="p">);</code>
+    <code class="k">return</code> <code class="nv">$result</code><code class="p">;</code>
+  <code class="p">}</code>
+<code class="cp">?&gt;</code><code class="x"/>
+</pre>
+</div>
+
+<p class="author1">In this example, a <code class="calibre15">while</code> loop is set up and will continue looping until the <code class="calibre15">myEach</code> function (equivalent to the old PHP <code class="calibre15">each</code> function) returns a value of <code class="calibre15">FALSE</code>. The <code class="calibre15">myEach</code> function acts like <code class="calibre15">foreach</code> in that it returns an array containing a key/value pair from the array <code class="calibre15">$paper</code> and then moves its built-in pointer to the next pair in that array. When there are no more pairs to return, <code class="calibre15">myEach</code> returns <code class="calibre15">FALSE</code>.</p>
+
+<p class="author1">The <code class="calibre15">list</code> function takes an array as its argument (in this case, the key/value pair returned by the function <code class="calibre15">myEach</code>) and then assigns the values of the array to the variables listed within parentheses.</p>
+
+<p class="author1">You can see how <code class="calibre15">list</code> works a little more clearly in <a data-type="xref" href="#using_the_list_function" class="calibre6">Example 6-9</a>, where an array is created out of the two strings <code class="calibre15">Alice</code> and <code class="calibre15">Bob</code> and then passed to the <code class="calibre15">list</code> function, which assigns those strings as values to the variables <code class="calibre15">$a</code> and <code class="calibre15">$b</code>.</p>
+
+<div data-type="example" id="using_the_list_function" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-9. </span>Using the <code class="calibre15">list</code> function</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="k">list</code><code class="p">(</code><code class="nv">$a</code><code class="p">,</code> <code class="nv">$b</code><code class="p">)</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code><code class="s">'Alice'</code><code class="p">,</code> <code class="s">'Bob'</code><code class="p">);</code>
+  <code class="k">echo</code> <code class="s">"a=</code><code class="err">$a</code><code class="s"> b=</code><code class="err">$b</code><code class="s">"</code><code class="p">;</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">The output from this code is as follows:</p>
+
+<p class="author1">
+<strong class="calibre16"><code class="calibre17">    a=Alice b=Bob</code></strong>
+</p>
+
+<p class="author1">So, you can take your pick when walking through arrays. Use <code class="calibre15">foreach...as</code> to create a loop that extracts values to the variable following the <code class="calibre15">as</code>, or use the <code class="calibre15">myEach</code> function and create your own looping system.</p>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Multidimensional Arrays" class="calibre4"><div class="preface" id="multidimensional_arrays">
+<h1 class="calibre11">Multidimensional Arrays</h1>
+
+<p class="author1">A<a contenteditable="false" data-primary="arrays (PHP)" data-secondary="multidimensional" data-type="indexterm" id="idm45694747947928" class="calibre6"/><a contenteditable="false" data-primary="multidimensional arrays" data-secondary="in PHP" data-type="indexterm" id="idm45694747946520" class="calibre6"/> simple design feature in PHP’s array syntax makes it possible to create arrays of more than one dimension. In fact, they can be as many dimensions as you like (although it’s a rare application that goes further than three).</p>
+
+<p class="author1">That feature is the ability to include an entire array as a part of another one, and to be able to keep doing so, just like the old rhyme: “Big fleas have little fleas upon their backs to bite ’em. Little fleas have lesser fleas, add flea, ad infinitum.”</p>
+
+<p class="author1">Let’s look at how this works by taking the associative array in the previous example and extending it; see <a data-type="xref" href="#creating_a_multidimensional_associative" class="calibre6">Example 6-10</a>.</p>
+
+<div data-type="example" id="creating_a_multidimensional_associative" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-10. </span>Creating a multidimensional associative array</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$products</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code>
+
+    <code class="s">'paper'</code> <code class="o">=&gt;</code> <code class="k">array</code><code class="p">(</code>
+
+      <code class="s">'copier'</code> <code class="o">=&gt;</code> <code class="s">"Copier &amp; Multipurpose"</code><code class="p">,</code>
+      <code class="s">'inkjet'</code> <code class="o">=&gt;</code> <code class="s">"Inkjet Printer"</code><code class="p">,</code>
+      <code class="s">'laser'</code>  <code class="o">=&gt;</code> <code class="s">"Laser Printer"</code><code class="p">,</code>
+      <code class="s">'photo'</code>  <code class="o">=&gt;</code> <code class="s">"Photographic Paper"</code><code class="p">),</code>
+
+    <code class="s">'pens'</code> <code class="o">=&gt;</code> <code class="k">array</code><code class="p">(</code>
+
+      <code class="s">'ball'</code>   <code class="o">=&gt;</code> <code class="s">"Ball Point"</code><code class="p">,</code>
+      <code class="s">'hilite'</code> <code class="o">=&gt;</code> <code class="s">"Highlighters"</code><code class="p">,</code>
+      <code class="s">'marker'</code> <code class="o">=&gt;</code> <code class="s">"Markers"</code><code class="p">),</code>
+
+    <code class="s">'misc'</code> <code class="o">=&gt;</code> <code class="k">array</code><code class="p">(</code>
+
+      <code class="s">'tape'</code>   <code class="o">=&gt;</code> <code class="s">"Sticky Tape"</code><code class="p">,</code>
+      <code class="s">'glue'</code>   <code class="o">=&gt;</code> <code class="s">"Adhesives"</code><code class="p">,</code>
+      <code class="s">'clips'</code>  <code class="o">=&gt;</code> <code class="s">"Paperclips"</code>
+    <code class="p">)</code>
+  <code class="p">);</code>
+
+  <code class="k">echo</code> <code class="s">"&lt;pre&gt;"</code><code class="p">;</code>
+
+  <code class="k">foreach</code><code class="p">(</code><code class="nv">$products</code> <code class="k">as</code> <code class="nv">$section</code> <code class="o">=&gt;</code> <code class="nv">$items</code><code class="p">)</code>
+    <code class="k">foreach</code><code class="p">(</code><code class="nv">$items</code> <code class="k">as</code> <code class="nv">$key</code> <code class="o">=&gt;</code> <code class="nv">$value</code><code class="p">)</code>
+      <code class="k">echo</code> <code class="s">"</code><code class="err">$section</code><code class="s">:</code><code class="se">\t</code><code class="err">$key\t</code><code class="s">(</code><code class="err">$value</code><code class="s">)&lt;br&gt;"</code><code class="p">;</code>
+
+  <code class="k">echo</code> <code class="s">"&lt;/pre&gt;"</code><code class="p">;</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">To make things clearer now that the code is starting to grow, I’ve renamed some of the elements. For example, because the previous array <code class="calibre15">$paper</code> is now just a subsection of a larger array, the main array is now called <code class="calibre15">$products</code>. Within this array, there are three items—<code class="calibre15">paper</code>, <code class="calibre15">pens</code>, and <code class="calibre15">misc</code>—each of which contains another array with key/value pairs.</p>
+
+<p class="author1">If necessary, these subarrays could have contained even further arrays. For example, under <code class="calibre15">ball</code> there might be many different types and colors of ballpoint pens available in the online store. But for now, I’ve restricted the code to a depth of just two.</p>
+
+<p class="author1">Once the array data has been assigned, I use a pair of nested <code class="calibre15">foreach...as</code> loops to print out the various values. The outer loop extracts the main sections from the top level of the array, and the inner loop extracts the key/value pairs for the categories within each section.</p>
+
+<p class="author1">As long as you remember that each level of the array works the same way (it’s a key/value pair), you can easily write code to access any element at any level.</p>
+
+<p class="author1">The <code class="calibre15">echo</code> statement makes<a contenteditable="false" data-primary="echo statements (PHP)" data-secondary="in arrays" data-type="indexterm" id="idm45694747834824" class="calibre6"/><a contenteditable="false" data-primary="\t (tab) character" data-type="indexterm" id="idm45694747783752" class="calibre6"/><a contenteditable="false" data-primary="tab (\t) character" data-type="indexterm" id="idm45694747782648" class="calibre6"/> use of the PHP escape character <code class="calibre15">\t</code>, which outputs a tab. Although tabs are not normally significant to the web browser, I let them be used for layout by using the <code class="calibre15">&lt;pre&gt;...&lt;/pre&gt;</code> tags, which tell the web browser to format the text as preformatted and monospaced, and <em class="hyperlink">not</em> to ignore whitespace characters such as tabs and line feeds. The output from this code looks like the following:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">paper:  copier  (Copier &amp; Multipurpose)</strong>
+<strong class="calibre31">paper:  inkjet  (Inkjet Printer)</strong>
+<strong class="calibre31">paper:  laser   (Laser Printer)</strong>
+<strong class="calibre31">paper:  photo   (Photographic Paper)</strong>
+<strong class="calibre31">pens:   ball    (Ball Point)</strong>
+<strong class="calibre31">pens:   hilite  (Highlighters)</strong>
+<strong class="calibre31">pens:   marker  (Markers)</strong>
+<strong class="calibre31">misc:   tape    (Sticky Tape)</strong>
+<strong class="calibre31">misc:   glue    (Adhesives)</strong>
+<strong class="calibre31">misc:   clips   (Paperclips)</strong></pre>
+
+<p class="author1">You<a contenteditable="false" data-primary="[] (square brackets)" data-secondary="accessing array elements" data-type="indexterm" id="idm45694747774376" class="calibre6"/><a contenteditable="false" data-primary="square brackets ([])" data-secondary="accessing array elements" data-type="indexterm" id="idm45694747772904" class="calibre6"/> can directly access a particular element of the array by using square brackets:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code> <code class="nv">$products</code><code class="p">[</code><code class="s">'misc'</code><code class="p">][</code><code class="s">'glue'</code><code class="p">];</code></pre>
+
+<p class="author1">This outputs the value <code class="calibre15">Adhesives</code>.</p>
+
+<p class="author1">You can also create numeric multidimensional arrays that are accessed directly by indexes rather than by alphanumeric identifiers. <a data-type="xref" href="#creating_a_multidimensional_numeric_arra" class="calibre6">Example 6-11</a> creates the board for a chess game with the pieces in their starting positions.</p>
+
+<div data-type="example" id="creating_a_multidimensional_numeric_arra" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-11. </span>Creating a multidimensional numeric array</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$chessboard</code> <code class="o">=</code> <code class="k">array</code><code class="p">(</code>
+    <code class="k">array</code><code class="p">(</code><code class="s">'r'</code><code class="p">,</code> <code class="s">'n'</code><code class="p">,</code> <code class="s">'b'</code><code class="p">,</code> <code class="s">'q'</code><code class="p">,</code> <code class="s">'k'</code><code class="p">,</code> <code class="s">'b'</code><code class="p">,</code> <code class="s">'n'</code><code class="p">,</code> <code class="s">'r'</code><code class="p">),</code>
+    <code class="k">array</code><code class="p">(</code><code class="s">'p'</code><code class="p">,</code> <code class="s">'p'</code><code class="p">,</code> <code class="s">'p'</code><code class="p">,</code> <code class="s">'p'</code><code class="p">,</code> <code class="s">'p'</code><code class="p">,</code> <code class="s">'p'</code><code class="p">,</code> <code class="s">'p'</code><code class="p">,</code> <code class="s">'p'</code><code class="p">),</code>
+    <code class="k">array</code><code class="p">(</code><code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">),</code>
+    <code class="k">array</code><code class="p">(</code><code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">),</code>
+    <code class="k">array</code><code class="p">(</code><code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">),</code>
+    <code class="k">array</code><code class="p">(</code><code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">,</code> <code class="s">' '</code><code class="p">),</code>
+    <code class="k">array</code><code class="p">(</code><code class="s">'P'</code><code class="p">,</code> <code class="s">'P'</code><code class="p">,</code> <code class="s">'P'</code><code class="p">,</code> <code class="s">'P'</code><code class="p">,</code> <code class="s">'P'</code><code class="p">,</code> <code class="s">'P'</code><code class="p">,</code> <code class="s">'P'</code><code class="p">,</code> <code class="s">'P'</code><code class="p">),</code>
+    <code class="k">array</code><code class="p">(</code><code class="s">'R'</code><code class="p">,</code> <code class="s">'N'</code><code class="p">,</code> <code class="s">'B'</code><code class="p">,</code> <code class="s">'Q'</code><code class="p">,</code> <code class="s">'K'</code><code class="p">,</code> <code class="s">'B'</code><code class="p">,</code> <code class="s">'N'</code><code class="p">,</code> <code class="s">'R'</code><code class="p">)</code>
+  <code class="p">);</code>
+
+  <code class="k">echo</code> <code class="s">"&lt;pre&gt;"</code><code class="p">;</code>
+
+  <code class="k">foreach</code><code class="p">(</code><code class="nv">$chessboard</code> <code class="k">as</code> <code class="nv">$row</code><code class="p">)</code>
+  <code class="p">{</code>
+    <code class="k">foreach</code> <code class="p">(</code><code class="nv">$row</code> <code class="k">as</code> <code class="nv">$piece</code><code class="p">)</code>
+      <code class="k">echo</code> <code class="s">"</code><code class="err">$piece</code><code class="s"> "</code><code class="p">;</code>
+
+    <code class="k">echo</code> <code class="s">"&lt;br&gt;"</code><code class="p">;</code>
+  <code class="p">}</code>
+
+  <code class="k">echo</code> <code class="s">"&lt;/pre&gt;"</code><code class="p">;</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">In this example, the lowercase letters represent black pieces, and the uppercase white. The key is <code class="calibre15">r</code> = rook, <code class="calibre15">n</code> = knight, <code class="calibre15">b</code> = bishop, <code class="calibre15">k</code> = king, <code class="calibre15">q</code> = queen, and <code class="calibre15">p</code> = pawn. Again, a pair of nested <code class="calibre15">foreach...as</code> loops walks through the array and displays its contents. The outer loop processes each row into the variable <code class="calibre15">$row</code>, which itself is an array, because the <code class="calibre15">$chessboard</code> array uses a subarray for each row. This loop has two statements within it, so curly braces enclose them.</p>
+
+<p class="author1">The inner loop then processes each square in a row, outputting the character (<code class="calibre15">$piece</code>) stored in it, followed by a space (to square up the printout). This loop has a single statement, so curly braces are not required to enclose it. The <code class="calibre15">&lt;pre&gt;</code> and <code class="calibre15">&lt;/pre&gt;</code> tags ensure that the output displays correctly, like this:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">r n b q k b n r</strong>
+<strong class="calibre31">p p p p p p p p</strong>
+
+
+
+
+<strong class="calibre31">P P P P P P P P</strong>
+<strong class="calibre31">R N B Q K B N R</strong></pre>
+
+<p class="author1">You can also directly access any element within this array by using square brackets:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code> <code class="nv">$chessboard</code><code class="p">[</code><code class="mi">7</code><code class="p">][</code><code class="mi">3</code><code class="p">];</code></pre>
+
+<p class="author1">This statement outputs the uppercase letter <code class="calibre15">Q</code>, the eighth element down and the fourth along (remember that array indexes start at 0, not 1).</p>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Using Array Functions" class="calibre4"><div class="preface" id="using_array_functions">
+<h1 class="calibre11">Using Array Functions</h1>
+
+<p class="author1">You’ve<a contenteditable="false" data-primary="arrays (PHP)" data-secondary="array functions" data-type="indexterm" id="Afunc06" class="calibre6"/><a contenteditable="false" data-primary="functions (PHP)" data-secondary="array functions" data-type="indexterm" id="Farray06" class="calibre6"/> already seen the <code class="calibre15">list</code> and <code class="calibre15">each</code> functions, but PHP comes with numerous other functions for handling arrays. You can find the full list in the <a href="https://tinyurl.com/arraysinphp" class="calibre6">documentation</a>. However, some of these functions are so fundamental that it’s worth taking the time to look at them here.</p>
+
+<section data-type="sect2" data-pdf-bookmark="is_array" class="calibre4"><div class="preface" id="is_array">
+<h2 class="calibre28">is_array</h2>
+
+<p class="author1">Arrays<a contenteditable="false" data-primary="is_array function (PHP)" data-type="indexterm" id="idm45694747460328" class="calibre6"/> and variables share the same namespace. This means that you cannot have a string variable called <code class="calibre15">$fred</code> and an array also called <code class="calibre15">$fred</code>. If you’re in doubt and your code needs to check whether a variable is an array, you can use the <code class="calibre15">is_array</code> function, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code> <code class="p">(</code><code class="nb">is_array</code><code class="p">(</code><code class="nv">$fred</code><code class="p">))</code> <code class="o">?</code> <code class="s">"Is an array"</code> <code class="o">:</code> <code class="s">"Is not an array"</code><code class="p">;</code></pre>
+
+<p class="author1">Note that if <code class="calibre15">$fred</code> has not yet been assigned a value, an <code class="calibre15">Undefined variable</code> message will be generated.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="count" class="calibre4"><div class="preface" id="count">
+<h2 class="calibre28">count</h2>
+
+<p class="author1">Although<a contenteditable="false" data-primary="count function (PHP)" data-type="indexterm" id="idm45694747418968" class="calibre6"/> the <code class="calibre15">each</code> function and <code class="calibre15">foreach...as</code> loop structure are excellent ways to walk through an array’s contents, sometimes you need to know exactly how many elements there are in your array, particularly if you will be referencing them directly. To count all the elements in the top level of an array, use a command such as this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code> <code class="nb">count</code><code class="p">(</code><code class="nv">$fred</code><code class="p">);</code></pre>
+
+<p class="author1">Should you wish to know how many elements there are altogether in a multidimensional array, you can use a statement such as the following:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="k">echo</code> <code class="nb">count</code><code class="p">(</code><code class="nv">$fred</code><code class="p">,</code> <code class="mi">1</code><code class="p">);</code></pre>
+
+<p class="author1">The second parameter is optional and sets the mode to use. It should be either <code class="calibre15">0</code> to limit counting to only the top level or <code class="calibre15">1</code> to force recursive counting of all subarray elements too.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="sort" class="calibre4"><div class="preface" id="sort">
+<h2 class="calibre28">sort</h2>
+
+<p class="author1">Sorting<a contenteditable="false" data-primary="sort function (PHP)" data-type="indexterm" id="idm45694747211368" class="calibre6"/> is so common that PHP provides a built-in function for it. In its simplest form, you would use it like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">sort</code><code class="p">(</code><code class="nv">$fred</code><code class="p">);</code></pre>
+
+<p class="author1">It is important to remember that, unlike some other functions, <code class="calibre15">sort</code> will act directly on the supplied array rather than returning a new array of sorted elements. It returns <code class="calibre15">TRUE</code> on success and <code class="calibre15">FALSE</code> on error and also supports a few flags—the main two flags that you might wish to use force items to be sorted either numerically or as strings, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">sort</code><code class="p">(</code><code class="nv">$fred</code><code class="p">,</code> <code class="n">SORT_NUMERIC</code><code class="p">);</code>
+<code class="nb">sort</code><code class="p">(</code><code class="nv">$fred</code><code class="p">,</code> <code class="n">SORT_STRING</code><code class="p">);</code></pre>
+
+<p class="author1">You can also sort an array in reverse order using the <code class="calibre15">rsort</code> function, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">rsort</code><code class="p">(</code><code class="nv">$fred</code><code class="p">,</code> <code class="n">SORT_NUMERIC</code><code class="p">);</code>
+<code class="nb">rsort</code><code class="p">(</code><code class="nv">$fred</code><code class="p">,</code> <code class="n">SORT_STRING</code><code class="p">);</code></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="shuffle" class="calibre4"><div class="preface" id="shuffle">
+<h2 class="calibre28">shuffle</h2>
+
+<p class="author1">There<a contenteditable="false" data-primary="shuffle function (PHP)" data-type="indexterm" id="idm45694747336952" class="calibre6"/> may be times when you need the elements of an array to be put in random order, such as when you’re creating a game of playing cards:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">shuffle</code><code class="p">(</code><code class="nv">$cards</code><code class="p">);</code></pre>
+
+<p class="author1">Like <code class="calibre15">sort</code>, <code class="calibre15">shuffle</code> acts directly on the supplied array and returns <code class="calibre15">TRUE</code> on success or <code class="calibre15">FALSE</code> on error.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="explode" class="calibre4"><div class="preface" id="explode">
+<h2 class="calibre28">explode</h2>
+
+<p class="author1"><code class="calibre15">explode</code><a contenteditable="false" data-primary="explode function (PHP)" data-type="indexterm" id="idm45694747297080" class="calibre6"/> is a very useful function with which you can take a string containing several items separated by a single character (or string of characters) and then place each of these items into an array. One handy example is to split up a sentence into an array containing all its words, as in <a data-type="xref" href="#exploding_a_string_into_an_array_using_s" class="calibre6">Example 6-12</a>.</p>
+
+<div data-type="example" id="exploding_a_string_into_an_array_using_s" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-12. </span>Exploding a string into an array using spaces</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$temp</code> <code class="o">=</code> <code class="nb">explode</code><code class="p">(</code><code class="s">' '</code><code class="p">,</code> <code class="s">"This is a sentence with seven words"</code><code class="p">);</code>
+  <code class="nb">print_r</code><code class="p">(</code><code class="nv">$temp</code><code class="p">);</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">This example prints out the following (on a single line when viewed in a browser):</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">Array</strong>
+<strong class="calibre31">(</strong>
+  <strong class="calibre31">[0] =&gt; This</strong>
+  <strong class="calibre31">[1] =&gt; is</strong>
+  <strong class="calibre31">[2] =&gt; a</strong>
+  <strong class="calibre31">[3] =&gt; sentence</strong>
+  <strong class="calibre31">[4] =&gt; with</strong>
+  <strong class="calibre31">[5] =&gt; seven</strong>
+  <strong class="calibre31">[6] =&gt; words</strong>
+<strong class="calibre31">)</strong></pre>
+
+<p class="author1">The first parameter, the delimiter, need not be a space or even a single character. <a data-type="xref" href="#exploding_a_string_delimited_with_asteri" class="calibre6">Example 6-13</a> shows a slight variation.</p>
+
+<div data-type="example" id="exploding_a_string_delimited_with_asteri" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-13. </span>Exploding a string delimited with <code class="calibre15">***</code> into an array</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$temp</code> <code class="o">=</code> <code class="nb">explode</code><code class="p">(</code><code class="s">'***'</code><code class="p">,</code> <code class="s">"A***sentence***with***asterisks"</code><code class="p">);</code>
+  <code class="nb">print_r</code><code class="p">(</code><code class="nv">$temp</code><code class="p">);</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">The code in <a data-type="xref" href="#exploding_a_string_delimited_with_asteri" class="calibre6">Example 6-13</a> prints out the following:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">Array</strong>
+<strong class="calibre31">(</strong>
+  <strong class="calibre31">[0] =&gt; A</strong>
+  <strong class="calibre31">[1] =&gt; sentence</strong>
+  <strong class="calibre31">[2] =&gt; with</strong>
+  <strong class="calibre31">[3] =&gt; asterisks</strong>
+<strong class="calibre31">)</strong></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="extract" class="calibre4"><div class="preface" id="extract">
+<h2 class="calibre28">extract</h2>
+
+<p class="author1">Sometimes<a contenteditable="false" data-primary="extract function (PHP)" data-type="indexterm" id="idm45694747111672" class="calibre6"/> it can be convenient to turn the key/value pairs from an array into PHP variables. One such time might be when you are processing the <code class="calibre15">$_GET</code> or <code class="calibre15">$_POST</code> variables sent to a PHP script by a form.</p>
+
+<p class="author1">When a form is submitted over the web, the web server unpacks the variables into a global array for the PHP script. If the variables were sent using the GET method, they will be placed in an associative array called <code class="calibre15">$_GET</code>; if they were sent using POST, they will be placed in an associative array called <code class="calibre15">$_POST</code>.</p>
+
+<p class="author1">You could, of course, walk through such associative arrays in the manner shown in the examples so far. However, sometimes you just want to store the values sent into variables for later use. In this case, you can have PHP do the job automatically:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">extract</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">);</code></pre>
+
+<p class="author1">So, if the query string parameter <code class="calibre15">q</code> is sent to a PHP script along with the associated value <code class="calibre15">Hi there</code>, a new variable called <code class="calibre15">$q</code> will be created and assigned that value.</p>
+
+<p class="author1">Be careful with this approach, though, because if any extracted variables conflict with ones that you have already defined, your existing values will be overwritten. To avoid this possibility, you can use one of the many additional parameters available to this function, like this:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">extract</code><code class="p">(</code><code class="nv">$_GET</code><code class="p">,</code> <code class="n">EXTR_PREFIX_ALL</code><code class="p">,</code> <code class="s">'fromget'</code><code class="p">);</code></pre>
+
+<p class="author1">In this case, all the new variables will begin with the given prefix string followed by an underscore, so <code class="calibre15">$q</code> will become <code class="calibre15">$fromget_q</code>. I strongly recommend that you use this version of the function when handling the <code class="calibre15">$_GET</code> and <code class="calibre15">$_POST</code> arrays, or any other array whose keys could be controlled by the user, because malicious users could submit keys chosen deliberately to overwrite commonly used variable names and compromise your website.</p>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="compact" class="calibre4"><div class="preface" id="compact">
+<h2 class="calibre28">compact</h2>
+
+<p class="author1">At<a contenteditable="false" data-primary="compact function (PHP)" data-type="indexterm" id="idm45694747097960" class="calibre6"/> times you may want to use <code class="calibre15">compact</code>, the inverse of <code class="calibre15">extract</code>, to create an array from variables and their values. <a data-type="xref" href="#using_the_compact_function" class="calibre6">Example 6-14</a> shows how you might use this <span class="keep-together">function.</span></p>
+
+<div data-type="example" id="using_the_compact_function" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-14. </span>Using the <code class="calibre15">compact</code> function</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$fname</code>         <code class="o">=</code> <code class="s">"Doctor"</code><code class="p">;</code>
+  <code class="nv">$sname</code>         <code class="o">=</code> <code class="s">"Who"</code><code class="p">;</code>
+  <code class="nv">$planet</code>        <code class="o">=</code> <code class="s">"Gallifrey"</code><code class="p">;</code>
+  <code class="nv">$system</code>        <code class="o">=</code> <code class="s">"Gridlock"</code><code class="p">;</code>
+  <code class="nv">$constellation</code> <code class="o">=</code> <code class="s">"Kasterborous"</code><code class="p">;</code>
+
+  <code class="nv">$contact</code> <code class="o">=</code> <code class="nb">compact</code><code class="p">(</code><code class="s">'fname'</code><code class="p">,</code> <code class="s">'sname'</code><code class="p">,</code> <code class="s">'planet'</code><code class="p">,</code> <code class="s">'system'</code><code class="p">,</code> <code class="s">'constellation'</code><code class="p">);</code>
+
+  <code class="nb">print_r</code><code class="p">(</code><code class="nv">$contact</code><code class="p">);</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">The result of running <a data-type="xref" href="#using_the_compact_function" class="calibre6">Example 6-14</a> is as follows:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">Array</strong>
+<strong class="calibre31">(</strong>
+  <strong class="calibre31">[fname] =&gt; Doctor</strong>
+  <strong class="calibre31">[sname] =&gt; Who</strong>
+  <strong class="calibre31">[planet] =&gt; Gallifrey</strong>
+  <strong class="calibre31">[system] =&gt; Gridlock</strong>
+  <strong class="calibre31">[constellation] =&gt; Kasterborous</strong>
+<strong class="calibre31">)</strong></pre>
+
+<p class="author1">Note how <code class="calibre15">compact</code> requires the variable names to be supplied in quotes, not preceded by a <code class="calibre15">$</code> symbol. This is because <code class="calibre15">compact</code> is looking for a list of variable names, not their values.</p>
+
+<p class="author1">Another use of this function is for debugging, when you wish to quickly view several variables and their values, as in <a data-type="xref" href="#using_compact_to_help_with_debugging" class="calibre6">Example 6-15</a>.</p>
+
+<div data-type="example" id="using_compact_to_help_with_debugging" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 6-15. </span>Using <code class="calibre15">compact</code> to help with debugging</h5>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;?</code><code class="n">php</code>
+  <code class="nv">$j</code>       <code class="o">=</code> <code class="mi">23</code><code class="p">;</code>
+  <code class="nv">$temp</code>    <code class="o">=</code> <code class="s">"Hello"</code><code class="p">;</code>
+  <code class="nv">$address</code> <code class="o">=</code> <code class="s">"1 Old Street"</code><code class="p">;</code>
+  <code class="nv">$age</code>     <code class="o">=</code> <code class="mi">61</code><code class="p">;</code>
+
+  <code class="nb">print_r</code><code class="p">(</code><code class="nb">compact</code><code class="p">(</code><code class="nb">explode</code><code class="p">(</code><code class="s">' '</code><code class="p">,</code> <code class="s">'j temp address age'</code><code class="p">)));</code>
+<code class="cp">?&gt;</code><code class="x"/></pre>
+</div>
+
+<p class="author1">This works by using the <code class="calibre15">explode</code> function to extract all the words from the string into an array, which is then passed to the <code class="calibre15">compact</code> function, which in turn returns an array to <code class="calibre15">print_r</code>, which finally shows its contents.</p>
+
+<p class="author1">If you copy and paste the <code class="calibre15">print_r</code> line of code, you only need to alter the variables named there for a quick printout of a group of variables’ values. In this example, the output is shown here:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">Array</strong>
+<strong class="calibre31">(</strong>
+  <strong class="calibre31">[j] =&gt; 23</strong>
+  <strong class="calibre31">[temp] =&gt; Hello</strong>
+  <strong class="calibre31">[address] =&gt; 1 Old Street</strong>
+  <strong class="calibre31">[age] =&gt; 61</strong>
+<strong class="calibre31">)</strong></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="reset" class="calibre4"><div class="preface" id="reset">
+<h2 class="calibre28">reset</h2>
+
+<p class="author1">When<a contenteditable="false" data-primary="reset function (PHP)" data-type="indexterm" id="idm45694746906248" class="calibre6"/> the <code class="calibre15">foreach...as</code> construct or the <code class="calibre15">each</code> function walks through an array, it keeps an internal PHP pointer that makes a note of which element of the array it should return next. If your code ever needs to return to the start of an array, you can issue <code class="calibre15">reset</code>, which also returns the value of that element. Examples of how to use this function are as follows:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">reset</code><code class="p">(</code><code class="nv">$fred</code><code class="p">);</code>         <code class="c">// Throw away return value</code>
+<code class="nv">$item</code> <code class="o">=</code> <code class="nb">reset</code><code class="p">(</code><code class="nv">$fred</code><code class="p">);</code> <code class="c">// Keep first element of the array in $item</code></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="end" class="calibre4"><div class="preface" id="end">
+<h2 class="calibre28">end</h2>
+
+<p class="author1">As<a contenteditable="false" data-primary="end function (PHP)" data-type="indexterm" id="idm45694746892056" class="calibre6"/> with <code class="calibre15">reset</code>, you can move PHP’s internal array pointer to the final element in an array using the <code class="calibre15">end</code> function, which also returns the value of the element and can be used as in these examples:</p>
+
+<pre data-code-language="php" data-programming-language="perl" class="calibre29">
+<code class="nb">end</code><code class="p">(</code><code class="nv">$fred</code><code class="p">);</code>
+<code class="nv">$item</code> <code class="o">=</code> <code class="nb">end</code><code class="p">(</code><code class="nv">$fred</code><code class="p">);</code></pre>
+
+<p class="author1">This chapter concludes your basic introduction to PHP, and you should now be able to write quite complex programs using the skills you have learned. In the next chapter, we’ll look at using PHP for common, practical tasks.<a contenteditable="false" data-primary="" data-startref="Farray06" data-type="indexterm" id="idm45694746844584" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="Afunc06" data-type="indexterm" id="idm45694746843368" class="calibre6"/><a contenteditable="false" data-primary="" data-startref="PHParray06" data-type="indexterm" id="idm45694746887032" class="calibre6"/></p>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Questions" class="calibre4"><div class="preface" id="questions-id00017">
+<h1 class="calibre11">Questions</h1>
+
+<ol class="calibre25">
+	<li class="calibre26">
+	<p class="author1">What is the difference between a numeric and an associative array?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is the main benefit of the <code class="calibre15">array</code> keyword?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is the difference between <code class="calibre15">foreach</code> and <code class="calibre15">each</code>?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you create a multidimensional array?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you determine the number of elements in an array?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is the purpose of the <code class="calibre15">explode</code> function?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How can you set PHP’s internal pointer into an array back to the first element of the array?</p>
+	</li>
+</ol>
+
+<p class="author1">See <a data-type="xref" href="app01_split_005.xhtml#chapter_6_answers" class="calibre6">“Chapter 6 Answers”</a> in the <a data-type="xref" href="app01_split_000.xhtml#solutions_to_the_chapter_questions" class="calibre6">Appendix A</a> for the answers to these <span class="keep-together">questions.</span></p>
+</div></section>
+</div></section></div></body></html>

@@ -1,0 +1,1239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xml:lang="en"
+      lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<title>PHP Cookbook</title>
+<link rel="stylesheet" type="text/css" href="override_v1.css"/>
+<link rel="stylesheet" type="text/css" href="epub.css"/>
+</head>
+<body>
+<div id="book-content">
+<div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 5. Numbers"><div class="chapter" id="chapter_numbers">
+<h1><span class="label">Chapter 5. </span>Numbers</h1>
+
+
+<p>Another fundamental building block of data in PHP is numbers. It’s easy to find different types of numbers in the world around us. The page number in a book is often printed in the footer. Your smartwatch displays the current time and perhaps the number of steps you’ve taken today. Some numbers can be impossibly large, others impossibly small. Numbers can be whole, fractional, or irrational like π.</p>
+
+<p>In PHP, numbers are represented <a data-type="indexterm" data-primary="numbers" data-secondary="integers" id="idm45875173285872"></a><a data-type="indexterm" data-primary="integers" id="idm45875173284896"></a><a data-type="indexterm" data-primary="numbers" data-secondary="floating-point" id="idm45875173284224"></a><a data-type="indexterm" data-primary="floating-point numbers" id="idm45875173492192"></a>natively in one of two formats: as integers (the <code>int</code> type) or as floating-point numbers (the <code>float</code> type). Both numeric types are highly flexible, but the range of values you can use depends on the processor architecture of your system—​a 32-bit system has tighter bounds than a 64-bit system.</p>
+
+<p>PHP defines several constants that help programs understand the available range of numbers in the system. Given that the capabilities of PHP will differ greatly based on how it was compiled (for 32 or 64 bits), it is wise to use the constants defined in <a data-type="xref" href="#php_numeric_constants">Table 5-1</a> rather than trying to determine what these values will be in a program. It’s always <a data-type="indexterm" data-primary="constants" data-secondary="numerics" id="idm45875173489344"></a><a data-type="indexterm" data-primary="numeric constants" id="idm45875173488400"></a>safer to defer to the operating system and language defaults.</p>
+<table id="php_numeric_constants">
+<caption><span class="label">Table 5-1. </span>Constant numeric values in PHP</caption>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>PHP_INT_MAX</code></p></td>
+<td><p>The largest integer value supported by PHP. On 32-bit systems, this will be <code>2147483647</code>. On 64-bit systems, this will be <code>9223372036854775807</code>.</p></td>
+</tr>
+<tr>
+<td><p><code>PHP_INT_MIN</code></p></td>
+<td><p>The smallest integer value supported by PHP. On 32-bit systems, this will be <code>-2147483648</code>. On 64-bit systems, this will be <code>-9223372036854775808</code>.</p></td>
+</tr>
+<tr>
+<td><p><code>PHP_INT_SIZE</code></p></td>
+<td><p>Size of integers in bytes for this build of PHP.</p></td>
+</tr>
+<tr>
+<td><p><code>PHP_FLOAT_DIG</code></p></td>
+<td><p>Number of digits that can be rounded in a <code>float</code> and back without a loss in precision.</p></td>
+</tr>
+<tr>
+<td><p><code>PHP_FLOAT_​EPSI⁠LON</code></p></td>
+<td><p>The smallest representable positive number <code><em>x</em></code> such that <code><em>x</em> + 1.0 !== 1.0</code>.</p></td>
+</tr>
+<tr>
+<td><p><code>PHP_FLOAT_MIN</code></p></td>
+<td><p>Smallest representable positive floating-point number.</p></td>
+</tr>
+<tr>
+<td><p><code>PHP_FLOAT_MAX</code></p></td>
+<td><p>Largest representable floating-point number.</p></td>
+</tr>
+<tr>
+<td><p><code>-PHP_FLOAT_MAX</code></p></td>
+<td><p>Not a separate constant, but the way to represent the smallest negative floating-point number.</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>The unfortunate limitation <a data-type="indexterm" data-primary="GMP (GNU Multiple Precision) library" id="idm45875173466416"></a>of PHP’s number systems is that very large or very small numbers cannot be represented natively. Instead, you need to leverage an extension like <a href="https://oreil.ly/qFeO3">BCMath</a> or <a href="https://oreil.ly/u9Mbf">GNU Multiple Precision Arithmetic Library (GMP)</a>, both of which wrap operating system–native operations on numbers. I’ll cover GMP specifically in <a data-type="xref" href="#very_large_or_small_numbers">Recipe 5.10</a>.</p>
+
+<p>The recipes that follow cover many of the problems developers need to solve with numbers in PHP.</p>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="5.1 Validating a Number Within a Variable"><div class="sect1" id="idm45875173462592">
+<h1>5.1 Validating a Number Within a Variable</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875173461344">
+<h2>Problem</h2>
+
+<p>You want to check whether a variable <a data-type="indexterm" data-primary="variables" data-secondary="numbers, validating" id="vbnmvd"></a><a data-type="indexterm" data-primary="numbers" data-secondary="variables, validating" id="nmbvbv"></a><a data-type="indexterm" data-primary="validation" data-secondary="numbers with variables" id="vdnmbvb"></a>contains a number, even if that variable is explicitly typed as a string.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875173455904">
+<h2>Solution</h2>
+
+<p>Use <code>is_numeric()</code> to check whether <a data-type="indexterm" data-primary="is_numeric() function" id="idm45875173453920"></a><a data-type="indexterm" data-primary="functions" data-secondary="is_numeric()" id="idm45875173453184"></a>a variable can be successfully cast as a numeric value—for example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$candidates</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="mi">22</code><code class="p">,</code>
+    <code class="s1">'15'</code><code class="p">,</code>
+    <code class="s1">'12.7'</code><code class="p">,</code>
+    <code class="mf">0.662</code><code class="p">,</code>
+    <code class="s1">'infinity'</code><code class="p">,</code>
+    <code class="nx">INF</code><code class="p">,</code>
+    <code class="mh">0xDEADBEEF</code><code class="p">,</code>
+    <code class="s1">'10e10'</code><code class="p">,</code>
+    <code class="s1">'15 apples'</code><code class="p">,</code>
+    <code class="s1">'2,500'</code>
+<code class="p">];</code>
+
+<code class="k">foreach</code> <code class="p">(</code><code class="nv">$candidates</code> <code class="k">as</code> <code class="nv">$candidate</code><code class="p">)</code> <code class="p">{</code>
+    <code class="nv">$numeric</code> <code class="o">=</code> <code class="nb">is_numeric</code><code class="p">(</code><code class="nv">$candidate</code><code class="p">)</code> <code class="o">?</code> <code class="s1">'is'</code> <code class="o">:</code> <code class="s1">'is NOT'</code><code class="p">;</code>
+
+    <code class="k">echo</code> <code class="s2">"The value '</code><code class="si">{</code><code class="nv">$candidate</code><code class="si">}</code><code class="s2">' </code><code class="si">{</code><code class="nv">$numeric</code><code class="si">}</code><code class="s2"> numeric."</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="p">}</code></pre>
+
+<p>The preceding example will print the following when run in a console:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nx">The</code> <code class="nx">value</code> <code class="s1">'22'</code> <code class="nx">is</code> <code class="nx">numeric</code><code class="o">.</code>
+<code class="nx">The</code> <code class="nx">value</code> <code class="s1">'15'</code> <code class="nx">is</code> <code class="nx">numeric</code><code class="o">.</code>
+<code class="nx">The</code> <code class="nx">value</code> <code class="s1">'12.7'</code> <code class="nx">is</code> <code class="nx">numeric</code><code class="o">.</code>
+<code class="nx">The</code> <code class="nx">value</code> <code class="s1">'0.662'</code> <code class="nx">is</code> <code class="nx">numeric</code><code class="o">.</code>
+<code class="nx">The</code> <code class="nx">value</code> <code class="s1">'infinity'</code> <code class="nx">is</code> <code class="k">NOT</code> <code class="nx">numeric</code><code class="o">.</code>
+<code class="nx">The</code> <code class="nx">value</code> <code class="s1">'INF'</code> <code class="nx">is</code> <code class="nx">numeric</code><code class="o">.</code>
+<code class="nx">The</code> <code class="nx">value</code> <code class="s1">'3735928559'</code> <code class="nx">is</code> <code class="nx">numeric</code><code class="o">.</code>
+<code class="nx">The</code> <code class="nx">value</code> <code class="s1">'10e10'</code> <code class="nx">is</code> <code class="nx">numeric</code><code class="o">.</code>
+<code class="nx">The</code> <code class="nx">value</code> <code class="s1">'15 apples'</code> <code class="nx">is</code> <code class="k">NOT</code> <code class="nx">numeric</code><code class="o">.</code>
+<code class="nx">The</code> <code class="nx">value</code> <code class="s1">'2,500'</code> <code class="nx">is</code> <code class="k">NOT</code> <code class="nx">numeric</code><code class="o">.</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875173255184">
+<h2>Discussion</h2>
+
+<p>At its core, PHP is a dynamically typed language. You can easily interchange strings for integers (and vice versa), and PHP will try to infer your intention, dynamically casting values from one type to another as needed. While you can (and probably should) enforce strict typing as discussed in <a data-type="xref" href="ch03.html#argument_and_return_typing">Recipe 3.4</a>, often you will explicitly need to encode numbers as strings.</p>
+
+<p>In those situations, you will lose the ability to identify numeric strings by leveraging PHP’s type system. A variable passed into a function as a <code>string</code> will be invalid for mathematical operations without an explicit cast to a numeric type (<code>int</code> or <code>float</code>). Unfortunately, not every string that contains numbers is numeric.</p>
+
+<p>The string <code>15 apples</code> contains a number but is not numeric. The string <code>10e10</code> contains non-numeric characters but is a valid numeric representation.</p>
+
+<p>The difference between strings that have numbers and truly numeric strings can be best illustrated through a <a data-type="indexterm" data-primary="is_numeric() function" id="idm45875173235824"></a><a data-type="indexterm" data-primary="functions" data-secondary="is_numeric()" id="idm45875173235120"></a>userland implementation of PHP’s native <code>is_numeric()</code> function, as defined in <a data-type="xref" href="#userland_is_numeric">Example 5-1</a>.</p>
+<div id="userland_is_numeric" data-type="example">
+<h5><span class="label">Example 5-1. </span>Userland <code>is_numeric()</code> implementation</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">string_is_numeric</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$test</code><code class="p">)</code><code class="o">:</code> <code class="nx">bool</code>
+<code class="p">{</code>
+    <code class="k">return</code> <code class="nv">$test</code> <code class="o">===</code> <code class="p">(</code><code class="nx">string</code><code class="p">)</code> <code class="nb">floatval</code><code class="p">(</code><code class="nv">$test</code><code class="p">);</code>
+<code class="p">}</code></pre></div>
+
+<p>Applied to the same array of <code>$candidates</code> from the Solution example, <a data-type="xref" href="#userland_is_numeric">Example 5-1</a> will accurately verify numeric strings in everything <em>except</em> the literal <code>INF</code> constant <a data-type="indexterm" data-primary="INF constant" id="idm45875173117344"></a><a data-type="indexterm" data-primary="floatval() function" id="idm45875173116608"></a><a data-type="indexterm" data-primary="functions" data-secondary="floatval()" id="idm45875173115936"></a>and the <code>10e10</code> exponent shorthand. This is because <code>floatval()</code> will strip any non-numeric characters from the string entirely while converting it to a floating-point number prior to <code>(string)</code> casting things back to a string.<sup><a data-type="noteref" id="idm45875173113616-marker" href="ch05.html#idm45875173113616">1</a></sup></p>
+
+<p>The userland implementation isn’t adequate for every situation, so you should use the native implementation to be safe. The goal of <code>is_numeric()</code> is to indicate whether a given string can be <a data-type="indexterm" data-primary="variables" data-secondary="numbers, validating" data-startref="vbnmvd" id="idm45875173111552"></a><a data-type="indexterm" data-primary="numbers" data-secondary="variables, validating" data-startref="nmbvbv" id="idm45875173110304"></a><a data-type="indexterm" data-primary="validation" data-secondary="numbers with variables" data-startref="vdnmbvb" id="idm45875173109088"></a>safely cast to a numeric type without losing information.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875173107616">
+<h2>See Also</h2>
+
+<p>PHP documentation for <a href="https://oreil.ly/jTGcF"><code>is_numeric()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="5.2 Comparing Floating-Point Numbers"><div class="sect1" id="floating_point_comparison">
+<h1>5.2 Comparing Floating-Point Numbers</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875173103696">
+<h2>Problem</h2>
+
+<p>You want to test for equality <a data-type="indexterm" data-primary="floating-point numbers" data-secondary="comparing" id="flpnmpr"></a><a data-type="indexterm" data-primary="numbers" data-secondary="floating-point" data-tertiary="comparing" id="nmbflptp"></a>of two floating-point numbers.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875173099248">
+<h2>Solution</h2>
+
+<p>Define an appropriate error <a data-type="indexterm" data-primary="epsilon" id="idm45875173097952"></a>bound (called <code>epsilon</code>) that represents the greatest acceptable difference between the two numbers and evaluate their difference against it as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$first</code> <code class="o">=</code> <code class="mf">22.19348234</code><code class="p">;</code>
+<code class="nv">$second</code> <code class="o">=</code> <code class="mf">22.19348230</code><code class="p">;</code>
+
+<code class="nv">$epsilon</code> <code class="o">=</code> <code class="mf">0.000001</code><code class="p">;</code>
+
+<code class="nv">$equal</code> <code class="o">=</code> <code class="nb">abs</code><code class="p">(</code><code class="nv">$first</code> <code class="o">-</code> <code class="nv">$second</code><code class="p">)</code> <code class="o">&lt;</code> <code class="nv">$epsilon</code><code class="p">;</code> <code class="c1">// true</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875173071744">
+<h2>Discussion</h2>
+
+<p>Floating-point arithmetic with modern computers is less than exact because of the way machines internally represent numbers. Different operations you might calculate by hand and assume to be precise can trip up the machines you rely on.</p>
+
+<p>For example, the mathematic operation <code>1 - 0.83</code> is obviously <code>0.17</code>. It’s simple enough to mentally calculate or even work out on paper. But asking a computer to calculate this will produce a <a data-type="indexterm" data-primary="floating-point numbers" data-secondary="subtraction" id="idm45875173061856"></a><a data-type="indexterm" data-primary="subtraction, floating-point" id="idm45875173060880"></a>strange result, as demonstrated in <a data-type="xref" href="#float_subtraction_example">Example 5-2</a>.</p>
+<div id="float_subtraction_example" data-type="example">
+<h5><span class="label">Example 5-2. </span>Floating-point subtraction</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$a</code><code> </code><code class="o">=</code><code> </code><code class="mf">0.17</code><code class="p">;</code><code>
+</code><code class="nv">$b</code><code> </code><code class="o">=</code><code> </code><code class="mi">1</code><code> </code><code class="o">-</code><code> </code><code class="mf">0.83</code><code class="p">;</code><code>
+
+</code><code class="nb">var_dump</code><code class="p">(</code><code class="nv">$a</code><code> </code><code class="o">==</code><code> </code><code class="nv">$b</code><code class="p">);</code><code> </code><a class="co" id="co_numbers_CO1-1" href="#callout_numbers_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nb">var_dump</code><code class="p">(</code><code class="nv">$a</code><code class="p">);</code><code> </code><a class="co" id="co_numbers_CO1-2" href="#callout_numbers_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="nb">var_dump</code><code class="p">(</code><code class="nv">$b</code><code class="p">);</code><code> </code><a class="co" id="co_numbers_CO1-3" href="#callout_numbers_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_numbers_CO1-1" href="#co_numbers_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p><code>bool(false)</code></p></dd>
+<dt><a class="co" id="callout_numbers_CO1-2" href="#co_numbers_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p><code>float(0.17)</code></p></dd>
+<dt><a class="co" id="callout_numbers_CO1-3" href="#co_numbers_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p><code>float(0.17000000000000004)</code></p></dd>
+</dl></div>
+
+<p>When it comes to floating-point arithmetic, the best computers can do is an approximate result within an acceptable margin of error. As a result, comparing this result to an expected value requires the explicit definition of that margin (<code>epsilon</code>) and a comparison to that margin rather than an exact value.</p>
+
+<p>Rather than leverage either of PHP’s equality <a data-type="indexterm" data-primary="floating-point numbers" data-secondary="relative equality" id="idm45875172944640"></a><a data-type="indexterm" data-primary="numbers" data-secondary="floating-point" data-tertiary="relative equality" id="idm45875172943792"></a><a data-type="indexterm" data-primary="relative equality, floating-point numbers" id="idm45875172942704"></a>operators (a double or triple equals sign), you can define a function to check for the <em>relative</em> equality of two floats, as shown in <a data-type="xref" href="#float_equality">Example 5-3</a>.</p>
+<div id="float_equality" data-type="example">
+<h5><span class="label">Example 5-3. </span>Comparing equality of floating-point numbers</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code><code> </code><code class="nf">float_equality</code><code class="p">(</code><code class="nx">float</code><code> </code><code class="nv">$epsilon</code><code class="p">)</code><code class="o">:</code><code> </code><code class="nx">callable</code><code>
+</code><code class="p">{</code><code>
+    </code><code class="k">return</code><code> </code><code class="k">function</code><code class="p">(</code><code class="nx">float</code><code> </code><code class="nv">$a</code><code class="p">,</code><code> </code><code class="nx">float</code><code> </code><code class="nv">$b</code><code class="p">)</code><code> </code><code class="k">use</code><code> </code><code class="p">(</code><code class="nv">$epsilon</code><code class="p">)</code><code class="o">:</code><code> </code><code class="nx">bool</code><code>
+    </code><code class="p">{</code><code>
+        </code><code class="k">return</code><code> </code><code class="nb">abs</code><code class="p">(</code><code class="nv">$a</code><code> </code><code class="o">-</code><code> </code><code class="nv">$b</code><code class="p">)</code><code> </code><code class="o">&lt;</code><code> </code><code class="nv">$epsilon</code><code class="p">;</code><code>
+    </code><code class="p">};</code><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nv">$tight_equality</code><code> </code><code class="o">=</code><code> </code><code class="nx">float_equality</code><code class="p">(</code><code class="mf">0.0000001</code><code class="p">);</code><code>
+</code><code class="nv">$loose_equality</code><code> </code><code class="o">=</code><code> </code><code class="nx">float_equality</code><code class="p">(</code><code class="mf">0.01</code><code class="p">);</code><code>
+
+</code><code class="nb">var_dump</code><code class="p">(</code><code class="nv">$tight_equality</code><code class="p">(</code><code class="mf">1.152</code><code class="p">,</code><code> </code><code class="mf">1.152001</code><code class="p">));</code><code> </code><a class="co" id="co_numbers_CO2-1" href="#callout_numbers_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+</code><code class="nb">var_dump</code><code class="p">(</code><code class="nv">$tight_equality</code><code class="p">(</code><code class="mf">0.234</code><code class="p">,</code><code> </code><code class="mf">0.2345</code><code class="p">));</code><code> </code><a class="co" id="co_numbers_CO2-2" href="#callout_numbers_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="nb">var_dump</code><code class="p">(</code><code class="nv">$tight_equality</code><code class="p">(</code><code class="mf">0.234</code><code class="p">,</code><code> </code><code class="mf">0.244</code><code class="p">));</code><code> </code><a class="co" id="co_numbers_CO2-3" href="#callout_numbers_CO2-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a><code>
+</code><code class="nb">var_dump</code><code class="p">(</code><code class="nv">$loose_equality</code><code class="p">(</code><code class="mf">1.152</code><code class="p">,</code><code> </code><code class="mf">1.152001</code><code class="p">));</code><code> </code><a class="co" id="co_numbers_CO2-4" href="#callout_numbers_CO2-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a><code>
+</code><code class="nb">var_dump</code><code class="p">(</code><code class="nv">$loose_equality</code><code class="p">(</code><code class="mf">0.234</code><code class="p">,</code><code> </code><code class="mf">0.2345</code><code class="p">));</code><code> </code><a class="co" id="co_numbers_CO2-5" href="#callout_numbers_CO2-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a><code>
+</code><code class="nb">var_dump</code><code class="p">(</code><code class="nv">$loose_equality</code><code class="p">(</code><code class="mf">0.234</code><code class="p">,</code><code> </code><code class="mf">0.244</code><code class="p">));</code><code> </code><a class="co" id="co_numbers_CO2-6" href="#callout_numbers_CO2-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_numbers_CO2-1" href="#co_numbers_CO2-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p><code>bool(false)</code></p></dd>
+<dt><a class="co" id="callout_numbers_CO2-2" href="#co_numbers_CO2-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p><code>bool(false)</code></p></dd>
+<dt><a class="co" id="callout_numbers_CO2-3" href="#co_numbers_CO2-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p><code>bool(false)</code></p></dd>
+<dt><a class="co" id="callout_numbers_CO2-4" href="#co_numbers_CO2-4"><img src="assets/4.png" alt="4" width="12" height="12"/></a></dt>
+<dd><p><code>bool(true)</code></p></dd>
+<dt><a class="co" id="callout_numbers_CO2-5" href="#co_numbers_CO2-5"><img src="assets/5.png" alt="5" width="12" height="12"/></a></dt>
+<dd><p><code>bool(true)</code></p></dd>
+<dt><a class="co" id="callout_numbers_CO2-6" href="#co_numbers_CO2-6"><img src="assets/6.png" alt="6" width="12" height="12"/></a></dt>
+<dd><p><code>bool(true)</code></p></dd>
+</dl></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875172801952">
+<h2>See Also</h2>
+
+<p>PHP documentation <a data-type="indexterm" data-primary="floating-point numbers" data-secondary="comparing" data-startref="flpnmpr" id="idm45875172755872"></a><a data-type="indexterm" data-primary="numbers" data-secondary="floating-point" data-tertiary="comparing" data-startref="nmbflptp" id="idm45875172754592"></a>on <a href="https://oreil.ly/-311_">floating-point numbers</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="5.3 Rounding Floating-Point Numbers"><div class="sect1" id="idm45875172752032">
+<h1>5.3 Rounding Floating-Point Numbers</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875172750848">
+<h2>Problem</h2>
+
+<p>You want to round a floating-point <a data-type="indexterm" data-primary="floating-point numbers" data-secondary="rounding" id="fgpnmb"></a><a data-type="indexterm" data-primary="numbers" data-secondary="floating-point" data-tertiary="rounding" id="nbflgprd"></a><a data-type="indexterm" data-primary="rounding" data-secondary="floating-point numbers" id="rdgflptnm"></a>number either to a fixed number of decimal places or to an integer.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875172745184">
+<h2>Solution</h2>
+
+<p>To round a floating-point number to a <a data-type="indexterm" data-primary="round() function" id="idm45875172743712"></a><a data-type="indexterm" data-primary="functions" data-secondary="round()" id="idm45875172743008"></a>set number of decimal places, use <code>round()</code> while specifying the number of places:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$number</code> <code class="o">=</code> <code class="nb">round</code><code class="p">(</code><code class="mf">15.31415</code><code class="p">,</code> <code class="mi">1</code><code class="p">);</code>
+<code class="c1">// 15.3</code></pre>
+
+<p>To explicitly round up to the nearest whole <a data-type="indexterm" data-primary="ceil() function" id="idm45875172730144"></a><a data-type="indexterm" data-primary="functions" data-secondary="ceil()" id="idm45875172729536"></a>number, use <code>ceil()</code>:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$number</code> <code class="o">=</code> <code class="nb">ceil</code><code class="p">(</code><code class="mf">15.3</code><code class="p">);</code>
+<code class="c1">// 16</code></pre>
+
+<p>To explicitly round down to the nearest <a data-type="indexterm" data-primary="floor() function" id="idm45875172704560"></a><a data-type="indexterm" data-primary="functions" data-secondary="floor()" id="idm45875172703952"></a>whole number, use <code>floor()</code>:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$number</code> <code class="o">=</code> <code class="nb">floor</code><code class="p">(</code><code class="mf">15.3</code><code class="p">);</code>
+<code class="c1">// 15</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875172688176">
+<h2>Discussion</h2>
+
+<p>All three functions referenced in the Solution examples—<code>round()</code>, <code>ceil()</code>, and <code>floor()</code>—are intended to operate on any numeric value but will return a <code>float</code> after operating on it. By default, <code>round()</code> will round to zero digits after the decimal point but will still return a floating-point number.</p>
+
+<p>To convert from a <code>float</code> to an <code>int</code> for any of <a data-type="indexterm" data-primary="floating-point numbers" data-secondary="converting integer" id="idm45875172634224"></a><a data-type="indexterm" data-primary="integers" data-secondary="converting from floating-point" id="idm45875172633216"></a><a data-type="indexterm" data-primary="numbers" data-secondary="floating-point" data-tertiary="converting to integer" id="idm45875172632304"></a>these functions, wrap the function itself in <code>intval()</code> to convert to an integer type.</p>
+
+<p>Rounding in PHP is more flexible than merely rounding up or down. By default, <code>round()</code> will always round the input number away from 0 when it’s halfway there. This means numbers like 1.4 will round down, while 1.5 will round up. This also holds true with negative numbers: −1.4 will be rounded towards 0 to −1, while −1.5 will be rounded away from 0 to −2.</p>
+
+<p>You can change the <a data-type="indexterm" data-primary="round() function" data-secondary="arguments" id="idm45875172650368"></a><a data-type="indexterm" data-primary="arguments" data-secondary="round() function" id="idm45875172649360"></a>behavior of <code>round()</code> by passing an optional third argument (or by using named parameters as shown in <a data-type="xref" href="ch03.html#named_function_parameters">Recipe 3.3</a>) to specify the rounding mode. This argument accepts one of four default constants <a data-type="indexterm" data-primary="rounding" data-secondary="constants" id="idm45875172647072"></a><a data-type="indexterm" data-primary="constants" data-secondary="rounding" id="idm45875172646128"></a>defined by PHP, as enumerated in <a data-type="xref" href="#php_rounding_constants">Table 5-2</a>.</p>
+<table id="php_rounding_constants">
+<caption><span class="label">Table 5-2. </span>Rounding mode constants</caption>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>PHP_ROUND_HALF_UP</code></p></td>
+<td><p>Rounds a value away from 0 when it is halfway there, making 1.5 into 2 and −1.5 into −2</p></td>
+</tr>
+<tr>
+<td><p><code>PHP_ROUND_HALF_DOWN</code></p></td>
+<td><p>Rounds a value towards 0 when it is halfway there, making 1.5 into 1 and −1.5 into −1</p></td>
+</tr>
+<tr>
+<td><p><code>PHP_ROUND_HALF_EVEN</code></p></td>
+<td><p>Rounds a value towards the nearest even value when it is halfway there, making both 1.5 and 2.5 into 2</p></td>
+</tr>
+<tr>
+<td><p><code>PHP_ROUND_HALF_ODD</code></p></td>
+<td><p>Rounds a value towards the nearest odd value when it is halfway there, making 1.5 into 1 and 2.5 into 3</p></td>
+</tr>
+</tbody>
+</table>
+
+<p><a data-type="xref" href="#php_rounding_with_modes">Example 5-4</a> illustrates the effect of each <a data-type="indexterm" data-primary="rounding" data-secondary="floats" id="idm45875172621312"></a>rounding mode constant when applied to the same numbers.</p>
+<div id="php_rounding_with_modes" data-type="example">
+<h5><span class="label">Example 5-4. </span>Rounding floats in PHP with different modes</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">echo</code> <code class="s1">'Rounding on 1.5'</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="nb">var_dump</code><code class="p">(</code><code class="nb">round</code><code class="p">(</code><code class="mf">1.5</code><code class="p">,</code> <code class="nx">mode</code><code class="o">:</code> <code class="nx">PHP_ROUND_HALF_UP</code><code class="p">));</code>
+<code class="nb">var_dump</code><code class="p">(</code><code class="nb">round</code><code class="p">(</code><code class="mf">1.5</code><code class="p">,</code> <code class="nx">mode</code><code class="o">:</code> <code class="nx">PHP_ROUND_HALF_DOWN</code><code class="p">));</code>
+<code class="nb">var_dump</code><code class="p">(</code><code class="nb">round</code><code class="p">(</code><code class="mf">1.5</code><code class="p">,</code> <code class="nx">mode</code><code class="o">:</code> <code class="nx">PHP_ROUND_HALF_EVEN</code><code class="p">));</code>
+<code class="nb">var_dump</code><code class="p">(</code><code class="nb">round</code><code class="p">(</code><code class="mf">1.5</code><code class="p">,</code> <code class="nx">mode</code><code class="o">:</code> <code class="nx">PHP_ROUND_HALF_ODD</code><code class="p">));</code>
+
+<code class="k">echo</code> <code class="s1">'Rounding on 2.5'</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="nb">var_dump</code><code class="p">(</code><code class="nb">round</code><code class="p">(</code><code class="mf">2.5</code><code class="p">,</code> <code class="nx">mode</code><code class="o">:</code> <code class="nx">PHP_ROUND_HALF_UP</code><code class="p">));</code>
+<code class="nb">var_dump</code><code class="p">(</code><code class="nb">round</code><code class="p">(</code><code class="mf">2.5</code><code class="p">,</code> <code class="nx">mode</code><code class="o">:</code> <code class="nx">PHP_ROUND_HALF_DOWN</code><code class="p">));</code>
+<code class="nb">var_dump</code><code class="p">(</code><code class="nb">round</code><code class="p">(</code><code class="mf">2.5</code><code class="p">,</code> <code class="nx">mode</code><code class="o">:</code> <code class="nx">PHP_ROUND_HALF_EVEN</code><code class="p">));</code>
+<code class="nb">var_dump</code><code class="p">(</code><code class="nb">round</code><code class="p">(</code><code class="mf">2.5</code><code class="p">,</code> <code class="nx">mode</code><code class="o">:</code> <code class="nx">PHP_ROUND_HALF_ODD</code><code class="p">));</code></pre></div>
+
+<p>The preceding example will print the following to your console:</p>
+
+<pre data-type="programlisting">Rounding on 1.5
+float(2)
+float(1)
+float(2)
+float(1)
+Rounding on 2.5
+float(3)
+float(2)
+float(2)
+float(3)</pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875172687712">
+<h2>See Also</h2>
+
+<p>PHP documentation <a data-type="indexterm" data-primary="floating-point numbers" data-secondary="rounding" data-startref="fgpnmb" id="idm45875172364704"></a><a data-type="indexterm" data-primary="numbers" data-secondary="floating-point" data-tertiary="rounding" data-startref="nbflgprd" id="idm45875172363424"></a><a data-type="indexterm" data-primary="rounding" data-secondary="floating-point numbers" data-startref="rdgflptnm" id="idm45875172566992"></a>on <a href="https://oreil.ly/ONHjD">floating-point numbers</a>, the <a href="https://oreil.ly/010CB"><code>round()</code></a> function, the <a href="https://oreil.ly/i5Rpy"><code>ceil()</code></a> function, and the <a href="https://oreil.ly/VAZ6t"><code>floor()</code></a> function.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="5.4 Generating Truly Random Numbers"><div class="sect1" id="recipe_random_numbers">
+<h1>5.4 Generating Truly Random Numbers</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875172560704">
+<h2>Problem</h2>
+
+<p>You want to generate random <a data-type="indexterm" data-primary="integers" data-secondary="random, generating" id="igrdmg"></a><a data-type="indexterm" data-primary="random numbers" data-secondary="generating" id="rndmbg"></a>integers within specific bounds.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875172556528">
+<h2>Solution</h2>
+
+<p>Use <code>random_int()</code> as <a data-type="indexterm" data-primary="random_init() function" id="rdmtfc"></a><a data-type="indexterm" data-primary="functions" data-secondary="random_int()" id="fctnrndm"></a>follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="c1">// Random integer between 10 and 225, inclusive</code>
+<code class="nv">$random_number</code> <code class="o">=</code> <code class="nb">random_int</code><code class="p">(</code><code class="mi">10</code><code class="p">,</code> <code class="mi">225</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875172549264">
+<h2>Discussion</h2>
+
+<p>When you need randomness, you most often need explicitly true, completely unpredictable randomness. In those situations, you can rely on the cryptographically secure pseudorandom number generators built into the machine itself. PHP’s <code>random_int()</code> function relies on these operating system–level number generators rather than implementing its own algorithm.</p>
+
+<p>On Windows, PHP will leverage either <a href="https://oreil.ly/0kVO9"><code>CryptGenRandom()</code></a> or the <a href="https://oreil.ly/otHP9"><code>Cryptography API: Next Generation (CNG)</code></a> depending on the language version in use. On Linux, PHP leverages a system call to <a href="https://oreil.ly/07DIE"><code>getrandom(2)</code></a>. On any other platform, PHP will fall back on the system-level <em>/dev/urandom</em> interface. All of these APIs are well tested and proven to be cryptographically secure, meaning they generate numbers with sufficient randomness that they are indistinguishable from noise.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>In rare situations, you’ll want a <a data-type="indexterm" data-primary="random number generators" id="idm45875172527312"></a>random number generator to produce a predictable series of pseudorandom values. In those circumstances, you can rely on algorithmic generators like the Mersenne Twister, which is further discussed in <a data-type="xref" href="#predictable_random_numbers">Recipe 5.5</a>.</p>
+</div>
+
+<p>PHP doesn’t natively support a method to create a random floating-point number (i.e., selecting a random decimal between 0 and 1). Instead, you can use <code>ran⁠dom_​int()</code> and your knowledge of integers in PHP to create your own function to do exactly that, as shown in <a data-type="xref" href="#random_float">Example 5-5</a>.</p>
+<div id="random_float" data-type="example">
+<h5><span class="label">Example 5-5. </span>Userland function for generating a random floating-point number</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">random_float</code><code class="p">()</code><code class="o">:</code> <code class="nx">float</code>
+<code class="p">{</code>
+    <code class="k">return</code> <code class="nb">random_int</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="nx">PHP_INT_MAX</code><code class="p">)</code> <code class="o">/</code> <code class="nx">PHP_INT_MAX</code><code class="p">;</code>
+<code class="p">}</code></pre></div>
+
+<p>This implementation of <code>random_float()</code> lacks bounds <a data-type="indexterm" data-primary="random_float() function" id="idm45875172506480"></a><a data-type="indexterm" data-primary="functions" data-secondary="random_float()" id="idm45875172505872"></a>because it will always generate a number between 0 and 1, inclusively. This might be useful to create random percentages, either for creating artificial data or for selecting randomly sized samples of arrays. A more complicated implementation might incorporate bounds as shown in <a data-type="xref" href="#random_float_with_bounds">Example 5-6</a>, but often being able to choose between 0 and 1 is utility enough.</p>
+<div id="random_float_with_bounds" data-type="example">
+<h5><span class="label">Example 5-6. </span>Userland function for generating a random <code>float</code> within bounds</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">random_float</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$min</code> <code class="o">=</code> <code class="mi">0</code><code class="p">,</code> <code class="nx">int</code> <code class="nv">$max</code> <code class="o">=</code> <code class="mi">1</code><code class="p">)</code><code class="o">:</code> <code class="nx">float</code>
+<code class="p">{</code>
+    <code class="nv">$rand</code> <code class="o">=</code> <code class="nb">random_int</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="nx">PHP_INT_MAX</code><code class="p">)</code> <code class="o">/</code> <code class="nx">PHP_INT_MAX</code><code class="p">;</code>
+
+    <code class="k">return</code> <code class="p">(</code><code class="nv">$max</code> <code class="o">-</code> <code class="nv">$min</code><code class="p">)</code> <code class="o">*</code> <code class="nv">$rand</code> <code class="o">+</code> <code class="nv">$min</code><code class="p">;</code>
+<code class="p">}</code></pre></div>
+
+<p>This newer definition of <code>random_float()</code> merely scales the original definition to the newly defined bounds. If you were to leave the default bounds in place, the function reduces down to the original <a data-type="indexterm" data-primary="integers" data-secondary="random, generating" data-startref="igrdmg" id="idm45875172343952"></a><a data-type="indexterm" data-primary="random numbers" data-secondary="generating" data-startref="rndmbg" id="idm45875172342864"></a><a data-type="indexterm" data-primary="random_init() function" data-startref="rdmtfc" id="idm45875172341648"></a><a data-type="indexterm" data-primary="functions" data-secondary="random_int()" data-startref="fctnrndm" id="idm45875172340704"></a>definition.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875172339104">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/kLoas"><code>random_int()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="5.5 Generating Predictable Random Numbers"><div class="sect1" id="predictable_random_numbers">
+<h1>5.5 Generating Predictable Random Numbers</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875172335152">
+<h2>Problem</h2>
+
+<p>You want to predict random numbers <a data-type="indexterm" data-primary="random numbers" data-secondary="generating" data-tertiary="predictable" id="rdmbgg"></a><a data-type="indexterm" data-primary="numbers" data-secondary="random, generating predictable" id="nmbrdtg"></a><a data-type="indexterm" data-primary="predictable random numbers" id="prrnmb"></a>in such a way that the sequence of numbers is the same every time.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875172329824">
+<h2>Solution</h2>
+
+<p>Use the <code>mt_rand()</code> function after <a data-type="indexterm" data-primary="mt_rand() function" id="idm45875172327840"></a><a data-type="indexterm" data-primary="functions" data-secondary="mt_rand()" id="idm45875172327104"></a>passing a predefined seed into <code>mt_srand()</code>—for example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">generate_sequence</code><code class="p">(</code><code class="nx">int</code> <code class="nv">$count</code> <code class="o">=</code> <code class="mi">10</code><code class="p">)</code><code class="o">:</code> <code class="k">array</code>
+<code class="p">{</code>
+    <code class="nv">$array</code> <code class="o">=</code> <code class="p">[];</code>
+
+    <code class="k">for</code> <code class="p">(</code><code class="nv">$i</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code> <code class="nv">$i</code> <code class="o">&lt;</code> <code class="nv">$count</code><code class="p">;</code> <code class="nv">$i</code><code class="o">++</code><code class="p">)</code> <code class="p">{</code>
+        <code class="nv">$array</code><code class="p">[]</code> <code class="o">=</code> <code class="nb">mt_rand</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">100</code><code class="p">);</code>
+    <code class="p">}</code>
+
+    <code class="k">return</code> <code class="nv">$array</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nb">mt_srand</code><code class="p">(</code><code class="mi">42</code><code class="p">);</code>
+<code class="nv">$first</code> <code class="o">=</code> <code class="nx">generate_sequence</code><code class="p">();</code>
+
+<code class="nb">mt_srand</code><code class="p">(</code><code class="mi">42</code><code class="p">);</code>
+<code class="nv">$second</code> <code class="o">=</code> <code class="nx">generate_sequence</code><code class="p">();</code>
+
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$first</code><code class="p">);</code>
+<code class="nb">print_r</code><code class="p">(</code><code class="nv">$second</code><code class="p">);</code></pre>
+
+<p>Both arrays in the preceding example will have the following contents:</p>
+
+<pre data-type="programlisting" data-code-language="bash">Array<code class="w"></code>
+<code class="o">(</code><code class="w"></code>
+<code class="w">    </code><code class="o">[</code><code class="m">0</code><code class="o">]</code><code class="w"> </code><code class="o">=</code>&gt;<code class="w"> </code><code class="m">38</code><code class="w"></code>
+<code class="w">    </code><code class="o">[</code><code class="m">1</code><code class="o">]</code><code class="w"> </code><code class="o">=</code>&gt;<code class="w"> </code><code class="m">32</code><code class="w"></code>
+<code class="w">    </code><code class="o">[</code><code class="m">2</code><code class="o">]</code><code class="w"> </code><code class="o">=</code>&gt;<code class="w"> </code><code class="m">94</code><code class="w"></code>
+<code class="w">    </code><code class="o">[</code><code class="m">3</code><code class="o">]</code><code class="w"> </code><code class="o">=</code>&gt;<code class="w"> </code><code class="m">55</code><code class="w"></code>
+<code class="w">    </code><code class="o">[</code><code class="m">4</code><code class="o">]</code><code class="w"> </code><code class="o">=</code>&gt;<code class="w"> </code><code class="m">2</code><code class="w"></code>
+<code class="w">    </code><code class="o">[</code><code class="m">5</code><code class="o">]</code><code class="w"> </code><code class="o">=</code>&gt;<code class="w"> </code><code class="m">21</code><code class="w"></code>
+<code class="w">    </code><code class="o">[</code><code class="m">6</code><code class="o">]</code><code class="w"> </code><code class="o">=</code>&gt;<code class="w"> </code><code class="m">10</code><code class="w"></code>
+<code class="w">    </code><code class="o">[</code><code class="m">7</code><code class="o">]</code><code class="w"> </code><code class="o">=</code>&gt;<code class="w"> </code><code class="m">12</code><code class="w"></code>
+<code class="w">    </code><code class="o">[</code><code class="m">8</code><code class="o">]</code><code class="w"> </code><code class="o">=</code>&gt;<code class="w"> </code><code class="m">47</code><code class="w"></code>
+<code class="w">    </code><code class="o">[</code><code class="m">9</code><code class="o">]</code><code class="w"> </code><code class="o">=</code>&gt;<code class="w"> </code><code class="m">30</code><code class="w"></code>
+<code class="o">)</code><code class="w"></code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875172277072">
+<h2>Discussion</h2>
+
+<p>When writing any other example about truly random numbers, the best anyone can do is to illustrate what the output <em>might</em> look like. When it comes to the output of <code>mt_rand()</code>, however, the output will be the same on every computer, given you’re using the same seed.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>PHP automatically seeds <code>mt_rand()</code> at random by <a data-type="indexterm" data-primary="mt_rand() function" id="idm45875166470848"></a><a data-type="indexterm" data-primary="functions" data-secondary="mt_rand()" id="idm45875166470112"></a>default. It is not necessary to specify your own seed unless your goal is deterministic output from the function.</p>
+</div>
+
+<p>The output is the same because <code>mt_rand()</code> leverages an algorithmic pseudorandom number <a data-type="indexterm" data-primary="random number generators" data-secondary="Mersenne Twister" id="idm45875166467984"></a><a data-type="indexterm" data-primary="Mersenne Twister" id="idm45875166467040"></a>generator called the <em>Mersenne Twister</em>. This is a well-known and heavily used algorithm first introduced in 1997; it’s also used in languages like Ruby and Python.</p>
+
+<p>Given an initial seed value, the algorithm creates an initial state and then generates seemingly random numbers by executing a “twist” operation on that state. The advantage of this approach is that it’s deterministic—​given the same seed, the algorithm will create the same sequence of “random” numbers every time.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>Predictability in random numbers can be hazardous to certain computing operations, specifically to cryptography. The use cases requiring a deterministic sequence of pseudorandom numbers are rare enough that <code>mt_rand()</code> should be avoided as much as possible. If you need to generate random numbers, leverage true sources of randomness like <code>random_int()</code> and <code>random_bytes()</code>.</p>
+</div>
+
+<p>Creating a pseudorandom but predictable sequence of numbers might be useful in creating object IDs for a database. You can easily test that your code operates correctly by running it multiple times and verifying the output. The disadvantage is that algorithms like the Mersenne Twister can be gamed by an outside party.</p>
+
+<p>Given a sufficiently long sequence of seemingly random numbers and knowledge of the algorithm, it is trivial to reverse the operation and identify the original seed. Once an attacker knows the seed value, they can generate every possible “random” number your system will leverage <a data-type="indexterm" data-primary="random numbers" data-secondary="generating" data-tertiary="predictable" data-startref="rdmbgg" id="idm45875166431536"></a><a data-type="indexterm" data-primary="numbers" data-secondary="random, generating predictable" data-startref="nmbrdtg" id="idm45875166430016"></a><a data-type="indexterm" data-primary="predictable random numbers" data-startref="prrnmb" id="idm45875166428832"></a>moving forward.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875166427664">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/niU_q"><code>mt_rand()</code></a> and <a href="https://oreil.ly/xSa53"><code>mt_srand()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="5.6 Generating Weighted Random Numbers"><div class="sect1" id="idm45875166424352">
+<h1>5.6 Generating Weighted Random Numbers</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875166423104">
+<h2>Problem</h2>
+
+<p>You want to generate random <a data-type="indexterm" data-primary="random numbers" data-secondary="weighted, generating" id="rnmbwggg"></a><a data-type="indexterm" data-primary="weighted random numbers, generating" id="wrnmbg"></a>numbers in order to select a specific item from a collection at random, but you want some items to have a higher chance of being selected than others. For example, you want to select the winner of a particular challenge at an event, but some participants have earned more points than others and need to have a greater chance of being selected.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875166419232">
+<h2>Solution</h2>
+
+<p>Pass a map of choices and weights into an <a data-type="indexterm" data-primary="weighted_random_choice() function" id="wgrndc"></a><a data-type="indexterm" data-primary="functions" data-secondary="weighted_random_choice()" id="fwgrdmc"></a><a data-type="indexterm" data-primary="weighted random choice" data-secondary="implementing" id="idm45875166415808"></a>implementation of <code>weighted_​ran⁠dom_choice()</code>, as demonstrated in <a data-type="xref" href="#solution_weighted_random_choice">Example 5-7</a>.</p>
+<div id="solution_weighted_random_choice" data-type="example">
+<h5><span class="label">Example 5-7. </span>Implementation of a weighted random choice</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$choices</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="s1">'Tony'</code>  <code class="o">=&gt;</code> <code class="mi">10</code><code class="p">,</code>
+    <code class="s1">'Steve'</code> <code class="o">=&gt;</code> <code class="mi">2</code><code class="p">,</code>
+    <code class="s1">'Peter'</code> <code class="o">=&gt;</code> <code class="mi">1</code><code class="p">,</code>
+    <code class="s1">'Wanda'</code> <code class="o">=&gt;</code> <code class="mi">4</code><code class="p">,</code>
+    <code class="s1">'Carol'</code> <code class="o">=&gt;</code> <code class="mi">6</code>
+<code class="p">];</code>
+
+<code class="k">function</code> <code class="nf">weighted_random_choice</code><code class="p">(</code><code class="k">array</code> <code class="nv">$choices</code><code class="p">)</code><code class="o">:</code> <code class="nx">string</code>
+<code class="p">{</code>
+    <code class="nb">arsort</code><code class="p">(</code><code class="nv">$choices</code><code class="p">);</code>
+
+    <code class="nv">$total_weight</code> <code class="o">=</code> <code class="nb">array_sum</code><code class="p">(</code><code class="nb">array_values</code><code class="p">(</code><code class="nv">$choices</code><code class="p">));</code>
+    <code class="nv">$selection</code> <code class="o">=</code> <code class="nb">random_int</code><code class="p">(</code><code class="mi">1</code><code class="p">,</code> <code class="nv">$total_weight</code><code class="p">);</code>
+
+    <code class="nv">$count</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+    <code class="k">foreach</code> <code class="p">(</code><code class="nv">$choices</code> <code class="k">as</code> <code class="nv">$choice</code> <code class="o">=&gt;</code> <code class="nv">$weight</code><code class="p">)</code> <code class="p">{</code>
+        <code class="nv">$count</code> <code class="o">+=</code> <code class="nv">$weight</code><code class="p">;</code>
+        <code class="k">if</code> <code class="p">(</code><code class="nv">$count</code> <code class="o">&gt;=</code> <code class="nv">$selection</code><code class="p">)</code> <code class="p">{</code>
+            <code class="k">return</code> <code class="nv">$choice</code><code class="p">;</code>
+        <code class="p">}</code>
+    <code class="p">}</code>
+
+    <code class="k">throw</code> <code class="k">new</code> <code class="nx">Exception</code><code class="p">(</code><code class="s1">'Unable to make a choice!'</code><code class="p">);</code>
+<code class="p">}</code>
+
+<code class="k">print</code> <code class="nx">weighted_random_choice</code><code class="p">(</code><code class="nv">$choices</code><code class="p">);</code></pre></div>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875166265328">
+<h2>Discussion</h2>
+
+<p>In the Solution example, each possible choice is assigned a weight. To choose a final option, you can <em>order</em> each option by weight, with the highest-weighted option coming first in the list. You then identify a random number somewhere in the field of total possible weights. That random number selects which of the options you chose.</p>
+
+<p>This is easiest to visualize on a number line. In the Solution example, Tony is entered into the selection with a weight of 10 and Peter with a weight of 1. This means Tony is 10 times as likely to win as Peter, but it’s still possible <em>neither</em> of them will be chosen. <a data-type="xref" href="#weighted_number_line">Figure 5-1</a> illustrates the relative weight of each if you order the possible choices by weight and print them on a number line.</p>
+
+<figure><div id="weighted_number_line" class="figure">
+<img src="assets/phpc_0501.png" alt="Weighted random choice visualized on a continuous line" width="600" height="71"/>
+<h6><span class="label">Figure 5-1. </span>Potential selections ordered and visualized by weight</h6>
+</div></figure>
+
+<p>The algorithm defined in <code>weighted_random_choice()</code> will check whether the selected random number is within the bounds of each possible choice and, if not, move on to the next candidate. If, for any reason, you’re unable to make a selection, the function will throw an exception.<sup><a data-type="noteref" id="idm45875166236512-marker" href="ch05.html#idm45875166236512">2</a></sup></p>
+
+<p>It is possible to verify the weighted nature of this choice by executing a random selection a thousand times and then plotting the relative number of times each choice is picked. <a data-type="xref" href="#weighted_random_outcome_code">Example 5-8</a> shows how such a repeated choice can be tabulated, while <a data-type="xref" href="#weighted_random_outcome">Figure 5-2</a> illustrates the outcome. Both demonstrate just how much more likely Tony is to be chosen than any other option in the candidate <a data-type="indexterm" data-primary="weighted random choice" data-secondary="repeated selection" id="idm45875166233200"></a>array.</p>
+<div id="weighted_random_outcome_code" data-type="example">
+<h5><span class="label">Example 5-8. </span>Repeated selection of a weighted random choice</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$output</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'output.csv'</code><code class="p">,</code> <code class="s1">'w'</code><code class="p">);</code>
+<code class="nb">fputcsv</code><code class="p">(</code><code class="nv">$output</code><code class="p">,</code> <code class="p">[</code><code class="s1">'selected'</code><code class="p">]);</code>
+
+<code class="k">foreach</code> <code class="p">(</code><code class="nb">range</code><code class="p">(</code><code class="mi">0</code><code class="p">,</code> <code class="mi">1000</code><code class="p">)</code> <code class="k">as</code> <code class="nv">$i</code><code class="p">)</code> <code class="p">{</code>
+    <code class="nv">$selection</code> <code class="o">=</code> <code class="nx">weighted_random_choice</code><code class="p">(</code><code class="nv">$choices</code><code class="p">);</code>
+    <code class="nb">fputcsv</code><code class="p">(</code><code class="nv">$output</code><code class="p">,</code> <code class="p">[</code><code class="nv">$selection</code><code class="p">]);</code>
+<code class="p">}</code>
+<code class="nb">fclose</code><code class="p">(</code><code class="nv">$output</code><code class="p">);</code></pre></div>
+
+<figure><div id="weighted_random_outcome" class="figure">
+<img src="assets/phpc_0502.png" alt="Outcome of 1000 iterations of a weighted random choice." width="600" height="350"/>
+<h6><span class="label">Figure 5-2. </span>Pie chart illustrating the relative number of times each choice is selected</h6>
+</div></figure>
+
+<p>This illustration of outcomes after 1,000 iterations clearly demonstrates that Tony is chosen roughly 10 times more frequently than Peter. This lines up perfectly with his having a weight of 10 to Peter’s 1. Likewise, Wanda’s weight of 4 reliably lines up with her being chosen twice as frequently as Steve, who has a weight of 2.</p>
+
+<p>Given that the choices here are random, running the same experiment again will result in slightly different percentages for each candidate. However, the integer weights of each will always translate <a data-type="indexterm" data-primary="random numbers" data-secondary="weighted, generating" data-startref="rnmbwggg" id="idm45875166113872"></a><a data-type="indexterm" data-primary="weighted random numbers, generating" data-startref="wrnmbg" id="idm45875166112624"></a><a data-type="indexterm" data-primary="weighted_random_choice() function" data-startref="wgrndc" id="idm45875166111712"></a><a data-type="indexterm" data-primary="functions" data-secondary="weighted_random_choice()" data-startref="fwgrdmc" id="idm45875166110800"></a>into roughly the same distribution of choices.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875166041312">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/Pq16w"><code>random_int()</code></a> and <a href="https://oreil.ly/VZ-Vz"><code>arsort()</code></a> as well as <a data-type="xref" href="#recipe_random_numbers">Recipe 5.4</a> for further examples of <code>random_int()</code> in practice.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="5.7 Calculating Logarithms"><div class="sect1" id="idm45875166196576">
+<h1>5.7 Calculating Logarithms</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875166195296">
+<h2>Problem</h2>
+
+<p>You want to calculate the <a data-type="indexterm" data-primary="logarithms, calculating" id="idm45875166193936"></a>logarithm of a number.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875166192848">
+<h2>Solution</h2>
+
+<p>For natural <a data-type="indexterm" data-primary="log() function" id="idm45875166191280"></a><a data-type="indexterm" data-primary="functions" data-secondary="log()" id="idm45875166190544"></a>logarithms (using base <code>e</code>), use <code>log()</code> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$log</code> <code class="o">=</code> <code class="nb">log</code><code class="p">(</code><code class="mi">5</code><code class="p">);</code>
+<code class="c1">// 1.6094379124341</code></pre>
+
+<p>For any arbitrary base logarithm, specify the base as a second optional parameter:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$log2</code> <code class="o">=</code> <code class="nb">log</code><code class="p">(</code><code class="mi">16</code><code class="p">,</code> <code class="mi">2</code><code class="p">);</code>
+<code class="c1">// 4.0</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875166192512">
+<h2>Discussion</h2>
+
+<p>PHP supports the calculation of logarithms with its native Math extension. When you call <code>log()</code> without specifying a base, PHP will fall back on the default <code>M_E</code> constant, which is coded to the value of <code>e</code>, or approximately 2.718281828459.</p>
+
+<p>If you try to take the logarithm of a negative value, PHP will always return <code>NAN</code>, a constant (typed as a <code>float</code>) that represents <em>not a number</em>. If you attempt to pass a negative base, PHP will return a <code>ValueError</code> and trigger a warning.</p>
+
+<p>Any positive, nonzero base is supported by <code>log()</code>. Many applications use base 10 so frequently that PHP supports a separate <code>log10()</code> function for just that base. This is functionally equivalent to passing the integer <code>10</code> as a base to <code>log()</code>.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875165982336">
+<h2>See Also</h2>
+
+<p>PHP documentation on the various functionality supported by the <a href="https://oreil.ly/nLOM7">Math extension</a>, including <a href="https://oreil.ly/r-WYo"><code>log()</code></a> and <a href="https://oreil.ly/7Tn4t"><code>log10()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="5.8 Calculating Exponents"><div class="sect1" id="idm45875165959360">
+<h1>5.8 Calculating Exponents</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875165958112">
+<h2>Problem</h2>
+
+<p>You want to raise a number <a data-type="indexterm" data-primary="exponents, calculating" id="xpnnccl"></a>to an arbitrary power.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875165955392">
+<h2>Solution</h2>
+
+<p>Use PHP’s <code>pow()</code> function as <a data-type="indexterm" data-primary="pow() function" id="idm45875165953616"></a><a data-type="indexterm" data-primary="functions" data-secondary="pow()" id="idm45875165952880"></a>follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="c1">// 2^5</code>
+<code class="nv">$power</code> <code class="o">=</code> <code class="nb">pow</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code> <code class="mi">5</code><code class="p">);</code> <code class="c1">// 32</code>
+
+<code class="c1">// 3^0.5</code>
+<code class="nv">$power</code> <code class="o">=</code> <code class="nb">pow</code><code class="p">(</code><code class="mi">3</code><code class="p">,</code> <code class="mf">0.5</code><code class="p">);</code> <code class="c1">// 1.7320508075689</code>
+
+<code class="c1">// e^2</code>
+<code class="nv">$power</code> <code class="o">=</code> <code class="nb">pow</code><code class="p">(</code><code class="nx">M_E</code><code class="p">,</code> <code class="mi">2</code><code class="p">);</code> <code class="c1">// 7.3890560989306</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875165919568">
+<h2>Discussion</h2>
+
+<p>PHP’s <code>pow()</code> function is an efficient way to raise any number to an arbitrary power and return either the integer or floating-point result. In addition to the function form, PHP provides a special operator for raising a number to a power: <code>**</code>.</p>
+
+<p>The following code is equivalent to the use of <code>pow()</code> in the Solution examples:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="c1">// 2^5</code>
+<code class="nv">$power</code> <code class="o">=</code> <code class="mi">2</code> <code class="o">**</code> <code class="mi">5</code><code class="p">;</code> <code class="c1">// 32</code>
+
+<code class="c1">// 3^0.5</code>
+<code class="nv">$power</code> <code class="o">=</code> <code class="mi">3</code> <code class="o">**</code> <code class="mf">0.5</code><code class="p">;</code> <code class="c1">// 1.7320508075689</code>
+
+<code class="c1">// e^2</code>
+<code class="nv">$power</code> <code class="o">=</code> <code class="nx">M_E</code> <code class="o">**</code> <code class="mi">2</code><code class="p">;</code> <code class="c1">// 7.3890560989306</code></pre>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>While the mathematical shorthand for exponentiation is usually the caret (<code>^</code>), this character in PHP is reserved for the XOR operator. Review <a data-type="xref" href="ch02.html#chapter_operators">Chapter 2</a> for more details on this and other operators.</p>
+</div>
+
+<p>While raising the constant <code>e</code> to an arbitrary power is possible through <code>pow()</code>, PHP also ships with a specific function for that use: <code>exp()</code>. The statements <code>pow(M_E, 2)</code> and <code>exp(2)</code> are functionally equivalent. They are implemented via different code and, because of the way floating-point numbers are represented internally by PHP, will return slightly <a data-type="indexterm" data-primary="exponents, calculating" data-startref="xpnnccl" id="idm45875165880064"></a>different results.<sup><a data-type="noteref" id="idm45875165878960-marker" href="ch05.html#idm45875165878960">3</a></sup></p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875165877600">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/JEsKM"><code>pow()</code></a> and <a href="https://oreil.ly/AsgKw"><code>exp()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="5.9 Formatting Numbers as Strings"><div class="sect1" id="idm45875165874320">
+<h1>5.9 Formatting Numbers as Strings</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875165873072">
+<h2>Problem</h2>
+
+<p>You want to print a number with thousands <a data-type="indexterm" data-primary="numbers" data-secondary="formatting as strings" id="nmbftstr"></a><a data-type="indexterm" data-primary="strings" data-secondary="formatting numbers as" id="stgfmttm"></a><a data-type="indexterm" data-primary="formatting" data-secondary="numbers as strings" id="fmttmbsg"></a>separators to make it more readable to end users of your application.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875165867680">
+<h2>Solution</h2>
+
+<p>Use <code>number_format()</code> to automatically add <a data-type="indexterm" data-primary="number_format() function" id="idm45875165837680"></a><a data-type="indexterm" data-primary="functions" data-secondary="number_format()" id="idm45875165836976"></a>thousands separators when converting a number to a string. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$number</code> <code class="o">=</code> <code class="mi">25519</code><code class="p">;</code>
+<code class="k">print</code> <code class="nb">number_format</code><code class="p">(</code><code class="nv">$number</code><code class="p">);</code>
+<code class="c1">// 25,519</code>
+
+<code class="nv">$number</code> <code class="o">=</code> <code class="mf">64923.12</code>
+<code class="k">print</code> <code class="nb">number_format</code><code class="p">(</code><code class="nv">$number</code><code class="p">,</code> <code class="mi">2</code><code class="p">);</code>
+<code class="c1">// 64,923.12</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875165791328">
+<h2>Discussion</h2>
+
+<p>PHP’s native <code>number_format()</code> function will automatically group thousands together as well as round decimal digits to the given precision. You can also optionally <em>change</em> the decimal and thousands separators to match a given locale or format.</p>
+
+<p>For example, assume you want to use periods to separate thousands groups and a comma to separate decimal digits (as is common in Danish number formats). To accomplish this, you would leverage <code>number_format()</code> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$number</code> <code class="o">=</code> <code class="mf">525600.23</code><code class="p">;</code>
+
+<code class="k">print</code> <code class="nb">number_format</code><code class="p">(</code><code class="nv">$number</code><code class="p">,</code> <code class="mi">2</code><code class="p">,</code> <code class="s1">','</code><code class="p">,</code> <code class="s1">'.'</code><code class="p">);</code>
+<code class="c1">// 525.600,23</code></pre>
+
+<p>PHP’s native <code>NumberFormatter</code> class provides similar utility but gives you the ability to explicitly define the locale rather than needing to remember a specific regional format.<sup><a data-type="noteref" id="idm45875165714064-marker" href="ch05.html#idm45875165714064">4</a></sup> You can rewrite the preceding example to use <code>NumberFormatter</code> specifically with the <code>da_DK</code> locale <a data-type="indexterm" data-primary="numbers" data-secondary="formatting as strings" data-startref="nmbftstr" id="idm45875165711504"></a><a data-type="indexterm" data-primary="strings" data-secondary="formatting numbers as" data-startref="stgfmttm" id="idm45875165710224"></a><a data-type="indexterm" data-primary="formatting" data-secondary="numbers as strings" data-startref="fmttmbsg" id="idm45875165709008"></a>to identify a Danish format as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$number</code> <code class="o">=</code> <code class="mf">525600.23</code><code class="p">;</code>
+
+<code class="nv">$fmt</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">NumberFormatter</code><code class="p">(</code><code class="s1">'da_DK'</code><code class="p">,</code> <code class="nx">NumberFormatter</code><code class="o">::</code><code class="na">DEFAULT_STYLE</code><code class="p">);</code>
+<code class="k">print</code> <code class="nv">$fmt</code><code class="o">-&gt;</code><code class="na">format</code><code class="p">(</code><code class="nv">$number</code><code class="p">);</code>
+<code class="c1">// 525.600,23</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875165688912">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/3_L6J"><code>number_format()</code></a> and the <a href="https://oreil.ly/IC3a9"><code>NumberFormatter</code> class</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="5.10 Handling Very Large or Very Small Numbers"><div class="sect1" id="very_large_or_small_numbers">
+<h1>5.10 Handling Very Large or Very Small Numbers</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875165672416">
+<h2>Problem</h2>
+
+<p>You need to use numbers that are too <a data-type="indexterm" data-primary="integers" data-secondary="very large or small numbers" id="itgrvymn"></a><a data-type="indexterm" data-primary="floating-point numbers" data-secondary="very large or small numbers" id="flpnmbg"></a>large (or too small) to be handled by PHP’s native integer and floating-point types.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875165668304">
+<h2>Solution</h2>
+
+<p>Use the GMP library:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$sum</code> <code class="o">=</code> <code class="nb">gmp_pow</code><code class="p">(</code><code class="mi">4096</code><code class="p">,</code> <code class="mi">100</code><code class="p">);</code>
+<code class="k">print</code> <code class="nb">gmp_strval</code><code class="p">(</code><code class="nv">$sum</code><code class="p">);</code>
+<code class="c1">// 17218479456385750618067377696052635483579924745448689921733236816400</code>
+<code class="c1">// 74069124174561939748453723604617328637091903196158778858492729081666</code>
+<code class="c1">// 10249916098827287173446595034716559908808846798965200551239064670644</code>
+<code class="c1">// 19056526231345685268240569209892573766037966584735183775739433978714</code>
+<code class="c1">// 57858778270138079724077247764787455598671274627136289222751620531891</code>
+<code class="c1">// 4435913511141036261376</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875165633648">
+<h2>Discussion</h2>
+
+<p>PHP supports two extensions for working with numbers either too large or too small to be represented with native types. The <a href="https://oreil.ly/XhhdH">BCMath extension</a> is an interface to a system-level <em>basic calculator</em> utility that supports <a data-type="indexterm" data-primary="basic calculator utility" id="idm45875165638032"></a>arbitrary precision mathematics. Unlike native PHP types, BCMath supports working with up to 2,147,483,647 decimal digits so long as the system has adequate memory.</p>
+
+<p>Unfortunately, BCMath encodes all numbers as regular strings in PHP, which makes using it somewhat difficult in modern applications that target strict type 
+<span class="keep-together">enforcement.<sup><a data-type="noteref" id="idm45875165610784-marker" href="ch05.html#idm45875165610784">5</a></sup></span></p>
+
+<p>The GMP extension is a valid alternative <a data-type="indexterm" data-primary="GMP (GNU Multiple Precision) library" data-secondary="extension" id="idm45875165609008"></a>also available to PHP that does not have this drawback. Internal to itself, numbers are stored as strings. They are, however, wrapped as <code>GMP</code> objects when exposed to the rest of PHP. This distinction helps clarify whether a function is operating on a small number encoded as a string or a large one necessitating the use of an extension.</p>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>BCMath and GMP act on and return integer values rather than floating points. If you need to conduct operations on floating-point numbers, you might need to increase the size of your numbers by an order of magnitude (i.e., multiply by 10) and then reduce them again once your calculations are complete in order to account for decimals or fractions.</p>
+</div>
+
+<p>GMP isn’t included with PHP by default, although many distributions will make it available quite easily. If you’re compiling PHP from source, doing so with the 
+<span class="keep-together"><code>--with-gmp</code></span> option will add support automatically. If you’re using a package manager to install PHP (for example, on a Linux machine) you can likely install the <code>php-gmp</code> package to add this support directly.<sup><a data-type="noteref" id="idm45875165604832-marker" href="ch05.html#idm45875165604832">6</a></sup></p>
+
+<p>Once available, GMP will empower you to execute any mathematic operation you desire on numbers of limitless size. The caveat is that you can no longer use native PHP operators and must use a functional format defined by the extension itself. <a data-type="xref" href="#gmp_function_calls">Example 5-9</a> presents some translations from native operators to GMP function calls. Note that the return <a data-type="indexterm" data-primary="gmp_intval() function" id="idm45875165601760"></a><a data-type="indexterm" data-primary="gmp_strval() function" id="idm45875165601088"></a><a data-type="indexterm" data-primary="functions" data-secondary="gmp_intval()" id="idm45875165600416"></a><a data-type="indexterm" data-primary="functions" data-secondary="gmp_strval()" id="idm45875165599472"></a>type of each function call is a <code>GMP</code> object, so you must convert it back to either a number or a string by using <code>gmp_intval()</code> or <code>gmp_strval()</code>, 
+<span class="keep-together">respectively</span>.</p>
+<div id="gmp_function_calls" data-type="example">
+<h5><span class="label">Example 5-9. </span>Various mathematical operations and their GMP function equivalents</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$add</code> <code class="o">=</code> <code class="mi">2</code> <code class="o">+</code> <code class="mi">5</code><code class="p">;</code>
+<code class="nv">$add</code> <code class="o">=</code> <code class="nb">gmp_add</code><code class="p">(</code><code class="mi">2</code><code class="p">,</code> <code class="mi">5</code><code class="p">);</code>
+
+<code class="nv">$sub</code> <code class="o">=</code> <code class="mi">23</code> <code class="o">-</code> <code class="mi">2</code><code class="p">;</code>
+<code class="nv">$sub</code> <code class="o">=</code> <code class="nb">gmp_sub</code><code class="p">(</code><code class="mi">23</code><code class="p">,</code> <code class="mi">2</code><code class="p">);</code>
+
+<code class="nv">$div</code> <code class="o">=</code> <code class="mi">15</code> <code class="o">/</code> <code class="mi">4</code><code class="p">;</code>
+<code class="nv">$div</code> <code class="o">=</code> <code class="nb">gmp_div</code><code class="p">(</code><code class="mi">15</code><code class="p">,</code> <code class="mi">4</code><code class="p">);</code>
+
+<code class="nv">$mul</code> <code class="o">=</code> <code class="mi">3</code> <code class="o">*</code> <code class="mi">9</code><code class="p">;</code>
+<code class="nv">$mul</code> <code class="o">=</code> <code class="nb">gmp_mul</code><code class="p">(</code><code class="mi">3</code><code class="p">,</code> <code class="mi">9</code><code class="p">);</code>
+
+<code class="nv">$pow</code> <code class="o">=</code> <code class="mi">4</code> <code class="o">**</code> <code class="mi">7</code><code class="p">;</code>
+<code class="nv">$pow</code> <code class="o">=</code> <code class="nb">gmp_pow</code><code class="p">(</code><code class="mi">4</code><code class="p">,</code> <code class="mi">7</code><code class="p">);</code>
+
+<code class="nv">$mod</code> <code class="o">=</code> <code class="mi">93</code> <code class="o">%</code> <code class="mi">4</code><code class="p">;</code>
+<code class="nv">$mod</code> <code class="o">=</code> <code class="nb">gmp_mod</code><code class="p">(</code><code class="mi">93</code><code class="p">,</code> <code class="mi">4</code><code class="p">);</code>
+
+<code class="nv">$eq</code> <code class="o">=</code> <code class="mi">42</code> <code class="o">==</code> <code class="p">(</code><code class="mi">21</code> <code class="o">*</code> <code class="mi">2</code><code class="p">);</code>
+<code class="nv">$eq</code> <code class="o">=</code> <code class="nb">gmp_cmp</code><code class="p">(</code><code class="mi">42</code><code class="p">,</code> <code class="nb">gmp_mul</code><code class="p">(</code><code class="mi">21</code><code class="p">,</code> <code class="mi">2</code><code class="p">));</code></pre></div>
+
+<p>The final illustration in <a data-type="xref" href="#gmp_function_calls">Example 5-9</a> introduces the <code>gmp_cmp()</code> function, which allows you to compare two GMP-wrapped values. This function will return a positive value if the first parameter is greater than the second, 0 if they are equal, and a negative value if the second parameter is greater than the first. It’s effectively the same as PHP’s spaceship operator (introduced in <a data-type="xref" href="ch02.html#spaceship_operator">Recipe 2.4</a>) rather <a data-type="indexterm" data-primary="integers" data-secondary="very large or small numbers" data-startref="itgrvymn" id="idm45875165302272"></a><a data-type="indexterm" data-primary="floating-point numbers" data-secondary="very large or small numbers" data-startref="flpnmbg" id="idm45875165590896"></a>than an equality comparison, which potentially provides more utility.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875165589456">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/rtfm3">GMP</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="5.11 Converting Numbers Between Numerical Bases"><div class="sect1" id="idm45875165508096">
+<h1>5.11 Converting Numbers Between Numerical Bases</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875165506816">
+<h2>Problem</h2>
+
+<p>You want to convert a <a data-type="indexterm" data-primary="numbers" data-secondary="converting base" id="nmbvbs"></a><a data-type="indexterm" data-primary="numerical bases, converting between" id="cvmcgs"></a>number from one base to another.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875165502912">
+<h2>Solution</h2>
+
+<p>Use the <code>base_convert()</code> function as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="c1">// Base 10 (decimal) number</code>
+<code class="nv">$decimal</code> <code class="o">=</code> <code class="s1">'240'</code><code class="p">;</code>
+
+<code class="c1">// Convert from base 10 to base 16</code>
+<code class="c1">// $hex = 'f0'</code>
+<code class="nv">$hex</code> <code class="o">=</code> <code class="nb">base_convert</code><code class="p">(</code><code class="nv">$decimal</code><code class="p">,</code> <code class="mi">10</code><code class="p">,</code> <code class="mi">16</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875165492496">
+<h2>Discussion</h2>
+
+<p>The <code>base_convert()</code> function <a data-type="indexterm" data-primary="base_convert() function" id="idm45875165494864"></a><a data-type="indexterm" data-primary="functions" data-secondary="base_convert()" id="idm45875165494128"></a>attempts to convert a number from one base to another, which is particularly helpful when working with hexadecimal or binary strings of data. PHP will work only with bases between 2 and 36. Bases higher than 10 will use alphabet characters to represent additional digits—<code>a</code> is equal to <code>10</code>, <code>b</code> to <code>11</code>, all the way to <code>z</code> being equal to <code>35</code>.</p>
+
+<p>Note that the Solution example passes a <em>string</em> into <code>base_convert()</code> rather than an integer or a float value. This is <a data-type="indexterm" data-primary="strings" data-secondary="base_convert() function" id="idm45875165482464"></a>because PHP will attempt to cast the input string to a number with an appropriate base before converting it to another base and returning a string. Strings are the best way to represent hexadecimal or octal numbers in PHP, but they’re generic enough they can represent numbers of <em>any</em> base.</p>
+
+<p>PHP supports several other base-specific conversion functions in addition to the more generic <code>base_convert()</code>. These additional functions are enumerated in <a data-type="xref" href="#base_conversions">Table 5-3</a>.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>PHP supports two functions for <a data-type="indexterm" data-primary="bin2hex() function" id="idm45875165475968"></a><a data-type="indexterm" data-primary="hex2bin() function" id="idm45875165475264"></a><a data-type="indexterm" data-primary="functions" data-secondary="bin2hex()" id="idm45875165474592"></a><a data-type="indexterm" data-primary="functions" data-secondary="hex2bin()" id="idm45875165473648"></a>converting back and forth between binary data and its hexadecimal representation: <code>bin2hex()</code> and <code>hex2bin()</code>. These functions are <em>not</em> intended for converting a string representation of binary (e.g., <code>11111001</code>) into hexadecimal but will instead operate the binary <em>bytes</em> of that string.</p>
+</div>
+<table id="base_conversions">
+<caption><span class="label">Table 5-3. </span>Specific base conversion functions</caption>
+<thead>
+<tr>
+<th>Function name</th>
+<th>From base</th>
+<th>To base</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>bindec()</code></p></td>
+<td><p>Binary (encoded as a <code>string</code>)</p></td>
+<td><p>Decimal (encoded as an <code>int</code> or, for size reasons, a <code>float</code>)</p></td>
+</tr>
+<tr>
+<td><p><code>decbin()</code></p></td>
+<td><p>Decimal (encoded as an <code>int</code>)</p></td>
+<td><p>Binary (encoded as a <code>string</code>)</p></td>
+</tr>
+<tr>
+<td><p><code>hexdec()</code></p></td>
+<td><p>Hexadecimal (encoded as a <code>string</code>)</p></td>
+<td><p>Decimal (encoded as an <code>int</code> or, for size reasons, a <code>float</code>)</p></td>
+</tr>
+<tr>
+<td><p><code>dechex()</code></p></td>
+<td><p>Decimal (encoded as an <code>int</code>)</p></td>
+<td><p>Hexadecimal (encoded as a <code>string</code>)</p></td>
+</tr>
+<tr>
+<td><p><code>octdec()</code></p></td>
+<td><p>Octal (encoded as a <code>string</code>)</p></td>
+<td><p>Decimal (encoded as an <code>int</code> or, for size reasons, a <code>float</code>)</p></td>
+</tr>
+<tr>
+<td><p><code>decoct()</code></p></td>
+<td><p>Decimal (encoded as an <code>int</code>)</p></td>
+<td><p>Octal (encoded as a <code>string</code>)</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>Note that, unlike <code>base_convert()</code>, the specialized base conversion functions often work with numeric types directly. If you are using strict typing, this will avoid requiring an <a data-type="indexterm" data-primary="numbers" data-secondary="converting base" data-startref="nmbvbs" id="idm45875165419072"></a><a data-type="indexterm" data-primary="numerical bases, converting between" data-startref="cvmcgs" id="idm45875165417824"></a>explicit cast from a numeric type to a <code>string</code> before changing bases, which <em>would</em> be required with <code>base_convert()</code>.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875165415488">
+<h2>See Also</h2>
+
+<p>PHP documentation on <a href="https://oreil.ly/NVsk_"><code>base_convert()</code></a>.</p>
+</div></section>
+</div></section>
+<div data-type="footnotes"><p data-type="footnote" id="idm45875173113616"><sup><a href="ch05.html#idm45875173113616-marker">1</a></sup> For more on type casting, review <a data-type="xref" href="ch02.html#typecasting_intro">“Type Casting”</a>.</p><p data-type="footnote" id="idm45875166236512"><sup><a href="ch05.html#idm45875166236512-marker">2</a></sup> Exceptions and error handling are discussed at length in <a data-type="xref" href="ch12.html#chapter_errors">Chapter 12</a>.</p><p data-type="footnote" id="idm45875165878960"><sup><a href="ch05.html#idm45875165878960-marker">3</a></sup> For more on the acceptable differences between floating-point numbers, review <a data-type="xref" href="#floating_point_comparison">Recipe 5.2</a>.</p><p data-type="footnote" id="idm45875165714064"><sup><a href="ch05.html#idm45875165714064-marker">4</a></sup> The <code>NumberFormatter</code> class itself is part of PHP’s <a href="https://oreil.ly/B-85H">intl</a> extension. This module is not built in by default and might need to be installed/enabled for the class to be available.</p><p data-type="footnote" id="idm45875165610784"><sup><a href="ch05.html#idm45875165610784-marker">5</a></sup> Review <a data-type="xref" href="ch03.html#argument_and_return_typing">Recipe 3.4</a> for more on strict typing in PHP.</p><p data-type="footnote" id="idm45875165604832"><sup><a href="ch05.html#idm45875165604832-marker">6</a></sup> Native extensions are covered in depth in <a data-type="xref" href="ch15.html#chapter_extensions">Chapter 15</a>.</p></div></div></section></div>
+</div>
+</body>
+</html>

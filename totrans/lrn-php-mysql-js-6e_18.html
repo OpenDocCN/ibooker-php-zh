@@ -1,0 +1,1076 @@
+<html><head></head><body><div id="sbo-rt-content" class="calibre1"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 15. Expressions and Control Flow in JavaScript" class="calibre4"><div class="preface" id="expressions_and_control_flow_in_javascri">
+<h1 class="calibre10"><span class="keep-together">Chapter 15. </span>Expressions and Control Flow in JavaScript</h1>
+
+<p class="author1">In<a contenteditable="false" data-primary="JavaScript" data-secondary="flow control in" data-type="indexterm" id="JSflow14" class="calibre6"/> the previous chapter, I introduced the basics of JavaScript and the DOM. Now it’s time to look at how to construct complex expressions in JavaScript and how to control the program flow of your scripts by using conditional statements.</p>
+
+<section data-type="sect1" data-pdf-bookmark="Expressions" class="calibre4"><div class="preface" id="expressions-id00058">
+<h1 class="calibre11">Expressions</h1>
+
+<p class="author1">JavaScript<a contenteditable="false" data-primary="expressions" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704621096" class="calibre6"/><a contenteditable="false" data-primary="flow control (JavaScript)" data-secondary="expressions" data-type="indexterm" id="idm45694704619688" class="calibre6"/> expressions are very similar to those in PHP. As you learned in <a data-type="xref" href="ch04.xhtml#expressions_and_control_flow_in_php" class="calibre6">Chapter 4</a>, an expression is a combination of values, variables, operators, and functions that results in a value; the result can be a number, a string, or a Boolean value (which evaluates to either <code class="calibre15">true</code> or <code class="calibre15">false</code>).</p>
+
+<p class="author1"><a data-type="xref" href="#four_simple_boolean_expressions-id00059" class="calibre6">Example 15-1</a> shows some simple expressions. For each line, it prints out a letter between <code class="calibre15">a</code> and <code class="calibre15">d</code>, followed by a colon and the result of the expressions. The <code class="calibre15">&lt;br&gt;</code> tag is there to create a line break and separate the output into four lines (remember that both <code class="calibre15">&lt;br&gt;</code> and <code class="calibre15">&lt;br /&gt;</code> are acceptable<a contenteditable="false" data-primary="Boolean expressions" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704612376" class="calibre6"/> in HTML5, so I chose to use the former style for brevity).</p>
+
+<div data-type="example" id="four_simple_boolean_expressions-id00059" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-1. </span>Four simple Boolean expressions</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a: "</code> <code class="o">+</code> <code class="p">(</code><code class="mi">42</code> <code class="o">&gt;</code> <code class="mi">3</code><code class="p">)</code> <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"b: "</code> <code class="o">+</code> <code class="p">(</code><code class="mi">91</code> <code class="o">&lt;</code> <code class="mi">4</code><code class="p">)</code> <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"c: "</code> <code class="o">+</code> <code class="p">(</code><code class="mi">8</code> <code class="o">==</code> <code class="mi">2</code><code class="p">)</code> <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"d: "</code> <code class="o">+</code> <code class="p">(</code><code class="mi">4</code> <code class="o">&lt;</code> <code class="mi">17</code><code class="p">)</code> <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">The output from this code is as follows:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">a: true</strong>
+<strong class="calibre31">b: false</strong>
+<strong class="calibre31">c: false</strong>
+<strong class="calibre31">d: true</strong></pre>
+
+<p class="author1">Notice that both expressions <code class="calibre15">a:</code> and <code class="calibre15">d:</code> evaluate to <code class="calibre15">true</code>, but <code class="calibre15">b:</code> and <code class="calibre15">c:</code> evaluate to <code class="calibre15">false</code>. Unlike PHP (which would print the number <code class="calibre15">1</code> and nothing, respectively), the actual strings <code class="calibre15">true</code> and <code class="calibre15">false</code> are displayed.</p>
+
+<p class="author1">In JavaScript, when you are checking whether a value is <code class="calibre15">true</code> or <code class="calibre15">false</code>, all values evaluate to <code class="calibre15">true</code> except the following, which evaluate to <code class="calibre15">false</code>: the string <code class="calibre15">false</code> itself, <code class="calibre15">0</code>, <span class="keep-together"><code class="calibre15">–0</code></span>, the empty string, <code class="calibre15">null</code>, <code class="calibre15">undefined</code>, and <code class="calibre15">NaN</code> (Not a Number, a computer engineering concept for the result of an illegal floating-point operation such as division by zero).</p>
+
+<p class="author1">Note that I am referring to <code class="calibre15">true</code> and <code class="calibre15">false</code> in lowercase. This is because, unlike in PHP, these values <em class="hyperlink">must</em> be in lowercase in JavaScript. Therefore, only the first of the two following statements will display, printing the lowercase word <code class="calibre15">true</code>, because the second will cause a <code class="calibre15">'TRUE' is not defined</code> error:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="mi">1</code> <code class="o">==</code> <code class="k">true</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">'true'</code><code class="p">)</code> <code class="c">// True</code>
+<code class="k">if</code> <code class="p">(</code><code class="mi">1</code> <code class="o">==</code> <code class="n">TRUE</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">'TRUE'</code><code class="p">)</code> <code class="c">// Will cause an error</code></pre>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">Remember that any code snippets you wish to type and try for yourself in an HTML file need to be enclosed within <code class="calibre15">&lt;script&gt;</code> and <code class="calibre15">&lt;/script&gt;</code> tags.</p>
+</div>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Literals and Variables" class="calibre4"><div class="preface" id="literals_and_variables-id00060">
+<h1 class="calibre11">Literals and Variables</h1>
+
+<p class="author1">The<a contenteditable="false" data-primary="literals" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704497304" class="calibre6"/><a contenteditable="false" data-primary="variables (JavaScript)" data-secondary="literals and" data-type="indexterm" id="idm45694704495896" class="calibre6"/><a contenteditable="false" data-primary="flow control (JavaScript)" data-secondary="literals and variables" data-type="indexterm" id="idm45694704494520" class="calibre6"/> simplest form of an expression is a <em class="hyperlink">literal</em>, which means something that evaluates to itself, such as the number <code class="calibre15">22</code> or the string <code class="calibre15">Press Enter</code>. An expression could also be a variable, which evaluates to the value that has been assigned to it. They are both types of expressions, because they return a value.</p>
+
+<p class="author1"><a data-type="xref" href="#five_types_of_literals" class="calibre6">Example 15-2</a> shows three different literals and two variables, all of which return values, albeit of different types.</p>
+
+<div data-type="example" id="five_types_of_literals" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-2. </span>Five types of literals</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="n">myname</code> <code class="o">=</code> <code class="s">"Peter"</code>
+  <code class="n">myage</code>  <code class="o">=</code> <code class="mi">24</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a: "</code> <code class="o">+</code> <code class="mi">42</code>     <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code> <code class="c">// Numeric literal</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"b: "</code> <code class="o">+</code> <code class="s">"Hi"</code>   <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code> <code class="c">// String literal</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"c: "</code> <code class="o">+</code> <code class="k">true</code>   <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code> <code class="c">// Constant literal</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"d: "</code> <code class="o">+</code> <code class="n">myname</code> <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code> <code class="c">// String variable</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"e: "</code> <code class="o">+</code> <code class="n">myage</code>  <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code> <code class="c">// Numeric variable</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">And, as you’d expect, you see a return value from all of these in the following output:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">a: 42</strong>
+<strong class="calibre31">b: Hi</strong>
+<strong class="calibre31">c: true</strong>
+<strong class="calibre31">d: Peter</strong>
+<strong class="calibre31">e: 24</strong></pre>
+
+<p class="author1">Operators let you create more complex expressions that evaluate to useful results. When you combine assignment or control-flow constructs with expressions, the result is a <em class="hyperlink">statement</em>.</p>
+
+<p class="author1"><a data-type="xref" href="#two_simple_javascript_statements" class="calibre6">Example 15-3</a> shows one of each. The first assigns the result of the expression <code class="calibre15">366 - day_number</code> to the variable <code class="calibre15">days_to_new_year</code>, and the second outputs a friendly message only if the expression <code class="calibre15">days_to_new_year &lt; 30</code> evaluates to <code class="calibre15">true</code>.</p>
+
+<div data-type="example" id="two_simple_javascript_statements" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-3. </span>Two simple JavaScript statements</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="n">day_number</code>       <code class="o">=</code> <code class="mi">127</code>  <code class="c">// For example</code>
+  <code class="n">days_to_new_year</code> <code class="o">=</code> <code class="mi">366</code> <code class="o">-</code> <code class="n">day_number</code>
+  <code class="k">if</code> <code class="p">(</code><code class="n">days_to_new_year</code> <code class="o">&lt;</code> <code class="mi">30</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"It's nearly New Year"</code><code class="p">)</code>
+  <code class="k">else</code>                       <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"It's a long time to go"</code><code class="p">)</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Operators" class="calibre4"><div class="preface" id="operators-id00061">
+<h1 class="calibre11">Operators</h1>
+
+<p class="author1">JavaScript<a contenteditable="false" data-primary="flow control (JavaScript)" data-secondary="operators" data-type="indexterm" id="FCop14" class="calibre6"/><a contenteditable="false" data-primary="operators (JavaScript)" data-secondary="types of" data-type="indexterm" id="idm45694704236696" class="calibre6"/><a contenteditable="false" data-primary="bitwise xor (^) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704235320" class="calibre6"/><a contenteditable="false" data-primary="^ (bitwise xor) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704233976" class="calibre6"/> offers a lot of powerful operators, ranging from arithmetic, string, and logical operators to assignment, comparison, and more (see <a data-type="xref" href="#javascript_operator_types" class="calibre6">Table 15-1</a>).</p>
+
+<table id="javascript_operator_types" class="calibre33">
+	<caption class="calibre34"><span class="keep-together">Table 15-1. </span>JavaScript operator types</caption>
+	<thead class="calibre35">
+		<tr class="calibre36">
+			<th class="calibre37">Operator</th>
+			<th class="calibre37">Description</th>
+			<th class="calibre37">Example</th>
+		</tr>
+	</thead>
+	<tbody class="calibre38">
+		<tr class="calibre36">
+			<td class="calibre39">Arithmetic</td>
+			<td class="calibre39">Basic mathematics</td>
+			<td class="calibre39"><code class="calibre48">a + b</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39">Array</td>
+			<td class="calibre39">Array manipulation</td>
+			<td class="calibre39"><code class="calibre48">a + b</code></td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39">Assignment</td>
+			<td class="calibre39">Assign values</td>
+			<td class="calibre39"><code class="calibre48">a = b + 23</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39">Bitwise</td>
+			<td class="calibre39">Manipulate bits within bytes</td>
+			<td class="calibre39"><code class="calibre48">12 ^ 9</code></td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39">Comparison</td>
+			<td class="calibre39">Compare two values</td>
+			<td class="calibre39"><code class="calibre48">a &lt; b</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39">Increment/decrement</td>
+			<td class="calibre39">Add or subtract one</td>
+			<td class="calibre39"><code class="calibre48">a++</code></td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39">Logical</td>
+			<td class="calibre39">Boolean</td>
+			<td class="calibre39"><code class="calibre48">a &amp;&amp; b</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39">String</td>
+			<td class="calibre39">Concatenation</td>
+			<td class="calibre39"><code class="calibre48">a + 'string'</code></td>
+		</tr>
+	</tbody>
+</table>
+
+<p class="author1">Each operator takes a different number of operands:</p>
+
+<ul class="printings">
+	<li class="calibre9">
+	<p class="author1"><em class="hyperlink">Unary</em> operators, such as incrementing (<code class="calibre15">a++</code>) or negation (<code class="calibre15">-a</code>), take a single operand.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1"><em class="hyperlink">Binary</em> operators, which represent the bulk of JavaScript operators—including addition, subtraction, multiplication, and division—take two operands.</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">The one <em class="hyperlink">ternary</em> operator, which takes the form <code class="calibre15">? x : y</code>, requires three operands. It’s a terse single-line <code class="calibre15">if</code> statement that chooses between two expressions depending on a third one.</p>
+	</li>
+</ul>
+
+
+<section data-type="sect2" data-pdf-bookmark="Operator Precedence" class="calibre4"><div class="preface" id="operator_precedence-id00062">
+<h2 class="calibre28">Operator Precedence</h2>
+
+<p class="author1">Like<a contenteditable="false" data-primary="operators (JavaScript)" data-secondary="precedence of" data-type="indexterm" id="idm45694704292888" class="calibre6"/><a contenteditable="false" data-primary="precedence" data-type="indexterm" id="idm45694704291160" class="calibre6"/><a contenteditable="false" data-primary="&lt;&lt; (bitwise left shift) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704290056" class="calibre6"/><a contenteditable="false" data-primary="&lt;&lt;= (bitwise left shift and assignment) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704288712" class="calibre6"/><a contenteditable="false" data-primary="bitwise left shift (&lt;&lt;) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704209032" class="calibre6"/><a contenteditable="false" data-primary="bitwise left shift and assignment (&lt;&lt;=) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704207784" class="calibre6"/><a contenteditable="false" data-primary="&gt;&gt;= (bitwise right shift and assignment) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704206376" class="calibre6"/><a contenteditable="false" data-primary="% (modulus) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704204968" class="calibre6"/> PHP, JavaScript utilizes operator precedence, in<a contenteditable="false" data-primary="| (Or) bitwise operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704203464" class="calibre6"/><a contenteditable="false" data-primary="|= (bitwise OR and assignment) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704202088" class="calibre6"/><a contenteditable="false" data-primary="Or (|) bitwise operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704200696" class="calibre6"/><a contenteditable="false" data-primary="bitwise OR and assignment (|=) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704199320" class="calibre6"/><a contenteditable="false" data-primary="minus sign (-)" data-secondary="unary operator in JavaScript" data-type="indexterm" id="idm45694704197928" class="calibre6"/><a contenteditable="false" data-primary="- (minus sign)" data-secondary="unary operator in JavaScript" data-type="indexterm" id="idm45694704196536" class="calibre6"/> which some<a contenteditable="false" data-primary="[] (square brackets)" data-secondary="precedence in JavaScript" data-type="indexterm" id="idm45694704195016" class="calibre6"/><a contenteditable="false" data-primary="square brackets ([])" data-secondary="precedence in JavaScript" data-type="indexterm" id="idm45694704193592" class="calibre6"/><a contenteditable="false" data-primary="&amp; (And) bitwise operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704192200" class="calibre6"/><a contenteditable="false" data-primary="&amp;= (bitwise AND and assignment) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704190808" class="calibre6"/><a contenteditable="false" data-primary="&gt;&gt; (bitwise right shift) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704189336" class="calibre6"/><a contenteditable="false" data-primary="bitwise right shift (&gt;&gt;) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704187944" class="calibre6"/><a contenteditable="false" data-primary="bitwise operators" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704186552" class="calibre6"/> operators in an expression are processed before others and are therefore evaluated first. <a data-type="xref" href="#precedence_of_javascript_operators_l" class="calibre6">Table 15-2</a> lists JavaScript’s operators and their precedences.</p>
+
+<table id="precedence_of_javascript_operators_l" class="calibre33">
+	<caption class="width-full"><span class="keep-together">Table 15-2. </span>Precedence of JavaScript operators (high to low)</caption>
+	<thead class="calibre35">
+		<tr class="calibre36">
+			<th class="calibre37">Operator(s)</th>
+			<th class="calibre37">Type(s)</th>
+		</tr>
+	</thead>
+	<tbody class="calibre38">
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">() [] .</code></td>
+			<td class="calibre39">Parentheses, call, and member</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">++ --</code></td>
+			<td class="calibre39">Increment/decrement</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">+ - ~ !</code></td>
+			<td class="calibre39">Unary, bitwise, and logical</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">* / %</code></td>
+			<td class="calibre39">Arithmetic</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">+ -</code></td>
+			<td class="calibre39">Arithmetic and string</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">&lt;&lt; &gt;&gt; &gt;&gt;&gt;</code></td>
+			<td class="calibre39">Bitwise</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">&lt; &gt; &lt;= &gt;=</code></td>
+			<td class="calibre39">Comparison</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">== != === !==</code></td>
+			<td class="calibre39">Comparison</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">&amp; ^ |</code></td>
+			<td class="calibre39">Bitwise</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">&amp;&amp;</code></td>
+			<td class="calibre39">Logical</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">||</code></td>
+			<td class="calibre39">Logical</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">? :</code></td>
+			<td class="calibre39">Ternary</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">= += -= *= /= %=</code></td>
+			<td class="calibre39">Assignment</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">&lt;&lt;= &gt;&gt;= &gt;&gt;&gt;= &amp;= ^= |=</code></td>
+			<td class="calibre39">Assignment</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">,</code></td>
+			<td class="calibre39">Separator</td>
+		</tr>
+	</tbody>
+</table>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Associativity" class="calibre4"><div class="preface" id="associativity-id00063">
+<h2 class="calibre28">Associativity</h2>
+
+<p class="author1">Most<a contenteditable="false" data-primary="operators (JavaScript)" data-secondary="associativity" data-type="indexterm" id="idm45694704156408" class="calibre6"/><a contenteditable="false" data-primary="associativity" data-type="indexterm" id="idm45694704155000" class="calibre6"/> JavaScript operators are processed in order from left to right in an equation. But some operators require processing from right to left instead. The direction of processing is called the operator’s <em class="hyperlink">associativity</em>.</p>
+
+<p class="author1">This associativity becomes important where you do not explicitly force precedence (which you should always do, by the way, because it makes code more readable and less error prone). For example, look at the following assignment operators, by which three variables are all set to the value <code class="calibre15">0</code>:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">level</code> <code class="o">=</code> <code class="n">score</code> <code class="o">=</code> <code class="n">time</code> <code class="o">=</code> <code class="mi">0</code></pre>
+
+<p class="author1">This<a contenteditable="false" data-primary="&gt;&gt;&gt;= (zero-fill right shift) bitwise operator in JavaScript" data-type="indexterm" id="idm45694704148152" class="calibre6"/><a contenteditable="false" data-primary="^= (bitwise XOR and assignment) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704145592" class="calibre6"/><a contenteditable="false" data-primary="bitwise XOR and assignment (^=) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704144184" class="calibre6"/> multiple assignment is possible only because the rightmost part of the expression is evaluated first and then processing continues in a right-to-left direction. <a data-type="xref" href="#operators_and_associativity" class="calibre6">Table 15-3</a> lists the JavaScript operators and their associativity.</p>
+
+<table id="operators_and_associativity" class="calibre33">
+	<caption class="calibre34"><span class="keep-together">Table 15-3. </span>Operators and associativity</caption>
+	<thead class="calibre35">
+		<tr class="calibre36">
+			<th class="calibre37">Operator</th>
+			<th class="calibre37">Description</th>
+			<th class="calibre37">Associativity</th>
+		</tr>
+	</thead>
+	<tbody class="calibre38">
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">++ --</code></td>
+			<td class="calibre39">Increment and decrement</td>
+			<td class="calibre39">None</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">new</code></td>
+			<td class="calibre39">Create a new object</td>
+			<td class="calibre39">Right</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">+ - ~ !</code></td>
+			<td class="calibre39">Unary and bitwise</td>
+			<td class="calibre39">Right</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">?:</code></td>
+			<td class="calibre39">Ternary</td>
+			<td class="calibre39">Right</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">= *= /= %= += -=</code></td>
+			<td class="calibre39">Assignment</td>
+			<td class="calibre39">Right</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">&lt;&lt;= &gt;&gt;= &gt;&gt;&gt;= &amp;= ^= |=</code></td>
+			<td class="calibre39">Assignment</td>
+			<td class="calibre39">Right</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">,</code></td>
+			<td class="calibre39">Separator</td>
+			<td class="calibre39">Left</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">+ - * / %</code></td>
+			<td class="calibre39">Arithmetic</td>
+			<td class="calibre39">Left</td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">&lt;&lt; &gt;&gt; &gt;&gt;&gt;</code></td>
+			<td class="calibre39">Bitwise</td>
+			<td class="calibre39">Left</td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">&lt; &lt;= &gt; &gt;= == != === !==</code></td>
+			<td class="calibre39">Arithmetic</td>
+			<td class="calibre39">Left</td>
+		</tr>
+	</tbody>
+</table>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Relational Operators" class="calibre4"><div class="preface" id="relational_operators-id00064">
+<h2 class="calibre28">Relational Operators</h2>
+
+<p class="author1"><em class="hyperlink">Relational operators</em> test two<a contenteditable="false" data-primary="operators (JavaScript)" data-secondary="relational" data-type="indexterm" id="idm45694704092120" class="calibre6"/> operands and return a Boolean result of either <code class="calibre15">true</code> or <code class="calibre15">false</code>. There are three types of relational operators: <em class="hyperlink">equality</em>, <em class="hyperlink">comparison</em>, and <em class="hyperlink">logical</em>.</p>
+
+<section data-type="sect3" data-pdf-bookmark="Equality operators" class="calibre4"><div class="preface" id="equality_operators">
+<h3 class="calibre43">Equality operators</h3>
+
+<p class="author1">The<a contenteditable="false" data-primary="relational operators (JavaScript)" data-secondary="equality" data-type="indexterm" id="idm45694704086344" class="calibre6"/><a contenteditable="false" data-primary="== (equality) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704085000" class="calibre6"/><a contenteditable="false" data-primary="equality (==) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704083592" class="calibre6"/> equality operator is <code class="calibre15">==</code> (which should not be confused with the <code class="calibre15">=</code> assignment operator). In <a data-type="xref" href="#assigning_a_value_and_testing_fo-id00065" class="calibre6">Example 15-4</a>, the first statement assigns a value, and the second tests it for equality. As it stands, nothing will be printed out, because <code class="calibre15">month</code> is assigned the string value <code class="calibre15">July</code>, and therefore the check for it having a value of <code class="calibre15">October</code> will fail.</p>
+
+<div data-type="example" id="assigning_a_value_and_testing_fo-id00065" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-4. </span>Assigning a value and testing for equality</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="n">month</code> <code class="o">=</code> <code class="s">"July"</code>
+  <code class="k">if</code> <code class="p">(</code><code class="n">month</code> <code class="o">==</code> <code class="s">"October"</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"It's the Fall"</code><code class="p">)</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">If the two operands of an equality expression are of different types, JavaScript will convert them to whatever type makes best sense to it. For example, any strings composed entirely of numbers will be converted to numbers whenever compared with a number. In <a data-type="xref" href="#equality_and_identity_operators-id00066" class="calibre6">Example 15-5</a>, <code class="calibre15">a</code> and <code class="calibre15">b</code> are two different values (one is a number, and the other is a string), and we would therefore normally expect neither of the <code class="calibre15">if</code> statements to output a result.<a contenteditable="false" data-primary="=== (identity) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704051736" class="calibre6"/><a contenteditable="false" data-primary="identity (===) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694704050360" class="calibre6"/></p>
+
+<div data-type="example" id="equality_and_identity_operators-id00066" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-5. </span>The equality and identity operators</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="n">a</code> <code class="o">=</code> <code class="mi">3.1415927</code>
+  <code class="n">b</code> <code class="o">=</code> <code class="s">"3.1415927"</code>
+  <code class="k">if</code> <code class="p">(</code><code class="n">a</code> <code class="o">==</code> <code class="n">b</code><code class="p">)</code>  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"1"</code><code class="p">)</code>
+  <code class="k">if</code> <code class="p">(</code><code class="n">a</code> <code class="o">===</code> <code class="n">b</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"2"</code><code class="p">)</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">However, if you run the example, you will see that it outputs the number <code class="calibre15">1</code>, which means that the first <code class="calibre15">if</code> statement evaluated to <code class="calibre15">true</code>. This is because the string value of <code class="calibre15">b</code> was temporarily converted to a number, and therefore both halves of the equation had a numerical value of <code class="calibre15">3.1415927</code>.</p>
+
+<p class="author1">In contrast, the second <code class="calibre15">if</code> statement uses the <em class="hyperlink">identity</em> operator, three equals signs in a row, which prevents JavaScript from automatically converting types. <code class="calibre15">a</code> and <code class="calibre15">b</code> are therefore found to be different, so nothing is output.</p>
+
+<p class="author1">As with forcing operator precedence, whenever you’re in doubt about how JavaScript will convert operand types, you can use the identity operator to turn this behavior off.</p>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Comparison operators" class="calibre4"><div class="preface" id="comparison_operators-id00067">
+<h3 class="calibre43">Comparison operators</h3>
+
+<p class="author1">Using<a contenteditable="false" data-primary="relational operators (JavaScript)" data-secondary="comparison" data-type="indexterm" id="idm45694703972536" class="calibre6"/><a contenteditable="false" data-primary="comparison operators" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703970776" class="calibre6"/><a contenteditable="false" data-primary="&lt; (less than) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703969400" class="calibre6"/><a contenteditable="false" data-primary="less than (&lt;) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703968024" class="calibre6"/><a contenteditable="false" data-primary="&gt;= (greater than or equal to) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703966648" class="calibre6"/><a contenteditable="false" data-primary="greater than or equal to (&gt;=) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703965304" class="calibre6"/><a contenteditable="false" data-primary="&lt;= (less than or equal to) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703963960" class="calibre6"/><a contenteditable="false" data-primary="less than or equal to (&lt;=) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703962568" class="calibre6"/><a contenteditable="false" data-primary="&gt; (greater than) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703961176" class="calibre6"/><a contenteditable="false" data-primary="greater than (&gt;) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703959784" class="calibre6"/><a contenteditable="false" data-primary="operators (JavaScript)" data-secondary="comparison" data-type="indexterm" id="idm45694703958392" class="calibre6"/> comparison operators, you can test for more than just equality and inequality. JavaScript also gives you <code class="calibre15">&gt;</code> (is greater than), <code class="calibre15">&lt;</code> (is less than), <code class="calibre15">&gt;=</code> (is greater than or equal to), and <code class="calibre15">&lt;=</code> (is less than or equal to) to play with. <a data-type="xref" href="#four_comparison_operators-id00068" class="calibre6">Example 15-6</a> shows these operators in use.</p>
+
+<div data-type="example" id="four_comparison_operators-id00068" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-6. </span>The four comparison operators</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="n">a</code> <code class="o">=</code> <code class="mi">7</code><code class="p">;</code> <code class="n">b</code> <code class="o">=</code> <code class="mi">11</code>
+  <code class="k">if</code> <code class="p">(</code><code class="n">a</code> <code class="o">&gt;</code> <code class="n">b</code><code class="p">)</code>  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is greater than b&lt;br&gt;"</code><code class="p">)</code>
+  <code class="k">if</code> <code class="p">(</code><code class="n">a</code> <code class="o">&lt;</code> <code class="n">b</code><code class="p">)</code>  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is less than b&lt;br&gt;"</code><code class="p">)</code>
+  <code class="k">if</code> <code class="p">(</code><code class="n">a</code> <code class="o">&gt;=</code> <code class="n">b</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is greater than or equal to b&lt;br&gt;"</code><code class="p">)</code>
+  <code class="k">if</code> <code class="p">(</code><code class="n">a</code> <code class="o">&lt;=</code> <code class="n">b</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is less than or equal to b&lt;br&gt;"</code><code class="p">)</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">In this example, where <code class="calibre15">a</code> is <code class="calibre15">7</code> and <code class="calibre15">b</code> is <code class="calibre15">11</code>, the following is output (because 7 is less than 11 and also less than or equal to 11):</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">a is less than b</strong>
+<strong class="calibre31">a is less than or equal to b</strong></pre>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Logical operators" class="calibre4"><div class="preface" id="logical_operators-id00069">
+<h3 class="calibre43">Logical operators</h3>
+
+<p class="author1">Logical operators<a contenteditable="false" data-primary="logical operators" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703868856" class="calibre6"/><a contenteditable="false" data-primary="operators (JavaScript)" data-secondary="logical" data-type="indexterm" id="idm45694703867448" class="calibre6"/><a contenteditable="false" data-primary="relational operators (JavaScript)" data-secondary="logical" data-type="indexterm" id="idm45694703866072" class="calibre6"/><a contenteditable="false" data-primary="operators (JavaScript)" data-secondary="logical" data-type="indexterm" id="idm45694703864728" class="calibre6"/> produce true or false results and are also<a contenteditable="false" data-primary="Boolean operators" data-type="indexterm" id="idm45694703863224" class="calibre6"/> known as <em class="hyperlink">Boolean</em> operators. There are three of them in JavaScript (see <a data-type="xref" href="#javascriptapostrophes_logical_operators" class="calibre6">Table 15-4</a>).<a contenteditable="false" data-primary="&amp;&amp; (And) logical operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703860424" class="calibre6"/><a contenteditable="false" data-primary="And (&amp;&amp;) logical operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703859032" class="calibre6"/><a contenteditable="false" data-primary="|| (Or) logical operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703857640" class="calibre6"/><a contenteditable="false" data-primary="Or (||) logical operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703856248" class="calibre6"/><a contenteditable="false" data-primary="! (Not) logical operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703854856" class="calibre6"/><a contenteditable="false" data-primary="Not (!) logical operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703853464" class="calibre6"/></p>
+
+<table id="javascriptapostrophes_logical_operators" class="calibre33">
+	<caption class="calibre34"><span class="keep-together">Table 15-4. </span>JavaScript’s logical operators</caption>
+	<thead class="calibre35">
+		<tr class="calibre36">
+			<th class="calibre37">Logical operator</th>
+			<th class="calibre37">Description</th>
+		</tr>
+	</thead>
+	<tbody class="calibre38">
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">&amp;&amp;</code> <em class="hyperlink">(and)</em></td>
+			<td class="calibre39"><code class="calibre48">true</code> if both operands are <code class="calibre48">true</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">||</code> <em class="hyperlink">(or)</em></td>
+			<td class="calibre39"><code class="calibre48">true</code> if either operand is <code class="calibre48">true</code></td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">!</code> <em class="hyperlink">(not)</em></td>
+			<td class="calibre39"><code class="calibre48">true</code> if the operand is <code class="calibre48">false</code>, or <code class="calibre48">false</code> if the operand is <code class="calibre48">true</code></td>
+		</tr>
+	</tbody>
+</table>
+
+<p class="author1">You can see how these can be used in <a data-type="xref" href="#logical_operators_in_use-id00070" class="calibre6">Example 15-7</a>, which outputs <code class="calibre15">0</code>, <code class="calibre15">1</code>, and <code class="calibre15">true</code>.</p>
+
+<div data-type="example" id="logical_operators_in_use-id00070" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-7. </span>The logical operators in use</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="n">a</code> <code class="o">=</code> <code class="mi">1</code><code class="p">;</code> <code class="n">b</code> <code class="o">=</code> <code class="mi">0</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">((</code><code class="n">a</code> <code class="o">&amp;&amp;</code> <code class="n">b</code><code class="p">)</code> <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">((</code><code class="n">a</code> <code class="o">||</code> <code class="n">b</code><code class="p">)</code> <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">((</code>  <code class="o">!</code><code class="n">b</code>  <code class="p">)</code> <code class="o">+</code> <code class="s">"&lt;br&gt;"</code><code class="p">)</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">The <code class="calibre15">&amp;&amp;</code> statement requires both operands to be <code class="calibre15">true</code> to return a value of <code class="calibre15">true</code>, the <code class="calibre15">||</code> statement will be <code class="calibre15">true</code> if either value is <code class="calibre15">true</code>, and the third statement performs a <code class="calibre15">NOT</code> on the value of <code class="calibre15">b</code>, turning it from <code class="calibre15">0</code> into a value of <code class="calibre15">true</code>.</p>
+
+<p class="author1">The <code class="calibre15">||</code> operator can cause unintentional problems, because the second operand will not be evaluated if the first is evaluated as <code class="calibre15">true</code>. In <a data-type="xref" href="#statement_using_the_vertical_lineverti" class="calibre6">Example 15-8</a>, the <code class="calibre15">getnext</code> function will never be called if <code class="calibre15">finished</code> has a value of <code class="calibre15">1</code> (these are purely examples, and the action of <code class="calibre15">getnext</code> is irrelevant to this explanation—just think of it as a function that does <em class="hyperlink">something</em> when called).</p>
+
+<div data-type="example" id="statement_using_the_vertical_lineverti" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-8. </span>A statement using the <code class="calibre15">||</code> operator</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="k">if</code> <code class="p">(</code><code class="n">finished</code> <code class="o">==</code> <code class="mi">1</code> <code class="o">||</code> <code class="n">getnext</code><code class="p">()</code> <code class="o">==</code> <code class="mi">1</code><code class="p">)</code> <code class="n">done</code> <code class="o">=</code> <code class="mi">1</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">If you <em class="hyperlink">need</em> <code class="calibre15">getnext</code> to be called at each <code class="calibre15">if</code> statement, you should rewrite the code as shown in <a data-type="xref" href="#ifdotdotdotor_statement_modified_to" class="calibre6">Example 15-9</a>.</p>
+
+<div data-type="example" id="ifdotdotdotor_statement_modified_to" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-9. </span>The <code class="calibre15">if...or</code> statement modified to ensure calling of <code class="calibre15">getnext</code></h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="n">gn</code> <code class="o">=</code> <code class="n">getnext</code><code class="p">()</code>
+  <code class="k">if</code> <code class="p">(</code><code class="n">finished</code> <code class="o">==</code> <code class="mi">1</code> <code class="n">OR</code> <code class="n">gn</code> <code class="o">==</code> <code class="mi">1</code><code class="p">)</code> <code class="n">done</code> <code class="o">=</code> <code class="mi">1</code><code class="p">;</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">In this case, the code in the function <code class="calibre15">getnext</code> will be executed and its return value stored in <code class="calibre15">gn</code> before the <code class="calibre15">if</code> statement.</p>
+
+<p class="author1"><a data-type="xref" href="#all_possible_logical_expressions" class="calibre6">Table 15-5</a> shows all the possible variations of using the logical operators. You should also note that <code class="calibre15">!true</code> equals <code class="calibre15">false</code> and <code class="calibre15">!false</code> equals <code class="calibre15">true</code>.<a contenteditable="false" data-primary="" data-startref="FCop14" data-type="indexterm" id="idm45694703628088" class="calibre6"/></p>
+
+<table id="all_possible_logical_expressions" class="calibre33">
+	<caption class="width-full"><span class="keep-together">Table 15-5. </span>All possible logical expressions</caption>
+	<thead class="calibre35">
+		<tr class="calibre36">
+			<th colspan="2" class="calibre37">Inputs</th>
+			<th colspan="2" class="calibre37">Operators and results</th>
+		</tr>
+		<tr class="calibre40">
+			<th class="calibre37"><code class="calibre48">a</code></th>
+			<th class="calibre37"><code class="calibre48">b</code></th>
+			<th class="calibre37"><code class="calibre48">&amp;&amp;</code></th>
+			<th class="calibre37"><code class="calibre48">||</code></th>
+		</tr>
+	</thead>
+	<tbody class="calibre38">
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">true</code></td>
+			<td class="calibre39"><code class="calibre48">true</code></td>
+			<td class="calibre39"><code class="calibre48">true</code></td>
+			<td class="calibre39"><code class="calibre48">true</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">true</code></td>
+			<td class="calibre39"><code class="calibre48">false</code></td>
+			<td class="calibre39"><code class="calibre48">false</code></td>
+			<td class="calibre39"><code class="calibre48">true</code></td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">false</code></td>
+			<td class="calibre39"><code class="calibre48">true</code></td>
+			<td class="calibre39"><code class="calibre48">false</code></td>
+			<td class="calibre39"><code class="calibre48">true</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">false</code></td>
+			<td class="calibre39"><code class="calibre48">false</code></td>
+			<td class="calibre39"><code class="calibre48">false</code></td>
+			<td class="calibre39"><code class="calibre48">false</code></td>
+		</tr>
+	</tbody>
+</table>
+</div></section>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="The with Statement" class="calibre4"><div class="preface" id="with_statement">
+<h1 class="calibre11">The with Statement</h1>
+
+<p class="author1">The <code class="calibre15">with</code> statement<a contenteditable="false" data-primary="with statements (JavaScript)" data-type="indexterm" id="idm45694703583848" class="calibre6"/><a contenteditable="false" data-primary="flow control (JavaScript)" data-secondary="with statements" data-type="indexterm" id="idm45694703582872" class="calibre6"/> is not one that you’ve seen in the earlier chapters on PHP, because it’s exclusive to JavaScript, and also one that while you need to know it, you should not use (see <a data-type="xref" href="#a-caution-against-using-with" class="calibre6">???</a>). With it (if you see what I mean), you can simplify some types of JavaScript statements by reducing many references to an object to just one reference. References to properties and methods within the <code class="calibre15">with</code> block are assumed to apply to that object.</p>
+
+<p class="author1">For example, take the code in <a data-type="xref" href="#using_the_with_statement" class="calibre6">Example 15-10</a>, in which the <code class="calibre15">document.write</code> function never references the variable <code class="calibre15">string</code> by name.</p>
+
+<div data-type="example" id="using_the_with_statement" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-10. </span>Using the <code class="calibre15">with</code> statement</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="n">string</code> <code class="o">=</code> <code class="s">"The quick brown fox jumps over the lazy dog"</code>
+
+  <code class="k">with</code> <code class="p">(</code><code class="n">string</code><code class="p">)</code>
+  <code class="p">{</code>
+    <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"The string is "</code> <code class="o">+</code> <code class="n">length</code> <code class="o">+</code> <code class="s">" characters&lt;br&gt;"</code><code class="p">)</code>
+    <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"In upper case it's: "</code> <code class="o">+</code> <code class="n">toUpperCase</code><code class="p">())</code>
+  <code class="p">}</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">Even though <code class="calibre15">string</code> is never directly referenced by <code class="calibre15">document.write</code>, this code still manages to output the following:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">The string is 43 characters</strong>
+<strong class="calibre31">In upper case it's: THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG</strong></pre>
+
+<p class="author1">This is how the code works: the JavaScript interpreter recognizes that the <code class="calibre15">length</code> property and <code class="calibre15">toUpperCase</code> method have to be applied to some object. Because they stand alone, the interpreter assumes they apply to the <code class="calibre15">string</code> object that you specified in the <code class="calibre15">with</code> statement.</p>
+
+<div data-type="note" epub:type="note" id="a-caution-against-using-with" class="calibre19"><h6 class="calibre20">Note</h6>
+
+<p class="author1">Using <code class="calibre15">with</code> is no longer recommended and is now forbidden in ECMAScript 5 strict mode. The recommended alternative is to assign the object whose properties you want to access to a temporary variable. Be sure to note this so you can update it (if necessary) when you see it in other people’s code, but do not use it yourself.</p>
+</div>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Using onerror" class="calibre4"><div class="preface" id="using_onerror">
+<h1 class="calibre11">Using onerror</h1>
+
+<p class="author1">Using<a contenteditable="false" data-primary="flow control (JavaScript)" data-secondary="onerror events" data-type="indexterm" id="idm45694703530584" class="calibre6"/><a contenteditable="false" data-primary="onerror events" data-type="indexterm" id="idm45694703529208" class="calibre6"/><a contenteditable="false" data-primary="events (JavaScript)" data-secondary="catching errors with onerror event" data-type="indexterm" id="idm45694703528104" class="calibre6"/><a contenteditable="false" data-primary="error handling" data-secondary="catching errors with onerror event" data-type="indexterm" id="idm45694703526760" class="calibre6"/> either the <code class="calibre15">onerror</code> event or a combination of the <code class="calibre15">try</code> and <code class="calibre15">catch</code> keywords, you can catch JavaScript errors and deal with them yourself.</p>
+
+<p class="author1"><em class="hyperlink">Events</em> are actions that can be detected by JavaScript. Every element on a web page has certain events that can trigger JavaScript functions. For example, the <code class="calibre15">onclick</code> event of a button element can be set to call a function and make it run whenever a user clicks the button.</p>
+
+<p class="author1"><a data-type="xref" href="#script_employing_the_onerror_event" class="calibre6">Example 15-11</a> illustrates how to use the <code class="calibre15">onerror</code> event.</p>
+
+<div data-type="example" id="script_employing_the_onerror_event" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-11. </span>A script employing the onerror event</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="n">onerror</code> <code class="o">=</code> <code class="n">errorHandler</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">writ</code><code class="p">(</code><code class="s">"Welcome to this website"</code><code class="p">)</code> <code class="c">// Deliberate error</code>
+
+  <code class="k">function</code> <code class="n">errorHandler</code><code class="p">(</code><code class="n">message</code><code class="p">,</code> <code class="n">url</code><code class="p">,</code> <code class="n">line</code><code class="p">)</code>
+  <code class="p">{</code>
+    <code class="n">out</code>  <code class="o">=</code> <code class="s">"Sorry, an error was encountered.\n\n"</code><code class="p">;</code>
+    <code class="n">out</code> <code class="o">+=</code> <code class="s">"Error: "</code> <code class="o">+</code> <code class="n">message</code> <code class="o">+</code> <code class="s">"\n"</code><code class="p">;</code>
+    <code class="n">out</code> <code class="o">+=</code> <code class="s">"URL: "</code>   <code class="o">+</code> <code class="n">url</code>     <code class="o">+</code> <code class="s">"\n"</code><code class="p">;</code>
+    <code class="n">out</code> <code class="o">+=</code> <code class="s">"Line: "</code>  <code class="o">+</code> <code class="n">line</code>    <code class="o">+</code> <code class="s">"\n\n"</code><code class="p">;</code>
+    <code class="n">out</code> <code class="o">+=</code> <code class="s">"Click OK to continue.\n\n"</code><code class="p">;</code>
+    <code class="n">alert</code><code class="p">(</code><code class="n">out</code><code class="p">);</code>
+    <code class="k">return</code> <code class="k">true</code><code class="p">;</code>
+  <code class="p">}</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">The first line of this script tells the error event to use the new <code class="calibre15">errorHandler</code> function from now on. This function takes three parameters—a <code class="calibre15">message</code>, a <code class="calibre15">url</code>, and a <code class="calibre15">line</code> number—so it’s a simple matter to display all these in an alert pop-up.</p>
+
+<p class="author1">Then, to test the new function, we deliberately place a syntax error in the code with a call to <code class="calibre15">document.writ</code> instead of <code class="calibre15">document.write</code> (the final <code class="calibre15">e</code> is missing). <a data-type="xref" href="#using_the_onerror_event_with_an_alert_me" class="calibre6">Figure 15-1</a> shows the result of running this script in a browser. Using <code class="calibre15">onerror</code> this way can also be quite useful during the debugging process.</p>
+
+<figure class="calibre23"><div id="using_the_onerror_event_with_an_alert_me" class="figure"><img alt="Using the onerror event with an alert method pop-up" src="Images/pmj6_1501.png" class="calibre87"/>
+<h6 class="calibre24"><span class="keep-together">Figure 15-1. </span>Using the <code class="calibre15">onerror</code> event with an alert method pop-up</h6>
+</div></figure>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Using try...catch" class="calibre4"><div class="preface" id="using_try_dotdotdot_catch">
+<h1 class="calibre11">Using try...catch</h1>
+
+<p class="author1">The <code class="calibre15">try</code> and <code class="calibre15">catch</code> keywords<a contenteditable="false" data-primary="try...catch construct (JavaScript)" data-type="indexterm" id="idm45694703398680" class="calibre6"/><a contenteditable="false" data-primary="flow control (JavaScript)" data-secondary="try...catch construct" data-type="indexterm" id="idm45694703397576" class="calibre6"/> are more standard and more flexible than the <code class="calibre15">onerror</code> technique shown in the previous section. These keywords let you trap errors for a selected section of code, rather than all scripts in a document. However, they do not catch syntax errors, for which you need <code class="calibre15">onerror</code>.</p>
+
+<p class="author1">The <code class="calibre15">try...catch</code> construct is supported by all major browsers and is handy when you want to catch a certain condition that you are aware could occur in a specific part of your code.</p>
+
+<p class="author1">For example, in <a data-type="xref" href="ch18.xhtml#using_ajax" class="calibre6">Chapter 18</a> we’ll be exploring Ajax techniques that make use of the <code class="calibre15">XMLHttpRequest</code> object. Therefore, we can use <code class="calibre15">try</code> and <code class="calibre15">catch</code> to trap this case and do something else if the function is not available. <a data-type="xref" href="#trapping_an_error_with_try_and_catch" class="calibre6">Example 15-12</a> shows how.</p>
+
+<div data-type="example" id="trapping_an_error_with_try_and_catch" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-12. </span>Trapping an error with <code class="calibre15">try</code> and <code class="calibre15">catch</code></h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="k">try</code>
+  <code class="p">{</code>
+    <code class="n">request</code> <code class="o">=</code> <code class="k">new</code> <code class="n">XMLHTTPRequest</code><code class="p">()</code>
+  <code class="p">}</code>
+  <code class="k">catch</code><code class="p">(</code><code class="n">err</code><code class="p">)</code>
+  <code class="p">{</code>
+    <code class="c">// Use a different method to create an XMLHTTPRequest object</code>
+  <code class="p">}</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">There’s also another keyword associated with <code class="calibre15">try</code> and <code class="calibre15">catch</code> called <code class="calibre15">finally</code> that is always executed, regardless of whether an error occurs in the <code class="calibre15">try</code> clause. To use it, just add something like the following statements after a <code class="calibre15">catch</code> statement:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">finally</code>
+<code class="p">{</code>
+  <code class="n">alert</code><code class="p">(</code><code class="s">"The 'try' clause was encountered"</code><code class="p">)</code>
+<code class="p">}</code></pre>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Conditionals" class="calibre4"><div class="preface" id="conditionals-id00071">
+<h1 class="calibre11">Conditionals</h1>
+
+<p class="author1">Conditionals<a contenteditable="false" data-primary="conditionals (JavaScript)" data-secondary="if statements" data-type="indexterm" id="idm45694703305864" class="calibre6"/><a contenteditable="false" data-primary="flow control (JavaScript)" data-secondary="conditionals" data-type="indexterm" id="FCcond14" class="calibre6"/> alter program flow. They enable you to ask questions about certain things and respond to the answers you get in different ways. There are three types of nonlooping conditionals: the <code class="calibre15">if</code> statement, the <code class="calibre15">switch</code> statement, and the <code class="calibre15">?</code> operator.</p>
+
+<section data-type="sect2" data-pdf-bookmark="The if Statement" class="calibre4"><div class="preface" id="if_statement-id00072">
+<h2 class="calibre28">The if Statement</h2>
+
+<p class="author1">Several<a contenteditable="false" data-primary="if statements (JavaScript)" data-type="indexterm" id="idm45694703366552" class="calibre6"/> examples in this chapter have already made use of <code class="calibre15">if</code> statements. The code within such a statement is executed only if the given expression evaluates to <code class="calibre15">true</code>. Multiline <code class="calibre15">if</code> statements require curly braces around them, but as in PHP, you can omit the braces for single statements, although it’s often a good idea to use them anyway, especially when writing code in which the number of actions within an <code class="calibre15">if</code> statement might change as development proceeds. Therefore, the following statements are valid:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="n">a</code> <code class="o">&gt;</code> <code class="mi">100</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="n">b</code><code class="o">=</code><code class="mi">2</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is greater than 100"</code><code class="p">)</code>
+<code class="p">}</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="n">b</code> <code class="o">==</code> <code class="mi">10</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"b is equal to 10"</code><code class="p">)</code></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The else Statement" class="calibre4"><div class="preface" id="else_statement-id00073">
+<h2 class="calibre28">The else Statement</h2>
+
+<p class="author1">When<a contenteditable="false" data-primary="conditionals (JavaScript)" data-secondary="else statements" data-type="indexterm" id="idm45694703250440" class="calibre6"/><a contenteditable="false" data-primary="else statements" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703249064" class="calibre6"/> a condition has not been met, you can execute an alternative by using an <code class="calibre15">else</code> statement, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="n">a</code> <code class="o">&gt;</code> <code class="mi">100</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is greater than 100"</code><code class="p">)</code>
+<code class="p">}</code>
+<code class="k">else</code>
+<code class="p">{</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is less than or equal to 100"</code><code class="p">)</code>
+<code class="p">}</code></pre>
+
+<p class="author1">Unlike PHP, JavaScript has no <code class="calibre15">elseif</code> statement, but that’s not a problem because you can use an <code class="calibre15">else</code> followed by another <code class="calibre15">if</code> to form the equivalent of an <code class="calibre15">elseif</code> statement, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">if</code> <code class="p">(</code><code class="n">a</code> <code class="o">&gt;</code> <code class="mi">100</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is greater than 100"</code><code class="p">)</code>
+<code class="p">}</code>
+<code class="k">else</code> <code class="k">if</code><code class="p">(</code><code class="n">a</code> <code class="o">&lt;</code> <code class="mi">100</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is less than 100"</code><code class="p">)</code>
+<code class="p">}</code>
+<code class="k">else</code>
+<code class="p">{</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is equal to 100"</code><code class="p">)</code>
+<code class="p">}</code></pre>
+
+<p class="author1">As you can see, you can use another <code class="calibre15">else</code> after the new <code class="calibre15">if</code>, which could equally be followed by another <code class="calibre15">if</code> statement, and so on. Although I have shown braces on the statements, because each is a single line, the previous example could be written as <span class="keep-together">follows:</span></p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">if</code>     <code class="p">(</code><code class="n">a</code> <code class="o">&gt;</code> <code class="mi">100</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is greater than 100"</code><code class="p">)</code>
+<code class="k">else</code> <code class="k">if</code><code class="p">(</code><code class="n">a</code> <code class="o">&lt;</code> <code class="mi">100</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is less than 100"</code><code class="p">)</code>
+<code class="k">else</code>             <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"a is equal to 100"</code><code class="p">)</code></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The switch Statement" class="calibre4"><div class="preface" id="switch_statement-id00074">
+<h2 class="calibre28">The switch Statement</h2>
+
+<p class="author1">The <code class="calibre15">switch</code> statement<a contenteditable="false" data-primary="conditionals (JavaScript)" data-secondary="switch statements" data-type="indexterm" id="idm45694703050824" class="calibre6"/><a contenteditable="false" data-primary="switch statements" data-secondary="in JavaScript" data-type="indexterm" id="idm45694703049448" class="calibre6"/> is useful when one variable or the result of an expression can have multiple values and you want to perform a different function for each value.</p>
+
+<p class="author1">For example, the following code takes the PHP menu system we put together in <a data-type="xref" href="ch04.xhtml#expressions_and_control_flow_in_php" class="calibre6">Chapter 4</a> and converts it to JavaScript. It works by passing a single string to the main menu code according to what the user requests. Let’s say the options are Home, About, News, Login, and Links, and we set the variable <code class="calibre15">page</code> to one of these according to the user’s input.</p>
+
+<p class="author1">The<a contenteditable="false" data-primary="if...else if... construct (JavaScript)" data-type="indexterm" id="idm45694703045400" class="calibre6"/> code for this written using <code class="calibre15">if...else if...</code> might look like <a data-type="xref" href="#multiline_ifdotdotdotelse_if" class="calibre6">Example 15-13</a>.</p>
+
+<div data-type="example" id="multiline_ifdotdotdotelse_if" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-13. </span>A multiline <code class="calibre15">if...else if...</code> statement</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="k">if</code>      <code class="p">(</code><code class="n">page</code> <code class="o">==</code> <code class="s">"Home"</code><code class="p">)</code>  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"You selected Home"</code><code class="p">)</code>
+  <code class="k">else</code> <code class="k">if</code> <code class="p">(</code><code class="n">page</code> <code class="o">==</code> <code class="s">"About"</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"You selected About"</code><code class="p">)</code>
+  <code class="k">else</code> <code class="k">if</code> <code class="p">(</code><code class="n">page</code> <code class="o">==</code> <code class="s">"News"</code><code class="p">)</code>  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"You selected News"</code><code class="p">)</code>
+  <code class="k">else</code> <code class="k">if</code> <code class="p">(</code><code class="n">page</code> <code class="o">==</code> <code class="s">"Login"</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"You selected Login"</code><code class="p">)</code>
+  <code class="k">else</code> <code class="k">if</code> <code class="p">(</code><code class="n">page</code> <code class="o">==</code> <code class="s">"Links"</code><code class="p">)</code> <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"You selected Links"</code><code class="p">)</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">But using a <code class="calibre15">switch</code> construct, the code could look like <a data-type="xref" href="#switch_construct" class="calibre6">Example 15-14</a>.</p>
+
+<div data-type="example" id="switch_construct" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-14. </span>A <code class="calibre15">switch</code> construct</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="k">switch</code> <code class="p">(</code><code class="n">page</code><code class="p">)</code>
+  <code class="p">{</code>
+    <code class="k">case</code> <code class="s">"Home"</code><code class="o">:</code>
+      <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"You selected Home"</code><code class="p">)</code>
+      <code class="k">break</code>
+    <code class="k">case</code> <code class="s">"About"</code><code class="o">:</code>
+      <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"You selected About"</code><code class="p">)</code>
+      <code class="k">break</code>
+    <code class="k">case</code> <code class="s">"News"</code><code class="o">:</code>
+      <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"You selected News"</code><code class="p">)</code>
+      <code class="k">break</code>
+    <code class="k">case</code> <code class="s">"Login"</code><code class="o">:</code>
+      <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"You selected Login"</code><code class="p">)</code>
+      <code class="k">break</code>
+    <code class="k">case</code> <code class="s">"Links"</code><code class="o">:</code>
+      <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"You selected Links"</code><code class="p">)</code>
+      <code class="k">break</code>
+  <code class="p">}</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">The variable <code class="calibre15">page</code> is mentioned only once at the start of the <code class="calibre15">switch</code> statement. Thereafter, the <code class="calibre15">case</code> command<a contenteditable="false" data-primary="case command" data-secondary="in JavaScript" data-type="indexterm" id="idm45694702827240" class="calibre6"/> checks for matches. When one occurs, the matching conditional statement is executed. Of course, a real program would have code here to display or jump to a page, rather than simply telling the user what was selected.</p>
+
+<div data-type="note" epub:type="note" class="calibre19"><h6 class="calibre20">Note</h6>
+<p class="author1">You may also supply multiple cases for a single action. For example:</p>
+
+<pre data-code-language="javascript" data-type="programlisting" class="calibre45">
+<code class="k">switch</code> <code class="p">(</code><code class="n">heroName</code><code class="p">)</code>
+<code class="p">{</code>
+  <code class="k">case</code> <code class="s">"Superman"</code><code class="o">:</code>
+  <code class="k">case</code> <code class="s">"Batman"</code><code class="o">:</code>
+  <code class="k">case</code> <code class="s">"Wonder Woman"</code><code class="o">:</code>
+    <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"Justice League"</code><code class="p">)</code>
+    <code class="k">break</code>
+  <code class="k">case</code> <code class="s">"Iron Man"</code><code class="o">:</code>
+  <code class="k">case</code> <code class="s">"Captain America"</code><code class="o">:</code>
+  <code class="k">case</code> <code class="s">"Spiderman"</code><code class="o">:</code>
+    <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"The Avengers"</code><code class="p">)</code>
+    <code class="k">break</code>
+<code class="err"/><code class="p">}</code></pre>
+</div>
+
+<section data-type="sect3" data-pdf-bookmark="Breaking out" class="calibre4"><div class="preface" id="breaking_out-id00075">
+<h3 class="calibre43">Breaking out</h3>
+
+<p class="author1">As<a contenteditable="false" data-primary="break command" data-secondary="in JavaScript" data-type="indexterm" id="idm45694702726344" class="calibre6"/> you can see in <a data-type="xref" href="#switch_construct" class="calibre6">Example 15-14</a>, just as with PHP, the <code class="calibre15">break</code> command allows your code to break out of the <code class="calibre15">switch</code> statement once a condition has been satisfied. Remember to include the <code class="calibre15">break</code> unless you want to continue executing the statements under the next <code class="calibre15">case</code>.</p>
+</div></section>
+
+<section data-type="sect3" data-pdf-bookmark="Default action" class="calibre4"><div class="preface" id="default_action-id00076">
+<h3 class="calibre43">Default action</h3>
+
+<p class="author1">When<a contenteditable="false" data-primary="default keyword (JavaScript)" data-type="indexterm" id="idm45694702796104" class="calibre6"/> no condition is satisfied, you can specify a default action for a <code class="calibre15">switch</code> statement by using the <code class="calibre15">default</code> keyword. <a data-type="xref" href="#default_statement_to_add_to_example_14" class="calibre6">Example 15-15</a> shows a code snippet that could be inserted into <a data-type="xref" href="#switch_construct" class="calibre6">Example 15-14</a>.</p>
+
+<div data-type="example" id="default_statement_to_add_to_example_14" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-15. </span>A default statement to add to <a data-type="xref" href="#switch_construct" class="calibre6">Example 15-14</a></h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">default</code><code class="o">:</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"Unrecognized selection"</code><code class="p">)</code>
+  <code class="k">break</code></pre>
+</div>
+</div></section>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The ? Operator" class="calibre4"><div class="preface" id="question_mark_operator-id00077">
+<h2 class="calibre28">The ? Operator</h2>
+
+<p class="author1">The <code class="calibre15">ternary</code> operator (<code class="calibre15">?</code>), combined<a contenteditable="false" data-primary="ternary (? :) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694702783688" class="calibre6"/><a contenteditable="false" data-primary="? : (ternary) operator" data-secondary="in JavaScript" data-type="indexterm" id="idm45694702782280" class="calibre6"/><a contenteditable="false" data-primary="conditionals (JavaScript)" data-secondary="? operator" data-type="indexterm" id="idm45694702780904" class="calibre6"/> with the <code class="calibre15">:</code> character, provides a quick way of doing <code class="calibre15">if...else</code> tests. With it you can write an expression to evaluate and then follow it with a <code class="calibre15">?</code> symbol and the code to execute if the expression is <code class="calibre15">true</code>. After that, place a <code class="calibre15">:</code> and the code to execute if the expression evaluates to <code class="calibre15">false</code>.</p>
+
+<p class="author1"><a data-type="xref" href="#using_the_ternary_operator" class="calibre6">Example 15-16</a> shows the ternary operator being used to print out whether the variable <code class="calibre15">a</code> is less than or equal to 5 and prints something either way.</p>
+
+<div data-type="example" id="using_the_ternary_operator" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-16. </span>Using the ternary operator</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code>
+  <code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code>
+    <code class="n">a</code> <code class="o">&lt;=</code> <code class="mi">5</code> <code class="o">?</code>
+    <code class="s">"a is less than or equal to 5"</code> <code class="o">:</code>
+    <code class="s">"a is greater than 5"</code>
+  <code class="p">)</code>
+<code class="o">&lt;</code><code class="err">/script&gt;</code></pre>
+</div>
+
+<p class="author1">The<a contenteditable="false" data-primary="" data-startref="FCcond14" data-type="indexterm" id="idm45694702663112" class="calibre6"/> statement has been broken up into several lines for clarity, but you would be more likely to use such a statement on a single line, in this manner:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">size</code> <code class="o">=</code> <code class="n">a</code> <code class="o">&lt;=</code> <code class="mi">5</code> <code class="o">?</code> <code class="s">"short"</code> <code class="o">:</code> <code class="s">"long"</code></pre>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Looping" class="calibre4"><div class="preface" id="looping-id00078">
+<h1 class="calibre11">Looping</h1>
+
+<p class="author1">Again, you<a contenteditable="false" data-primary="looping (JavaScript)" data-secondary="while loops" data-type="indexterm" id="idm45694702653416" class="calibre6"/><a contenteditable="false" data-primary="while loops" data-secondary="in JavaScript" data-type="indexterm" id="idm45694702652008" class="calibre6"/><a contenteditable="false" data-primary="flow control (JavaScript)" data-secondary="looping" data-type="indexterm" id="FCloop14" class="calibre6"/> will find many close similarities between JavaScript and PHP when it comes to looping. Both languages support <code class="calibre15">while</code>, <code class="calibre15">do...while</code>, and <code class="calibre15">for</code> loops.</p>
+
+<section data-type="sect2" data-pdf-bookmark="while Loops" class="calibre4"><div class="preface" id="while_loops-id00079">
+<h2 class="calibre28">while Loops</h2>
+
+<p class="author1">A JavaScript <code class="calibre15">while</code> loop first checks the value of an expression and starts executing the statements within the loop only if that expression is <code class="calibre15">true</code>. If it is <code class="calibre15">false</code>, execution skips over to the next JavaScript statement (if any).</p>
+
+<p class="author1">Upon completing an iteration of the loop, the expression is again tested to see if it is <code class="calibre15">true</code>, and the process continues until such a time as the expression evaluates to <code class="calibre15">false</code> or until execution is otherwise halted. <a data-type="xref" href="#while_loop-id00080" class="calibre6">Example 15-17</a> shows such a loop.</p>
+
+<div data-type="example" id="while_loop-id00080" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-17. </span>A <code class="calibre15">while</code> loop</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code><code class="calibre15">
+  </code><code class="n">counter</code><code class="o">=</code><code class="mi">0</code><code class="calibre15">
+
+  </code><strong class="calibre31"><code class="k1">while</code><code class="calibre17"> </code><code class="p1">(</code><code class="nx1">counter</code><code class="calibre17"> </code><code class="o1">&lt;</code><code class="calibre17"> </code><code class="mi1">5</code><code class="p1">)</code></strong><code class="calibre15">
+  </code><strong class="calibre31"><code class="p1">{</code></strong><code class="calibre15">
+    </code><code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"Counter: "</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="n">counter</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="s">"&lt;br&gt;"</code><code class="p">)</code><code class="calibre15">
+    </code><code class="o">++</code><code class="n">counter</code><code class="calibre15">
+  </code><strong class="calibre31"><code class="p1">}</code></strong><code class="calibre15">
+</code><code class="o">&lt;</code><code class="err">/</code><code class="err">s</code><code class="err">c</code><code class="err">r</code><code class="err">i</code><code class="err">p</code><code class="err">t</code><code class="err">&gt;</code></pre>
+</div>
+
+<p class="author1">This script outputs the following:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">Counter: 0</strong>
+<strong class="calibre31">Counter: 1</strong>
+<strong class="calibre31">Counter: 2</strong>
+<strong class="calibre31">Counter: 3</strong>
+<strong class="calibre31">Counter: 4</strong></pre>
+
+<div data-type="warning" epub:type="warning" class="calibre21"><h6 class="calibre22">Warning</h6>
+<p class="author1">If the variable <code class="calibre15">counter</code> were not incremented within the loop, it is quite possible that some browsers could become unresponsive due to a never-ending loop, and the page may not even be easy to terminate with Escape or the Stop button. So, be careful with your JavaScript loops.</p>
+</div>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="do...while Loops" class="calibre4"><div class="preface" id="do_dotdotdot_while_loops-id00081">
+<h2 class="calibre28">do...while Loops</h2>
+
+<p class="author1">When you require<a contenteditable="false" data-primary="looping (JavaScript)" data-secondary="do...while loops" data-type="indexterm" id="idm45694702545128" class="calibre6"/><a contenteditable="false" data-primary="do...while loops" data-secondary="in JavaScript" data-type="indexterm" id="idm45694702543720" class="calibre6"/> a loop to iterate at least once before any tests are made, use a <code class="calibre15">do...while</code> loop, which is similar to a <code class="calibre15">while</code> loop, except that the test expression is checked only after each iteration of the loop. So, to output the first seven results in the 7 times table, you could use code such as that in <a data-type="xref" href="#do_dotdotdot_while_loop" class="calibre6">Example 15-18</a>.</p>
+
+<div data-type="example" id="do_dotdotdot_while_loop" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-18. </span>A <code class="calibre15">do...while </code>loop</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code><code class="calibre15">
+  </code><code class="n">count</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="mi">1</code><code class="calibre15">
+
+  </code><strong class="calibre31"><code class="k1">do</code></strong><code class="calibre15">
+  </code><strong class="calibre31"><code class="p1">{</code></strong><code class="calibre15">
+    </code><code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="n">count</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="s">" times 7 is "</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="n">count</code><code class="calibre15"> </code><code class="o">*</code><code class="calibre15"> </code><code class="mi">7</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="s">"&lt;br&gt;"</code><code class="p">)</code><code class="calibre15">
+  </code><strong class="calibre31"><code class="p1">}</code><code class="calibre17"> </code><code class="k1">while</code><code class="calibre17"> </code><code class="p1">(</code><code class="o1">++</code><code class="nx1">count</code><code class="calibre17"> </code><code class="o1">&lt;=</code><code class="calibre17"> </code><code class="mi1">7</code><code class="p1">)</code></strong><code class="calibre15">
+</code><code class="o">&lt;</code><code class="err">/</code><code class="err">s</code><code class="err">c</code><code class="err">r</code><code class="err">i</code><code class="err">p</code><code class="err">t</code><code class="err">&gt;</code></pre>
+</div>
+
+<p class="author1">As you might expect, this loop outputs the following:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">1 times 7 is 7</strong>
+<strong class="calibre31">2 times 7 is 14</strong>
+<strong class="calibre31">3 times 7 is 21</strong>
+<strong class="calibre31">4 times 7 is 28</strong>
+<strong class="calibre31">5 times 7 is 35</strong>
+<strong class="calibre31">6 times 7 is 42</strong>
+<strong class="calibre31">7 times 7 is 49</strong></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="for Loops" class="calibre4"><div class="preface" id="for_loops-id00082">
+<h2 class="calibre28">for Loops</h2>
+
+<p class="author1">A <code class="calibre15">for</code> loop<a contenteditable="false" data-primary="looping (JavaScript)" data-secondary="for loops" data-type="indexterm" id="idm45694702460440" class="calibre6"/><a contenteditable="false" data-primary="for loops" data-secondary="in JavaScript" data-type="indexterm" id="idm45694702459032" class="calibre6"/> combines the best of all worlds into a single looping construct that allows you to pass three parameters for each statement:</p>
+
+<ul class="printings">
+	<li class="calibre9">
+	<p class="author1">An initialization expression</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">A condition expression</p>
+	</li>
+	<li class="calibre9">
+	<p class="author1">A modification expression</p>
+	</li>
+</ul>
+
+<p class="author1">These are separated by semicolons, like this: <code class="calibre15">for (</code><em class="hyperlink"><code class="calibre18">expr1</code></em><code class="calibre15"> ;</code> <em class="hyperlink"><code class="calibre18">expr2</code></em><code class="calibre15"> ;</code> <em class="hyperlink"><code class="calibre18">expr3</code></em><code class="calibre15">)</code>. The initialization expression is executed at the start of the first iteration of the loop. In the case of the code for the multiplication table for 7, <code class="calibre15">count</code> would be initialized to the value <code class="calibre15">1</code>. Then, each time around the loop, the condition expression (in this case, <code class="calibre15">count &lt;= 7</code>) is tested, and the loop is entered only if the condition is <code class="calibre15">true</code>. Finally, at the end of each iteration, the modification expression is executed. In the case of the multiplication table for 7, the variable <code class="calibre15">count</code> is incremented. <a data-type="xref" href="#using_a_for_loop" class="calibre6">Example 15-19</a> shows what the code would look like.</p>
+
+<div data-type="example" id="using_a_for_loop" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-19. </span>Using a <code class="calibre15">for</code> loop</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code><code class="calibre15">
+  </code><strong class="calibre31"><code class="k1">for</code><code class="calibre17"> </code><code class="p1">(</code><code class="nx1">count</code><code class="calibre17"> </code><code class="o1">=</code><code class="calibre17"> </code><code class="mi1">1</code><code class="calibre17"> </code><code class="p1">;</code><code class="calibre17"> </code><code class="nx1">count</code><code class="calibre17"> </code><code class="o1">&lt;=</code><code class="calibre17"> </code><code class="mi1">7</code><code class="calibre17"> </code><code class="p1">;</code><code class="calibre17"> </code><code class="o1">++</code><code class="nx1">count</code><code class="p1">)</code></strong><code class="calibre15">
+  </code><strong class="calibre31"><code class="p1">{</code></strong><code class="calibre15">
+    </code><code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="n">count</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="s">"times 7 is "</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="n">count</code><code class="calibre15"> </code><code class="o">*</code><code class="calibre15"> </code><code class="mi">7</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="s">"&lt;br&gt;"</code><code class="p">)</code><code class="p">;</code><code class="calibre15">
+  </code><strong class="calibre31"><code class="p1">}</code></strong><code class="calibre15">
+</code><code class="o">&lt;</code><code class="err">/</code><code class="err">s</code><code class="err">c</code><code class="err">r</code><code class="err">i</code><code class="err">p</code><code class="err">t</code><code class="err">&gt;</code></pre>
+</div>
+
+<p class="author1">As in PHP, you can assign multiple variables in the first parameter<a contenteditable="false" data-primary=", (comma)" data-secondary="in JavaScript" data-type="indexterm" id="idm45694702357336" class="calibre6"/><a contenteditable="false" data-primary="comma (,)" data-secondary="in JavaScript" data-type="indexterm" id="idm45694702356056" class="calibre6"/> of a <code class="calibre15">for</code> loop by separating them with a comma, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">for</code> <code class="p">(</code><code class="n">i</code> <code class="o">=</code> <code class="mi">1</code><code class="p">,</code> <code class="n">j</code> <code class="o">=</code> <code class="mi">1</code> <code class="p">;</code> <code class="n">i</code> <code class="o">&lt;</code> <code class="mi">10</code> <code class="p">;</code> <code class="n">i</code><code class="o">++</code><code class="p">)</code></pre>
+
+<p class="author1">Likewise, you can perform multiple modifications in the last parameter, like this:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">for</code> <code class="p">(</code><code class="n">i</code> <code class="o">=</code> <code class="mi">1</code> <code class="p">;</code> <code class="n">i</code> <code class="o">&lt;</code> <code class="mi">10</code> <code class="p">;</code> <code class="n">i</code><code class="o">++</code><code class="p">,</code> <code class="o">--</code><code class="n">j</code><code class="p">)</code></pre>
+
+<p class="author1">Or you can do both at the same time:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="k">for</code> <code class="p">(</code><code class="n">i</code> <code class="o">=</code> <code class="mi">1</code><code class="p">,</code> <code class="n">j</code> <code class="o">=</code> <code class="mi">1</code> <code class="p">;</code> <code class="n">i</code> <code class="o">&lt;</code> <code class="mi">10</code> <code class="p">;</code> <code class="n">i</code><code class="o">++</code><code class="p">,</code> <code class="o">--</code><code class="n">j</code><code class="p">)</code></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="Breaking Out of a Loop" class="calibre4"><div class="preface" id="breaking_out_of_a_loop-id00083">
+<h2 class="calibre28">Breaking Out of a Loop</h2>
+
+<p class="author1">The <code class="calibre15">break</code> command, which<a contenteditable="false" data-primary="looping (JavaScript)" data-secondary="breaking out of loops" data-type="indexterm" id="idm45694702231176" class="calibre6"/><a contenteditable="false" data-primary="break command" data-secondary="in JavaScript looping" data-type="indexterm" id="idm45694702229768" class="calibre6"/> you’ll recall is important inside a <code class="calibre15">switch</code> statement, is also available within <code class="calibre15">for</code> loops. You might need to use this, for example, when searching for a match of some kind. Once the match is found, you know that continuing to search will only waste time and make your visitor wait. <a data-type="xref" href="#using_the_break_command_in_a_for_loop" class="calibre6">Example 15-20</a> shows how to use the <code class="calibre15">break</code> command.</p>
+
+<div data-type="example" id="using_the_break_command_in_a_for_loop" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-20. </span>Using the <code class="calibre15">break</code> command in a <code class="calibre15">for</code> loop</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code><code class="calibre15">
+  </code><code class="n">haystack</code><code class="calibre15">     </code><code class="o">=</code><code class="calibre15"> </code><code class="k">new</code><code class="calibre15"> </code><code class="nb">Array</code><code class="p">(</code><code class="p">)</code><code class="calibre15">
+  </code><code class="n">haystack</code><code class="p">[</code><code class="mi">17</code><code class="p">]</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="s">"Needle"</code><code class="calibre15">
+
+  </code><code class="k">for</code><code class="calibre15"> </code><code class="p">(</code><code class="n">j</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="mi">0</code><code class="calibre15"> </code><code class="p">;</code><code class="calibre15"> </code><code class="n">j</code><code class="calibre15"> </code><code class="o">&lt;</code><code class="calibre15"> </code><code class="mi">20</code><code class="calibre15"> </code><code class="p">;</code><code class="calibre15"> </code><code class="o">++</code><code class="n">j</code><code class="p">)</code><code class="calibre15">
+  </code><code class="p">{</code><code class="calibre15">
+    </code><code class="k">if</code><code class="calibre15"> </code><code class="p">(</code><code class="n">haystack</code><code class="p">[</code><code class="n">j</code><code class="p">]</code><code class="calibre15"> </code><code class="o">==</code><code class="calibre15"> </code><code class="s">"Needle"</code><code class="p">)</code><code class="calibre15">
+    </code><code class="p">{</code><code class="calibre15">
+      </code><code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"&lt;br&gt;- Found at location "</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="n">j</code><code class="p">)</code><code class="calibre15">
+      </code><strong class="calibre31"><code class="k1">break</code></strong><code class="calibre15">
+    </code><code class="p">}</code><code class="calibre15">
+    </code><code class="k">else</code><code class="calibre15"> </code><code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="n">j</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="s">", "</code><code class="p">)</code><code class="calibre15">
+  </code><code class="p">}</code><code class="calibre15">
+</code><code class="o">&lt;</code><code class="err">/</code><code class="err">s</code><code class="err">c</code><code class="err">r</code><code class="err">i</code><code class="err">p</code><code class="err">t</code><code class="err">&gt;</code></pre>
+</div>
+
+<p class="author1">This script outputs the following:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,</strong>
+<strong class="calibre31">- Found at location 17</strong></pre>
+</div></section>
+
+<section data-type="sect2" data-pdf-bookmark="The continue Statement" class="calibre4"><div class="preface" id="continue_statement-id00084">
+<h2 class="calibre28">The continue Statement</h2>
+
+<p class="author1">Sometimes<a contenteditable="false" data-primary="looping (JavaScript)" data-secondary="continue statements" data-type="indexterm" id="idm45694702183048" class="calibre6"/><a contenteditable="false" data-primary="continue statements" data-secondary="in JavaScript" data-type="indexterm" id="idm45694702181672" class="calibre6"/> you don’t want to entirely exit from a loop but instead wish to skip the remaining statements just for this iteration of the loop. In such cases, you can use the <code class="calibre15">continue</code> command. <a data-type="xref" href="#using_the_continue_command_in_a_for_loop" class="calibre6">Example 15-21</a> shows this in use.</p>
+
+<div data-type="example" id="using_the_continue_command_in_a_for_loop" class="calibre41">
+<h5 class="calibre42"><span class="keep-together">Example 15-21. </span>Using the <code class="calibre15">continue</code> command in a <code class="calibre15">for</code> loop</h5>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="o">&lt;</code><code class="n">script</code><code class="o">&gt;</code><code class="calibre15">
+  </code><code class="n">haystack</code><code class="calibre15">     </code><code class="o">=</code><code class="calibre15"> </code><code class="k">new</code><code class="calibre15"> </code><code class="nb">Array</code><code class="p">(</code><code class="p">)</code><code class="calibre15">
+  </code><code class="n">haystack</code><code class="p">[</code><code class="mi">4</code><code class="p">]</code><code class="calibre15">  </code><code class="o">=</code><code class="calibre15"> </code><code class="s">"Needle"</code><code class="calibre15">
+  </code><code class="n">haystack</code><code class="p">[</code><code class="mi">11</code><code class="p">]</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="s">"Needle"</code><code class="calibre15">
+  </code><code class="n">haystack</code><code class="p">[</code><code class="mi">17</code><code class="p">]</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="s">"Needle"</code><code class="calibre15">
+
+  </code><code class="k">for</code><code class="calibre15"> </code><code class="p">(</code><code class="n">j</code><code class="calibre15"> </code><code class="o">=</code><code class="calibre15"> </code><code class="mi">0</code><code class="calibre15"> </code><code class="p">;</code><code class="calibre15"> </code><code class="n">j</code><code class="calibre15"> </code><code class="o">&lt;</code><code class="calibre15"> </code><code class="mi">20</code><code class="calibre15"> </code><code class="p">;</code><code class="calibre15"> </code><code class="o">++</code><code class="n">j</code><code class="p">)</code><code class="calibre15">
+  </code><code class="p">{</code><code class="calibre15">
+    </code><code class="k">if</code><code class="calibre15"> </code><code class="p">(</code><code class="n">haystack</code><code class="p">[</code><code class="n">j</code><code class="p">]</code><code class="calibre15"> </code><code class="o">==</code><code class="calibre15"> </code><code class="s">"Needle"</code><code class="p">)</code><code class="calibre15">
+    </code><code class="p">{</code><code class="calibre15">
+      </code><code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="s">"&lt;br&gt;- Found at location "</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="n">j</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="s">"&lt;br&gt;"</code><code class="p">)</code><code class="calibre15">
+      </code><strong class="calibre31"><code class="k1">continue</code></strong><code class="calibre15">
+    </code><code class="p">}</code><code class="calibre15">
+
+    </code><code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="n">j</code><code class="calibre15"> </code><code class="o">+</code><code class="calibre15"> </code><code class="s">", "</code><code class="p">)</code><code class="calibre15">
+  </code><code class="p">}</code><code class="calibre15">
+</code><code class="o">&lt;</code><code class="err">/</code><code class="err">s</code><code class="err">c</code><code class="err">r</code><code class="err">i</code><code class="err">p</code><code class="err">t</code><code class="err">&gt;</code></pre>
+</div>
+
+<p class="author1">Notice<a contenteditable="false" data-primary="" data-startref="FCloop14" data-type="indexterm" id="idm45694702007000" class="calibre6"/> how the second <code class="calibre15">document.write</code> call does not have to be enclosed in an <code class="calibre15">else</code> statement (as it did before), because the <code class="calibre15">continue</code> command will skip it if a match has been found. The output from this script is as follows:</p>
+
+<pre data-programming-language="perl" class="calibre29">
+<strong class="calibre31">0, 1, 2, 3,</strong>
+<strong class="calibre31">- Found at location 4</strong>
+<strong class="calibre31">5, 6, 7, 8, 9, 10,</strong>
+<strong class="calibre31">- Found at location 11</strong>
+<strong class="calibre31">12, 13, 14, 15, 16,</strong>
+<strong class="calibre31">- Found at location 17</strong>
+<strong class="calibre31">18, 19,</strong></pre>
+</div></section>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Explicit Casting" class="calibre4"><div class="preface" id="explicit_casting">
+<h1 class="calibre11">Explicit Casting</h1>
+
+<p class="author1">Unlike<a contenteditable="false" data-primary="casting" data-secondary="explicit in JavaScript" data-type="indexterm" id="idm45694702020680" class="calibre6"/><a contenteditable="false" data-primary="explicit casting" data-secondary=" in JavaScript" data-type="indexterm" id="idm45694702023384" class="calibre6"/><a contenteditable="false" data-primary="flow control (JavaScript)" data-secondary="explicit casting" data-type="indexterm" id="idm45694702022008" class="calibre6"/> PHP, JavaScript has no explicit casting of types such as <code class="calibre15">(int)</code> or <code class="calibre15">(float)</code>. Instead, when you need a value to be of a certain type, use one of JavaScript’s built-in functions, shown in <a data-type="xref" href="#javascriptapostrophes_type-changing_func" class="calibre6">Table 15-6</a>.</p>
+
+<table id="javascriptapostrophes_type-changing_func" class="calibre33">
+	<caption class="width-full"><span class="keep-together">Table 15-6. </span>JavaScript’s type-changing functions</caption>
+	<thead class="calibre35">
+		<tr class="calibre36">
+			<th class="calibre37">Change to type</th>
+			<th class="calibre37">Function to use</th>
+		</tr>
+	</thead>
+	<tbody class="calibre38">
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">Int</code>, <code class="calibre48">Integer</code></td>
+			<td class="calibre39"><code class="calibre48">parseInt()</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">Bool</code>, <code class="calibre48">Boolean</code></td>
+			<td class="calibre39"><code class="calibre48">Boolean()</code></td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">Float</code>, <code class="calibre48">Double</code>, <code class="calibre48">Real</code></td>
+			<td class="calibre39"><code class="calibre48">parseFloat()</code></td>
+		</tr>
+		<tr class="calibre40">
+			<td class="calibre39"><code class="calibre48">String</code></td>
+			<td class="calibre39"><code class="calibre48">String()</code></td>
+		</tr>
+		<tr class="calibre36">
+			<td class="calibre39"><code class="calibre48">Array</code></td>
+			<td class="calibre39"><code class="calibre48">split()</code></td>
+		</tr>
+	</tbody>
+</table>
+
+<p class="author1">So, for example, to change a floating-point number to an integer, you could use code such as the following (which displays the value <code class="calibre15">3</code>):</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="n">n</code> <code class="o">=</code> <code class="mi">3.1415927</code>
+<code class="n">i</code> <code class="o">=</code> <code class="nb">parseInt</code><code class="p">(</code><code class="n">n</code><code class="p">)</code>
+<code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="n">i</code><code class="p">)</code></pre>
+
+<p class="author1">Or you can use the compound form:</p>
+
+<pre data-code-language="javascript" data-programming-language="perl" class="calibre29">
+<code class="nb">document</code><code class="p">.</code><code class="n">write</code><code class="p">(</code><code class="nb">parseInt</code><code class="p">(</code><code class="mi">3.1415927</code><code class="p">))</code></pre>
+
+<p class="author1">That’s it for control flow and expressions. The next chapter focuses on the use of functions, objects, and arrays in JavaScript.<a contenteditable="false" data-primary="" data-startref="JSflow14" data-type="indexterm" id="idm45694701911544" class="calibre6"/></p>
+</div></section>
+
+<section data-type="sect1" data-pdf-bookmark="Questions" class="calibre4"><div class="preface" id="questions-id00085">
+<h1 class="calibre11">Questions</h1>
+
+<ol class="calibre25">
+	<li class="calibre26">
+	<p class="author1">How are Boolean values handled differently by PHP and JavaScript?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What characters are used to define a JavaScript variable name?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is the difference between unary, binary, and ternary operators?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is the best way to force your own operator precedence?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">When would you use the <code class="calibre15">===</code> (identity) operator?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What are the simplest two forms of expressions?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Name the three conditional statement types.</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">How do <code class="calibre15">if</code> and <code class="calibre15">while</code> statements interpret conditional expressions of different data types?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">Why is a <code class="calibre15">for</code> loop more powerful than a <code class="calibre15">while</code> loop?</p>
+	</li>
+	<li class="calibre26">
+	<p class="author1">What is the purpose of the <code class="calibre15">with</code> statement?</p>
+	</li>
+</ol>
+
+<p class="author1">See <a data-type="xref" href="app01_split_014.xhtml#chapter_15_answers" class="calibre6">“Chapter 15 Answers”</a> in the <a data-type="xref" href="app01_split_000.xhtml#solutions_to_the_chapter_questions" class="calibre6">Appendix A</a> for the answers to these <span class="keep-together">questions</span>.</p>
+</div></section>
+</div></section></div></body></html>

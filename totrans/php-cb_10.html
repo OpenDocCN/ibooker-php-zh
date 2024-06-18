@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xml:lang="en"
+      lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<title>PHP Cookbook</title>
+<link rel="stylesheet" type="text/css" href="override_v1.css"/>
+<link rel="stylesheet" type="text/css" href="epub.css"/>
+</head>
+<body>
+<div id="book-content">
+<div id="sbo-rt-content"><section data-type="chapter" epub:type="chapter" data-pdf-bookmark="Chapter 10. File Handling"><div class="chapter" id="chapter_file_handling">
+<h1><span class="label">Chapter 10. </span>File Handling</h1>
+
+
+<p>One of the most common design philosophies around Unix and Linux is that “everything is a file.” This means that, regardless of the resource with which you’re interacting, the operating system treats it as if it were a file locally on disk. This includes remote requests to other systems and handles on the output of processes running on the machine.</p>
+
+<p>PHP treats requests, proceses, and resources similarly, but instead of considering everything to be a file, the language considers everything to be a stream resource. <a data-type="xref" href="ch11.html#chapter_streams">Chapter 11</a> covers <a data-type="indexterm" data-primary="streams" id="idm45875149242976"></a>streams at length, but the important point to know about streams for this chapter is the way PHP treats them in memory.</p>
+
+<p>When accessing a file, PHP doesn’t necessarily read the file’s entire data into memory. Instead, it creates a <code>resource</code> in memory that references the file’s location on disk and selectively buffers bytes from that file in memory. PHP then accesses or manipulates those buffered bytes directly as a stream. The fundamentals of streams, however, are not required knowledge for the recipes in this chapter.</p>
+
+<p>PHP’s file methods—<code>fopen()</code>, <code>file_get_contents()</code>, and <a data-type="indexterm" data-primary="fopen() function" id="idm45875149194224"></a><a data-type="indexterm" data-primary="file_get_contents() function" id="idm45875149193600"></a><a data-type="indexterm" data-primary="functions" data-secondary="fopen()" id="idm45875149192960"></a><a data-type="indexterm" data-primary="functions" data-secondary="file_get_contents()" id="idm45875149192016"></a>the like—all leverage the <code>file://</code> stream wrapper under the hood. Remember, though, if everything in PHP is a stream, you can just as easily use other stream protocols as well, including <code>php://</code> and <code>http://</code>.</p>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Windows Versus Unix"><div class="sect2" id="idm45875149189568">
+<h2>Windows Versus Unix</h2>
+
+<p>PHP is distributed for use on <a data-type="indexterm" data-primary="Windows versus Unix" id="wdwvux"></a><a data-type="indexterm" data-primary="Unix" data-secondary="versus Windows" id="uxvwdw"></a>both Windows and Unix-style operating systems (including Linux and macOS). It’s important to understand that the underlying filesystem behind Windows is very different from a Unix-style system. Windows doesn’t consider “everything to be a file” and sometimes respects case sensitivity in both file and directory names in unexpected ways.</p>
+
+<p>As you’ll see in <a data-type="xref" href="#file_locking">Recipe 10.6</a>, the differences between operating system paradigms also lead to minor differences in how functions behave. Specifically, file locking will work differently if your program is run on Windows because of differences in the underlying operating system calls.</p>
+
+<p>The recipes that follow cover the most common filesystem operations you might experience in PHP, from opening and manipulating <a data-type="indexterm" data-primary="Windows versus Unix" data-startref="wdwvux" id="idm45875149184256"></a><a data-type="indexterm" data-primary="Unix" data-secondary="versus Windows" data-startref="uxvwdw" id="idm45875149183280"></a>files to locking them from being touched by other processes.</p>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="10.1 Creating or Opening a Local File"><div class="sect1" id="opening_a_file">
+<h1>10.1 Creating or Opening a Local File</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875149180192">
+<h2>Problem</h2>
+
+<p>You need to open a file for reading or <a data-type="indexterm" data-primary="files" data-secondary="opening" id="flspng"></a>writing on the local filesystem.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875149177136">
+<h2>Solution</h2>
+
+<p>Use <code>fopen()</code> to open the file and <a data-type="indexterm" data-primary="fopen() function" id="fpnfct"></a><a data-type="indexterm" data-primary="functions" data-secondary="fopen()" id="ftpn"></a>return a resource reference for further use:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'document.txt'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875149156208">
+<h2>Discussion</h2>
+
+<p>Internally, an open file is represented as <a data-type="indexterm" data-primary="files" data-secondary="open, as streams" id="idm45875149154736"></a>a stream within PHP. You can read data from or write data to any position within the stream based on the position of the current file pointer. In the Solution example, you’ve opened a stream for reading only (attempting to write to this stream will fail) and positioned the pointer at the beginning of the file.</p>
+
+<p><a data-type="xref" href="#reading_from_a_buffer">Example 10-1</a> shows how you can read as many bytes from the file as you want and then close the stream by passing its <a data-type="indexterm" data-primary="fclose() function" id="idm45875149168320"></a><a data-type="indexterm" data-primary="functions" data-secondary="fclose()" id="idm45875149167648"></a>reference into <code>fclose()</code>.</p>
+<div id="reading_from_a_buffer" data-type="example">
+<h5><span class="label">Example 10-1. </span>Reading bytes from a buffer</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">while</code><code> </code><code class="p">((</code><code class="nv">$buffer</code><code> </code><code class="o">=</code><code> </code><code class="nb">fgets</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code><code> </code><code class="mi">4096</code><code class="p">))</code><code> </code><code class="o">!==</code><code> </code><code class="k">false</code><code class="p">)</code><code> </code><code class="p">{</code><code> </code><a class="co" id="co_file_handling_CO1-1" href="#callout_file_handling_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a><code>
+    </code><code class="k">echo</code><code> </code><code class="nv">$buffer</code><code class="p">;</code><code> </code><a class="co" id="co_file_handling_CO1-2" href="#callout_file_handling_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a><code>
+</code><code class="p">}</code><code>
+
+</code><code class="nb">fclose</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code><code> </code><a class="co" id="co_file_handling_CO1-3" href="#callout_file_handling_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></pre>
+<dl class="calloutlist">
+<dt><a class="co" id="callout_file_handling_CO1-1" href="#co_file_handling_CO1-1"><img src="assets/1.png" alt="1" width="12" height="12"/></a></dt>
+<dd><p>The <code>fgets()</code> function reads one <a data-type="indexterm" data-primary="fgets() function" id="idm45875149129232"></a><a data-type="indexterm" data-primary="functions" data-secondary="fgets()" id="idm45875149128608"></a>line from the specified resource, stopping either when it hits a newline character or when it has read the specified number of bytes (4,096) from the underlying stream. If there is no data to read, the function returns <code>false</code>.</p></dd>
+<dt><a class="co" id="callout_file_handling_CO1-2" href="#co_file_handling_CO1-2"><img src="assets/2.png" alt="2" width="12" height="12"/></a></dt>
+<dd><p>Once you have data buffered into a variable, you can do with it whatever you want. In this case, print that single line to the console.</p></dd>
+<dt><a class="co" id="callout_file_handling_CO1-3" href="#co_file_handling_CO1-3"><img src="assets/3.png" alt="3" width="12" height="12"/></a></dt>
+<dd><p>After using a file’s contents, you should explicitly close and clean up the resource you’ve created.</p></dd>
+</dl></div>
+
+<p>In addition to reading a file, <code>fopen()</code> allows for arbitrary writes, file appending, overwriting, or truncation. Each operation is determined by the mode passed as the second parameter—the Solution example passed <code>r</code> to indicate a read-only mode. Additional modes are described in <a data-type="xref" href="#file_modes">Table 10-1</a>.</p>
+<table id="file_modes">
+<caption><span class="label">Table 10-1. </span>File modes available to <code>fopen()</code></caption>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p><code>r</code></p></td>
+<td><p>Open for reading only; place the file pointer at the beginning of the file.</p></td>
+</tr>
+<tr>
+<td><p><code>w</code></p></td>
+<td><p>Open for writing only; place the file pointer at the beginning of the file and truncate the file to 0 length. If the file does not exist, attempt to create it.</p></td>
+</tr>
+<tr>
+<td><p><code>a</code></p></td>
+<td><p>Open for writing only; place the file pointer at the end of the file. If the file does not exist, attempt to create it. In this mode, <code>fseek()</code> has no effect, and writes are always appended.</p></td>
+</tr>
+<tr>
+<td><p><code>x</code></p></td>
+<td><p>Create and open for writing only; place the file pointer at the beginning of the file. If the file already exists, the <code>fopen()</code> call will fail by returning <code>false</code> and generating an error of level <code>E_WARNING</code>. If the file does not exist, attempt to create it.</p></td>
+</tr>
+<tr>
+<td><p><code>c</code></p></td>
+<td><p>Open the file for writing only. If the file does not exist, it is created. If it exists, it is neither truncated (as opposed to <code>w</code>), nor does the call to this function fail (as is the case with <code>x</code>). The file pointer is placed at the beginning of the file.</p></td>
+</tr>
+<tr>
+<td><p><code>e</code></p></td>
+<td><p>Set close-on-exec flag on the opened file descriptor.</p></td>
+</tr>
+</tbody>
+</table>
+
+<p>For all of the file modes documented in <a data-type="xref" href="#file_modes">Table 10-1</a> <em>except</em> for <code>e</code>, you can append a literal <code>+</code> sign to the mode to open a file for both reading <em>and</em> writing rather than one operation or the other.</p>
+
+<p>The <code>fopen()</code> function works with more than just local files. By default, the function assumes you want to work with the local filesystem, which is why you do not need to explicitly specify the <code>file://</code> protocol handler. However, you can just as easily reference remote files by using the <code>http://</code> or <code>ftp://</code> handlers, as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'https://eamann.com/'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code></pre>
+<div data-type="note" epub:type="note"><h6>Note</h6>
+<p>While remote file includes are <a data-type="indexterm" data-primary="files" data-secondary="remote, opening" id="idm45875148993552"></a>possible, they can be dangerous in many situations, as you might not always have control over the contents returned by a remote filesystem. It’s often recommended to disable remote file access by toggling <code>allow_url_include</code> in your system configuration. Refer to the <a href="https://oreil.ly/-gXR-">PHP runtime configuration documents</a> for instructions on implementing this change.</p>
+</div>
+
+<p>An optional third parameter allows <code>fopen()</code> to search for a file in your <a href="https://oreil.ly/3S1lo">system include path</a> if desired. By default, PHP will only search the local directory (or use an absolute path if specified). Loading files from the system include path encourages code reuse as you can specify individual classes or configuration files without replicating them throughout <a data-type="indexterm" data-primary="files" data-secondary="opening" data-startref="flspng" id="idm45875148989824"></a><a data-type="indexterm" data-primary="fopen() function" data-startref="fpnfct" id="idm45875148988576"></a><a data-type="indexterm" data-primary="functions" data-secondary="fopen()" data-startref="ftpn" id="idm45875148974384"></a>your project.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875149155952">
+<h2>See Also</h2>
+
+<p>Documentation on the <a href="https://oreil.ly/oGJTp">PHP filesystem</a>, particularly <a href="https://oreil.ly/7yQG-"><code>fopen()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="10.2 Reading a File into a String"><div class="sect1" id="idm45875148969888">
+<h1>10.2 Reading a File into a String</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875148968640">
+<h2>Problem</h2>
+
+<p>You want to read an entire file into <a data-type="indexterm" data-primary="files" data-secondary="reading to string" id="flsrdsrg"></a><a data-type="indexterm" data-primary="strings" data-secondary="reading files to" id="sgsrflt"></a><a data-type="indexterm" data-primary="reading files" data-secondary="to strings" id="rdgflsg"></a><a data-type="indexterm" data-primary="file_get_contents() function" id="fgcttsc"></a><a data-type="indexterm" data-primary="functions" data-secondary="file_get_contents()" id="fnsfgctt"></a>a variable for use elsewhere in your application.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875189036432">
+<h2>Solution</h2>
+
+<p>Use <code>file_get_contents()</code> as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$config</code> <code class="o">=</code> <code class="nb">file_get_contents</code><code class="p">(</code><code class="s1">'config.json'</code><code class="p">);</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="nv">$config</code> <code class="o">!==</code> <code class="k">false</code><code class="p">)</code> <code class="p">{</code>
+    <code class="nv">$parsed</code> <code class="o">=</code> <code class="nb">json_decode</code><code class="p">(</code><code class="nv">$config</code><code class="p">);</code>
+
+    <code class="c1">// ...</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875148911456">
+<h2>Discussion</h2>
+
+<p>The <code>file_get_contents()</code> function opens a file for reading, reads the entire data of that file into a variable, and then closes the file and allows you to use that data as a string. This is functionally equivalent to reading a file into a string manually <a data-type="indexterm" data-primary="fread() function" id="idm45875148900000"></a><a data-type="indexterm" data-primary="functions" data-secondary="fread()" id="idm45875148899296"></a>with <code>fread()</code>, as in <a data-type="xref" href="#filegetcontents_from_scratch">Example 10-2</a>.</p>
+<div id="filegetcontents_from_scratch" data-type="example">
+<h5><span class="label">Example 10-2. </span>Implementing <code>file_get_contents()</code> manually with <code>fread()</code></h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">function</code> <code class="nf">fileGetContents</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$filename</code><code class="p">)</code><code class="o">:</code> <code class="nx">string</code><code class="o">|</code><code class="k">false</code>
+<code class="p">{</code>
+    <code class="nv">$buffer</code> <code class="o">=</code> <code class="s1">''</code><code class="p">;</code>
+    <code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="nv">$filename</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code>
+
+    <code class="k">try</code> <code class="p">{</code>
+        <code class="k">while</code> <code class="p">(</code><code class="o">!</code><code class="nb">feof</code><code class="p">(</code><code class="nv">$fp</code><code class="p">))</code> <code class="p">{</code>
+            <code class="nv">$buffer</code> <code class="o">.=</code> <code class="nb">fread</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="mi">4096</code><code class="p">);</code>
+        <code class="p">}</code>
+    <code class="p">}</code> <code class="k">catch</code><code class="p">(</code><code class="nx">Exception</code> <code class="nv">$e</code><code class="p">)</code> <code class="p">{</code>
+        <code class="nv">$buffer</code> <code class="o">=</code> <code class="k">false</code><code class="p">;</code>
+    <code class="p">}</code> <code class="k">finally</code> <code class="p">{</code>
+        <code class="nb">fclose</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code>
+    <code class="p">}</code>
+
+    <code class="k">return</code> <code class="nv">$buffer</code><code class="p">;</code>
+<code class="p">}</code>
+
+<code class="nv">$config</code> <code class="o">=</code> <code class="nx">fileGetContents</code><code class="p">(</code><code class="s1">'config.json'</code><code class="p">);</code></pre></div>
+
+<p>While it’s possible to manually read a file into memory, as demonstrated in <a data-type="xref" href="#filegetcontents_from_scratch">Example 10-2</a>, it’s a better idea to focus on writing simple programs and using the functions exposed by the language to handle complicated operations for you. The <code>file_get_contents()</code> function is implemented in C and provides a high level of performance for your application. It is binary-safe and leverages the memory-mapping functionality exposed by your operating system to achieve peak performance.</p>
+
+<p>Like <code>fread()</code>, <code>file_get_contents()</code> can read both local and remote files into memory. It can also search for files in the system include path if you should set the optional second parameter to <code>true</code>.</p>
+
+<p>Like <code>fread()</code>’s parallel <code>fwrite()</code> operation, there is <a data-type="indexterm" data-primary="fwrite() function" id="idm45875148857584"></a><a data-type="indexterm" data-primary="functions" data-secondary="fwrite()" id="idm45875148856848"></a><a data-type="indexterm" data-primary="file_put_contents() function" id="idm45875148855904"></a><a data-type="indexterm" data-primary="functions" data-secondary="file_put_contents()" id="idm45875148855264"></a>an automatic write equivalent function called <code>file_put_contents()</code>. This function abstracts away the complexity of opening a file and overwriting its contents with string data from a variable. The following demonstrates how an object might be encoded to JSON and written out to a static file:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$config</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">Config</code><code class="p">(</code><code class="sd">/** ... **/</code><code class="p">);</code>
+<code class="nv">$serialized</code> <code class="o">=</code> <code class="nb">json_encode</code><code class="p">(</code><code class="nv">$config</code><code class="p">);</code>
+
+<code class="nb">file_put_contents</code><code class="p">(</code><code class="s1">'config.json'</code><code class="p">,</code> <code class="nv">$serialized</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875148846032">
+<h2>See Also</h2>
+
+<p>Documentation <a data-type="indexterm" data-primary="files" data-secondary="reading to string" data-startref="flsrdsrg" id="idm45875148724464"></a><a data-type="indexterm" data-primary="strings" data-secondary="reading files to" data-startref="sgsrflt" id="idm45875148723184"></a><a data-type="indexterm" data-primary="reading files" data-secondary="to strings" data-startref="rdgflsg" id="idm45875148721968"></a><a data-type="indexterm" data-primary="file_get_contents() function" data-startref="fgcttsc" id="idm45875148720752"></a><a data-type="indexterm" data-primary="functions" data-secondary="file_get_contents()" data-startref="fnsfgctt" id="idm45875148719840"></a>on <a href="https://oreil.ly/5pRBt"><code>file_​get_​contents()</code></a> and <a href="https://oreil.ly/4W0rG"><code>file_​put_​con⁠tents()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="10.3 Reading a Specific Slice of a File"><div class="sect1" id="slicing_a_file">
+<h1>10.3 Reading a Specific Slice of a File</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875148696192">
+<h2>Problem</h2>
+
+<p>You want to read a specific set of <a data-type="indexterm" data-primary="files" data-secondary="reading specific bytes" id="flrgspfy"></a><a data-type="indexterm" data-primary="reading files" data-secondary="specific bytes" id="rgfpccby"></a><a data-type="indexterm" data-primary="fseek() function" id="fskfc"></a><a data-type="indexterm" data-primary="functions" data-secondary="fseek()" id="fcfsk"></a>bytes from a particular position within a file.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875148690208">
+<h2>Solution</h2>
+
+<p>Use <code>fopen()</code> to create a resource, <code>fseek()</code> to reposition the pointer within the file, and <code>fread()</code> to read data from that position as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'document.txt'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code>
+<code class="nb">fseek</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="mi">32</code><code class="p">,</code> <code class="nx">SEEK_SET</code><code class="p">);</code>
+
+<code class="nv">$data</code> <code class="o">=</code> <code class="nb">fread</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="mi">32</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875148499536">
+<h2>Discussion</h2>
+
+<p>By default, <code>fopen()</code> in read mode will open the file as a resource and place its pointer at the beginning of the file. When you start reading bytes from the file, the pointer will advance until it hits the end of the file. You can use <code>fseek()</code> to set the pointer to an arbitrary position within the resource, with the default being the beginning of the file.</p>
+
+<p>The third parameter—<code>SEEK_SET</code> in the Solution example—tells PHP where to add the offset. You have three options:</p>
+
+<ul>
+<li>
+<p><code>SEEK_SET</code> (the default) sets the pointer from the <a data-type="indexterm" data-primary="files" data-secondary="pointers" id="idm45875148655840"></a>beginning of the file.</p>
+</li>
+<li>
+<p><code>SEEK_CUR</code> adds the offset to the current pointer position.</p>
+</li>
+<li>
+<p><code>SEEK_END</code> adds the offset to the end of the file. This is useful for reading the last bytes in a file by setting a negative offset as the second parameter.</p>
+</li>
+</ul>
+
+<p>Assume you want to read the last bytes in a long log file from within PHP. You would do so similarly to the way you read arbitrary bytes in the Solution example but with a negative offset, as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'log.txt'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code>
+<code class="nb">fseek</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="o">-</code><code class="mi">4096</code><code class="p">,</code> <code class="nx">SEEK_END</code><code class="p">);</code>
+
+<code class="k">echo</code> <code class="nb">fread</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="mi">4096</code><code class="p">);</code>
+
+<code class="nb">fclose</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code></pre>
+
+<p>Note that, even if the log file in the preceding snippet is less than 4,096 bytes long, PHP will not read past the beginning of the file. The interpreter will instead place the pointer at the beginning of the file and start reading bytes from that position. Likewise, you cannot read past the end of the file regardless of how many bytes <a data-type="indexterm" data-primary="files" data-secondary="reading specific bytes" data-startref="flrgspfy" id="idm45875148621088"></a><a data-type="indexterm" data-primary="reading files" data-secondary="specific bytes" data-startref="rgfpccby" id="idm45875148620000"></a><a data-type="indexterm" data-primary="fseek() function" data-startref="fskfc" id="idm45875148618784"></a><a data-type="indexterm" data-primary="functions" data-secondary="fseek()" data-startref="fcfsk" id="idm45875148617840"></a>you specify in your call to <code>fread()</code>.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875148615984">
+<h2>See Also</h2>
+
+<p><a data-type="xref" href="#opening_a_file">Recipe 10.1</a> for more on <code>fopen()</code>, and the documentation on <a href="https://oreil.ly/Gb2m5"><code>fread()</code></a> and <a href="https://oreil.ly/Tl6gs"><code>fseek()</code></a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="10.4 Modifying a File in Place"><div class="sect1" id="idm45875148582912">
+<h1>10.4 Modifying a File in Place</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875148581664">
+<h2>Problem</h2>
+
+<p>You want to modify a specific <a data-type="indexterm" data-primary="files" data-secondary="modifying parts" id="idm45875148580336"></a>part of a file.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875148578976">
+<h2>Solution</h2>
+
+<p>Open the file for reading and writing by using <code>fopen()</code>, then use <code>fseek()</code> to move the pointer to the position you wish to update and overwrite a certain number of bytes starting with that position. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'resume.txt'</code><code class="p">,</code> <code class="s1">'r+'</code><code class="p">);</code>
+<code class="nb">fseek</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="mi">32</code><code class="p">);</code>
+
+<code class="nb">fwrite</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="s1">'New data'</code><code class="p">,</code> <code class="mi">8</code><code class="p">);</code>
+
+<code class="nb">fclose</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875148516528">
+<h2>Discussion</h2>
+
+<p>As in <a data-type="xref" href="#slicing_a_file">Recipe 10.3</a>, the <code>fseek()</code> function is leveraged to move the pointer to an arbitrary location within the file. From there, <code>fwrite()</code> is used to write a specific set of bytes to the file in that location before you close the resource.</p>
+
+<p>The third parameter passed to <code>fwrite()</code> tells PHP how many bytes to write. By default, the system will write all of the data passed in the second parameter, but you can restrict the amount of data written out by specifying a byte count. In the Solution example, the write length is set equal to the data length, which is redundant. A more realistic example of this functionality would appear something like the following.</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$contents</code> <code class="o">=</code> <code class="s1">'the quick brown fox jumped over the lazy dog'</code><code class="p">;</code>
+<code class="nb">fwrite</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="nv">$contents</code><code class="p">,</code> <code class="mi">9</code><code class="p">);</code></pre>
+
+<p>Note also that the Solution example adds a plus sign to the typical read mode; this opens the file for reading <em>and</em> writing. Opening the file in other modes leads to very different behavior:</p>
+
+<ul>
+<li>
+<p><code>w</code> (write mode), with or <a data-type="indexterm" data-primary="fopen() function" data-secondary="write mode" id="idm45875148466576"></a>without the ability to read, will truncate the file before you do anything else with it!</p>
+</li>
+<li>
+<p><code>a</code> (append mode), with or <a data-type="indexterm" data-primary="fopen() function" data-secondary="append mode" id="idm45875148464208"></a>without the ability to read, will force the file pointer to the end of the file. Calls to <code>fseek()</code> will <em>not</em> move the file pointer as expected, and your new data will always be appended to the file.</p>
+</li>
+</ul>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875148461664">
+<h2>See Also</h2>
+
+<p><a data-type="xref" href="#slicing_a_file">Recipe 10.3</a> for more information on random I/O with files in PHP.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="10.5 Writing to Many Files Simultaneously"><div class="sect1" id="idm45875148459376">
+<h1>10.5 Writing to Many Files Simultaneously</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875148458096">
+<h2>Problem</h2>
+
+<p>You want to write data to <a data-type="indexterm" data-primary="files" data-secondary="writing to multiple" id="flswgmp"></a><a data-type="indexterm" data-primary="writing to files, multiple" id="wrtgsmp"></a>multiple files at the same time. For example, you want to write both to the local filesystem and to the console.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875148454096">
+<h2>Solution</h2>
+
+<p>Open multiple resource references with <code>fopen()</code> and write to them all in a loop:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fps</code> <code class="o">=</code> <code class="p">[</code>
+    <code class="nb">fopen</code><code class="p">(</code><code class="s1">'data.txt'</code><code class="p">,</code> <code class="s1">'w'</code><code class="p">),</code>
+    <code class="nb">fopen</code><code class="p">(</code><code class="s1">'php://stdout'</code><code class="p">,</code> <code class="s1">'w'</code><code class="p">)</code>
+<code class="p">];</code>
+
+<code class="k">foreach</code> <code class="p">(</code><code class="nv">$fps</code> <code class="k">as</code> <code class="nv">$fp</code><code class="p">)</code> <code class="p">{</code>
+    <code class="nb">fwrite</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="s1">'The wheels on the bus go round and round.'</code><code class="p">);</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875148431184">
+<h2>Discussion</h2>
+
+<p>PHP is generally a single-threaded system that must perform operations one at a time.<sup><a data-type="noteref" id="idm45875148413792-marker" href="ch10.html#idm45875148413792">1</a></sup> While the Solution example will produce output for two file references, it will write first to one and then to the other. In practice, this will be fast enough to be acceptable but is not truly simultaneous.</p>
+
+<p>Even with this limitation, knowing that you can write the same data to multiple files with ease makes it fairly straightforward to juggle multiple potential outputs. Rather than crafting a procedural approach with a finite number of files as in the Solution example, you could even abstract this kind of operation into a class, as shown in <a data-type="xref" href="#multi_file_operations">Example 10-3</a>:</p>
+<div id="multi_file_operations" data-type="example">
+<h5><span class="label">Example 10-3. </span>A simple class for abstracting multiple file operations</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="k">class</code> <code class="nc">MultiFile</code>
+<code class="p">{</code>
+    <code class="k">private</code> <code class="k">array</code> <code class="nv">$handles</code> <code class="o">=</code> <code class="p">[];</code>
+
+    <code class="k">public</code> <code class="k">function</code> <code class="nf">open</code><code class="p">(</code>
+        <code class="nx">string</code> <code class="nv">$filename</code><code class="p">,</code>
+        <code class="nx">string</code> <code class="nv">$mode</code> <code class="o">=</code> <code class="s1">'w'</code><code class="p">,</code>
+        <code class="nx">bool</code> <code class="nv">$use_include_path</code> <code class="o">=</code> <code class="k">false</code><code class="p">,</code>
+        <code class="nv">$context</code> <code class="o">=</code> <code class="k">null</code>
+        <code class="p">)</code><code class="o">:</code> <code class="nx">mixed</code>
+    <code class="p">{</code>
+        <code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="nv">$filename</code><code class="p">,</code> <code class="nv">$mode</code><code class="p">,</code> <code class="nv">$use_include_path</code><code class="p">,</code> <code class="nv">$context</code><code class="p">);</code>
+
+        <code class="k">if</code> <code class="p">(</code><code class="nv">$fp</code> <code class="o">!==</code> <code class="k">false</code><code class="p">)</code> <code class="p">{</code>
+            <code class="nv">$this</code><code class="o">-&gt;</code><code class="na">handles</code><code class="p">[]</code> <code class="o">=</code> <code class="nv">$fp</code><code class="p">;</code>
+        <code class="p">}</code>
+
+        <code class="k">return</code> <code class="nv">$fp</code><code class="p">;</code>
+    <code class="p">}</code>
+
+    <code class="k">public</code> <code class="k">function</code> <code class="nf">write</code><code class="p">(</code><code class="nx">string</code> <code class="nv">$data</code><code class="p">,</code> <code class="o">?</code><code class="nx">int</code> <code class="nv">$length</code> <code class="o">=</code> <code class="k">null</code><code class="p">)</code><code class="o">:</code> <code class="nx">int</code><code class="o">|</code><code class="k">false</code>
+    <code class="p">{</code>
+        <code class="nv">$success</code> <code class="o">=</code> <code class="k">true</code><code class="p">;</code>
+        <code class="nv">$bytes</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code>
+
+        <code class="k">foreach</code><code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">handles</code> <code class="k">as</code> <code class="nv">$fp</code><code class="p">)</code> <code class="p">{</code>
+            <code class="nv">$out</code> <code class="o">=</code> <code class="nb">fwrite</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="nv">$data</code><code class="p">,</code> <code class="nv">$length</code><code class="p">);</code>
+            <code class="k">if</code> <code class="p">(</code><code class="nv">$out</code> <code class="o">===</code> <code class="k">false</code><code class="p">)</code> <code class="p">{</code>
+                <code class="nv">$success</code> <code class="o">=</code> <code class="k">false</code><code class="p">;</code>
+            <code class="p">}</code> <code class="k">else</code> <code class="p">{</code>
+                <code class="nv">$bytes</code> <code class="o">=</code> <code class="nv">$out</code><code class="p">;</code>
+            <code class="p">}</code>
+        <code class="p">}</code>
+
+        <code class="k">return</code> <code class="nv">$success</code> <code class="o">?</code> <code class="nv">$bytes</code> <code class="o">:</code> <code class="k">false</code><code class="p">;</code>
+    <code class="p">}</code>
+
+    <code class="k">public</code> <code class="k">function</code> <code class="nf">close</code><code class="p">()</code><code class="o">:</code> <code class="nx">bool</code>
+    <code class="p">{</code>
+        <code class="nv">$return</code> <code class="o">=</code> <code class="k">true</code><code class="p">;</code>
+
+        <code class="k">foreach</code> <code class="p">(</code><code class="nv">$this</code><code class="o">-&gt;</code><code class="na">handles</code> <code class="k">as</code> <code class="nv">$fp</code><code class="p">)</code> <code class="p">{</code>
+            <code class="nv">$return</code> <code class="o">=</code> <code class="nv">$return</code> <code class="o">&amp;&amp;</code> <code class="nb">fclose</code><code class="p">(</code><code class="nv">$fp</code><code class="p">);</code>
+        <code class="p">}</code>
+
+        <code class="k">return</code> <code class="nv">$return</code><code class="p">;</code>
+    <code class="p">}</code>
+<code class="p">}</code></pre></div>
+
+<p>The class defined by <a data-type="xref" href="#multi_file_operations">Example 10-3</a> allows you to easily bind a write operation to multiple file handles and clean them up as necessary when you’re done. Rather than opening each file in turn and manually iterating over them, you simply instantiate the class, add your files, and go. For example:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$writer</code> <code class="o">=</code> <code class="k">new</code> <code class="nx">MultiFile</code><code class="p">();</code>
+<code class="nv">$writer</code><code class="o">-&gt;</code><code class="na">open</code><code class="p">(</code><code class="s1">'data.txt'</code><code class="p">);</code>
+<code class="nv">$writer</code><code class="o">-&gt;</code><code class="na">open</code><code class="p">(</code><code class="s1">'php://stdout'</code><code class="p">);</code>
+
+<code class="nv">$writer</code><code class="o">-&gt;</code><code class="na">write</code><code class="p">(</code><code class="s2">"Row, row, row your boat</code><code class="se">\n</code><code class="s2">Gently down the stream."</code><code class="p">);</code>
+
+<code class="nv">$writer</code><code class="o">-&gt;</code><code class="na">close</code><code class="p">();</code></pre>
+
+<p>PHP’s internal handling of resource pointers is highly efficient and empowers you to write to as many files or streams as necessary with minimal overhead. Abstractions like <a data-type="xref" href="#multi_file_operations">Example 10-3</a> similarly make it easy for you to focus on the business logic of your <a data-type="indexterm" data-primary="files" data-secondary="writing to multiple" data-startref="flswgmp" id="idm45875148225856"></a><a data-type="indexterm" data-primary="writing to files, multiple" data-startref="wrtgsmp" id="idm45875148223600"></a>application, while PHP juggles the resource handles (and related memory allocation) for you.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875148222320">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/i0kSI">PHP’s <code>stdout</code> stream</a>.</p>
+</div></section>
+</div></section>
+
+
+
+
+
+
+<section data-type="sect1" data-pdf-bookmark="10.6 Locking a File to Prevent Access or Modification by Another Process"><div class="sect1" id="file_locking">
+<h1>10.6 Locking a File to Prevent Access or Modification by Another Process</h1>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Problem"><div class="sect2" id="idm45875148218048">
+<h2>Problem</h2>
+
+<p>You want to prevent another PHP <a data-type="indexterm" data-primary="files" data-secondary="locking" id="fllck"></a><a data-type="indexterm" data-primary="locking files" id="lckgfl"></a><a data-type="indexterm" data-primary="flock() function" id="flckfct"></a><a data-type="indexterm" data-primary="functions" data-secondary="flock()" id="ftnfck"></a>process from manipulating a file while your script is running.</p>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Solution"><div class="sect2" id="idm45875148211984">
+<h2>Solution</h2>
+
+<p>Use <code>flock()</code> to lock the file as follows:</p>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'myfile.txt'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code>
+
+<code class="k">if</code> <code class="p">(</code><code class="nb">flock</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="nx">LOCK_EX</code><code class="p">))</code> <code class="p">{</code>
+    <code class="c1">// ... Do whatever reading you need</code>
+
+    <code class="nb">flock</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="nx">LOCK_UN</code><code class="p">);</code>
+<code class="p">}</code> <code class="k">else</code> <code class="p">{</code>
+    <code class="k">echo</code> <code class="s1">'Could not lock file!'</code><code class="p">;</code>
+    <code class="k">exit</code><code class="p">(</code><code class="mi">1</code><code class="p">);</code>
+<code class="p">}</code></pre>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="Discussion"><div class="sect2" id="idm45875148159680">
+<h2>Discussion</h2>
+
+<p>Often, you need to open a file to read its data or write something to it, but with the assurance that no other script will manipulate the file while you’re working with it. The safest way to do this is by explicitly locking the file.</p>
+<div data-type="warning" epub:type="warning"><h6>Warning</h6>
+<p>On Windows, PHP leverages <em>mandatory locking</em> that is <a data-type="indexterm" data-primary="locking files" data-secondary="mandatory locking" id="idm45875148153360"></a><a data-type="indexterm" data-primary="mandatory locking" id="idm45875148152352"></a>enforced by the operating system itself. Once a file is locked, no other process is permitted to open that file. On Unix-based systems (including Linux and macOS), PHP instead <a data-type="indexterm" data-primary="locking files" data-secondary="advisory locking" id="idm45875148151552"></a><a data-type="indexterm" data-primary="advisory locking" id="idm45875148150608"></a>uses <em>advisory locking</em>. In this mode, the operating system can choose to ignore locks between different processes. While multiple PHP scripts will usually respect the lock, other processes might ignore it entirely.</p>
+</div>
+
+<p>An explicit file lock prevents other processes from either reading or writing the same file, depending on the type of lock. PHP supports two kinds of locks: a shared lock (<code>LOCK_SH</code>) that still permits reads, and an exclusive lock (<code>LOCK_EX</code>) that prevents other processes from accessing the file at all.</p>
+
+<p>If you were to run the code in the Solution example twice on a machine (with a long-blocking operation like <code>sleep()</code> called before unlocking the file), the second process would pause and wait for the lock to be released before executing. A more concrete example is shown in <a data-type="xref" href="#long_running_file_lock">Example 10-4</a>.</p>
+<div id="long_running_file_lock" data-type="example">
+<h5><span class="label">Example 10-4. </span>Illustration of a long-running file lock</h5>
+
+<pre data-type="programlisting" data-code-language="php"><code class="nv">$fp</code> <code class="o">=</code> <code class="nb">fopen</code><code class="p">(</code><code class="s1">'myfile.txt'</code><code class="p">,</code> <code class="s1">'r'</code><code class="p">);</code>
+
+<code class="k">echo</code> <code class="s1">'Getting a lock ...'</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+<code class="k">if</code> <code class="p">(</code><code class="nb">flock</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="nx">LOCK_EX</code><code class="p">))</code> <code class="p">{</code>
+    <code class="k">echo</code> <code class="s1">'Sleeping ...'</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+    <code class="k">for</code><code class="p">(</code><code class="nv">$i</code> <code class="o">=</code> <code class="mi">0</code><code class="p">;</code> <code class="nv">$i</code> <code class="o">&lt;</code> <code class="mi">3</code><code class="p">;</code> <code class="nv">$i</code><code class="o">++</code><code class="p">)</code> <code class="p">{</code>
+        <code class="nb">sleep</code><code class="p">(</code><code class="mi">10</code><code class="p">);</code>
+        <code class="k">echo</code> <code class="s1">'  Zzz ...'</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+    <code class="p">}</code>
+
+    <code class="k">echo</code> <code class="s1">'Unlocking ...'</code> <code class="o">.</code> <code class="nx">PHP_EOL</code><code class="p">;</code>
+    <code class="nb">flock</code><code class="p">(</code><code class="nv">$fp</code><code class="p">,</code> <code class="nx">LOCK_UN</code><code class="p">);</code>
+<code class="p">}</code> <code class="k">else</code> <code class="p">{</code>
+    <code class="k">echo</code> <code class="s1">'Could not lock file!'</code><code class="p">;</code>
+    <code class="k">exit</code><code class="p">(</code><code class="mi">1</code><code class="p">);</code>
+<code class="p">}</code></pre></div>
+
+<p>Running the preceding program in two separate terminals side by side illustrates how locking works, as shown in <a data-type="xref" href="#side_by_side_consoles">Figure 10-1</a>. The first execution will acquire the file lock and continue operating as expected. The second will wait until the lock is available <a data-type="indexterm" data-primary="files" data-secondary="locking" data-startref="fllck" id="idm45875147990976"></a><a data-type="indexterm" data-primary="locking files" data-startref="lckgfl" id="idm45875147902816"></a><a data-type="indexterm" data-primary="flock() function" data-startref="flckfct" id="idm45875147901872"></a><a data-type="indexterm" data-primary="functions" data-secondary="flock()" data-startref="ftnfck" id="idm45875147900928"></a>and, after it acquires the lock, continue merrily along.</p>
+
+<figure><div id="side_by_side_consoles" class="figure">
+<img src="assets/phpc_1001.png" alt="Two processes cannot acquire the same lock on a single file." width="600" height="136"/>
+<h6><span class="label">Figure 10-1. </span>Two processes cannot acquire the same lock on a single file</h6>
+</div></figure>
+</div></section>
+
+
+
+
+
+
+
+
+<section data-type="sect2" data-pdf-bookmark="See Also"><div class="sect2" id="idm45875147897552">
+<h2>See Also</h2>
+
+<p>Documentation on <a href="https://oreil.ly/BRBO5"><code>flock()</code></a>.</p>
+</div></section>
+</div></section>
+<div data-type="footnotes"><p data-type="footnote" id="idm45875148413792"><sup><a href="ch10.html#idm45875148413792-marker">1</a></sup> <a data-type="xref" href="ch17.html#chapter_asynchronous">Chapter 17</a> covers parallel and asynchronous operations at length to explain ways to break out of a single-threaded paradigm.</p></div></div></section></div>
+</div>
+</body>
+</html>
