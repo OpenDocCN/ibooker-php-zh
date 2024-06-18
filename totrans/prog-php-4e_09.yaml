@@ -1,0 +1,1280 @@
+- en: Chapter 8\. Web Techniques
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: PHP was designed as a web-scripting language and, although it is possible to
+    use it in purely command-line and GUI scripts, the web accounts for the vast majority
+    of PHP uses. A dynamic website may have forms, sessions, and sometimes redirection,
+    and this chapter explains how to implement those elements in PHP. You’ll learn
+    how PHP provides access to form parameters and uploaded files, how to send cookies
+    and redirect the browser, how to use PHP sessions, and more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: HTTP Basics
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The web runs on HTTP, or Hypertext Transfer Protocol. This protocol governs
+    how web browsers request files from web servers and how the servers send the files
+    back. To understand the various techniques we’ll show you in this chapter, you
+    need to have a basic understanding of HTTP. For a more thorough discussion of
+    HTTP, see the [*HTTP Pocket Reference*](http://oreil.ly/HTTP_PocketRef) (O’Reilly)
+    by Clinton Wong.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When a web browser requests a web page, it sends an HTTP request message to
+    a web server. The request message always includes some header information, and
+    it sometimes also includes a body. The web server responds with a reply message,
+    which always includes header information and usually contains a body. The first
+    line of an HTTP request looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: This line specifies an HTTP command, called a *method*, followed by the address
+    of a document and the version of the HTTP protocol being used. In this case, the
+    request is using the `GET` method to ask for the *index.html* document using HTTP
+    1.1\. After this initial line, the request can contain optional header information
+    that gives the server additional data about the request.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `User-Agent` header provides information about the web browser, while the
+    `Accept` header specifies the MIME types that the browser accepts. After any headers,
+    the request contains a blank line to indicate the end of the header section. The
+    request can also contain additional data, if that is appropriate for the method
+    being used (e.g., with the `POST` method, as we’ll discuss shortly). If the request
+    doesn’t contain any data, it ends with a blank line.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The web server receives the request, processes it, and sends a response. The
+    first line of an HTTP response looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This line specifies the protocol version, a status code, and a description
+    of that code. In this case, the status code is `200`, meaning that the request
+    was successful (hence the description `OK`). After the status line, the response
+    contains headers that give the client additional information about the response.
+    For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `Server` header provides information about the web server software, while
+    the `Content-Type` header specifies the MIME type of the data included in the
+    response. After the headers, the response contains a blank line, followed by the
+    requested data if the request was successful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The two most common HTTP methods are `GET` and `POST`. The `GET` method is designed
+    for retrieving information, such as a document, an image, or the results of a
+    database query, from the server. The `POST` method is meant for posting information,
+    such as a credit card number or information to be stored in a database, to the
+    server. The `GET` method is what a web browser uses when the user types in a URL
+    or clicks on a link. When the user submits a form, either the `GET` or `POST`
+    method can be used, as specified by the `method` attribute of the `form` tag.
+    We’ll discuss the `GET` and `POST` methods in more detail in the section “Processing
+    Forms”.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variables
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Server configuration and request information—including form parameters and cookies—are
+    accessible in three different ways from your PHP scripts. Collectively, this information
+    is referred to as *EGPCS* (short for *environment*, `GET`, `POST`, *cookies*,
+    and *server*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'PHP creates six global arrays that contain the EGPCS information:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$_ENV`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contains the values of any environment variables, where the keys of the array
+    are the names of the environment variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$_GET`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contains any parameters that are part of a `GET` request, where the keys of
+    the array are the names of the form parameters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$_COOKIE`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contains any cookie values passed as part of the request, where the keys of
+    the array are the names of the cookies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$_POST`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contains any parameters that are part of a `POST` request, where the keys of
+    the array are the names of the form parameters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$_SERVER`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contains useful information about the web server, as described in the next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$_FILES`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contains information about any uploaded files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These variables are not only global, but also visible from within function definitions.
+    The `$_REQUEST` array is created by PHP automatically and contains the elements
+    of the `$_GET`, `$_POST`, and `$_COOKIE` arrays all in one array variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Server Information
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The `$_SERVER` array contains a lot of useful information from the web server,
+    much of which comes from the environment variables required in the [Common Gateway
+    Interface (CGI) specification](http://bit.ly/Vw912h)). Here is a complete list
+    of the `$_SERVER` entries that come from CGI, including some example values:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PHP_SELF`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The name of the current script, relative to the document root (e.g., `/store/cart.php`).
+    You have already seen this used in some of the sample code in earlier chapters.
+    This variable is useful when creating self-referencing scripts, as we’ll see later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`SERVER_SOFTWARE`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A string that identifies the server (e.g., `"Apache/1.3.33 (Unix) mod_perl/1.26
+    PHP/5.0.4"`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`SERVER_NAME`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The hostname, DNS alias, or IP address for self-referencing URLs (e.g., `www.``example.com`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`GATEWAY_INTERFACE`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The version of the CGI standard being followed (e.g., `CGI/1.1`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`SERVER_PROTOCOL`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The name and revision of the request protocol (e.g., `HTTP/1.1`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`SERVER_PORT`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The server port number to which the request was sent (e.g., `80`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`REQUEST_METHOD`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The method the client used to fetch the document (e.g., `GET`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PATH_INFO`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Extra path elements given by the client (e.g., `/list/users`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PATH_TRANSLATED`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The value of `PATH_INFO`, translated by the server into a filename (e.g., `/home/httpd/htdocs/list/users`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`SCRIPT_NAME`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The URL path to the current page, which is useful for self-referencing scripts
+    (e.g., `/~me/menu.php`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`QUERY_STRING`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Everything after the `?` in the URL (e.g., `name=Fred+age=35`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`REMOTE_HOST`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The hostname of the machine that requested this page (e.g., `http://dialup-192-168-0-1.example.com`).
+    If there’s no DNS for the machine, this is blank and `REMOTE_ADDR` is the only
+    information given.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`REMOTE_ADDR`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A string containing the IP address of the machine that requested this page (e.g.,
+    `"192.168.0.250"`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`AUTH_TYPE`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The authentication method used to protect the page, if the page is password-protected
+    (e.g., `basic`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`REMOTE_USER`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The username with which the client authenticated, if the page is password-protected
+    (e.g., `fred`). Note that there’s no way to find out what password was used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The Apache server also creates entries in the `$_SERVER` array for each HTTP
+    header in the request. For each key, the header name is converted to uppercase,
+    hyphens (`-`) are turned into underscores (`_`), and the string `"HTTP_"` is prepended.
+    For example, the entry for the `User-Agent` header has the key `"HTTP_USER_AGENT"`.
+    The two most common and useful headers are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`HTTP_USER_AGENT`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The string the browser used to identify itself (e.g., `"Mozilla/5.0 (Windows
+    2000; U) Opera 6.0 [en]"`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`HTTP_REFERER`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The page the browser said it came from to get to the current page (e.g., `http://www.example.com/last_page.html`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Processing Forms
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: It’s easy to process forms with PHP, as the form parameters are available in
+    the `$_GET` and `$_POST` arrays. This section describes some tricks and techniques
+    that will make it even easier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Methods
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As we already discussed, there are two HTTP methods that a client can use to
+    pass form data to the server: `GET` and `POST`. The method that a particular form
+    uses is specified with the `method` attribute to the `form` tag. In theory, methods
+    are case-insensitive in HTML, but in practice some broken browsers require the
+    method name to be in all uppercase.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A `GET` request encodes the form parameters in the URL in a *query string*,
+    which is indicated by the text that follows the `?`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: A `POST` request passes the form parameters in the body of the HTTP request,
+    leaving the URL untouched.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The most visible difference between `GET` and `POST` is the URL line. Because
+    all of a form’s parameters are encoded in the URL with a `GET` request, users
+    can bookmark `GET` queries. They cannot do this with `POST` requests, however.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The biggest difference between `GET` and `POST` requests, however, is far subtler.
+    The HTTP specification says that `GET` requests are *idempotent*—that is, one
+    `GET` request for a particular URL, including form parameters, is the same as
+    two or more requests for that URL. Thus, web browsers can cache the response pages
+    for `GET` requests, because the response page doesn’t change regardless of how
+    many times the page is loaded. Because of idempotence, `GET` requests should be
+    used only for queries such as splitting a word into smaller chunks or multiplying
+    numbers, where the response page is never going to change.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`POST` requests are not idempotent. This means that they cannot be cached,
+    and the server is contacted every time the page is displayed. You’ve probably
+    seen your web browser prompt you with “Repost form data?” before displaying or
+    reloading certain pages. This makes `POST` requests the appropriate choice for
+    queries whose response pages may change over time—for example, displaying the
+    contents of a shopping cart or the current messages in a bulletin board.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: That said, idempotence is often ignored in the real world. Browser caches are
+    generally so poorly implemented, and the Reload button so easy to hit, that programmers
+    tend to use `GET` and `POST` simply based on whether they want the query parameters
+    shown in the URL or not. What you need to remember is that `GET` requests should
+    not be used for any actions that cause a change in the server, such as placing
+    an order or updating a database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The type of method that was used to request a PHP page is available through
+    `$_SERVER[''REQUEST_METHOD'']`. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parameters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use the `$_POST`, `$_GET`, and `$_FILES` arrays to access form parameters from
+    your PHP code. The keys are the parameter names, and the values are the values
+    of those parameters. Because periods are legal in HTML field names but not in
+    PHP variable names, periods in field names are converted to underscores (`_`)
+    in the array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 8-1](#example_eight_onedot_the_chunkify_form) shows an HTML form that
+    chunkifies a string supplied by the user. The form contains two fields: one for
+    the string (parameter name `word`) and one for the size of chunks to produce (parameter
+    name `number`).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-1\. The chunkify form (chunkify.html)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 8-2](#example_eight_twodot_the_chunkify_scrip) lists the PHP script,
+    *chunkify.php*, to which the form in [Example 8-1](#example_eight_onedot_the_chunkify_form)
+    submits. The script copies the parameter values into variables and uses them.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-2\. The chunkify script (chunkify.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Figure 8-1](#the_chunkify_form_and_its_output) shows both the chunkify form
+    and the resulting output.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The chunkify form and its output](Images/php4_0801.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 8-1\. The chunkify form and its output
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Self-Processing Pages
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: One PHP page can be used to both generate a form and subsequently process it.
+    If the page shown in [Example 8-3](#example_eight_threedot_a_self_processin) is
+    requested with the `GET` method, it prints a form that accepts a Fahrenheit temperature.
+    If called with the `POST` method, however, the page calculates and displays the
+    corresponding Celsius temperature.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-3\. A self-processing temperature conversion page (temp.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Figure 8-2](#the_temperature_conversion_page_and_its) shows the temperature-conversion
+    page and the resulting output.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The temperature-conversion page and its output](Images/php4_0802.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 8-2\. The temperature-conversion page and its output
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Another way for a script to decide whether to display a form or process it is
+    to see whether or not one of the parameters has been supplied. This lets you write
+    a self-processing page that uses the `GET` method to submit values. [Example 8-4](#example_eight_fourdot_temperature_conve)
+    shows a new version of the temperature-conversion page that submits parameters
+    using a `GET` request. This page uses the presence or absence of parameters to
+    determine what to do.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-4\. Temperature conversion using the GET method (temp2.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: In [Example 8-4](#example_eight_fourdot_temperature_conve), we copy the form
+    parameter value into `$fahrenheit`. If we weren’t given that parameter, `$fahrenheit`
+    contains `NULL`, so we could use `is_null()` to test whether we should display
+    the form or process the form data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sticky Forms
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Many websites use a technique known as *sticky forms*, in which the results
+    of a query are accompanied by a search form whose default values are those of
+    the previous query. For instance, if you search Google for “Programming PHP,”
+    the top of the results page contains another search box, which already contains
+    “Programming PHP.” To refine your search to “Programming PHP from O’Reilly,” you
+    can simply add the extra keywords.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This sticky behavior is easy to implement. [Example 8-5](#example_eight_fivedot_temperature_conve)
+    shows our temperature-conversion script from [Example 8-4](#example_eight_fourdot_temperature_conve),
+    with the form made sticky. The basic technique is to use the submitted form value
+    as the default value when creating the HTML field.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-5\. Temperature conversion with a sticky form (sticky_form.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Multivalued Parameters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'HTML selection lists, created with the `select` tag, can allow multiple selections.
+    To ensure that PHP recognizes the multiple values that the browser passes to a
+    form-processing script, you need to use square brackets, `[]`, after the name
+    of the field in the HTML form. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now, when the user submits the form, `$_GET['languages']` contains an array
+    instead of a simple string. This array contains the values that were selected
+    by the user.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 8-6](#example_eight_sixdot_multiple_selection) illustrates multiple
+    selections of values within an HTML selection list. The form provides the user
+    with a set of personality attributes. When the user submits the form, it returns
+    a (not very interesting) description of the user’s personality.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-6\. Multiple selection values with a select box (select_array.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: In [Example 8-6](#example_eight_sixdot_multiple_selection), the submit button
+    has a name, `"s"`. We check for the presence of this parameter value to see whether
+    we have to produce a personality description. [Figure 8-3](#multiple_selection_page_and_its_output)
+    shows the multiple-selection page and the resulting output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Multiple-selection page and its output](Images/php4_0803.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 8-3\. Multiple-selection page and its output
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The same technique applies for any form field where multiple values can be returned.
+    [Example 8-7](#example_eight_sevendot_multiple_selecti) shows a revised version
+    of our personality form that is rewritten to use checkboxes instead of a select
+    box. Notice that only the HTML has changed—the code to process the form doesn’t
+    need to know whether the multiple values came from checkboxes or a select box.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-7\. Multiple selection values in checkboxes (checkbox_array.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Sticky Multivalued Parameters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'So now you’re probably wondering, *Can I make multiple-selection form elements
+    sticky?* You can, but it isn’t easy. You’ll need to check whether each possible
+    value in the form was one of the submitted values. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: You could use this technique for each checkbox, but that’s repetitive and error-prone.
+    At this point, it’s easier to write a function to generate the HTML for the possible
+    values and work from a copy of the submitted parameters. [Example 8-8](#example_eight_eightdot_sticky_multivalu)
+    shows a new version of the multiple-selection checkboxes, with the form made sticky.
+    Although this form looks just like the one in [Example 8-7](#example_eight_sevendot_multiple_selecti),
+    behind the scenes there are substantial changes to the way the form is generated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-8\. Sticky multivalued checkboxes (checkbox_array2.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The heart of this code is the `makeCheckboxes()` function. It takes three arguments:
+    the name for the group of checkboxes, the array of on-by-default values, and the
+    array that maps values to descriptions. The list of options for the checkboxes
+    is in the `$personalityAttributes` array.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: File Uploads
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To handle file uploads (supported in most modern browsers), use the `$_FILES`
+    array. Using the various authentication and file upload functions, you can control
+    who is allowed to upload files and what to do with those files once they’re on
+    your system. Security concerns to take note of are described in [Chapter 14](ch14.xhtml#security).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following code displays a form that allows file uploads to the same page:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The biggest problem with file uploads is the risk of getting a file that is
+    too large to process. PHP has two ways of preventing this: a hard limit and a
+    soft limit. The `upload_max_filesize` option in *php.ini* gives a hard upper limit
+    on the size of uploaded files (it is set to 2 MB by default). If your form submits
+    a parameter called `MAX_FILE_SIZE` before any file field parameters, PHP uses
+    that value as the soft upper limit. For instance, in the previous example, the
+    upper limit is set to 10 KB. PHP ignores attempts to set `MAX_FILE_SIZE` to a
+    value larger than `upload_max_filesize`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Also, notice that the form tag takes an `enctype` attribute with the value `"multipart/form-data"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Each element in `$_FILES` is itself an array, giving information about the
+    uploaded file. The keys are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`name`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The name of the uploaded file as supplied by the browser. It’s difficult to
+    make meaningful use of this, as the client machine may have different filename
+    conventions than the web server (e.g., a file path of *D:\PHOTOS\ME.JPG* from
+    a client machine running Windows would be meaningless to a web server running
+    Unix).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`type`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The MIME type of the uploaded file as guessed at by the client.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`size`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The size of the uploaded file (in bytes). If the user attempted to upload a
+    file that was too large, the size would be reported as 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`tmp_name`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The name of the temporary file on the server that holds the uploaded file. If
+    the user attempted to upload a file that was too large, the name is given as `"none"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The correct way to test whether a file was successfully uploaded is to use
+    the function `is_uploaded_file()`, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Files are stored in the server’s default temporary files directory, which is
+    specified in *php.ini* with the `upload_tmp_dir` option. To move a file, use the
+    `move_``uploaded``_file()` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: The call to `move_uploaded_file()` automatically checks whether it was an uploaded
+    file. When a script finishes, any files uploaded to that script are deleted from
+    the temporary directory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Form Validation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When you allow users to input data, you typically need to validate that data
+    before using it or storing it for later use. There are several strategies available
+    for validating data. The first is JavaScript on the client side. However, since
+    the user can choose to turn JavaScript off, or may even be using a browser that
+    doesn’t support it, this cannot be the only validation you do.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A more secure choice is to use PHP to do the validation. [Example 8-9](#example_eight_ninedot_form_validation_l)
+    shows a self-processing page with a form. The page allows the user to input a
+    media item; three of the form elements—the name, media type, and filename—are
+    required. If the user neglects to give a value to any of them, the page is presented
+    anew with a message detailing what’s wrong. Any form fields the user already filled
+    out are set to the values originally entered. Finally, as an additional clue to
+    the user, the text of the submit button changes from “Create” to “Continue” when
+    the user is correcting the form.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-9\. Form validation (data_validation.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, the validation is simply a check that a value was supplied. We
+    set `$validated` to be `true` only if `$name`, `$type`, and `$filename` are all
+    nonempty. Other possible validations include checking that an email address is
+    valid or checking that the supplied filename is local and exists.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, to validate an age field to ensure that it contains a non-negative
+    integer, use this code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The call to `strspn()` finds the number of digits at the start of the string.
+    In a non-negative integer, the whole string should be composed of digits, so it’s
+    a valid age if the entire string is made of digits. We could also have done this
+    check with a regular expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Validating email addresses is a nigh-impossible task. There’s no way to take
+    a string and see whether it corresponds to a valid email address. However, you
+    can catch typos by requiring the user to enter the email address twice (into two
+    different fields). You can also prevent people from entering email addresses like
+    *me* or *me@aol* by requiring an at sign (@) and a period somewhere after it,
+    and for bonus points you can check for domains to which you don’t want to send
+    mail (e.g., *[whitehouse.gov](http://whitehouse.gov)*, or a competitor site).
+    For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Field validation is basically string manipulation. In this example, we’ve used
+    regular expressions and string functions to ensure that the string provided by
+    the user is the type of string we expect.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Setting Response Headers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As we’ve already discussed, the HTTP response that a server sends back to a
+    client contains headers that identify the type of content in the body of the response,
+    the server that sent the response, how many bytes are in the body, when the response
+    was sent, and so on. PHP and Apache normally take care of the headers for you
+    (identifying the document as HTML, calculating the length of the HTML page, etc.).
+    Most web applications never need to set headers themselves. However, if you want
+    to send back something that’s not HTML, set the expiration time for a page, redirect
+    the client’s browser, or generate a specific HTTP error, you’ll need to use the
+    `header()` function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The only catch to setting headers is that you must do so before any of the
+    body is generated. This means that all calls to `header()` (or `setcookie()`,
+    if you’re setting cookies) must happen at the very top of your file, even before
+    the `<html>` tag. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Attempting to set headers after the document has started results in this warning:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can instead use an output buffer; see `ob_start()`, `ob_end_flush()`, and
+    related functions for more information on using output buffers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Different Content Types
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `Content-Type` header identifies the type of document being returned. Ordinarily
+    this is `"text/html"`, indicating an HTML document, but there are other useful
+    document types. For example, `"text/plain"` forces the browser to treat the page
+    as plain text. This type is like an automatic “view source,” and it is useful
+    when debugging.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In [Chapter 10](ch10.xhtml#graphic) and [Chapter 11](ch11.xhtml#pdf), we’ll
+    make heavy use of the `Content-Type` header as we generate documents that are
+    actually graphic images and Adobe PDF files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Redirections
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To send the browser to a new URL, known as a *redirection*, you set the `Location`
+    header. Generally, you’ll also exit immediately afterward, so the script doesn’t
+    bother generating and outputting the remainder of the code listing:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: When you provide a partial URL (e.g., `/elsewhere.html`), the web server handles
+    this redirection internally. This is only rarely useful, as the browser generally
+    won’t learn that it isn’t getting the page it requested. If there are relative
+    URLs in the new document, the browser interprets those URLs as being relative
+    to the requested document, rather than to the document that was ultimately sent.
+    In general, you’ll want to redirect to an absolute URL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Expiration
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A server can explicitly inform the browser, and any proxy caches that might
+    be between the server and browser, of a specific date and time for the document
+    to expire. Proxy and browser caches can hold the document until that time or expire
+    it earlier. Repeated reloads of a cached document do not contact the server. However,
+    an attempt to fetch an expired document does contact the server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To set the expiration time of a document, use the `Expires` header:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To force a document to expire three hours from the time the page was generated,
+    use `time()` and `gmstrftime()` to generate the expiration date string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To indicate that a document “never” expires, use the time a year from now:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To mark a document as expired, use the current time or a time in the past:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is the best way to prevent a browser or proxy cache from storing your
+    document:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: For more information on controlling the behavior of browser and web caches,
+    see Chapter 6 of [*Web Caching*](http://bit.ly/Web_Caching) (O’Reilly) by Duane
+    Wessels .
+  prefs: []
+  type: TYPE_NORMAL
+- en: Authentication
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: HTTP authentication works through request headers and response statuses. A browser
+    can send a username and password (the *credentials*) in the request headers. If
+    the credentials aren’t sent or aren’t satisfactory, the server sends a “401 Unauthorized”
+    response and identifies the *realm* of authentication (a string such as `"Mary's`
+    `Pictures"` or `"Your Shopping Cart"`) via the `WWW-Authenticate` header. This
+    typically pops up an “Enter username and password for . . .” dialog box on the
+    browser, and the page is then re-requested with the updated credentials in the
+    header.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To handle authentication in PHP, check the username and password (the `PHP_AUTH_USER`
+    and `PHP_AUTH_PW` items of `$_SERVER`) and call `header()` to set the realm and
+    send a “401 Unauthorized” response:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can do anything you want to authenticate the username and password; for
+    example, you could consult a database, read a file of valid users, or consult
+    a Microsoft domain server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This example checks to make sure that the password is the username reversed
+    (not the most secure authentication method, to be sure!):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you’re protecting more than one page, put the preceding code into a separate
+    file and include it at the top of every protected page.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If your host is using the CGI version of PHP rather than an Apache module, these
+    variables cannot be set and you’ll need to use some other form of authentication—for
+    example, by gathering the username and password through an HTML form.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Maintaining State
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: HTTP is a *stateless* protocol, which means that once a web server completes
+    a client’s request for a web page, the connection between the two goes away. In
+    other words, there is no way for a server to recognize that a sequence of requests
+    all originate from the same client.
+  prefs: []
+  type: TYPE_NORMAL
+- en: State is useful, though. You can’t build a shopping-cart application, for example,
+    if you can’t keep track of a sequence of requests from a single user. You need
+    to know when a user adds items to the cart or removes them, and what’s in the
+    cart when the user decides to check out.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To get around the web’s lack of state, programmers have come up with many tricks
+    to track state information between requests (also known as *session tracking*).
+    One such technique is to use hidden form fields to pass around information. PHP
+    treats hidden form fields just like normal form fields, so the values are available
+    in the `$_GET` and `$_POST` arrays. Using hidden form fields, you can pass around
+    the entire contents of a shopping cart. However, it’s more common to assign each
+    user a unique identifier and pass the ID around using a single hidden form field.
+    While hidden form fields work in all browsers, they work only for a sequence of
+    dynamically generated forms, so they aren’t as generally useful as some other
+    techniques.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Another technique is URL rewriting, where every local URL on which the user
+    might click is dynamically modified to include extra information. This extra information
+    is often specified as a parameter in the URL. For example, if you assign every
+    user a unique ID, you might include that ID in all URLs, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you make sure to dynamically modify all local links to include a user ID,
+    you can now keep track of individual users in your application. URL rewriting
+    works for all dynamically generated documents, not just forms, but actually performing
+    the rewriting can be tedious.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The third and most widespread technique for maintaining state is to use cookies.
+    A *cookie* is a bit of information that the server can give to a client. On every
+    subsequent request the client will give that information back to the server, thus
+    identifying itself. Cookies are useful for retaining information through repeated
+    visits by a browser, but they’re not without their own problems. The main issue
+    is that most browsers allow users to disable cookies. So any application that
+    uses cookies for state maintenance needs to use another technique as a fallback
+    mechanism. We’ll discuss cookies in more detail shortly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The best way to maintain state with PHP is to use the built-in session-tracking
+    system. This system lets you create persistent variables that are accessible from
+    different pages of your application, as well as in different visits to the site
+    by the same user. Behind the scenes, PHP’s session-tracking mechanism uses cookies
+    (or URLs) to elegantly solve most problems that require state, taking care of
+    all the details for you. We’ll cover PHP’s session-tracking system in detail later
+    in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cookies
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A cookie is basically a string that contains several fields. A server can send
+    one or more cookies to a browser in the headers of a response. Some of the cookie’s
+    fields indicate the pages for which the browser should send the cookie as part
+    of the request. The `value` field of the cookie is the payload—servers can store
+    any data they like there (within limits), such as a unique code identifying the
+    user, preferences, and the like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Use the `setcookie()` function to send a cookie to the browser:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This function creates the cookie string from the given arguments and creates
+    a `Cookie` header with that string as its value. Because cookies are sent as headers
+    in the response, `setcookie()` must be called before any of the body of the document
+    is sent. The parameters of `setcookie()` are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*name*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A unique name for a particular cookie. You can have multiple cookies with different
+    names and attributes. The name must not contain whitespace or semicolons.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*value*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The arbitrary string value attached to this cookie. The original Netscape specification
+    limited the total size of a cookie (including name, expiration date, and other
+    information) to 4 KB, so while there’s no specific limit on the size of a cookie
+    value, it probably can’t be much larger than 3.5 KB.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*expires*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The expiration date for this cookie. If no expiration date is specified, the
+    browser saves the cookie in memory and not on disk. When the browser exits, the
+    cookie disappears. The expiration date is specified as the number of seconds since
+    midnight, January 1, 1970 (GMT). For example, pass `time() + 60 * 60 * 2` to expire
+    the cookie in two hours’ time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*path*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The browser will return the cookie only for URLs below this path. The default
+    is the directory in which the current page resides. For example, if */store/front/cart.php*
+    sets a cookie and doesn’t specify a path, the cookie will be sent back to the
+    server for all pages whose URL path starts with */store/front/*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*domain*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The browser will return the cookie only for URLs within this domain. The default
+    is the server hostname.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*secure*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The browser will transmit the cookie only over *https* connections. The default
+    is `false`, meaning that it’s OK to send the cookie over insecure connections.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*httponly*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If this parameter is set to `TRUE`, the cookie will be available only via the
+    HTTP protocol, and thus inaccessible via other means like JavaScript. Whether
+    this allows for a more secure cookie is still up for debate, so use this parameter
+    cautiously and test well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `setcookie()` function also has an alternate syntax:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: where `$options` is an array that holds the other parameters following the `$value`
+    content. This saves a little on the code line length for the `setcookie()` function,
+    but the `$options` array will have to be built prior to its use, so there is a
+    trade-off of sorts in play.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When a browser sends a cookie back to the server, you can access that cookie
+    through the `$_COOKIE` array. The key is the cookie name, and the value is the
+    cookie’s `value` field. For instance, the following code at the top of a page
+    keeps track of the number of times the page has been accessed by this client:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: When cookies are decoded, any periods (`.`) in a cookie’s name are turned into
+    underscores. For instance, a cookie named `tip.top` is accessible as `$_COOKIE['tip_top']`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s take a look at cookies in action. First, [Example 8-10](#example_eight_onezerodot_preference_sel)
+    shows an HTML page that gives a range of options for background and foreground
+    colors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-10\. Preference selection (colors.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: The form in [Example 8-10](#example_eight_onezerodot_preference_sel) submits
+    to the PHP script *prefs.php*, which is shown in [Example 8-11](#example_eight_oneonedot_setting_prefere).
+    This script then sets cookies for the color preferences specified in the form.
+    Note that the calls to `setcookie()` are made after the HTML page is started.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-11\. Setting preferences with cookies (prefs.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: The page created by [Example 8-11](#example_eight_oneonedot_setting_prefere)
+    contains a link to another page, shown in [Example 8-12](#example_eight_onetwodot_using_the_color),
+    that uses the color preferences by accessing the `$_COOKIE` array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-12\. Using the color preferences with cookies (prefs_demo.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: There are plenty of caveats about the use of cookies. Not all clients (browsers)
+    support or accept cookies, and even if the client does support cookies, the user
+    can turn them off. Furthermore, the cookie specification says that no cookie can
+    exceed 4 KB in size, only 20 cookies are allowed per domain, and a total of 300
+    cookies can be stored on the client side. Some browsers may have higher limits,
+    but you can’t rely on that. Finally, you have no control over when browsers actually
+    expire cookies—if a browser is at capacity and needs to add a new cookie, it may
+    discard a cookie that has not yet expired. You should also be careful of setting
+    cookies to expire quickly. Expiration times rely on the client’s clock being as
+    accurate as yours. Many people do not have their system clocks set accurately,
+    so you can’t rely on rapid expirations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Despite these limitations, cookies are very useful for retaining information
+    through repeated visits by a browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sessions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP has built-in support for sessions, handling all the cookie manipulation
+    for you to provide persistent variables that are accessible from different pages
+    and across multiple visits to the site. Sessions allow you to easily create multipage
+    forms (such as shopping carts), save user authentication information from page
+    to page, and store persistent user preferences on a site.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each first-time visitor is issued a unique session ID. By default, the session
+    ID is stored in a cookie called `PHPSESSID`. If the user’s browser does not support
+    cookies or has cookies turned off, the session ID is propagated in URLs within
+    the website.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every session has a data store associated with it. You can *register* variables
+    to be loaded from the data store when each page starts and saved back to the data
+    store when the page ends. Registered variables persist between pages, and changes
+    to variables made on one page are visible from others. For example, an “add this
+    to your shopping cart” link can take the user to a page that adds an item to a
+    registered array of items in the cart. This registered array can then be used
+    on another page to display the contents of the cart.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Session basics
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Sessions start automatically when a script begins running. A new session ID
+    is generated if necessary, possibly creating a cookie to be sent to the browser,
+    and loads any persistent variables from the store.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can register a variable with the session by passing the name of the variable
+    to the `$_SESSION[]` array. For example, here is a basic hit counter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `session_start()` function loads registered variables into the associative
+    array `$_SESSION`. The keys are the variables’ names (e.g., `$_SESSION['hits']`).
+    If you’re curious, the `session_id()` function returns the current session ID.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To end a session, call `session_destroy()`. This removes the data store for
+    the current session, but it doesn’t remove the cookie from the browser cache.
+    This means that, on subsequent visits to sessions-enabled pages, the user will
+    have the same session ID as before the call to `session_destroy()`, but none of
+    the data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 8-13](#example_eight_onethreedot_setting_prefe) shows the code from
+    [Example 8-11](#example_eight_oneonedot_setting_prefere) rewritten to use sessions
+    instead of manually setting cookies.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-13\. Setting preferences with sessions (prefs_session.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 8-14](#example_eight_onefourdot_using_preferen) shows [Example 8-12](#example_eight_onetwodot_using_the_color)
+    rewritten to use sessions. Once the session is started, the `$bg` and `$fg` variables
+    are created, and all the script has to do is use them.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-14\. Using preferences from sessions (prefs_session_demo.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: To see this change, simply update the action destination in the *colors.php*
+    file. By default, PHP session ID cookies expire when the browser closes. That
+    is, sessions don’t persist after the browser ceases to exist. To change this,
+    you’ll need to set the `session.cookie_lifetime` option in *php.ini* to the lifetime
+    of the cookie in seconds.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Alternatives to cookies
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'By default, the session ID is passed from page to page in the `PHPSESSID` cookie.
+    However, PHP’s session system supports two alternatives: form fields and URLs.
+    Passing the session ID via hidden form fields is extremely awkward, as it forces
+    you to make every link between pages to be a form’s submit button. We will not
+    discuss this method further here.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The URL system for passing around the session ID, however, is somewhat more
+    elegant. PHP can rewrite your HTML files, adding the session ID to every relative
+    link. For this to work, though, PHP must be configured with the `-enable-trans-id`
+    option when compiled. There is a performance penalty for this, as PHP must parse
+    and rewrite every page. Busy sites may wish to stick with cookies, as they do
+    not incur the slowdown caused by page rewriting. In addition, this exposes your
+    session IDs, potentially allowing for man-in-the-middle attacks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Custom storage
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: By default, PHP stores session information in files in your server’s temporary
+    directory. Each session’s variables are stored in a separate file. Every variable
+    is serialized into the file in a proprietary format. You can change all of these
+    values in the *php.ini* file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can change the location of the session files by setting the `session.save_path`
+    value in *php.ini*. If you are on a shared server with your own installation of
+    PHP, set the directory to somewhere in your own directory tree, so other users
+    on the same machine cannot access your session files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP can store session information in one of two formats in the current session
+    store—either PHP’s built-in format or Web Distributed Data eXchange (WDDX). You
+    can change the format by setting the `session.serialize_handler` value in your
+    *php.ini* file to either `php` for the default behavior, or `wddx` for WDDX format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Combining Cookies and Sessions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Using a combination of cookies and your own session handler, you can preserve
+    state across visits. Any state that should be forgotten when a user leaves the
+    site, such as which page the user is on, can be left up to PHP’s built-in sessions.
+    Any state that should persist between user visits, such as a unique user ID, can
+    be stored in a cookie. With the user ID, you can retrieve the user’s more permanent
+    state (display preferences, mailing address, etc.) from a permanent store, such
+    as a database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 8-15](#example_eight_onefivedot_saving_state_a) allows the user to
+    select text and background colors and stores those values in a cookie. Any visits
+    to the page within the next week send the color values in the cookie.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-15\. Saving state across visits (save_state.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: SSL
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The Secure Sockets Layer (SSL) provides a secure channel over which regular
+    HTTP requests and responses can flow. PHP doesn’t specifically concern itself
+    with SSL, so you cannot control the encryption in any way from PHP. An *https://*
+    URL indicates a secure connection for that document, unlike an *http://* URL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `HTTPS` entry in the `$_SERVER` array is set to `''on''` if the PHP page
+    was generated in response to a request over an SSL connection. To prevent a page
+    from being generated over a nonencrypted connection, simply use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: A common mistake is to send a form over a secure connection (e.g., *https://www.example.com/form.html*),
+    but have the `action` of the `form` submit to an *http://* URL. Any form parameters
+    then entered by the user are sent over an insecure connection, and a trivial packet
+    sniffer can reveal them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What’s Next
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There are many tips, tricks, and gotchas in modern web development, and we hope
+    that the ones this chapter has pointed out will be helpful as you build great
+    sites. Coming in the next chapter is a discussion on saving data to data stores
+    within PHP. We will cover most of the more commonly used approaches, like databases,
+    SQL and NoSQL style, SQLite, and direct file information storage.
+  prefs: []
+  type: TYPE_NORMAL

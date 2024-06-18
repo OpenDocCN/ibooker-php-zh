@@ -1,0 +1,1276 @@
+- en: Chapter 11\. Accessing MySQL Using PHP
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you worked through the previous chapters, you’re proficient in using both
+    MySQL and PHP. In this chapter, you will learn how to integrate the two by using
+    PHP’s built-in functions to access MySQL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Querying a MySQL Database with PHP
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The reason for using PHP as an interface to MySQL is to format the results of
+    SQL queries in a form visible in a web page. As long as you can log in to your
+    MySQL installation using your username and password, you can also do so from PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, instead of using MySQL’s command line to enter instructions and view
+    output, you will create query strings that are passed to MySQL. When MySQL returns
+    its response, it will come as a data structure that PHP can recognize instead
+    of the formatted output you see when you work on the command line. Further PHP
+    commands can retrieve the data and format it for the web page.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Process
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The process of using MySQL with PHP is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Connect to MySQL and select the database to use.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Prepare a query string.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Perform the query.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Retrieve the results and output them to a web page.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Repeat steps 2 to 4 until all desired data has been retrieved.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Disconnect from MySQL.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: We’ll work through these steps in turn, but first it’s important to set up your
+    login details in a secure manner so people snooping around on your system have
+    trouble getting access to your database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a Login File
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Most websites developed with PHP contain multiple program files that will require
+    access to MySQL and will thus need the login and password details. Therefore,
+    it’s sensible to create a single file to store these and then include that file
+    wherever it’s needed. [Example 11-1](#logindotphp_file) shows such a file, which
+    I’ve called *login.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-1\. The login.php file
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Type the example, replacing the username *`root`* and password of *`mysql`*
+    with the values you use for your MySQL database (and the host and database name
+    too, if necessary), and save it to the document root directory you set up in [Chapter 2](ch02.xhtml#setting_up_a_development_server).
+    We’ll be making use of the file shortly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The hostname `localhost` should work as long as you’re using a MySQL database
+    on your local system, and the database `publications` should work if you’re typing
+    the examples I’ve used so far.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The enclosing `<?php` and `?>` tags are especially important for the *login.php*
+    file in [Example 11-1](#logindotphp_file), because they mean that the lines between
+    can be interpreted *only* as PHP code. If you were to leave them out and someone
+    were to call up the file directly from your website, it would display as text
+    and reveal your secrets. But, with the tags in place, all that person will see
+    is a blank page. The file will correctly include your other PHP files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: In previous versions of the book we have used direct access to MySQL, which
+    was not at all secure, and later on switched to using *mysqli*, which was much
+    more secure. But, as they say, time marches on, and now there’s the most secure
+    and easiest way yet to access a MySQL database from PHP, and that’s called PDO,
+    which we now use by default in this edition of the book as a lightweight and consistent
+    interface for accessing databases in PHP. PDO stands for PHP Data Objects and
+    is a data access layer that uses a unified API. Each database driver that implements
+    the PDO interface can expose database-specific features as regular extension functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `$host` variable will tell PHP which computer to use when connecting to
+    a database. This is required because you can access MySQL databases on any computer
+    connected to your PHP installation, and that potentially includes any host anywhere
+    on the web. However, the examples in this chapter will be working on the local
+    server. So, in place of specifying a domain such as `mysql.myserver.com`, you
+    can just use the word `localhost` (or the IP address `127.0.0.1`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The database we’ll be using, `$data`, is the one called *publications* that
+    we created in [Chapter 8](ch08.xhtml#introduction_to_mysql) (if you’re using a
+    different database—one provided by your server administrator—you’ll have to modify
+    *login.php* accordingly).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$chrs` stands for character set, and in this case we are using `utf8mb4`,
+    while `$attr` and `$opts` contain additional options needed to access the database.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Another benefit of keeping these login details in a single place is that you
+    can change your password as frequently as you like and there will be only one
+    file to update when you do, no matter how many PHP files access MySQL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Connecting to a MySQL Database
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that you have saved the *login.php* file, you can include it in any PHP
+    files that will need to access the database by using the `require_once` statement.
+    This is preferable to an `include` statement, as it will generate a fatal error
+    if the file is not found—and believe me, not finding the file containing the login
+    details to your database *is* a fatal error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Also, using `require_once` instead of `require` means that the file will be
+    read in only when it has not previously been included, which prevents wasteful
+    duplicate disk accesses. [Example 11-2](#connecting-to-a-mysql-server-using-pdo) shows
+    the code to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-2\. Connecting to a MySQL server using PDO
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: This example creates a new object called `$pdo` by calling a new instance of
+    the `PDO` method, passing all the values retrieved from the *login.php* file. We
+    achieve error checking by using the `try...catch` pair of commands.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `PDO` object is used in the following examples to access the MySQL database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: You should also never be tempted to output the contents of any error message
+    received from MySQL. Rather than helping your users, you could give away sensitive
+    information to hackers, such as login details. Instead, just guide the user with
+    information on how to overcome their difficulty based on what the error message
+    reports to your code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building and executing a query
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Sending a query to MySQL from PHP is as simple as including the relevant SQL
+    in the `query` method of a connection object. [Example 11-3](#querying-a-database-with-pdo) shows
+    you how to do this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-3\. Querying a database with PDO
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, the MySQL query looks just like what you would type directly
+    at the command line, except that there is no trailing semicolon, as none is needed
+    when you are accessing MySQL from PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Here the variable `$query` is assigned a string containing the query to be made
+    and then passed to the `query` method of the `$pdo` object, which returns a result
+    that we place in the object `$result`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All the data returned by MySQL is now stored in an easily interrogable format
+    in the `$result` object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fetching a result
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Once you have an object returned in `$result`, you can use it to extract the
+    data you want, one item at a time, using the `fetch` method of the object. [Example 11-4](#fetching_results_one_row_at_a_time) combines
+    and extends the previous examples into a program that you can run yourself to
+    retrieve the results (as depicted in [Figure 11-1](#output_from_querydotphp)).
+    Type this script in and save it using the filename *query.php*, or download it
+    from the [example repository](https://github.com/RobinNixon/lpmj6).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-4\. Fetching results one row at a time
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![The output from the query-mysqli.php program in Example 10-5](Images/pmj6_1101.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-1\. The output from query.php
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Here, each time around the loop, we call the `fetch` method of the `$pdo` object
+    to retrieve the value stored in each row, and output the result using `echo` statements.
+    Don’t worry if you see the results in a different order. This is because we have
+    not used an `ORDER BY` command to specify the order in which they should be returned,
+    so the order will be unspecified.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When displaying data in a browser whose source was (or may have been) user input,
+    there’s always a risk of sneaky HTML characters being embedded within it—even
+    if you believe it to have been previously sanitized—which could potentially be
+    used for a cross-site scripting (XSS) attack. The simple way to prevent this possibility
+    is to embed all such output within a call to the function `htmlspecialchars`,
+    which replaces all such characters with harmless HTML entities. This technique
+    was implemented in the preceding example and will be used in many of the following
+    examples.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In [Chapter 9](ch09.xhtml#mastering_mysql), I talked about First, Second, and
+    Third Normal Form. You may have noticed that the *classics* table doesn’t satisfy
+    these, because both author and book details are included within the same table.
+    That’s because we created this table before encountering normalization. However,
+    for the purposes of illustrating access to MySQL from PHP, reusing this table
+    prevents the hassle of typing in a new set of test data, so we’ll stick with it
+    for the time being.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Fetching a row while specifying the style
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `fetch` method can return data in various styles, including the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PDO::FETCH_ASSOC`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns the next row as an array indexed by column name
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PDO::FETCH_BOTH` (default)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns the next row as an array indexed by both column name and number
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PDO::FETCH_LAZY`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns the next row as an anonymous object with names as properties
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PDO::FETCH_OBJ`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns the next row as an anonymous object with column name as properties
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PDO::FETCH_NUM`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns an array indexed by column number
+  prefs: []
+  type: TYPE_NORMAL
+- en: For the full list of PDO fetch styles, please refer to the [online reference](https://tinyurl.com/pdofetch).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Therefore, the following (slightly changed) example (shown in [Example 11-5](#using-fetch-both)) shows
+    more clearly the intention of the `fetch` method in this case. You may wish to
+    save this revised file using the name *fetchrow.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-5\. Fetching results one row at a time
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this modified code, only one-fifth of the interrogations of the `$result`
+    object are made (compared to the previous example), and only one seek into the
+    object is made in each iteration of the loop, because each row is fetched in its
+    entirety via the `fetch` method. This returns a single row of data as an array,
+    which is then assigned to the array `$row`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This script uses an associative array. Associative arrays are usually more useful
+    than numeric ones because you can refer to each column by name, such as `$row['author']`,
+    instead of trying to remember where it is in the column order.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Closing a connection
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'PHP will eventually return the memory it has allocated for objects after you
+    have finished with the script, so in small scripts, you don’t usually need to
+    worry about releasing memory yourself. However, should you wish to close a PDO
+    connection manually, you simply set it to `null` like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: A Practical Example
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: It’s time to write our first example of inserting data in and deleting it from
+    a MySQL table using PHP. I recommend that you type [Example 11-6](#inserting_and_deleting_using_sqltestdotp)
+    and save it to your web development directory using the filename *sqltest.php*.
+    You can see an example of the program’s output in [Figure 11-2](#output_from_example_10-8comma_sqltes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: '[Example 11-6](#inserting_and_deleting_using_sqltestdotp) creates a standard
+    HTML form. [Chapter 12](ch12.xhtml#form_handling) explains forms in detail, but
+    in this chapter I take form handling for granted and just deal with database interaction.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-6\. Inserting and deleting using sqltest.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![The output from Example 10-8, sqltest.php](Images/pmj6_1102.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-2\. The output from [Example 11-6](#inserting_and_deleting_using_sqltestdotp),
+    sqltest.php
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: At almost 80 lines of code, this program may appear daunting, but don’t worry—you’ve
+    already covered many of those lines in [Example 11-4](#fetching_results_one_row_at_a_time),
+    and what the code does is actually quite simple.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It first checks for any inputs that may have been made and then either inserts
+    new data into the table *classics* of the *publications* database or deletes a
+    row from it, according to the input supplied. Regardless of whether there was
+    input, the program then outputs all rows in the table to the browser. So, let’s
+    see how it works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The first section of new code starts by using the `isset` function to check
+    whether values for all the fields have been posted to the program. Upon confirmation,
+    each line within the `if` statement calls the function `get_post`, which appears
+    at the end of the program. This function has one small but critical job: fetching
+    input from the browser.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: For reasons of clarity and brevity, and to explain things as simply as possible,
+    many of the following examples omit certain very sensible security precautions
+    that would have made them longer and possibly detract from explaining their function
+    in the clearest manner. Therefore, it is important that you don’t skip past the
+    section later in this chapter on preventing your database from being hacked ([“Preventing
+    Hacking Attempts”](#preventing_hacking_attempts)), in which you will learn about
+    additional actions you can take with your code to secure it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The $_POST Array
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: I mentioned in an earlier chapter that a browser sends user input through either
+    a GET request or a POST request. The POST request is usually preferred (because
+    it prevents placing unsightly data in the browser’s address bar), and so we use
+    it here. The web server bundles up all of the user input (even if the form was
+    filled out with a hundred fields) and puts it into an array named `$_POST`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$_POST` is an associative array, which you encountered in [Chapter 6](ch06.xhtml#php_arrays).
+    Depending on whether a form has been set to use the POST or the GET method, either
+    the `$_POST` or the `$_GET` associative array will be populated with the form
+    data. They can both be read in exactly the same way.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each field has an element in the array named after that field. So, if a form
+    contains a field named `isbn`, the `$_POST` array contains an element keyed by
+    the word `isbn`. The PHP program can read that field by referring to either `$_POST['isbn']`
+    or `$_POST["isbn"]` (single and double quotes have the same effect in this case).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If the `$_POST` syntax still seems complex to you, rest assured that you can
+    just use the convention I’ve shown in [Example 11-6](#inserting_and_deleting_using_sqltestdotp),
+    copy the user’s input to other variables, and forget about `$_POST` after that.
+    This is normal in PHP programs: they retrieve all the fields from `$_POST` at
+    the beginning of the program and then ignore it.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: There is no reason to write to an element in the `$_POST` array. Its only purpose
+    is to communicate information from the browser to the program, and you’re better
+    off copying data to your own variables before altering it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So, back to the `get_post` function, which passes each item it retrieves through
+    the `quote` method of the PDO object to escape any quotes that a hacker may have
+    inserted in order to break into or alter your database, like this, and it adds
+    quotes around each string for you:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Deleting a Record
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Prior to checking whether new data has been posted, the program checks whether
+    the variable `$_POST['delete']` has a value. If so, the user has clicked the DELETE
+    RECORD button to erase a record. In this case, the value of `$isbn` will also
+    have been posted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you’ll recall, the ISBN uniquely identifies each record. The HTML form appends
+    the ISBN to the `DELETE FROM` query string created in the variable `$query`, which
+    is then passed to the `query` method of the `$conn` object to issue it to MySQL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If `$_POST['delete']` is not set (and there is no record to be deleted), `$_POST['author']`
+    and other posted values are checked. If they have all been given values, `$query`
+    is set to an `INSERT INTO` command, followed by the five values to be inserted.
+    The string is then passed to the `query` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If any query fails, the `try...catch` commands will cause an error to be issued.
+    On a production website, you will not want these very programmer-oriented error
+    messages to show, and you will need to replace your `CATCH` statement with one
+    in which you handle the error yourself neatly and decide what sort of error message
+    (if any) to give to your users.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Displaying the Form
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Before displaying the little form (as shown in [Figure 11-2](#output_from_example_10-8comma_sqltes)),
+    the program sanitizes copies of the elements we will be outputting from the `$row`
+    array into the variables `$r0` through `$r4` by passing them to the `htmlspecialchars`
+    function, to replace any potentially dangerous HTML characters with harmless HTML
+    entities.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Then the part of code that displays the output follows, using an `echo <<<_END..._END`
+    structure as seen in previous chapters, which outputs everything between the `_END`
+    tags.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'Instead of using the `echo` command, the program could drop out of PHP using
+    `?>`, issue the HTML, and then reenter PHP processing with `<?php`. Which style
+    is used is a matter of programmer preference, but I always recommend staying within
+    PHP code, for these reasons:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It makes it very clear when you’re debugging (and also for other users) that
+    everything within a *.php* file is PHP code. Therefore, there is no need to go
+    hunting for dropouts to HTML.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: When you wish to include a PHP variable directly within HTML, you can just type
+    it. If you had dropped back to HTML, you would have had to temporarily reenter
+    PHP processing, access the variable, and then drop back out again.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The HTML form section simply sets the form’s action to *sqltest.php*. This means
+    that when the form is submitted, the contents of the form fields will be sent
+    to the file *sqltest.php*, which is the program itself. The form is also set up
+    to send the fields as a POST rather than a GET request. This is because GET requests
+    are appended to the URL being submitted and can look messy in your browser. They
+    also allow users to easily modify submissions and try to hack your server (although
+    that can also be achieved with in-browser developer tools). Additionally, avoiding
+    GET requests prevents too much information appearing in server logfiles. Therefore,
+    whenever possible, you should use POST submissions, which also have the benefit
+    of revealing less posted data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Having output the form fields, the HTML displays a submit button with the name
+    ADD RECORD and closes the form. Note the `<pre>` and `</pre>` tags here, which
+    have been used to force a monospaced font that lines up all the inputs neatly.
+    The carriage returns at the end of each line are also output when inside `<pre>`
+    tags.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Querying the Database
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Next, the code returns to the familiar territory of [Example 11-4](#fetching_results_one_row_at_a_time),
+    where a query is sent to MySQL asking to see all the records in the *classics*
+    table, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next a `while` loop is then entered to display the contents of each row. Then
+    the program populates the array `$row` with a row of results by calling the `fetch` method
+    of `$result`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the data in `$row`, it’s now a simple matter to display it within the heredoc
+    `echo` statement that follows, in which I have chosen to use a `<pre>` tag to
+    line up the display of each record in a pleasing manner.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'After the display of each record, there is a second form that also posts to
+    *sqltest.php* (the program itself) but this time contains two hidden fields: `delete`
+    and `isbn`. The `delete` field is set to `yes` and `isbn` to the value held in
+    `$row[isbn]`, which contains the ISBN for the record.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Then a submit button with the name Delete Record is displayed, and the form
+    is closed. A curly brace then completes the `while` loop, which will continue
+    until all records have been displayed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, you see the definition for the function `get_post`, which we’ve already
+    looked at. And that’s it—our first PHP program to manipulate a MySQL database.
+    So, let’s check out what it can do.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once you have typed the program (and corrected any typing errors), try entering
+    the following data into the various input fields to add a new record for the book
+    *Moby Dick* to the database:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Running the Program
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When you have submitted this data using the Add Record button, scroll down the
+    web page to see the new addition. It should look something like [Figure 11-3](#result_of_adding_moby_dick_to_the_da),
+    although since we have not ordered the results using `ORDER BY` , the position
+    in which it appears is undetermined.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The result of adding Moby Dick to the database](Images/pmj6_1103.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-3\. The result of adding Moby Dick to the database
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Now let’s look at how deleting a record works by creating a dummy record. Try
+    entering just the number `1` in each of the five fields and clicking the Add Record
+    button. If you now scroll down, you’ll see a new record consisting just of 1s.
+    Obviously, this record isn’t useful in this table, so now click the Delete Record
+    button and scroll down again to confirm that the record has been deleted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Assuming that everything worked, you are now able to add and delete records
+    at will. Try doing this a few times, but leave the main records in place (including
+    the new one for *Moby Dick*), as we’ll be using them later. You could also try
+    adding the record with all 1s again a couple of times and note the error message
+    that you receive the second time, indicating that there is already an ISBN with
+    the number 1.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Practical MySQL
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You are now ready to look at some practical techniques that you can use in PHP
+    to access the MySQL database, including tasks such as creating and dropping tables;
+    inserting, updating, and deleting data; and protecting your database and website
+    from malicious users. Note that the following examples assume that you’ve already
+    created the *login.php* program discussed earlier in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a Table
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s assume that you are working for a wildlife park and need to create a database
+    to hold details about all the types of cats it houses. You are told that there
+    are nine *families* of cats—Lion, Tiger, Jaguar, Leopard, Cougar, Cheetah, Lynx,
+    Caracal, and Domestic—so you’ll need a column for that. Then each cat has been
+    given a *name*, so that’s another column, and you also want to keep track of their
+    *ages*, which is another. Of course, you will probably need more columns later,
+    perhaps to hold dietary requirements, inoculations, and other details, but for
+    now that’s enough to get going. A unique identifier is also needed for each animal,
+    so you also decide to create a column for that called *id*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 11-7](#creating_a_table_called_cats) shows the code you might use
+    to create a MySQL table to hold this data, with the main query assignment in bold
+    text.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-7\. Creating a table called cats
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, the MySQL query looks just like what you would type directly
+    at the command line, except without the trailing semicolon.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Describing a Table
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When you aren’t logged in to the MySQL command line, here’s a handy piece of
+    code that you can use to verify that a table has been correctly created from inside
+    a browser. It simply issues the query `DESCRIBE cats` and then outputs an HTML
+    table with four headings—*Column*, *Type*, *Null*, and *Key*—underneath which
+    all columns within the table are shown. To use it with other tables, simply replace
+    the name `cats` in the query with that of the new table (see [Example 11-8](#describing_the_table_cats)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-8\. Describing the cats table
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'See how the PDO fetch style of `FETCH_NUM` is used to return a numeric array
+    so that it is easy to display the contents of the returned data without using
+    names. The output from the program should look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Dropping a Table
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Dropping a table is very easy to do and is therefore very dangerous, so be careful.
+    [Example 11-9](#dropping_the_table_cats) shows the code that you need. However,
+    I don’t recommend that you try it until you have been through the other examples
+    (up to [“Performing Additional Queries”](#performing_additional_queries)), as
+    it will drop the table *cats* and you’ll have to re-create it using [Example 11-7](#creating_a_table_called_cats).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-9\. Dropping the cats table
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Adding Data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s add some data to the table now, using the code in [Example 11-10](#adding_data_to_table_cats).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-10\. Adding data to the cats table
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You may wish to add a couple more items of data by modifying `$query` as follows
+    and calling up the program in your browser again:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: By the way, notice the `NULL` value passed as the first parameter? This is because
+    the *id* column is of type `AUTO_INCREMENT`, and MySQL will decide what value
+    to assign according to the next available number in sequence. So, we simply pass
+    a `NULL` value, which will be ignored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Of course, the most efficient way to populate MySQL with data is to create an
+    array and insert the data with a single query.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: At this point in the book, I am concentrating on showing you how to directly
+    insert data into MySQL (and providing some security precautions to keep the process
+    safe). However, later in this book we’ll move on to a better method you can employ
+    that involves placeholders (see [“Using Placeholders”](#using_placeholders)),
+    which make it virtually impossible for users to inject malicious hacks into your
+    database. So, as you read this section, do understand that these are the basics
+    of how MySQL insertion works, and remember that we will improve upon it later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Retrieving Data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that some data has been entered into the *cats* table, [Example 11-11](#retrieving-rows-from-the-cats-table) shows
+    how you can check that it was correctly inserted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-11\. Retrieving rows from the cats table
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This code simply issues the MySQL query `SELECT * FROM cats` and then displays
+    all the rows returned by requiring them in the form of numerically accessed arrays
+    with the style of `PDO::FETCH_NUM`. Its output is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here you can see that the *id* column has correctly auto-incremented.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Updating Data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Changing data that you have already inserted is also quite simple. Did you notice
+    the spelling of *Charly* for the cheetah’s name? Let’s correct that to *Charlie*,
+    as in [Example 11-12](#renaming_charly_the_cheetah_to_charlie).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-12\. Changing the name Charly the cheetah to Charlie
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you run [Example 11-11](#retrieving-rows-from-the-cats-table) again, you’ll
+    see that it now outputs the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Deleting Data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Growler the cougar has been transferred to another zoo, so it’s time to remove
+    him from the database; see [Example 11-13](#removing_growler_the_cougar_from_the_cat).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-13\. Removing Growler the cougar from the cats table
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This uses a standard `DELETE FROM` query, and when you run [Example 11-11](#retrieving-rows-from-the-cats-table),
+    you can see that the row has been removed in the following output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using AUTO_INCREMENT
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'When using `AUTO_INCREMENT`, you cannot know what value has been given to a
+    column before a row is inserted. Instead, if you need to know it, you must ask
+    MySQL afterward using the `mysql_insert_id` function. This need is common: for
+    instance, when you process a purchase, you might insert a new customer into a
+    *Customers* table and then refer to the newly created *CustId* when inserting
+    a purchase into the *Purchases* table.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Using `AUTO_INCREMENT` is recommended instead of selecting the highest ID in
+    the *id* column and incrementing it by one, because concurrent queries could change
+    the values in that column after the highest value has been fetched and before
+    the calculated value is stored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 11-10](#adding_data_to_table_cats) can be rewritten as [Example 11-14](#adding_data_to_table_cats_and_reporting)
+    to display this value after each insert.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-14\. Adding data to the cats table and reporting the insert ID
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The contents of the table should now look like the following (note how the
+    previous *id* value of `2` is *not* reused, as this could cause complications
+    in some instances):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using insert IDs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'It’s very common to insert data in multiple tables: a book followed by its
+    author, a customer followed by their purchase, and so on. When doing this with
+    an auto-increment column, you will need to retain the insert ID returned for storing
+    in the related table.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, let’s assume that these cats can be “adopted” by the public as
+    a means of raising funds, and that when a new cat is stored in the *cats* table,
+    we also want to create a key to tie it to the animal’s adoptive owner. The code
+    to do this is similar to that in [Example 11-14](#adding_data_to_table_cats_and_reporting),
+    except that the returned insert ID is stored in the variable `$insertID` and is
+    then used as part of the subsequent query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now the cat is connected to its “owner” through the cat’s unique ID, which was
+    created automatically by `AUTO_INCREMENT`. This example, and especially the last
+    two lines, is theoretical code showing how to use an insert ID as a key if we
+    had created a table called `owners`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Performing Additional Queries
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Okay, that’s enough feline fun. To explore some slightly more complex queries,
+    we need to revert to using the *customers* and *classics* tables that you created
+    in [Chapter 8](ch08.xhtml#introduction_to_mysql). There will be two customers
+    in the *customers* table; the *classics* table holds the details of a few books.
+    They also share a common column of ISBNs, called *isbn*, that you can use to perform
+    additional queries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, to display all of the customers along with the titles and authors
+    of the books they have bought, you can use the code in [Example 11-15](#performing_a_secondary_query).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-15\. Performing a secondary query
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This program uses an initial query to the *customers* table to look up all
+    the customers and then, given the ISBNs of the books each customer purchased,
+    makes a new query to the *classics* table to find out the title and author for
+    each. The output from this code should be similar to the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'Of course, although it wouldn’t illustrate performing additional queries, in
+    this particular case you could also return the same information using a `NATURAL
+    JOIN` query (see [Chapter 8](ch08.xhtml#introduction_to_mysql)), like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Preventing Hacking Attempts
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'If you haven’t looked into it, you may find it hard to appreciate just how
+    dangerous it is to pass user input unchecked to MySQL. For example, suppose you
+    have a simple piece of code to verify a user, and it looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'At first glance, you might think this code is perfectly fine. If the user enters
+    values of `fredsmith` and `mypass` for `$user` and `$pass`, respectively, then
+    the query string, as passed to MySQL, will be as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is all well and good, but what if someone enters the following for `$user`
+    (and doesn’t even enter anything for `$pass`)?
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Let’s look at the string that would be sent to MySQL:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: Do you see the problem there? An *SQL injection* attack has occurred. In MySQL,
+    the `#` symbol represents the start of a comment. Therefore, the user will be
+    logged in as *admin* (assuming there is a user *admin*), without having to enter
+    a password. In the following, the part of the query that will be executed is shown
+    in bold; the rest will be ignored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'But you should count yourself very lucky if that’s all a malicious user does
+    to you. At least you might still be able to go into your application and undo
+    any changes the user makes as *admin*. But what about the case in which your application
+    code removes a user from the database? The code might look something like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Again, this looks quite normal at first glance, but what if someone entered
+    the following for `$user`?
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This would be interpreted by MySQL as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Ouch—because of the fact that any statement followed by `OR 1=1` is always `TRUE`,
+    that SQL query will always be `TRUE`, and therefore, since the rest of the statement
+    is ignored due to the # character, you’ve now lost your whole *users* database!
+    So what can you do about this kind of attack?'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Steps You Can Take
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The first thing is not to rely on PHP’s built-in *magic quotes*, which automatically
+    escape any characters such as single and double quotes by prefacing them with
+    a backslash (`\`). Why? Because this feature can be turned off. Many programmers
+    do so in order to put their own security code in place, and there is no guarantee
+    that this hasn’t happened on the server you are working on. In fact, the feature
+    was deprecated as of PHP 5.3.0 and removed in PHP 5.4.0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instead, as we showed earlier on, you could use the `quote` method of the PDO
+    object to escape all characters and surround strings with quotation marks. [Example 11-16](#how_to_properly_sanitize_user_input_for)
+    is a function you can use that will remove any magic quotes added to a user-inputted
+    string and then properly sanitize it for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-16\. How to properly sanitize user input for MySQL
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `get_magic_quotes_gpc` function returns `TRUE` if magic quotes are active.
+    In that case, any slashes that have been added to a string have to be removed,
+    or the `quote` method could end up double-escaping some characters, creating corrupted
+    strings. [Example 11-17](#how_to_safely_access_mysql_with_user_inp) illustrates
+    how you would incorporate `mysql_fix_string` within your own code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-17\. How to safely access MySQL with user input
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'Remember that, because the quote method automatically adds quotes around strings,
+    you should *not* use them in any query that uses these sanitized strings. So,
+    in place of using this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'you should enter the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: These precautions are becoming less important, however, because there’s a much
+    easier and safer way to access MySQL, which obviates the need for these types
+    of functions—the use of placeholders, which is explained next.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Placeholders
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: All the methods you have seen so far work with MySQL but had security implications,
+    with strings constantly requiring escaping to prevent security risks. So, now
+    that you know the basics, let me introduce the best and recommended way to interact
+    with MySQL, which is pretty much bulletproof in terms of security. Once you have
+    read this section, you should no longer use direct inserting of data into MySQL
+    (though it was important to show you how to do this) but should always use placeholders
+    instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So what are placeholders? They are positions within prepared statements in which
+    data is transferred directly to the database, without the possibility of user-submitted
+    (or other) data being interpreted as MySQL statements (and the potential for hacking
+    that could then result).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The technology works by requiring you to first prepare the statement you wish
+    to be executed in MySQL but leave all the parts of the statement that refer to
+    data as simple question marks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In plain MySQL, prepared statements look like [Example 11-18](#mysql_placeholders).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-18\. MySQL placeholders
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This can be cumbersome to submit to MySQL, so the `PDO` extension makes handling
+    placeholders easier for you with a ready-made method called `prepare`, which you
+    call like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The object `$stmt` (which is shorthand for *statement*) returned by this method
+    is then used for sending the data to the server in place of the question marks.
+    Its first use is to bind some PHP variables to each of the question marks (the
+    placeholder parameters) in turn, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first argument to `bindParam` is a number representing the position in the
+    query string of the value to insert (in other words, which question mark placeholder
+    is being referred to). This is followed by the variable that will supply the data
+    for that placeholder, and then the type of data the variable must be, and, if
+    a string, another value follows stating its maximum length.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With the variables bound to the prepared statement, it is now necessary to
+    populate them with the data to be passed to MySQL, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'At this point, PHP has everything it needs to execute the prepared statement,
+    so you can issue the following command, which calls the `execute` method of the
+    `$stmt` object created earlier, passing the values to be inserted in the form
+    of an array:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Before going any further, it makes sense to verify whether the command was
+    executed successfully. Here’s how you can do that by calling the `rowCount` method
+    of `$stmt`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, the output should indicate that one row was inserted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When you put all this together, the result is [Example 11-19](#issuing_prepared_statements).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-19\. Issuing prepared statements
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: Every time you are able to use prepared statements in place of nonprepared ones,
+    you will be closing a potential security hole, so it’s worth spending some time
+    getting to know how to use them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preventing JavaScript Injection into HTML
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There’s another type of injection you need to concern yourself about—not for
+    the safety of your own websites but for your users’ privacy and protection. That’s
+    *cross-site scripting*, also referred to as an *XSS attack*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This occurs when you allow HTML or, more often, JavaScript code to be input
+    by a user and then displayed by your website. One place this is common is in a
+    comment form. What happens most often is that a malicious user will try to write
+    code that steals cookies from your site’s users, which even allows them to discover
+    username and password pairs if those are poorly handled, or other information
+    that could enable session hijacking (in which a user’s login is taken over by
+    a hacker, who could then take over that person’s account!). Or the malicious user
+    might launch an attack to download a Trojan onto a user’s computer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Preventing this is as simple as calling the `htmlentities` function, which
+    strips out all HTML markup and replaces it with a form that displays the characters
+    but does not allow a browser to act on them. For example, consider this HTML:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This code loads in a JavaScript program and then executes malicious functions.
+    But if it is first passed through `htmlentities`, it will be turned into the following
+    totally harmless string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: Therefore, if you are ever going to display anything that your users enter,
+    either immediately or after storing it in a database, you need to first sanitize
+    it using the `htmlentities` function. To do this, I recommend that you create
+    a new function, like the first one in [Example 11-20](#functions_for_preventing_both_sql_and_xs),
+    which can sanitize for both SQL and XSS injections.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-20\. Functions for preventing both SQL and XSS injection attacks
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `mysql_entities_fix_string` function first calls `mysql_fix_string` and
+    then passes the result through `htmlentities` before returning the fully sanitized
+    string. To use either of these functions, you must already have an active connection
+    object open to a MySQL database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 11-21](#how_to_safely_access_mysql_and_prevent_x) shows the new “higher
+    protection” version of [Example 11-17](#how_to_safely_access_mysql_with_user_inp).
+    This is just example code, and you need to add the code to access the results
+    returned where you see the `//Etc...` comment line.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-21\. How to safely access MySQL and prevent XSS attacks
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: How do you connect to a MySQL database using PDO?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How do you submit a query to MySQL using PDO?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What style of the `fetch` method can be used to return a row as an array indexed
+    by column number?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you manually close a PDO connection?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When adding a row to a table with an `AUTO_INCREMENT` column, what value should
+    be passed to that column?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which PDO method can be used to properly escape user input to prevent code injection?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the best way to ensure database security when accessing it?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: See [“Chapter 11 Answers”](app01_split_010.xhtml#chapter_11_answers) in the
+    [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions) for the
+    answers to these questions.
+  prefs: []
+  type: TYPE_NORMAL

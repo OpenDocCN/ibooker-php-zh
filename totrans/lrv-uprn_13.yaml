@@ -1,0 +1,1431 @@
+- en: Chapter 13\. Writing APIs
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: One of the most common tasks Laravel developers are given is to create an API,
+    usually JSON and REST or REST-like, that allows third parties to interact with
+    the Laravel application’s data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel makes it incredibly easy to work with JSON, and its resource controllers
+    are already structured around REST verbs and patterns. In this chapter you’ll
+    learn about some basic API-writing concepts, the tools Laravel provides for writing
+    APIs, and some external tools and organizational systems you’ll want to consider
+    when writing your first Laravel API.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Basics of REST-Like JSON APIs
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Representational state transfer (REST) is an architectural style for building
+    APIs. Technically, REST is either a broad definition that could apply to almost
+    the entirety of the internet or something so specific that *no one* actually uses
+    it, so don’t let yourself get overwhelmed by the definition or caught in an argument
+    with a pedant. When we talk about RESTful or REST-like APIs in the Laravel world,
+    we’re generally talking about APIs with a few common characteristics:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: They’re structured around “resources” that can be uniquely represented by URIs,
+    like `/cats` for all cats, `/cats/15` for a single cat with the ID of 15, etc.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Interactions with resources primarily take place using HTTP verbs (`GET` `/cats/15`
+    versus `DELETE /cats/15`).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: They’re stateless, meaning there’s no persistent session authentication between
+    requests; each request must uniquely authenticate itself.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: They’re cacheable and consistent, meaning each request (except for a few authenticated
+    user–specific requests) should return the same result regardless of who the requester
+    is.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: They return JSON.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The most common API pattern is to have a unique URL structure for each of your
+    Eloquent models that’s exposed as an API resource and allow for users to interact
+    with that resource with specific verbs and get JSON back. [Example 13-1](#Common_REST_API_endpoint_structures)
+    shows a few possible examples.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-1\. Common REST API endpoint structures
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: This gives you the idea of the basic set of interactions we are likely to have
+    with our APIs. Let’s dig into how to make them happen with Laravel.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Controller Organization and JSON Returns
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Laravel’s API resource controllers are like normal resource controllers (see
+    [“Resource Controllers”](ch03.html#resource_controllers)) but modified to align
+    with RESTful API routes. For example, they exclude the `create()` and `edit()`
+    methods, both of which are irrelevant in an API. Let’s get started there. First
+    we’ll create a new controller for our resource, which we’ll route at `/api/dogs`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 13-2](#generated_api_resource_controller) shows what our API resource
+    controller will look like.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-2\. A generated API resource controller
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: The docblocks pretty much tell the story. `index()` lists all of the dogs, `show()`
+    lists a single dog, `store()` stores a new dog, `update()` updates a dog, and
+    `destroy()` removes a dog.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s quickly make a model and a migration so we can work with it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Great! Now we can fill out our controller methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Database Requirements for These Code Samples to Work
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you want the code we’re writing here to actually work, you’ll want to add
+    a `string()` column to the migration named `name` and another named `breed`, and
+    either add those columns to the Eloquent model’s `fillable` property or just set
+    the `guarded` property of that model equal to an empty array (`[]`). Later examples
+    will also require columns for `weight`, `color`, and relationships for `bones`
+    and `friends`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We can take advantage of a great feature of Eloquent here: if you echo an Eloquent
+    results collection, it’ll automatically convert itself to JSON (using the `__toString()`
+    magic method, if you’re curious). That means if you return a collection of results
+    from a route, you’ll in effect be returning JSON. So, as [Example 13-3](#resource_controller_for_the_dog_entity)
+    demonstrates, this will be some of the simplest code you’ll ever write.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-3\. A sample API resource controller for the `Dog` entity
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Artisan’s `make:model` command also has an `--api` flag you can pass to generate
+    the same API-specific controller we generated above:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want to generate migration, seeder, factory, policy, and resource controller,
+    and both store and update form requests in one command, you can use the `--all`
+    flag:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 13-4](#binding_the_routes_for_a_resource_controller) shows how we
+    can link this up in our routes file. As you can see, we can use `Route::apiResource()`
+    to automatically map all of these default methods to their appropriate routes
+    and HTTP verbs.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-4\. Binding the routes for a resource controller
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There you have it! Your first RESTful API in Laravel. Of course, you’ll need
+    much more nuance: pagination, sorting, authentication, and better-defined response
+    headers. But this is the foundation of everything else.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reading and Sending Headers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'REST APIs often read, and send, noncontent information using headers. For example,
+    any request to GitHub’s API will return headers detailing the current user’s rate
+    limiting status:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Similarly, many APIs allow developers to customize their requests using request
+    headers. For example, GitHub’s API makes it easy to define which version of the
+    API you’d like to use with the `Accept` header:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you were to change `v3` to `v2`, GitHub would pass your request to version
+    2 of its API instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s learn quickly how to do both in Laravel.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sending Response Headers in Laravel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We already covered this topic quite a bit in [Chapter 10](ch10.html#requests_and_responses),
+    but here’s a quick refresher. Once you have a response object, you can add a header
+    using `header(*$headerName*, *$headerValue*)`, as seen in [Example 13-5](#adding_a_response_header_in_Laravel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-5\. Adding a response header in Laravel
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Nice and easy.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reading Request Headers in Laravel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you have an incoming request, it’s also simple to read any given header.
+    [Example 13-6](#reading_a_request_header_in_Laravel) illustrates this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-6\. Reading a request header in Laravel
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now that you can read incoming request headers and set headers on your API responses,
+    let’s take a look at how you might want to customize your API.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Eloquent Pagination
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Pagination is one of the first places where most APIs need to consider special
+    instructions. Eloquent comes out of the box with a pagination system that hooks
+    directly into the query parameters of any page request. We already covered the
+    paginator component a bit in [Chapter 6](ch06.html#frontend_components), but here’s
+    a quick refresher.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Any Eloquent call provides a `paginate()` method, to which you can pass the
+    number of items you’d like to return per page. Eloquent then checks the URL for
+    a page query parameter and, if it’s set, treats that as an indicator of where
+    (how many pages) the user is in a paginated list.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To make your API route ready for automated Laravel pagination, use `paginate()`
+    instead of `all()` or `get()` to call your Eloquent queries in your route; something
+    like [Example 13-7](#paginated_API_route).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-7\. A paginated API route
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We’ve defined that Eloquent should get 20 results from the database. Depending
+    on what the `page` query parameter is set to, Laravel will know exactly *which*
+    20 results to pull for us:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that the `paginate()` method is also available on query builder calls,
+    as seen in [Example 13-8](#using_the_paginate_method_on_a_query_builder_call).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-8\. Using the `paginate()` method on a query builder call
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here’s something interesting, though: this isn’t just going to return 20 results
+    when you convert it to JSON. Instead, it’s going to build a response object that
+    automatically passes some useful pagination-related details to the end user, *along
+    with* the paginated data. [Example 13-9](#sample_output_from_a_paginated_database_call)
+    shows a possible response from our call, truncated to only three records to save
+    space.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-9\. Sample output from a paginated database call
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Sorting and Filtering
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Although there is a convention and some built-in tooling for pagination in Laravel,
+    there isn’t any for sorting, so you have to figure that out on your own. I’ll
+    give a quick code sample here, and I’ll style the query parameters similarly to
+    the JSON API spec (described in the following sidebar).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sorting Your API Results
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: First, let’s set up the ability to sort our results. We start in [Example 13-10](#simplest_API_sorting)
+    with the ability to sort by only a single column, and in only a single direction.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-10\. Simplest API sorting
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: We add the ability to invert it (e.g., `?sort=-weight`) in [Example 13-11](#single_column_API_sorting_direction_control).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-11\. Single-column API sorting, with direction control
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, we do the same for multiple columns (e.g., `?sort=name,-weight`) in
+    [Example 13-12](#json_API_style_sorting).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-12\. JSON API–style sorting
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, it’s not the simplest process ever, and you’ll likely want to
+    build some helper tooling around the repetitive processes, but we’re building
+    up the customizability of our API piece by piece using logical and simple features.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Filtering Your API Results
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Another common task in building APIs is filtering out all but a certain subset
+    of data. For example, the client might ask for a list of the dogs that are Chihuahuas.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The JSON API doesn’t give us any great ideas for syntax here, other than that
+    we should use the `filter` query parameter. Let’s think along the lines of the
+    sort syntax, where we’re putting everything into a single key—​maybe `?filter=breed:chihuahua`.
+    You can see how to do this in [Example 13-13](#single_filter_on_API_results).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-13\. Single filter on API results
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that in [Example 13-13](#single_filter_on_API_results) we’re using the
+    `request()` helper instead of injecting an instance of `$request`. Both work the
+    same, but sometimes the `request()` helper can be easier when you’re working inside
+    of a closure so you don’t have to pass variables in manually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: And, just for kicks, in [Example 13-14](#multiple_filters_on_API_results) we
+    allow for multiple filters, like `?filter=breed:chihuahua,color:brown`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-14\. Multiple filters on API results
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Transforming Results
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We’ve covered how to sort and filter our result sets. But right now, we’re relying
+    on Eloquent’s JSON serialization, which means we return every field on every model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Eloquent provides a few convenience tools for defining which fields to show
+    when you’re serializing an array. You can read more in [Chapter 5](ch05.html#database_and_eloquent),
+    but the gist is that if you set a `$hidden` array property on your Eloquent class,
+    any field listed in that array will not be shown in the serialized model output.
+    You can alternatively set a `$visible` array that defines the fields that are
+    allowed to be shown. You could also either overwrite or mimic the `toArray()`
+    function on your model, crafting a custom output format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another common pattern is to create a *transformer* for each data type. Transformers
+    are helpful because they give you more control, isolate API-specific logic away
+    from the model itself, and allow you to provide a more consistent API even when
+    the models and their relationships change down the road.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There’s a fantastic but complicated package for this, [Fractal](https://oreil.ly/pso1E),
+    that sets up a series of convenience structures and classes for transforming your
+    data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: API Resources
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In the past, one of the first challenges we’d run into when developing APIs
+    in Laravel was how to transform our data. The simplest APIs can just return Eloquent
+    objects as JSON, but very quickly the needs of most APIs outgrow that structure.
+    How should we convert our Eloquent results into the right format? What if we want
+    to embed other resources or do so but only optionally, or add a computed field
+    or hide some fields from APIs but not other JSON output? An API-specific transformer
+    is the solution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We now have access to a feature called *Eloquent API resources*, which are structures
+    that define how to transform an Eloquent object (or a collection of Eloquent objects)
+    of a given class to API results. For example, your `Dog` Eloquent model now has
+    a `Dog` resource whose responsibility it is to translate each instance of `Dog`
+    to the appropriate `Dog`-shaped API response object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a Resource Class
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s walk through this `Dog` example to see what it looks like to transform
+    our API output. First, use the Artisan command `make:resource` to create your
+    first resource:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will create a new class in *app/Http/Resources/Dog.php*, which contains
+    one method: `toArray()`. You can see what the file looks like in [Example 13-15](#api_resource_stub).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-15\. Generated API resource
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `toArray()` method we’re working with here has access to two important pieces
+    of data. First, it has access to the Illuminate `Request` object, so we can customize
+    our response based on query parameters and headers and anything else important.
+    And second, it has access to the entire Eloquent object being transformed by calling
+    its properties and methods on `$this`, as you can see in [Example 13-16](#simple_dog_resource).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-16\. Simple API resource for the `Dog` model
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: To use this new resource, you’ll want to update any API endpoint that returns
+    a single `Dog` to wrap the response in your new resource, like in [Example 13-17](#using_single_dog_resource).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-17\. Using the simple `Dog` resource
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Resource Collections
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now, let’s talk about what happens when you have more than one of your entities
+    returning from a given API endpoint. This is possible using an API resource’s
+    `collection()` method, as you can see in [Example 13-18](#using_default_api_resource_collection).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-18\. Using the default API resource collection method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: This method iterates over every entry that’s passed to it, transforms it with
+    the `DogResource` API resource, and then returns the collection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This will likely be enough for many APIs, but if you need to customize any of
+    the structure or add metadata to your collection responses, you’ll want to instead
+    create a custom API resource collection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In order to do so, let’s reach for the `make:resource` Artisan command again.
+    This time we’ll name it `DogCollection`, which signals to Laravel that this is
+    an API resource collection, not just an API resource:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will generate a new file very similar to the API resource file, living
+    at *app/Http/Resources/DogCollection.php*, which again contains one method: `toArray()`.
+    You can see what the file looks like in [Example 13-19](#api_resource_collection_stub).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-19\. Generated API resource collection
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Just like with the API resource, we have access to the request and the underlying
+    data. But unlike with the API resource, we’re dealing with a collection of items
+    instead of just one, so we will access that (already transformed) collection as
+    `$this->collection`. Take a look at [Example 13-20](#api_resource_collection_example)
+    for an example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-20\. A simple API resource collection for the `Dog` model
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Nesting Relationships
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: One of the more complicated aspects of any API is how relationships are nested.
+    The simplest way with API resources is to add a key to your returned array that’s
+    set to an API resource collection, like in [Example 13-21](#simple_included_api_relationships).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-21\. A simple included API relationship
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'If you try the code in [Example 13-21](#simple_included_api_relationships)
+    and receive a 502 error, it’s because you haven’t loaded the “friends” relationship
+    on your parent resource first. Keep reading to see how to get around that, but
+    here’s how to eager load that relationship when you’re working with this resource,
+    using the `with()` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: You may also want this to be a conditional property; you can choose to only
+    nest it if it’s asked for in the request or only if it’s already been eager loaded
+    on the Eloquent object that’s passed in. Take a look at [Example 13-22](#conditional_loading_api_relationships).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-22\. Conditionally loading API relationship
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using Pagination with API Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Just like you can pass a collection of Eloquent models to a resource, you can
+    also pass a paginator instance. Take a look at [Example 13-23](#passing_paginators_to_api_resource_collections).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-23\. Passing a paginator instance to an API resource collection
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you pass a paginator instance, the transformed result will have additional
+    links containing pagination information (`first` page, `last` page, `prev` page,
+    and `next` page) and meta-information about the entire collection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can take a look at [Example 13-24](#sample_paginated_resource_response)
+    to see what this information looks like. In this example, I’ve set the items-per-page
+    count to 2 by calling `Dog::paginate(2)` so you can more easily see how the links
+    work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-24\. A sample paginated resource response with pagination links
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Conditionally Applying Attributes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can also specify that certain attributes in your response should only be
+    applied when a particular test is satisfied, as illustrated in [Example 13-25](#EX13a).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-25\. Conditionally applying attributes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: More Customizations for API Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The default shape of how the `data` property is wrapped might not be how you
+    like it, or you may find yourself needing to add or customize metadata for the
+    responses. Take a look at the [resources docs](https://oreil.ly/LJ3Ie) for details
+    on how to customize every aspect of your API responses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: API Authentication
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Laravel provides two primary tools for authenticating API requests: Sanctum
+    (most recommended) and Passport (powerful but very complex and usually overkill).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: API Authentication with Sanctum
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Sanctum is an API authentication system for Laravel, built for two tasks: generating
+    simple tokens for your power users to use to interact with your API, and allowing
+    SPAs and mobile apps to latch onto your existing authentication system. It’s not
+    quite as configurable as OAuth 2.0, but it’s *very close* and it comes with much
+    lower cost in terms of setup and configuration.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are several ways to use Sanctum. You can allow power users to generate
+    tokens for your API directly in your admin panel, similar to how many developer-focused
+    SaaS services do. You can allow users to visit a special login page to receive
+    a token directly, which is useful for authenticating mobile apps to your API.
+    And you can integrate with your SPA, which, using some of Sanctum’s special sauce,
+    can hook directly into Laravel’s cookie-based authentication sessions, and you
+    won’t have to manage tokens at all.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s look at how to install Sanctum and then how to use it in each of these
+    contexts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing Sanctum
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Sanctum comes preinstalled with new Laravel projects. If your project doesn’t
+    have it, you’ll need to manually install it and publish its config files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For any routes you want to protect with Sanctum, attach the `auth:sanctum`
+    middleware:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: Issuing Sanctum tokens manually
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you want to build tooling in your application to provide tokens for your
+    users to authenticate against your API, here are the steps you’ll want to take.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, make sure your `User` model uses the `HasApiTokens` trait (on a new
+    project, it’ll already have it):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, build a user interface that allows the user to generate a token. You
+    could make a button in their settings page that says “Generate new token,” pops
+    up a modal asking for the nickame for that token, and then posts the results to
+    this form:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also list out all of the tokens your user has by referencing the `tokens`
+    property of a `user` object:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: Sanctum token abilities
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A common security pattern for token-based API authentication is to allow users
+    to generate tokens with only certain privileges, to minimize the potential damage
+    if the token were compromised.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you want to build a system for that, you can define (based on business logic
+    or user preferences) which “abilities” each token has when you create it. Pass
+    an array of strings to the `createToken()` method and each string will represent
+    an ability that token has.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then, your code can check against the authenticated user’s tokens either directly
+    (as in [Example 13-26](#sanctum_manually_checking_tokens)) or through middleware
+    (as in [Example 13-27](#sanctum_using_middleware_to_restrict)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-26\. Manually checking a user’s access based on token abilities
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: Example 13-27\. Using middleware to restrict access based on token scopes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: If you want to use Sanctum’s middleware checks, you’ll need to add the following
+    two lines to the `middlewareAliases` property of `App\Http\Kernel`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: SPA authentication
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you plan to use Sanctum to authenticate with an SPA, there are a few steps
+    you’ll need to take first to set up your Laravel app and your SPA.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel app preparation
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: First, uncomment the `EnsureFrontendRequestsAreStateful` class on the `api`
+    middleware group in *app/Http/Kernel.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: Second, update the list of “stateful” domains in the Sanctum config. These are
+    all the domains your SPA can make requests from. You can modify them directly
+    in *config/sanctum.php*, or add a comma-separated list of domains to the `SANCTUM_STATEFUL_DOMAINS`
+    key in your *.env* file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: SPA app preparation
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Before allowing your users to log into your app, your SPA should request Laravel
+    set a CSRF cookie, which most JavaScript HTTP clients like Axios will then pass
+    with every future request.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can then log in to your Laravel login route, either one you’ve created yourself
+    or a route offered by an existing tool like Fortify. Future requests will remain
+    authenticated via the session cookie Laravel sets for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mobile app authentication
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Here’s the workflow for allowing your mobile app users to authenticate to a
+    Sanctum-based app: request the user’s email (or username) and their password in
+    your mobile app. Send that, together with the name of their device (reading from
+    the device’s name in its OS; e.g., “Matt’s iPhone”), to a route you create yourself
+    on the backend, which will validate their login and (assuming it’s valid) create
+    and return a token, as you can see in [Example 13-28](#EX13f), which I’ve taken
+    directly from the docs.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-28\. Route to accept mobile app logins to Sanctum-based apps
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: Future requests to the API should pass the token in the `Authorization` header
+    as a `Bearer` type token.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further configuration and debugging
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you’re having any trouble with your Sanctum install or want to customize
+    any of Sanctum’s functionality, check out the [Sanctum docs](https://oreil.ly/lIpkq)
+    to learn more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: API Authentication with Laravel Passport
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Passport (a first-party package that has to be installed, brought in via Composer)
+    makes it easy to set up a full-featured OAuth 2.0 server in your application,
+    complete with an API and UI components for managing clients and tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A brief introduction to OAuth 2.0
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: OAuth is by far the most common auth system used in RESTful APIs. Unfortunately,
+    it’s far too complex a topic for us to cover here in depth. For further reading,
+    Matt Frost has written a great book on OAuth and PHP titled *Integrating Web Services
+    with OAuth and PHP* (php[architect]).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s the simplest concept behind OAuth: because APIs are stateless, we can’t
+    rely on the same session-based authentication that we do in normal browser-based
+    viewing sessions, where the user logs in and their authenticated state is saved
+    to the session for subsequent views. Instead, the API client needs to make a single
+    call to an authentication endpoint and perform some form of handshake to prove
+    itself. It then gets back a token that it must send along with every future request
+    (via the `Authorization` header, usually) to prove its identity.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are a few different types of OAuth “grant,” which basically means that
+    there are several different scenarios and types of interaction that can define
+    that authentication handshake. Different projects and different sorts of end consumers
+    will necessitate different grants.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Passport gives you everything needed to add a basic OAuth 2.0 authentication
+    server to your Laravel application, with a simpler and powerful API and interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing Passport
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Passport is a separate package, so your first step is to install it. I’ll sum
+    up the steps here, but you can get more in-depth installation instructions in
+    the [Passport docs](https://oreil.ly/N9-eD).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, bring it in with Composer:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: Passport imports a series of migrations, so run those with `php artisan migrate`
+    to create the tables necessary for OAuth clients, scopes, and tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, run the installer with `php artisan passport:install`. This will create
+    encryption keys for the OAuth server (*storage/oauth-private.key* and *storage/oauth-public.key*)
+    and insert OAuth clients into the database for our personal and password grant
+    type tokens (which we’ll cover later).
+  prefs: []
+  type: TYPE_NORMAL
+- en: You’ll need to import the `Laravel\Passport\HasApiTokens` trait into your `User`
+    model; this will add OAuth client- and token-related relationships to each `User`,
+    as well as a few token-related helper methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, add a new auth guard in *config/auth.php* named `api`; set the provider
+    to `users`, and the driver to `passport`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You now have a fully functional OAuth 2.0 server! You can create new clients
+    with `php artisan passport:client`, and you have an API for managing your clients
+    and tokens available under the `/oauth` route prefix.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To protect a route behind your Passport auth system, add the `auth:api` middleware
+    to the route or route group, as shown in [Example 13-29](#protecting_an_API_route).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-29\. Protecting an API route with the Passport auth middleware
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: In order to authenticate to these protected routes, your client apps will need
+    to pass a token (we’ll cover how to get one shortly) as a `Bearer` token in the
+    `Authorization` header. [Example 13-30](#sample_API_request_with_a_Bearer_token)
+    shows what this would look like if you were making a request using the HTTP client
+    included by Laravel.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-30\. Making a sample API request with a `Bearer` token
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now, let’s take a closer look at how it all works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Passport’s API
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Passport exposes an API in your application under the `/oauth` route prefix.
+    The API provides two primary functions: first, to authorize users with OAuth 2.0
+    authorization flows (`/oauth/authorize` and `/oauth/token`), and second, to allow
+    users to manage their clients and tokens (the rest of the routes).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is an important distinction, especially if you’re unfamiliar with OAuth.
+    Every OAuth server needs to expose the ability for consumers to authenticate with
+    your server; that’s the entire point of the service. But Passport *also* exposes
+    an API for managing the state of your OAuth server’s clients and tokens. This
+    means you can easily build a frontend to let your users manage their information
+    in your OAuth application. Passport actually comes with Vue-based manager components
+    that you can either use directly or use for inspiration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ll cover the API routes that allow you to manage clients and tokens, and
+    the Vue components that Passport ships with to make that easy, but first let’s
+    dig into the various ways your users can authenticate with your Passport-protected
+    API.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Passport’s available grant types
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Passport makes it possible for you to authenticate users in four different ways.
+    Two are traditional OAuth 2.0 grants (the password grant and authorization code
+    grant) and two are convenience methods that are unique to Passport (the personal
+    token and synchronizer token).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Password grant
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The *password grant*, while less common than the authorization code grant, is
+    much simpler. If you want users to be able to authenticate directly with your
+    API using their username and password—​for example, if you have a mobile app for
+    your company consuming your own API—​you can use the password grant.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With the password grant type, there is just one step to getting a token: sending
+    the user’s credentials to the `/oauth/token` route, like in [Example 13-31](#password_grant_type).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-31\. Making a request with the password grant type
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This route will return an `access_token`, a `refresh_token`, and two pieces
+    of metadata: `token_type` and `expires_in` (discussed later in this chapter).
+    You can now save those tokens to use to authenticate with the API (access token)
+    and to request more tokens later (refresh token).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note that the ID and secret we would use for the password grant type would
+    be those in the `oauth_clients` database table of our Passport app in the row
+    whose name matches that of our Passport grant client. You’ll also see entries
+    in this table for the two clients that are generated by default when you run `passport:install`:
+    “Laravel Personal Access Client” and “Laravel Password Grant Client.”'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Authorization code grant
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The most common OAuth 2.0 auth workflow is also the most complex one Passport
+    supports. Let’s imagine we’re developing an application that’s like Twitter but
+    for sound clips; we’ll call it Tweeter. And we’ll imagine another website, a social
+    network for science fiction fans, called SpaceBook. SpaceBook’s developer wants
+    to let people embed their Tweeter data into their SpaceBook newsfeeds. We’re going
+    to install Passport in our Tweeter app so that other apps—SpaceBook, for example—can
+    allow their users to authenticate with their Tweeter information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the *authorization code grant* type, each consuming website—SpaceBook, in
+    this example—needs to create a client in our Passport-enabled app. In most scenarios,
+    the other sites’ admins will have user accounts at Tweeter, and we’ll build tools
+    for them to create clients there. But for starters, we can just manually create
+    a client for the SpaceBook admins:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To answer the first question, you’ll need to know that every client needs to
+    be assigned to a user in your app. Imagine user #1 is writing SpaceBook; they’ll
+    be the “owner” of this client we’re creating.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once we’ve run this command, we have the ID and secret for the SpaceBook client.
+    At this point, SpaceBook can use this ID and secret to build tooling that allows
+    an individual SpaceBook user (who is also a Tweeter user) to get an auth token
+    from Tweeter for use when SpaceBook wants to make API calls to Tweeter on that
+    user’s behalf. [Example 13-32](#redirecting_to_OAuth) illustrates this. (This
+    and the following examples assume SpaceBook is a Laravel app, too; they also assume
+    the Spacebook’s developer created a file at *config/tweeter.php* that returns
+    the ID and secret we just created.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-32\. A consumer app redirecting a user to our OAuth server
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When users hit that route in SpaceBook, they’ll now be redirected to the `/oauth/authorize`
+    Passport route in our Tweeter app. At this point they’ll see a confirmation page—you
+    can use the default Passport confirmation page by running this command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will publish the view to *resources/views/vendor/passport/authorize.blade.php*,
+    and your users will see the page shown in [Figure 13-1](#authorization_code_approval_page).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![A screenshot of the OAuth authorization code approval page](assets/lur3_1301.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 13-1\. OAuth authorization code approval page
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Once a user chooses to accept or reject the authorization, Passport will redirect
+    that user back to the provided `redirect_uri`. In [Example 13-32](#redirecting_to_OAuth)
+    we set a `redirect_uri` of `url('tweeter/callback')`, so the user will be redirected
+    back to *http://spacebook.test/tweeter/callback*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An approval request will contain a code that our consumer app’s callback route
+    can now use to get a token back from our Passport-enabled app, Tweeter. A rejection
+    request will contain an error. SpaceBook’s callback route might look something
+    like [Example 13-33](#authorization_callback_route).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-33\. The authorization callback route in the sample consuming app
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'What the SpaceBook developer has done here is build an HTTP request, using
+    the Laravel HTTP client, to the `/oauth``/token` Passport route on Tweeter. They
+    then send a `POST` request containing the authorization code they received when
+    the user approved access, and Tweeter will return a JSON response containing a
+    few keys:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`access_token`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The token SpaceBook will want to save for this user. This token is what the
+    user will use to authenticate in future requests to Tweeter (using the `Authorization`
+    header).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`refresh_token`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A token SpaceBook will need *if* you decide to set your tokens to expire. By
+    default, Passport’s access tokens last for one year.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`expires_in`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The number of seconds until an `access_token` expires (needs to be refreshed).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`token_type`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The type of token you’re getting back, which will be `Bearer`; this means you
+    pass a header with all future requests with the name of `Authorization` and the
+    value of `Bearer *YOURTOKENHERE*`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You now have all the tools you need to perform basic authorization code flows.
+    We’ll cover how to build an admin panel for your clients and tokens later, but
+    first, let’s take a quick look at the other grant types.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Personal access tokens
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: The authorization code grant is great for your users’ apps, and the password
+    code grant is great for your own apps, but what if your users want to create tokens
+    for themselves to test out your API or to use when they’re developing their apps?
+    That’s what personal tokens are for.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a Personal Access Client
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To create personal tokens, you need a personal access client in your database.
+    Running `php artisan passport:install` will have added one already, but if you
+    ever need to generate a new personal access client for any reason, you can run
+    `php artisan passport:client --personal`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: Personal access tokens are not quite a “grant” type; there’s no OAuth-prescribed
+    flow here. Rather, they’re a convenience method that Passport adds to make it
+    easy to have a single client registered in your system that exists solely to facilitate
+    the creation of convenience tokens for your users who are developers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, maybe you have a user who’s developing a competitor to SpaceBook
+    named RaceBook (it’s for marathon runners), and they want to toy around with the
+    Tweeter API a bit to figure out how it works *before* starting to code. Does this
+    developer have the facility to create tokens using the authorization code flow?
+    Not yet—​they haven’t even written any code yet! That’s what personal access tokens
+    are for.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can create personal access tokens through the JSON API, which we’ll cover
+    shortly, but you can also create one for your user directly in code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: Your users can use these tokens just as if they were tokens created with the
+    authorization code grant flow. We’ll talk more about scopes in [“Passport scopes”](#passport_scopes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tokens from Laravel session authentication (synchronizer tokens)
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: There’s one final way for your users to get tokens to access your API, and it’s
+    another convenience method that Passport adds but that normal OAuth servers don’t
+    provide. This method is for when your users are already authenticated because
+    they’ve logged in to your Laravel app like normal, and you want your app’s JavaScript
+    to be able to access the API. It’d be a pain to have to reauthenticate the users
+    with the authorization code or password grant flow, so Laravel provides a helper
+    for that.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you add the `Laravel\Passport\Http\Middleware\CreateFreshApiToken` middleware
+    to your `web` middleware group (in *app/Http/Kernel.php*), every response Laravel
+    sends to your authenticated users will have a cookie named `laravel_token` attached
+    to it. This cookie is a JSON Web Token (JWT) that contains encoded information
+    about the CSRF token. Now, if you send the normal CSRF token with your JavaScript
+    requests in the `X-CSRF-TOKEN` header and also send the `X-Requested-With` header
+    with any API requests you make, the API will compare your CSRF token with this
+    cookie and this will authenticate your users to the API just like any other token.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The default JavaScript bootstrap setup that Laravel comes bundled with sets
+    up this header for you, but if you’re using a different framework, you’ll need
+    to set it up manually. [Example 13-36](#pass_tokens_with_all_Ajax_requests) shows
+    how to do it with jQuery.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-36\. Setting jQuery to pass Laravel’s CSRF tokens and the `X-Requested-With`
+    header with all Ajax requests
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you add the `CreateFreshApiToken` middleware to your `web` middleware group
+    and pass those headers with every JavaScript request, your JavaScript requests
+    will be able to hit your Passport-protected API routes without worrying about
+    any of the complexity of the authorization code or password grants.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Passport scopes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you’re familiar with OAuth, you’ve probably noticed we haven’t talked much
+    about scopes yet. Everything we’ve covered so far can be customized by scope—but
+    before we get into that, let’s first quickly cover what scopes are.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In OAuth, *scopes* are defined sets of privileges that are something other than
+    “can do everything.” If you’ve ever gotten a GitHub API token before, for example,
+    you might’ve noticed that some apps want access just to your name and email address,
+    some want access to all of your repos, and some want access to your gists. Each
+    of these is a “scope,” which allows both the user and the consumer app to define
+    what access the consumer app needs to perform its job.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As shown in [Example 13-37](#defining_passport_scopes), you can define the scopes
+    for your application in the `boot()` method of your `AuthServiceProvider`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-37\. Defining Passport scopes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once you have your scopes defined, the consumer app can define which scopes
+    it’s asking for access to. Just add a space-separated list of tokens in the `scope`
+    field in the initial redirect, as shown in [Example 13-38](#requesting_authorization).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-38\. Requesting authorization to access specific scopes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: When the user tries to authorize with this app, it’ll present the list of requested
+    scopes. This way, the user will know whether “SpaceBook is requesting to see your
+    email address” or “SpaceBook is requesting access to post as you and delete your
+    posts and message your friends.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can check for scope using middleware or on the `User` instance. [Example 13-39](#check_to_perform_a_given_action)
+    shows how to check on the `User`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-39\. Checking whether the token a user authenticated with can perform
+    a given action
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There are two middleware you can use for this too, `scope` and `scopes`. To
+    use these in your app, add them to `$middlewareAliases` in your *app/Http/Kernel.php*
+    file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE61]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can now use the middleware as illustrated in [Example 13-40](#passport_Using_middleware_to_restrict).
+    `scopes` requires *all* of the defined scopes to be on the user’s token in order
+    for the user to access the route, while `scope` requires *at least one* of the
+    defined scopes to be on the user’s token.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-40\. Using middleware to restrict access based on token scopes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE62]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you haven’t defined any scopes, the app will just work as if they don’t exist.
+    The moment you use scopes, however, your consumer apps will have to explicitly
+    define which scopes they’re requesting access with. The one exception to this
+    rule is that if you’re using the password grant type, your consumer app can request
+    the `*` scope, which gives the token access to everything.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deploying Passport
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The first time you deploy your Passport-powered app, the Passport API won’t
+    function until you generate keys for the app. This can be accomplished by running
+    `php artisan passport:keys` on your production server, which will generate the
+    encryption keys Passport uses to generate tokens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Customizing 404 Responses
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel offers customizable error-message pages for normal HTML views, but you
+    can also customize the default 404 fallback response for calls with a JSON content
+    type. To do so, add a `Route::fallback()` call to your API, as shown in [Example 13-41](#EX13d).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-41\. Defining a fallback route
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE63]'
+  prefs: []
+  type: TYPE_PRE
+- en: Triggering the Fallback Route
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you want to customize which route is returned when Laravel catches “not found”
+    exceptions, you can update the exception handler using the `respondWithRoute()`
+    method, as illustrated in [Example 13-42](#EX13e).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-42\. Calling the fallback route when “not found” exceptions are caught
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE64]'
+  prefs: []
+  type: TYPE_PRE
+- en: Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Fortunately, testing APIs is actually simpler than testing almost anything else
+    in Laravel.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We cover this in more depth in [Chapter 12](ch12.html#testing), but there are
+    a series of methods for making assertions against JSON. Combine that capability
+    with the simplicity of full-stack application tests, and you can put together
+    your API tests quickly and easily. Take a look at the common API testing pattern
+    in [Example 13-43](#common_API_testing_pattern).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-43\. A common API testing pattern
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE65]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that we’re using `WithoutMiddleware` to avoid worrying about authentication.
+    You’ll want to test that separately, if at all (for more on authentication, see
+    [Chapter 9](ch09.html#user_authentication_and_authorization)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this test we insert two `Dog`s into the database, then visit the API route
+    for listing all `Dog`s and make sure both are present in the output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can cover all of your API routes simply and easily here, including modifying
+    actions like `POST` and `PATCH`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing Passport
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can use the `actingAs()` method on the `Passport` facade to test your scopes.
+    Take a look at [Example 13-44](#common_passport_testing) to see a common pattern
+    for testing scopes in Passport.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-44\. Testing scoped access
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE66]'
+  prefs: []
+  type: TYPE_PRE
+- en: TL;DR
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel is geared toward building APIs and makes it simple to work with JSON
+    and RESTful APIs. There are some conventions, like for pagination, but much of
+    the definition of exactly how your API will be sorted, authenticated, or whatever
+    else is up to you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel provides tools for authentication and testing, easy manipulation and
+    reading of headers, and working with JSON, even automatically encoding all Eloquent
+    results to JSON if they’re returned directly from a route.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel Passport is a separate package that makes it simple to create and manage
+    an OAuth server in your Laravel apps.
+  prefs: []
+  type: TYPE_NORMAL

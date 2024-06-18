@@ -1,0 +1,1708 @@
+- en: Chapter 7\. Arrays
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '*Arrays* are ordered maps—constructs that associate specific values to easily
+    identified keys. These maps are effective ways to build both simple lists and
+    more complex collections of objects. They’re also easy to manipulate—adding or
+    removing items from an array is straightforward and supported through multiple
+    functional interfaces.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Types of Arrays
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There are two forms of arrays in PHP—numeric and associative. When you define
+    an array without explicitly setting keys, PHP will internally assign an integer
+    index to each member of the array. Arrays are indexed starting with 0 and increase
+    by steps of 1 automatically.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Associative arrays can have keys of either strings or integers, but generally
+    use strings. String keys are effective ways to “look up” a particular value stored
+    in an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Arrays are implemented internally as hash tables, allowing for effective direct
+    associations between keys and values. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Unlike simpler hash tables, though, PHP arrays also implement an iterable interface
+    allowing you to loop through all of their elements one at a time. Iteration is
+    fairly obvious when keys are numeric, but even with associative arrays, the elements
+    have a fixed order because they’re stored in memory. [Recipe 7.3](#iterating_through_array)
+    details different ways to act on each element in both types of arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In many circumstances, you might also be met with objects or classes that look
+    and feel like an array but are not actually arrays. In fact, any object that implements
+    the [`ArrayAccess` interface](https://oreil.ly/kdN4_) can be used as an array.^([1](ch07.html#idm45875163152816))
+    These more advanced implementations push the limits of what is possible with arrays
+    beyond mere lists and hash tables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Syntax
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'PHP supports two different syntaxes for defining arrays. Those who have worked
+    in PHP for some time will recognize the [`array()`](https://oreil.ly/v75i9) construct
+    that allows for the literal definition of an array at runtime as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'An alternative and terser syntax is to use square brackets to define the array.
+    The preceding example could be rewritten as follows with the same behavior:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Both formats can be used to create nested arrays (where an array contains another
+    array) and can be used interchangeably as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Though mixing and matching syntaxes as in the preceding example is possible,
+    it is highly encouraged to remain consistent within your application and to use
+    one form or the other—not both. All of the examples in this chapter will use the
+    short array syntax (square brackets).
+  prefs: []
+  type: TYPE_NORMAL
+- en: All arrays in PHP map from keys to values. In the preceding examples, the arrays
+    merely specified values and let PHP assign keys automatically. These are considered
+    *numeric* arrays as the keys will be integers, starting at 0\. More complex arrays,
+    like the nested construct illustrated in [Example 7-1](#complex_associative_array),
+    assign both values and keys. This is done by mapping from a key to a value with
+    a two-character arrow operator (`=>`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-1\. Associative array with nested values
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: While not a syntactic requirement, many coding environments and integrated development
+    environments (IDEs) will automatically align the arrow operators in multiline
+    array literals. This makes the code easier to read and is a standard adopted by
+    this book as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The recipes that follow illustrate various ways developers can work with arrays—both
+    numeric and associative—to accomplish common tasks in PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.1 Associating Multiple Elements per Key in an Array
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to associate multiple items with a single array key.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Make each array value an array on its own—for example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP places no requirement on the type of data used for a value in an array.
+    However, keys are required to be either strings or integers. In addition, it is
+    a hard requirement that every key in an array be unique. If you attempt to set
+    multiple values for the same key, you will overwrite existing data, as shown in
+    [Example 7-2](#array_key_overwrite).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-2\. Overwriting array data by assignment
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: As PHP only allows one value per unique key in an array, writing further data
+    to that key overwrites its value in the same way that you might reassign the value
+    of a variable in your application. If you do need to store multiple values in
+    one key, use a nested array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Solution example illustrates how *every* key could point to its own array.
+    However, PHP does not require this to be true—all but one key could point to a
+    scalar and just the key that needs multiple items could point to an array. In
+    [Example 7-3](#array_key_array), you’ll use a nested array to store multiple items
+    rather than accidentally overwriting a single value stored in a specific key.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-3\. Writing an array to a key
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: To leverage the elements of a nested array, you loop over them just as you would
+    the parent array. For example, if you wanted to print all of the data stored in
+    the `$basket` array from [Example 7-3](#array_key_array), you would need two loops,
+    as in [Example 7-4](#printing_arrays_in_a_loop).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-4\. Accessing array data in a loop
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_arrays_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The parent array is associative, and you need both its keys and values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_arrays_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You use one branch of logic for nested arrays, another for scalars.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_arrays_CO1-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since you know the nested array is numeric, ignore the keys and iterate over
+    only the values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Recipe 7.3](#iterating_through_array) for further examples of iterating through
+    arrays.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.2 Initializing an Array with a Range of Numbers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to build an array of consecutive integers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use the `range()` function as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP’s `range()` function automatically iterates over a given sequence, assigning
+    a value to a key based on the definition of that sequence. By default, and as
+    illustrated in the Solution example, the function steps through sequences one
+    at a time. But this isn’t the limit of the function’s behavior—passing a third
+    parameter to the function will change its step size.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You could iterate over all even integers from 2 to 100 as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Likewise, you could iterate over all *odd* integers from 1 to 100 by changing
+    the starting point of the sequence to 1\. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The start and end parameters of `range()` (the first two parameters, respectively)
+    can be integers, floating-point numbers, or even strings. This flexibility allows
+    you to do some pretty amazing things in code. For example, rather than counting
+    natural numbers (integers), you could produce an array of floating-point numbers
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: When passing string characters to `range()`, PHP will begin enumerating ASCII
+    characters. You can leverage this functionality to quickly build an array representative
+    of the English alphabet, as shown in [Example 7-5](#array_range_alphabet).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: PHP will internally use any and all printable ASCII characters, based on their
+    decimal representation, to complete a request to `range()`. This is an efficient
+    way to enumerate printable characters, but you need to keep in mind where special
+    characters such as `=`, `?`, and `)` fall within the ASCII table, particularly
+    if your program is expecting alphanumeric values in the array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-5\. Creating an array of alphabetical characters
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_arrays_CO2-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns all uppercase characters from `A` through `Z`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_arrays_CO2-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns all lowercase characters from `a` through `z`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_arrays_CO2-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Returns an array of special characters: `[!, ", #, $, %, &, '', (, )]`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [`range()`](https://oreil.ly/qH_iW).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.3 Iterating Through Items in an Array
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to perform an action on every element in an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For numeric arrays, use `foreach` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For associative arrays, use `foreach()` with optional keys as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP has the concept of *iterable objects* and, internally, that’s precisely
+    what an array is. Other data structures can also implement iterable behavior,^([2](ch07.html#idm45875162170640))
+    but *any* iterable expression can be provided to `foreach` and will return the
+    items it contains one at a time in a loop.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: PHP does not implicitly unset the variable used within a `foreach` loop when
+    you exit the loop. You can still explicitly reference the *last* value stored
+    in `$value` in the Solution examples in the program outside the loop!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The most important thing to remember, though, is that `foreach` is a *language
+    construct*, not a function. As a construct, it acts on a given expression and
+    applies the defined loop over every item within that expression. By default, that
+    loop does not modify the contents of an array. If you want to make the values
+    of an array mutable, you must pass them into the loop by reference by prefixing
+    the variable name with an `&` character as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Versions of PHP prior to 8.0 supported an `each()` function that would maintain
+    an array cursor and return the current key/value pair of the array before advancing
+    that cursor. This function was deprecated in PHP 7.2 and fully removed as of the
+    8.0 release, but you will likely find legacy examples of its use in books and
+    online. Upgrade any occurrences of `each()` to an implementation of `foreach`
+    to ensure forward compatibility of your code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'An alternative approach to using a `foreach` loop is to create an explicit
+    `for` loop over the keys of the array. Numeric arrays are easiest as their keys
+    are already incrementing integers starting at 0\. Iterating over a numeric array
+    is relatively straightforward as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Tip
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: While it’s possible to place a call to `count()` to identify the upper bounds
+    of a `for` loop directly within the expression, it’s better to store the length
+    of an array outside the expression itself. Otherwise, your `count()` will be reinvoked
+    on every iteration of the loop to check that you’re still in bounds. For small
+    arrays, this won’t matter; as you start working with larger collections, though,
+    the performance drain of repeated `count()` checks will become problematic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Iterating over an associative array with a `for` loop is a tiny bit different.
+    Instead of iterating over the elements of the array directly, you’ll want to iterate
+    over the keys of the array directly. Then use each key to extract the corresponding
+    value from the array as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on the [`foreach`](https://oreil.ly/lmeAe) and [`for`](https://oreil.ly/chSRT)
+    language constructs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.4 Deleting Elements from Associative and Numeric Arrays
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to remove one or more elements from an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Delete an element by targeting its key or numeric index directly with `unset()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Delete more than one element at a time by passing multiple keys or indexes
+    into `unset()` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In PHP, `unset()` actually destroys any reference to the memory containing the
+    specified variable. In the context of this Solution, that variable is an element
+    of an array, so unsetting it removes that element from the array itself. In an
+    associative array, this takes the form of deleting the specified key and the value
+    it represented.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In a numeric array, `unset()` does far more. It both removes the specified element
+    and effectively converts the numeric array into an associative array with integer
+    keys. On the one hand, this is likely the behavior you wanted in the first place,
+    as demonstrated in [Example 7-6](#unset_numeric_array).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-6\. Unsetting elements in a numeric array
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_arrays_CO3-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The array by default represents all English characters from `a` through `z`,
+    so this line prints `26`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_arrays_CO3-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The 13th letter in the alphabet is `m`. (Remember that arrays start at index
+    `0`.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_arrays_CO3-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The 26th letter in the alphabet is `z`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_arrays_CO3-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the element removed, the array has decreased in size to `25`!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_arrays_CO3-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The 13th letter in the alphabet is *still* `m`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_arrays_CO3-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The 26th letter in the alphabet is *still* `z`. Further, this index is still
+    valid, as removing an element doesn’t re-index the array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can typically ignore the indexes of numeric arrays because they’re set by
+    PHP automatically. This makes the behavior of `unset()` implicitly converting
+    these indexes into numeric keys somewhat surprising. With a numeric array, attempting
+    to access an index greater than the length of the array results in an error. Once
+    you’ve used `unset()` with the array and decreased its size, however, you will
+    often end up with an array that has numeric keys greater than the size of the
+    array, as was illustrated in [Example 7-6](#unset_numeric_array).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you want to return to the world of numeric arrays after removing an element,
+    you can re-index the array entirely. PHP’s `array_values()` function returns a
+    new, numerically indexed array that contains only the values of the specified
+    array. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_arrays_CO4-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The default array has numeric indexes: `[0 => first, 1 => second, 2 => third,
+    3 => fourth]`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_arrays_CO4-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Unsetting an element removes it from the array but leaves the indexes (keys)
+    unchanged: `[0 => first, 1 => second, 3 => fourth]`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_arrays_CO4-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The call to `array_values()` gives you a *new* array with brand-new, properly
+    incrementing numeric indexes: `[0 => first, 1 => second, 2 => fourth]`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An additional option for removing elements from an array is to use the `array_splice()`
+    function.^([3](ch07.html#idm45875161556000)) This function will remove a portion
+    of an array and replace it with something else.^([4](ch07.html#idm45875161553616))
+    Consider [Example 7-7](#array_splice_example), where `array_splice()` is used
+    to replace elements of an array with *nothing*, thus removing them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-7\. Removing elements of an array with `array_splice()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_arrays_CO5-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, remove the sun to clean up a list of planets in the solar system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_arrays_CO5-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once the sun is removed, the indexes of all objects shift. You still want to
+    remove the asteroid belt from the list, so use its newly shifted index.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_arrays_CO5-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, truncate the array by removing everything from Pluto to the end of
+    the array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unlike `unset()`, the modified array created by `array_splice()` does *not*
+    retain the numeric indexes/keys in numeric arrays! This might be a good way to
+    avoid needing an extra call to `array_values()` after removing an item from an
+    array. It’s also an effective way to remove *continuous* elements from a numerically
+    indexed array without needing to explicitly specify each element.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`unset()`](https://oreil.ly/-ebRG), [`array_splice()`](https://oreil.ly/g-M9G),
+    and [`array_values()`](https://oreil.ly/9FvTV).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.5 Changing the Size of an Array
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to increase or decrease the size of an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Add elements to the end of the array by using `array_push()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Remove elements from an array by using `array_splice()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Unlike many other languages, PHP doesn’t require you to declare the size of
+    an array. Arrays are dynamic—you can add or remove data from them whenever you
+    want with no real downside.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The first Solution example merely adds a single element to the end of an array.
+    While this approach is straightforward, it’s not the most efficient. Instead,
+    you can push an individual item into an array *directly* as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: The key difference between the preceding example and the one documented in the
+    Solution is that of a function call. In PHP, function calls have more overhead
+    than language constructs (like assignment operators). The preceding example is
+    slightly more efficient, but only if it’s used several times in an application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you are instead adding *multiple* items to the end of an array, the `array_push()`
+    function will be more efficient. It accepts and appends many items at once, thus
+    avoiding multiple assignments. [Example 7-8](#array_push_multiples) illustrates
+    the difference between approaches.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-8\. Appending multiple elements with `array_push()` versus assignment
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If, rather than appending elements, you want to *prepend* them, you would use
+    `array_unshift()` to place the specified items at the beginning of the array as
+    follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: PHP retains the order of elements passed to `array_unshift()` when prepending
+    them to the target array. The first parameter will become the first element, the
+    second the second, and so on until you reach the array’s *original* first element.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Remember, arrays in PHP do not have a set size and can easily be manipulated
+    in different ways. All of the preceding functional examples (`array_push()`, `array_​splice()`,
+    and `array_unshift()`) work well on numeric arrays and *do not change the order
+    or structure* of their numerical indexes. You could just as easily add an element
+    to the end of a numeric array by referencing a new index directly. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: So long as the index your code references is continuous with the rest of the
+    array, the preceding example will work flawlessly. If, however, your count is
+    off and you introduce a gap in the index, you have effectively converted your
+    numeric array to an associative one, just with numeric keys.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While all of the functions used in this recipe will work with associative arrays,
+    they work primarily against numeric keys and will result in strange behavior when
+    used against non-numeric ones. It would be wise to use these functions *only*
+    with numeric arrays and to manipulate the sizes of associative arrays directly
+    based on their keys.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`array_push()`](https://oreil.ly/DhVgq), [`array_splice()`](https://oreil.ly/eLoTZ),
+    and [`array_unshift()`](https://oreil.ly/BYisR).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.6 Appending One Array to Another
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to combine two arrays into a single, new array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `array_merge()` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In addition, you can also leverage the spread operator (`…​`) to combine arrays
+    directly. Rather than a call to `array_merge()`, the preceding example then becomes
+    this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: The spread operator works for both numeric and associative arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP’s `array_merge()` function is an obvious way to combine two arrays into
+    one. It does, however, have slightly different behavior for numeric versus associative
+    arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Any discussion of merging arrays will inevitably use the term *combine*. Note
+    that [`array_combine()`](https://oreil.ly/wcM69) is itself a function in PHP.
+    However, it doesn’t merge two arrays as shown in this recipe. Instead, it creates
+    a new array by using the two specified arrays—the first for the *keys* and the
+    second for the *values* of the new array. It’s a useful function but is not something
+    you can use for merging two arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For numeric arrays (like those in the Solution example), all elements of the
+    second array are appended to those of the first array. The function ignores the
+    indexes of both, and the newly produced array has continuous indexes (starting
+    from `0`) as if you’d built it directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For associative arrays, the keys (and values) of the second array are added
+    to those of the first. If the two arrays have the same keys, the values of the
+    second array will overwrite those of the first. [Example 7-9](#array_merge_associative)
+    illustrates how the data in one array overwrites that of the other.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-9\. Overwriting associative array data with `array_merge()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: There might be cases where you want to retain the data held in duplicate keys
+    when you merge two or more arrays. In those circumstances, use `array_merge_​re⁠cur⁠sive()`.
+    Unlike the preceding example, this function will create an array containing the
+    data defined in duplicate keys rather than overwriting one value with another.
+    [Example 7-10](#array_merge_recursive) rewrites the preceding example to illustrate
+    how this happens.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-10\. Merging arrays with duplicate keys
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: While the preceding examples combine only two arrays, there is no upper limit
+    to the number of arrays you can merge with either `array_merge()` or `array_merge_​re⁠cur⁠sive()`.
+    Keep in mind how duplicate keys are handled by both functions as you begin merging
+    more than two arrays at a time to avoid potentially losing data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A third and final way to combine two arrays into one is with the literal addition
+    operator: `+`. On paper, this has the appearance of adding two arrays together.
+    What it really does is add any new key from the second array to the keys of the
+    first. Unlike `array_merge()`, this operation will not overwrite data. If the
+    second array has keys that duplicate any in the first array, those keys are ignored,
+    and the data from the first array is used.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This operator also works *explicitly* with array keys, meaning it’s not a good
+    fit for numeric arrays. Two same-sized numeric arrays, when treated like associative
+    arrays, will have the exact same keys because they have the same indexes. This
+    means the second array’s data will be ignored entirely!
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation for [`array_merge()`](https://oreil.ly/s38Xa) and [`array_merge_recursive()`](https://oreil.ly/aFQxS).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.7 Creating an Array from a Fragment of an Existing Array
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to select a subsection of an existing array and use it independently.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `array_slice()` to select a sequence of elements from an existing array
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `array_slice()` function quickly extracts a continuous sequence of items
+    from the given array based on a defined offset (position within the array) and
+    length of elements to retrieve. Unlike `array_splice()`, it copies the sequence
+    of items from the array, leaving the original array unchanged.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'It’s important to understand the full function signature to appreciate the
+    power of this function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: Only the first two parameters—the target array and the initial offset—are required.
+    If the offset is positive (or `0`), the new sequence will start at that position
+    from the beginning of the array. If the offset is negative, the sequence will
+    start that many positions back from the *end* of the array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The array offset is explicitly referencing the *position* within an array, not
+    in terms of keys or indexes. The `array_slice()` function works on associative
+    arrays as easily as it does on numeric arrays because it uses the relative positions
+    of elements in the array to define a new sequence and ignores the array’s actual
+    keys.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When you define the optional `$length` argument, this defines the maximum number
+    of items in the new sequence. Note that the new sequence is limited by the number
+    of items in the original array, so if the length overruns the end of the array,
+    your sequence will be shorter than you expected. [Example 7-11](#slice_length_overrun)
+    presents a quick example of this behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-11\. Using `array_slice()` with a too-short array
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the length specified is *negative*, then the sequence will stop that many
+    elements away from the end of the target array. If the length is not specified
+    (or is `null`), then the sequence will include everything from the original offset
+    through the end of the target array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The final parameter, `$preserve_keys`, tells PHP whether to reset the integer
+    indexes of the slice of the array. By default, PHP will return a newly indexed
+    array with integer keys starting at `0`. [Example 7-12](#array_slice_keys) shows
+    how the behavior of the function differs based on this parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The `array_slice()` function will always preserve string keys in an associative
+    array regardless of the value of `$preserve_keys`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-12\. Key preservation behavior in `array_slice()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: Remember, numeric arrays in PHP can be thought of as associative arrays with
+    integer keys that start at `0` and increment consecutively. With that in mind,
+    it’s easy to see how `array_slice()` behaves on associative arrays with both string
+    and integer keys—it operates based on position rather than key, as shown in [Example 7-13](#array_slice_mixed_keys).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-13\. Using `array_slice()` on an array with mixed keys
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In [Recipe 7.4](#deleting_array_elements), you were introduced to `array_splice()`
+    for deleting a sequence of elements from an array. Conveniently, this function
+    uses a method signature similar to that of `array_slice()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: The key difference between these functions is that one modifies the source array
+    whereas the other does not. You might use `array_slice()` to work on a subset
+    of a larger sequence in isolation or instead to fully separate two sequences from
+    one another. In either case, the functions exhibit similar behavior and use cases.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`array_slice()`](https://oreil.ly/9iBvj) and [`array_splice()`](https://oreil.ly/k-h7n).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.8 Converting Between Arrays and Strings
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to convert a string into an array or combine the elements of an array
+    into a string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `str_split()` to convert a string to an array:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use `join()` to combine the elements of an array into a string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `str_split()` function is a powerful way to convert any string of characters
+    into an array of like-sized chunks. By default, it will break the string into
+    one-character chunks, but you can just as easily break a string into any number
+    of characters. The last chunk in the sequence is only guaranteed to be *up to*
+    the specified length. For example, [Example 7-14](#str_split_length) attempts
+    to break a string down into five-character chunks, but note that the last chunk
+    is fewer than five characters in length.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-14\. Using `str_split()` with arbitrary chunk sizes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Remember that `str_split()` works on bytes. When you’re dealing with multibyte
+    encoded strings, you will need to use [`mb_​str_​split()`](https://oreil.ly/ocQi1)
+    instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In some cases, you might want to split a string into separate words rather than
+    individual characters. PHP’s `explode()` function allows you to specify the separator
+    on which to split things. This is handy for splitting a sentence into an array
+    of its component words, as demonstrated by [Example 7-15](#split_string_into_words).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-15\. Splitting a string into an array of words
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: While `explode()` appears to function similarly to `str_split()`, it cannot
+    explode a string with an empty delimiter (the first parameter to the function).
+    If you try to pass an empty string, you will be met with a `ValueError`. If you
+    want to work with an array of characters, stick with `str_split()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Combining an array of strings into a single string requires the use of the `join()`
+    function, which itself is merely an alias of `implode()`. That said, it’s far
+    more powerful than just being the inverse of `str_split()`, as you can optionally
+    define a separator to be placed between newly concatenated code chunks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The separator is optional, but the long legacy of `implode()` in PHP has led
+    to two somewhat unintuitive function signatures as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you want to merely combine an array of characters into a string, you can
+    do so with the equivalent methods shown in [Example 7-16](#combining_characters_into_string).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-16\. Creating a string from an array of characters
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Because you can explicitly specify the separator—the glue used to join each
+    chunk of text—there are few limits to what `implode()` allows you to do. Assume
+    your array is a list of words rather than a list of characters. You can use `implode()`
+    to link them together as a printable and comma-delimited list, as in the following
+    example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`implode()`](https://oreil.ly/mpdcI), [`explode()`](https://oreil.ly/PScj_),
+    and [`str_split()`](https://oreil.ly/2dTMD).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.9 Reversing an Array
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to reverse the order of elements in an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `array_reverse()` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `array_reverse()` function creates a new array where each element is in
+    the reverse order of the input array. By default, this function does not preserve
+    numeric keys from the source array but instead re-indexes each element. Non-numeric
+    keys (in associative arrays) are left unchanged by this re-indexing; however,
+    their order is still reversed as expected. [Example 7-17](#reverse_associative_array)
+    demonstrates how associative arrays are reordered by `array_reverse()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-17\. Reversing associative arrays
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since associative arrays can have numeric keys to begin with, the re-indexing
+    behavior might produce unexpected results. Thankfully, it can be disabled by passing
+    an optional Boolean parameter as the second argument when reversing an array.
+    [Example 7-18](#reversing_with_keys) shows how this indexing behavior impacts
+    such arrays (and how it can be disabled).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-18\. Reversing an associative array with numeric keys
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_arrays_CO6-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The default value of the second parameter is `false`, which means numeric keys
+    will not be preserved after the array is reversed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_arrays_CO6-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Passing `true` as a second parameter will still allow the array to reverse but
+    will retain numeric keys in the new array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`array_reverse()`](https://oreil.ly/mI5eG).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.10 Sorting an Array
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to sort the elements of an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To sort items based on default comparison rules in PHP, use `sort()` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP’s native sorting system is built atop Quicksort, a common and relatively
+    fast sorting algorithm. By default, it uses rules defined by PHP’s comparison
+    operators to determine the order of each element in the array.^([5](ch07.html#idm45875159668272))
+    You can, however, sort with different rules by passing a flag as the optional
+    second parameter of `sort()`. Available sorting flags are described in [Table 7-1](#sort_type_flags).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 7-1\. Sorting type flags
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Flag | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `SORT_REGULAR` | Compare items normally by using default comparison operations
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `SORT_NUMERIC` | Compare items numerically |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `SORT_STRING` | Compare items as strings |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `SORT_LOCALE_STRING` | Compare items as strings by using the current system
+    locale |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `SORT_NATURAL` | Compare items by using “natural ordering” |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `SORT_FLAG_CASE` | Combine with `SORT_STRING` or `SORT_NATURAL` by using
+    a bitwise OR operator to compare strings without case-sensitivity |'
+  prefs: []
+  type: TYPE_TB
+- en: Sorting type flags are useful when the default sorting comparisons produce a
+    sorted array that makes no sense. For example, sorting an array of integers as
+    if they were strings would sort things incorrectly. Using the `SORT_NUMERIC` flag
+    will ensure that integers are sorted in the correct order. [Example 7-19](#sorting_integers)
+    demonstrates how the two sorting types differ.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-19\. Sorting integers with a regular versus numeric sort type
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `sort()` function ignores array keys and indexes and sorts the elements
+    of the array purely by their values. Thus, attempting to use `sort()` to sort
+    an associative array will destroy the keys in that array. If you want to retain
+    the keys in an array while still sorting by values, use `asort()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To do this, invoke `asort()` exactly the same way as you do `sort()`; you can
+    even use the same flags as defined in [Table 7-1](#sort_type_flags). The resulting
+    array will, however, retain the same keys as before, even though elements are
+    in a different order. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Both `sort()` and `asort()` will produce arrays sorted in ascending order.
+    If you want to get an array in descending order, you have two options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sort the array in ascending order, then reverse it as demonstrated in [Recipe
+    7.9](#reversing_an_array).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Leverage `rsort()` or `arsort()` for numeric and associative arrays, respectively.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To reduce overall code complexity, the latter option is often preferable. The
+    functions have the same signatures as `sort()` and `asort()` but merely reverse
+    the order in which elements will be positioned in the resulting array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`arsort()`](https://oreil.ly/G14ve), [`asort()`](https://oreil.ly/jkl5w),
+    [`rsort()`](https://oreil.ly/Z6p49), and [`sort()`](https://oreil.ly/sHWtt).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.11 Sorting an Array Based on a Function
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to sort an array based on a user-defined function or comparator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `usort()` with a custom sorting callback as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `usort()` function leverages a user-defined function as the comparison operation
+    behind its sorting algorithm. You can pass in any callable as the second parameter,
+    and every element of the array will be checked through this function to determine
+    its appropriate order. The Solution example references a callback by its name,
+    but you could just as easily pass an anonymous function as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Solution example further leverages PHP’s newer spaceship operator to conduct
+    a complex comparison between your array elements.^([6](ch07.html#idm45875159078400))
+    In this particular case, you want to sort James Bond actors first by last name,
+    then by first name. The same function could be used for any collection of names.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A more powerful example is to apply custom sorting to dates in PHP. Dates are
+    relatively easy to sort as they’re part of a continuous series. But it’s possible
+    to define custom behavior that breaks those expectations. [Example 7-20](#custom_sorting_datetime)
+    attempts to sort an array of dates first based on the day of the week, then by
+    the year, then by the month.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-20\. User-defined sorting applied to dates
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: Like many other array functions discussed in this chapter, `usort()` ignores
+    array keys/indexes and re-indexes the array as part of its operation. If you need
+    to retain the index or key associations of elements, use `uasort()` instead. This
+    function has the same signature as `usort()` but leaves the array keys untouched
+    after sorting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Array keys often hold important information about the data within the array,
+    so retaining them during a sorting operation can prove critical at times. In addition,
+    you might want to actually sort by the keys of the array rather than by the value
+    of each element. In those circumstances, leverage `uksort()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `uksort()` function will sort an array by its keys, using a function you
+    define. Like `uasort()`, it respects the keys and leaves them in place after the
+    array is sorted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`usort()`](https://oreil.ly/TuK1L), [`uasort()`](https://oreil.ly/igH5E),
+    and [`uksort()`](https://oreil.ly/MEyff).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.12 Randomizing the Elements in an Array
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to scramble the elements of your array so that their order is entirely
+    random.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `shuffle()` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `shuffle()` function acts on an existing array that is passed into the function
+    by reference. It completely ignores the keys of the array and sorts element values
+    at random, updating the array in place. After shuffling, array keys are re-indexed
+    starting from 0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: While you won’t receive an error if you shuffle an associative array, all information
+    on keys will be lost during the operation. You should only ever shuffle numeric
+    arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Internally, `shuffle()` uses the [Mersenne Twister](https://oreil.ly/86yIo)
+    pseudorandom number generator to identify a new, seemingly random order for each
+    element in the array. This pseudorandom number generator is not suitable when
+    true randomness is required (e.g., cryptography or security scenarios), but it
+    is an effective way to quickly shuffle the contents of an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`shuffle()`](https://oreil.ly/AkcpO).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.13 Applying a Function to Every Element of an Array
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to transform an array by applying a function to modify every element
+    of the array in turn.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To modify the array in place, use `array_walk()` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Looping through collections of data is a common requirement for PHP applications.
+    For example, you may want to use collections to define repeated tasks. Or you
+    may want to perform a particular operation on every item in a collection, like
+    squaring values, as shown in the Solution example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `array_walk()` function is an effective way to both define the transformation
+    you want applied and to apply it to the value of every element of the array. The
+    callback function (the second parameter) accepts three arguments: the value and
+    key for an element in the array and an optional `$arg` argument. This final argument
+    is defined during the initial invocation of `array_walk()` and is passed to every
+    use of the callback. It’s an efficient way to pass a constant value to the callback,
+    as shown in [Example 7-21](#array_walk_with_arg).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-21\. Invoking `array_walk()` with an extra argument
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using `array_walk()` to modify an array in place requires passing array values
+    *by reference* into the callback (note the extra `&` in front of the argument
+    name). This function could also be used to merely walk over each element in the
+    array and perform some other function *without* modifying the source array. In
+    fact, that’s the most common use of this function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In addition to walking over every element of an array, you can walk over the
+    *leaf* nodes in a nested array by using `array_walk_recursive()`. Unlike the preceding
+    examples, `array_walk_recursive()` will traverse nested arrays until it finds
+    a non-array element before applying your specified callback function. [Example 7-22](#array_walk_recursive)
+    handily demonstrates the difference between the recursive and nonrecursive function
+    calls against a nested array. Specifically, if you are dealing with a nested array,
+    `array_walk()` will throw an error and fail to do anything at all.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-22\. Comparing `array_walk()` with `array_walk_recursive()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In many situations, you might want to create a new copy of a mutated array
+    without losing track of its original state. In those circumstances, `array_map()`
+    might be a safer choice than `array_walk()`. Rather than modifying the source
+    array, `array_map()` empowers you to apply a function to every element in the
+    source array and return an entirely new array. The advantage is that you’ll have
+    both the original and the modified arrays available for further use. The following
+    example leverages the same logic as the Solution example *without* changing the
+    source array:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here are some key differences to note between these two families of array functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`array_walk()` expects the array first and the callback second.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`array_map()` expects the callback first and the array second.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`array_walk()` returns a Boolean flag, while `array_map()` returns a new array.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`array_map()` does not pass keys into the callback.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`array_map()` does not pass additional arguments into the callback.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: There is no recursive form of `array_map()`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`array_map()`](https://oreil.ly/fzU_0), [`array_walk()`](https://oreil.ly/OTpL4),
+    and [`array_walk_recursive()`](https://oreil.ly/qCt7G).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.14 Reducing an Array to a Single Value
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to iteratively reduce a collection of values to a single value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `array_reduce()` with a callback as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `array_reduce()` function walks through every element of an array and modifies
+    its own internal state to eventually arrive at a single answer. The Solution example
+    walks through each element of a list of numbers and adds them all to the initial
+    value of `0`, returning the final sum of all of the numbers in question.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The callback function accepts two parameters. The first is the value you’re
+    carrying over from the last operation. The second is the value of the current
+    item in the array over which you’re iterating. Whatever the callback returns will
+    be passed into the callback as the `$carry` parameter for the next element in
+    the array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When you first start out, you pass an optional initial value (`null` by default)
+    into the callback as the `$carry` parameter. If the reduction operation you’re
+    applying to the array is straightforward, you can often provide a better initial
+    value, as done in the Solution example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The biggest drawback of `array_reduce()` is that it does not handle array keys.
+    In order to leverage any keys in the array as part of the reduction operation,
+    you need to define your own version of the function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 7-23](#associative_array_reduce) shows how you can instead iterate
+    over the array returned by `array_keys()` to leverage elements’ keys and values
+    in the reduction. You pass both the array and callback into the closure processed
+    by `array_reduce()` so you can both reference the *element* in the array defined
+    by that key and apply your custom function to it. In the main program, you are
+    then free to reduce an associative array the same way you would a numeric one—except
+    you have an extra argument in your callback containing each element’s key.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-23\. Associative alternative to `array_reduce()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE61]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding code will return the sum of the keys of `$array` multiplied by
+    their corresponding values—specifically, `1 * 10 + 2 * 10 + 3 * 5 = 45`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`array_reduce()`](https://oreil.ly/iu_XM).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 7.15 Iterating over Infinite or Very Large/Expensive Arrays
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to iterate over a list of items that is too large to be held in memory
+    or is too slow to generate.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use a generator to yield one chunk of data at a time to your program, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE62]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Generators are a memory-efficient way to handle large pieces of data in PHP.
+    In the Solution example, a generator produces weekdays (Monday through Friday)
+    in order as an infinite series. An infinite series will not fit in the memory
+    available to PHP, but the generator construct allows you to build it up one piece
+    at a time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rather than instantiate a too-large array, you generate the first piece of data
+    and return it via the `yield` keyword to whomever called the generator. This freezes
+    the state of the generator and yields executional control back to the main application.
+    Unlike a typical function that returns data once, a generator can provide data
+    multiple times so long as it is still valid.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the Solution example, the `yield` appears inside an infinite `while` loop,
+    so it will continue enumerating weekdays forever. If you wanted the generator
+    to exit, you would do so using an empty `return` statement at the end (or merely
+    break the loop and implicitly return).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tip
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Returning data from a generator is different from a usual function call. You
+    typically return data with the `yield` keyword and exit a generator with an empty
+    `return` statement. However, if the generator *does* have a final return, you
+    must access that data by calling `::getReturn()` on the generator object. This
+    additional method call often sticks out as odd, so unless your generator has a
+    reason to return data outside its typical `yield` operation, you should try to
+    avoid it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Since the generator can provide data forever, you can iterate over that data
+    by using a standard `foreach` loop. Similarly, you could leverage a limited `for`
+    loop to avoid an infinite series. The following code leverages such a limited
+    loop and the Solution’s original generator:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE63]'
+  prefs: []
+  type: TYPE_PRE
+- en: Though the generator is defined as a function, internally PHP recognizes it
+    as a generator and converts it to an instance of the [`Generator` class](https://oreil.ly/R_geQ).
+    This class gives you access to the `::current()` and `::next()` methods and permits
+    you to step over the generated data one piece at a time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The control flow within the application passes back and forth between the main
+    program and the generator’s `yield` statement. The first time you access the generator,
+    it runs internally up to `yield` and then returns control (and possibly data)
+    to the main application. Subsequent calls to the generator start *after* the `yield`
+    keyword. Loops are required to force the generator back to the beginning in order
+    to `yield` again.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Overview on [generators](https://oreil.ly/cR4-V).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch07.html#idm45875163152816-marker)) Class inheritance is discussed in
+    [Chapter 8](ch08.html#chapter_classes), and object interfaces are explicitly covered
+    in [Recipe 8.7](ch08.html#class_interfaces).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([2](ch07.html#idm45875162170640-marker)) See [Recipe 7.15](#iterating_over_large_arrays)
+    for examples of very large iterable data structures.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([3](ch07.html#idm45875161556000-marker)) Take care not to confuse `array_splice()`
+    with `array_slice()`. The two functions have vastly different uses, and the latter
+    is covered in [Recipe 7.7](#slicing_arrays).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([4](ch07.html#idm45875161553616-marker)) The `array_splice()` function will
+    also *return* the elements it extracted from the target array, in the event you
+    need to use that data for some other operation. See [Recipe 7.7](#slicing_arrays)
+    for further discussion of this behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([5](ch07.html#idm45875159668272-marker)) Review [“Comparison Operators”](ch02.html#comparison_operators_intro)
+    for further details on comparison operators and their usage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([6](ch07.html#idm45875159078400-marker)) The spaceship operator is explained
+    at length in [Recipe 2.4](ch02.html#spaceship_operator), which also introduces
+    an example use of `usort()`.
+  prefs: []
+  type: TYPE_NORMAL

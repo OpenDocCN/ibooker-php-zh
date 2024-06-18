@@ -1,0 +1,902 @@
+- en: Chapter 14\. Security
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: PHP is a flexible language with hooks into just about every API offered on the
+    machines on which it runs. Because it was designed to be a forms-processing language
+    for HTML pages, PHP makes it easy to use form data sent to a script. Convenience
+    is a double-edged sword, however. The very features that allow you to quickly
+    write programs in PHP can open doors for those who would break into your systems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP itself is neither secure nor insecure. The security of your web applications
+    is entirely determined by the code you write. For example, if a script opens a
+    file whose name is passed to the script as a form parameter, that script could
+    be given a remote URL, an absolute pathname, or even a relative path, allowing
+    it to open a file outside the site’s document root. This could expose your password
+    file or other sensitive information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Web application security is still a relatively young and evolving discipline.
+    A single chapter on security cannot sufficiently prepare you for the onslaught
+    of attacks your applications are sure to receive. This chapter takes a pragmatic
+    approach and covers a distilled selection of topics related to security, including
+    how to protect your applications from the most common and dangerous attacks. The
+    chapter concludes with a list of further resources as well as a brief recap with
+    a few additional tips.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Safeguards
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: One of the most fundamental things you need to understand when developing a
+    secure site is that all information not generated within the application itself
+    is potentially tainted, or at least suspect. This includes data from forms, files,
+    and databases. There should always be protections or safeguards in place.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Filtering Input
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When data is described as being tainted, this doesn’t necessarily mean it’s
+    malicious. It means it *might be* malicious. You can’t trust the source, so you
+    should inspect it to make sure it’s valid. This inspection process is called *filtering*,
+    and you only want to allow valid data to enter your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are a few best practices for the filtering process:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use a whitelist approach. This means you err on the side of caution and assume
+    data is invalid unless you can prove it to be valid.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Never correct invalid data. History has proven that attempts to correct invalid
+    data often result in security vulnerabilities due to errors.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use a naming convention to help distinguish between filtered and tainted data.
+    Filtering is useless if you can’t reliably determine whether something has been
+    filtered.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'In order to solidify these concepts, consider a simple HTML form allowing a
+    user to select among three colors:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It’s easy to appreciate the desire to trust `$_POST[''color'']` in *process.php*.
+    After all, the form seemingly restricts what a user can enter. However, experienced
+    developers know that HTTP requests have no restriction on the fields they contain—client-side
+    validation is never sufficient by itself. There are numerous ways malicious data
+    can be sent to your application, and your only defense is to trust nothing and
+    filter your input:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: This example demonstrates a simple naming convention. You initialize an array
+    called `$clean`. For each input field, validate the input and store the validated
+    input in the array. This reduces the likelihood of tainted data being mistaken
+    for filtered data, because you should always err on the side of caution and consider
+    everything not stored in this array to be tainted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Your filtering logic depends entirely upon the type of data you’re inspecting,
+    and the more restrictive you can be, the better. For example, consider a registration
+    form that asks the user to provide a desired username. Clearly, there are many
+    possible usernames, so the previous example doesn’t help. In these cases, the
+    best approach is to filter based on format. If you want to require a username
+    to be alphanumeric (consisting of only alphabetic and numeric characters), your
+    filtering logic can enforce this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Of course, this doesn’t ensure any particular length. Use `mb_strlen()` to
+    inspect a string’s length and enforce a minimum and maximum:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Frequently, the characters you want to allow don’t all belong to a single group
+    (such as alphanumeric), and this is where regular expressions can help. For example,
+    consider the following filtering logic for a last name:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: This filter allows only alphabetic characters, spaces, hyphens, and single quotes
+    (apostrophes), and it uses a whitelist approach as described earlier. In this
+    case, the whitelist is the list of valid characters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In general, filtering is a process that ensures the integrity of your data.
+    But while many web application security vulnerabilities can be prevented by filtering,
+    most are due to a failure to escape data, and neither safeguard is a substitute
+    for the other.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Escaping Output Data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*Escaping* is a technique that preserves data as it enters another context.
+    PHP is frequently used as a bridge between disparate data sources, and when you
+    send data to a remote source, it’s your responsibility to prepare it properly
+    so that it’s not misinterpreted.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, `O'Reilly` is represented as `O\'Reilly` when used in an SQL query
+    to be sent to a MySQL database. The backslash preserves the single quote (apostrophe)
+    in the context of the SQL query. The single quote is part of the data, not part
+    of the query, and the escaping guarantees this interpretation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The two predominant remote sources to which PHP applications send data are
+    HTTP clients (web browsers) that interpret HTML, JavaScript, and other client-side
+    technologies, and databases that interpret SQL. For the former, PHP provides `html``entities()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: This example demonstrates the use of another naming convention. The `$html`
+    array is similar to the `$clean` array, except that its purpose is to hold data
+    that is safe to be used in the context of HTML.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'URLs are sometimes embedded in HTML as links:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In this particular example, `$value` exists within nested contexts. It’s within
+    the query string of a URL that is embedded in HTML as a link. Because it’s alphabetic
+    in this case, it’s safe to be used in both contexts. However, when the value of
+    `$var` cannot be guaranteed to be safe in these contexts, it must be escaped twice:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: This ensures that the link is safe to be used in the context of HTML, and when
+    it is used as a URL (such as when the user clicks the link), the URL encoding
+    ensures that the value of `$var` is preserved.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For most databases, there is a native escaping function specific to the database.
+    For example, the MySQL extension provides `mysqli_real_escape_string()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'An even safer alternative is to use a database abstraction library that handles
+    the escaping for you. The following illustrates this concept with `PEAR::DB`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Although this is not a complete example, it highlights the use of a placeholder
+    (the question mark) in the SQL query. `PEAR::DB` properly quotes and escapes the
+    data according to the requirements of your database. Take a look at [Chapter 9](ch09.xhtml#databases-id00007)
+    for more in-depth coverage of placeholder techniques.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A more complete output-escaping solution would include context-aware escaping
+    for HTML elements, HTML attributes, JavaScript, CSS, and URL content, and would
+    do so in a Unicode-safe manner. [Example 14-1](#example_onefour_onedot_escaping_output)
+    shows a sample class for escaping output in a variety of contexts, based on the
+    [content-escaping rules](https://oreil.ly/Xpu6q) defined by the Open Web Application
+    Security Project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-1\. Escaping output for multiple contexts
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Security Vulnerabilities
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Now that we’ve explored the two primary safeguarding approaches, let’s turn
+    to some of the common security vulnerabilities they seek to address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cross-Site Scripting
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Cross-site scripting (XSS) has become the most common web application security
+    vulnerability, and with the rising popularity of Ajax technologies, XSS attacks
+    are likely to become more advanced and to occur more frequently.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The term *cross-site scripting* derives from an old exploit and is no longer
+    very descriptive or accurate for most modern attacks, and this has caused some
+    confusion. Simply put, your code is vulnerable whenever you output data not properly
+    escaped to the output’s context. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is an extreme example, because `$_POST` is obviously neither filtered nor
+    escaped, but it demonstrates the vulnerability.
+  prefs: []
+  type: TYPE_NORMAL
+- en: XSS attacks are limited to only what is possible with client-side technologies.
+    Historically, XSS has been used to capture a victim’s cookies by taking advantage
+    of the fact that `document.cookie` contains this information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In order to prevent XSS, you simply need to properly escape your output for
+    the output context:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: You should also always filter your input, which can offer a redundant safeguard
+    in some cases (implementing redundant safeguards adheres to a security principle
+    known as *Defense in Depth*). For example, if you inspect a username to ensure
+    that it’s alphabetic and also only output the filtered username, no XSS vulnerability
+    exists. Just be sure that you don’t depend upon filtering as your primary safeguard
+    against XSS, because it doesn’t address the root cause of the problem.
+  prefs: []
+  type: TYPE_NORMAL
+- en: SQL Injection
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The second most common web application vulnerability is SQL injection, an attack
+    very similar to XSS. The difference is that SQL injection vulnerabilities exist
+    wherever you use unescaped data in an SQL query. (If these names were more consistent,
+    XSS would probably be called “HTML injection.”)
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following example demonstrates an SQL injection vulnerability:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The problem is that if the username is not escaped, its value can manipulate
+    the format of the SQL query. Because this particular vulnerability is so common,
+    many attackers try usernames such as the following when trying to log in to a
+    target site:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Attackers love this username, because it allows access to the account with
+    the username `chris''` without them having to know that account’s password. After
+    interpolation, the SQL query becomes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Because two consecutive hyphens (`--`) indicate the beginning of an SQL comment,
+    this query is identical to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the code containing this snippet of code assumes a successful login when
+    `$result` is nonzero, this SQL injection would allow an attacker to log in to
+    any account without having to know or guess the password.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Safeguarding your applications against SQL injection is primarily accomplished
+    by escaping output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: However, this only ensures that the data you escape is interpreted as data.
+    You still need to filter data because characters like the percent sign (`%`) have
+    a special meaning in SQL but don’t need to be escaped.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The best protection against SQL injection is the use of *bound parameters*.
+    The following example demonstrates the use of bound parameters with PHP’s PDO
+    extension and an Oracle database:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Because bound parameters ensure that the data never enters a context where it
+    can be considered anything but data (i.e., it’s never misinterpreted), no escaping
+    of the username and password is necessary.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Filename Vulnerabilities
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'It’s fairly easy to construct a filename that refers to something other than
+    what you intended. For example, say you have a `$username` variable that contains
+    the name the user wants to be called, which the user has specified through a form
+    field. Now let’s say you want to store a welcome message for each user in the
+    directory */usr/local/lib/greetings* so that you can output the message any time
+    the user logs in to your application. The code to print the current user’s greeting
+    is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This seems harmless enough, but what if the user chose the username `"../../../../etc/passwd"`?
+    The code to include the greeting now includes this relative path instead: */etc/passwd*.
+    Relative paths are a common trick used by hackers against unsuspecting scripts.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Another trap for the unwary programmer lies in the way that, by default, PHP
+    can open remote files with the same functions that open local files. The `fopen()`
+    function and anything that uses it—such as `include()` and `require()`—can be
+    passed an HTTP or FTP URL as a filename, and the document identified by the URL
+    will be opened. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: If `$username` is set to *https://www.example.com/myfile*, a remote file is
+    opened, not a local one.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The situation is even worse if you let the user tell you which file to `include()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the user passes a `theme` parameter of *https://www.example.com/badcode.inc*
+    and your `variables_order` includes `GET` or `POST`, your PHP script will happily
+    load and run the remote code. Never use parameters as filenames like this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are several solutions to the problem of checking filenames. You can disable
+    remote file access, check filenames with `realpath()` and `basename()` (as described
+    next), and use the `open_basedir` option to restrict filesystem access outside
+    your site’s document root.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check for relative paths
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When you need to allow the user to specify a filename in your application, you
+    can use a combination of the `realpath()` and `basename()` functions to ensure
+    that the filename is what it ought to be. The `realpath()` function resolves special
+    markers (such as `.` and `..`). After a call to `realpath()`, the resulting path
+    is a full path on which you can then use `basename()`. The `basename()` function
+    returns just the filename portion of the path.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Going back to our welcome message scenario, here’s an example of `realpath()`
+    and `basename()` in action:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, we’ve resolved `$filename` to its full path and then extracted
+    just the filename. If this value doesn’t match the original value of `$filename`,
+    we’ve got a bad filename that we don’t want to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once you have the completely bare filename, you can reconstruct what the file
+    path ought to be, based on where legal files should go, and add a file extension
+    based on the actual contents of the file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Session Fixation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A very popular attack that targets sessions is session fixation. The primary
+    reason behind its popularity is that it’s the easiest method by which an attacker
+    can obtain a valid session identifier. As such, it is intended as a stepping-stone
+    to a session hijacking attack, in which an attacker impersonates a user by presenting
+    the user’s session identifier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Session fixation is any approach that causes a victim to use a session identifier
+    chosen by an attacker. The simplest example is a link with an embedded session
+    identifier:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: A victim who clicks this link will resume the session identified as `1234`,
+    and if the victim proceeds to log in, the attacker can hijack the victim’s session
+    to escalate the level of privilege.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are a few variants of this attack, including some that use cookies for
+    this same purpose. Luckily, the safeguard is simple, straightforward, and consistent.
+    Whenever there is a change in the level of privilege, such as when a user logs
+    in, regenerate the session identifier with `session_regenerate_id()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: This effectively prevents session fixation attacks by ensuring that any user
+    who logs in (or otherwise escalates the privilege level in any way) is assigned
+    a fresh, random session identifier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: File Upload Traps
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'File uploads combine two dangers we’ve already discussed: user-modifiable data
+    and the filesystem. While PHP 7 itself is secure in how it handles uploaded files,
+    there are several potential traps for unwary programmers.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Distrust browser-supplied filenames
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Be careful using the filename sent by the browser. If possible, do not use
+    it as the name of the file on your filesystem. It’s easy to make the browser send
+    a file identified as */etc/passwd* or */home/kevin/.forward*. You can use the
+    browser-supplied name for all user interaction, but generate a unique name yourself
+    to actually call the file. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Beware of filling your filesystem
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Another trap is the size of uploaded files. Although you can tell the browser
+    the maximum size of file to upload, this is only a recommendation and does not
+    ensure your script won’t be handed a file of a larger size. Attackers can perform
+    a denial-of-service attack by sending files large enough to fill up your server’s
+    filesystem.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Set the `post_max_size` configuration option in *php.ini* to the maximum size
+    (in bytes) that you want:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: PHP will ignore requests with data payloads larger than this size. The default
+    10 MB is probably larger than most sites require.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Account for EGPCS settings
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The default `variables_order` (EGPCS: environment, `GET`, `POST`, cookie, server)
+    processes `GET` and `POST` parameters before cookies. This makes it possible for
+    the user to send a cookie that overwrites the global variable you think contains
+    information on your uploaded file. To avoid being tricked like this, check that
+    the given file was actually an uploaded file using the `is_uploaded_file()` function.
+    For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'PHP provides a `move_uploaded_file()` function that moves the file only if
+    it was an uploaded file. This is preferable to moving the file directly with a
+    system-level function or PHP’s `copy()` function. For example, the following code
+    cannot be fooled by cookies:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Unauthorized File Access
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If only you and people you trust can log in to your web server, you don’t need
+    to worry about file permissions for files used by or created by your PHP programs.
+    However, most websites are hosted on an ISP’s machines, and there’s a risk that
+    nontrusted users can read files that your PHP program creates. There are a number
+    of techniques that you can use to deal with file permissions issues.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Restrict filesystem access to a specific directory
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can set the `open_basedir` option to restrict access from your PHP scripts
+    to a specific directory. If `open_basedir` is set in your *php.ini*, PHP limits
+    filesystem and I/O functions so that they can operate only within that directory
+    or any of its subdirectories. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'With this configuration in effect, the following function calls succeed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'But these generate runtime errors:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Of course, one web server can run many applications, and each application typically
+    stores files in its own directory. You can configure `open_basedir` on a per-virtual-host
+    basis in your *httpd.conf* file like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Similarly, you can configure it per directory or per URL in *httpd.conf*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `open_basedir` directory can be set only in the *httpd.conf* file, not in
+    .*htaccess* files, and you must use `php_admin_value` to set it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Get permissions right the first time
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Do not create a file and then change its permissions. This creates a *race
+    condition*, where a lucky user can open the file once it’s created but before
+    it’s locked down. Instead, use the `umask()` function to strip off unnecessary
+    permissions. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: By default, the `fopen()` function attempts to create a file with permission
+    0666 (`rw-rw-rw-`). Calling `umask()` first disables the group and other bits,
+    leaving only 0600 (`rw-------`). Now, when `fopen()` is called, the file is created
+    with those permissions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Don’t use files
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Because all scripts running on a machine run as the same user, a file that one
+    script creates can be read by another, regardless of which user wrote the script.
+    All a script needs to know to read a file is the name of that file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is no way to change this, so the best solution is to not use files to
+    store data that should be protected; the most secure place to store data is in
+    a database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A complex workaround is to run a separate Apache daemon for each user. If you
+    add a reverse proxy such as *haproxy* in front of the pool of Apache instances,
+    you may be able to serve 100+ users on a single machine. Few sites do this, however,
+    because the complexity and cost are much greater than those for the typical situation,
+    where one Apache daemon can serve web pages for thousands of users.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Protect session files
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With PHP’s built-in session support, session information is stored in files.
+    Each file is named `/tmp/sess_*id*`, where *`id`* is the name of the session and
+    is owned by the web server user ID, usually `nobody`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because all PHP scripts run as the same user through the web server, this means
+    that any PHP script hosted on a server can read any session files for any other
+    PHP site. In situations where your PHP code is stored on an ISP’s server that
+    is shared with other users’ PHP scripts, variables you store in your sessions
+    are visible to other PHP scripts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Even worse, other users on the server can create files in the session directory
+    */tmp*. There’s nothing preventing attackers from creating a fake session file
+    that has any variables and values they want in it. They can then have the browser
+    send your script a cookie containing the name of the faked session, and your script
+    will happily load the variables stored in the fake session file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'One workaround is to ask your service provider to configure their server to
+    place your session files in your own directory. Typically, this means that your
+    `VirtualHost` block in the Apache *httpd.conf* file will contain:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you have *.htaccess* capabilities on your server and Apache is configured
+    to let you override options, you can make the change yourself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conceal PHP libraries
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Many a hacker has learned of weaknesses by downloading include files or data
+    that is stored alongside HTML and PHP files in the web server’s document root.
+    To prevent this from happening to you, all you need to do is store code libraries
+    and data outside the server’s document root.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, if the document root is */home/httpd/html*, everything below that
+    directory can be downloaded through a URL. It is a simple matter to put your library
+    code, configuration files, logfiles, and other data outside that directory (e.g.,
+    in */usr/local/lib/myapp*). This doesn’t prevent other users on the web server
+    from accessing those files (see [“Don’t use files”](#donapostrophet_use_files)),
+    but it does prevent the files from being downloaded by remote users.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you must store these auxiliary files in your document root, you should configure
+    the web server to deny requests for those files. For example, this tells Apache
+    to deny requests for any file with the *.inc* extension, a common extension for
+    PHP include files:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: A better and more preferred way to prevent downloading of PHP source files is
+    to always use the *.php* extension.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you store code libraries in a different directory from the PHP pages that
+    use them, you’ll need to tell PHP where the libraries are. Either give a path
+    to the code in each `include()` or `require()`, or change `include_path` in *php.ini*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: PHP Code Issues
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With the `eval()` function, PHP allows a script to execute arbitrary PHP code.
+    Although it can be useful in a few limited cases, allowing any user-supplied data
+    to go into an `eval()` call is just begging to be hacked. For instance, the following
+    code is a security nightmare:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This page takes some arbitrary PHP code from a form and runs it as part of
+    the script. The running code has access to all of the global variables for, and
+    runs with the same privileges as, the script. It’s not hard to see why this is
+    a problem. Type this into the form:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: Never do this. There is no practical way to ensure such a script can ever be
+    secure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can globally disable particular function calls by listing them, separated
+    by commas, in the `disable_functions` configuration option in *php.ini*. For example,
+    you may never have need for the `system()` function, so you can disable it entirely
+    with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: This doesn’t make `eval()` any safer, though, as there’s no way to prevent important
+    variables from being changed or built-in constructs such as `echo()` from being
+    called.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the case of `include`, `require`, `include_once`, and `require_once`, your
+    best bet is to turn off remote file access using `allow_url_fopen`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Any use of `eval()` and the `/e` option with `preg_replace()` is dangerous,
+    especially if you use any user-entered data in the calls. Consider the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It seems pretty innocuous. However, suppose the user enters the following value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, both the expected command and the one you’d rather avoid will
+    be executed. The only viable solution is to never give user-supplied data to `eval()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shell Command Weaknesses
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Be very wary of using the `exec()`, `system()`, `passthru()`, and `popen()`
+    functions and the backtick operator (`` ` ``) in your code. The shell is a problem
+    because it recognizes special characters (e.g., semicolons to separate commands).
+    For example, suppose your script contains this line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If the user passes the value `"/tmp;cat /etc/passwd"` as the `$directory` parameter,
+    your password file is displayed because `system()` executes the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In cases where you must pass user-supplied arguments to a shell command, use
+    `escapeshellarg()` on the string to escape any sequences that have special meaning
+    to shells:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, if the user passes `"/tmp;cat /etc/passwd"`, the command that’s actually
+    run is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: The easiest way to avoid the shell is to do the work of whatever program you’re
+    trying to call in PHP code, rather than calling out to the shell. Built-in functions
+    are likely to be more secure than anything involving the shell.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Data Encryption Concerns
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: One last topic to cover is encrypting data that you want to ensure is not viewable
+    in its native form. This mostly applies to website passwords, but there are other
+    examples, such as Social Security numbers (Social Insurance numbers in Canada),
+    credit card numbers, and bank account numbers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check out the discussion on [the FAQ page of the PHP website](https://oreil.ly/3wh7t)
+    to find the best approach for your specific data encryption needs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Further Resources
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The following resources can help you expand on this brief introduction to code
+    security:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[*Essential PHP Security*](https://oreil.ly/PHP_Security) (O’Reilly) by Chris
+    Shiflett and its [companion website](http://phpsecurity.org)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [Open Web Application Security Project](https://www.owasp.org)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Security Recap
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Because security is such an important issue, we want to reiterate the main
+    points of this chapter as well as provide a few additional tips:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Filter input to be sure that all data you receive from remote sources is the
+    data you expect. Remember, the stricter your filtering logic, the safer your application.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Escape output in a context-aware manner to be sure that your data isn’t misinterpreted
+    by a remote system.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Always initialize your variables. This is especially important when the `register_globals`
+    directive is enabled.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Disable `register_globals`, `magic_quotes_gpc`, and `allow_url_fopen`. See the
+    [PHP website](http://www.php.net) for details on these directives.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Whenever you construct a filename, check the components with `basename()` and
+    `realpath()`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Store include files outside of the document root. It is better to not name your
+    include files with the *.inc* extension. Name them with a *.php* extension, or
+    some other less obvious extension.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Always call `session_regenerate_id()` whenever a user’s privilege level changes.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Whenever you construct a filename from a user-supplied component, check the
+    components with `basename()` and `realpath()`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Don’t create a file and then change its permissions. Instead, set `umask()`
+    so that the file is created with the correct permissions.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Don’t use user-supplied data with `eval()`, `preg_replace()` with the `/e` option,
+    or any of the system commands—`exec()`, `system()`, `popen()`, `passthru()`, and
+    the backtick operator (`` ` ``).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: What’s Next
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: With potential vulnerabilities like these, you might be wondering why you should
+    do this “web development thing” at all. There are almost daily reports of web
+    security breaches at banks and investment houses with massive data loss and identity
+    theft. At the very least, if you are going to become a good web developer you
+    *must* always embrace security and keep in mind that it is a changing landscape.
+    Don’t ever assume that you are 100% secure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Coming in the next chapter is a discussion on application development techniques.
+    This is another area where web developers can really shine and save themselves
+    a lot of headaches. The use of code libraries, error handling, and performance
+    tuning are among the topics we’ll cover.
+  prefs: []
+  type: TYPE_NORMAL

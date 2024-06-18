@@ -1,0 +1,797 @@
+- en: Chapter 18\. PHP Command Line
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Developers come to PHP from all sorts of backgrounds and with various levels
+    of experience in software development. Regardless of whether you are a new computer
+    science graduate, a seasoned developer, or someone from a noncoding field looking
+    to learn a new skill, the forgiving nature of the language makes it easy to get
+    started. That being said, the largest stumbling block for these noncoder beginners
+    may be PHP’s command-line interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Noncoder beginners are likely to be comfortable with using a graphical user
+    interface and navigating with a mouse and a graphical display. Give the same user
+    a command-line terminal, and they might struggle with or be intimidated by the
+    interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a backend language, PHP is frequently manipulated at the command line. This
+    potentially makes it an intimidating language for developers not accustomed to
+    text-based interfaces. Fortunately, PHP-based command-line applications are relatively
+    straightforward to build and immensely powerful to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An application might expose a command palette similar to its default RESTful
+    interface, thus making interactions from a terminal similar to those over a browser
+    or through an API. Yet another application might bury its administrative tooling
+    in the CLI, protecting less technical end users from accidentally damaging the
+    application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'One of the most popular PHP applications in the market today is [WordPress](https://wordpress.org),
+    the open source blogging and web platform. Most users interact with the platform
+    through its graphical web interface, but the WordPress community also maintains
+    a rich command-line interface for the platform: [WP-CLI](https://wp-cli.org).
+    This tool allows a user to manage everything already exposed by the graphical
+    tool but through a scriptable, text-based terminal interface. It also exposes
+    commands for managing user roles, system configuration, the state of the database,
+    and even the system cache. None of these capabilities exist within the stock web
+    interface!'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Any developer building a PHP application today can and should understand the
+    capabilities of the command line, both in terms of what you can do with PHP itself
+    and how your application can expose its functionality through the same interface.
+    A truly rich web application will at some point live on a server that might not
+    expose any sort of graphical interface, so being able to control your application
+    from the terminal is not just a power move—it’s a necessity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following recipes demystify the intricacies of argument parsing, managing
+    input and output, and even leveraging extensions to build full applications that
+    run in the console.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 18.1 Parsing Program Arguments
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want a user to pass an argument when they invoke your script so it can be
+    parsed from within the application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use the `$argc` integer and the `$argv` array to retrieve the value of an argument
+    directly in the script. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Assuming you named the script in the Solution example *script.php*, it would
+    be invoked in a terminal session with the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Internally, the `$argc` variable contains a count of the number of parameters
+    passed to PHP when executing the script. In the Solution example, there are exactly
+    two parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The name of the script itself (*script.php*)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Whatever string value you passed after the name of the script
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Both `$argc` and `$argv` can be disabled at runtime by setting the [`reg⁠ister_argc_argv`
+    flag](https://oreil.ly/ZKulH) to `false` in your *php.ini* file. If enabled, these
+    parameters will contain either the arguments passed to a script or information
+    about a GET request forwarded from a web server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The first argument will *always* be the name of the script or file being executed.
+    All other arguments are delimited by spaces beyond that. Should you need to pass
+    a compound argument (like a string with spaces), wrap that argument in double
+    quotes. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: More complicated implementations might leverage PHP’s `getopt()` function rather
+    than manipulating the argument variables directly. This function will parse both
+    short and long options and pass their contents into arrays your application can
+    then leverage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Short options are each single characters represented at the command line with
+    a single dash—for example, `-v`. Each option could either merely be present (as
+    in a flag) or be followed by data (as in an option).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Long options are prefixed with double dashes but otherwise act the same way
+    as their short relatives. You can assume either or both styles of options are
+    present and use them however you want in your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Often, a command-line application will provide both a long option and a single-character
+    shortcut for the same thing. For example, `-v` and `--verbose` are frequently
+    used to control the level of output of a script. With `getopt()`, you can easily
+    have both, but PHP won’t link them together. If you support two different methods
+    for providing the same option value or flag, you’ll need to reconcile them within
+    your script manually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `getopt()` function takes three parameters and returns an array representing
+    the options the PHP interpreter has parsed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first argument is a single string in which each character represents a short
+    option or flag.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The second argument is an array of strings, and each string is a long option
+    name.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The final argument, *which is passed by reference*, is an integer representing
+    the index in `$argv` where parsing has stopped when PHP encounters a non-option.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Both short and long options also accept modifiers. If you pass an option by
+    itself, PHP will not accept a value for that option but will treat it as a flag.
+    If you append a colon to an option, PHP will *require* a value. If you append
+    two colons, PHP will treat the value as optional.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As an illustration, [Table 18-1](#getopt_arguments) lists out various ways both
+    short and long options can leverage these additional elements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 18-1\. PHP `getopt()` arguments
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Argument | Argument type | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `a` | Short option | A single flag with no value: `-a` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `b:` | Short option | A single flag with a required value: `-b value` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `c::` | Short option | A single flag with an optional value: `-c value` or
+    just `-c` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `ab:c` | Short option | Composite three flags where `a` and `c` have no value
+    but `b` requires a value: `-a -b value -c` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `verbose` | Long option | Option string with no value: `--verbose` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `name:` | Long option | Option string with a required value: `--name Alice`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `output::` | Long option | Option string with an optional value: `--output
+    file.txt` or just `--output` |'
+  prefs: []
+  type: TYPE_TB
+- en: 'To illustrate the utility of option parsing, define a program as in [Example 18-1](#getopt_walkthrough)
+    that exposes both short and long options but also leverages free-form (non-option)
+    input after the flags. The following script will expect the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A flag to control whether output should be capitalized (`-c`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A username (`--name`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Some extra, arbitrary text after the options
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Example 18-1\. Direct illustration of `getopt()` with multiple options
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_php_command_line_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use `getopt()` to define both the short and long options your script expects.
+    The third, optional parameter is passed by reference and will be overwritten by
+    the index at which the interpreter runs out of options to parse.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_php_command_line_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Options with values are easy to extract from the resultant associative array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_php_command_line_CO1-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The resultant index from `getopt()` can be used to quickly extract any additional
+    data from the command by pulling unparsed values out of the `$argv` array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_php_command_line_CO1-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Options without values will still set a key in the associative array, but the
+    value will be a Boolean `false`. Check that the key exists, but don’t rely on
+    its value because of the counterintuitive nature of the result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Assuming you name the script defined by [Example 18-1](#getopt_walkthrough)
+    *getopt.php*, you can expect to see a result like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`$argc`](https://oreil.ly/BXdSI), [`$argv`](https://oreil.ly/ODRwK),
+    and the [`getopt()` function](https://oreil.ly/ZfqTP).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 18.2 Reading Interactive User Input
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to prompt the user for input and read their response into a variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Read data from the standard input stream by using the `STDIN` file handle constant.
+    For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The standard input stream makes it easy for you to read any data that comes
+    in with a request. Reading data directly from the stream in a program using `fgets()`
+    will pause the execution of your program until the end user provides that input
+    to you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Solution example leverages the shorthand constant `STDIN` to reference the
+    input stream. You could just as easily use the stream’s fully qualified name (along
+    with an explicit `fopen()`), as demonstrated in [Example 18-2](#php_stdin_user_input).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 18-2\. Reading user input from `stdin`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The special `STDIN` and `STDOUT` shorthand names are only accessible in an application.
+    If using the interactive terminal REPL as in [Recipe 18.5](#recipe_php_repl),
+    these constants will not be defined nor will they be accessible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An alternative approach is to use the [GNU Readline extension](https://oreil.ly/eRhJw)
+    with PHP, which may or may not be available in your installation. This extension
+    wraps much of the manual work to prompt for, retrieve, and trim user input. The
+    entire Solution example could be rewritten as shown in [Example 18-3](#php_readline_integration).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 18-3\. Reading input from the GNU Readline extension
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Additional functions provided by the Readline extension, like [`readline_add_​history()`](https://oreil.ly/J5do3),
+    allow for efficient manipulation of the system’s command-line history. If the
+    extension is available, it’s a powerful way to work with user input.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Some distributions of PHP, like those for Windows, will come with Readline support
+    enabled by default. In other situations, you might need to compile PHP explicitly
+    to include this support. For more on native PHP extensions, review [Recipe 15.4](ch15.html#native_php_extensions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Further discussion of standard input in [Recipe 11.2](ch11.html#recipe_input_stream).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 18.3 Colorizing Console Output
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to display text in the console in different colors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use properly escaped console color codes. For example, print the string `Happy
+    Independence Day` in blue text on a red background as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Unix-like terminals support ANSI escape sequences that grant programs fine-grained
+    control over things like cursor location and font styling. In particular, you
+    can define the color used by the terminal for all following text with this escape
+    sequence:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Foreground colors come in two variants—regular and bold (determined by an extra
+    Boolean flag in the color definition). Background colors lack this differentiation.
+    All of the colors are identified by these codes in [Table 18-2](#ansi_color_codes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 18-2\. ANSI color codes
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Color | Normal foreground | Bright foreground | Background |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Black | `0;30` | `1;30` | `40` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Red | `0;31` | `1;31` | `41` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Green | `0;32` | `1;32` | `42` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Yellow | `0;33` | `1;33` | `43` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Blue | `0;34` | `1;34` | `44` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Magenta | `0;35` | `1;35` | `45` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Cyan | `0;36` | `1;36` | `46` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| White | `0;37` (really light gray) | `1;37` | `47` |'
+  prefs: []
+  type: TYPE_TB
+- en: To reset the terminal colors back to normal, use a simple `0` in place of any
+    color definitions. The code `\e[0m` will reset all attributes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Wikipedia coverage of [ANSI escape codes](https://oreil.ly/y02cf).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 18.4 Creating a Command-Line Application with Symfony Console
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to create a full command-line application without manually writing
+    all of the argument parsing and handling code yourself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use the Symfony Console component to define your application and its commands.
+    [Example 18-4](#basic_hello_world_command), for example, defines a Symfony command
+    for greeting a user by name with `Hello world` at the console. [Example 18-5](#actual_console_application)
+    then uses that command object to create an application that greets the user within
+    the terminal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 18-4\. A basic hello world command
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Example 18-5\. Creating the actual console application
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then run the command as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The [Symfony project](https://symfony.com) provides a robust collection of reusable
+    components for PHP. It acts as a framework to simplify and greatly increase the
+    speed of development for web applications as well. It’s remarkably well documented,
+    powerful, and best of all, free and entirely open source.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The open source [Laravel framework](https://laravel.com), the data modules of
+    which were covered in [Recipe 16.9](ch16.html#recipe_eloquent_orm), is itself
+    a meta package of individual Symfony components. Its own [Artisan console tool](https://oreil.ly/uY4QL)
+    is built atop the Symfony Console component. It provides rich command-line control
+    over Laravel projects, their configuration, and even their runtime environments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Like any other PHP extension, Symfony components are installed via Composer.^([1](ch18.html#idm45875132854256))
+    The Console component itself can be installed as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding `require` command will update your project’s *composer.json* file
+    to include the Console component, and it also installs this component (and its
+    dependencies) in your project’s *vendor/* directory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: If your project is not already using Composer, installing any package will create
+    a new *composer.json* file for you automatically. You should take time to update
+    it to autoload any classes or files your project requires so everything works
+    together seamlessly. For more on Composer, extensions, and autoloading, review
+    [Chapter 15](ch15.html#chapter_extensions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you have the library installed, you can start leveraging it immediately.
+    Business logic for various commands can live elsewhere within your application
+    (e.g., behind a RESTful API) but can also be imported into and exposed via the
+    command-line interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, every class that descends from `Command` gives you the ability to
+    work with user-provided arguments and to display content back to the terminal.
+    Options and arguments are created with the `addArgument()` and `addOption()` methods
+    on the class and can be manipulated within its `configure()` method directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Output is highly flexible. You can print content directly to the screen with
+    any of the methods of the `ConsoleOutputInterface` class listed in [Table 18-3](#symfony_output_methods).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 18-3\. Symfony console output methods
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Method | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `writeln()` | Writes a single line to the console. Equivalent to using `echo`
+    on some text followed by an explicit `PHP_EOL` newline. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `write()` | Writes text to the console without appending a newline character.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `section()` | Creates a new output section that can be atomically controlled
+    as if it were an independent output buffer. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `overwrite()` | Only valid on a section—overwrites content in a section with
+    the given content. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `clear()` | Only valid on a section—clears all contents of a section. |'
+  prefs: []
+  type: TYPE_TB
+- en: In addition to the text methods introduced in [Table 18-3](#symfony_output_methods),
+    Symfony Console empowers you to create dynamic tables in the terminal. Every `Table`
+    instance is bound to an output interface and can have as many rows, columns, and
+    separators as you need. [Example 18-6](#console_table_rendering) demonstrates
+    how a simple table can be built and populated with content from an array before
+    itself being rendered to the console.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 18-6\. Rendering tables in the console with Symfony
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Symfony Console automatically parses the content passed into a `Table` object
+    and renders the table for you complete with grid lines. The preceding command
+    produces the following output in the console:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Further modules within the component aid in the control and rendering of dynamic
+    [progress bars](https://oreil.ly/TszPm) and interactive [user prompts and questions](https://oreil.ly/8i5Hx).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Console component even [aids in coloring terminal output directly](https://oreil.ly/arrtr).
+    Unlike the complicated ANSI escape sequences discussed in [Recipe 18.3](#recipe_colorized_console),
+    Console allows you to use named tags and styles directly to control content.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: At the time of this writing, the Console component disables output coloring
+    on Windows systems by default. There are various, free terminal applications (like
+    [Cmder](https://oreil.ly/gs5e6)) available for Windows as alternatives to the
+    standard terminal that do support output coloring.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The terminal is an incredibly powerful interface for your users. Symfony Console
+    makes it easy to target this interface within your application without resorting
+    to hand-parsing arguments or manually crafting rich output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Full documentation of [Symfony’s Console component](https://oreil.ly/vm8Qx).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 18.5 Using PHP’s Native Read-Eval-Print-Loop
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to test some PHP logic without creating a full application to house
+    it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Leverage PHP’s interactive shell as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The PHP interactive shell provides a read-eval-print loop (REPL) that effectively
+    tests single statements in PHP and, where possible, prints directly to the terminal.
+    Within the shell, you can define functions and classes or even directly execute
+    imperative code without creating a script file on disk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This shell is an efficient way to test a particular line of code or piece of
+    logic outside the context of a full application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The interactive shell also enables full tab-completion for all PHP functions
+    or variables as well as any functions or variables that you have defined while
+    the shell session is running. Merely type the first few characters of an otherwise
+    long name, press Tab, and the shell will automatically complete the name for you.
+    If there are multiple possible completions, press the Tab key twice to see a list
+    of all possibilities.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can control two particular settings for the shell in your *php.ini* configuration
+    file: `cli.pager` allows for an external program to handle output rather than
+    displaying directly to the console, and `cli.prompt` allows you to control the
+    default `php >` prompt.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, you can replace the prompt itself by passing an arbitrary string
+    to `#cli.prompt` within the shell session as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_php_command_line_CO2-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The initial invocation of PHP launches the interactive shell.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_php_command_line_CO2-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Setting the `cli.prompt` configuration directly will override the default until
+    this session closes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_php_command_line_CO2-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you’ve overridden the default prompt, you will see your new version until
+    you exit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Backticks can be used to execute arbitrary PHP code within the prompt itself.
+    [Some examples in the PHP documentation](https://oreil.ly/o6NU6) use this method
+    to prepend the current time to the prompt. However, this might not work consistently
+    between systems and could introduce unnecessary instability when executing your
+    PHP code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can even colorize your output by using the ANSI escape sequences defined
+    in [Table 18-2](#ansi_color_codes). This presents a more pleasant interface in
+    many situations and empowers you to provide additional information if desired.
+    The CLI prompt itself introduces four additional escape sequences, as defined
+    in [Table 18-4](#cli_escape_sequences).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 18-4\. CLI prompt escape sequences
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Sequence | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\e` | Adds colors to the prompt by using the ANSI codes introduced in [Recipe
+    18.3](#recipe_colorized_console). |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\v` | Prints the PHP version. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\b` | Indicates which logical block contains the interpreter. By default,
+    this will be `php` but could be `/*` to represent a multiline comment. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\>` | Represents the prompt character, which is `>` by default. When the
+    interpreter is inside another unterminated block or string, this will change to
+    indicate where the shell is. Possible characters are `'' " { ( >`. |'
+  prefs: []
+  type: TYPE_TB
+- en: 'By using both ANSI escape sequences to define colors and the special sequences
+    defined for the prompt itself, you can define a prompt that exposes the version
+    of PHP and the location of the interpreter and that uses a friendly foreground
+    color as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding setting results in the display in [Figure 18-1](#colorized_php_output).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The PHP console updated with colorization](assets/phpc_1801.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 18-1\. The PHP console updated with colorization
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Not every console will support colorization via ANSI control sequences. If this
+    is a pattern you intend to use, take care to test your sequences thoroughly prior
+    to asking anyone else to use the system. While a properly rendered console is
+    attractive and easy to use, unrendered escape sequences can make a console nearly
+    impossible to work with.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [PHP’s interactive command shell](https://oreil.ly/HrCV-).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch18.html#idm45875132854256-marker)) For more on Composer, review [Recipe
+    15.3](ch15.html#installing_composer_packages).
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,1575 @@
+- en: Chapter 3\. Functions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Every computer program in every language is built by tying various components
+    of business logic together. Often, these components need to be somewhat reusable,
+    encapsulating common functionality that needs to be referenced in multiple places
+    throughout an application. The easiest way to make these components modular and
+    reusable is to encapsulate their business logic into *functions*, specific constructs
+    within the application that can be referenced elsewhere throughout an application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 3-1](#imperative_code_without_functions) illustrates how a simple
+    program might be written to capitalize the first character in a string. Coding
+    without using functions is considered *imperative* programming, as you define
+    exactly what the program needs to accomplish one command (or line of code) at
+    a time.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-1\. Imperative (function-free) string capitalization
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The functions `ord()` and `chr()` are references to native functions defined
+    by PHP itself. The [`ord()`](https://oreil.ly/kSI-4) function returns the binary
+    value of a character as an integer. Similarly, [`chr()`](https://oreil.ly/0KUmf)
+    converts a binary value (represented as an integer) into its corresponding character.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When you write code without defining functions, your code ends up rather repetitive
+    as you’re forced to copy and paste identical blocks throughout the application.
+    This violates one of the key principles of software development: *DRY*, or *don’t
+    repeat yourself*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A common way to describe the *opposite* of this principle is *WET*, or *write
+    everything twice*. Writing the same block of code over again leads to two problems:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Your code becomes rather long and difficult to maintain.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If the logic within the repeated code block needs to change, you have to update
+    *several* parts of your program every time.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Rather than repeating logic imperatively, as in [Example 3-1](#imperative_code_without_functions),
+    you can define a function that wraps this logic and later invoke that function
+    directly, as in [Example 3-2](#procedural_code_with_functions). Defining functions
+    is an evolution of imperative to procedural programming that augments the functions
+    provided by the language itself with those defined by your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-2\. Procedural string capitalization
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'User-defined functions are incredibly powerful and quite flexible. The `capitalize_string()`
+    function in [Example 3-2](#procedural_code_with_functions) is relatively simple—it
+    takes a single string parameter and returns a string. However, there is no indication
+    in the function as defined that the `$str` parameter must be a string—you could
+    just as easily pass a number or even an array as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Recall the discussion of PHP’s loose type system from [Chapter 1](ch01.html#chapter_variables)--by
+    default, PHP will try to infer your intent when you pass a parameter into `capitalize_string()`
+    and, in most cases, will return something useful. In the case of passing an integer,
+    PHP will trigger a warning that you are trying to access elements of an array
+    incorrectly, but it will still return an integer without crashing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: More sophisticated programs can add explicit typing information to both the
+    function parameters and its return to provide safety checks around this kind of
+    usage. Other functions could return *multiple* values rather than a single item.
+    Strong typing is illustrated explicitly in [Recipe 3.4](#argument_and_return_typing).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The recipes that follow cover a variety of ways functions can be used in PHP
+    and begins scratching at the surface of building a full application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.1 Accessing Function Parameters
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to access the values passed into a function when it’s called elsewhere
+    in a program.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use the variables defined in the function signature within the body of the
+    function itself as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The variable names defined in the function signature are available only within
+    the scope of the function itself and will contain values matching the data passed
+    into the function when it’s called. Inside the curly braces that define the function,
+    you can use these variables as if you’ve defined them yourself. Just know that
+    any changes you make to those variables will *only* be available within the function
+    and won’t impact anything elsewhere in the application by default.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 3-3](#local_function_scoping) illustrates how a specific variable
+    name can be used both within a function and outside a function while referring
+    to two, completely independent values. Said another way, changing the value of
+    `$number` within the function will only impact the value within the function,
+    not within the parent application.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-3\. Local function scoping
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: By default, PHP passes values into functions rather than passing a reference
+    to the variable. In [Example 3-3](#local_function_scoping), this means PHP passes
+    the *value* `6` into a new `$number` variable within the function, performs a
+    calculation, and returns the result. The `$number` variable outside the function
+    is entirely unaffected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: PHP passes simple values (strings, integers, Booleans, arrays) by value by default.
+    More complex objects, however, are *always* passed by reference. In the case of
+    objects, the variable inside the function points back to the same object as the
+    variable outside the function rather than to a copy of it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In some cases, you might want to explicitly pass a variable by reference rather
+    than just passing its value. In that case, you need to modify the function signature
+    as this is a change to its very definition rather than something that can be modified
+    when the function is called. [Example 3-4](#variable_pass_by_reference) illustrates
+    how the `increment()` function would change to pass `$number` by reference instead
+    of by value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-4\. Passing variables by reference
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: In reality, the variable name doesn’t need to match both inside and outside
+    the function. I’m using `$number` in both cases here to illustrate the difference
+    in scoping. If you stored an integer in `$a` and passed that variable instead
+    as `increment($a)`, the result would be identical to that in [Example 3-4](#variable_pass_by_reference).
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP reference documentation on [user-defined functions](https://oreil.ly/9c1Nr)
+    and [passing variables by reference](https://oreil.ly/ZfOLR).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.2 Setting a Function’s Default Parameters
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to set a default value for a function’s parameter so invocations don’t
+    have to pass it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Assign a default value within the function signature itself. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The example in the Solution attempts to query a database for the title of a
+    book based on its ISBN. If the query fails for any reason, the function will return
+    the string passed into the `$error` parameter instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To make this parameter optional, the function signature assigns a default value.
+    When calling `get_book_title()` with a single parameter, the default `$error`
+    value is used automatically. You alternatively have the option to pass your own
+    string into this variable when invoking the function, such as `get_book_title​(*978-1-098-12132-7*,
+    *Oops!*);`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When defining a function with default parameters, it’s a best practice to place
+    all parameters with default values *last* in the function signature. While defining
+    parameters in any order is *possible*, doing so makes it difficult to call the
+    function properly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 3-5](#misordered_default_parameters) illustrates the kinds of problems
+    that can come up by placing optional parameters before required ones.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: It is possible to define function parameters with specific defaults in any order.
+    However, declaring mandatory parameters after optional ones is deprecated as of
+    PHP 8.0\. Continuing to do so might result in an error in a future version of
+    PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-5\. Misordered default parameters
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_functions_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Proper execution. Returns `Brewing a 2-shot, vanilla latte!`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_functions_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Triggers an `ArgumentCountError` exception because `$shots` is undefined.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In some cases, placing the parameters themselves in a particular order might
+    make logical sense (to make the code more readable, for example). Know that if
+    any parameters are required, every parameter to their left is also effectively
+    required even if you try to define a default value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Examples of default arguments in the [PHP Manual](https://oreil.ly/XVoK1).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.3 Using Named Function Parameters
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to pass arguments into a function based on the name of the parameter
+    rather than its position.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use the named argument syntax while calling a function as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'By default, PHP leverages positional parameters in function definitions. The
+    Solution example references the native [`array_fill()`](https://oreil.ly/jdZQH)
+    function that has the following function signature:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Basic PHP coding must supply arguments to `array_fill()` in the same order
+    in which they’re defined—`$start_index` followed by `$count` followed by `$value`.
+    While the order itself is not a problem, making sense of the meaning of each value
+    when scanning visually through code can be a challenge. Using the basic, ordered
+    parameters, the Solution example would be written as follows, requiring deep familiarity
+    with the function signature to know which integer represents which parameter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Named function parameters disambiguate which value is being assigned to which
+    internal variable. They also allow for arbitrary reordering of parameters when
+    you invoke the function as that invocation is now explicit as to which value is
+    assigned to which parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another key advantage of named arguments is that optional arguments can be *skipped*
+    entirely during function invocation. Consider a verbose activity logging function
+    like in [Example 3-6](#verbose_logging_function), where multiple parameters are
+    considered optional as they set defaults.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-6\. Verbose activity logging function
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Internally, [Example 3-6](#verbose_logging_function) will use its default values
+    when it’s called with a single argument; if `$time` is `null`, the value will
+    be silently replaced with a new `DateTime` instance representing “now.” However,
+    sometimes you might want to populate one of these optional parameters without
+    wanting to explicitly set *all* of them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Say you want to replay previously witnessed events from a static log file. User
+    activity was anonymous (so the defaults for `$user_name` and `$ip_address` are
+    adequate), but you need to explicitly set the date at which an event occurred.
+    Without named arguments, an invocation in this case would look similar to [Example 3-7](#verbose_logging_utilization).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-7\. Invoking the verbose `activity_log()` function
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'With named arguments, you can skip setting parameters to their defaults and
+    explicitly set just the parameters you need to. The preceding code can be simplified
+    to the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: In addition to drastically simplifying the usage of `activity_log()`, named
+    parameters have the added benefit of keeping your code DRY. The default values
+    for your arguments are stored directly in the function definition rather than
+    being copied to every invocation of the function as well. If you later need to
+    change a default, you can edit the function definition alone.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The original RFC [proposing named parameters](https://oreil.ly/UdoDP).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.4 Enforcing Function Argument and Return Typing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to force your program to implement type safety and avoid PHP’s native
+    loose type comparisons.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Add input and return types to function definitions. Optionally, add a strict
+    type declaration to the top of each file to enforce values matching type annotations
+    (and emit a fatal error if they don’t match). For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_functions_CO2-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is a perfectly valid operation and will return the integer `5`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_functions_CO2-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: While `2 + '3'` is valid PHP code, the string `'3'` violates the function’s
+    type definitions and will trigger a fatal error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP natively supports various scalar types and allows developers to declare
+    both function input parameters and returns to identify the kinds of values that
+    are allowable for each. In addition, developers can specify their own custom classes
+    and interfaces as types, or leverage class inheritance within the type system.^([1](ch03.html#idm45875184619360))
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Parameter types are annotated by placing the type directly before the name
+    of the parameter when defining the function. Similarly, return types are specified
+    by appending the function signature with a `:` and the type that function would
+    return as in the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Table 3-1](#php_single_types) enumerates the simplest types leveraged by PHP.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 3-1\. Simple single types in PHP
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Type | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `array` | The value must be an array (containing any type of values). |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `callable` | The value must be a callable function. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `bool` | The value must be a Boolean. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `float` | The value must be a floating-point number. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `int` | The value must be an integer. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `string` | The value must be a string. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [`iterable`](https://oreil.ly/tiTI1) | The value must be an array or an object
+    that implements `Traversable`. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [`mixed`](https://oreil.ly/V8VOc) | The object can be any value. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [`void`](https://oreil.ly/Izmvp) | A return-only type indicating that the
+    function does not return a value. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| [`never`](https://oreil.ly/48KVB) | A return-only type indicating a function
+    does not return; it either calls `exit`, throws an exception, or is intentionally
+    an infinite loop. |'
+  prefs: []
+  type: TYPE_TB
+- en: In addition, both built-in and custom classes can be used to define types, as
+    shown in [Table 3-2](#php_object_types).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 3-2\. Object types in PHP
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Type | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Class/interface name | The value must be an instance of the specified class
+    or implementation of an interface. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `self` | The value must be an instance of the same class as the one in which
+    the declaration is used. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `parent` | The value must be an instance of the parent of the class in which
+    the declaration is used. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `object` | The value must be an instance of an object. |'
+  prefs: []
+  type: TYPE_TB
+- en: PHP also permits simple scalar types to be expanded by either making them nullable
+    or combining them into *union types*. To make a specific type nullable, you have
+    to prefix the type annotation with a `?`. This will instruct the compiler to allow
+    values to be either the specified type or `null`, as in [Example 3-8](#function_using_nullable_types).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-8\. Function utilizing nullable parameters
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: A union type declaration combines multiple types into a single declaration by
+    concatenating simple types together with the pipe character (`|`). If you were
+    to rewrite the type declarations on the Solution example with a union type combining
+    strings and integers, the fatal error thrown by passing in a string for addition
+    would resolve itself. Consider the possible rewrite in [Example 3-9](#type_solution_rewrite)
+    that would permit *either* integers or strings as parameters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-9\. Rewriting the Solution example to leverage union types
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: The biggest problem with this alternative is that adding strings together with
+    the `+` operator has no meaning in PHP. If both parameters are numeric (either
+    integers or integers represented as strings), the function will work just fine.
+    If either is a non-numeric string, PHP will throw a `TypeError` as it doesn’t
+    know how to “add” two strings together. These kinds of errors are what you hope
+    to avoid by adding type declarations to your code and enforcing strict typing—they
+    formalize the contract you expect your code to support and encourage programming
+    practices that naturally defend against coding mistakes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, PHP uses its typing system to *hint* at which types are allowed
+    into and returned from functions. This is useful to prevent passing bad data into
+    a function, but it relies heavily on either developer diligence or additional
+    tooling^([2](ch03.html#idm45875190957904)) to enforce typing. Rather than rely
+    on humans’ ability to check code, PHP allows for a static declaration in each
+    file that all invocations should follow strict typing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Placing `declare(strict_types=1);` at the top of a file tells the PHP compiler
+    you intend for all invocations in that file to obey parameter and return type
+    declarations. Note that this directive applies to *invocations* within the file
+    where it’s used, not to the definitions of functions in that file. If you call
+    functions from another file, PHP will honor the type declarations in that file
+    as well. However, placing this directive in your file will not force other files
+    that reference your functions to obey the typing system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [type declarations](https://oreil.ly/I9D33) and the [`declare`
+    construct](https://oreil.ly/P2jM_).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.5 Defining a Function with a Variable Number of Arguments
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to define a function that takes one or more arguments without knowing
+    ahead of time how many values will be passed in.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use PHP’s spread operator (`…​`) to define a variable number or arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The *spread operator* automatically adds all parameters passed in that particular
+    position or after it to an array. This array can be typed by prefixing the spread
+    operator with a type declaration (review [Recipe 3.4](#argument_and_return_typing)
+    for more on typing), thus requiring every element of the array to match a specific
+    type. Invoking the function defined in the Solution example as `greatest(2, "five");`
+    will throw a `TypeError`, as you have explicitly declared an `int` type for every
+    member of the `$numbers` array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Your function can accept more than one positional parameter while still leveraging
+    the spread operator to accept an unlimited number of additional arguments. The
+    function defined in [Example 3-10](#utilizing_the_spread_operator) will print
+    a greeting to the screen for an unlimited number of individuals.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-10\. Utilizing the spread operator
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: The spread operator has more utility than just function definition. While it
+    can be used to pack multiple arguments into an array, it can also be used to unpack
+    an array into multiple arguments for a more traditional function invocation. [Example 3-11](#ellipsis_unpacking_array)
+    provides a trivial illustration of how this array unpacking works by using the
+    spread operator to pass an array into a function that does not accept an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-11\. Unpacking an array with the spread operator
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: In some cases, a more complex function might return multiple values (as discussed
+    in the next recipe), so passing the return of one function into another becomes
+    simple with the spread operator. In fact, any array or variable that implements
+    PHP’s [Traversable](https://oreil.ly/jVUvs) interface can be unpacked into a function
+    invocation in this manner.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [variable-length argument lists](https://oreil.ly/9IoHh).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.6 Returning More Than One Value
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to return multiple values from a single function invocation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Rather than returning a single value, return an array of multiple values and
+    unpack them by using `list()` outside the function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP is only capable of returning one value from a function invocation, but that
+    value itself could be an array containing multiple values. When paired with PHP’s
+    `list()` construct, this array can be easily destructured to individual variables
+    for further use by the program.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While the need to return many different values isn’t common, when the occasion
+    comes up, being able to do so can be incredibly handy. One example is in web authentication.
+    Many modern systems today use JSON Web Tokens (JWTs), which are period-delimited
+    strings of Base64-encoded data. Each component of a JWT represents a separate,
+    discrete thing—a header describing the algorithm used, the data in the token payload,
+    and a verifiable signature on that data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When reading a JWT as a string, PHP applications often leverage the built-in
+    `explode()` function to split the string on the periods delimiting each component.
+    A simple use of `explode()` might appear as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding code works just fine, but the repeated references to positions
+    within an array can be difficult to follow both during development and debugging
+    later if a problem arises. In addition, developers must manually decode every
+    part of the JWT separately; forgetting to invoke `base64_decode()` could be fatal
+    to the operation of the program.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An alternative approach is to unpack and automatically decode the JWT within
+    a function and return an array of the components, as shown in [Example 3-12](#decoding_jwt).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-12\. Decoding a JWT
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: A further advantage of using a function to unpack a JWT rather than decomposing
+    each element directly is that you could build in automated signature verification
+    or even filter JWTs for acceptability based on the encryption algorithms declared
+    in the header. While this logic could be applied procedurally while processing
+    a JWT, keeping everything in a single function definition leads to cleaner, more
+    maintainable code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The biggest drawback to returning multiple values in one function call is in
+    typing. These functions have an `array` return type, but PHP doesn’t natively
+    allow for specifying the type of the elements within an array. We have potential
+    workarounds to this limitation by way of documenting the function signature and
+    integrating with a static analysis tool like [Psalm](https://psalm.dev) or [PHPStan](https://phpstan.org),
+    but we have no native support within the language for typed arrays. As such, if
+    you’re using strict typing (and you *should* be), returning multiple values from
+    a single function invocation should be a rare occurrence.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Recipe 3.5](#variable_number_of_arguments) on passing a variable number of
+    arguments and [Recipe 1.3](ch01.html#swapping_variables_inplace) for more on PHP’s
+    `list()` construct. Also reference the [phpDocumentor documentation on typed arrays](https://oreil.ly/RsXGh)
+    that can be enforced by tools like Psalm.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.7 Accessing Global Variables from Within a Function
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Your function needs to reference a globally defined variable from elsewhere
+    in the application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Prefix any global variables with the `global` keyword to access them within
+    the function’s scope:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP separates operations into various scopes based on the context in which a
+    variable is defined. For most programs, a single scope spans all included or required
+    files. A variable defined in this global scope is available *everywhere* regardless
+    of which file is currently executing, as demonstrated in [Example 3-13](#globally_defined_variables).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-13\. Variables defined in the global scope are available to included
+    scripts
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_functions_CO3-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `$apple` variable is also defined within this script and available for use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: User-defined functions, however, define their own scope. A variable defined
+    outside a user-defined function is *not available* within the body of the function.
+    Likewise, any variable defined within the function is not available outside the
+    function. [Example 3-14](#local_vs_global_scoping) illustrates the boundaries
+    of the parent and function scope in a program.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-14\. Local versus global scoping
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_functions_CO4-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The variable `$a` is initially defined in the parent scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_functions_CO4-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inside the function scope, `$a` is not yet defined. Attempting to `echo` its
+    value will result in a warning.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_functions_CO4-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining a variable called `$a` within the function will *not* overwrite the
+    value of the same-named variable outside the function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_functions_CO4-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining a variable called `$b` within the function makes it available within
+    the function, but this value will not escape the scope of the function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_functions_CO4-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Echoing `$a` outside the function, even after invoking `example()`, will print
+    the initial value you’ve set, as the function did not change the variable’s value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_functions_CO4-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since `$b` was defined within the function, it is undefined in the scope of
+    the parent application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: It is possible to pass a variable into a function call *by reference* if the
+    function is defined to accept a variable in such a way. However, this is a decision
+    made by the definition of the function and not a runtime flag available to routines
+    leveraging that function after the fact. [Example 3-4](#variable_pass_by_reference)
+    shows what pass-by-reference might look like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To reference variables defined outside its scope, a function needs to declare
+    those variables as *global* within its own scope. To reference the parent scope,
+    you can rewrite [Example 3-14](#local_vs_global_scoping) as [Example 3-15](#local_vs_globals_rewrite).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-15\. Local versus global scoping, revisited
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_functions_CO5-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: By declaring both `$a` and `$b` to be global variables, you are telling the
+    function to use values from the parent scope rather than its own scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_functions_CO5-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With a reference to the *global* `$a` variable, you can now actually print it
+    to output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_functions_CO5-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Likewise, any changes to `$a` within the scope of the function will impact the
+    variable in the parent scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_functions_CO5-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similarly, you now define `$b` but, as it’s global, this definition will bubble
+    out to the parent scope as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_functions_CO5-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Echoing `$a` will now reflect the changes made within the scope of `example()`
+    as you made the variable global.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_functions_CO5-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Likewise, `$b` is now defined globally and can be echoed to output as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There is no limit on the number of global variables PHP can support aside from
+    the memory available to the system. Additionally, *all* globals can be listed
+    by enumerating the special `$GLOBALS` array defined by PHP. This associative array
+    contains references to all variables defined within the global scope. This special
+    array can be useful if you want to reference a specific variable in the global
+    scope *without* declaring the variable as global, as in [Example 3-16](#global_assoc_array).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-16\. Using the associative `$GLOBALS` array
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: As of PHP 8.1, it is no longer possible to overwrite the entirety of the `$GLOBALS`
+    array. In previous versions, you could reset it to an empty array (for example,
+    during test runs of your code). Moving forward, you can edit only the contents
+    of the array rather than manipulating the collection in its entirety.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Global variables are a handy way to reference state across your application,
+    but they can lead to confusion and maintainability issues if overused. Some large
+    applications leverage global variables heavily—WordPress, a PHP-based project
+    that powers more than 40% of the internet,^([3](ch03.html#idm45875191172432))
+    [uses global variables throughout its codebase](https://oreil.ly/jztni). However,
+    most application developers agree that global variables should be used sparingly,
+    if at all, to help keep systems clean and easy to maintain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [variable scope](https://oreil.ly/tN5tV) and the [special
+    `$GLOBALS` array](https://oreil.ly/z9JJS).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.8 Managing State Within a Function Across Multiple Invocations
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Your function needs to keep track of its change in state over time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use the `static` keyword to define a locally scoped variable that retains its
+    state between function invocations:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A static variable exists only within the scope of the function in which it is
+    declared. However, unlike regular local variables, it holds on to its value every
+    time you return to the scope of the function. In this way, a function can become
+    *stateful* and keep track of certain data (like the number of times it’s been
+    called) between independent invocations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In a typical function, using the `=` operator will assign a value to a variable.
+    When the `static` keyword is applied, this assignment operation only happens the
+    first time that function is called. Subsequent calls will reference the previous
+    state of the variable and allow the program to either use or modify the stored
+    value as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One of the most common use cases of static variables is to track the state of
+    a recursive function. [Example 3-17](#static_variable) demonstrates a function
+    that recursively calls itself a fixed number of times before exiting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-17\. Using a static variable to limit recursion depth
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `static` keyword can also be used to keep track of expensive resources
+    that might be needed by a function multiple times but that you might only want
+    a single instance of. Consider a function that logs messages to a database: you
+    might not be able to pass a database connection into the function itself, but
+    you want to ensure that the function only opens a *single* database connection.
+    Such a logging function might be implemented as in [Example 3-18](#static_database_connection).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-18\. Using a static variable to hold a database connection
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_functions_CO6-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first time `logger()` is called, it will define the value of the static
+    `$dbh` variable. In this case, it will connect to a database by using the [PHP
+    Data Objects (PDO)](https://oreil.ly/do1eJ) interface. This interface is a standard
+    object provided by PHP for accessing databases.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_functions_CO6-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every subsequent call to `logger()` will leverage the initial connection opened
+    to the database and stored in `$dbh`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that PHP automatically manages its memory usage and automatically clears
+    variables from memory when they leave scope. For regular variables within a function,
+    this means the variables are freed from memory as soon as the function completes.
+    Static and global variables are *never* cleaned up until the program itself exits,
+    as they are always in scope. Take care when using the `static` keyword to ensure
+    that you aren’t storing unnecessarily large pieces of data in memory. In [Example 3-18](#static_database_connection),
+    you open a connection to a database that will never be automatically closed by
+    the function you’ve created.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While the `static` keyword can be a powerful way to reuse state across function
+    calls, it should be used with care to ensure that your application doesn’t do
+    anything unexpected. In many cases, it might be better to explicitly pass variables
+    representing state into the function. Even better would be to encapsulate the
+    function’s state as part of an overarching object, which is covered in [Chapter 8](ch08.html#chapter_classes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [variable scoping, including the `static` keyword](https://oreil.ly/-yflc).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.9 Defining Dynamic Functions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to define an anonymous function and reference it as a variable within
+    your application because you only want to use or call the function a single time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Define a closure that can be assigned to a variable and passed into another
+    function as needed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Whereas most functions in PHP have defined names, the language supports the
+    creation of unnamed (so-called *anonymous*) functions, also called *closures*
+    or *lambdas*. These functions can encapsulate either simple or complex logic and
+    can be assigned directly to variables for reference elsewhere in the program.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Internally, anonymous functions are implemented using PHP’s native [`Closure`](https://oreil.ly/u5qt7)
+    class. This class is declared as `final`, which means no class can extend it directly.
+    Yet, anonymous functions are all instances of this class and can be used either
+    directly as functions or as objects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, closures do not inherit any scope from the parent application and,
+    like regular functions, define variables within their own scope. Variables from
+    the parent scope can be passed directly into a closure by leveraging the `use`
+    directive when defining a function. [Example 3-19](#closure_with_use) illustrates
+    how variables from one scope can be passed into another dynamically.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-19\. Passing a variable between scopes with `use()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Anonymous functions are used in many projects to encapsulate a piece of logic
+    for application against a collection of data. The next recipe covers exactly that
+    use case.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Older versions of PHP used [`create_function()`](https://oreil.ly/RRMgO) for
+    similar utility. Developers could create an anonymous function as a string and
+    pass that code into `create_function()` to turn it into a closure instance. Unfortunately,
+    this method used `eval()` under the hood to evaluate the string—a practice considered
+    highly unsafe. While some older projects might still use `create_function()`,
+    the function itself was deprecated in PHP 7.2 and removed from the language entirely
+    in version 8.0.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [anonymous functions](https://oreil.ly/W0QPL).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.10 Passing Functions as Parameters to Other Functions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to define part of a function’s implementation and pass that implementation
+    as an argument to another function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Define a closure that implements part of the logic you need and pass that directly
+    into another function as if it were any other variable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP is considered by many to be a *functional language*, as functions are first-class
+    elements in the language and can be bound to variable names, passed as arguments,
+    or even returned from other functions. PHP supports functions as variables through
+    the [callable](https://oreil.ly/m7skJ) type as implemented in the language. Many
+    core functions (like `usort()`, `array_map()`, and `array_reduce()`) support passing
+    a callable parameter, which is then used internally to define the function’s overall
+    implementation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `reduce()` function defined in the Solution example is a user-written implementation
+    of PHP’s native `array_reduce()` function. Both have the same behavior, and the
+    Solution could be rewritten to pass `$reducer` directly into PHP’s native implementation
+    with no change in the result:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since functions can be passed around like any other variable, PHP has the ability
+    to define partial implementations of functions. This is achieved by defining a
+    function that, in turn, returns another function that can be used elsewhere in
+    the program.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, you can define a function to set up a basic multiplier routine
+    that multiplies any input by a *fixed* base amount, as in [Example 3-20](#partial_function_multiplier).
+    The main function returns a new function each time you call it, so you can create
+    functions to double or triple arbitrary values and use them however you want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-20\. Partially applied multiplier function
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: Breaking functions apart like this is known as [*https://oreil.ly/-*](https://oreil.ly/-)*a4l[_currying*].
+    This is the practice of changing a function with multiple input parameters into
+    a series of functions, that each take a *single* parameter, with most of those
+    parameters being functions themselves. To fully illustrate how this can work in
+    PHP, let’s look at [Example 3-21](#multiplier_currying_walkthrough) and walk through
+    a rewrite of the `multiplier()` function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-21\. Walk-through of currying in PHP
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_functions_CO7-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The most basic form of the function takes two values, multiplies them together,
+    and returns a final result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_functions_CO7-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When you curry the function, you want each component function to only take a
+    single value. The new `curried_multiply()` only accepts one parameter but returns
+    a function that leverages that parameter internally.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_functions_CO7-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The internal function references the value passed by your previous function
+    invocation automatically (with the `use` directive).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_functions_CO7-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The resulting function implements the same business logic as the basic form.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_functions_CO7-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Calling a curried function has the appearance of calling *multiple* functions
+    in series, but the result is the same.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The biggest advantage of currying, as in [Example 3-21](#multiplier_currying_walkthrough),
+    is that a partially applied function can be passed around as a variable and used
+    elsewhere. Similar to using the `mul⁠tiplier()` function, you can create a doubling
+    or tripling function by *partially* applying your curried multiplier as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: Partially applied, curried functions are themselves callable functions but can
+    be passed into other functions as variables and fully invoked later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Details on anonymous functions in [Recipe 3.9](#anonymous_functions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.11 Using Concise Function Definitions (Arrow Functions)
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to create a simple, anonymous function that references the parent scope
+    without verbose `use` declarations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use PHP’s short anonymous function (arrow function) syntax to define a function
+    that inherits its parent’s scope automatically:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*Arrow functions* were introduced in PHP 7.4 as a way to write more concise
+    anonymous functions, as in [Recipe 3.9](#anonymous_functions). Arrow functions
+    automatically capture any referenced variables and import them (by value rather
+    than by reference) into the scope of the function.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A more verbose version of the Solution example could be written as shown in
+    [Example 3-22](#verbose_anonymous_function) while still achieving the same level
+    of functionality.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-22\. Long form of an anonymous function
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Arrow functions always return a value—it is impossible to either implicitly
+    or explicitly return `void`. These functions follow a very specific syntax and
+    always return the result of their expression: `*fn* (*arguments*) => *expression*`.
+    This structure makes arrow functions useful in a wide variety of situations.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: One example is a concise inline definition of a function to be applied to all
+    elements in an array via PHP’s native `array_map()`. Assume input user data is
+    an array of strings that each represent an integer value and you want to convert
+    the array of strings into an array of integers to enforce proper type safety.
+    This can easily be accomplished via [Example 3-23](#convert_string_array_to_integers).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-23\. Convert an array of numeric strings to an array of integers
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: Arrow functions only permit a single-line expression. If your logic is complicated
+    enough to require multiple expressions, use a standard anonymous function (see
+    [Recipe 3.9](#anonymous_functions)) or define a named function in your code. This
+    being said, an arrow function itself is an expression, so one arrow function can
+    actually return another.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The ability to return an arrow function as the expression of another arrow function
+    leads to a way to use arrow functions in *curried* or partially applied functions
+    to encourage code reuse. Assume you want to pass a function in the program that
+    performs modulo arithmetic with a fixed modulus. You can do so by defining one
+    arrow function to perform the calculation and wrap it in another that specifies
+    the modulus, assigning the final, curried function to a variable you can use elsewhere,
+    as in [Example 3-24](#curried_arrow_functions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Modulo arithmetic is used to create *clock functions* that always return a specific
+    set of integer values regardless of the integer input. You take the modulus of
+    two integers by dividing them and returning the integer remainder. For example,
+    “12 modulo 3” is written as `12 % 3` and returns the remainder of `12/3`, or `0`.
+    Similarly, “15 modulo 6” is written as `15 % 6` and returns the remainder of `15/6`,
+    or `3`. The return of a modulo operation is never greater than the modulus itself
+    (`3` or `6` in the previous two examples, respectively). Modulo arithmetic is
+    commonly used to group large collections of input values together or to power
+    cryptographic operations, which are discussed further in [Chapter 9](ch09.html#chapter_encryption).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-24\. Function currying with arrow functions
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, just like regular functions, arrow functions can accept multiple arguments.
+    Rather than passing a single variable (or implicitly referencing variables defined
+    in the parent scope), you can just as easily define a function with multiple parameters
+    and freely use them within the expression. A trivial equality function might use
+    an arrow function as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Details on anonymous functions in [Recipe 3.9](#anonymous_functions) and the
+    PHP Manual documentation on [arrow functions](https://oreil.ly/MLURC).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.12 Creating a Function with No Return Value
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You need to define a function that does not return data to the rest of the program
+    after it completes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use explicit type declarations and reference the `void` return type:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The Solution example uses PHP’s native `mail()` function to dispatch a simple
+    message with a static subject to the specified recipient. PHP’s `mail()` returns
+    either `true` (on success) or `false` (when there’s an error). In the Solution
+    example, you merely want to throw an exception when something goes wrong but otherwise
+    want to return silently.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: In many cases, you might want to return a flag—a Boolean value or a string or
+    `null`—when a function completes to indicate what has happened so the rest of
+    your program can behave appropriately. Functions that return *nothing* are relatively
+    rare, but they do come up when your program is communicating with an outside party
+    and the result of that communication doesn’t impact the rest of the program. Sending
+    a fire-and-forget connection to a message queue or logging to the system error
+    log are both common use cases for a function that returns `void`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `void` return type is enforced on compile time in PHP, meaning your code
+    will trigger a fatal error if the function body returns *anything* at all, even
+    if you haven’t executed anything yet. [Example 3-25](#valid_and_invalid_void)
+    illustrates both valid and invalid uses of `void`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-25\. Valid and invalid uses of the `void` return type
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_functions_CO8-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returning a scalar type (such as a string, integer, or Boolean) will trigger
+    a fatal error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_functions_CO8-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Omitting any kind of return in a function is valid.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_functions_CO8-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Explicitly returning no data is valid.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_functions_CO8-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Even though `null` is “empty,” it still counts as a return and will trigger
+    a fatal error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unlike most other types in PHP, the `void` type is only valid for returns. It
+    cannot be used as a parameter type in a function definition; attempts to do so
+    will result in a fatal error at compile time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The [original RFC introducing the `void` return type](https://oreil.ly/FvRb_)
+    in PHP 7.1.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 3.13 Creating a Function That Does Not Return
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You need to define a function that explicitly exits and to ensure that other
+    parts of your application are aware it will never return.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use explicit type annotations and reference the `never` return type. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Some operations in PHP are intended to be the last action the engine takes before
+    exiting the current process. Calling `header()` to define a specific response
+    header must be done prior to printing any body to the response itself. Specifically,
+    calling `header()` to trigger a redirect is usually the last thing you want your
+    application to do—printing any body text or processing any other operation after
+    you’ve told the requesting client to redirect elsewhere has no meaning or value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `never` return type signals both to PHP and to other parts of your code
+    that the function is *guaranteed* to halt the program’s execution by way of either
+    `exit()` or `die()` or throwing an exception.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If a function that leverages the `never` return type still returns implicitly,
+    as in [Example 3-26](#never_implicit_return), PHP will throw a `TypeError` exception.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-26\. Implicit return in a function that should never return
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: Likewise, if a `never`-typed function *explicitly* returns a value, PHP will
+    throw a `TypeError` exception. In both situations, whether an implicit or an explicit
+    return, this exception is enforced at call time (when the function is invoked)
+    rather than when the function is defined.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The [original RFC introducing the `never` return type](https://oreil.ly/wO3zv)
+    in PHP 8.1.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch03.html#idm45875184619360-marker)) Custom classes and objects are discussed
+    at length in [Chapter 8](ch08.html#chapter_classes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([2](ch03.html#idm45875190957904-marker)) [PHP CodeSniffer](https://oreil.ly/G4tHg)
+    is a popular developer tool for automatically scanning a codebase and ensuring
+    that all code matches a specific coding standard. It can be trivially extended
+    to enforce a strict type declaration in all files as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([3](ch03.html#idm45875191172432-marker)) The market reach of WordPress was
+    about 63% of websites using content management systems and more than 43% of all
+    websites as of March 2023 according to [W3Techs](https://oreil.ly/8Y_Zp).
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,1446 @@
+- en: Chapter 7\. Practical PHP
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The previous chapters went over the elements of the PHP language. This chapter
+    builds on your new programming skills to teach you how to perform some common
+    but important practical tasks. You will learn the best ways to handle strings
+    in order to achieve clear and concise code that displays in web browsers exactly
+    how you want it to, including advanced date and time management. You’ll also find
+    out how to create and otherwise modify files, including those uploaded by users.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using printf
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'You’ve already seen the `print` and `echo` functions, which simply output text
+    to the browser. But a much more powerful function, `printf`, controls the format
+    of the output by letting you put special formatting characters in a string. For
+    each formatting character, `printf` expects you to pass an argument that it will
+    display using that format. For instance, the following example uses the `%d` conversion
+    specifier to display the value `3` in decimal:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you replace the `%d` with `%b`, the value `3` will be displayed in binary
+    (`11`). [Table 7-1](#printf_conversion_specifiers) shows the conversion specifiers
+    supported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 7-1\. The `printf` conversion specifiers
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Specifier | Conversion action on argument arg | Example (for an arg of 123)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%` | Display a % character (no `arg` required) | `%` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `b` | Display `arg` as a binary integer | `1111011` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `c` | Display ASCII character for `arg` | `{` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `d` | Display `arg` as a signed decimal integer | `123` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `e` | Display `arg` using scientific notation | `1.23000e+2` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `f` | Display `arg` as floating point | `123.000000` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `o` | Display `arg` as an octal integer | `173` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `s` | Display `arg` as a string | `123` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `u` | Display `arg` as an unsigned decimal | `123` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `x` | Display `arg` in lowercase hexadecimal | `7b` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `X` | Display `arg` in uppercase hexadecimal | `7B` |'
+  prefs: []
+  type: TYPE_TB
+- en: 'You can have as many specifiers as you like in a `printf` function, as long
+    as you pass a matching number of arguments and as long as each specifier is prefaced
+    by a `%` symbol. Therefore, the following code is valid and will output `"My name
+    is Simon. I''m 33 years old, which is 21 in hexadecimal"`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you leave out any arguments, you will receive a parse error informing you
+    that a right bracket, `)`, was unexpectedly encountered or that there are too
+    few arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A more practical example of `printf` sets colors in HTML using decimal values.
+    For example, suppose you know you want a color that has a triplet value of 65
+    red, 127 green, and 245 blue but don’t want to convert this to hexadecimal yourself.
+    Here’s an easy solution:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Check the format of the color specification between the apostrophes (`''''`)
+    carefully. First comes the pound, or hash, sign (`#`) expected by the color specification.
+    Then come three `%X` format specifiers, one for each of your numbers. The resulting
+    output from this command is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Usually, you’ll find it convenient to use variables or expressions as arguments
+    to `printf`. For instance, if you stored values for your colors in the three variables
+    `$r`, `$g`, and `$b`, you could create a darker color with this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Precision Setting
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Not only can you specify a conversion type, but you can also set the precision
+    of the displayed result. For example, amounts of currency are usually displayed
+    with only two digits of precision. However, after a calculation, a value may have
+    a greater precision than this, such as 123.42 / 12, which results in 10.285\.
+    To ensure that such values are correctly stored internally, but displayed with
+    only two digits of precision, you can insert the string `".2"` between the `%`
+    symbol and the conversion specifier:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The output from this command is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: But you actually have even more control than that, because you can also specify
+    whether to pad output with either zeros or spaces by prefacing the specifier with
+    certain values. [Example 7-1](#precision_setting-id00018) shows four possible
+    combinations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-1\. Precision setting
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The output from this example looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The way it works is simple if you go from right to left (see [Table 7-2](#conversion_specifier_components)).
+    Notice that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The rightmost character is the conversion specifier: in this case, `f` for
+    floating point.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Just before the conversion specifier, if there is a period and a number together,
+    then the precision of the output is specified as the value of the number.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Regardless of whether there’s a precision specifier, if there is a number, then
+    that represents the number of characters to which the output should be padded.
+    In the previous example, this is 15 characters. If the output is already equal
+    to or greater than the padding length, then this argument is ignored.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'The leftmost parameter allowed after the `%` symbol is a `0`, which is ignored
+    unless a padding value has been set, in which case the output is padded with zeros
+    instead of spaces. If a pad character other than zero or a space is required,
+    you can use any one of your choice as long as you preface it with a single quotation
+    mark, like this: `''#`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: On the left is the `%` symbol, which starts the conversion.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Table 7-2\. Conversion specifier components
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Start conversion | Pad character | Number of pad characters | Display precision
+    | Conversion specifier | Example |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%` |   | `15` |   | `f` | `10.285000` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%` | `0` | `15` | `.2` | `f` | `000000000010.29` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%` | `''#` | `15` | `.4` | `f` | `########10.2850` |'
+  prefs: []
+  type: TYPE_TB
+- en: String Padding
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can also pad strings to required lengths (as you can with numbers), select
+    different padding characters, and even choose between left and right justification.
+    [Example 7-2](#string_padding-id00019) shows various examples.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-2\. String padding
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Note how for purposes of layout in a web page, I’ve used the `<pre>` HTML tag
+    to preserve all the spaces and the `\n` newline character after each of the lines
+    to be displayed. The output from this example is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: When you specify a padding value, strings of a length equal to or greater than
+    that value will be ignored, *unless* a cutoff value is given that shortens the
+    strings back to less than the padding value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Table 7-3](#string_conversion_specifier_components) shows the components available
+    to string conversion specifiers.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 7-3\. String conversion specifier components
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Start conversion | Left/right justify | Padding character | Number of pad
+    characters | Cutoff | Conversion specifier | Example (using “Rasmus”) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%` |   |   |   |   | `s` | `[Rasmus]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%` | `-` |   | `10` |   | `s` | `[Rasmus ]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%` |   | `''#` | `8` | `.4` | `s` | `[####Rasm]` |'
+  prefs: []
+  type: TYPE_TB
+- en: Using sprintf
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Often, you don’t want to output the result of a conversion but need it to use
+    elsewhere in your code. This is where the `sprintf` function comes in. With it,
+    you can send the output to another variable rather than to the browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You might use it to make a conversion, as in the following example, which returns
+    the hexadecimal string value for the RGB color group 65, 127, 245 in `$hexstring`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or you may wish to store output in a variable for other use or display:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Date and Time Functions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To keep track of the date and time, PHP uses standard Unix timestamps, which
+    are simply the number of seconds since the start of January 1, 1970\. To determine
+    the current timestamp, you can use the `time` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Because the value is stored as seconds, to obtain the timestamp for this time
+    next week, you would use the following, which adds 7 days × 24 hours × 60 minutes
+    × 60 seconds to the returned value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you wish to create a timestamp for a given date, you can use the `mktime`
+    function. Its output is the timestamp `1669852800` for the first second of the
+    first minute of the first hour of the first day of December in the year 2022:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The parameters to pass are, in order from left to right:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The number of the hour (0–23)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The number of the minute (0–59)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The number of seconds (0–59)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The number of the month (1–12)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The number of the day (1–31)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The year (1970–2038, or 1901–2038 with PHP 5.1.0+ on 32-bit signed systems)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: You may ask why you are limited to the years 1970 through 2038\. Well, it’s
+    because the original developers of Unix chose the start of the year 1970 as the
+    base date that no programmer should need to go before!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Luckily, as of version 5.1.0, PHP supports systems using a signed 32-bit integer
+    for the timestamp, and dates from 1901 to 2038 are allowed on them. However, that
+    introduces a problem even worse than the original one, because the Unix designers
+    also decided that nobody would still be using Unix after about 70 years or so
+    and therefore believed they could get away with storing the timestamp as a 32-bit
+    value—which will run out on January 19, 2038!
+  prefs: []
+  type: TYPE_NORMAL
+- en: This will create what has come to be known as the Y2K38 bug (much like the millennium
+    bug, which was caused by storing years as two-digit values, and which also had
+    to be fixed). PHP introduced the `DateTime` class in version 5.2 to overcome this
+    issue, but it will work only on 64-bit architecture, which most computers will
+    be these days (but do check before you use it).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To display the date, use the `date` function, which supports a plethora of
+    formatting options enabling you to display the date any way you wish. The format
+    is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The parameter `$format` should be a string containing formatting specifiers
+    as detailed in [Table 7-4](#major_date_function_format_specifier), and `$timestamp`
+    should be a Unix timestamp. For the complete list of specifiers, please see the
+    [documentation](https://tinyurl.com/phpdate). The following command will output
+    the current date and time in the format `"Monday February 17th, 2025 - 1:38pm"`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Table 7-4\. The major date function format specifiers
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Format | Description | Returned value |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Day specifiers** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `d` | Day of month, two digits, with leading zeros | `01` to `31` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `D` | Day of the week, three letters | `Mon` to `Sun` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `j` | Day of month, no leading zeros | `1` to `31` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `l` | Day of week, full names | `Sunday` to `Saturday` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `N` | Day of week, numeric, Monday to Sunday | `1` to `7` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `S` | Suffix for day of month (useful with specifier `j`) | `st`, `nd`, `rd`,
+    or `th` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `w` | Day of week, numeric, Sunday to Saturday | `0` to `6` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `z` | Day of year | `0` to `365` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Week specifier** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `W` | Week number of year | `01` to `52` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Month specifiers** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `F` | Month name | `January` to `December` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `m` | Month number with leading zeros | `01` to `12` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `M` | Month name, three letters | `Jan` to `Dec` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `n` | Month number, no leading zeros | `1` to `12` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `t` | Number of days in given month | `28` to `31` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Year specifiers** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `L` | Leap year | `1` = Yes, `0` = No |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `y` | Year, 2 digits | `00` to `99` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `Y` | Year, 4 digits | `0000` to `9999` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Time specifiers** |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `a` | Before or after midday, lowercase | `am` or `pm` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `A` | Before or after midday, uppercase | `AM` or `PM` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `g` | Hour of day, 12-hour format, no leading zeros | `1` to `12` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `G` | Hour of day, 24-hour format, no leading zeros | `0` to `23` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `h` | Hour of day, 12-hour format, with leading zeros | `01` to `12` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `H` | Hour of day, 24-hour format, with leading zeros | `00` to `23` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `i` | Minutes, with leading zeros | `00` to `59` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `s` | Seconds, with leading zeros | `00` to `59` |'
+  prefs: []
+  type: TYPE_TB
+- en: Date Constants
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There are a number of useful constants that you can use with the `date` command
+    to return the date in specific formats. For example, `date(DATE_RSS)` returns
+    the current date and time in the valid format for an RSS feed. Some of the more
+    commonly used constants are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`DATE_ATOM`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is the format for Atom feeds. The PHP format is `"Y-m-d\TH:i:sP"`, and
+    example output is `"2025-05-15T12:00:00+00:00"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`DATE_COOKIE`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is the format for cookies set from a web server or JavaScript. The PHP
+    format is `"l, d-M-y H:i:s T"`, and example output is `"Thursday, 15-May-25 12:00:00
+    UTC"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`DATE_RSS`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is the format for RSS feeds. The PHP format is `"D, d M Y H:i:s O"`, and
+    example output is `"Thu, 15 May 2025 12:00:00 UTC"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`DATE_W3C`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is the format for the World Wide Web Consortium. The PHP format is `"Y-m-d\TH:i:sP"`,
+    and example output is `"2025-05-15T12:00:00+00:00"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The complete list can be found in the [documentation](https://tinyurl.com/phpdatetime).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using checkdate
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You’ve seen how to display a valid date in a variety of formats. But how can
+    you check whether a user has submitted a valid date to your program? The answer
+    is to pass the month, day, and year to the `checkdate` function, which returns
+    a value of `TRUE` if the date is valid or `FALSE` if it is not.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, if September 31 of any year is input, it will always be an invalid
+    date. [Example 7-3](#checking_for_the_validity_of_a_date) shows code that you
+    could use for this. As it stands, it will find the given date invalid.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-3\. Checking for the validity of a date
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: File Handling
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Powerful as it is, MySQL is not the only (or necessarily the best) way to store
+    all data on a web server. Sometimes it can be quicker and more convenient to directly
+    access files on the hard disk. Cases in which you might need to do this are when
+    modifying images such as uploaded user avatars or with logfile that you wish to
+    process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, though, a note about file naming: if you are writing code that may be
+    used on various PHP installations, there is no way of knowing whether these systems
+    are case-sensitive. For example, Windows and macOS filenames are not case-sensitive,
+    but Linux and Unix filenames are. Therefore, you should always assume that the
+    system is case-sensitive and stick to a convention such as all-lowercase filenames.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Checking Whether a File Exists
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To determine whether a file already exists, you can use the `file_exists` function,
+    which returns either `TRUE` or `FALSE` and is used like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Creating a File
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: At this point, *testfile.txt* doesn’t exist, so let’s create it and write a
+    few lines to it. Type [Example 7-4](#creating_a_simple_text_file) and save it
+    as *testfile.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-4\. Creating a simple text file
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Should a program call the `die` function, the open file will be automatically
+    closed as part of terminating the program.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When you run this in a browser, all being well, you will receive the message
+    `File ''testfile.txt'' written successfully`. If you receive an error message,
+    your hard disk may be full or, more likely, you may not have permission to create
+    or write to the file, in which case you should modify the attributes of the destination
+    folder according to your operating system. Otherwise, the file *testfile.txt*
+    should now be residing in the same folder in which you saved the *testfile.php*
+    program. Try opening the file in a text or program editor—the contents will look
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This simple example shows the sequence that all file handling takes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Always start by opening the file. You do this through a call to `fopen`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Then you can call other functions; here we write to the file (`fwrite`), but
+    you can also read from an existing file (`fread` or `fgets`) and do other things.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Finish by closing the file (`fclose`). Although the program does this for you
+    when it ends, you should clean up by closing the file when you’re finished.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Every open file requires a file resource so that PHP can access and manage it.
+    The preceding example sets the variable `$fh` (which I chose to stand for *file
+    handle*) to the value returned by the `fopen` function. Thereafter, each file-handling
+    function that accesses the opened file, such as `fwrite` or `fclose`, must be
+    passed `$fh` as a parameter to identify the file being accessed. Don’t worry about
+    the content of the `$fh` variable; it’s a number PHP uses to refer to internal
+    information about the file—you just pass the variable to other functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Upon failure, `FALSE` will be returned by `fopen`. The previous example shows
+    a simple way to capture and respond to the failure: it calls the `die` function
+    to end the program and give the user an error message. A web application would
+    never abort in this crude way (you would create a web page with an error message
+    instead), but this is fine for our testing purposes.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Notice the second parameter to the `fopen` call. It is simply the character
+    `w`, which tells the function to open the file for writing. The function creates
+    the file if it doesn’t already exist. Be careful when playing around with these
+    functions: if the file already exists, the `w` mode parameter causes the `fopen`
+    call to delete the old contents (even if you don’t write anything new!).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are several different mode parameters that can be used here, as detailed
+    in [Table 7-5](#supported_fopen_modes). The modes that include a `+` symbol are
+    further explained in the section [“Updating Files”](#updating_files).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 7-5\. The supported `fopen` modes
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Mode | Action | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `''r''` | Read from file’s beginning | Open for reading only; place the file
+    pointer at the beginning of the file. Return `FALSE` if the file doesn’t already
+    exist. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `''r+''` | Read from file’s beginning and allow writing | Open for reading
+    and writing; place the file pointer at the beginning of the file. Return `FALSE`
+    if the file doesn’t already exist. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `''w''` | Write from file’s beginning and truncate file | Open for writing
+    only; place the file pointer at the beginning of the file and truncate the file
+    to zero length. If the file doesn’t exist, attempt to create it. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `''w+''` | Write from file’s beginning, truncate file, and allow reading
+    | Open for reading and writing; place the file pointer at the beginning of the
+    file and truncate the file to zero length. If the file doesn’t exist, attempt
+    to create it. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `''a''` | Append to file’s end | Open for writing only; place the file pointer
+    at the end of the file. If the file doesn’t exist, attempt to create it. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `''a+''` | Append to file’s end and allow reading | Open for reading and
+    writing; place the file pointer at the end of the file. If the file doesn’t exist,
+    attempt to create it. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: Reading from Files
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The easiest way to read from a text file is to grab a whole line through `fgets`
+    (think of the final `s` as standing for *string*), as in [Example 7-5](#reading_a_file_with_fgets).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-5\. Reading a file with `fgets`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you created the file as shown in [Example 7-4](#creating_a_simple_text_file),
+    you’ll get the first line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can retrieve multiple lines or portions of lines through the `fread` function,
+    as in [Example 7-6](#reading_a_file_with_fread).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-6\. Reading a file with `fread`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'I’ve requested three characters in the `fread` call, so the program displays
+    this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `fread` function is commonly used with binary data. If you use it on text
+    data that spans more than one line, remember to count newline characters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Copying Files
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s try out the PHP `copy` function to create a clone of *testfile.txt*. Type
+    [Example 7-7](#copying_a_file), save it as *copyfile.php*, and then call up the
+    program in your browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-7\. Copying a file
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you check your folder again, you’ll see that you now have the new file *testfile2.txt*
+    in it. By the way, if you don’t want your programs to exit on a failed copy attempt,
+    you could try the alternate syntax in [Example 7-8](#alternate_syntax_for_copying_a_file).
+    This uses the `!` (`NOT`) operator as a quick-and-easy shorthand. Placed in front
+    of an expression, it applies the `NOT` operator to it, so the equivalent statement
+    here in English would begin “If not able to copy...”.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-8\. Alternate syntax for copying a file
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Moving a File
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To move a file, rename it with the `rename` function, as in [Example 7-9](#moving_a_file-id00020).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-9\. Moving a file
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can use the `rename` function on directories, too. To avoid any warning
+    messages if the original file doesn’t exist, you can call the `file_exists` function
+    first to check.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deleting a File
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Deleting a file is just a matter of using the `unlink` function to remove it
+    from the filesystem, as in [Example 7-10](#deleting_a_file-id00021).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-10\. Deleting a file
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Whenever you access files on your hard disk directly, you must also always ensure
+    that it is impossible for your filesystem to be compromised. For example, if you
+    are deleting a file based on user input, you must make absolutely certain it is
+    a file that can be safely deleted and that the user is allowed to delete it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As with moving a file, a warning message will be displayed if the file doesn’t
+    exist, which you can avoid by using `file_exists` to first check for its existence
+    before calling `unlink`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Updating Files
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Often, you will want to add more data to a saved file, which you can do in many
+    ways. You can use one of the append write modes (see [Table 7-5](#supported_fopen_modes)),
+    or you can simply open a file for reading and writing with one of the other modes
+    that supports writing, and move the file pointer to the correct place within the
+    file that you wish to write to or read from.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The *file pointer* is the position within a file at which the next file access
+    will take place, whether it’s a read or a write. It is not the same as the *file
+    handle* (as stored in the variable `$fh` in [Example 7-4](#creating_a_simple_text_file)),
+    which contains details about the file being accessed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can see this in action by typing [Example 7-11](#updating_a_file) and saving
+    it as *update.php*. Then call it up in your browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-11\. Updating a file
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This program opens *testfile.txt* for both reading and writing by setting the
+    mode with `''r+''`, which puts the file pointer right at the start. It then uses
+    the `fgets` function to read in a single line from the file (up to the first line
+    feed). After that, the `fseek` function is called to move the file pointer right
+    to the file end, at which point the line of text that was extracted from the start
+    of the file (stored in `$text`) is then appended to the file’s end (preceded by
+    a `\n` line feed) and the file is closed. The resulting file now looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first line has successfully been copied and then appended to the file’s
+    end.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As used here, in addition to the `$fh` file handle, the `fseek` function was
+    passed two other parameters, `0` and `SEEK_END`. `SEEK_END` tells the function
+    to move the file pointer to the end of the file, and `0` tells it how many positions
+    it should then be moved backward from that point. In the case of [Example 7-11](#updating_a_file),
+    a value of `0` is used because the pointer is required to remain at the file’s
+    end.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two other seek options available to the `fseek` function: `SEEK_SET`
+    and `SEEK_CUR`. The `SEEK_SET` option tells the function to set the file pointer
+    to the exact position given by the preceding parameter. Thus, the following example
+    moves the file pointer to position 18:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`SEEK_CUR` sets the file pointer to the current position *plus* the value of
+    the given offset. Therefore, if the file pointer is currently at position 18,
+    the following call will move it to position 23:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Locking Files for Multiple Accesses
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Web programs are often called by many users at the same time. If more than one
+    person tries to write to a file simultaneously, it can become corrupted. And if
+    one person writes to it while another is reading from it, the file is all right,
+    but the person reading it can get odd results. To handle simultaneous users, you
+    must use the file-locking `flock` function. This function queues up all other
+    requests to access a file until your program releases the lock. So, whenever your
+    programs use write access on files that may be accessed concurrently by multiple
+    users, you should also add file locking to them, as in [Example 7-12](#updating_a_file_with_file_locking),
+    which is an updated version of [Example 7-11](#updating_a_file).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-12\. Updating a file with file locking
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There is a trick to file locking to preserve the best possible response time
+    for your website visitors: perform it directly before a change you make to a file,
+    and then unlock it immediately afterward. Having a file locked for any longer
+    than this will slow down your application unnecessarily. This is why the calls
+    to `flock` in [Example 7-12](#updating_a_file_with_file_locking) are directly
+    before and after the `fwrite` call.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The first call to `flock` sets an exclusive file lock on the file referred
+    to by `$fh` using the `LOCK_EX` parameter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'From this point onward, no other processes can write to (or even read from)
+    the file until you release the lock by using the `LOCK_UN` parameter, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: As soon as the lock is released, other processes are again allowed access to
+    the file. This is one reason why you should reseek to the point you wish to access
+    in a file each time you need to read or write data—another process could have
+    changed the file since the last access.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, did you notice that the call to request an exclusive lock is nested
+    as part of an `if` statement? This is because `flock` is not supported on all
+    systems; thus, it is wise to check whether you successfully secured a lock, just
+    in case one could not be obtained.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Something else you must consider is that `flock` is what is known as an *advisory*
+    lock. This means that it locks out only other processes that call the function.
+    If you have any code that goes right in and modifies files without implementing
+    `flock` file locking, it will always override the locking and could wreak havoc
+    on your files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By the way, implementing file locking and then accidentally leaving it out in
+    one section of code can lead to an extremely hard-to-locate bug.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: '`flock` will not work on NFS and many other networked filesystems. Also, when
+    using a multithreaded server like ISAPI, you may not be able to rely on `flock`
+    to protect files against other PHP scripts running in parallel threads of the
+    same server instance. Additionally, `flock` is not supported on any system using
+    the old FAT filesystem, such as older versions of Windows, although you are unlikely
+    to come across such systems (hopefully).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If in doubt, you can try making a quick lock on a test file at the start of
+    a program to see whether you can obtain a lock on the file. Don’t forget to unlock
+    it (and maybe delete it if not needed) after checking.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Also remember that any call to the `die` function automatically unlocks a lock
+    and closes the file as part of ending the program.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reading an Entire File
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A handy function for reading in an entire file without having to use file handles
+    is `file_get_contents`. It’s very easy to use, as you can see in [Example 7-13](#using_file_get_contents).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-13\. Using `file_get_contents`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: But the function is actually a lot more useful than that, because you can also
+    use it to fetch a file from a server across the internet, as in [Example 7-14](#grabbing_the_oapostrophereilly_home_page),
+    which requests the HTML from the O’Reilly home page and then displays it as if
+    the user had surfed to the page itself. The result will be similar to [Figure 7-1](#oreillyhome).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-14\. Grabbing the O’Reilly home page
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](Images/pmj6_0701.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 7-1\. The O’Reilly home page grabbed with `file_get_contents`
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Uploading Files
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Uploading files to a web server is a subject that seems daunting to many people,
+    but it actually couldn’t be much easier. All you need to do to upload a file from
+    a form is choose a special type of encoding called `multipart/form-data`, and
+    your browser will handle the rest. To see how this works, type the program in
+    [Example 7-15](#image_uploader_uploaddotphp) and save it as *upload.php*. When
+    you run it, you’ll see a form in your browser that lets you upload a file of your
+    choice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-15\. Image uploader upload.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s examine this program a section at a time. The first line of the multiline
+    `echo` statement starts an HTML document, displays the title, and then starts
+    the document’s body.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next we come to the form, which selects the POST method of form submission,
+    sets the target for posted data to the program *upload.php* (the program itself),
+    and tells the web browser that the data posted should be encoded via the content
+    type of `multipart/form-data`, the mime type used for file uploads.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the form set up, the next lines display the prompt `Select File:` and then
+    request two inputs. The first request is for a file; it uses an input type of
+    `file`, a name of `filename`, and an input field with a width of 10 characters.
+    The second requested input is just a submit button that is given the label `Upload`
+    (which replaces the default button text of Submit Query). And then the form is
+    closed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This short program shows a common technique in web programming in which a single
+    program is called twice: once when the user first visits a page and again when
+    the user clicks the submit button.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The PHP code to receive the uploaded data is fairly simple, because all uploaded
+    files are placed into the associative system array `$_FILES`. Therefore, a quick
+    check to see whether `$_FILES` contains anything is sufficient to determine whether
+    the user has uploaded a file. This is done with the statement `if ($_FILES)`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first time the user visits the page, before uploading a file, `$_FILES`
+    is empty, so the program skips this block of code. When the user uploads a file,
+    the program runs again and discovers an element in the `$_FILES` array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once the program realizes that a file was uploaded, the actual name, as read
+    from the uploading computer, is retrieved and placed into the variable `$name`.
+    Now all that’s necessary is to move the uploaded file from the temporary location
+    in which PHP stored it to a more permanent one. We do this using the `move_uploaded_file`
+    function, passing it the original name of the file, with which it is saved to
+    the current directory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, the uploaded image is displayed within an `IMG` tag, and the result
+    should look like [Figure 7-2](#uploading_an_image_as_form_data).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: If you run this program and receive a warning message such as `Permission denied`
+    for the `move_uploaded_file` function call, then you may not have the correct
+    permissions set for the folder in which the program is running.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Uploading an image as form data](Images/pmj6_0702.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 7-2\. Uploading an image as form data
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Using $_FILES
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Five things are stored in the `$_FILES` array when a file is uploaded, as shown
+    in [Table 7-6](#contents_of_the_dollar_files_array) (where *`file`* is the file
+    upload field name supplied by the submitting form).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 7-6\. The contents of the `$_FILES` array
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Array element | Contents |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_FILES[''*file*''][''*name*'']` | The name of the uploaded file (e.g.,
+    *smiley.jpg*) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_FILES[''*file*''][''*type*'']` | The content type of the file (e.g., *image/jpeg*)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_FILES[''*file*''][''*size*'']` | The file’s size in bytes |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_FILES[''*file*''][''*tmp_name*'']` | The name of the temporary file stored
+    on the server |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_FILES[''*file*''][''*error*'']` | The error code resulting from the file
+    upload |'
+  prefs: []
+  type: TYPE_TB
+- en: Content types used to be known as *MIME* (Multipurpose Internet Mail Extension)
+    types, but because their use later expanded to the whole internet, now they are
+    often called *internet media types*. [Table 7-7](#some_common_internet_media_content_types)
+    shows some of the more frequently used types that turn up in `$_FILES['`*`file`*`']['`*`type`*`']`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 7-7\. Some common internet media content types
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| `application/pdf` | `image/gif` | `multipart/form-data` | `text/xml` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `application/zip` | `image/jpeg` | `text/css` | `video/mpeg` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `audio/mpeg` | `image/png` | `text/html` | `video/mp4` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `audio/x-wav` | `application/json` | `text/plain` | `audio/webm` |'
+  prefs: []
+  type: TYPE_TB
+- en: Validation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: I hope it now goes without saying (although I’ll do so anyway) that form data
+    validation is of the utmost importance, due to the possibility of users attempting
+    to hack into your server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In addition to maliciously formed input data, some of the things you also have
+    to check are whether a file was actually received and, if so, whether the right
+    type of data was sent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Taking all these things into account, [Example 7-16](#more_secure_version_of_uploaddotphp),
+    *upload2.php*, is a more secure rewrite of *upload.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-16\. A more secure version of upload.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: The non-HTML section of code has been expanded from the half-dozen lines of
+    [Example 7-15](#image_uploader_uploaddotphp) to more than 20 lines, starting at
+    `if ($_FILES)`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As with the previous version, this `if` line checks whether any data was actually
+    posted, but there is now a matching `else` near the bottom of the program that
+    echoes a message to the screen when nothing has been uploaded.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Within the `if` statement, the variable `$name` is assigned the value of the
+    filename as retrieved from the uploading computer (just as before), but this time
+    we won’t rely on the user having sent us valid data. Instead, a `switch` statement
+    checks the uploaded content type against the four types of image this program
+    supports. If a match is made, the variable `$ext` is set to the three-letter file
+    extension for that type. Should no match be found, the file uploaded was not of
+    an accepted type and the variable `$ext` is set to the empty string `""`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: In this example the file type still comes from the browser and can be modified
+    or changed by the user uploading the file. In this instance such user manipulation
+    is not of concern as the files are only being treated as images. But if the file
+    could ever be executable, you should not rely on information you have not ascertained
+    to be absolutely correct.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next section of code then checks the variable `$ext` to see whether it contains
+    a string and, if so, creates a new filename called `$n` with the base name *image*
+    and the extension stored in `$ext`. This means that the program has full control
+    over the file type of the file to be created, as it can be only one of *image.jpg*,
+    *image.gif*, *image.png*, or *image.tif*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Safe in the knowledge that the program has not been compromised, the rest of
+    the PHP code is much the same as in the previous version. It moves the uploaded
+    temporary image to its new location and then displays it while also displaying
+    the old and new image names.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Don’t worry about having to delete the temporary file that PHP creates during
+    the upload process, because if the file has not been moved or renamed, it will
+    be automatically removed when the program exits.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After the `if` statement, there is a matching `else`, which is executed only
+    if an unsupported image type was uploaded (in which case it displays an appropriate
+    error message).
+  prefs: []
+  type: TYPE_NORMAL
+- en: When you write your own file-uploading routines, I strongly advise you to use
+    a similar approach and have prechosen names and locations for uploaded files.
+    That way, no attempts to add pathnames and other malicious data to the variables
+    you use can get through. If this means that more than one user could end up having
+    a file uploaded with the same name, you could prefix such files with their user’s
+    usernames, or save them to individually created folders for each user.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'But if you must use a supplied filename, you should sanitize it by allowing
+    only alphanumeric characters and the period, which you can do with the following
+    command, using a regular expression (see [Chapter 18](ch18.xhtml#using_ajax))
+    to perform a search and replace on `$name`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: This leaves only the characters A–Z, a–z, 0–9 and periods in the string `$name`,
+    and strips out everything else.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Even better, to ensure that your program will work on all systems, regardless
+    of whether they are case-sensitive or case-insensitive, you should probably use
+    the following command instead, which changes all uppercase characters to lowercase
+    at the same time:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'Sometimes you may encounter the media type of `image/pjpeg`, which indicates
+    a progressive JPEG, but you can safely add this to your code as an alias of `image/jpeg`,
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: System Calls
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Sometimes PHP will not have the function you need to perform a certain action,
+    but the operating system it is running on may. In such cases, you can use the
+    `exec` system call to do the job.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, to quickly view the contents of the current directory, you can
+    use a program such as [Example 7-17](#executing_a_system_command). If you are
+    on a Windows system, it will run as is using the Windows `dir` command. On Linux,
+    Unix, or macOS, comment out or remove the first line and uncomment the second
+    to use the `ls` system command. You may wish to type this program, save it as
+    *exec.php*, and call it up in your browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-17\. Executing a system command
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `htmlspecialchars` function is called to turn any special characters returned
+    by the system into ones that HTML can understand and properly display, neatening
+    the output. Depending on the system you are using, the result of running this
+    program will look something like this (from a Windows `dir` command):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`exec` takes three arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The command itself (in the previous case, `$cmd`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: An array in which the system will put the output from the command (in the previous
+    case, `$output`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A variable to contain the returned status of the call (which, in the previous
+    case, is `$status`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you wish, you can omit the `$output` and `$status` parameters, but you will
+    not know the output created by the call or even whether it completed successfully.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You should also note the use of the `escapeshellcmd` function. It is a good
+    habit to always use this when issuing an `exec` call, because it sanitizes the
+    command string, preventing the execution of arbitrary commands, should you supply
+    user input to the call.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The system call functions are typically disabled on shared web hosts, as they
+    pose a security risk. You should always try to solve your problems within PHP
+    if you can, and go to the system directly only if it is really necessary. Also,
+    going to the system is relatively slow, and you need to code two implementations
+    if your application is expected to run on both Windows and Linux/Unix systems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: XHTML or HTML5?
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Because XHTML documents need to be well formed, you can parse them using standard
+    XML parsers—unlike HTML, which requires a lenient HTML-specific parser. For this
+    reason, XHTML never really caught on, and when the time came to devise a new standard,
+    the World Wide Web Consortium chose to support HTML5 rather than the newer XHTML2
+    standard.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'HTML5 has some of the features of both HTML4 and XHTML but is much simpler
+    to use and less strict to validate—and, happily, there is now just a single document
+    type you need to place at the head of an HTML5 document (instead of the variety
+    of strict, transitional, and frameset types previously required):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: Just the simple word `html` is sufficient to tell the browser that your web
+    page is designed for HTML5, and, because all the latest versions of the most popular
+    browsers have been supporting most of the HTML5 specification since 2011 or so,
+    this document type is generally the only one you need, unless you choose to cater
+    to older browsers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For all intents and purposes, when writing HTML documents, web developers can
+    safely ignore the old XHTML document types and syntax (such as using `<br />`
+    instead of the simpler `<br>` tag). But if you find yourself having to cater to
+    a very old browser or an unusual application that relies on XHTML, then you can
+    get more information on how to do that at [*http://xhtml.com*](http://xhtml.com).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Which `printf` conversion specifier would you use to display a floating-point
+    number?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What `printf` statement could be used to take the input string `"Happy Birthday"`
+    and output the string `"**Happy"`?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: To send the output from `printf` to a variable instead of to a browser, what
+    alternative function would you use?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How would you create a Unix timestamp for 7:11 a.m. on May 2, 2025?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which file access mode would you use with `fopen` to open a file in write and
+    read mode, with the file truncated and the file pointer at the start?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the PHP command for deleting the file *file.txt*?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which PHP function is used to read in an entire file in one go, even from across
+    the web?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which PHP superglobal variable holds the details on uploaded files?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which PHP function enables the running of system commands?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'Which of the following tag styles is preferred in HTML5: `<hr>` or `<hr />`?'
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: See [“Chapter 7 Answers”](app01_split_006.xhtml#chapter_7_answers) in the [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions)
+    for the answers to these questions.
+  prefs: []
+  type: TYPE_NORMAL

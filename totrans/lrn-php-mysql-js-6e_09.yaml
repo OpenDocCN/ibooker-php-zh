@@ -1,0 +1,707 @@
+- en: Chapter 6\. PHP Arrays
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In [Chapter 3](ch03.xhtml#introduction_to_php), I gave a very brief introduction
+    to PHP’s arrays—just enough for a little taste of their power. In this chapter,
+    I’ll show you many more things that you can do with arrays, some of which—if you
+    have ever used a strongly typed language such as C—may surprise you with their
+    elegance and simplicity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Not only do arrays remove the tedium of writing code to deal with complicated
+    data structures, but they also provide numerous ways to access data while remaining
+    amazingly fast.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Basic Access
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We’ve already looked at arrays as if they were clusters of matchboxes glued
+    together. Another way to think of an array is like a string of beads, with the
+    beads representing variables that can be numbers, strings, or even other arrays.
+    They are like bead strings because each element has its own location and (with
+    the exception of the first and last ones) each has other elements on either side.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some arrays are referenced by numeric indexes; others allow alphanumeric identifiers.
+    Built-in functions let you sort them, add or remove sections, and walk through
+    them to handle each item through a special kind of loop. And by placing one or
+    more arrays inside another, you can create arrays of two, three, or any number
+    of dimensions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Numerically Indexed Arrays
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s assume that you’ve been tasked with creating a simple website for a local
+    office supply company and you’re currently working on the section devoted to paper.
+    One way to manage the various items of stock in this category would be to place
+    them in a numeric array. You can see the simplest way of doing so in [Example 6-1](#adding_items_to_an_array).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-1\. Adding items to an array
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In this example, each time you assign a value to the array `$paper`, the first
+    empty location within that array is used to store the value, and a pointer internal
+    to PHP is incremented to point to the next free location, ready for future insertions.
+    The familiar `print_r` function (which prints out the contents of a variable,
+    array, or object) is used to verify that the array has been correctly populated.
+    It prints out the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: The previous code could also have been written as shown in [Example 6-2](#adding_items_to_an_array_using_explicit),
+    where the exact location of each item within the array is specified. But, as you
+    can see, that approach requires extra typing and makes your code harder to maintain
+    if you want to insert supplies into or remove them from the array. So, unless
+    you wish to specify a different order, it’s usually better to simply let PHP handle
+    the actual location numbers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-2\. Adding items to an array using explicit locations
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: The output from these examples is identical, but you are not likely to use `print_r`
+    in a developed website, so [Example 6-3](#adding_items_to_an_array_and_retrieving)
+    shows how you might print out the various types of paper the website offers using
+    a `for` loop.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-3\. Adding items to an array and retrieving them
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This example prints out the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: So far, you’ve seen a couple of ways in which you can add items to an array
+    and one way of referencing them. PHP offers many more, which I’ll get to shortly.
+    But first, we’ll look at another type of array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Associative Arrays
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Keeping track of array elements by index works just fine but can require extra
+    work in terms of remembering which number refers to which product. It can also
+    make code hard for other programmers to follow.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is where associative arrays come into their own. Using them, you can reference
+    the items in an array by name rather than by number. [Example 6-4](#adding_items_to_an_associative_array_and)
+    expands on the previous code by giving each element in the array an identifying
+    name and a longer, more explanatory string value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-4\. Adding items to an associative array and retrieving them
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: In place of a number (which doesn’t convey any useful information, aside from
+    the position of the item in the array), each item now has a unique name that you
+    can use to reference it elsewhere, as with the `echo` statement—which simply prints
+    out `Laser Printer`. The names (`copier`, `inkjet`, and so on) are called *indexes*
+    or *keys*, and the items assigned to them (such as `Laser Printer`) are called
+    *values*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This very powerful feature of PHP is often used when you are extracting information
+    from XML and HTML. For example, an HTML parser such as those used by a search
+    engine could place all the elements of a web page into an associative array whose
+    names reflect the page’s structure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: The program would also probably break down all the links found within a page
+    into another array, and all the headings and subheadings into another. When you
+    use associative rather than numeric arrays, the code to refer to all of these
+    items is easy to write and debug.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Assignment Using the array Keyword
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: So far, you’ve seen how to assign values to arrays by just adding new items
+    one at a time. Whether you specify keys, specify numeric identifiers, or let PHP
+    assign numeric identifiers implicitly, this is a long-winded approach. A more
+    compact and faster assignment method uses the `array` keyword. [Example 6-5](#adding_items_to_an_array_using_the_array)
+    shows both a numeric and an associative array assigned using this method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-5\. Adding items to an array using the `array` keyword
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The first half of this snippet assigns the old, shortened product descriptions
+    to the array `$p1`. There are four items, so they will occupy slots 0 through
+    3\. Therefore, the `echo` statement prints out the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`    p1 element: Laser`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The second half assigns associative identifiers and accompanying longer product
+    descriptions to the array `$p2` using the format *`key`* `=>` *`value`*. The use
+    of `=>` is similar to the regular `=` assignment operator, except that you are
+    assigning a value to an *index* and not to a *variable*. The index is then inextricably
+    linked with that value, unless it is assigned a new value. The `echo` command
+    therefore prints out this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`    p2 element: Inkjet Printer`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can verify that `$p1` and `$p2` are different types of array, because both
+    of the following commands, when appended to the code, will cause an `Undefined
+    index` or `Undefined offset` error, as the array identifier for each is incorrect:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: The foreach...as Loop
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The creators of PHP have gone to great lengths to make the language easy to
+    use. So, not content with the loop structures already provided, they added another
+    one especially for arrays: the `foreach...as` loop. Using it, you can step through
+    all the items in an array, one at a time, and do something with them.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The process starts with the first item and ends with the last one, so you don’t
+    even have to know how many items there are in an array. [Example 6-6](#walking_through_a_numeric_array_using_fo)
+    shows how `foreach...as` can be used to rewrite [Example 6-3](#adding_items_to_an_array_and_retrieving).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-6\. Walking through a numeric array using `foreach...as`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: When PHP encounters a `foreach` statement, it takes the first item of the array
+    and places it in the variable following the `as` keyword; and each time control
+    flow returns to the `foreach`, the next array element is placed in the `as` keyword.
+    In this case, the variable `$item` is set to each of the four values in turn in
+    the array `$paper`. Once all values have been used, execution of the loop ends.
+    The output from this code is exactly the same as in [Example 6-3](#adding_items_to_an_array_and_retrieving).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now let’s see how `foreach` works with an associative array by taking a look
+    at [Example 6-7](#walking_through_an_associative_array_usi), which is a rewrite
+    of the second half of [Example 6-5](#adding_items_to_an_array_using_the_array).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-7\. Walking through an associative array using `foreach...a`s
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Remember that associative arrays do not require numeric indexes, so the variable
+    `$j` is not used in this example. Instead, each item of the array `$paper` is
+    fed into the key/value pair of variables `$item` and `$description`, from which
+    they are printed out. The displayed result of this code is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`    copier: Copier & Multipurpose     inkjet: Inkjet Printer     laser:
+    Laser Printer     photo: Photographic Paper`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prior to version 7.2 of PHP, as an alternative syntax to `foreach...as`, you
+    could use the `list` function in conjunction with the `each` function. However,
+    `each` was then deprecated and therefore is not recommended for use because it
+    may be removed in a future version. This is a bit of a nightmare for PHP programmers
+    with legacy code to update, especially as the `each` function is extremely useful.
+    Therefore, I have written a replacement for `each` called `myEach`, which works
+    identically and will allow you to easily update old code, as in [Example 6-8](#walking_through_an_associative_a-id00016).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-8\. Walking through an associative array using `myEach` and `list`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, a `while` loop is set up and will continue looping until the
+    `myEach` function (equivalent to the old PHP `each` function) returns a value
+    of `FALSE`. The `myEach` function acts like `foreach` in that it returns an array
+    containing a key/value pair from the array `$paper` and then moves its built-in
+    pointer to the next pair in that array. When there are no more pairs to return,
+    `myEach` returns `FALSE`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `list` function takes an array as its argument (in this case, the key/value
+    pair returned by the function `myEach`) and then assigns the values of the array
+    to the variables listed within parentheses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can see how `list` works a little more clearly in [Example 6-9](#using_the_list_function),
+    where an array is created out of the two strings `Alice` and `Bob` and then passed
+    to the `list` function, which assigns those strings as values to the variables
+    `$a` and `$b`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-9\. Using the `list` function
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The output from this code is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`    a=Alice b=Bob`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, you can take your pick when walking through arrays. Use `foreach...as` to
+    create a loop that extracts values to the variable following the `as`, or use
+    the `myEach` function and create your own looping system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multidimensional Arrays
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: A simple design feature in PHP’s array syntax makes it possible to create arrays
+    of more than one dimension. In fact, they can be as many dimensions as you like
+    (although it’s a rare application that goes further than three).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'That feature is the ability to include an entire array as a part of another
+    one, and to be able to keep doing so, just like the old rhyme: “Big fleas have
+    little fleas upon their backs to bite ’em. Little fleas have lesser fleas, add
+    flea, ad infinitum.”'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s look at how this works by taking the associative array in the previous
+    example and extending it; see [Example 6-10](#creating_a_multidimensional_associative).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-10\. Creating a multidimensional associative array
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: To make things clearer now that the code is starting to grow, I’ve renamed some
+    of the elements. For example, because the previous array `$paper` is now just
+    a subsection of a larger array, the main array is now called `$products`. Within
+    this array, there are three items—`paper`, `pens`, and `misc`—each of which contains
+    another array with key/value pairs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If necessary, these subarrays could have contained even further arrays. For
+    example, under `ball` there might be many different types and colors of ballpoint
+    pens available in the online store. But for now, I’ve restricted the code to a
+    depth of just two.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once the array data has been assigned, I use a pair of nested `foreach...as`
+    loops to print out the various values. The outer loop extracts the main sections
+    from the top level of the array, and the inner loop extracts the key/value pairs
+    for the categories within each section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As long as you remember that each level of the array works the same way (it’s
+    a key/value pair), you can easily write code to access any element at any level.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `echo` statement makes use of the PHP escape character `\t`, which outputs
+    a tab. Although tabs are not normally significant to the web browser, I let them
+    be used for layout by using the `<pre>...</pre>` tags, which tell the web browser
+    to format the text as preformatted and monospaced, and *not* to ignore whitespace
+    characters such as tabs and line feeds. The output from this code looks like the
+    following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can directly access a particular element of the array by using square brackets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: This outputs the value `Adhesives`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also create numeric multidimensional arrays that are accessed directly
+    by indexes rather than by alphanumeric identifiers. [Example 6-11](#creating_a_multidimensional_numeric_arra)
+    creates the board for a chess game with the pieces in their starting positions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-11\. Creating a multidimensional numeric array
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, the lowercase letters represent black pieces, and the uppercase
+    white. The key is `r` = rook, `n` = knight, `b` = bishop, `k` = king, `q` = queen,
+    and `p` = pawn. Again, a pair of nested `foreach...as` loops walks through the
+    array and displays its contents. The outer loop processes each row into the variable
+    `$row`, which itself is an array, because the `$chessboard` array uses a subarray
+    for each row. This loop has two statements within it, so curly braces enclose
+    them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The inner loop then processes each square in a row, outputting the character
+    (`$piece`) stored in it, followed by a space (to square up the printout). This
+    loop has a single statement, so curly braces are not required to enclose it. The
+    `<pre>` and `</pre>` tags ensure that the output displays correctly, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also directly access any element within this array by using square
+    brackets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: This statement outputs the uppercase letter `Q`, the eighth element down and
+    the fourth along (remember that array indexes start at 0, not 1).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Array Functions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You’ve already seen the `list` and `each` functions, but PHP comes with numerous
+    other functions for handling arrays. You can find the full list in the [documentation](https://tinyurl.com/arraysinphp).
+    However, some of these functions are so fundamental that it’s worth taking the
+    time to look at them here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: is_array
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Arrays and variables share the same namespace. This means that you cannot have
+    a string variable called `$fred` and an array also called `$fred`. If you’re in
+    doubt and your code needs to check whether a variable is an array, you can use
+    the `is_array` function, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that if `$fred` has not yet been assigned a value, an `Undefined variable`
+    message will be generated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: count
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Although the `each` function and `foreach...as` loop structure are excellent
+    ways to walk through an array’s contents, sometimes you need to know exactly how
+    many elements there are in your array, particularly if you will be referencing
+    them directly. To count all the elements in the top level of an array, use a command
+    such as this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Should you wish to know how many elements there are altogether in a multidimensional
+    array, you can use a statement such as the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: The second parameter is optional and sets the mode to use. It should be either
+    `0` to limit counting to only the top level or `1` to force recursive counting
+    of all subarray elements too.
+  prefs: []
+  type: TYPE_NORMAL
+- en: sort
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Sorting is so common that PHP provides a built-in function for it. In its simplest
+    form, you would use it like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It is important to remember that, unlike some other functions, `sort` will
+    act directly on the supplied array rather than returning a new array of sorted
+    elements. It returns `TRUE` on success and `FALSE` on error and also supports
+    a few flags—the main two flags that you might wish to use force items to be sorted
+    either numerically or as strings, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also sort an array in reverse order using the `rsort` function, like
+    this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: shuffle
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There may be times when you need the elements of an array to be put in random
+    order, such as when you’re creating a game of playing cards:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Like `sort`, `shuffle` acts directly on the supplied array and returns `TRUE`
+    on success or `FALSE` on error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: explode
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '`explode` is a very useful function with which you can take a string containing
+    several items separated by a single character (or string of characters) and then
+    place each of these items into an array. One handy example is to split up a sentence
+    into an array containing all its words, as in [Example 6-12](#exploding_a_string_into_an_array_using_s).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-12\. Exploding a string into an array using spaces
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This example prints out the following (on a single line when viewed in a browser):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first parameter, the delimiter, need not be a space or even a single character.
+    [Example 6-13](#exploding_a_string_delimited_with_asteri) shows a slight variation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-13\. Exploding a string delimited with `***` into an array
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The code in [Example 6-13](#exploding_a_string_delimited_with_asteri) prints
+    out the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: extract
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Sometimes it can be convenient to turn the key/value pairs from an array into
+    PHP variables. One such time might be when you are processing the `$_GET` or `$_POST`
+    variables sent to a PHP script by a form.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When a form is submitted over the web, the web server unpacks the variables
+    into a global array for the PHP script. If the variables were sent using the GET
+    method, they will be placed in an associative array called `$_GET`; if they were
+    sent using POST, they will be placed in an associative array called `$_POST`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You could, of course, walk through such associative arrays in the manner shown
+    in the examples so far. However, sometimes you just want to store the values sent
+    into variables for later use. In this case, you can have PHP do the job automatically:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: So, if the query string parameter `q` is sent to a PHP script along with the
+    associated value `Hi there`, a new variable called `$q` will be created and assigned
+    that value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Be careful with this approach, though, because if any extracted variables conflict
+    with ones that you have already defined, your existing values will be overwritten.
+    To avoid this possibility, you can use one of the many additional parameters available
+    to this function, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, all the new variables will begin with the given prefix string
+    followed by an underscore, so `$q` will become `$fromget_q`. I strongly recommend
+    that you use this version of the function when handling the `$_GET` and `$_POST`
+    arrays, or any other array whose keys could be controlled by the user, because
+    malicious users could submit keys chosen deliberately to overwrite commonly used
+    variable names and compromise your website.
+  prefs: []
+  type: TYPE_NORMAL
+- en: compact
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: At times you may want to use `compact`, the inverse of `extract`, to create
+    an array from variables and their values. [Example 6-14](#using_the_compact_function)
+    shows how you might use this function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-14\. Using the `compact` function
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The result of running [Example 6-14](#using_the_compact_function) is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note how `compact` requires the variable names to be supplied in quotes, not
+    preceded by a `$` symbol. This is because `compact` is looking for a list of variable
+    names, not their values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another use of this function is for debugging, when you wish to quickly view
+    several variables and their values, as in [Example 6-15](#using_compact_to_help_with_debugging).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-15\. Using `compact` to help with debugging
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: This works by using the `explode` function to extract all the words from the
+    string into an array, which is then passed to the `compact` function, which in
+    turn returns an array to `print_r`, which finally shows its contents.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you copy and paste the `print_r` line of code, you only need to alter the
+    variables named there for a quick printout of a group of variables’ values. In
+    this example, the output is shown here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: reset
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'When the `foreach...as` construct or the `each` function walks through an array,
+    it keeps an internal PHP pointer that makes a note of which element of the array
+    it should return next. If your code ever needs to return to the start of an array,
+    you can issue `reset`, which also returns the value of that element. Examples
+    of how to use this function are as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: end
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As with `reset`, you can move PHP’s internal array pointer to the final element
+    in an array using the `end` function, which also returns the value of the element
+    and can be used as in these examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: This chapter concludes your basic introduction to PHP, and you should now be
+    able to write quite complex programs using the skills you have learned. In the
+    next chapter, we’ll look at using PHP for common, practical tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: What is the difference between a numeric and an associative array?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the main benefit of the `array` keyword?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the difference between `foreach` and `each`?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you create a multidimensional array?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you determine the number of elements in an array?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the purpose of the `explode` function?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you set PHP’s internal pointer into an array back to the first element
+    of the array?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: See [“Chapter 6 Answers”](app01_split_005.xhtml#chapter_6_answers) in the [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions)
+    for the answers to these questions.
+  prefs: []
+  type: TYPE_NORMAL

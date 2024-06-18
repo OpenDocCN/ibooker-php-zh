@@ -1,0 +1,1696 @@
+- en: Chapter 14\. Storage and Retrieval
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We looked at how to store data in relational databases in [Chapter 5](ch05.html#database_and_eloquent),
+    but there’s a lot more that can be stored, both locally and remotely. In this
+    chapter we’ll cover filesystem and in-memory storage, file uploads and manipulation,
+    nonrelational data stores, sessions, the cache, logging, cookies, and full-text
+    search.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Local and Cloud File Managers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel provides a series of file manipulation tools through the `Storage` facade
+    and a few helper functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel’s filesystem access tools can connect to the local filesystem as well
+    as to S3, Rackspace, and FTP. The S3 and Rackspace file drivers are provided by
+    [Flysystem](https://oreil.ly/2lP4P), and it’s simple to add additional Flysystem
+    providers, such as Dropbox or WebDAV, to your Laravel app.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuring File Access
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The definitions for Laravel’s file manager live in *config/filesystems.php*.
+    Each connection is called a “disk,” and [Example 14-1](#default_available_storage_disks)
+    lists the disks that are available out of the box.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-1\. Default available storage disks
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: The storage_path() Helper
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The `storage_path()` helper used in [Example 14-1](#default_available_storage_disks)
+    links to Laravel’s configured storage directory, *storage/*. Anything you pass
+    to it is added to the end of the directory name, so `storage``_path(``'public')`
+    will return the string `storage/public`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `local` disk connects to your local storage system and presumes it will
+    be interacting with the *app* directory of the storage path, which is *storage/app*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `public` disk is also a local disk (although you can change it if you’d
+    like), which is intended for use with any files you intend to be served by your
+    application. It defaults to the *storage/app/public* directory, and if you want
+    to use this directory to serve files to the public, you’ll need to add a symbolic
+    link (*symlink*) to somewhere within the *public/* directory. Thankfully, there’s
+    an Artisan command that maps *public/storage* to serve the files from *storage/app/public*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `s3` disk shows how Laravel connects to cloud-based file storage systems.
+    If you’ve ever connected to S3 or any other cloud storage provider, this will
+    be familiar; pass it your key and secret and some information defining the “folder”
+    you’re working with, which in S3 is the region and the bucket.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the Storage Facade
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In *config/filesystem.php* you can set the default disk, which is what will
+    be used any time you call the `Storage` facade without specifying a disk. To specify
+    a disk, call `disk(''*diskname*'')` on the facade:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The filesystems all provide the following methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`get(''*file.jpg*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Retrieves the file at `*file.jpg*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`json(''*file.json*'', $flags)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Retrieves the file at `*file.json*` and decodes its JSON contents
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`put(''*file.jpg*'', *$contentsOrStream*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Puts the given file contents to `*file.jpg*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`putFile(''*myDir*'', *$file*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Puts the contents of a provided file (in the form of an instance of either `Illuminate``\Http\File`
+    or `Illuminate\Http\UploadedFile`) to the `*myDir*` directory, but with Laravel
+    managing the entire streaming process and naming the file
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`exists(''*file.jpg*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns a Boolean indicating whether `*file.jpg*` exists
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`getVisibility(''*myPath*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Gets the visibility for the given path (“public” or “private”)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`setVisibility(''*myPath*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sets the visibility for the given path (“public” or “private”)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`copy(''*file.jpg*'', ''*newfile.jpg*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Copies `*file.jpg*` to `*newfile.jpg*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`move(''*file.jpg*'', ''*newfile.jpg*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Moves `*file.jpg*` to `*newfile.jpg*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`prepend(''*my.log*'', ''*log text*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds the *`log text`* content at the beginning of `*my.log*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`append(''*my.log*'', ''*log text*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds the *`log text`* content to the end of `*my.log*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`delete(''*file.jpg*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deletes `*file.jpg*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`size(''*file.jpg*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns the size in bytes of `*file.jpg*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`lastModified(''*file.jpg*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns the Unix timestamp when `*file.jpg*` was last modified
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`files(''*myDir*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns an array of filenames in the directory `*myDir*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`allFiles(''*myDir*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns an array of filenames in the directory `*myDir*` and all its subdirectories
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`directories(''*myDir*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns an array of directory names in the directory `*myDir*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`allDirectories(''*myDir*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns an array of directory names in the directory `*myDir*` and all its subdirectories
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`makeDirectory(''*myDir*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creates a new directory
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`deleteDirectory(''*myDir*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deletes `*myDir*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`readStream(''*my.log*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Gets a resource to read `*my.log*`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`writeStream(''*my.log*'', $resource)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writes a new file (`*my.log*`) using a stream
+  prefs: []
+  type: TYPE_NORMAL
+- en: Injecting an Instance
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you’d prefer injecting an instance instead of using the `File` facade, typehint
+    or inject `Illuminate\Filesystem\Filesystem` and you’ll have all the same methods
+    available to you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding Additional Flysystem Providers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you want to add an additional Flysystem provider, you’ll need to “extend”
+    Laravel’s native storage system. In a service provider somewhere—it could be the
+    `boot()` method of `AppServiceProvider`, but it’d be more appropriate to create
+    a unique service provider for each new binding—​use the `Storage` facade to add
+    new storage systems, as seen in [Example 14-2](#add_additional_Flysytem_providers).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-2\. Adding additional Flysystem providers
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Basic File Uploads and Manipulation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: One of the more common usages for the `Storage` facade is accepting file uploads
+    from your application’s users. Let’s look at a common workflow for that in [Example 14-3](#common_user_upload_work_flow).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-3\. Common user upload workflow
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: We `put()` to a file named *dogs/id*, and we grab our contents from the uploaded
+    file. Every uploaded file is a descendant of the `SplFileInfo` class, which provides
+    a `getRealPath()` method that returns the path to the file’s location. So, we
+    get the temporary upload path for the user’s uploaded file, read it with `file_get_contents()`,
+    and pass it into `Storage::put()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since we have this file available to us here, we can do anything we want to
+    the file before we store it—use an image manipulation package to resize it if
+    it’s an image, validate it and reject it if it doesn’t meet our criteria, or whatever
+    else we like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If we want to upload this same file to S3 and we have our credentials stored
+    in *config/filesystems.php*, we can simply adjust [Example 14-3](#common_user_upload_work_flow)
+    to call `Storage::disk('s3')->put()`; we’ll now be uploading to S3\. Take a look
+    at [Example 14-4](#uploads_using_intervention) to see a more complex upload example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-4\. A more complex example of file uploads, using Intervention
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: I used an image library called [Intervention](http://image.intervention.io)
+    in [Example 14-4](#uploads_using_intervention) just as an example; you can use
+    any library you want. The important point is that you have the freedom to manipulate
+    the files however you want before you store them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using store() and storeAs() on the Uploaded File
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can also store an uploaded file using the file itself. Learn more in [Example 7-18](ch07.html#EX611).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Simple File Downloads
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Just like `Storage` makes it easy to accept uploads from users, it also simplifies
+    the task of returning files to them. Take a look at [Example 14-5](#simple_file_downloads)
+    for the simplest example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-5\. Simple file downloads
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Sessions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Session storage is the primary tool we use in web applications to store state
+    between page requests. Laravel’s session manager supports session drivers using
+    files, cookies, a database, Memcached or Redis, DynamoDB, or in-memory arrays
+    (which expire after the page request and are only good for tests).
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can configure all of your session settings and drivers in *config/session.php*.
+    You can choose whether or not to encrypt your session data, select which driver
+    to use (`file` is the default), and specify more connection-specific details like
+    the length of session storage and which files or database tables to use. Take
+    a look at [the session docs](https://oreil.ly/AMp4T) to learn about specific dependencies
+    and settings you need to prepare for whichever driver you choose to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The general API of the session tools allows you to save and retrieve data based
+    on individual keys: `session()->put(''*user_id*'')` and `session()->get(''*user_id*'')`,
+    for example. Make sure to avoid saving anything to a `flash` session key, since
+    Laravel uses that internally for flash (only available for the next page request)
+    session storage.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Accessing the Session
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The most common way to access the session is using the `Session` facade:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: But you can also use the `session()` method on any given Illuminate `Request`
+    object, as in [Example 14-6](#using_the_session_method).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-6\. Using the `session()` method on a `Request` object
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Or you can inject an instance of `Illuminate\Session\Store`, as in [Example 14-7](#injecting_the_backing_class_for_sessions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-7\. Injecting the backing class for sessions
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, you can use the global `session()` helper. Use it with no parameters
+    to get a session instance, with a single string parameter to “get” from the session,
+    or with an array to “put” to the session, as demonstrated in [Example 14-8](#using_the_global_session_helper).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-8\. Using the global `session()` helper
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you’re new to Laravel and not sure which to use, I’d recommend using the
+    global helper.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Methods Available on Session Instances
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The two most common methods are `get()` and `put()`, but let’s take a look
+    at each of the available methods and their parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`session()->get(*$key*, *$fallbackValue*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`get()` pulls the value of the provided key out of the session. If there is
+    no value attached to that key, it will return the fallback value instead (and
+    if you don’t provide a fallback, it will return `null`). The fallback value can
+    be a simple value or a closure, as you can see in the following examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`session()->put(*$key*, *$value*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`put()` stores the provided value in the session at the provided key:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`session()->push(*$key*, *$value*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If any of your session values are arrays, you can use `push()` to add a value
+    to the array:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`session()->has(*$key*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`has()` checks whether there’s a value set at the provided key:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also pass an array of keys, and it only returns `true` if all of the
+    keys exist.
+  prefs: []
+  type: TYPE_NORMAL
+- en: session()->has() and Null Values
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If a session value is set but the value is `null`, `session()``->``has()` will
+    return `false`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`session()->exists(*$key*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`exists()` checks whether there’s a value set at the provided key, like `has()`,
+    but unlike `has()`, it will return `true` even if the set value is `null`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`session()->all()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`all()` returns an array of everything that’s in the session, including those
+    values set by the framework. You’ll likely see values under keys like `_token`
+    (CSRF tokens), `_previous` (previous page, for `back()` redirects), and `flash`
+    (for flash storage).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`session()->only()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`only()` returns an array of only the specified values in the session.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`session()->forget(*$key*)`, `session()->flush()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`forget()` removes a previously set session value. `flush()` removes every
+    session value, even those set by the framework:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`session()->pull(*$key*, *$fallbackValue*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`pull()` is the same as `get()`, except that it deletes the value from the
+    session after pulling it.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`session()->regenerate()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s not common, but if you need to regenerate your session ID, `regenerate()`
+    is there for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Flash Session Storage
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There are three more methods we haven’t covered yet, and they all have to do
+    with something called *flash session storage*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'One very common pattern for session storage is to set a value that you only
+    want available for the next page load. For example, you might want to store a
+    message like “Updated post successfully.” You could manually get that message
+    and then wipe it on the next page load, but if you use this pattern a lot it can
+    get wasteful. Enter flash session storage: keys that are expected to only last
+    for a single page request.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Laravel handles the work for you, and all you need to do is use `flash()` instead
+    of `put()`. These are the useful methods here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`session()->flash(*$key*, *$value*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`flash()` sets the session key to the provided value for just the next page
+    request.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`session()->reflash()`, `session()->keep(*$key*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you need the previous page’s flash session data to stick around for one more
+    request, you can use `reflash()` to restore all of it for the next request or
+    `keep(*$key*)` to just restore a single flash value for the next request. `keep()`
+    can also accept an array of keys to reflash.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cache
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Caches are structured very similarly to sessions. You provide a key and Laravel
+    stores it for you. The biggest difference is that the data in a cache is cached
+    per application, and the data in a session is cached per user. That means caches
+    are more commonly used for storing results from database queries, API calls, or
+    other slow queries that can stand to get a little bit “stale.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: The cache configuration settings are available at *config/cache.php*. Just like
+    with a session, you can set the specific configuration details for any of your
+    drivers and also choose which will be your default. Laravel uses the `file` cache
+    driver by default, but you can also use Memcached or Redis, APC, DynamoDB, or
+    a database, or write your own cache driver. Take a look at [the cache docs](https://laravel.com/docs/cache)
+    to learn about specific dependencies and settings you need to prepare for whichever
+    driver you choose to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Accessing the Cache
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Just like with sessions, there are several ways to access a cache. You can
+    use the facade:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Or you can get an instance from the container, as in [Example 14-9](#get_instance_from_container).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-9\. Injecting an instance of the cache
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also use the global `cache()` helper, as in [Example 14-10](#global_cache_helper).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-10\. Using the global `cache()` helper
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you’re new to Laravel and not sure which to use, I’d recommend using the
+    global helper.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Methods Available on Cache Instances
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s take a look at the methods you can call on a `Cache` instance:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cache()->get(*$key*, *$fallbackValue*)`,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cache()->pull(*$key*, *$fallbackValue*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`get()` makes it easy to retrieve the value for any given key. `pull()` is
+    the same as `get()` except it removes the cached value after retrieving it.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cache()->put(*$key*, *$value*, *$secondsOrExpiration*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`put()` sets the value of the specified key for a given number of seconds.
+    If you’d prefer setting an expiration date/time instead of a number of seconds,
+    you can pass a Carbon object as the third parameter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`cache()->add(*$key*, *$value*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`add()` is similar to `put()`, except if the value already exists, `add()`
+    won’t set it. Also, the method returns a Boolean indicating whether or not the
+    value was actually added:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`cache()->forever(*$key*, *$value*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`forever()` saves a value to the cache for a specific key; it’s the same as
+    `put()`, except the values will never expire (until they’re removed with `forget()`).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cache()->has(*$key*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`has()` returns a Boolean indicating whether or not there’s a value at the
+    provided key.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cache()->remember(*$key*, *$seconds*,` `*$closure*)`,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cache()->rememberForever(*$key*,` `*$closure*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`remember()` provides a single method to handle a very common flow: look up
+    whether a value exists in the cache for a certain key, and if it doesn’t, get
+    that value somehow, save it to the cache, and return it.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`remember()` lets you provide a key to look up, the number of seconds it should
+    be saved for, and a closure to define how to look it up, in case the key has no
+    value set. `rememberForever()` is the same, except it doesn’t need you to set
+    the number of seconds it should be saved for. Take a look at the following example
+    to see a common user scenario for `remember()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`cache()->increment(*$key*, *$amount*)`, `cache()->decrement(*$key*, *$amount*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`increment()` and `decrement()` allow you to increment and decrement integer
+    values in the cache. If there is no value at the given key, it’ll be treated as
+    if it were `0`, and if you pass a second parameter to increment or decrement,
+    it’ll increment or decrement by that amount instead of by 1.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cache()->forget(*$key*)`, `cache()->flush()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`forget()` works just like `Session`’s `forget()` method: pass it a key and
+    it’ll wipe that key’s value. `flush()` wipes the entire cache.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cookies
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'You might expect cookies to work the same as sessions and the cache. A facade
+    and a global helper are available for these too, and our mental models of all
+    three are similar: you can get or set their values in the same way.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: But because cookies are inherently attached to the requests and responses, you’ll
+    need to interact with cookies differently. Let’s look really briefly at what makes
+    cookies different.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cookies in Laravel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Cookies can exist in three places in Laravel. They can come in via the request,
+    which means the user had the cookie when they visited the page. You can read that
+    with the `Cookie` facade, or you can read it off of the request object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: They can also be sent out with a response, which means the response will instruct
+    the user’s browser to save the cookie for future visits. You can do this by adding
+    the cookie to your response object before returning it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: And last, a cookie can be *queued*. If you use the `Cookie` facade to set a
+    cookie, you have put it into a “CookieJar” queue, and it will be removed and added
+    to the response object by the `AddQueuedCookiesToResponse` middleware.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Accessing the Cookie Tools
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can get and set cookies in three places: the `Cookie` facade, the `cookie()`
+    global helper, and the request and response objects.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The cookie facade
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `Cookie` facade is the most full-featured option, allowing you to not only
+    read and make cookies, but also to queue them to be added to the response. It
+    provides the following methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Cookie::get(*$key*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To pull the value of a cookie that came in with the request, you can just run
+    `Cookie::get('*cookie-name*')`. This is the simplest option.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Cookie::has(*$key*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can check whether a cookie came in with the request using `Cookie::has('*cookie-name*')`,
+    which returns a Boolean.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Cookie::make(*...params*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you want to *make* a cookie without queueing it anywhere, you can use `Cookie::make()`.
+    The most likely use for this would be to make a cookie and then manually attach
+    it to the response object, which we’ll cover in a bit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here are the parameters for `make()`, in order:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$name` is the name of the cookie.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$value` is the content of the cookie.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$minutes` specifies how many minutes the cookie should live.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$path` is the path under which your cookie should be valid.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$domain` lists the domains for which your cookie should work.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$secure` indicates whether the cookie should only be transmitted over a secure
+    (HTTPS) connection.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$httpOnly` indicates whether the cookie will be made accessible only through
+    the HTTP protocol.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$raw` indicates whether the cookie should be sent without URL encoding.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$sameSite` indicates whether the cookie should be available for cross-site
+    requests; options are `lax`, `strict`, or `null`.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`Cookie::make()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns an instance of `Symfony\Component\HttpFoundation\Cookie`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Default Settings for Cookies
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The `CookieJar` used by the `Cookie` facade instance reads its defaults from
+    the session config. So, if you change any of the configuration values for the
+    session cookie in *config/session.php*, those same defaults will be applied to
+    all of your cookies that you create using the `Cookie` facade.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Cookie::queue(*Cookie || params*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you use `Cookie::make()`, you’ll still need to attach the cookie to your
+    response, which we’ll cover shortly. `Cookie::queue()` has the same syntax as
+    `Cookie::make()`, but it enqueues the created cookie to be automatically attached
+    to the response by middleware.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’d like, you can also just pass a cookie you’ve created yourself into
+    `Cookie::queue()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s the simplest possible way to add a cookie to the response in Laravel:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: When Your Queued Cookies Won’t Get Set
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Cookies can only be returned as part of a response. So, if you enqueue cookies
+    with the `Cookie` facade and then your response isn’t returned correctly—for example,
+    if you use PHP’s `exit()` or something halts the execution of your script—your
+    cookies won’t be set.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The cookie() global helper
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `cookie()` global helper will return a `CookieJar` instance if you call
+    it with no parameters. However, two of the most convenient methods on the `Cookie`
+    facade—`has()` and `get()`—exist *only* on the facade, not on the `CookieJar`.
+    So, in this context, I think the global helper is actually less useful than the
+    other options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The one task for which the `cookie()` global helper is useful is creating a
+    cookie. If you pass parameters to `cookie()`, they’ll be passed directly to the
+    equivalent of `Cookie::make()`, so this is the fastest way to create a cookie:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Injecting an Instance
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can also inject an instance of `Illuminate\Cookie\CookieJar` anywhere in
+    the app, but you’ll have the same limitations discussed here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cookies on Request and Response objects
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Since cookies come in as a part of the request and are set as a part of the
+    response, those Illuminate objects are the places they actually live. The `Cookie`
+    facade’s `get()`, `has()`, and `queue()` methods are just proxies to interact
+    with the `Request` and `Response` objects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, the simplest way to interact with cookies is to pull cookies from the request
+    and set them on the response.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reading cookies from Request objects
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Once you have a copy of your `Request` object—​if you don’t know how to get
+    one, just try `app('request')`—you can use the `Request` object’s `cookie()` method
+    to read its cookies, as shown in [Example 14-11](#reading_cookie_from_request_object).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-11\. Reading a cookie from a `Request` object
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As you can see in this example, the `cookie()` method has two parameters: the
+    cookie’s name and, optionally, the fallback value.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Setting cookies on Response objects
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: When you have your `Response` object ready, you can use the `cookie()` method
+    on it to add a cookie to the response, like in [Example 14-12](#setting_cookie_on_response_object).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-12\. Setting a cookie on a `Response` object
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you’re new to Laravel and not sure which option to use, I’d recommend setting
+    cookies on the `Request` and `Response` objects. It’s a bit more work, but will
+    lead to fewer surprises if future developers don’t understand the `CookieJar`
+    queue.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Logging
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We’ve seen a few really brief examples of logging so far in this book when we
+    were talking about other concepts like the container and facades, so let’s briefly
+    look at what options you have with logging beyond just `Log::info('Message')`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The purpose of logs is to increase *discoverability*, or your ability to understand
+    what’s going on at any given moment in your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Logs are short messages, sometimes with some data embedded in a human-readable
+    form, that your code generates for the sake of understanding what’s happening
+    during the execution of an app. Each log must be captured at a specific *level*,
+    which can vary from `emergency` (something very bad happened) to `debug` (something
+    of almost no significance happened).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Without any modifications, your app will write any log statements to a file
+    located at *storage/logs/laravel.log*, and each log statement will look a little
+    bit like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can see we have the date, time, environment, error level, and message all
+    on one line. However, Laravel also (by default) logs any uncaught exceptions,
+    and in that case you’ll see the entire stack trace inline.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ll cover how to log, why to log, and how to log elsewhere (for example, in
+    Slack) in this following section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When and Why to Use Logs
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The most common use case for logs is to act as a semidisposable record of things
+    that have happened that you *may* care about later, but to which you definitively
+    don’t need programmatic access. The logs are more about learning what’s going
+    on in the app and less about creating structured data your app can consume.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, if you want to have code that consumes a record of every user login
+    and does something interesting with it, that’s a use case for a *logins* database
+    table. However, if you have a casual interest in those logins but you’re not entirely
+    certain whether you care or whether you need that information programmatically,
+    you may just throw a `debug`- or `info`-level log on it and forget about it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Logs are also common when you need to see the value of something at the moment
+    it goes wrong, or at a certain time of day, or something else that means you want
+    the data at a time when you’re not around. Throw a log statement in the code,
+    get the data you need out of the logs, and either keep it in the code for later
+    usage or just delete it again.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing to the Logs
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The simplest way to write a log entry in Laravel is to use the `Log` facade
+    and use the method on that facade that matches the severity level you’d like to
+    record. The levels are the same as those defined in [RFC 5424](https://oreil.ly/6ODcf):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also, optionally, pass a second parameter that’s an array of connected
+    data:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This additional information may be captured differently by different log destinations,
+    but here’s how this looks in the default local log (although it will be just a
+    single line in the log):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Log Channels
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Like many other aspects of Laravel (file storage, database, mail, etc.), you
+    can configure your logs to use one or more predefined log types, which you define
+    in the config file. Using each type involves passing various configuration details
+    to a specific log driver.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These log types are called *channels*, and out of the box you’ll have options
+    for `stack`, `single`, `daily`, `slack`, `stderr`, `syslog`, and `errorlog`. Each
+    channel is connected to a single driver; the available drivers are `stack`, `single`,
+    `daily`, `slack`, `syslog`, `errorlog`, `monolog`, and `custom`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We’ll cover the most common channels here: `single`, `daily`, `slack`, and
+    `stack`. To learn more about the drivers and the full list of channels available,
+    take a look at the [logging docs](https://oreil.ly/vrJvj).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The single channel
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `single` channel writes every log entry to a single file, which you’ll
+    define in the `path` key. You can see its default configuration in [Example 14-13](#EX14g):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-13\. Default configuration for the `single` channel
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: This means it’ll only log events at the `debug` level or higher, and it will
+    write them all to a single file, *storage/logs/laravel.log*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The daily channel
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `daily` channel splits out a new file for each day. You can see its default
+    config in [Example 14-14](#EX14a).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-14\. Default configuration for the `daily` channel
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: It’s similar to `single`, but we now can set how many days of logs to keep before
+    they’re cleaned up, and the date will be appended to the filename we specify.
+    For example, the preceding config will generate a file named *storage/logs/laravel-<yyyy-mm-dd>.log*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Slack channel
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `slack` channel makes it easy to send your logs (or, more likely, only certain
+    logs) over to Slack.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It also illustrates that you’re not limited to just the handlers that come out
+    of the box with Laravel. We’ll cover this in a second, but this isn’t a custom
+    Slack implementation; it’s just Laravel building a log driver that connects to
+    the Monolog Slack handler, and if you can use any Monolog handler, you have a
+    *lot* of options available to you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The default configuration for this channel is shown in [Example 14-15](#EX14b).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-15\. Default configuration for the `slack` channel
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: The stack channel
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `stack` channel is the channel that’s enabled by default on your application.
+    Its default configuration is shown in [Example 14-16](#EX14c).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-16\. Default configuration for the `stack` channel
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `stack` channel allows you to send all your logs to more than one channel
+    (listed in the `channels` array). So, while this is the channel that’s configured
+    by default on your Laravel apps, because its `channels` array is set to `single`
+    by default, in reality your app is just using the `single` log channel.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But what if you wanted everything of the level `info` and above to go to the
+    daily files, but you wanted `critical` and higher log messages to go to Slack?
+    It’s easy with the `stack` driver, as [Example 14-17](#EX14d) demonstrates.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-17\. Customizing the `stack` driver
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: Writing to specific log channels
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'There may also be times when you want to control exactly which log messages
+    go where. You can do that by specifying the channel when you call the `Log` facade:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: Advanced Log Configuration
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you’d like to customize how each log is sent to each channel, or implement
+    custom Monolog handlers, check out the [logging docs](https://oreil.ly/vrJvj)
+    to learn more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Full-Text Search with Laravel Scout
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel Scout is a separate package that you can bring into your Laravel apps
+    to add full-text search to your Eloquent models. Scout makes it easy to index
+    and search the contents of your Eloquent models; it ships with drivers for Algolia,
+    Meilisearch, and databases (MySQL/PostgreSQL), but there are also community packages
+    for other providers. I’ll assume you’re using Algolia.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing Scout
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'First, pull in the package in any Laravel app:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next you’ll want to set up your Scout configuration. Run this command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: and paste your Algolia credentials in *config/scout.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, install the Algolia SDK:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: Marking Your Model for Indexing
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In your model (we’ll use `Review`, for a book review, for this example), import
+    the `Laravel\Scout\Searchable` trait.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can define which properties are searchable using the `toSearchableArray()`
+    method (it defaults to mirroring `toArray()`), and define the name of the model’s
+    index using the `searchableAs()` method (it defaults to the table name).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scout subscribes to the create/delete/update events on your marked models. When
+    you create, update, or delete any rows, Scout will sync those changes up to Algolia.
+    It’ll either make those changes synchronously with your updates or, if you configure
+    Scout to use a queue, queue the updates.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Searching Your Index
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Scout’s syntax is simple. For example, to find any `Review` with the word `Llew`
+    in it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also modify your queries as you would with regular Eloquent calls:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: What comes back from these searches? A collection of Eloquent models, rehydrated
+    from your database. The IDs are stored in Algolia, which returns a list of matched
+    IDs; Scout then pulls the database records for those and returns them as Eloquent
+    objects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You don’t have full access to the complexity of SQL `WHERE` commands, but it
+    provides a basic framework for comparison checks like you can see in the code
+    samples here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Queues and Scout
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: At this point your app will be making HTTP requests to Algolia on every request
+    that modifies any database records. This can slow down your application quickly,
+    which is why Scout makes it easy to push all of its actions onto a queue.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In *config/scout.php*, set `queue` to `true` so that these updates are indexed
+    asynchronously. Your full-text index is now operating under “eventual consistency”;
+    your database records will receive the updates immediately, and the updates to
+    your search indexes will be queued and updated as fast as your queue worker allows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Performing Operations Without Indexing
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you need to perform a set of operations and avoid triggering the indexing
+    in response, wrap the operations in the `withoutSyncingToSearch()` method on your
+    model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: Conditionally Indexing Models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Sometimes you might only want to index records if they meet a certain condition.
+    You may use the `shouldBeSearchable()` method on the model class to achieve this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: Manually Triggering Indexing via Code
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you want to manually trigger indexing your model, you can do it using code
+    in your app or via the command line.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To manually trigger indexing from your code, add `searchable()` to the end
+    of any Eloquent query and it will index all of the records that were found in
+    that query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also choose to scope the query to only those records you want to index.
+    However, Scout is smart enough to insert new records and update old records, so
+    you may choose to just reindex the entire contents of the model’s database table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can also run `searchable()` on relationship methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want to unindex any records with the same sort of query chaining, just
+    use `unsearchable()` instead:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: Manually Triggering Indexing via the CLI
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can also trigger indexing with an Artisan command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will chunk all of the `Review` models and index them all.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The HTTP Client
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel’s HTTP client isn’t quite a storage mechanism, but it is a retrieval
+    mechanism, and to be honest, I’m not sure where else it fits in this book. Let’s
+    get to it!
+  prefs: []
+  type: TYPE_NORMAL
+- en: The HTTP client makes it possible for your Laravel app to make calls—`POST`,
+    `GET`, whatever—​to external web services and APIs with a simple, clean interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you’ve ever worked with Guzzle, you understand what it can do, and you can
+    also likely understand why a simple interface is worth mentioning: Guzzle is incredibly
+    powerful, but also incredibly complex, and it’s become increasingly so over the
+    years.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the HTTP Facade
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Most of the time, if you’re working with the HTTP client, you’ll rely on its
+    facade, calling methods like `get()` and `post()` directly on the facade. Take
+    a look at [Example 14-18](#EX14f) for an example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-18\. Basic usage examples of the HTTP facade
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `$response` you receive back from a call on the HTTP facade is an instance
+    of `Illuminate\Http\Client\Response`, which gives you a suite of methods to inspect
+    the response. You can take a look at [the docs](https://oreil.ly/N4XXS) for a
+    full list, but you can also see a few common methods in [Example 14-19](#EX14h).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-19\. Commonly used methods on the HTTP `Client Response` object
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see from [Example 14-18](#EX14f), you can send data along with `POST`
+    requests, but there are many other ways you can send data along with your requests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once again, here are a few common examples, and you can see more in the docs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: Handling Errors and Timeouts and Checking Statuses
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: By default, the HTTP client will wait 30 seconds before failing out of a request,
+    and not retry it at all. But you can customize many aspects of how the client
+    responds to unexpected situations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To define the timeout, chain `timeout()` and pass the number of seconds it
+    should wait:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you expect there to be failures with your attempts, you can define that
+    the client should retry each request a given number of times, using the `retry()`
+    chained method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Some of the other methods on the response object allow us to check whether
+    the request worked and what HTTP status we got back; here are a few:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also define a callback to be run any time there’s an error:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Testing most of these features is as simple as using them in your tests; no
+    need to mock or stub. The default configuration will already work—​for example,
+    take a look at *phpunit.xml* to see that your session driver and cache driver
+    have been set to values appropriate for tests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, there are a few convenience methods and a few gotchas that you should
+    know about before you attempt to test them all.
+  prefs: []
+  type: TYPE_NORMAL
+- en: File Storage
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Testing file uploads can be a bit of a pain, but follow these steps and it will
+    be clear.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Uploading fake files
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: First, let’s look at how to manually create an `Illuminate\Http\UploadedFile`
+    object for use in our application testing ([Example 14-20](#create_fake_UploadedFile)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-20\. Creating a fake `UploadedFile` object for testing
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: We’ve created a new instance of `UploadedFile` that refers to our testing file,
+    and we can now use it to test our routes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returning fake files
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If your route is expecting a real file to exist, sometimes the best way to make
+    it testable is to make that real file actually exist. Let’s say every user must
+    have a profile picture.
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, let’s set up the model factory for the user to use Faker to make a copy
+    of the picture, as in [Example 14-21](#returning_fake_files).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-21\. Returning fake files with Faker
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: Faker’s `file()` method picks a random file from the source directory, copies
+    it to the target directory, and then returns the filename. So, we’ve just picked
+    a random file from the *tests/stubs/images* directory, copied it to the *storage/app*
+    directory, and set its filename as the `picture` property on our `User`. At this
+    point we can use a `User` in tests on routes that expect the `User` to have a
+    picture, as seen in [Example 14-22](#asserting_URL_echo).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-22\. Asserting that an image’s URL is echoed
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: Of course, in many contexts you can just generate a random string there without
+    even copying a file. But if your routes check for the file’s existence or run
+    any operations on the file, this is your best option.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Session
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you need to assert something has been set in the session, you can use some
+    convenience methods Laravel makes available in every test. All of these methods
+    are available in your tests on the `Illuminate\Testing\TestResponse` object:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`assertSessionHas(*$key*, *$value = null*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the session has a value for a particular key, and, if the second
+    parameter is passed, that that key is a particular value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`assertSessionHasAll(*array $bindings*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If passed an array of key/value pairs, asserts that all of the keys are equal
+    to all of the values. If one or more of the array entries is just a value (with
+    PHP’s default numeric key), it will just be checked for existence in the session:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`assertSessionMissing(*$key*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Asserts that the session does *not* have a value for a particular key.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`assertSessionHasErrors(*$bindings = []*, *$format = null*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Asserts that the session has an `errors` value. This is the key Laravel uses
+    to send errors back from validation failures.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If the array contains just keys, it will check that errors are set with those
+    keys:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also pass values for those keys, and, optionally, a *`$format`*, to
+    check that the messages for those errors came back the way you expected:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE61]'
+  prefs: []
+  type: TYPE_PRE
+- en: Cache
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There’s nothing special about testing your features that use the cache—​just
+    do it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE62]'
+  prefs: []
+  type: TYPE_PRE
+- en: Laravel uses the `array` cache driver by default in your testing environment,
+    which just stores your cache values in memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cookies
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: What if you need to set a cookie before testing a route in your application
+    tests? You can set cookies on a request using the `withCookies()` method. To learn
+    more, check out [Chapter 12](ch12.html#testing).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Excluding Your Cookie from Encryption During Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Your cookies won’t work in your tests unless you exclude them from Laravel’s
+    cookie encryption middleware. You can do this by teaching the `EncryptCookies`
+    middleware to temporarily disable itself for those cookies:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE63]'
+  prefs: []
+  type: TYPE_PRE
+- en: That means you can set a cookie and check against it with something like [Example 14-23](#running_tests_against_cookies).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-23\. Running unit tests against cookies
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE64]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want to test that a response has a cookie set, you can use `assertCookie()`
+    to test for the cookie:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE65]'
+  prefs: []
+  type: TYPE_PRE
+- en: Or you could use `assertPlainCookie()` to test for the cookie and to assert
+    that it’s not encrypted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Log
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The simplest way to test that a certain log was written is by making assertions
+    against the `Log` facade (learn more in [“Faking Other Facades”](ch12.html#faking_facades)).
+    [Example 14-24](#EX14e) shows how this works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-24\. Making assertions against the `Log` facade
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE66]'
+  prefs: []
+  type: TYPE_PRE
+- en: There’s also a package called [Log Fake](https://oreil.ly/TCBMm) that expands
+    on what you can do with the facade testing shown here and allows you to write
+    more customized assertions against your logs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scout
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you need to test code that uses Scout data, you’re probably not going to
+    want your tests triggering indexing actions or reading from Scout. Simply add
+    an environment variable to your *phpunit.xml* to disable Scout’s connection to
+    Algolia:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE67]'
+  prefs: []
+  type: TYPE_PRE
+- en: HTTP Client
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: One incredible benefit of using Laravel’s HTTP client is that it makes it possible
+    to fake responses in your tests with minimal configuration.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The simplest option is to run `Http::fake()`, which will return an empty successful
+    response from every call you make.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, you can also customize the specific responses you want to come back
+    from your HTTP client calls, as you can see in [Example 14-25](#EX14i).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-25\. Customizing responses to HTTP clients by URL
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE68]'
+  prefs: []
+  type: TYPE_PRE
+- en: If, instead, you need to define that requests made to a given endpoint (or that
+    match a given endpoint pattern) follow a particular sequence, you can also define
+    that, as you can see in [Example 14-26](#EX14j).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-26\. Defining a sequence of responses to a given endpoint
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE69]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also make assertions against the data your application is sending to
+    particular endpoints, as in [Example 14-27](#EX14k).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-27\. Asserting against the calls your application makes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE70]'
+  prefs: []
+  type: TYPE_PRE
+- en: TL;DR
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Laravel provides simple interfaces to many common storage operations: filesystem
+    access, sessions, cookies, the cache, and search. Each of these APIs is the same
+    regardless of which provider you use, which Laravel enables by allowing multiple
+    “drivers” to serve the same public interface. This makes it simple to switch providers
+    depending on the environment or as the needs of the application change.'
+  prefs: []
+  type: TYPE_NORMAL

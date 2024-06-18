@@ -1,0 +1,485 @@
+- en: Chapter 1\. Variables
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The foundation of a flexible application is *variability*—the capability of
+    the program to serve multiple purposes in different contexts. *Variables* are
+    a common mechanism to build such flexibility in any programming language. These
+    named placeholders reference a specific value that a program wants to use. This
+    could be a number, a raw string, or even a more complex object with its own properties
+    and methods. The point is that a variable is the way a program (and the developer)
+    references that value and passes it along from one part of the program to another.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variables do not need to be set by default—it is perfectly reasonable to define
+    a placeholder variable without assigning any value to it. Think of this like having
+    an empty box on the shelf, ready and waiting to receive a gift for Christmas.
+    You can easily find the box—the variable—but because nothing is inside it, you
+    can’t do much with it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, assume the variable is called `$giftbox`. If you were to try to
+    check the value of this variable right now, it would be empty, as it has not yet
+    been set. In fact, `empty($giftbox)` will return `true`, and `isset($giftbox)`
+    will return `false`. The box is both empty and not yet set.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: It’s important to remember that any variable that has not been explicitly defined
+    (or set) will be treated as `empty()` by PHP. An actually defined (or set) variable
+    can either be empty or non-empty depending on its value, as any real value that
+    evaluates to `false` will be treated as empty.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Broadly speaking, programming languages can either be strongly or loosely typed.
+    A strongly typed language requires explicit identification of all variable, parameter,
+    and function return types and enforces that the type of each value absolutely
+    matches expectations. With a loosely typed language—like PHP—values are typed
+    *dynamically* when they’re used. For example, developers can store an integer
+    (like `42`) in a variable and then use that variable as a string elsewhere (i.e.,
+    `"42"`), and PHP will transparently cast that variable from an integer to a string
+    at runtime.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The advantage of loose typing is that developers don’t need to identify how
+    they will use a variable when it’s defined, as the interpreter can do that identification
+    well enough at runtime. A key disadvantage is that it’s not always clear how certain
+    values will be treated when the interpreter coerces them from one type to another.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP is well known as a loosely typed language. This sets the language apart
+    as developers are not required to identify the type of a specific variable when
+    it’s created or even when it’s called. The interpreter behind PHP will identify
+    the right type when the variable is used and, in many cases, transparently cast
+    the variable as a different type at runtime. [Table 1-1](#php_empty_expressions)
+    illustrates various expressions that, as of PHP 8.0, are evaluated as “empty”
+    regardless of their underlying type.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 1-1\. PHP empty expressions
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Expression | `empty($x)` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$x = ""` | `true` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$x = null` | `true` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$x = []` | `true` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$x = false` | `true` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$x = 0` | `true` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$x = "0"` | `true` |'
+  prefs: []
+  type: TYPE_TB
+- en: Note that some of these expressions are not truly empty but are treated as such
+    by PHP. In common conversation, they’re considered `falsey` because they are treated
+    to be equivalent to `false` although they’re not identical to `false`. It’s therefore
+    important to *explicitly* check for expected values like `null` or `false` or
+    `0` in an application rather than relying on language constructs like `empty()`
+    to do the check for you. In such cases, you might want to check for emptiness
+    of a variable *and* make an explicit equality check against a known, fixed value.^([1](ch01.html#idm45875192117424))
+  prefs: []
+  type: TYPE_NORMAL
+- en: The recipes in this chapter handle the basics of variable definition, management,
+    and utilization in PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 1.1 Defining Constants
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to define a specific variable in your program to have a fixed value
+    that cannot be mutated or changed by any other code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The following block of code uses `define()` to explicitly define the value
+    of a globally scoped constant that cannot be changed by other code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: As an alternative approach, the following block of code uses the `const` directive
+    within a class to define a constant scoped to that class itself:^([2](ch01.html#idm45875192074384))
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If a constant is defined in an application, the function `defined()` will return
+    `true` and let you know that you can access that constant directly within your
+    code. If the constant is not yet defined, PHP tries to guess at what you’re doing
+    and instead converts the reference to the constant into a string literal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tip
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Writing constant names in all caps is not required. However, this convention,
+    defined in the [Basic Coding Standard (PHP Standard Recommendation 1, or PSR-1)](https://oreil.ly/_rNMe)
+    as published by the [PHP Framework Interoperability Group (PHP-FIG)](https://oreil.ly/JHj-l),
+    is strongly encouraged by documented standards.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, the following block of code will assign the value of `MY_CONSTANT`
+    to the variable `$x` only when the constant is defined. Prior to PHP 8.0, an undefined
+    constant would lead `$x` to hold the literal string `"MY_CONSTANT"` instead:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the expected value of `MY_CONSTANT` is anything other than a string, the
+    fallback behavior of PHP to provide a string literal could introduce unexpected
+    side effects into your application. The interpreter won’t necessarily crash, but
+    having `"MY_​CON⁠STANT"` floating around where an integer is expected will cause
+    problems. As of PHP 8.0, referencing an as-yet-undefined constant results in a
+    fatal error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The Solution example demonstrates the two patterns used to define constants:
+    `define()` or `const`. Using `define()` will create a global constant that is
+    available anywhere in your application by using just the name of the constant
+    itself. Defining a constant by way of `const` within a class definition will scope
+    the constant to that class. Instead of referencing `MY_CONSTANT` as in the first
+    solution, the class-scoped constant is referenced as `MyClass::MY_CONSTANT`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: PHP defines [several default constants](https://oreil.ly/zQ40o) that cannot
+    be overwritten by user code. Constants in general are fixed and cannot be modified
+    or replaced, so *always* check that a constant is not defined before attempting
+    to define it. Attempts to redefine a constant will result in a notice. See [Chapter 12](ch12.html#chapter_errors)
+    for more information on handling errors and notices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Class constants are publicly visible by default, meaning any code in the application
+    that can reference `MyClass` can reference its public constants as well. However,
+    it is possible as of PHP 7.1.0 to apply a visibility modifier to a class constant
+    and make it private to instances of the class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [constants in PHP](https://oreil.ly/9WBhy), [`defined()`](https://oreil.ly/jmiau),
+    [`define()`](https://oreil.ly/9iON9), and [class constants](https://oreil.ly/ggaCv).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 1.2 Creating Variable Variables
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to reference a specific variable dynamically without knowing ahead
+    of time which of several related variables the program will need.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'PHP’s variable syntax starts with a `$` followed by the name of the variable
+    you want to reference. You can make the name of a variable *itself* a variable.
+    The following program will print `#f00` by using a variable variable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When PHP is interpreting your code, it sees a leading `$` character as identifying
+    a variable, and the immediate next section of text to represent that variable’s
+    name. In the Solution example, that text is itself, a variable. PHP will evaluate
+    variable variables from right to left, passing the result of one evaluation as
+    the name used for the left evaluation before printing any data to the screen.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Said another way, [Example 1-1](#variable_variable_evaluation) shows two lines
+    of code that are functionally equivalent, except the second uses curly braces
+    to explicitly identify the code evaluated first.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 1-1\. Evaluating variable variables
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The rightmost `$color` is first evaluated to a literal `"red"`, which in turn
+    means `$$color` and `$red` ultimately reference the same value. The introduction
+    of curly braces as explicit evaluation delimiters suggests even more complicated
+    applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 1-2](#ab_test_headlines) assumes an application wants to A/B test
+    a headline for search engine optimization (SEO) purposes. Two options are provided
+    by the marketing team, and the developers want to return different headlines for
+    different visitors—but return the *same* headline when a visitor returns to the
+    site. You can do so by leveraging the visitor’s IP address and creating a variable
+    variable that chooses a headline based on the visitor IP address.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 1-2\. A/B testing headlines
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `crc32()` function in the preceding example is a handy utility that calculates
+    a 32-bit checksum of a given string—it turns a string into an integer in a deterministic
+    fashion. The `%` operator performs a modulo operation on the resulting integer,
+    returning `0` if the checksum is even and `1` if it is odd. The result is then
+    concatenated to the string `headline` within your dynamic variable to allow the
+    function to choose one or the other headline.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The `$_SERVER` array is a system-defined [superglobal variable](https://oreil.ly/DtQV-)
+    that contains useful information about the server running your code and the incoming
+    request that triggered PHP to run in the first place. The exact contents of this
+    particular array will differ from server to server, particularly based on whether
+    you used NGINX or Apache HTTP Server (or another web server) in front of PHP,
+    but it usually contains helpful information like request headers, request paths,
+    and the filename of the currently executing script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 1-3](#crc32_walkthrough) presents a `crc32()` utilization line by
+    line to further illustrate how a user-associated value like an IP address can
+    be leveraged to deterministically identify a headline used for SEO purposes.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 1-3\. Walk-through of checksums against visitor IP addresses
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_variables_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The IP address is extracted from the `$_SERVER` superglobal variable. Note also
+    that the `REMOTE_ADDR` key will only be present when using PHP from a web server
+    and not through the CLI.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_variables_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`crc32()` converts the string IP address to an integer checksum.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_variables_CO1-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The modulo operator (`%`) determines whether the checksum is even or odd.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_variables_CO1-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The result of this modulo operation is appended to `headline`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_variables_CO1-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The final string `headline0` is used as a variable variable to identify the
+    correct SEO headline value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s even possible to nest variable variables more than two layers deep. Using
+    three `$` characters—as with `$$$name`—is just as valid, as would be `$$${*some_function*()}`.
+    It’s a good idea, both for the simplicity of code review and for general maintenance,
+    to limit the levels of variability within your variable names. The use cases for
+    variable variables are rare enough to begin with, but multiple levels of indirection
+    will render your code difficult to follow, understand, test, or maintain if something
+    ever breaks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [variable variables](https://oreil.ly/wNBh0).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 1.3 Swapping Variables in Place
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to exchange the values stored in two variables without defining any
+    additional variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The following block of code uses the `list()` language construct to reassign
+    the values of the variables in place:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'An even more concise version of the preceding solution is to use both the short
+    list and short array syntaxes available since PHP 7.1 as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `list` keyword in PHP doesn’t refer to a function, although it looks like
+    one. It’s a *language construct* used to assign values to a list of variables
+    rather than to one variable at a time. This enables developers to set multiple
+    variables all at once from another list-like collection of values (like an array).
+    It also permits the destructuring of arrays into individual variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Modern PHP leverages square brackets (`[` and `]`) for a short array syntax,
+    allowing for more concise array literals. Writing `[1, 4, 5]` is functionally
+    equivalent to `array(1, 4, 5)`, but is sometimes clearer depending on the context
+    in which it is used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Like `list`, the `array` keyword refers to a language construct within PHP.
+    Language constructs are hardcoded into the language and are the keywords that
+    make the system work. Keywords like `if` and `else` or `echo` are easy to distinguish
+    from userland code. Language constructs like `list` and `array` and `exit` look
+    like functions, but like keyword-style constructs, they are built into the language
+    and behave slightly differently than typical functions do. The [PHP Manual’s list
+    of reserved keywords](https://oreil.ly/OJD13) better illustrates existing constructs
+    and cross-references with how each is used in practice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As of PHP 7.1, developers can use the same short square bracket syntax to replace
+    the usage of `list()`, creating more concise and readable code. Given that a solution
+    to this problem is to assign values from an array to an array of variables, using
+    similar syntax on both sides of the assignment operator (`=`) both makes sense
+    and clarifies your intent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Solution example explicitly swaps the values stored in the variables `$green`
+    and `$blue`. This is something that an engineer might do while deploying an application
+    to switch from one version of an API to another. Rolling deployments often refer
+    to the current live environment as the *green* deployment and a new, potential
+    replacement as *blue*, instructing load balancers and other reliant applications
+    to swap from green/blue and verify connectivity and functionality before confirming
+    that the deployment is healthy.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In a more verbose example ([Example 1-4](#blue_green_cutover)), assume that
+    the application consumes an API prefixed by the date of deployment. The application
+    keeps track of which version of the API it is using (`$green`) and attempts to
+    swap to a new environment to verify connectivity. If the connectivity check fails,
+    the application will automatically switch back to the old environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 1-4\. Blue/green environment cutover
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `list()` construct can also be used to extract certain values from an arbitrary
+    group of elements. [Example 1-5](#list_extraction) illustrates how an address,
+    stored as an array, can be used in different contexts to extract just specific
+    values as needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 1-5\. Using `list()` to extract elements of an array
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Each extraction in the preceding example is independent and sets only the variables
+    that are necessary.^([3](ch01.html#idm45875188698112)) For a trivial illustration
+    such as this, there is no need to worry about extracting each element and setting
+    a variable, but for more complex applications manipulating data that is significantly
+    larger, setting unnecessary variables can lead to performance issues. While `list()`
+    is a powerful tool for destructuring array-like collections, it is only appropriate
+    for simple cases like those discussed in the preceding examples.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`list()`](https://oreil.ly/bzO7i), [`array()`](https://oreil.ly/tq1Z_),
+    and the PHP RFC on [short `list()` syntax](https://oreil.ly/Ou98z).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch01.html#idm45875192117424-marker)) Equality operators are covered in
+    [Recipe 2.3](ch02.html#equality_operators), which provides both an example and
+    a thorough discussion of equality checks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([2](ch01.html#idm45875192074384-marker)) Read more about classes and objects
+    in [Chapter 8](ch08.html#chapter_classes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([3](ch01.html#idm45875188698112-marker)) Recall in this chapter’s introduction
+    the explanation that variable references not explicitly being set will evaluate
+    as “empty.” This means you can set only the values and variables you need to use.
+  prefs: []
+  type: TYPE_NORMAL

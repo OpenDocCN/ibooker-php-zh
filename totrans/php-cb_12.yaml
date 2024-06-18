@@ -1,0 +1,620 @@
+- en: Chapter 12\. Error Handling
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The best laid plans of mice and men often go awry.
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: ''
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: adapted from Robert Burns
+  prefs:
+  - PREF_BQ
+  type: TYPE_NORMAL
+- en: If you work in programming or software development, you’re probably very familiar
+    with bugs and the process of debugging. You might have even spent as much time,
+    if not more, tracking down bugs as you do writing code in the first place. It’s
+    an unfortunate maxim of software—no matter how hard a team works to build correct
+    software, there will inevitably be a failure that needs to be identified and corrected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Luckily, PHP makes finding bugs relatively straightforward. The forgiving nature
+    of the language often also renders a bug a nuisance rather than a fatal flaw.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following recipes introduce the quickest and easiest way to identify and
+    handle bugs in your code. They also detail how to both code and handle custom
+    exceptions thrown by your code in the event of invalid data output by a third-party
+    API or other incorrect system behavior.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 12.1 Finding and Fixing Parse Errors
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The PHP compiler has failed to parse a script within your application; you want
+    to find and correct the problem quickly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Open the offending file in a text editor and review the line called out by the
+    parser for syntax errors. If the problem isn’t immediately apparent, walk backwards
+    through the code one line at a time until you find the problem and make corrections
+    in the file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP is a relatively forgiving language and will often attempt to let even an
+    incorrect or problematic script run to completion. In many situations, though,
+    the parser cannot properly interpret a line of code to identify what should be
+    done and will instead return an error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As a contrived example, loop through Western states in the US:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This code, when run in a PHP interpreter, will throw a `Parse error` on the
+    second line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Based on this error message alone, you can zero in on the offending line. Remember
+    that, though `foreach` is a language construct, it is still written similar to
+    a function call with parentheses. The correct way to iterate through the array
+    of states would be as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This particular error—omitting parentheses while leveraging language constructs—is
+    common among developers frequently moving between languages. The same mechanism
+    in Python, for example, looks nearly the same but is syntactically correct when
+    omitting the parentheses on the `foreach` call. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The syntax of the two languages is confusingly similar. Thankfully, they are
+    different enough that each language’s parser will catch these differences and
+    alert you, should you make such a mistake when moving back and forth between projects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conveniently, IDEs like [Visual Studio Code](https://oreil.ly/CkzbA) automatically
+    parse your script and highlight any syntax errors for you. [Figure 12-1](#vscode_parser_error)
+    illustrates how this highlighting makes it relatively easy to track down and correct
+    issues before your application ever runs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Visual Studio Code identifies and highlights syntax errors before your application
+    runs](assets/phpc_1201.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 12-1\. Visual Studio Code identifies and highlights syntax errors before
+    your application runs
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The [list of tokens](https://oreil.ly/Zw_1I), various parts of the source code,
+    used by the PHP parser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 12.2 Creating and Handling Custom Exceptions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want your application to throw (and catch) a custom exception when things
+    go wrong.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Extend the base `Exception` class to introduce custom behavior, then leverage
+    `try`/`catch` blocks to capture and handle exceptions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP defines a basic [`Throwable`](https://oreil.ly/NkLuC) interface implemented
+    by any kind of error or exception in the language. Internal issues are then represented
+    by the [`Error`](https://oreil.ly/eFMGz) class and its descendants, while problems
+    in userland are represented by the `Exception` class and its descendants.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generally, you will only ever be extending the `Exception` class within your
+    application, but you can catch any `Throwable` implementation within a standard
+    `try`/`catch` block.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, assume you are implementing a division function with very precise,
+    custom functionality:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Division by 0 is not allowed.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: All decimal values will be rounded down.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The integer 42 is never valid as a numerator.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The numerator must be an integer, but the denominator can also be a float.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Such a function might leverage built-in errors like `ArithmeticError` or `DivisionByZeroError`.
+    But in the preceding list of rules, the third stands out as requiring a custom
+    exception. Before defining your function, you would define a custom exception
+    as in [Example 12-1](#custom_hitchhiker_exception).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-1\. Simple custom exception definition
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once the custom exception exists, you can `throw` it within your custom division
+    function as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once you’ve defined your custom functionality, it’s a matter of leveraging that
+    code in an application. You know the function *could* throw an error, so it’s
+    important to wrap any invocation in a `try` statement and handle that error appropriately.
+    [Example 12-2](#division_error_handling) will iterate through four pairs of numbers,
+    attempting division on each, and handling any subsequent errors/exceptions thrown.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-2\. Handling errors in custom division
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_error_handling_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If 42 is ever passed as a numerator, the `divide()` function will throw a `Hitchhi⁠ker​Exception`
+    and fail to recover. Capturing this exception allows you to provide feedback either
+    to the application or to the user and move on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_error_handling_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Any other `Error` or `Exception` thrown by the function will be caught as an
+    implementation of `Throwable`. In this case, you’re throwing that error away and
+    moving on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Documentation on the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The base [`Exception` class](https://oreil.ly/2s4mN)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The list of [predefined exceptions](https://oreil.ly/TdeGN)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Additional exceptions [as defined by the Standard PHP Library (SPL)](https://oreil.ly/GSDEg)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Creating custom exceptions through extension](https://oreil.ly/-jrVt)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The [error hierarchy as of PHP 7](https://oreil.ly/KF1Zd)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 12.3 Hiding Error Messages from End Users
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You’ve fixed all of the bugs you know of and are ready to launch your application
+    in production. But you also want to prevent any new errors from being displayed
+    to end users.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To completely suppress errors in production, set both the `error_reporting`
+    and `dis⁠play_​errors` directives in *php.ini* to `Off` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The configuration change presented in the Solution example will impact your
+    entire application. Errors will be entirely suppressed and, even if they were
+    to be thrown, will never be displayed to an end user. It’s considered bad practice
+    to present errors or unhandled exceptions directly to users. It might also lead
+    to security issues if stack traces are presented directly to end users of the
+    application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, if your application is misbehaving, nothing will be logged for the
+    development team to diagnose and address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For a production instance, leaving `display_errors` set to `Off` will still
+    hide errors from end users, but reverting to the default `error_reporting` level
+    will reliably send any errors to the logs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There might be specific pages with known errors (due to legacy code, poorly
+    written dependencies, or known technical debt) that you wish to omit, though.
+    In those situations you can *programmatically* set the error reporting level by
+    using the `error_​reporting()` function in PHP. This function accept a new error
+    reporting level and returns whatever level was previously set (the default if
+    not previously configured).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As a result, you can use calls to `error_reporting()` to wrap problematic blocks
+    of code and prevent too-chatty errors from being presented in the logs. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_error_handling_CO2-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Set the error level to the absolute minimum, including only fatal runtime errors
+    that halt script execution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_error_handling_CO2-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Return the error level to its previous state.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The default error level is `E_ALL`, which presents all errors, warnings, and
+    notices.^([1](ch12.html#idm45875144247792)) You can use integer reporting levels
+    to override this, but PHP presents several named constants that represent each
+    potential setting. These constants are enumerated in [Table 12-1](#error_reporting_levels).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Prior to PHP 8.0, the default error reporting level started with `E_ALL` and
+    then explicitly removed diagnostic notices (`E_NOTICE`), strict type warnings
+    (`E_STRICT`), and deprecation notices ( `E_DEPRECATED`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 12-1\. Error reporting level constants
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Integer value | Constant | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1 | `E_ERROR` | Fatal runtime errors that result in script execution halting.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2 | `E_WARNING` | Runtime warnings (nonfatal errors) that do not halt script
+    execution. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 4 | `E_PARSE` | Compile-time errors generated by the parser. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 8 | `E_NOTICE` | Runtime notices that indicate that the script encountered
+    something that could indicate an error but could also happen in the normal course
+    of running a script. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 16 | `E_CORE_ERROR` | Fatal errors that occur during PHP’s initial startup.
+    This is like `E_ERROR`, except it is generated by the core of PHP. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 32 | `E_CORE_WARNING` | Warnings (nonfatal errors) that occur during PHP’s
+    initial startup. This is like `E_WARNING`, except it is generated by the core
+    of PHP. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 64 | `E_COMPILE_ERROR` | Fatal compile-time errors. This is like `E_ERROR`,
+    except it is generated by the Zend Scripting Engine. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 128 | `E_COMPILE_​WARN⁠ING` | Compile-time warnings (nonfatal errors). This
+    is like `E_WARNING`, except it is generated by the Zend Scripting Engine. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 256 | `E_USER_ERROR` | User-generated error messages. This is like `E_ERROR`,
+    except it is generated in PHP code by using the PHP function [`trigger_error()`](https://oreil.ly/eNgVf).
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 512 | `E_USER_WARNING` | User-generated warning messages. This is like `E_WARNING`,
+    except it is generated in PHP code by using the PHP function `trigger_error()`.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 1024 | `E_USER_NOTICE` | User-generated notice messages. This is like `E_NOTICE`,
+    except it is generated in PHP code by using the PHP function `trigger_error()`.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 2048 | `E_STRICT` | Enable to have PHP suggest changes to your code which
+    will ensure the best interoperability and forward compatibility of your code.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 4096 | `E_RECOVERA⁠BLE_​ERROR` | Catchable fatal errors. A dangerous error
+    occurred, but PHP is not unstable and can recover. If the error is not caught
+    by a user-defined handle (see also [Recipe 12.4](#recipe_error_handler)), the
+    application aborts as if it was an `E_ERROR`. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 8192 | `E_DEPRECATED` | Runtime notices. Enable this to receive warnings
+    about code that will not work in future versions. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 16384 | `E_USER_​DEPRE⁠CATED` | User-generated warning messages. This is
+    like `E_DEPRECATED`, except it is generated in PHP code by using the PHP function
+    `trigger_error()`. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 32767 | `E_ALL` | All errors, warnings, and notices. |'
+  prefs: []
+  type: TYPE_TB
+- en: 'Note that you can combine error levels via binary operations, creating a bitmask.
+    A simple error reporting level might include errors, warnings, and parser errors
+    alone (omitting core, user errors, and notices). This level would be adequately
+    set with the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`error_reporting()`](https://oreil.ly/b4eIH), the [`error_reporting`
+    directive](https://oreil.ly/t5IW2), and the [`dis⁠play_​errors` directive](https://oreil.ly/lxXNs).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 12.4 Using a Custom Error Handler
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to customize the way PHP handles and reports errors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Define your custom handler as a callable function in PHP, then pass that function
+    into `set_error_handler()` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP will leverage your custom handler in most situations where an error is recoverable.
+    Fatal errors, core errors, and compile-time issues (like parser errors) either
+    halt or entirely prevent program execution and cannot be handled with a user function.
+    Specifically, `E_ERROR`, `E_PARSE`, `E_CORE_ERROR`, `E_CORE_WARNING`, `E_COMPILE_ERROR`,
+    and `E_COMPILE_WARNING` errors can never be caught. In addition, most `E_STRICT`
+    errors in the file that invoked `set_error_handler()` cannot be caught, as the
+    errors will be thrown before the custom handler is properly registered.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you define a custom error handler consistent with the one presented in the
+    Solution example, any catchable errors will then invoke this function and print
+    data to the screen. As illustrated in [Example 12-3](#catching_runtime_errors),
+    attempting to `echo` an undefined variable will cause an `E_WARNING` error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-3\. Catching recoverable runtime errors
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'With `my_error_handler()` from the Solution example defined and registered,
+    the erroneous code in [Example 12-3](#catching_runtime_errors) will print the
+    following text to the screen, referencing the integer value of the `E_WARNING`
+    error type:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once you’ve caught an error to handle it, if the error is something that will
+    lead to instability in the application, it is your responsibility to invoke `die()`
+    to halt execution. PHP won’t do this for you outside the handler and will instead
+    continue processing the application as if no error had been thrown.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If, once you’ve handled errors in part of your application, you wish to restore
+    the original (default) error handler, you should do so by calling `restore_error_​han⁠dler()`.
+    This merely reverts your earlier error handler registration and restores whatever
+    error handler was previously registered.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similarly, PHP empowers you to register (and restore) custom exception handlers.
+    These operate the same as custom error handlers but instead capture any exception
+    thrown outside a `try`/`catch` block. Unlike error handlers, program execution
+    will halt after the custom exception handler has been called.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more on exceptions, review [Recipe 12.2](#custom_exceptions) and the documentation
+    for both [`set_exception_handler()`](https://oreil.ly/_pf4H) and [`restore_exception_&#x200b;han&#x2060;dler()`](https://oreil.ly/TOEuz).
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`set_error_handler()`](https://oreil.ly/IAh69) and [`restore_error_handler()`](https://oreil.ly/SlT_d).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 12.5 Logging Errors to an External Stream
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to log application errors to a file or to an external source of some
+    sort for future debugging.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `error_log()` to write errors to the default log file as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: By default, `error_log()` will log errors to whatever location is specified
+    by the [`error_log` directive](https://oreil.ly/3lVPn) in *php.ini*. Often on
+    Unix-style systems, this will be a file within */var/log* but can be customized
+    to be anywhere within your system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The optional second parameter of `error_log()` allows you to route error messages
+    where necessary. If the server is set up to send emails, you can specify a message
+    type of `1` and provide an email address for the optional third parameter to send
+    errors by email. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Under the hood, `error_log()` will use the same functionality as `mail()` to
+    send errors by email. In many cases, this might be disabled for security purposes.
+    Be sure to verify the functionality of any mail systems before relying on this
+    functionality, particularly in a production environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Alternatively, you can specify a file *other* than the default log location
+    as the destination and pass the integer `3` as the message type. Rather than writing
+    to the default logs, PHP will append the message to that file directly. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: When logging directly to a file with `error_log()`, the system will *not* append
+    a newline character automatically. You will be responsible for either appending
+    `PHP_EOL` to any string or encoding the `\r\n` newline literals.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Chapter 11](ch11.html#chapter_streams) covers the file protocol at length
+    as well as the other streams exposed by PHP. Remember that directly referencing
+    a filepath is transparently leveraging the `file://` protocol so, in reality,
+    you are logging errors to a file *stream* with the preceding code block. You can
+    just as easily reference any other kind of stream so long as you properly reference
+    the stream protocol. The following example logs errors directly to the console’s
+    standard error stream:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`error_log()`](https://oreil.ly/QUQRH) and [Recipe 13.5](ch13.html#recipe_logging)’s
+    coverage of Monolog, a more comprehensive logging library for PHP applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch12.html#idm45875144247792-marker)) The default error level can be directly
+    set in *php.ini* and, in many environments, might already be set to something
+    other than `E_ALL`. Confirm your own environment’s configuration to be sure.
+  prefs: []
+  type: TYPE_NORMAL

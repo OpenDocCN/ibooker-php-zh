@@ -1,0 +1,616 @@
+- en: Chapter 2\. Setting Up a Laravel Development Environment
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Part of PHP’s success has been because it’s hard to find a web server that *can’t*
+    serve PHP. However, modern PHP tools have stricter requirements than those of
+    the past. The best way to develop for Laravel is to ensure a consistent local
+    and remote server environment for your code, and, thankfully, the Laravel ecosystem
+    has a few tools for this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: System Requirements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Everything we’ll cover in this chapter is possible with Windows machines, but
+    you’ll need dozens of pages of custom instructions and caveats. I’ll leave those
+    instructions and caveats to actual Windows users, so the examples here and in
+    the rest of the book will focus on Unix/Linux/macOS developers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Whether you choose to serve your website by installing PHP and other tools
+    on your local machine, serve your development environment from a virtual machine
+    via Vagrant or Docker, or rely on a tool like MAMP/WAMP/XAMPP, your development
+    environment will need to have all of the following installed in order to serve
+    Laravel sites:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP >= 8.1
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: OpenSSL PHP extension
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: PDO PHP extension
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Mbstring PHP extension
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Tokenizer PHP extension
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: XML PHP extension
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Ctype PHP extension
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: JSON PHP extension
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: BCMath PHP extension
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Composer
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Whatever machine you’re developing on will need to have [Composer](https://getcomposer.org)
+    installed globally. *Composer* is a tool that’s at the foundation of most modern
+    PHP development. It’s a dependency manager for PHP, much like NPM (Node Package
+    Manager) for Node or RubyGems for Ruby. But like NPM, Composer is also the foundation
+    of much of our testing, local script loading, installation scripts, and much more.
+    You’ll need Composer to install Laravel, update Laravel, and bring in external
+    dependencies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Local Development Environments
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: For many projects, hosting your development environment using a simpler toolset
+    will be enough. If you already have MAMP or WAMP or XAMPP installed on your system,
+    that will likely be fine to run Laravel.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also just run Laravel with PHP’s built-in web server. Run `php -S localhost:8000
+    -t public` from your Laravel site’s root folder, and PHP’s built-in web server
+    will serve your site at *http://localhost:8000/*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, if you want a little more power in your development environment (different
+    local domains for each project, management of dependencies like MySQL, etc.),
+    you’ll want to reach for a more powerful tool than just PHP’s built-in server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Laravel offers five tools for local development: `Artisan serve`, Sail, Valet,
+    Herd, and Homestead. We’ll cover each briefly. If you’re unsure of which to use,
+    I’m personally a fan of Valet for Mac users and Sail for everyone else.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Artisan Serve
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you run `php artisan serve` after setting up your Laravel application, it’ll
+    serve it at [*http://localhost:8000*](http://localhost:8000), just like we set
+    it up earlier using PHP’s built-in web server. You’re not getting anything else
+    for free here, so its only meaningful benefit is that it’s easier to remember.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel Sail
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Sail is the simplest way to get started with local Laravel development in a
+    way that’s the same regardless of your operating system. It comes with a PHP web
+    server, databases, and a host of other niceties that make it very easy to run
+    a single Laravel installation that’s consistent for every developer on your project
+    regardless of the project’s dependencies or your developers’ work environments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Why don’t I use Sail? It uses Docker to accomplish the above, and Docker on
+    macOS is just slow enough that I prefer Valet. But if you’re new to Laravel, especially
+    if you don’t use a Mac, Sail is intentionally created as the simplest way to get
+    started building your Laravel apps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel Valet
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you’re a macOS user (there are also unofficial forks for Windows and Linux),
+    Laravel Valet makes it easy to serve every one of your local Laravel apps (and
+    most other static and PHP-based apps) on different local domains.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You’ll need to install a few tools using Homebrew, which the documentation will
+    walk you through, but there are very few steps from initial installation to serving
+    your apps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Install Valet—see the [Valet docs](https://laravel.com/docs/valet) for the latest
+    installation instructions—and point it at one or more directories where your sites
+    will live. I ran `valet park` from my *~/Sites* directory, which is where I put
+    all of my under-development apps. Now, you can just add *.test* to the end of
+    the directory name and visit it in your browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Valet makes it easy to serve Laravel apps; we can use `valet park` to serve
+    all subfolders in a given folder as *{foldername}.test*, `valet link` to serve
+    just a single folder, `valet open` to open a browser to show the Valet-served
+    domain for a folder, `valet secure` to serve the Valet site with HTTPS, and `valet
+    share` to open an ngrok or Expose tunnel so you can share your site with others.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel Herd
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Herd is a native macOS app that bundles Valet and all its dependencies as a
+    single installer. While Herd is not quite as customizable as Valet CLI is, it
+    removes the need to work with Homebrew, Docker, or any other dependency managers,
+    and it allows you to interact with Valet’s core features through a nice graphical
+    interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel Homestead
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Homestead is another tool you might want to use to set up your local development
+    environment. It’s a configuration tool that sits on top of Vagrant (which is a
+    tool for managing virtual machines) and provides a preconfigured virtual machine
+    image that is perfectly set up for Laravel development *and* mirrors the most
+    common production environment that many Laravel sites run on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [Homestead docs](https://laravel.com/docs/homestead) are robust and kept
+    constantly up to date, so I’ll just refer you to them if you want to learn how
+    it works and how to get it set up.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a New Laravel Project
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There are two ways to create a new Laravel project, both of which are run from
+    the command line. The first option is to globally install the Laravel installer
+    tool (using Composer); the second is to use Composer’s `create-project` feature.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can learn about both options in greater detail on the [Installation documentation
+    page](https://laravel.com/docs/installation), but I’d recommend the Laravel installer
+    tool.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing Laravel with the Laravel Installer Tool
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you have Composer installed globally, installing the Laravel installer tool
+    is as simple as running the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once you have the Laravel installer tool installed, spinning up a new Laravel
+    project is simple. Just run this command from your command line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will create a new subdirectory of your current directory named *{projectName}*
+    and install a bare Laravel project in it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing Laravel with Composer’s create-project Feature
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Composer also offers a feature called `create-project` for creating new projects
+    with a particular skeleton. To use this tool to create a new Laravel project,
+    issue the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Just like the installer tool, this will create a subdirectory of your current
+    directory named *{projectName}* that contains a skeleton Laravel install, ready
+    for you to develop.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing Laravel with Sail
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you plan to work with Laravel Sail, you can install a Laravel app and begin
+    its Sail installation process at the same time. Ensure you have Docker installed
+    on your computer, and then issue the following command, replacing `*example-app*`
+    with the name of your app:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will install Laravel into the `*example-app*` folder underneath your current
+    folder and then begin the Sail installation process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once that installation process is complete, change to your new directory and
+    spin up Sail:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The first time you run `sail up`, it’ll take quite a bit longer than other installation
+    processes, as it needs to build up the initial Docker image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel’s Directory Structure
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'When you open up a directory that contains a skeleton Laravel application,
+    you’ll see the following files and directories:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s walk through them one by one to get familiar.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Folders
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The root directory contains the following folders by default:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: app
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where the bulk of your actual application will go. Models, controllers, commands,
+    and your PHP domain code all go in here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: bootstrap
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contains the files that the Laravel framework uses to boot every time it runs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: config
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where all the configuration files live.
+  prefs: []
+  type: TYPE_NORMAL
+- en: database
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where database migrations, seeds, and factories live.
+  prefs: []
+  type: TYPE_NORMAL
+- en: public
+  prefs: []
+  type: TYPE_NORMAL
+- en: The directory the server points to when it’s serving the website. This contains
+    *index.php*, which is the front controller that kicks off the bootstrapping process
+    and routes all requests appropriately. It’s also where any public-facing files
+    like images, stylesheets, scripts, or downloads go.
+  prefs: []
+  type: TYPE_NORMAL
+- en: resources
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where files that are needed for other scripts live. Views, and (optionally)
+    source CSS and source JavaScript files live here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: routes
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where all of the route definitions live, both for HTTP routes and “console routes,”
+    or Artisan commands.
+  prefs: []
+  type: TYPE_NORMAL
+- en: storage
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where caches, logs, and compiled system files live.
+  prefs: []
+  type: TYPE_NORMAL
+- en: tests
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where unit and integration tests live.
+  prefs: []
+  type: TYPE_NORMAL
+- en: vendor
+  prefs: []
+  type: TYPE_NORMAL
+- en: Where Composer installs its dependencies. It’s Git-ignored (marked to be excluded
+    from your version control system) because Composer is expected to run as a part
+    of your deploy me process on any remote servers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Loose Files
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The root directory also contains the following files:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: .editorconfig
+  prefs: []
+  type: TYPE_NORMAL
+- en: Gives your IDE/text editor instructions about Laravel’s coding standards (e.g.,
+    the size of indents, the charset, and whether to trim trailing whitespace).
+  prefs: []
+  type: TYPE_NORMAL
+- en: .env and .env.example
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dictate the environment variables (variables that are expected to be different
+    in each environment and are therefore not committed to version control). *.env.example*
+    is a template that each environment should duplicate to create its own *.env*
+    file, which is Git-ignored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: .gitignore and .gitattributes
+  prefs: []
+  type: TYPE_NORMAL
+- en: Git configuration files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: artisan
+  prefs: []
+  type: TYPE_NORMAL
+- en: Allows you to run Artisan commands (see [Chapter 8](ch08.html#artisan_and_tinker))
+    from the command line.
+  prefs: []
+  type: TYPE_NORMAL
+- en: composer.json and composer.lock
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration files for Composer; *composer.json* is user-editable and *composer.lock*
+    is not. These files share some basic information about the project and also define
+    its PHP dependencies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: package.json
+  prefs: []
+  type: TYPE_NORMAL
+- en: Like *composer.json*, but for frontend assets and dependencies of the build
+    system; it instructs NPM about which JavaScript-based dependencies to pull in.
+  prefs: []
+  type: TYPE_NORMAL
+- en: phpunit.xml
+  prefs: []
+  type: TYPE_NORMAL
+- en: A configuration file for PHPUnit, the tool Laravel uses for testing out of the
+    box.
+  prefs: []
+  type: TYPE_NORMAL
+- en: readme.md
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Markdown file giving a basic introduction to Laravel. You won’t see this file
+    if you use the Laravel installer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: vite.config.js
+  prefs: []
+  type: TYPE_NORMAL
+- en: The (optional) configuration file for Vite. This file instructs your build system
+    about how to compile and process your frontend assets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The core settings of your Laravel application—​database connection settings,
+    queue and mail settings, etc.—live in files in the *config* folder. Each of these
+    files returns a PHP array, and each value in the array is accessible by a config
+    key that is comprised of the filename and all descendant keys, separated by dots
+    (`.`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So, if you create a file at *config/services.php* that looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can access that config variable using `config('services.sparkpost.secret')`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Any configuration variables that should be distinct for each environment (and
+    therefore not committed to source control) will instead live in your *.env* files.
+    Let’s say you want to use a different Bugsnag API key for each environment. You’d
+    set the config file to pull it from *.env*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This `env()` helper function pulls a value from your *.env* file with that
+    same key. So now, add that key to your *.env* (settings for this environment)
+    and *.env.example* (template for all environments) files:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Your *.env* file will already contain quite a few environment-specific variables
+    needed by the framework, like which mail driver you’ll be using and what your
+    basic database settings are.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using env() Outside of Config Files
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Certain features in Laravel, including some caching and optimization features,
+    aren’t available if you use `env()` calls anywhere outside of config files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The best way to pull in environment variables is to set up config items for
+    anything you want to be environment-specific. Have those config items read the
+    environment variables, and then reference the config variables anywhere within
+    your app:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: The .env File
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s take a quick look at the default contents of the *.env* file. The exact
+    keys will vary depending on which version of Laravel you’re using, but take a
+    look at [Example 2-1](#default_env_vars) to see what they look like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 2-1\. The default environment variables in Laravel
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'I won’t go into all of them, because quite a few are just groups of authentication
+    information for various services (Pusher, Redis, DB, Mail). Here are two important
+    environment variables you should know about, though:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`APP_KEY`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A randomly generated string that’s used to encrypt data. If this is ever empty,
+    you may run into the error “No application encryption key has been specified.”
+    In that case, just run `php artisan key:generate`, and Laravel will generate one
+    for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`APP_DEBUG`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Boolean determining whether the users of this instance of your application
+    should see debug errors—great for local and staging environments, terrible for
+    production.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The rest of the nonauthentication settings (`BROADCAST_DRIVER`, `QUEUE_CONNECTION`,
+    etc.) are given default values that work with as little reliance on external services
+    as possible, which is perfect for when you’re getting started.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When you start your first Laravel app, the only change you’ll likely want to
+    make for most projects is to the database configuration settings. I use Laravel
+    Valet, so I change `DB_DATABASE` to the name of my project, `DB_USERNAME` to `root`,
+    and `DB_PASSWORD` to an empty string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then, I create a database with the same name as my project in my favorite MySQL
+    client, and I’m ready to go.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Up and Running
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'You’re now up and running with a bare Laravel install. Run `git init`, commit
+    the bare files with `git add .` and `git commit`, and you’re ready to start coding.
+    That’s it! And if you’re using Valet, you can run the following commands and instantly
+    see your site live in your browser:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Every time I start a new project, these are the steps I take:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: I keep all of my sites in a *~/Sites* folder, which I have set up as my primary
+    Valet directory, so in this case I’d instantly have *myProject.test* accessible
+    in my browser with no added work. I can edit *.env* and point it to a particular
+    database, add that database in my MySQL app, and I’m ready to start coding.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In every chapter after this, the “Testing” section at the end of the chapter
+    will show you how to write tests for the feature or features that were covered.
+    Since this chapter doesn’t cover a testable feature, let’s talk tests quickly.
+    (To learn more about writing and running tests in Laravel, head over to [Chapter 12](ch12.html#testing).)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Out of the box, Laravel brings in PHPUnit as a dependency and is configured
+    to run the tests in any file in the *tests* directory whose name ends with *Test.php*
+    (for example, *tests/UserTest.php*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, the simplest way to write tests is to create a file in the *tests* directory
+    with a name that ends with *Test.php*. And the easiest way to run them is to run
+    `./vendor/bin/phpunit` from the command line (in the project root).
+  prefs: []
+  type: TYPE_NORMAL
+- en: If any tests require database access, be sure to run your tests from the machine
+    where your database is hosted—​so if you’re hosting your database in Vagrant,
+    make sure to `ssh` into your Vagrant box to run your tests from there. Again,
+    you can learn about this and much more in [Chapter 12](ch12.html#testing).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Also, some of the testing sections will use testing syntax and features that
+    you will not be familiar with yet if you’re reading the book for the first time.
+    If code in any of the testing sections is confusing, just skip it and come back
+    to it after you’ve had a chance to read the testing chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: TL;DR
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Since Laravel is a PHP framework, it’s very simple to serve it locally. Laravel
+    also provides three tools for managing your local development: Sail, a Docker
+    setup; Valet, a simpler macOS-based tool; and Homestead, a preconfigured Vagrant
+    setup. Laravel relies on and can be installed by Composer and comes out of the
+    box with a series of folders and files that reflect both its conventions and its
+    relationship with other open source tools.'
+  prefs: []
+  type: TYPE_NORMAL

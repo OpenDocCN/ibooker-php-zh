@@ -1,0 +1,1012 @@
+- en: Chapter 7\. Collecting and Handling User Data
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Websites that benefit from a framework like Laravel often don’t just serve
+    static content. Many deal with complex and mixed data sources, and one of the
+    most common (and most complex) of these sources is user input in its myriad forms:
+    URL paths, query parameters, `POST` data, and file uploads.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel provides a collection of tools for gathering, validating, normalizing,
+    and filtering user-provided data. We’ll look at those here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Injecting a Request Object
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The most common tool for accessing user data in Laravel is injecting an instance
+    of the `Illuminate\Http\Request` object. It offers easy access to all of the ways
+    users can provide input to your site: `POST`ed form data or JSON, `GET` requests
+    (query parameters), and URL segments.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Other Options for Accessing Request Data
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There’s also a `request()` global helper and a `Request` facade, both of which
+    expose the same methods. Each of these options exposes the entire Illuminate `Request`
+    object, but for now we’re only going to cover the methods that specifically relate
+    to user data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Since we’re planning on injecting a `Request` object, let’s take a quick look
+    at how to get the `$request` object we’ll be calling all these methods on:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: $request->all()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Just like the name suggests, `$request->all()` gives you an array containing
+    all of the input the user has provided, from every source. Let’s say, for some
+    reason, you decided to have a form `POST` to a URL with a query parameter—for
+    example, sending a `POST` to *http://myapp.com/signup?utm=12345*. Take a look
+    at [Example 7-1](#EX601) to see what you’d get from `$request->all()`. (Note that
+    `$request->all()` also contains information about any files that were uploaded,
+    but we’ll cover that later in the chapter.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-1\. `$request->all()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: $request->except() and ->only()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '`$request->except()` provides the same output as `$request->all()`, but you
+    can choose one or more fields to exclude—for example, `_token`. You can pass it
+    either a string or an array of strings.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 7-2](#EX602) shows what it looks like when we use `$request->except()`
+    on the same form as in [Example 7-1](#EX601).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-2\. `$request->except()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$request->only()` is the inverse of `$request->except()`, as you can see in
+    [Example 7-3](#EX603).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-3\. `$request->only()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: $request->has() and ->missing()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: With `$request->has()` you can detect whether a particular piece of user input
+    is available to you, regardless of whether the input actually has a value in it.
+    Check out [Example 7-4](#EX604) for an analytics example with our `utm` query
+    string parameter from the previous examples.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-4\. `$request->has()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$request->missing()` is its inverse.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: $request->whenHas()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: With `$request->whenHas()`, you can define the behavior when the request either
+    does or doesn’t have a field provided. The first closure parameter is returned
+    when the field exists, and the second is returned when it doesn’t.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See [Example 7-5](#EX624) for an example with our `utm` query string parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-5\. `$request->whenHas()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: $request->filled()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Using the `$request->filled()` method, it is possible to check if a particular
+    field is present and filled in the request. `filled()` is the same as `has()`,
+    except it also requires there to be an actual value present in the field. In [Example 7-6](#EX625)
+    you can see an example of how to use this method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-6\. `$request->filled()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: $request->whenFilled()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Much like with the `whenHas()` method, the `$request->whenFilled()` method allows
+    you to define the values either when the field is filled or when it isn’t. The
+    first closure parameter runs when the field is filled, the second when it is not.
+    See [Example 7-7](#EX626) for an example of how to use this method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-7\. `$request->whenFilled()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: $request->mergeIfMissing()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: With the `mergeIfMissing()` method you can add a field to the request when it
+    is not present and while defining its value. This can be useful, for example,
+    when a field comes from a checkbox, as it is only present when checked. You can
+    see [Example 7-8](#EX627) for an implementation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-8\. `$request->mergeIfMissing()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: $request->input()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Whereas `$request->all()`, `$request->except()`, and `$request->only()` operate
+    on the full array of input provided by the user, `$request->input()` allows you
+    to get the value of just a single field. [Example 7-9](#EX605) provides an example.
+    Note that the second parameter is the default value, so if the user hasn’t passed
+    in a value, you can have a sensible (and nonbreaking) fallback.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-9\. `$request->input()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: $request->method() and ->isMethod()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '`$request->method()` returns the HTTP verb for the request, and `$⁠r⁠e⁠q⁠u⁠e⁠s⁠t​\-⁠>⁠i⁠s⁠M⁠e⁠t⁠h⁠o⁠d⁠(⁠)`
+    checks whether it matches the specified verb. [Example 7-10](#EX622) illustrates
+    their use.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-10\. `$request->method()` and `$request->isMethod()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: $request->integer(), ->float(), ->string(), and ->enum()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: These methods cast the inputs directly into integers, floats, strings, or enums
+    when you use each method respectively. See [Example 7-11](#EX628) for usage examples.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-11\. `$request->integer()`, `$request->float()`, `$request->string()`,
+    and `$request->enum()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: $request->dump() and ->dd()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '`$request->dump()` and `$request->dd()` are helper methods for dumping the
+    request. For both, you can dump the whole request by not passing any parameters
+    or dump only selected fields by passing an array. `$request->dump()` dumps and
+    then continues, while `$request->dd()` dumps and then stops execution of the script.
+    [Example 7-12](#EX629) illustrates their use.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-12\. `$request->dump()` and `$request->dd()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Array Input
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Laravel also provides convenience helpers for accessing data from array input.
+    Just use the “dot” notation to indicate the steps of digging into the array structure,
+    like in [Example 7-13](#EX606).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-13\. Dot notation to access array values in user data
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: JSON Input (and $request->json())
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'So far we’ve covered input from query strings (`GET`) and form submissions
+    (`POST`). But there’s another form of user input that’s becoming more common with
+    the advent of JavaScript SPAs: the JSON request. It’s essentially just a `POST`
+    request with the body set to JSON instead of a traditional form `POST`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s take a look at what it might look like to submit some JSON to a Laravel
+    route, and how to use `$request->input()` to pull out that data ([Example 7-14](#EX607)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-14\. Getting data from JSON with `$request->input()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since `$request->input()` is smart enough to pull user data from `GET`, `POST`,
+    or JSON, you may wonder why Laravel even offers `$request->json()`. There are
+    two reasons you might prefer `$request->json()`. First, you might want to just
+    be more explicit to other programmers working on your project about where you’re
+    expecting the data to come from. And second, if the `POST` doesn’t have the correct
+    `application/json` headers, `$request->input()` won’t pick it up as JSON, but
+    `$request->json()` will.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Route Data
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: It might not be the first thing you think of when you imagine “user data,” but
+    the URL is just as much user data as anything else in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two primary ways you’ll get data from the URL: via `Request` objects
+    and via route parameters.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: From Request
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Injected `Request` objects (and the `Request` facade and the `request()` helper)
+    have several methods available to represent the state of the current page’s URL,
+    but right now, let’s focus on getting information about the URL segments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Each group of characters after the domain in a URL is called a *segment*. So,
+    *[*http://www.myapp.com/users/15*](http://www.myapp.com/users/15)* has two segments:
+    *users* and *15*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As you can probably guess, we have two methods available to us: `$request``->segments()`
+    returns an array of all segments, and `$request⁠->​s⁠e⁠g⁠m⁠e⁠n⁠t⁠(*$segmentId*)`
+    allows us to get the value of a single segment. Note that segments are returned
+    on a 1-based index, so in the preceding example, `$request⁠->​s⁠e⁠g⁠m⁠e⁠n⁠t⁠(1)`
+    would return *users*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Request` objects, the `Request` facade, and the `request()` global helper
+    provide quite a few more methods to help us get data out of the URL. To learn
+    more, check out [Chapter 10](ch10.html#requests_and_responses).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: From Route Parameters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The other primary way we get data about the URL is from route parameters, which
+    are injected into the controller method or closure that is serving a current route,
+    as shown in [Example 7-15](#EX608).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-15\. Getting URL details from route parameters
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: To learn more about routes and route binding, check out [Chapter 3](ch03.html#routing).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Uploaded Files
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We’ve talked about different ways to interact with users’ text input, but there’s
+    also the matter of file uploads to consider. `Request` objects provide access
+    to any uploaded files using the `$request->file()` method, which takes the file’s
+    input name as a parameter and returns an instance of `Symfony\Component\HttpFoundation\File\UploadedFile`.
+    Let’s walk through an example. First, our form, in [Example 7-16](#EX609).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-16\. A form to upload files
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now let’s take a look at what we get from running `$request->all()`, as shown
+    in [Example 7-17](#EX610). Note that `$request->input('profile_picture')` will
+    return `null`; we need to use `$request->file('profile_picture')` instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-17\. The output from submitting the form in [Example 7-16](#EX609)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Laravel also offers file-specific validation rules, allowing you to require
+    file uploads to match certain mime types, file sizes or lengths, and more. Take
+    a look at the [validation docs](https://oreil.ly/bamub) to learn more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Symfony’s `UploadedFile` class extends PHP’s native `SplFileInfo` with methods
+    allowing you to easily inspect and manipulate the file. This list isn’t exhaustive,
+    but it gives you a taste of what you can do:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`guessExtension()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`getMimeType()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`store(*$path*, *$storageDisk = default disk*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`storeAs(*$path*, *$newName*, *$storageDisk = default disk*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`storePublicly(*$path*, *$storageDisk = default disk*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`storePubliclyAs(*$path*, *$newName*, *$storageDisk = default disk*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`move(*$directory*, *$newName = null*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`getClientOriginalName()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`getClientOriginalExtension()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`getClientMimeType()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`guessClientExtension()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`getClientSize()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`getError()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`isValid()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'As you can see, most of the methods have to do with getting information about
+    the uploaded file, but there’s one that you’ll likely use more than all the others:
+    `store()`, which takes the file that was uploaded with the request and stores
+    it in a specified directory on your server. Its first parameter is the destination
+    directory, and the optional second parameter is the storage disk (`s3`, `local`,
+    etc.) to use to store the file. You can see a common workflow in [Example 7-18](#EX611).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-18\. Common file upload workflow
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you need to specify the filename, you can use `storeAs()` instead of `store()`.
+    The first parameter is still the path; the second is the filename, and the optional
+    third parameter is the storage disk to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Proper Form Encoding for File Uploads
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'If you get `null` when you try to get the contents of a file from your request,
+    you might’ve forgotten to set the encoding type on your form. Make sure to add
+    the attribute `enctype="multipart/form-data"` on your form:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Validation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Laravel has quite a few ways you can validate incoming data. We’ll cover form
+    requests in the next section, so that leaves us with two primary options: validating
+    manually or using the `validate()` method on the `Request` object. Let’s start
+    with the simpler, and more common, `validate()`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: validate() on the Request Object
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `Request` object has a `validate()` method that provides a convenient shortcut
+    for the most common validation workflow. Take a look at [Example 7-19](#EX612).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-19\. Basic usage of request validation
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: We only have four lines of code running our validation here, but they’re doing
+    a lot.
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, we explicitly define the fields we expect and apply rules (here separated
+    by the pipe character, `|`) to each individually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, the `validate()` method checks the incoming data from `$request` and determines
+    whether or not it is valid.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the data is valid, the `validate()` method ends and we can move on with the
+    controller method, saving the data or whatever else.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But if the data isn’t valid, it throws a `ValidationException`. This contains
+    instructions to the router about how to handle this exception. If the request
+    is from JavaScript (or if it’s requesting JSON as a response), the exception will
+    create a JSON response containing the validation errors. If not, the exception
+    will return a redirect to the previous page, together with all of the user input
+    and the validation errors—​perfect for repopulating a failed form and showing
+    some errors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: More on Laravel’s Validation Rules
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In our examples here (like in the docs) we’re using the “pipe” syntax: `''*fieldname*'':
+    ''*rule*|*otherRule*|*anotherRule*''`. But you can also use the array syntax to
+    do the same thing: `''*fieldname*'': [''*rule*'', ''*otherRule*'', ''*anotherRule*'']`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Additionally, you can validate nested properties. This matters if you use HTML’s
+    array syntax, which allows you to, for example, have multiple “users” on an HTML
+    form, each with an associated name. Here’s how you validate that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We don’t have enough space to cover every possible validation rule here, but
+    here are a few of the most common rules and their functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Require the field
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`required`; `required_if:*anotherField,equalToThisValue*`;'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`required_unless:*anotherField,equalToThisValue*`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Exclude the field from the request output
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`exclude_if:*anotherField,equalToThisValue*`;'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`exclude_unless:*anotherField,equalToThisValue*`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Field must contain certain types of characters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`alpha`; `alpha_dash`; `alpha_num`; `numeric`; `integer`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Field must contain certain patterns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`email`; `active_url`; `ip`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dates
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`after:*date*`; `before:*date*` (`*date*` can be any valid string that `strtotime()`
+    can handle)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Numbers
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`between:*min*`,`*max*`; `min:*num*`; `max:*num*`; `size:*num*` (`size` tests
+    against length for strings, value for integers, `count` for arrays, or size in
+    KB for files.)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image dimensions
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`dimensions:min_width=*XXX*`; can also use and/or combine with `max_width`,
+    `min_height`, `max_height`, `width`, `height`, and `ratio`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Databases
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`exists:*tableName*`; `unique:*tableName*` (expects to look in the same table
+    column as the field name; see the [validation docs](https://oreil.ly/JmbQC) for
+    how to customize)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can also specify the Eloquent model instead of the table name in the database
+    validation rules:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Manual Validation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you are not working in a controller, or if for some other reason the previously
+    described flow is not a good fit, you can manually create a `Validator` instance
+    using the `Validator` facade and check for success or failure like in [Example 7-20](#EX613).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-20\. Manual validation
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, we create an instance of a validator by passing it our input
+    as the first parameter and the validation rules as the second parameter. The validator
+    exposes a `fails()` method that we can check against and can be passed into the
+    `withErrors()` method of the redirect.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Validated Data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Once you’ve validated your data, you can pull it from the request in a way
+    that ensures you’re only working with validated data. There are two main options:
+    `validated()` and `safe()`. You can run these methods either on the `$request`
+    object, or, if you created a manual validator, the `$validator` instance.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `validated()` method returns an array of all of the data that’s been validated,
+    as shown in [Example 7-21](#validated_data_validated).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-21\. Getting validated data with `validated()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `safe()` method, on the other hand, returns an object that gives you access
+    to `all()`, `only()`, and `except()` methods, as you can see in [Example 7-22](#validated_data_safe).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-22\. Getting validated data with `safe()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Custom Rule Objects
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If the validation rule you need doesn’t exist in Laravel, you can create your
+    own. To create a custom rule, run `php artisan make:rule *RuleName*` and then
+    edit that file in *app/Rules/{RuleName}.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You’ll get the method `validate()` in your rule class out of the box. The `validate()`
+    method should accept an attribute name as the first parameter, the user-provided
+    value as the second, and the third a closure that you’ll when the validation fails;
+    you can use `:attribute` as a placeholder in your message for the attribute name.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 7-23](#EX621) as an example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-23\. A sample custom rule
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To use this rule, just pass an instance of the rule object to your validator:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: Displaying Validation Error Messages
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We’ve already covered much of this in [Chapter 6](ch06.html#frontend_components),
+    but here’s a quick refresher on how to display errors from validation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `validate()` method on requests (and the `withErrors()` method on redirects
+    that it relies on) flashes any errors to the session. These errors are made available
+    to the view you’re being redirected to in the `$errors` variable. And remember
+    that as a part of Laravel’s magic, that `$errors` variable will be available every
+    time you load the view, even if it’s just empty, so you don’t have to check if
+    it exists with `isset()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: That means you can do something like [Example 7-24](#EX614) on every page.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-24\. Echo validation errors
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also conditionally echo a single field’s error message. For this you’ll
+    use the `@error` Blade directive to check for whether there’s an error on a given
+    field.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Form Requests
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As you build out your applications, you might start noticing some patterns in
+    your controller methods. There are certain patterns that are repeated—​for example,
+    input validation, user authentication and authorization, and possible redirects.
+    If you find yourself wanting a structure to normalize and extract these common
+    behaviors out of your controller methods, you may be interested in Laravel’s form
+    requests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A form request is a custom request class that is intended to map to the submission
+    of a form, and the request takes the responsibility for validating the request,
+    authorizing the user, and optionally redirecting the user upon a failed validation.
+    Each form request will usually, but not always, explicitly map to a single HTTP
+    request—for example, “Create Comment.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a Form Request
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can create a new form request from the command line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: You now have a form request object available at *app/Http/Requests/Create**Comment**Request.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every form request class provides either one or two public methods. The first
+    is `rules()`, which needs to return an array of validation rules for this request.
+    The second (optional) method is `authorize()`; if this returns `true`, the user
+    is authorized to perform this request, and if `false`, the user is rejected. Take
+    a look at [Example 7-25](#EX615) to see a sample form request.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-25\. Sample form request
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `rules()` section of [Example 7-25](#EX615) is pretty self-explanatory,
+    but let’s look at `authorize()` briefly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We’re grabbing the segment from the route named `blogPost`. That’s implying
+    the route definition for this route probably looks a bit like this: ``Route::post(''blogPosts/*`blogPost`*'',
+    function () *`{ // Do stuff }`*)``. As you can see, we named the route parameter
+    `blogPost`, which makes it accessible in our `Request` using `$⁠t⁠h⁠i⁠s​-⁠>⁠r⁠o⁠u⁠t⁠e⁠(''blogPost'')`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We then look at whether the user is logged in and, if so, whether any blog posts
+    exist with that identifier that are owned by the currently logged-in user. You’ve
+    already learned some easier ways to check ownership in [Chapter 5](ch05.html#database_and_eloquent),
+    but we’ll keep it more explicit here to keep it clean. We’ll cover what implications
+    this has shortly, but the important thing to know is that returning `true` means
+    the user is authorized to perform the specified action (in this case, creating
+    a comment), and `false` means the user is not authorized.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using a Form Request
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that we’ve created a form request object, how do we use it? It’s a little
+    bit of Laravel magic. Any route (closure or controller method) that typehints
+    a form request as one of its parameters will benefit from the definition of that
+    form request.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s try it out, in [Example 7-26](#EX616).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-26\. Using a form request
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: You might be wondering where we call the form request, but Laravel does it for
+    us. It validates the user input and authorizes the request. If the input is invalid,
+    it’ll act just like the `Request` object’s `validate()` method, redirecting the
+    user to the previous page with their input preserved and with the appropriate
+    error messages passed along. And if the user is not authorized, Laravel will return
+    a “403 Forbidden” error and not execute the route code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Eloquent Model Mass Assignment
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Until now, we’ve been looking at validating at the controller level, which is
+    absolutely the best place to start. But you can also filter the incoming data
+    at the model level.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s a common (but not recommended) pattern to pass the entirety of a form’s
+    input directly to a database model. In Laravel, that might look like [Example 7-27](#EX617).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-27\. Passing the entirety of a form to an Eloquent model
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: We’re assuming here that the end user is kind and not malicious, and has kept
+    only the fields we want them to edit—maybe the post `title` or `body`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But what if our end user can guess, or discern, that we have an `author_id`
+    field on that `posts` table? What if they used their browser tools to add an `author_id`
+    field and set the ID to be someone else’s ID, and impersonated the other person
+    by creating fake blog posts attributed to them?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Eloquent has a concept called “mass assignment” that allows you to either define
+    a list of fields that should be fillable (using the model’s `$fillable` property)
+    or a list of fields that shouldn’t be fillable (using the model’s `$guarded` property)
+    by passing them in an array to `create()` or `update()`. See [“Mass assignment”](ch05.html#mass_assignment)
+    for more information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In our example, we might want to fill out the model like in [Example 7-28](#EX618)
+    to keep our app safe.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-28\. Guarding an Eloquent model from mischievous mass assignment
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: By setting `author_id` to `guarded`, we ensure that malicious users will no
+    longer be able to override the value of this field by manually adding it to the
+    contents of a form that they’re sending to our app.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Double Protection Using $request->only()
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'While it’s important to do a good job of protecting our models from mass assignment,
+    it’s also worth being careful on the assigning end. Rather than using `$request->all()`,
+    consider using `$request->``only()` so you can specify which fields you’d like
+    to pass into your model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: '{{ Versus {!!'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Any time you display content on a web page that was created by a user, you need
+    to guard against malicious input, such as script injection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s say you allow your users to write blog posts on your site. You probably
+    don’t want them to be able to inject malicious JavaScript that will run in your
+    unsuspecting visitors’ browsers, right? So, you’ll want to escape any user input
+    that you show on the page to avoid this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Thankfully, this is almost entirely covered for you. If you use Laravel’s Blade
+    templating engine, the default “echo” syntax (`{{ *$stuffToEcho* }}`) runs the
+    output through `htmlentities()` (PHP’s best way of making user content safe to
+    echo) automatically. You actually have to do *extra* work to avoid escaping the
+    output, by using the `{!! *$stuffToEcho* !!}` syntax.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you’re interested in testing your interactions with user input, you’re probably
+    most interested in simulating valid and invalid user input and ensuring that if
+    the input is invalid the user is redirected, and if the input is valid it ends
+    up in the proper place (e.g., the database).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel’s application testing framework makes this simple.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel Dusk for Testing User Interactions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: These tests are testing the HTTP layer of your application, but not the actual
+    form fields and interactions. If you want to test specific user interactions on
+    the page and with your forms, you’ll want to pull in Laravel’s Dusk testing package.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check out [“Testing with Dusk”](ch12.html#dusk_testing) to learn how to install
+    and use Dusk in your tests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s start with an invalid route that we expect to be rejected, as in [Example 7-29](#EX619).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-29\. Testing that invalid input is rejected
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here we assert that after invalid input the user is redirected, with errors
+    attached. You can see we’re using a few custom PHPUnit assertions that Laravel
+    adds here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, how do we test our route’s success? Check out [Example 7-30](#EX620).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 7-30\. Testing that valid input is processed
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that if you’re testing something using the database, you’ll need to learn
+    more about database migrations and transactions. More on that in [Chapter 12](ch12.html#testing).
+  prefs: []
+  type: TYPE_NORMAL
+- en: TL;DR
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'There are a lot of ways to get the same data: using the `Request` facade, using
+    the `request()` global helper, and injecting an instance of `Illuminate\Http\Request`.
+    Each exposes the ability to get all input, some input, or specific pieces of data,
+    and there can be some special considerations for files and JSON input.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: URL path segments are also a possible source of user input, and they’re also
+    accessible via the request tools.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Validation can be performed manually with `Validator::make()`, or automatically
+    using the `validate()` request method or form requests. Each automatic tool, upon
+    failed validation, redirects the user to the previous page with all old input
+    stored and errors passed along.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Views and Eloquent models also need to be protected from nefarious user input.
+    You can protect Blade views by using the double curly brace syntax (`{{ }}`),
+    which escapes user input. You can protect models by only passing specific fields
+    into bulk methods using `$request->only()` and by defining the mass assignment
+    rules on the model itself.
+  prefs: []
+  type: TYPE_NORMAL

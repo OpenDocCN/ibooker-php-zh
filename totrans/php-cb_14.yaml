@@ -1,0 +1,698 @@
+- en: Chapter 14\. Performance Tuning
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Dynamically interpreted languages, such as PHP, are known for their flexibility
+    and ease of use but not necessarily for their speed. This is partly because of
+    the way their type systems work. When types are inferred at runtime, it’s impossible
+    for the parser to know exactly how to perform a certain operation until it’s provided
+    with data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Consider the following, loosely typed PHP function to add two items together:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since this function does not declare the types for the variables passed in or
+    the return type, it can exhibit multiple signatures. All of the method signatures
+    in [Example 14-1](#various_signatures) are equally valid ways to call the preceding
+    function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-1\. Various signatures for the same function definition
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_performance_tuning_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`add(1, 2)` returns `int(3)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_performance_tuning_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`add(1., 2.)` returns `float(3)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_performance_tuning_CO1-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`add(1, 2.)` returns `float(3)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_performance_tuning_CO1-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`add(1., 2)` returns `float(3)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_performance_tuning_CO1-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`add("1", 2)` returns `int(3)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_performance_tuning_CO1-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`add("1.", 2)` returns `float(3)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The preceding example illustrates how you can write a single function and PHP
+    internally needs to process it multiple ways. The language doesn’t know which
+    version of the function you actually need until it sees the data you provide it,
+    and it will internally cast some values to other types where necessary. At runtime,
+    though, the actual function is compiled to operation code (opcode) that runs on
+    the processor through a dedicated virtual machine—and PHP will need to produce
+    multiple versions of the same function’s opcode to handle the differing input
+    and return types.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The loose typing system leveraged by PHP is one of the things that makes it
+    so easy to learn but also so easy to make fatal programming mistakes. This book
+    has taken care to leverage *strict typing* wherever possible to avoid these exact
+    pitfalls. Review [Recipe 3.4](ch03.html#argument_and_return_typing) for more on
+    using strict typing in your own code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With a compiled language, the problem expressed here about loose typing would
+    be trivial—merely compile the program to the multiple forks of opcode and move
+    on. Unfortunately, PHP is more of an interpreted language; it reloads and recompiles
+    your script on demand, depending on how your application is loaded. Luckily, the
+    performance drain of multiple code paths can be combatted with two modern features
+    built into the very language itself: just-in-time (JIT) compilation and the caching
+    of opcode.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Just-In-Time Compilation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: As of version 8.0, PHP [ships with a JIT compiler](https://oreil.ly/XS9gg) that
+    immediately enables faster program execution and better-performing applications.
+    It does this by leveraging traces of actual instructions passed to the virtual
+    machine (VM) handling the script’s execution. When a particular trace is called
+    frequently, PHP will automatically recognize the importance of the operation and
+    gauge whether or not the code benefits from compilation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Subsequent invocations of the same code will use the compiled byte code rather
+    than the dynamic script, causing a significant performance boost. Based on [metrics
+    published by Zend when PHP 8.0 was released](https://oreil.ly/LpZ3w), the inclusion
+    of a JIT compiler renders the PHP benchmark suite to be up to three times faster!
+  prefs: []
+  type: TYPE_NORMAL
+- en: The point to remember is that JIT compilation primarily benefits low-level algorithms.
+    This includes number crunching and raw data manipulation. Anything outside of
+    CPU-intensive operations (e.g., graphics manipulation or heavy database integrations)
+    won’t see nearly as much benefit to these changes. However, knowing that the JIT
+    compiler exists, you can take advantage of it and use PHP in new ways.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Opcode Caching
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Among the easiest ways to increase performance—indeed, the way the JIT compiler
+    does so—is to cache expensive operations and reference the result rather than
+    doing the operations again and again. Since version 5.5, PHP has shipped with
+    an optional extension for caching precompiled byte code in memory called [OPcache](https://oreil.ly/wH2ue).^([1](ch14.html#idm45875141364544))
+  prefs: []
+  type: TYPE_NORMAL
+- en: Remember, PHP is primarily a dynamic script interpreter and will read in your
+    scripts when the program starts. If you stop and start your application frequently,
+    PHP will need to recompile your script to computer-readable byte code in order
+    for the code to execute properly. Frequent starts/stops can force frequent recompiling
+    of scripts and thus slow performance. The OPcache, however, allows you to selectively
+    compile scripts to provide the byte code to PHP before the rest of the application
+    runs. This removes the need for PHP to load and parse the scripts each time!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The JIT compiler in PHP 8 and above can only be enabled if OPcache is also enabled
+    on the server, since it uses the cache as its shared memory backend. However,
+    you do not need to use the JIT compiler to use OPcache itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both JIT compilation and opcode caching are low-level performance improvements
+    to the language that you can easily leverage at runtime, but they’re not the end
+    of the story. It’s also critical to understand how to time the execution of user-defined
+    functions. This makes identifying bottlenecks in business logic relatively easy.
+    Comprehensively benchmarking the application also helps gauge performance changes
+    when deploying to new environments, on new releases of the language, or with updated
+    dependencies down the road.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following recipes describe both the timing/benchmarking of userland application
+    code and how to leverage the language-level opcode cache to optimize the performance
+    of your application and environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 14.1 Timing Function Execution
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to understand how long it takes a particular function to execute in
+    order to identify potential opportunities for optimization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Leverage PHP’s built-in `hrtime()` function both before and after function
+    execution to determine how long the function took to run. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `hrtime()` function will return the system’s built-in high-resolution time,
+    counting from an arbitrary point in time defined by the system. By default, it
+    returns an array of two integers—seconds and nanoseconds, respectively. Passing
+    `true` to the function will instead return the total number of nanoseconds, requiring
+    you to divide by `1e+9` to convert the raw output back to human-readable seconds.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A slightly fancier approach is to abstract the timing mechanism into a decorator
+    object. As covered in [Chapter 8](ch08.html#chapter_classes), a decorator is a
+    programming design pattern that allows you to extend the functionality of a single
+    function call (or a whole class) by wrapping it in another class implementation.
+    In this case, you want to trigger the use of `hrtime()` to time a function’s execution
+    without changing the function itself. The decorator in [Example 14-2](#timed_decorator_object)
+    would do exactly that.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-2\. A timed decorator object for measuring function call performance
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_performance_tuning_CO2-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `__invoke()` magic method makes class instances callable as if they were
+    functions. Using the `...` spread operator will capture any arguments passed in
+    at runtime so they can be passed later to the wrapped method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_performance_tuning_CO2-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The actual timing mechanism used by the decorator is the same as that in the
+    Solution example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_performance_tuning_CO2-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Assuming the wrapped function is callable, PHP will call the function and pass
+    all necessary arguments thanks to the `...` spread operator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_performance_tuning_CO2-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This implementation of the decorator can be instantiated with a verbosity flag
+    that will also print runtimes to the console.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_performance_tuning_CO2-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since the wrapped function might return data, you need to ensure that the decorator
+    returns that output as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_performance_tuning_CO2-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As the decorated function is itself an object, you can directly expose additional
+    properties and methods. In this case, the decorator keeps track of aggregate metrics
+    that can be retrieved directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Assuming the same `doSomethingComputationallyExpensive()` function from the
+    Solution example is the function you want to test, the preceding decorator can
+    wrap the function and produce metrics as shown in [Example 14-3](#leveraging_decorator).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-3\. Leveraging a decorator to time function execution
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_performance_tuning_CO3-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since the decorator class implements the `__invoke()` magic method, you can
+    use an instance of the class as if it were a function itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_performance_tuning_CO3-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The resulting metrics array will include a count of invocations, the total runtime
+    (in seconds) for all invocations, and the average runtime (in seconds) across
+    all invocations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Similarly, you can test the same wrapped function multiple times and pull aggregate
+    runtime metrics from all invocations as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since the `TimerDecorator` class can wrap any callable function, you can use
+    it to decorate class methods just as easily as you can native functions. The class
+    in [Example 14-4](#decorator_friendly_class) defines both a static and an instance
+    method, either of which can be wrapped by a decorator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-4\. Simple class definition for testing decorators
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 14-5](#decorator_callables) shows how class methods (both static and
+    instance-bound) can be referred to as callables at runtime in PHP. Anything that
+    can be expressed as a callable interface can be wrapped by a decorator.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-5\. Any callable interface can be wrapped by a decorator
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_performance_tuning_CO4-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A static class method is used as a callable by passing an array of both the
+    names of the class and its static method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_performance_tuning_CO4-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once created, the decorated static method can be called as any other function
+    would be and will produce metrics the same way.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_performance_tuning_CO4-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A method of a class instance is used as a callable by passing an array of the
+    instantiated object and the string name of the method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_performance_tuning_CO4-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similar to the decorated static method, a decorated instance method can then
+    be called as any other function would be to populate metrics within the decorator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you know how long a function takes to run, you can focus on optimizing
+    its execution. This might involve refactoring the logic or using an alternative
+    approach to defining an algorithm.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The use of `hrtime()` originally required the [HRTime extension](https://oreil.ly/P_4Fq)
+    to PHP but is now bundled as a core function by default. If you’re using a version
+    of PHP older than 7.3 or a prebuilt distribution where it was explicitly omitted,
+    the function itself might be missing. In that event, you can either install the
+    extension yourself via PECL or leverage the similar `microtime()` function instead.^([2](ch14.html#idm45875140747200))
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Rather than counting seconds from an arbitrary point in time, `microtime()`
+    returns the number of microseconds since the Unix epoch. This function can be
+    used in place of `hrtime()` to gauge function execution time as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Regardless of whether you use `hrtime()` as in the Solution example or `microtime()`
+    as in the preceding snippet, ensure that you’re consistent with the way you read
+    out the resulting data. Both mechanisms return notions of time at different levels
+    of precision, which could lead to confusion if you mix and match on any output
+    formatting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [`hrtime()`](https://oreil.ly/AjZ4H) and [`microtime()`](https://oreil.ly/r_U84).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 14.2 Benchmarking the Performance of an Application
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to benchmark the performance of your entire application so you can
+    gauge changes (e.g., performance regressions) as the codebase, dependencies, and
+    underlying language versions evolve.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Leverage an automated tool like PHPBench to instrument your code and run regular
+    performance benchmarks. For example, the following class is constructed to test
+    the performance of all available hashing algorithms over various string sizes.^([3](ch14.html#idm45875140682000))
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To run the default preceding example benchmark, first clone PHPBench, then
+    install Composer dependencies, and finally run the following command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: The resulting output, once the benchmark completes, will resemble the chart
+    in [Figure 14-1](#hashing_benchmark).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Output metrics from PHPBench''s example hashing benchmark](assets/phpc_1401.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 14-1\. Output metrics from PHPBench’s example hashing benchmark
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHPBench is an effective way to gauge performance benchmarks of user-defined
+    code in a variety of situations. It can be used in development environments to
+    judge the performance level of new code, and it can also be integrated directly
+    into continuous integration environments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHPBench’s own [GitHub Actions configuration](https://oreil.ly/D6PMf) runs a
+    full benchmarking suite of the application itself with every pull request and
+    change. This allows the project maintainers to ensure that the project continues
+    performing as expected with each change they introduce across a broad matrix of
+    supported versions of PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Any project aiming to include automated benchmarks must first start with Composer.^([4](ch14.html#idm45875140540864))
+    You need to leverage Composer autoloading so PHPBench knows where to grab classes
+    from, but once that’s set up, you can build your project however you want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Assume you’re building a project that leverages value objects and hashing to
+    protect sensitive data they store. Your initial *composer.json* file might look
+    something like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Naturally, your project code will live in a *src/* directory and any tests,
+    benchmarking or otherwise, will live in a separate *tests/* directory. For the
+    sake of benchmarking alone, you’ll want to create a dedicated *tests/Benchmark/*
+    directory to keep track of both namespaces and filterable code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Your first class, the one you want to benchmark, is a value object that takes
+    in an email address and can be easily manipulated as if it were a string. But
+    when it dumps its contents to a debugging context, like `var_dump()` or `print_r()`,
+    it automatically hashes the value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Email is a common enough format that even hashing the data won’t be enough to
+    protect it from a truly dedicated attacker. The illustrations in this recipe are
+    meant to demonstrate how data can be *obfuscated* using a hash. This should not
+    be considered a comprehensive security tutorial.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create the class defined in [Example 14-6](#protected_string_class) as *ProtectedString.php*
+    in your new *src/* directory. This class has a lot to it—primarily several implemented
+    magic methods to ensure that there is no way to *accidentally* serialize the object
+    and get at its internal value. Instead, once you instantiate a `ProtectedString`
+    object, the only way to get at its contents is with the `::getValue()` method.
+    Anything else will return the SHA-256 hash of the contents.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-6\. Protected string wrapper class definition
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: You want to validate the performance of the chosen hashing algorithm. SHA-256
+    is more than reasonable, but you want to ensure that you benchmark all possible
+    means of serialization for performance so that, if and when you need to change
+    to a different hashing algorithm, you can ensure no performance regressions in
+    the system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To actually begin benchmarking this class, create the following *phpbench.json*
+    file in the root of your project:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, create an actual benchmark to time the various ways a user can serialize
+    a string. The benchmark defined in [Example 14-7](#protected_string_benchmark)
+    should live in *tests/Benchmark/ProtectedStringBench.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-7\. Benchmarking the `ProtectedString` class
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, you can run your benchmarks with the following shell command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: This command will produce an output similar to that in [Figure 14-2](#object_serialization_benchmarks),
+    detailing the memory usage and runtime for each of your serialization operations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Output of PHPBench for value object serialization with hashing.](assets/phpc_1402.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 14-2\. Output of PHPBench for value object serialization with hashing
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Every element of your application can, and should, have benchmarking built into
+    it. This will drastically simplify testing the performance of your application
+    in new environments—like on new server hardware or under a newly released version
+    of PHP. Wherever possible, take time to wire these benchmarks into continuous
+    integration runs as well to ensure that the tests are run and recorded as frequently
+    as possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Official documentation for the [PHPBench project](https://oreil.ly/4HCMc).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 14.3 Accelerating an Application with an Opcode Cache
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to leverage opcode caching in your environment to improve the overall
+    performance of your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Install the shared OPcache extension and configure it in *php.ini* for your
+    environment.^([5](ch14.html#idm45875139889680)) As it’s a default extension, you
+    merely need to update your configuration to enable caching. The following settings
+    are generally recommended for solid performance but should be tested against your
+    particular application and infrastructure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When PHP is running, the interpreter reads your scripts and compiles your user-friendly
+    PHP code into something that’s easy for the machine to understand. Unfortunately,
+    since PHP isn’t a formally compiled language, it has to do this compilation every
+    time a script loads. With a simple application, this isn’t that much of an issue.
+    With a complex application, it can lead to slow load times and high latency for
+    repeated requests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The easiest way to optimize an application around this particular issue is to
+    cache the compiled byte code so it can be reused on subsequent requests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To test and verify the functionality of the opcode cache locally, you can leverage
+    `-d` flags at the command line when starting a script. The `-d` flag sets an explicit
+    override for a configuration value otherwise set (or left to its default) by *php.ini*.
+    Specifically, the command-line flags in [Example 14-8](#webserver_no_opcache)
+    will leverage the local PHP development server to run an application with OPcache
+    *disabled* entirely.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-8\. Launch a local PHP web server without OPcache support
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Similarly, you can run almost exactly the same command with explicit *enabling*
+    of the opcode cache to directly compare the behavior and performance of your application,
+    as shown in [Example 14-9](#webserver_with_opcache).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-9\. Launch a local PHP web server with OPcache support
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To fully demonstrate how this works, take time to install a demo application
+    using the open source Symfony framework. The following two commands will clone
+    a demonstration application to the */demosite/* directory locally and use Composer
+    to install required dependencies:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Next, use the built-in PHP web server to launch the application itself. Use
+    the command from [Example 14-8](#webserver_no_opcache) to start without opcache
+    support. The application will be available on port 8080 and will look something
+    like [Figure 14-3](#symfony_demo).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Loading page of the default Symfony demo application.](assets/phpc_1403.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 14-3\. Loading page of the default Symfony demo application
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The default application is running locally, using a lightweight SQLite database,
+    so it should load fairly quickly. As shown in [Example 14-10](#curl_performance_test),
+    you can effectively test the load time with a cURL command in your terminal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 14-10\. Simple cURL command for gauging web application response time
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Without opcode caching enabled, the Symfony demo application loads with a total
+    time of ~0.3677 seconds. This is remarkably fast but, again, the application is
+    being run entirely within the local environment. In production with a remote database,
+    it would likely be slower, but this is a solid baseline.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now, stop the application and restart it *with* opcode caching enabled using
+    the command defined in [Example 14-9](#webserver_with_opcache). Then rerun the
+    cURL performance test from [Example 14-10](#curl_performance_test). With opcode
+    caching, the application now loads with a total time of ~0.0371 seconds.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is a relatively simple, default application, but a 10 times increase in
+    performance is a massive boost to system performance. The faster an application
+    loads, the more customers your system can service in the same period of time!
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on the [OPcache extension](https://oreil.ly/Tb8rC).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch14.html#idm45875141364544-marker)) The newer JIT compiler released with
+    PHP 8.0 uses OPcache under the hood, but you can still leverage caching *manually*
+    to control the system even if JIT compilation is unavailable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([2](ch14.html#idm45875140747200-marker)) For more on PECL and extension management,
+    refer to [Recipe 15.4](ch15.html#native_php_extensions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([3](ch14.html#idm45875140682000-marker)) This particular example is taken
+    from the [example benchmarks](https://oreil.ly/zZE4X) that ship by default with
+    PHPBench.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([4](ch14.html#idm45875140540864-marker)) For more on initializing a project
+    with Composer, review [Recipe 15.1](ch15.html#composer_definition).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([5](ch14.html#idm45875139889680-marker)) OPcache is a shared extension that
+    will not exist if your PHP was compiled with the `--disable-all` flag to disable
+    default extensions. In that case, you have no choice but to either recompile PHP
+    with the `--enable-opcache` flag set or else install a fresh version of the PHP
+    engine that was compiled with this flag set.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,524 @@
+- en: Chapter 16\. Web Services
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Historically, every time there’s been a need for two systems to communicate,
+    a new protocol has been created (for example, SMTP for sending mail, POP3 for
+    receiving mail, and the numerous protocols that database clients and servers use).
+    The idea of web services is to remove the need to create new protocols by providing
+    a standardized mechanism for remote procedure calls, based on XML and HTTP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Web services make it easy to integrate heterogeneous systems. Say you’re writing
+    a web interface to a library system that already exists. It has a complex system
+    of database tables, and lots of business logic embedded in the program code that
+    manipulates those tables. And it’s written in C++. You could reimplement the business
+    logic in PHP, writing a lot of code to manipulate tables in the correct way, or
+    you could write a little code in C++ to expose the library operations (e.g., check
+    out a book to a user, see when this book is due back, see what the overdue fines
+    are for this user) as a web service. Now your PHP code simply has to handle the
+    web frontend; it can use the library service to do all the heavy lifting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: REST Clients
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: A *RESTful web service* is a loose description of web APIs implemented using
+    HTTP and the principles of Representational State Transfer (REST). It refers to
+    a collection of resources, along with basic operations a client can perform on
+    those resources through the API.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, an API might describe a collection of authors and the books to
+    which those authors have contributed. The data within each object type is arbitrary.
+    In this case, a *resource* is each individual author, each individual book, and
+    the collections of all authors, all books, and the books to which each author
+    has contributed. Each resource must have a unique identifier so calls into the
+    API know what resource is being retrieved or acted upon.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You might represent a simple set of classes to represent the book and author
+    resources, as in [Example 16-1](#example_onesix_onedot_book_and_author_c).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-1\. Book and Author classes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Because HTTP was built with the REST architecture in mind, it provides a set
+    of *verbs* that you use to interact with the API. We’ve already seen `GET` and
+    `POST` verbs, which websites often use to represent “retrieve data” and “perform
+    an action,” respectively. RESTful web services introduce two additional verbs,
+    `PUT` and `DELETE`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`GET`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Retrieve information about a resource or collection of resources.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`POST`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a new resource.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PUT`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Update a resource with new data, or replace a collection of resources with new
+    ones.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`DELETE`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Delete a resource or a collection of resources.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, the `Books` and `Authors` API might consist of the following REST
+    endpoints, based on the data contained within the object classes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`GET /api/authors`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Return a list of identifiers for each author in the collection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`POST /api/authors`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Given information about a new author, create a new author in the collection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`GET /api/authors/`*`id`*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Retrieve the author with identifier *`id`* from the collection and return it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PUT /api/authors/`*`id`*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Given updated information about an author with identifier *`id`*, update that
+    author’s information in the collection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`DELETE /api/authors/`*`id`*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Delete the author with identifier *`id`* from the collection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`GET /api/authors/`*`id`*`/books`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Retrieve a list of identifiers for each book to which the author with identifier
+    *`id`* has contributed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`POST /api/authors/`*`id`*`/books`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Given information about a new book, create a new book in the collection under
+    the author with identifier *`id`*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`GET /api/books/`*`id`*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Retrieve the book with identifier *`id`* from the collection and return it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `GET`, `POST`, `PUT`, and `DELETE` verbs provided by RESTful web services
+    can be thought of as roughly equivalent to the *create*, *retrieve*, *update*,
+    and *delete* (CRUD) operations typical to a database, although they can correlate
+    to collections, not just entities as is typical with CRUD implementations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Responses
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In each of the preceding API endpoints, the HTTP status code is used to provide
+    the result of the request. HTTP provides a long list of standard status codes:
+    for example, `201 Created` would be returned when you create a resource, and `501
+    Not Implemented` would be returned when you send a request to an endpoint that
+    doesn’t exist.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'While the full list of HTTP codes is beyond the scope of this chapter, some
+    common ones include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`200 OK`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The request was successfully completed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`201 Created`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A request for creating a new resource was completed successfully.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`400 Bad Request`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The request hit a valid endpoint, but was malformed and could not be completed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`401 Unauthorized`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Along with `403 Forbidden`, represents a valid request, but one that could not
+    be completed due to a lack of permissions. Typically, this response indicates
+    that authorization is required but has not yet been provided.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`403 Forbidden`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similar to `401 Unauthorized`, this response indicates a valid request, but
+    one that could not be completed due to a lack of permissions. Typically, this
+    response indicates that authorization was available but that the user lacks permission
+    to perform the requested action.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`404 Not Found`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The resource was not found (for example, attempting to delete an author with
+    an ID that does not exist).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`500 Internal Server Error`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An error occurred on the server side.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These codes are mere guidelines and typical responses; the exact responses provided
+    by a RESTful API are detailed by the API itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Retrieving Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Retrieving information for a resource involves a straightforward `GET` request.
+    [Example 16-2](#example_onesix_twodot_retrieving_author) uses the *curl* extension
+    to format an HTTP request, set parameters on it, send the request, and get the
+    returned information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-2\. Retrieving author data
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: To retrieve information about an author, this script first constructs a URL
+    representing the endpoint for the resource. Then, it initializes a curl resource
+    and provides the constructed URL to it. Finally, the curl object is executed,
+    which sends the HTTP request, waits for the response, and returns it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this case, the response is JSON data, which is decoded and handed off to
+    a `Factory` method of `Author` to construct an instance of the `Author` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Updating Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Updating an existing resource is a bit trickier than retrieving information
+    about a resource. In this case, you need to use the `PUT` verb. As `PUT` was originally
+    intended to handle file uploads, `PUT` requests require that you stream data to
+    the remote service from a file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rather than creating a file on disk and streaming from it, the script in [Example 16-3](#example_onesix_threedot_updating_book_d)
+    uses the `'memory'` stream provided by PHP, first filling it with the data to
+    send, then rewinding it to the start of the data it just wrote, and finally pointing
+    the curl object at the file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-3\. Updating book data
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Creating Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To create a new resource, call the appropriate endpoint with the `POST` verb.
+    The data for the request is put into the typical key-value form for `POST` requests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In [Example 16-4](#example_onesix_fourdot_creating_an_auth), the `Author` API
+    endpoint for creating a new author takes the information to create the new author
+    as a JSON-formatted object under the key `'data'`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-4\. Creating an author
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: This script first constructs a new `Author` instance and encodes its values
+    as a JSON-formatted string. Then, it constructs the key-value data in the appropriate
+    format, provides that data to the curl object, and sends the request.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deleting Resources
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Deleting a resource is similarly straightforward. [Example 16-5](#example_onesix_fivedot_deleting_a_book)
+    creates a request, sets the verb on that request to `'DELETE'` via the `curl_setopt()`
+    function, and sends it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-5\. Deleting a book
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: XML-RPC
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: While less popular nowadays than REST, XML-RPC and SOAP are two older standard
+    protocols used to create web services. XML-RPC is the older and simpler of the
+    two, while SOAP is newer and more complex.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP provides access to both SOAP and XML-RPC through the *xmlrpc* extension,
+    which is based on the [xmlrpc-epi project](http://xmlrpc-epi.sourceforge.net).
+    The *xmlrpc* extension is not compiled in by default, so you’ll need to add `--with-xmlrpc`
+    to your `configure` line when you compile PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Servers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Example 16-6](#example_onesix_sixdot_multiplier_xml_rp) shows a very basic
+    XML-RPC server that exposes only one function (which XML-RPC calls a “method”).
+    That function, `multiply()`, multiplies two numbers and returns the result. It’s
+    not a very exciting example, but it shows the basic structure of an XML-RPC server.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-6\. Multiplier XML-RPC server
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *xmlrpc* extension handles the dispatch for you. That is, it works out which
+    method the client was trying to call, decodes the arguments, and calls the corresponding
+    PHP function. It then returns an XML response that encodes any values returned
+    by the function that can be decoded by an XML-RPC client.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Create a server with `xmlrpc_server_create()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once you’ve created a server, expose functions through the XML-RPC dispatch
+    mechanism using `xmlrpc_server_register_method()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *`method`* parameter is the name the XML-RPC client knows. The *`function`*
+    parameter is the PHP function implementing that XML-RPC method. In the case of
+    [Example 16-6](#example_onesix_sixdot_multiplier_xml_rp), the `multiply()` XML-RPC
+    client method is implemented by the `times()` function in PHP. Often a server
+    will call `xmlrpc_server_register_method()` many times to expose many functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When you’ve registered all your methods, call `xmlrpc_server_call_method()`
+    to dispatch the incoming request to the appropriate function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *`request`* is the XML-RPC request, which is typically sent as HTTP `POST`
+    data. We fetch that through the `$HTTP_RAW_POST_DATA` variable. It contains the
+    name of the method to be called and parameters to that method. The parameters
+    are decoded into PHP data types, and the function (`times()`, in this case) is
+    called.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A function exposed as an XML-RPC method takes two or three parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *`method`* parameter contains the name of the XML-RPC method (so you can
+    have one PHP function exposed under many names). The arguments to the method are
+    passed in the array *`args`*, and the optional *`user_data`* parameter is whatever
+    the `xmlrpc_server_call_method()` function’s *`user_data`* parameter was.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The *`options`* parameter to `xmlrpc_server_call_method()` is an array mapping
+    option names to their values. The options are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`output_type`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Controls the data encoding used. Permissible values are `"php"` or `"xml"` (default).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`verbosity`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Controls how much whitespace is added to the output XML to make it readable
+    to humans. Permissible values are `"no_white_space"`, `"newlines_only"`, and `"pretty"`
+    (default).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`escaping`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Controls which characters are escaped and how they are escaped. Multiple values
+    may be given as a subarray. Permissible values are `"cdata"`, `"non-ascii"` (default),
+    `"non-print"` (default), and `"markup"` (default).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`versioning`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Controls which web service system to use. Permissible values are `"simple"`,
+    `"soap 1.1"`, `"xmlrpc"` (default for clients), and `"auto"` (default for servers,
+    meaning “whatever format the request came in”).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`encoding`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Controls the character encoding of the data. Permissible values include any
+    valid encoding identifiers, but you’ll rarely want to change it from `"iso-8859-1"`
+    (the default).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Clients
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: An XML-RPC client issues an HTTP request and parses the response. The *xmlrpc*
+    extension that ships with PHP can work with the XML that encodes an XML-RPC request,
+    but it doesn’t know how to issue HTTP requests. For that functionality, you must
+    download the [xmlrpc-epi distribution](http://xmlrpc-epi.sourceforge.net) and
+    install the *sample/utils/utils.php* file. This file contains a function to perform
+    the HTTP request.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 16-7](#example_onesix_sevendot_multiply_xml_rp) shows a client for
+    the `multiply` XML-RPC service.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-7\. Multiply XML-RPC client
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We begin by loading the XML-RPC convenience utilities library. This gives us
+    the `xu_rpc_http_concise()` function, which constructs a `POST` request for us:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The *`hash`* array contains the various attributes of the XML-RPC call as an
+    associative array:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`method`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Name of the method to call.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`args`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Array of arguments to the method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`host`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hostname of the web service offering the method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`url`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: URL path to the web service.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`options`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Associative array of options, as for the server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`debug`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If nonzero, prints debugging information (default is `0`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The value returned by `xu_rpc_http_concise()` is the decoded return value from
+    the called method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are several features of XML-RPC we haven’t covered. For example, XML-RPC’s
+    data types do not always map precisely onto those of PHP, and there are ways to
+    encode values as a particular data type rather than as the *xmlrpc* extension’s
+    best guess. Also, there are features of the *xmlrpc* extension we haven’t covered,
+    such as SOAP faults. See the [*xmlrpc* extension’s documentation](http://www.php.net)
+    for the full details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For more information on XML-RPC, see [*Programming Web Services in XML-RPC*](http://oreil.ly/Web_Services_XML-RPC)
+    (O’Reilly) by Simon St. Laurent et al. See [*Programming Web Services with SOAP*](http://oreil.ly/Web_Services_SOAP)
+    (O’Reilly) by James Snell et al. for more information on SOAP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What’s Next
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Now that we’ve covered the majority of the syntax, features, and application
+    of PHP, the next chapter explores what to do when things go wrong: how to debug
+    problems that arise in your PHP applications and scripts.'
+  prefs: []
+  type: TYPE_NORMAL

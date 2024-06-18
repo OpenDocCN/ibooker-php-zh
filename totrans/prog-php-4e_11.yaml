@@ -1,0 +1,975 @@
+- en: Chapter 10\. Graphics
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The web is much more visual than textual; that is obvious. Images appear in
+    the form of logos, buttons, photographs, charts, advertisements, and icons. Many
+    of these images are static and never change, built with tools such as Photoshop.
+    But many are dynamically created—from advertisements for Amazon’s referral program
+    that include your name to graphs of stock performance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP supports graphics creation with the built-in GD extension library. In this
+    chapter, we’ll show you how to generate images dynamically within PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Embedding an Image in a Page
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: A common misconception is that there is a mixture of text and graphics flowing
+    across a single HTTP request. After all, when you view a page, you see a single
+    page containing such a mixture. It is important to understand that a standard
+    web page containing text and graphics is created through a series of HTTP requests
+    from the web browser; each request is answered by a response from the web server.
+    Each response can contain one and only one type of data, and each image requires
+    a separate HTTP request and web server response. Thus, if you see a page that
+    contains some text and two images, you know that it has taken three HTTP requests
+    and corresponding responses to construct this page.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Take this HTML page, for example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The series of requests sent by the web browser for this page looks something
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The web server sends back a response to each of these requests. The `Content-Type`
+    headers in these responses look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To embed a PHP-generated image in an HTML page, pretend that the PHP script
+    that generates the image is actually the image. Thus, if we have *image1.php*
+    and *image2.php* scripts that create images, we can modify the previous HTML to
+    look like this (the image names are PHP extensions now):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Instead of referring to real images on your web server, the `<img>` tags now
+    refer to the PHP scripts that generate and return image data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Furthermore, you can pass variables to these scripts, so instead of having
+    separate scripts to generate each image, you could write your `<img>` tags like
+    this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then, inside the called PHP file *image.php*, you can access the request parameter
+    `$_GET['num']` to generate the appropriate image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Basic Graphics Concepts
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: An *image* is a rectangle of pixels of various colors. Colors are identified
+    by their position in the *palette*, an array of colors. Each entry in the palette
+    has three separate color values—one each for red, green, and blue. Each value
+    ranges from `0` (color not present) to `255` (color at full intensity). This is
+    known as its *RGB value*. There are also hexadecimal, or “hex” values—alphanumeric
+    representations of colors that are commonly used in HTML. Some image tools, such
+    as [ColorPic](https://oreil.ly/F-Z3e), will convert RGB values to hex for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Image files are rarely a straightforward dump of the pixels and the palette.
+    Instead, various *file formats* (GIF, JPEG, PNG, etc.) have been created that
+    attempt to compress the data somewhat to make smaller files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Different file formats handle image *transparency*, which controls whether and
+    how the background shows through the image, in different ways. Some, such as PNG,
+    support an *alpha channel*, an extra value for every pixel reflecting the transparency
+    at that point. Others, such as GIF, simply designate one entry in the palette
+    as indicating transparency. Still others, like JPEG, don’t support transparency
+    at all.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rough and jagged edges, an effect known as *aliasing*, can make for unappealing
+    images. *Antialiasing* involves moving or recoloring pixels at the edge of a shape
+    to transition more gradually between the shape and its background. Some functions
+    that draw on an image implement antialiasing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With 256 possible values for each of red, green, and blue, there are 16,777,216
+    possible colors for each pixel. Some file formats limit the number of colors you
+    can have in a palette (e.g., GIF supports no more than 256 colors); others let
+    you have as many colors as you need. The latter are known as *true color* formats,
+    because 24-bit color (8 bits each for red, green, and blue) gives more hues than
+    the human eye can distinguish.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating and Drawing Images
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: For now, let’s start with the simplest possible GD example. [Example 10-1](#example_onezero_onedot_a_black_square_o)
+    is a script that generates a black-filled square. The code works with any version
+    of GD that supports the PNG image format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-1\. A black square on a white background (black.php)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 10-1](#example_onezero_onedot_a_black_square_o) illustrates the basic
+    steps in generating any image: creating the image, allocating colors, drawing
+    the image, and then saving or sending the image. [Figure 10-1](#a_black_square_on_a_white_background)
+    shows the output of [Example 10-1](#example_onezero_onedot_a_black_square_o).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![A black square on a white background](Images/php4_1001.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-1\. A black square on a white background
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'To see the result, simply point your browser at the *black.php* page. To embed
+    this image in a web page, use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: The Structure of a Graphics Program
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Most dynamic image-generation programs follow the same basic steps outlined
+    in [Example 10-1](#example_onezero_onedot_a_black_square_o).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can create a 256-color image with the `imagecreate()` function, which returns
+    an image handle:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: All colors used in an image must be allocated with the `imagecolorallocate()`
+    function. The first color allocated becomes the background color for the image:^([1](ch10.xhtml#ch10fn1))
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: The arguments are the numeric RGB (red, green, blue) components of the color.
+    In [Example 10-1](#example_onezero_onedot_a_black_square_o), we wrote the color
+    values in hexadecimal to bring the function call closer to the HTML color representation
+    `#FFFFFF` and `#000000`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are many drawing primitives in GD. [Example 10-1](#example_onezero_onedot_a_black_square_o)
+    uses `imagefilledrectangle()`, in which you specify the dimensions of the rectangle
+    by passing the coordinates of the top-left and bottom-right corners:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The next step is to send a `Content-Type` header to the browser with the appropriate
+    content type for the kind of image being created. Once that is done, we call the
+    appropriate output function. The `imagejpeg()`, `imagegif()`, `imagepng()`, and
+    `imagewbmp()` functions create GIF, JPEG, PNG, and WBMP files from the image,
+    respectively:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: If no *filename* is given, the image is output to the browser; otherwise, it
+    creates (or overwrites) the image to the given file path. The *quality* argument
+    for JPEGs is a value from `0` (worst-looking) to `100` (best-looking). The lower
+    the quality, the smaller the JPEG file. The default setting is `75`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In [Example 10-1](#example_onezero_onedot_a_black_square_o), we set the HTTP
+    header immediately before calling the output-generating function `imagepng()`.
+    If you set the `Content-Type` at the very start of the script, any errors that
+    are generated are treated as image data and the browser displays a broken image
+    icon. [Table 10-1](#content_type_values_for_image_formats) lists the image formats
+    and their `Content-Type` values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 10-1\. Content-Type values for image formats
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Format | `Content-Type` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| GIF | `image/gif` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| JPEG | `image/jpeg` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| PNG | `image/png` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| WBMP | `image/vnd.wap.wbmp` |'
+  prefs: []
+  type: TYPE_TB
+- en: Changing the Output Format
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As you may have deduced, generating an image stream of a different type requires
+    only two changes to the script: send a different `Content-Type` and use a different
+    image-generating function. [Example 10-2](#example_onezero_twodot_jpeg_version_of)
+    shows [Example 10-1](#example_onezero_onedot_a_black_square_o) modified to generate
+    a JPEG instead of a PNG image.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-2\. JPEG version of the black square
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Testing for Supported Image Formats
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you are writing code that must be portable across systems that may support
+    different image formats, use the `imagetypes()` function to check which image
+    types are supported. This function returns a bit field; you can use the bitwise
+    AND operator (`&`) to check if a given bit is set. The constants `IMG_GIF`, `IMG_JPG`,
+    `IMG_PNG`, and `IMG_WBMP` correspond to the bits for those image formats.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 10-3](#example_onezero_threedot_checking_for_i) generates PNG files
+    if PNG is supported, JPEG files if PNG is not supported, and GIF files if neither
+    PNG nor JPEG is supported.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-3\. Checking for image format support
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Reading an Existing File
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you want to start with an existing image and then modify it, use `imagecreatefromgif()`,
+    `imagecreatefromjpeg()`, or `imagecreatefrompng()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Basic Drawing Functions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: GD has functions for drawing basic points, lines, arcs, rectangles, and polygons.
+    This section describes the base functions supported by GD 2.x.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The most basic function is `imagesetpixel()`, which sets the color of a specified
+    pixel:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There are two functions for drawing lines, `imageline()` and `imagedashedline()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There are two functions for drawing rectangles, one that simply draws the outline
+    and one that fills the rectangle with the specified color:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Specify the location and size of the rectangle by passing the coordinates of
+    the top-left and bottom-right corners.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can draw arbitrary polygons with the `imagepolygon()` and `imagefilled`​`polygon()`
+    functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Both functions take an array of points. This array has two integers (the *x*
+    and *y* coordinates) for each vertex on the polygon. The *number* argument is
+    the number of vertices in the array (typically `count($points)/2`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `imagearc()` function draws an arc (a portion of an ellipse):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: The ellipse is defined by its center, width, and height (height and width are
+    the same for a circle). The start and end points of the arc are given as degrees
+    counting counterclockwise from 3 o’clock. Draw the full ellipse with a *start*
+    of `0` and an *end* of `360`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two ways to fill in already-drawn shapes. The `imagefill()` function
+    performs a flood fill, changing the color of the pixels starting at the given
+    location. Any change in pixel color marks the limits of the fill. The `imagefilltoborder()`
+    function lets you pass the particular color of the limits of the fill:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Another thing that you may want to do with your images is rotate them. This
+    could be helpful if you are trying to create a web-style brochure, for example.
+    The `image``rotate()` function allows you to rotate an image by an arbitrary angle:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: The code in [Example 10-4](#example_onezero_fourdot_image_rotation) shows the
+    black box image from before, rotated by 45 degrees. The *background_color* option,
+    used to specify the color of the uncovered area after the image is rotated, has
+    been set to `1` to show the contrast of the black and white colors. [Figure 10-2](#black_box_image_rotated_fourfive_degree)
+    shows the result of this code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-4\. Image rotation example
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Black box image rotated 45 degrees](Images/php4_1002.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-2\. Black box image rotated 45 degrees
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Images with Text
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Often it is necessary to add text to images. GD has built-in fonts for this
+    purpose. [Example 10-5](#example_onezero_fivedot_adding_text_to) adds some text
+    to our black square image.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-5\. Adding text to an image
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Figure 10-3](#the_black_box_image_with_added_text) shows the output of [Example 10-5](#example_onezero_fivedot_adding_text_to).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The black box image with added text](Images/php4_1003.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-3\. The black box image with added text
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'The `imagestring()` function adds text to an image. Specify the top-left point
+    of the text, as well as the color and the font (by GD font identifier) to use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Fonts
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: GD identifies fonts by an ID. Five fonts are built in, and you can load additional
+    fonts through the `imageloadfont()` function. The five built-in fonts are shown
+    in [Figure 10-4](#native_gd_fonts).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Native GD fonts](Images/php4_1004.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-4\. Native GD fonts
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'Here is the code used to show you these fonts:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can create your own bitmap fonts and load them into GD using the `imageloadfont()`
+    function. However, these fonts are binary and architecture-dependent, making them
+    nonportable from machine to machine. Using TrueType fonts with the TrueType functions
+    in GD provides much more flexibility.
+  prefs: []
+  type: TYPE_NORMAL
+- en: TrueType Fonts
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'TrueType is an outline font standard; it provides more precise control over
+    the rendering of the characters. To add text in a TrueType font to an image, use
+    `imagettftext()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *size* is measured in pixels. The *angle* is in degrees from 3 o’clock (`0`
+    gives horizontal text, `90` gives vertical text going up the image, etc.). The
+    *x* and *y* coordinates specify the lower-left corner of the baseline for the
+    text. The text may include UTF-8^([2](ch10.xhtml#ch10fn2)) sequences of the form
+    `&#234;` to print high-bit ASCII characters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The font parameter is the location of the TrueType font to use for rendering
+    the string. If the font does not begin with a leading `/` character, the *.ttf*
+    extension is added and the font is looked up in */usr/share/fonts/truetype*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, text in a TrueType font is antialiased. This makes most fonts much
+    easier to read, although very slightly blurred. Antialiasing can make very small
+    text harder to read, though—small characters have fewer pixels, so the adjustments
+    of antialiasing are more significant.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can turn off antialiasing by using a negative color index (e.g., `−4` means
+    to use color index 4 without antialiasing the text).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 10-6](#example_onezero_sixdot_using_a_truetype) uses a TrueType font
+    to add text to an image, searching for the font in the same location as the script,
+    but still having to provide the full path to the location of the font file (included
+    in the book’s code examples).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-6\. Using a TrueType font
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Figure 10-5](#indie_flower_truetype_font) shows the output of [Example 10-6](#example_onezero_sixdot_using_a_truetype).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Indie Flower TrueType font](Images/php4_1005.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-5\. Indie Flower TrueType font
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: '[Example 10-7](#example_onezero_sevendot_displaying_ver) uses `imagettftext()`
+    to add vertical text to an image.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-7\. Displaying vertical TrueType text
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Figure 10-6](#vertical_truetype_text) shows the output of [Example 10-7](#example_onezero_sevendot_displaying_ver).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Vertical TrueType text](Images/php4_1006.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-6\. Vertical TrueType text
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Dynamically Generated Buttons
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Creating images for buttons on the fly is one popular use for generating images
+    (this topic was introduced in [Chapter 1](ch01.xhtml#introduction_to_php)). Typically,
+    this involves compositing text over a preexisting background image, as shown in
+    [Example 10-8](#example_onezero_eightdot_creating_a_dyn).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-8\. Creating a dynamic button
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, the blank button (*button.png*) is overwritten with the default
+    text, as shown in [Figure 10-7](#dynamic_button_with_default_text).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Dynamic button with default text](Images/php4_1007.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-7\. Dynamic button with default text
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'The script in [Example 10-8](#example_onezero_eightdot_creating_a_dyn) can
+    be called from a page like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: This HTML generates the button shown in [Figure 10-8](#button_with_generated_text_label).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Button with generated text label](Images/php4_1008.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-8\. Button with generated text label
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'The + character in the URL is the encoded form of a space. Spaces are illegal
+    in URLs and must be encoded. Use PHP’s `urlencode()` function to encode your button
+    strings. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Caching the Dynamically Generated Buttons
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: It is somewhat slower to generate an image than to send a static image. For
+    buttons that will always look the same when called with the same text argument,
+    you can implement a simple cache mechanism.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 10-9](#example_onezero_ninedot_caching_dynamic) generates the button
+    only when no cache file for that button is found. The `$path` variable holds a
+    directory, writable by the web server user, where buttons can be cached; make
+    sure it can be reached from where you run this code. The `filesize()` function
+    returns the size of a file, and `readfile()` sends the contents of a file to the
+    browser. Because this script uses the text form parameter as the filename, it
+    is very insecure. ([Chapter 14](ch14.xhtml#security), which covers security issues,
+    explains why and how to fix it.)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-9\. Caching dynamic buttons
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: A Faster Cache
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Example 10-9](#example_onezero_ninedot_caching_dynamic) is still not as quick
+    as it could be. Using Apache directives, you can bypass the PHP script entirely
+    and load the cached image directly once it is created.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, create a *buttons* directory somewhere under your web server’s `DocumentRoot`
+    and make sure that your web server user has permissions to write to this directory.
+    For example, if the `DocumentRoot` directory is */var/www/html*, create */var/www/html/buttons*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Second, edit your Apache *httpd.conf* file and add the following block:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: This tells Apache that requests for nonexistent files in the *buttons* directory
+    should be sent to your *button.php* script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Third, save [Example 10-10](#example_onezero_onezerodot_more_efficie) as *button.php*.
+    This script creates new buttons, saving them to the cache and sending them to
+    the browser. There are several differences from [Example 10-9](#example_onezero_ninedot_caching_dynamic),
+    though. We don’t have form parameters in `$_GET`, because Apache handles error
+    pages as redirections. Instead, we have to pull apart values in `$_SERVER` to
+    find out which button we’re generating. While we’re at it, we delete the `'..'`
+    in the filename to fix the security hole from [Example 10-9](#example_onezero_ninedot_caching_dynamic).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once *button.php* is installed, when a request comes in for something like *http://your.site/buttons/php.png*,
+    the web server checks whether the *buttons/php.png* file exists. If it does not,
+    the request is redirected to the *button.php* script, which creates the image
+    (with the text “php”) and saves it to *buttons/php.png*. Any subsequent requests
+    for this file are served up directly without a line of PHP being run.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-10\. More efficient caching of dynamic buttons
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: One significant drawback to the mechanism in [Example 10-10](#example_onezero_onezerodot_more_efficie)
+    is that the button text cannot contain any characters that are illegal in a filename.
+    Nonetheless, this is the most efficient way to cache dynamically generated images.
+    If you change the look of your buttons and you need to regenerate the cached images,
+    simply delete all the images in your *buttons* directory, and they will be re-created
+    as they are requested.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also take this a step further and get your *button.php* script to support
+    multiple image types. Simply check `$extension` and call the appropriate `imagepng()`,
+    `imagejpeg()`, or `imagegif()` function at the end of the script. You can also
+    parse the filename and add modifiers such as color, size, and font, or pass them
+    right in the URL. Because of the `parse_str()` call in the example, a URL such
+    as *http://your.site/buttons/php.png?size=16* displays “php” in a font size of
+    16.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Scaling Images
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'There are two ways to change the size of an image. The `imagecopyresized()`
+    function is fast but crude, and may produce jagged edges in your new images. The
+    `imagecopyresampled()` function is slower, but uses pixel interpolation to generate
+    smooth edges and give clarity to the resized image. Both functions take the same
+    arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *dest* and *src* parameters are image handles. The point `(`*dx*`,` *dy*`)`
+    is the point in the destination image where the region will be copied. The point
+    `(`*sx*`,` *sy*`)` is the upper-left corner of the source image. The *sw*, *sh*,
+    *dw*, and *dh* parameters give the width and height of the copy regions in the
+    source and destination.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 10-11](#example_onezero_oneonedot_resizing_with) takes the *php.jpg*
+    image shown in [Figure 10-9](#original_phpdotjpg_image) and smoothly scales it
+    down to one-quarter of its size, yielding the image in [Figure 10-10](#resulting_onesolidusfour_sized_image).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-11\. Resizing with imagecopyresampled()
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Original php.jpg image](Images/php4_1009.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-9\. Original php.jpg image
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: '![Resulting 1/4-sized image](Images/php4_1010.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-10\. Resulting 1/4-sized image
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Dividing the height and the width by 4 instead of 2 produces the output shown
+    in [Figure 10-11](#resulting_onesolidusonesix_sized_image).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Resulting 1/16-sized image](Images/php4_1011.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-11\. Resulting 1/16-sized image
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Color Handling
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The GD library supports both 8-bit palette (256 color) images and true color
+    images with alpha channel transparency.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To create an 8-bit palette image, use the `imagecreate()` function. The image’s
+    background is subsequently filled with the first color you allocate using `imagecolor``allocate()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To create a true color image with a 7-bit alpha channel, use the `imagecreatetruecolor()`
+    function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use `imagecolorallocatealpha()` to create a color index that includes transparency:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *alpha* value is between 0 (opaque) and 127 (transparent).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'While most people are used to an 8-bit (0–255) alpha channel, it is actually
+    quite handy that GD’s is 7-bit (0–127). Each pixel is represented by a 32-bit
+    signed integer, with the four 8-bit bytes arranged like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: For a signed integer, the leftmost bit, or the highest bit, is used to indicate
+    whether the value is negative, thus leaving only 31 bits of actual information.
+    PHP’s default integer value is a signed long into which we can store a single
+    GD palette entry. Whether that integer is positive or negative tells us whether
+    antialiasing is enabled for that palette entry.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unlike with palette images, with true color images the first color you allocate
+    does not automatically become your background color. Instead, the image is initially
+    filled with fully transparent pixels. Call `imagefilledrectangle()` to fill the
+    image with any background color you want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 10-12](#example_onezero_onetwodot_a_simple_oran) creates a true color
+    image and draws a semitransparent orange ellipse on a white background.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-12\. A simple orange ellipse on a white background
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Figure 10-12](#an_orange_ellipse_on_a_white_background) shows the output of
+    [Example 10-12](#example_onezero_onetwodot_a_simple_oran).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![An orange ellipse on a white background](Images/php4_1012.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-12\. An orange ellipse on a white background
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: You can use the `imagetruecolortopalette()` function to convert a true color
+    image to one with a color index (also known as a *paletted* image).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the Alpha Channel
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In [Example 10-12](#example_onezero_onetwodot_a_simple_oran), we turned off
+    *alpha blending* before drawing our background and our ellipse. Alpha blending
+    is a toggle that determines whether the alpha channel, if present, should be applied
+    when the image is drawn. If alpha blending is off, the old pixel is replaced with
+    the new pixel. If an alpha channel exists for the new pixel, it is maintained,
+    but all pixel information for the original pixel being overwritten is lost.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 10-13](#example_onezero_onethreedot_a_gray_rect) illustrates alpha
+    blending by drawing a gray rectangle with a 50% alpha channel over an orange ellipse.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-13\. A gray rectangle with a 50% alpha channel overlaid
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Figure 10-13](#a_gray_rectangle_over_the_orange_ellips) shows the output of
+    [Example 10-13](#example_onezero_onethreedot_a_gray_rect) (alpha blending is still
+    turned off).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![A gray rectangle over the orange ellipse](Images/php4_1013.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-13\. A gray rectangle over the orange ellipse
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: If we change [Example 10-13](#example_onezero_onethreedot_a_gray_rect) to enable
+    alpha blending just before the call to `image`​`filledrectangle()`, we get the
+    image shown in [Figure 10-14](#image_with_alpha_blending_enabled).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Image with alpha blending enabled](Images/php4_1014.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-14\. Image with alpha blending enabled
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Identifying Colors
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To check the color index for a specific pixel in an image, use `imagecolorat()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For images with an 8-bit color palette, the function returns a color index
+    that you then pass to `imagecolorsforindex()` to get the actual RGB values:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: The array returned by `imagecolorsforindex()` has the keys `'red'`, `'green'`,
+    and `'blue'`. If you call `imagecolorsforindex()` on a color from a true color
+    image, the returned array also has a value for the key `'alpha'`. The values for
+    these keys correspond to the 0–255 color values and the 0–127 alpha value used
+    when calling `image`​`colorallocate()` and `imagecolorallocatealpha()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: True Color Indexes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The color index returned by `imagecolorallocatealpha()` is really a 32-bit signed
+    long, with the first three bytes holding the red, green, and blue values, respectively.
+    The next bit indicates whether antialiasing is enabled for this color, and the
+    remaining seven bits hold the transparency value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: This code sets `$green` to `2130771712`, which in hex is `0x7F00FF00` and in
+    binary is `01111111000000001111111100000000`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This is equivalent to the following `imagecolorresolvealpha()` call:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also drop the two `0` entries in this example and just make it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To deconstruct this value, you can use something like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Direct manipulation of color values like this is rarely necessary. One application
+    is to generate a color-testing image that shows the pure shades of red, green,
+    and blue. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Figure 10-15](#the_color_test) shows the output of the color-testing program.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The color test](Images/php4_1015.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-15\. The color test
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Obviously it will be much more colorful than what we can show you here in black
+    and white print, so try this example for yourself. In this particular example,
+    it is much easier to simply calculate the pixel color than to call `imagecolorallocatealpha()`
+    for every color.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text Representation of an Image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: An interesting use of the `imagecolorat()` function is to loop through each
+    pixel in an image and do something with that color data. [Example 10-14](#example_onezero_onefourdot_converting_a)
+    prints `#` for each pixel in the image *php-tiny.jpg* in that pixel’s color.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-14\. Converting an image to text
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: The result is an ASCII representation of the image, as shown in [Figure 10-16](#ascii_representation_of_an_image).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![ASCII representation of an image](Images/php4_1016.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-16\. ASCII representation of an image
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: What’s Next
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There are many different ways to manipulate images on the fly with PHP. This
+    certainly dispels the myth that PHP is useful only for generating web HTML content.
+    If you have the time and desire to explore what’s possible in more depth, feel
+    free to experiment with the code samples here. In the next chapter we’ll be looking
+    at another myth-buster in generating dynamic PDF documents. Stay tuned!
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch10.xhtml#ch10fn1-marker)) This is true only for images with a color
+    palette. True color images created using `ImageCreateTrueColor()` do not obey
+    this rule.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([2](ch10.xhtml#ch10fn2-marker)) UTF-8 is an 8-bit Unicode ([*http://www.unicode.org*](http://www.unicode.org))
+    encoding scheme.
+  prefs: []
+  type: TYPE_NORMAL

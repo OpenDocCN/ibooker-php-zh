@@ -1,0 +1,1053 @@
+- en: Chapter 12\. Form Handling
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: One of the main ways that website users interact with PHP and MySQL is through
+    HTML forms. These were introduced very early on in the development of the World
+    Wide Web, in 1993—even before the advent of ecommerce—and have remained a mainstay
+    ever since, due to their simplicity and ease of use, although formatting them
+    can be a nightmare.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Of course, enhancements have been made over the years to add extra functionality
+    to HTML form handling, so this chapter will bring you up to speed on the state
+    of the art and show you the best ways to implement forms for good usability and
+    security. Plus, as you will see a little later on, the HTML5 specification has
+    further improved the use of forms.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building Forms
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Handling forms is a multipart process. First is the creation of a form into
+    which a user can enter the required details. This data is then sent to the web
+    server, where it is interpreted, often with some error checking. If the PHP code
+    identifies one or more fields that require reentering, the form may be redisplayed
+    with an error message. When the code is satisfied with the accuracy of the input,
+    it takes some action that may often involve a database, such as entering details
+    about a purchase.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To build a form, you must have at least the following elements:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An opening `<form>` and closing `</form>` tag
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A submission type specifying either a GET or POST method
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: One or more `input` fields
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The destination URL to which the form data is to be submitted
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Example 12-1](#formtestdotphpem_dasha_simple_php_form_h) shows a very simple
+    form created with PHP, which you should type in and save as *formtest.php*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-1\. formtest.php—a simple PHP form handler
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first thing to notice about this example is that, as you have already seen
+    in this book, rather than dropping in and out of PHP code, the `echo <<<_END..._END`
+    construct is used whenever multiline HTML must be output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inside of this multiline output is some standard code for commencing an HTML
+    document, displaying its title, and starting the body of the document. This is
+    followed by the form, which is set to send its data using the POST method to the
+    PHP program *formtest.php*, which is the name of the program itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The rest of the program just closes all the items it opened: the form, the
+    body of the HTML document, and the PHP `echo <<<_END` statement. The result of
+    opening this program in a web browser is shown in [Figure 12-1](#result_of_opening_formtestdotphp_in).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The result of opening formtest.php in a web browser](Images/pmj6_1201.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 12-1\. The result of opening formtest.php in a web browser
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Retrieving Submitted Data
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '[Example 12-1](#formtestdotphpem_dasha_simple_php_form_h) is only one part
+    of the multipart form-handling process. If you enter a name and click the Submit
+    Query button, absolutely nothing will happen other than the form being redisplayed
+    (and the entered data lost). So now it’s time to add some PHP code to process
+    the data submitted by the form.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 12-2](#updated_version_of_formtestdotphp) expands on the previous
+    program to include data processing. Type it or modify *formtest.php* by adding
+    in the new lines, save it as *formtest2.php*, and try the program for yourself.
+    The result of running this program and entering a name is shown in [Figure 12-2](#formtestdotphp_with_data_handling).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-2\. Updated version of formtest.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![formtest.php with data handling](Images/pmj6_1202.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 12-2\. formtest.php with data handling
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The only changes are a couple of lines at the start that check the `name` field
+    of the `$_POST` associative array and echo it back to the user. [Chapter 11](ch11.xhtml#accessing_mysql_using_php)
+    introduced the `$_POST` associative array, which contains an element for each
+    field in an HTML form. In [Example 12-2](#updated_version_of_formtestdotphp),
+    the input name used was `name` and the form method was POST, so the element `name`
+    of the `$_POST` array contains the value in `$_POST['name']`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The PHP `isset` function is used to test whether `$_POST['name']` has been assigned
+    a value. If nothing was posted, the program assigns the value `(Not entered)`;
+    otherwise, it stores the value that was entered. Then a single line has been added
+    after the `<body>` statement to display that value, which is stored in `$name`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Default Values
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Sometimes it’s convenient to offer your site visitors a default value in a web
+    form. For example, suppose you put up a loan repayment calculator widget on a
+    real estate website. It could make sense to enter default values of, say, 15 years
+    and 3% interest so that the user can simply type either the principal sum to borrow
+    or the amount that they can afford to pay each month.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this case, the HTML for those two values would be something like [Example 12-3](#setting_default_values).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-3\. Setting default values
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Take a look at the third and fourth inputs. By populating the `value` attribute,
+    you display a default value in the field, which the users can then change if they
+    wish. With sensible default values, you can often make your web forms more user-friendly
+    by minimizing unnecessary typing. The result of the previous code looks like [Figure 12-3](#using_default_values_for_selected_form_f).
+    Of course, this was created to illustrate default values, and, because the program
+    *calc.php* has not been written, the form will return a 404 error message if you
+    submit it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Default values are also used for hidden fields if you want to pass extra information
+    from your web page to your program, in addition to what users enter. We’ll look
+    at hidden fields later in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Using default values for selected form fields](Images/pmj6_1203.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 12-3\. Using default values for selected form fields
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Input Types
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: HTML forms are very versatile and allow you to submit a wide range of input
+    types, from text boxes and text areas to checkboxes, radio buttons, and more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text boxes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The input type you will probably use most often is the text box. It accepts
+    a wide range of alphanumeric text and other characters in a single-line box. The
+    general format of a text box input is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We’ve already covered the `name` and `value` attributes, but two more are introduced
+    here: `size` and `maxlength`. The `size` attribute specifies the width of the
+    box (in characters of the current font) as it should appear on the screen, and
+    `maxlength` specifies the maximum number of characters that a user is allowed
+    to enter into the field.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The only required attributes are `type`, which tells the web browser what type
+    of input to expect, and `name`, for giving the input a name that will be used
+    to process the field upon receipt of the submitted form.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text areas
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'When you need to accept input of more than a short line of text, use a text
+    area. This is similar to a text box, but, because it allows multiple lines, it
+    has some different attributes. Its general format looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first thing to notice is that `<textarea>` has its own tag and is not a
+    subtype of the `<input>` tag. It therefore requires a closing `</textarea>` to
+    end input.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Instead of a default attribute, if you have default text to display, you must
+    put it before the closing `</textarea>`, and it will then be displayed and be
+    editable by the user:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: To control the width and height, use the `cols` and `rows` attributes. Both
+    use the character spacing of the current font to determine the size of the area.
+    If you omit these values, a default input box will be created that will vary in
+    dimensions depending on the browser used, so you should always define them to
+    be certain about how your form will appear.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Last, you can control how the text entered into the box will wrap (and how any
+    such wrapping will be sent to the server) using the `wrap` attribute. [Table 12-1](#wrap_types_available_in_a_textarea_i)
+    shows the wrap types available. If you leave out the `wrap` attribute, soft wrapping
+    is used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 12-1\. The wrap types available in a *<textarea>* input
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Type | Action |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `off` | Text does not wrap, and lines appear exactly as the user types them.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `soft` | Text wraps but is sent to the server as one long string without
+    carriage returns and line feeds. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `hard` | Text wraps and is sent to the server in wrapped format with soft
+    or hard returns and line feeds. |'
+  prefs: []
+  type: TYPE_TB
+- en: Checkboxes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'When you want to offer a number of different options to a user, from which
+    they can select one or more items, checkboxes are the way to go. Here is the format
+    to use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'By default, checkboxes are square. If you include the `checked` attribute,
+    the box is already checked when the browser is displayed. The string you assign
+    to the attribute should either be surrounded with double or single quotes or the
+    value `"checked"`, or there should be no value assigned (just `checked`). If you
+    don’t include the attribute, the box is shown unchecked. Here is an example of
+    creating an unchecked box:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If the user doesn’t check the box, no value will be submitted. But if they
+    do, a value of `"on"` will be submitted for the field named `agree`. If you prefer
+    to have your own value submitted instead of the word *on* (such as the number
+    1), you could use the following syntax:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'On the other hand, if you wish to offer a newsletter to your readers when submitting
+    a form, you might want to have the checkbox already checked as the default value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you want to allow groups of items to be selected at one time, assign them
+    all the same name. However, only the last item checked will be submitted, unless
+    you pass an array as the name. For example, [Example 12-4](#offering_multiple_checkbox_choices)
+    allows the user to select their favorite ice creams (see [Figure 12-4](#using_checkboxes_to_make_quick_selection)
+    for how it displays in a browser).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-4\. Offering multiple checkbox choices
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Using checkboxes to make quick selections](Images/pmj6_1204.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 12-4\. Using checkboxes to make quick selections
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: If only one of the checkboxes is selected, such as the second one, only that
+    item will be submitted (the field named `ice` would be assigned the value `"Chocolate"`).
+    But if two or more are selected, only the last value will be submitted, with prior
+    values being ignored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you *want* exclusive behavior—so that only one item can be submitted—then
+    you should use radio buttons instead (see the next section). Otherwise, to allow
+    multiple submissions, you have to slightly alter the HTML, as in [Example 12-5](#submitting_multiple_values_with_an_array)
+    (note the addition of the square brackets, `[]`, following the values of `ice`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-5\. Submitting multiple values with an array
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now when the form is submitted, if any of these items have been checked, an
+    array called `ice` will be submitted that contains all the selected values. You
+    can extract either the single submitted value or the array of values to a variable
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the field `ice` has been posted as a single value, `$ice` will be a single
+    string, such as `"Strawberry"`. But if `ice` was defined in the form as an array
+    (like in [Example 12-5](#submitting_multiple_values_with_an_array)), `$ice` will
+    be an array, and its number of elements will be the number of values submitted.
+    [Table 12-2](#seven_possible_sets_of_values_for_th) shows the seven possible sets
+    of values that could be submitted by this HTML for one, two, or all three selections.
+    In each case, an array of one, two, or three items is created.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 12-2\. The seven possible sets of values for the array `$ice`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| One value submitted | Two values submitted | Three values submitted |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '|'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '|'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '|'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '|'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If `$ice` is an array, the PHP code to display its contents is quite simple
+    and might look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: This uses the standard PHP `foreach` construct to iterate through the array
+    `$ice` and pass each element’s value into the variable `$item`, which is then
+    displayed via the `echo` command. The `<br>` is just an HTML formatting device
+    to force a new line after each flavor in the display.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Radio buttons
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Radio buttons are named after the push-in preset buttons found on many older
+    radios, where any previously depressed button pops back up when another is pressed.
+    They are used when you want only a single value to be returned from a selection
+    of two or more options. All the buttons in a group must use the same name, and,
+    because only a single value is returned, you do not have to pass an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, if your website offers a choice of delivery times for items purchased
+    from your store, you might use HTML like that in [Example 12-6](#using_radio_buttons)
+    (see [Figure 12-5](#selecting_a_single_value_with_radio_butt) to see how it displays).
+    By default, radio buttons are round.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-6\. Using radio buttons
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Selecting a single value with radio buttons](Images/pmj6_1205.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 12-5\. Selecting a single value with radio buttons
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Here, the second option of Noon–4pm has been selected by default. This default
+    choice ensures that at least one delivery time will be chosen by the user, which
+    they can change to one of the other two options if they prefer. Had one of the
+    items not been already checked, the user might forget to select an option, and
+    no value would be submitted at all for the delivery time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Hidden fields
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Sometimes it is convenient to have hidden form fields so that you can keep
+    track of the state of form entry. For example, you might wish to know whether
+    a form has already been submitted. You can achieve this by adding some HTML in
+    your PHP code, such as the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is a simple PHP `echo` statement that adds an `input` field to the HTML
+    form. Let’s assume the form was created outside the program and displayed to the
+    user. The first time the PHP program receives the input, this line of code has
+    not run, so there will be no field named `submitted`. The PHP program re-creates
+    the form, adding the `input` field. So when the visitor resubmits the form, the
+    PHP program receives it with the `submitted` field set to `"yes"`. The code can
+    simply check whether the field is present:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Hidden fields can also be useful for storing other details, such as a session
+    ID string that you might create to identify a user, and so on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Never treat hidden fields as secure—because they are not. Someone could easily
+    view the HTML containing them by using a browser’s View Source feature. A malicious
+    attacker could also craft a post that removes, adds, or changes a hidden field.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <select>
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `<select>` tag lets you create a drop-down list of options, offering either
+    single or multiple selections. It conforms to the following syntax:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: The attribute `size` is the number of lines to display before the dropdown is
+    expanded. Clicking on the display causes a list to drop down, showing all the
+    options. If you use the `multiple` attribute, a user can select multiple options
+    from the list by pressing the Ctrl key when clicking. So, to ask a user for their
+    favorite vegetable from a choice of five, you might use HTML like that in [Example 12-7](#using_select),
+    which offers a single selection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-7\. Using `<select>`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This HTML offers five choices, with the first one, *Peas*, preselected (due
+    to it being the first item). [Figure 12-6](#creating_a_drop-down_list_with_select)
+    shows the output where the list has been clicked to drop it down, and the option
+    *Carrots* has been highlighted. If you want to have a different default option
+    offered first (such as *Beans*), use the `selected` attribute, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![Creating a drop-down list with select](Images/pmj6_1206.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 12-6\. Creating a drop-down list with `<select>`
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: You can also allow users to select more than one item, as in [Example 12-8](#using_select_with_the_multiple_attribute).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-8\. Using `<select>` with the `multiple` attribute
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: This HTML is not very different; the `size` has been changed to `"5"`, and the
+    attribute `multiple` has been added. But, as you can see from [Figure 12-7](#using_a_select_with_the_multiple_attribu),
+    it is now possible for the user to select more than one option by using the Ctrl
+    key when clicking. You can leave out the `size` attribute if you wish, and the
+    output will be the same; however, with a larger list, the drop-down box may display
+    more items, so I recommend that you pick a suitable number of rows and stick with
+    it. I also recommend not using multiple select boxes smaller than two rows in
+    height—some browsers may not correctly display the scroll bars needed to access
+    them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Using a select with the multiple attribute](Images/pmj6_1207.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 12-7\. Using a `<select>` with the `multiple` attribute
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: You can also use the `selected` attribute within a multiple select and can,
+    in fact, have more than one option preselected if you wish.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Labels
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can provide an even better user experience by utilizing the `<label>` tag.
+    With it, you can surround a form element, making it selectable by clicking any
+    visible part contained between the opening and closing `<label>` tags.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For instance, going back to the example of choosing a delivery time, you could
+    allow the user to click the radio button itself *and* the associated text, like
+    this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: The text will not be underlined like a hyperlink when you do this, but as the
+    mouse pointer passes over it, it will change to an arrow instead of a text cursor,
+    indicating that the whole item is clickable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The submit button
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To match the type of form being submitted, you can change the text of the submit
+    button to anything you like by using the `value` attribute, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also replace the standard text button with a graphic image of your
+    choice, using HTML such as this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Sanitizing Input
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now we return to PHP programming. It can never be emphasized enough that handling
+    user data is a security minefield, and it is essential to learn to treat all such
+    data with the utmost caution from the start. It’s actually not that difficult
+    to sanitize user input from potential hacking attempts, but it must be done.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first thing to remember is that regardless of what constraints you have
+    placed in an HTML form to limit the types and sizes of inputs, it is a trivial
+    matter for a hacker to use their browser’s View Source feature to extract the
+    form and modify it to provide malicious input to your website.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Therefore, you must never trust any variable that you fetch from either the
+    `$_GET` or `$_POST` arrays until you have sanitized it. If you don’t, users may
+    try to inject JavaScript into the data to interfere with your site’s operation,
+    or even attempt to add MySQL commands to compromise your database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So, instead of just using code such as the following when reading in user input:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'you should also use one or more of the following lines of code. For example,
+    to prevent escape characters from being injected into a string that will be presented
+    to MySQL, use the following to escape all necessary characters and also add quotes
+    to the start and end of the string. Remember that this function takes into account
+    the current character set of a MySQL connection, so it must be used with a PDO
+    connection object (in this instance, `$pdo`), as discussed in [Chapter 11](ch11.xhtml#accessing_mysql_using_php):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Remember that the safest way to secure MySQL from hacking attempts is to use
+    placeholders and prepared statements, as described in [Chapter 11](ch11.xhtml#accessing_mysql_using_php).
+    If you do so for all accesses to MySQL, it becomes unnecessary to escape data
+    being transferred into or out of the database. You will, however, still need to
+    sanitize input when including it within HTML.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To get rid of unwanted slashes, you should first check whether PHP’s magic
+    quotes feature is enabled (which will escape quotes by adding slashes), and if
+    so call the `stripslashes` function like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And to remove any HTML from a string, use the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: For example, this would change a string of interpretable HTML code like `<b>hi</b>`
+    into `&lt;b&gt;hi&lt;/b&gt;`, which then displays as text and won’t be interpreted
+    as HTML tags.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, if you wish to strip HTML entirely from an input, use the following
+    (but ensure you use it before calling `htmlentities`, which replaces any angle
+    brackets used as part of HTML tags):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: In fact, until you know exactly what sanitization you require for a program,
+    [Example 12-9](#sanitizestring_and_sanitizemysql_fun) shows a pair of functions
+    that brings all these checks together to provide a very good level of security.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-9\. The `sanitizeString` and `sanitizeMySQL` functions
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Add this code to the end of your PHP programs, and you can then call it for
+    each user input to sanitize, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or, when you have an open MySQL connection and a PDO connection object (in
+    this case, called `$pdo`):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: An Example Program
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Let’s look at how a real-life PHP program integrates with an HTML form by creating
+    the program *convert.php* listed in [Example 12-10](#program_to_convert_values_between_fahr).
+    Type it as shown and try it for yourself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-10\. A program to convert values between Fahrenheit and Celsius
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: When you call up *convert.php* in a browser, the result should look something
+    like [Figure 12-8](#temperature_conversion_program_in_ac).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The temperature conversion program in action](Images/pmj6_1208.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 12-8\. The temperature conversion program in action
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: To break the program down, the first line initializes the variables `$c` and
+    `$f` in case they do not get posted to the program. The next two lines fetch the
+    values of either the field named `f` or the one named `c`, for an input Fahrenheit
+    or Celsius value. If the user inputs both, the Celsius is simply ignored and the
+    Fahrenheit value is converted. As a security measure, the new function `sanitizeString`
+    from [Example 12-9](#sanitizestring_and_sanitizemysql_fun) is also used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, having either submitted values or empty strings in both `$f` and `$c`, the
+    next portion of code constitutes an `if...elseif...else` structure that first
+    tests whether `$f` has a numeric value. If not, it checks `$c`; if `$c` does not
+    have a numeric value either, the variable `$out` is set to the empty string (more
+    on that in a moment).
+  prefs: []
+  type: TYPE_NORMAL
+- en: If `$f` is found to have a numeric value, the variable `$c` is assigned a simple
+    mathematical expression that converts the value of `$f` from Fahrenheit to Celsius.
+    The formula used is Celsius = (5 / 9) × (Fahrenheit – 32). The variable `$out`
+    is then set to a message string explaining the conversion.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the other hand, if `$c` is found to have a numeric value, a complementary
+    operation is performed to convert the value of `$c` from Celsius to Fahrenheit
+    and assign the result to `$f`. The formula used is Fahrenheit = (9 / 5) × Celsius
+    + 32\. As with the previous section, the string `$out` is then set to contain
+    a message about the conversion.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In both conversions, the PHP `intval` function is called to convert the result
+    of the conversion to an integer value. It’s not necessary but looks better.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With all the arithmetic done, the program now outputs the HTML, which starts
+    with the basic head and title and then contains some introductory text before
+    displaying the value of `$out`. If no temperature conversion was made, `$out`
+    will have a value of `NULL` and nothing will be displayed, which is exactly what
+    we want when the form hasn’t yet been submitted. But if a conversion was made,
+    `$out` contains the result, which is displayed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After this, we come to the form, which is set to submit using the POST method
+    to the program itself (represented by a pair of double quotation marks so that
+    the file can be saved with any name). Within the form, there are two inputs for
+    either a Fahrenheit or a Celsius value to be entered. A submit button with the
+    text Convert is then displayed, and the form is closed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After outputting the HTML to close the document, we come finally to the function
+    `sanitizeString` from [Example 12-9](#sanitizestring_and_sanitizemysql_fun). Try
+    playing with the example by inputting different values into the fields; for a
+    bit of fun, can you find a value for which Fahrenheit and Celsius are the same?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: All the examples in this chapter have used the POST method to send form data.
+    I recommend this, as it’s the neatest and most secure method. However, the forms
+    can easily be changed to use the GET method, as long as values are fetched from
+    the `$_GET` array instead of the `$_POST` array. Reasons to do this might include
+    making the result of a search bookmarkable or directly linkable from another page.
+  prefs: []
+  type: TYPE_NORMAL
+- en: HTML5 Enhancements
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: With HTML5, developers can draw on a number of useful enhancements to form handling
+    to make using forms easier than ever, including new attributes; color, date, and
+    time pickers; and new input types. You can always refer to *caniuse.com* to check
+    how widely a feature has been implemented by the various browsers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The autocomplete Attribute
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can apply the `autocomplete` attribute to the `<form>` element, or to any
+    of the `color`, `date`, `email`, `password`, `range`, `search`, `tel`, `text`,
+    or `url` types of the `<input>` element.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With autocomplete enabled, previous user inputs are recalled and automatically
+    entered into fields as suggestions. You can also disable this feature by turning
+    autocomplete off. Here’s how to turn autocomplete on for an entire form but disable
+    it for specific fields (highlighted in bold):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: The autofocus Attribute
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `autofocus` attribute gives immediate focus to an element when a page loads.
+    It can be applied to any `<input>`, `<textarea>`, or `<button>` element, like
+    this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Browsers that use touch interfaces (such as Android or iOS) usually ignore the
+    `autofocus` attribute, leaving it to the user to tap on a field to give it focus;
+    otherwise, the zooming, focusing, and pop-up keyboards this attribute would generate
+    could quickly become very annoying.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because this feature will cause the focus to move into an input element, the
+    Backspace key will no longer take the user back a web page (although Alt-Left
+    arrow and Alt-Right arrow will still move backward and forward within the browsing
+    history).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The placeholder Attribute
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `placeholder` attribute lets you place into any blank input field a helpful
+    hint to explain to users what they should enter. You use it like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: The input field will display the placeholder text as a prompt until the user
+    starts typing, at which point the placeholder will disappear.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The required Attribute
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `required` attribute ensures that a field has been completed before a form
+    is submitted. Use it like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: When the browser detects an attempted form submission where there’s an uncompleted
+    `required` input, a message is displayed, prompting the user to complete the field.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Override Attributes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With override attributes, you can override form settings on an element-by-element
+    basis. So, for example, using the `formaction` attribute, you can specify that
+    a submit button should submit a form to a different URL from the one specified
+    in the form itself, like the following (in which the default and overridden action
+    URLs are bold):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: HTML5 also brings support for the `formenctype`, `formmethod`, `formnovalidate`,
+    and `formtarget` override attributes, which you can use in exactly the same manner
+    as `formaction` to override one of these settings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The width and height Attributes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Using these new attributes, you can alter the displayed dimensions of an input
+    image, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: The min and max Attributes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With the `min` and `max` attributes, you can specify minimum and maximum values
+    for inputs. You use the attributes like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: The browser will then either offer up and down selectors for the range of values
+    allowed or simply disallow values outside of that range.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The step Attribute
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Often used with `min` and `max`, the `step` attribute supports stepping through
+    number or date values, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: When you are stepping through date or time values, each unit represents 1 second.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The form Attribute
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'With HTML5, you no longer have to place `<input>` elements within `<form>`
+    elements, because you can specify the form to which an input applies by supplying
+    a `form` attribute. The following code shows a form being created, but with its
+    input outside of the `<form>` and `</form>` tags:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: To do this, you must give the form an ID using the `id` attribute and refer
+    to this ID in the `form` attribute of the `input` element. This is most useful
+    for adding hidden input fields, because you can’t control how the field is laid
+    out inside the form, or for using JavaScript to modify forms and inputs on the
+    fly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The list Attribute
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'HTML5 supports attaching lists to inputs to enable users to easily select from
+    a predefined list, which you can use like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: The color Input Type
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `color` input type calls up a color picker so that you can simply click
+    the color of your choice. You use it like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: The number and range Input Types
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `number` and `range` input types restrict input to a number and optionally
+    also specify an allowed range like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: Date and Time Pickers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'When you choose an input type of `date`, `month`, `week`, `time`, `datetime`,
+    or `datetime-local`, a picker will pop up on supported browsers from which the
+    user can make a selection, like this one, which inputs the time:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: The next chapter will show you how to use cookies and authentication to store
+    users’ preferences and keep them logged in, and how to maintain a complete user
+    session.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can submit form data using either the POST or the GET method. Which associative
+    arrays are used to pass this data to PHP?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the difference between a text box and a text area?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If a form has to offer three choices to a user, each of which is mutually exclusive
+    so that only one of the three can be selected, which input type would you use,
+    given a choice between checkboxes and radio buttons?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you submit a group of selections from a web form using a single field
+    name?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you submit a form field without displaying it in the browser?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which HTML tag is used to encapsulate a form element and supporting text or
+    graphics, making the entire unit selectable with a mouse-click?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which PHP function converts HTML into a format that can be displayed but will
+    not be interpreted as HTML by a browser?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What form attribute can be used to help users complete input fields?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you ensure that an input is completed before a form gets submitted?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: See [“Chapter 12 Answers”](app01_split_011.xhtml#chapter_12_answers) in the
+    [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions) for the
+    answers to these questions.
+  prefs: []
+  type: TYPE_NORMAL

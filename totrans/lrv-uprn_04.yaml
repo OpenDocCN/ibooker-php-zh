@@ -1,0 +1,1029 @@
+- en: Chapter 4\. Blade Templating
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Compared to most other backend languages, PHP actually functions relatively
+    well as a templating language. But it has its shortcomings, and it’s also just
+    ugly to be using `<?php` inline all over the place, so you can expect most modern
+    frameworks to offer a templating language.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel offers a custom templating engine called *Blade*, which is inspired
+    by .NET’s Razor engine. It boasts a concise syntax, a shallow learning curve,
+    a powerful and intuitive inheritance model, and easy extensibility.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For a quick look at what writing Blade looks like, check out [Example 4-1](#EX401).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-1\. Blade samples
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, Blade uses curly braces for its “echo” and introduces a convention
+    in which its custom tags, called “directives,” are prefixed with an `@`. You’ll
+    use directives for all of your control structures and also for inheritance and
+    any custom functionality you want to add.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Blade’s syntax is clean and concise, so at its core it’s just more pleasant
+    and tidy to work with than the alternatives. But the moment you need anything
+    of any complexity in your templates—​nested inheritance, complex conditionals,
+    or recursion—​Blade starts to really shine. Just like the best Laravel components,
+    it takes complex application requirements and makes them easy and accessible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additionally, since all Blade syntax is compiled into normal PHP code and then
+    cached, it’s fast and it allows you to use native PHP in your Blade files if you
+    want. However, I’d recommend avoiding using PHP if at all possible—​usually if
+    you need to do anything that you can’t do with Blade or a custom Blade directive,
+    it doesn’t belong in the template.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Twig with Laravel
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Unlike many other Symfony-based frameworks, Laravel doesn’t use Twig by default.
+    But if you’re just in love with Twig, there’s a [TwigBridge package](https://oreil.ly/9z_3t)
+    that makes it easy to use Twig instead of Blade.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Echoing Data
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As you can see in [Example 4-1](#EX401), `{{` and `}}` are used to wrap sections
+    of PHP that you’d like to echo. ``{{ `*$variable*` }}`` is similar to `<?=` `*$variable*`
+    `?>` in plain PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'It’s different in one way, however, and you might’ve guessed this already:
+    Blade escapes all echoes by default using PHP’s `htmlentities()` to protect your
+    users from malicious script insertion. That means ``{{ `*$variable*` }}`` is functionally
+    equivalent to `<?=` ``htmlentities(`*$variable*`)`` `?>`. If you want to echo
+    without the escaping, use `{!!` and `!!}` instead.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Control Structures
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Most of the control structures in Blade will be very familiar. Many directly
+    echo the name and structure of the same tag in PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are a few convenience helpers, but in general, the control structures
+    just look cleaner than they would in PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conditionals
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: First, let’s take a look at the control structures that allow for logic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '@if'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Blade’s `@if (*$condition*)` compiles to `<?php if (*$condition*): ?>`. `@else`,
+    `@elseif`, and `@endif` also compile to the exact same style of syntax in PHP.
+    Take a look at [Example 4-2](#EX402) for some examples.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-2\. `@if`, `@else`, `@elseif`, and `@endif`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Just like with the native PHP conditionals, you can mix and match these how
+    you want. They don’t have any special logic; there’s literally a parser looking
+    for something with the shape of ``@if (`*$condition*`)`` and replacing it with
+    the appropriate PHP code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '@unless and @endunless'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`@unless`, on the other hand, is a new syntax that doesn’t have a direct equivalent
+    in PHP. It’s the direct inverse of `@if`. `@unless (*$condition*)` is the same
+    as `<?php if (! *$condition*)`. You can see it in use in [Example 4-3](#EX403).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-3\. `@unless` and `@endunless`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Loops
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Next, let’s take a look at the loops.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '@for, @foreach, and @while'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`@for`, `@foreach`, and `@while` work the same in Blade as they do in PHP;
+    see Examples [4-4](#EX404), [4-5](#EX405), and [4-6](#EX405.5).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-4\. `@for` and `@endfor`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Example 4-5\. `@foreach` and `@endforeach`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Example 4-6\. `@while` and `@endwhile`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '@forelse and @endforelse'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`@forelse` is a `@foreach` that also allows you to program in a fallback if
+    the object you’re iterating over is empty. We saw it in action at the start of
+    this chapter; [Example 4-7](#EX406) shows another example.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-7\. `@forelse`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Template Inheritance
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Blade provides a structure for template inheritance that allows views to extend,
+    modify, and include other views.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s take a look at how inheritance is structured with Blade.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining Sections with @section/@show and @yield
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s start with a top-level Blade layout, like in [Example 4-8](#EX407). This
+    is the definition of a generic page wrapper that we’ll later place page-specific
+    content into.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-8\. Blade layout
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This looks a bit like a normal HTML page, but you can see we’ve *yielded* in
+    two places (`title` and `content`) and we’ve defined a *section* in a third (`footerScripts`).
+    We have three Blade directives here: `@yield(''content'')` alone, `@yield(''title'',
+    ''Home Page'')` with a defined default, and `@section/@show` with actual content
+    in it.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although they each look a little different, *all three function essentially
+    the same.* All three are defining that there’s a section with a given name (the
+    first parameter) that can be extended later, and all three are defining what to
+    do if the section isn’t extended. They do this either by providing a string fallback
+    (`'Home Page'`), no fallback (which will just not show anything if it’s not extended),
+    or an entire block fallback (in this case, `<script src="app.js"></script>`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: What’s different? Well, clearly, `@yield('content')` has no default content.
+    But additionally, the default content in `@yield('title')` will *only* be shown
+    if it’s never extended. If it is extended, its child sections will not have programmatic
+    access to the default value. `@section/@show`, on the other hand, is both defining
+    a default *and* doing so in such a way that its default contents will be available
+    to its children, through `@parent`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you have a parent layout like this, you can extend it in a new template
+    file like in [Example 4-9](#EX408).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-9\. Extending a Blade layout
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '@show Versus @endsection'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You may have noticed that [Example 4-8](#EX407) uses `@section/@show`, but [Example 4-9](#EX408)
+    uses `@section/@endsection`. What’s the difference?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use `@show` when you’re defining the place for a section, in the parent template.
+    Use `@endsection` when you’re defining the content for a template in a child template.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This child view allows us to cover a few new concepts in Blade inheritance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '@extends'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In [Example 4-9](#EX408), with `@extends('layouts.master')`, we define that
+    this view should not be rendered on its own but that it instead *extends* another
+    view. That means its role is to define the content of various sections, but not
+    to stand alone. It’s almost more like a series of buckets of content, rather than
+    an HTML page. This line also defines that the view it’s extending lives at *resources/views/layouts/master.blade.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each file should only extend one other file, and the `@extends` call should
+    be the first line of the file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '@section and @endsection'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: With `@section('title', 'Dashboard')`, we provide our content for the first
+    section, `title`. Since the content is so short, instead of using `@section` and
+    `@endsection`, we’re just using a shortcut. This allows us to pass the content
+    in as the second parameter of `@section` and then move on. If it’s a bit disconcerting
+    to see `@section` without `@endsection`, you could just use the normal syntax.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With `@section('content')` and following, we use the normal syntax to define
+    the contents of the `content` section. We’ll just throw a little greeting in for
+    now. Note, however, that when you’re using `@section` in a child view, you end
+    it with `@endsection` (or its alias `@stop`), instead of `@show`, which is reserved
+    for defining sections in parent views.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '@parent'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Finally, with `@section('footerScripts')` and on, we use the normal syntax to
+    define the contents of the `footerScripts` section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'But remember, we actually defined that content (or, at least, its “default”)
+    already in the master layout. So this time, we have two options: we can either
+    *overwrite* the content from the parent view, or we can *add* to it.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can see that we have the option to include the content from the parent by
+    using the `@parent` directive within the section. If we didn’t, the content of
+    this section would entirely overwrite anything defined in the parent for this
+    section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Including View Partials
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that we’ve established the basics of inheritance, there are a few more tricks
+    we can perform.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '@include'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: What if we’re in a view and want to pull in another view? Maybe we have a call-to-action
+    “Sign up” button that we want to reuse around the site. And maybe we want to customize
+    the button text every time we use it. Take a look at [Example 4-10](#EX409).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-10\. Including view partials with `@include`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`@include` pulls in the partial and, optionally, passes data into it. Note
+    that not only can you *explicitly* pass data to an include via the second parameter
+    of `@include`, but you can also reference any variables within the included file
+    that are available to the including view (`$pageName`, in this example). Once
+    again, you can do whatever you want, but I would recommend you consider always
+    explicitly passing every variable that you intend to use, just for clarity.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You also use the `@includeIf`, `@includeWhen`, and `@includeFirst` directives,
+    as shown in [Example 4-11](#EX411).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-11\. Conditionally including views
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '@each'
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can probably imagine some circumstances in which you’d need to loop over
+    an array or collection and `@include` a partial for each item. There’s a directive
+    for that: `@each`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s say we have a sidebar composed of modules, and we want to include multiple
+    modules, each with a different title. Take a look at [Example 4-12](#EX410).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-12\. Using view partials in a loop with `@each`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Consider that `@each` syntax. The first parameter is the name of the view partial.
+    The second is the array or collection to iterate over. The third is the variable
+    name that each item (in this case, each element in the `$modules` array) will
+    be passed as to the view. And the optional fourth parameter is the view to show
+    if the array or collection is empty (or, optionally, you can pass a string in
+    here that will be used as your template).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Components
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Laravel offers another pattern for including content between views: *components*.
+    Components make the most sense in contexts where you find yourself using view
+    partials and passing large chunks of content into them as variables. Take a look
+    at [Example 4-13](#EX431) for an example of a modal, or popover, that might alert
+    the user in response to an error or other action.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-13\. A modal as an awkward view partial
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is too much for these poor variables, and it’s the perfect fit for a component.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel’s components are another way of structuring view partials that looks
+    much closer to how components work in frontend frameworks like Vue. They may be
+    more familiar to frontend developers, but they also have a few significant benefits
+    compared to view partials, including that it’s much easier to pass large sections
+    of template code into them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 4-14](#EX420) to see how to refactor [Example 4-13](#EX431)
+    with components.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-14\. A modal as a more appropriate component
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see in [Example 4-14](#EX420), components allow us to pull our HTML
+    out of a cramped variable string and back into the template space.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s dig into more of the features of components, how they’re structured, and
+    how we write them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating components
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Components can exist either as purely Blade templates (*anonymous components*),
+    or as Blade templates backed by a PHP class that injects data and functionality
+    (*class-based components*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you only need a template, you can generate your component with the `--view`
+    flag:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you also want to generate the PHP class, exclude that flag:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you’d like to group your components under folders, you can use the `.` separator:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Passing data into components
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'There are four ways to pass data into components: string attributes, PHP attributes,
+    the default slot, and named slots.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Passing data into components via attributes
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Let’s start with attributes. You can pass strings directly into components by
+    passing attributes with no prefix, or you can pass PHP variables and expressions
+    with a colon prefix, as you can see in [Example 4-15](#EX450).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-15\. Passing data to components via attributes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: For class-based components, you’ll need to define every attribute in the PHP
+    class and set it as a public property on the class, as in [Example 4-16](#EX451).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-16\. Defining attributes as public on component classes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For anonymous components, you’ll need to define the attributes in a `props`
+    array at the top of your template:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Passing data into components via slots
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: In [Example 4-14](#EX420) you may have noticed that the contents of the modal
+    were refered to as a variable, `$slot`. But where did this come from?
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, every component that has an opening and a closing tag when it’s
+    referenced has a `$slot` variable, and it’s filled with all the HTML between those
+    two tags. In [Example 4-14](#EX420), the `$slot` variable contains the two `<p>`
+    tags and everything inside (and between) them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But what if you need two or more slots? You can add more than just the default
+    slot, giving each slot its own name and variable. Let’s rework [Example 4-14](#EX420)
+    assuming we want to define the title in a slot; take a look at [Example 4-17](#EX453).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-17\. Defining multiple slots
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: The contents of this new `$slot` variable will be accessible to the component
+    template as a `$title` variable, just like the attribute was before.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Component methods
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: At times it can be helpful to have a helper method in a component that performs
+    some logic. One common pattern is to use these methods for complex logic checks
+    you’d rather keep out of your templates.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Components allow you to call any public method on their associated PHP class
+    in the template by prefixing the method name with `$`, as you can see in [Example 4-18](#EX452).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-18\. Defining and calling component methods
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Attributes grab bag
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Most of the attributes we’ll pass into our components will be named, specific,
+    and similar to passing parameters to a PHP function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But sometimes there are just loose HTML attributes we want to pass in, almost
+    always so they can be assigned to the root element of our template.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With components, you can grab all of those attributes at once, using the `$attributes`
+    variable. This variable captures all the attributes not defined as properties
+    and allows you to echo them out (by treating it like a string) or interact with
+    some of its methods for grabbing or inspecting data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Take a look at [the docs](https://oreil.ly/JWEjK) to learn about all the ways
+    you can interact with the `$attributes` object, but here is one very useful trick:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using Stacks
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: One common pattern that can be difficult to manage using basic Blade includes
+    is when each view in a Blade includes hierarchy needs to add something to a certain
+    section—​almost like adding an entry to an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The most common situation for this is when certain pages (and sometimes, more
+    broadly, certain sections of a website) have specific, unique CSS and JavaScript
+    files they need to load. Imagine you have a site-wide “global” CSS file, a “jobs
+    section” CSS file, and an “apply for a job” page CSS file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Blade’s *stacks* are built for exactly this situation. In your parent template,
+    define a stack, which is just a placeholder. Then, in each child template you
+    can “push” entries onto that stack with `@push/@endpush`, which adds them to the
+    bottom of the stack in the final render. You can also use `@prepend/@endprepend`
+    to add them to the top of the stack. [Example 4-19](#EX410.5) illustrates.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-19\. Using Blade stacks
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'These generate the following result:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: View Composers and Service Injection
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As we covered in [Chapter 3](ch03.html#routing), it’s simple to pass data to
+    our views from the route definition (see [Example 4-20](#EX412)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-20\. Reminder of how to pass data to views
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: There may be times, however, when you find yourself passing the same data over
+    and over to multiple views. Or you might find yourself using a header partial
+    or something similar that requires some data; will you have to pass that data
+    in from every route definition that might ever load that header partial?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Binding Data to Views Using View Composers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Thankfully, there’s a simpler way. The solution is called a *view composer*,
+    and it allows you to define that *any time a particular view loads, it should
+    have certain data passed to it*—without the route definition having to pass that
+    data in explicitly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s say you have a sidebar on every page, which is defined in a partial named
+    `partials.sidebar` (*resources/views/partials/sidebar.blade.php*) and then included
+    on every page. This sidebar shows a list of the last seven posts that were published
+    on your site. If it’s on every page, every route definition would normally have
+    to grab that list and pass it in, like in [Example 4-21](#EX413).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-21\. Passing sidebar data in from every route
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: That could get annoying quickly. Instead, we’re going to use view composers
+    to “share” that variable with a prescribed set of views. We can do this a few
+    ways, so let’s start simple and move up.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sharing a variable globally
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'First, the simplest option: just globally “share” a variable with every view
+    in your application, like in [Example 4-22](#EX425).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-22\. Sharing a variable globally
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you want to use `view()->share()`, the best place would be the `boot()` method
+    of a service provider so that the binding runs on every page load. You can create
+    a custom `ViewComposerServiceProvider` (see [“Service Providers”](ch10.html#service_providers)
+    for more detail), but for now just put it in `App\Providers\AppServiceProvider`
+    in the `boot()` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using `view()->share()` makes the variable accessible to every view in the entire
+    application, however, so it might be overkill.
+  prefs: []
+  type: TYPE_NORMAL
+- en: View-scoped view composers with closures
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The next option is to use a closure-based view composer to share variables with
+    a single view, like in [Example 4-23](#EX426).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-23\. Creating a closure-based view composer
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, we’ve defined the name of the view we want it shared with in
+    the first parameter (`partials.sidebar`) and then passed a closure to the second
+    parameter; in the closure we’ve used `$view->with()` to share a variable, but
+    only with a specific view.
+  prefs: []
+  type: TYPE_NORMAL
+- en: View-scoped view composers with classes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Finally, the most flexible, but also the most complex, option is to create a
+    dedicated class for your view composer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, let’s create the view composer class. There’s no formally defined place
+    for view composers to live, but the docs recommend `App\Http\ViewComposers`. So,
+    let’s create `App\Http\ViewComposers\RecentPostsComposer` like in [Example 4-24](#EX414).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-24\. A view composer
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, when this composer is called, it runs the `compose()` method,
+    in which we bind the `recentPosts` variable to the result of running the `Post`
+    model’s `recent()` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Like the other methods of sharing variables, this view composer needs to have
+    a binding somewhere. Again, you’d likely create a custom `ViewComposerServiceProvider`,
+    but for now, as seen in [Example 4-25](#EX415), we’ll just put it in the `boot()`
+    method of `App\Providers\AppServiceProvider`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-25\. Registering a view composer in `AppServiceProvider`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that this binding is the same as a closure-based view composer, but instead
+    of passing a closure, we’re passing the class name of our view composer. Now,
+    every time Blade renders the `partials.sidebar` view, it’ll automatically run
+    our provider and pass the view a `recentPosts` variable set to the results of
+    the `recent()` method on our `Post` model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Blade Service Injection
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There are three primary types of data we’re most likely to inject into a view:
+    collections of data to iterate over, single objects that we’re displaying on the
+    page, and services that generate data or views.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With a service, the pattern will most likely look like [Example 4-26](#EX417),
+    where we inject an instance of our analytics service into the route definition
+    by typehinting it in the route’s method signature, and then pass it into the view.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-26\. Injecting services into a view via the route definition constructor
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Just as with view composers, Blade’s service injection offers a convenient shortcut
+    to reduce duplication in your route definitions. Normally, the content of a view
+    using our analytics service might look like [Example 4-27](#EX418).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-27\. Using an injected navigation service in a view
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: Blade service injection makes it easy to inject an instance of a class from
+    the container directly into the view, like in [Example 4-28](#EX419).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-28\. Injecting a service directly into a view
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, this `@inject` directive has actually made an `$analytics` variable
+    available, which we’re using later in our view.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first parameter of `@inject` is the name of the variable you’re injecting,
+    and the second parameter is the class or interface that you want to inject an
+    instance of. This is resolved just like when you typehint a dependency in a constructor
+    elsewhere in Laravel; if you’re unfamiliar with how that works, check out [Chapter 11](ch11.html#the_container)
+    to learn more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Just like view composers, Blade service injection makes it easy to make certain
+    data or functionality available to every instance of a view, without having to
+    inject it via the route definition every time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Custom Blade Directives
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'All of the built-in syntax of Blade that we’ve covered so far—`@if`, `@unless`,
+    and so on—are called *directives*. Each Blade directive is a mapping between a
+    pattern (e.g., `@if (*$condition*)`) and a PHP output (e.g., `<?php if (*$condition*):
+    ?>`).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Directives aren’t just for the core; you can actually create your own. You might
+    think directives are good for making little shortcuts to bigger pieces of code—​for
+    example, using `@button('buttonName')` and having it expand to a larger set of
+    button HTML. This isn’t a *terrible* idea, but for simple code expansion like
+    this you might be better off including a view partial.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Custom directives tend to be most useful when they simplify some form of repeated
+    logic. Say we’re tired of having to wrap our code with `@if (auth()``->``guest())`
+    (to check if a user is logged in or not) and we want a custom `@ifGuest` directive.
+    As with view composers, it might be worth having a custom service provider to
+    register these, but for now let’s just put it in the `boot()` method of `App\Providers\AppServiceProvider`.
+    Take a look at [Example 4-29](#EX421) to see what this binding will look like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-29\. Binding a custom Blade directive in a service provider
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We’ve now registered a custom directive, `@ifGuest`, which will be replaced
+    with the PHP code `<?php if (auth()->guest()): ?>`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This might feel strange. You’re writing a *string* that will be returned and
+    then executed as PHP. But what this means is that you can now take the complex,
+    ugly, unclear, or repetitive aspects of your PHP templating code and hide them
+    behind clear, simple, and expressive syntax.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Custom Directive Result Caching
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'You might be tempted to do some logic to make your custom directive faster
+    by performing an operation *in* the binding and then embedding the result within
+    the returned string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: The problem with this idea is that it assumes this directive will be re-created
+    on every page load. However, Blade caches aggressively, so you’re going to find
+    yourself in a bad spot if you try this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameters in Custom Blade Directives
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: What if you want to accept parameters in your custom logic? Check out [Example 4-30](#EX422).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-30\. Creating a Blade directive with parameters
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `$expression` parameter received by the closure represents whatever’s within
+    the parentheses. As you can see, we then generate a valid PHP code snippet and
+    return it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you find yourself constantly writing the same conditional logic over and
+    over, you should consider a Blade directive.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example: Using Custom Blade Directives for a Multitenant App'
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s imagine we’re building an application that supports *multitenancy*, which
+    means users might be visiting the site from *www.myapp.com*, *client1.myapp.com*,
+    *client2.myapp.com*, or elsewhere.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Suppose we have written a class to encapsulate some of our multitenancy logic
+    and named it `Context`. This class will capture information and logic about the
+    context of the current visit, such as who the authenticated user is and whether
+    the user is visiting the public website or a client subdomain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ll probably frequently resolve that `Context` class in our views and perform
+    conditionals on it, like in [Example 4-31](#EX423). `app('context')` is a shortcut
+    to get an instance of a class from the container, which we’ll learn more about
+    in [Chapter 11](ch11.html#the_container).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-31\. Conditionals on context without a custom Blade directive
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: What if we could simplify `@if (app('context')->isPublic())` to just `@ifPublic`?
+    Let’s do it. Check out [Example 4-32](#EX424).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-32\. Conditionals on context with a custom Blade directive
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since this resolves to a simple `if` statement, we can still rely on the native
+    `@else` and `@endif` conditionals. But if we wanted, we could also create a custom
+    `@elseIfClient` directive, or a separate `@ifClient` directive, or really whatever
+    else we want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Easier Custom Directives for “if” Statements
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Although custom Blade directives are powerful, the most common use for them
+    is `if` statements. So there’s a simpler way to create custom “if” directives:
+    `Blade::if()`. [Example 4-33](#EX424.5) shows how we could refactor [Example 4-32](#EX424)
+    using the `Blade::if()` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-33\. Defining a custom “if” Blade directive
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’ll use the directives exactly the same way, but as you can see, defining
+    them is a bit simpler. Instead of having to manually type out PHP braces, you
+    can just write a closure that returns a Boolean.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The most common method of testing views is through application testing, meaning
+    that you’re actually calling the route that displays the views and ensuring the
+    views have certain content (see [Example 4-34](#EX428)). You can also click buttons
+    or submit forms and ensure that you are redirected to a certain page or that you
+    see a certain error. (You’ll learn more about testing in [Chapter 12](ch12.html#testing).)
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-34\. Testing that a view displays certain content
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also test that a certain view has been passed a particular set of data,
+    which, if it accomplishes your testing goals, is less fragile than checking for
+    certain text on the page. [Example 4-35](#EX429) demonstrates this approach.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-35\. Testing that a view was passed certain content
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: With `assertViewHas()` we can pass in a closure, meaning we can customize how
+    we want to check more complex data structures. [Example 4-36](#EX430) illustrates
+    how we might use this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-36\. Passing a closure to `assertViewHas()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: TL;DR
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Blade is Laravel’s templating engine. Its primary focus is a clear, concise,
+    and expressive syntax with powerful inheritance and extensibility. Its “safe echo”
+    brackets are `{{` and `}}`, its unprotected echo brackets are `{!!` and `!!}`,
+    and it has a series of custom tags called “directives” that all begin with `@`
+    (`@if` and `@unless`, for example).
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can define a parent template and leave “holes” in it for content using `@yield`
+    and `@section`/`@show`. You can then teach its child views to extend the parent
+    using `@extends('*parent.view*')` and define their sections using `@section`/`@endsection`.
+    You use `@parent` to reference the content of the block’s parent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: View composers make it easy to define that every time a particular view or subview
+    loads, it should have certain information available to it. And service injection
+    allows the view itself to request data straight from the application container.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,1268 @@
+- en: Chapter 5\. PHP Functions and Objects
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The basic requirements of any programming language include somewhere to store
+    data, a means of directing program flow, and a few bits and pieces such as expression
+    evaluation, file management, and text output. PHP has all these, plus tools like
+    `else` and `elseif` to make life easier. But even with all these in your toolkit,
+    programming can be clumsy and tedious, especially if you have to rewrite portions
+    of very similar code each time you need them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: That’s where functions and objects come in. As you might guess, a *function*
+    is a set of statements that performs a particular function and—optionally—returns
+    a value. You can pull out a section of code that you have used more than once,
+    place it into a function, and call the function by name when you want the code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Functions have many advantages over contiguous, inline code. For example, they:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Involve less typing
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Reduce syntax and other programming errors
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Decrease the loading time of program files
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Decrease execution time, because each function is compiled only once, no matter
+    how often you call it
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Accept arguments and can therefore be used for general as well as specific cases
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Objects take this concept a step further. An *object* incorporates one or more
+    functions, and the data they use, into a single structure called a *class*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this chapter, you’ll learn all about using functions, from defining and calling
+    them to passing arguments back and forth. With that knowledge under your belt,
+    you’ll start creating functions and using them in your own objects (where they
+    will be referred to as *methods*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: It is now highly unusual (and definitely not recommended) to use any version
+    of PHP lower than 5.4\. Therefore, this chapter assumes that this release is the
+    bare minimum version you will be working with. Generally I would recommend version
+    5.6, or the new version 7.0 or 7.1 (there is no version 6). You can select any
+    of these from the AMPPS control panel, as described in [Chapter 2](ch02.xhtml#setting_up_a_development_server).
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP Functions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'PHP comes with hundreds of ready-made, built-in functions, making it a very
+    rich language. To use a function, call it by name. For example, you can see the
+    `date` function in action here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: The parentheses tell PHP that you’re referring to a function. Otherwise, it
+    thinks you’re referring to a constant or variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Functions can take any number of arguments, including zero. For example, `phpinfo`,
+    as shown next, displays lots of information about the current installation of
+    PHP and requires no argument:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: The result of calling this function can be seen in [Figure 5-1](#phpinfo).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](Images/pmj6_0501.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 5-1\. The output of PHP’s built-in `phpinfo` function
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The `phpinfo` function is extremely useful for obtaining information about your
+    current PHP installation, but that information could also be very useful to potential
+    hackers. Therefore, never leave a call to this function in any web-ready code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some of the built-in functions that use one or more arguments appear in [Example 5-1](#three_string_functions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-1\. Three string functions
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This example uses three string functions to output the following text:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`Hello world. Hip Hip HOORAY!`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you can see, the `strrev` function reversed the order of characters in the
+    string, `str_repeat` repeated the string `"Hip "` twice (as required by the second
+    argument), and `strtoupper` converted `"hooray!"` to uppercase.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining a Function
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The general syntax for a function is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The first line of the syntax indicates the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A definition starts with the word `function`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A name follows, which must start with a letter or underscore, followed by any
+    number of letters, numbers, or underscores.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The parentheses are required.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: One or more parameters, separated by commas, are optional (as indicated by the
+    square brackets).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Function names are case-insensitive, so all of the following strings can refer
+    to the `print` function: `PRINT`, `Print`, and `PrInT`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The opening curly brace starts the statements that will execute when you call
+    the function; a matching curly brace must close it. These statements may include
+    one or more `return` statements, which force the function to cease execution and
+    return to the calling code. If a value is attached to the `return` statement,
+    the calling code can retrieve it, as we’ll see next.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returning a Value
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s take a look at a simple function to convert a person’s full name to lowercase
+    and then capitalize the first letter of each part of the name.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We’ve already seen an example of PHP’s built-in `strtoupper` function in [Example 5-1](#three_string_functions).
+    For our current function, we’ll use its counterpart, `strtolower`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The output of this experiment is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`any # of letters and punctuation you want`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We don’t want names all lowercase, though; we want the first letter of each
+    part of the sentence capitalized. (We’re not going to deal with subtle cases such
+    as Mary-Ann or Jo-En-Lai for this example.) Luckily, PHP also provides a `ucfirst`
+    function that sets the first character of a string to uppercase:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The output is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`    Any # of letters and punctuation you want`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Now we can do our first bit of program design: to get a word with its initial
+    letter capitalized, we call `strtolower` on the string first and then `ucfirst`.
+    The way to do this is to nest a call to `strtolower` within `ucfirst`. Let’s see
+    why, because it’s important to understand the order in which code is evaluated.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Say you make a simple call to the `print` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The expression `5-8` is evaluated first, and the output is `–3`. (As you saw
+    in the previous chapter, PHP converts the result to a string in order to display
+    it.) If the expression contains a function, that function is evaluated first as
+    well:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'PHP is doing several things in executing that short statement:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Evaluate `5-8` to produce `–3`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Use the `abs` function to turn `–3` into `3`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Convert the result to a string and output it using the `print` function.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: 'It all works because PHP evaluates each element from the inside out. The same
+    procedure is in operation when we call the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'PHP passes our string to `strtolower` and then to `ucfirst`, producing (as
+    we’ve already seen when we played with the functions separately):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`    Any # of letters and punctuation you want`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now let’s define a function (shown in [Example 5-2](#cleaning_up_a_full_name))
+    that takes three names and makes each one lowercase, with an initial capital letter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-2\. Cleaning up a full name
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You may well find yourself writing this type of code, because users often leave
+    their Caps Lock key on, accidentally insert capital letters in the wrong places,
+    and even forget capitals altogether. The output from this example is shown here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**  `William Henry Gates`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returning an Array
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We just saw a function returning a single value. There are also ways of getting
+    multiple values from a function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first method is to return them within an array. As you saw in [Chapter 3](ch03.xhtml#introduction_to_php),
+    an array is like a bunch of variables stuck together in a row. [Example 5-3](#returning_multiple_values_in_an_array)
+    shows how you can use an array to return function values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-3\. Returning multiple values in an array
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: This method has the benefit of keeping all three names separate, rather than
+    concatenating them into a single string, so you can refer to any user simply by
+    first or last name without having to extract either name from the returned string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Passing Arguments by Reference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In PHP versions prior to 5.3, you used to be able to preface a variable with
+    the `&` symbol at the time of calling a function (for example, `increment(&$myvar);`)
+    to tell the parser to pass a reference to the variable, not the variable’s value.
+    This granted a function access to the variable (allowing different values to be
+    written back to it).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Caution
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Call-time pass-by-reference was deprecated in PHP 5.3 and removed in PHP 5.4\.
+    You should therefore not use this feature other than on legacy websites, and even
+    there it is recommended you rewrite code that passes by reference, because it
+    will halt with a fatal error on newer versions of PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, *within* a function definition, you may continue to access arguments
+    by reference. This concept can be hard to get your head around, so let’s go back
+    to the matchbox metaphor from [Chapter 3](ch03.xhtml#introduction_to_php).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Imagine that instead of taking a piece of paper out of a matchbox, reading it,
+    copying what’s on it onto another piece of paper, putting the original back, and
+    passing the copy to a function (phew!) you could simply attach a piece of thread
+    to the original piece of paper and pass one end of it to the function (see [Figure 5-2](#imagining_a_reference_as_a_thread_attach)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Imagining a reference as a thread attached to a variable](Images/pmj6_0502.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 5-2\. Imagining a reference as a thread attached to a variable
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Now the function can follow the thread to find the data to be accessed. This
+    prevents all the overhead of creating a copy of the variable just for the function’s
+    use. What’s more, the function can now modify the variable’s value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This means you can rewrite [Example 5-3](#returning_multiple_values_in_an_array)
+    to pass references to all the parameters, and then the function can modify these
+    directly (see [Example 5-4](#returning_values_from_a_function_by_refe)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-4\. Passing values to a function by reference
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Rather than passing strings directly to the function, you first assign them
+    to variables and print them out to see their “before” values. Then you call the
+    function as before, but within the function definition you place an `&` symbol
+    in front of each parameter to be passed by reference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now the variables `$n1`, `$n2`, and `$n3` are attached to “threads” that lead
+    to the values of `$a1`, `$a2`, and `$a3`. In other words, there is one group of
+    values, but two sets of variable names are allowed to access them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Therefore, the function `fix_names` only has to assign new values to `$n1`,
+    `$n2`, and `$n3` to update the values of `$a1`, `$a2`, and `$a3`. The output from
+    this code is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`    WILLIAM henry gatES William Henry Gates`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you see, both of the `echo` statements use only the values of `$a1`, `$a2`,
+    and `$a3`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returning Global Variables
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The better way to give a function access to an externally created variable that
+    is not passed as an argument is by declaring it to have global access from within
+    the function. The `global` keyword followed by the variable name gives every part
+    of your code full access to it (see [Example 5-5](#returning_values_in_global_variables)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-5\. Returning values in global variables
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now you don’t have to pass parameters to the function, and it doesn’t have to
+    accept them. Once declared, these variables retain global access and are available
+    to the rest of your program, including its functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Recap of Variable Scope
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'A quick reminder of what you know from [Chapter 3](ch03.xhtml#introduction_to_php):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Local variables* are accessible just from the part of your code where you
+    define them. If they’re outside of a function, they can be accessed by all code
+    outside of functions, classes, and so on. If a variable is inside a function,
+    only that function can access the variable, and its value is lost when the function
+    returns.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Global variables* are accessible from all parts of your code, whether within
+    or outside of functions.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*Static variables* are accessible only within the function that declared them
+    but retain their value over multiple calls.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Including and Requiring Files
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As you progress in your use of PHP programming, you are likely to start building
+    a library of functions that you think you will need again. You’ll also probably
+    start using libraries created by other programmers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There’s no need to copy and paste these functions into your code. You can save
+    them in separate files and use commands to pull them in. There are two commands
+    to perform this action: `include` and `require`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The include Statement
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Using `include`, you can tell PHP to fetch a particular file and load all its
+    contents. It’s as if you pasted the included file into the current file at the
+    insertion point. [Example 5-6](#including_a_php_file) shows how you would include
+    a file called *library.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-6\. Including a PHP file
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using include_once
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Each time you issue the `include` directive, it includes the requested file
+    again, even if you’ve already inserted it. For instance, suppose that *library.php*
+    contains a lot of useful functions, so you include it in your file, but you also
+    include another library that includes *library.php*. Through nesting, you’ve inadvertently
+    included *library.php* twice. This will produce error messages, because you’re
+    trying to define the same constant or function multiple times. So, you should
+    use `include_once` instead (see [Example 5-7](#including_a_php_file_only_once)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-7\. Including a PHP file only once
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then, any further attempts to include the same file (with `include` or `include_once`)
+    will be ignored. To determine whether the requested file has already been executed,
+    the absolute filepath is matched after all relative paths are resolved (to their
+    absolute paths) and the file is found in your `include` path.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: In general, it’s probably best to stick with `include_once` and ignore the basic
+    `include` statement. That way, you will never have the problem of files being
+    included multiple times.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using require and require_once
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A potential problem with `include` and `include_once` is that PHP will only
+    *attempt* to include the requested file. Program execution continues even if the
+    file is not found.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When it is absolutely essential to include a file, `require` it. For the same
+    reasons I gave for using `include_once`, I recommend that you generally stick
+    with `require_once` whenever you need to `require` a file (see [Example 5-8](#requiring_a_php_file_only_once)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-8\. Requiring a PHP file only once
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: PHP Version Compatibility
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: PHP is in an ongoing process of development, and there are multiple versions.
+    If you need to check whether a particular function is available to your code,
+    you can use the `function_exists` function, which checks all predefined and user-created
+    functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 5-9](#checking_for_a_functionapostrophes_exist) checks for `array_combine`,
+    a function specific to only some versions of PHP.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-9\. Checking for a function’s existence
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using code such as this, you can take advantage of features in newer versions
+    of PHP and yet still have your code run on earlier versions where the newer features
+    are unavailable, as long as you replicate any features that are missing. Your
+    functions may be slower than the built-in ones, but at least your code will be
+    much more portable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can also use the `phpversion` function to determine which version of PHP
+    your code is running on. The returned result will be similar to the following,
+    depending on the version:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**  8.0.0**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP Objects
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In much the same way that functions represent a huge increase in programming
+    power over the early days of computing, where sometimes the best program navigation
+    available was a very basic `GOTO` or `GOSUB` statement, *object-oriented programming*
+    (OOP) takes the use of functions in a different direction.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you get the hang of condensing reusable bits of code into functions, it’s
+    not that great a leap to consider bundling the functions and their data into objects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s take a social networking site that has many parts. One handles all user
+    functions—that is, code to enable new users to sign up and existing users to modify
+    their details. In standard PHP, you might create a few functions to handle this
+    and embed some calls to the MySQL database to keep track of all the users.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To create an object to represent the current user, you could create a class,
+    perhaps called `User`, that would contain all the code required for handling users
+    and all the variables needed for manipulating the data within the class. Then,
+    whenever you need to manipulate a user’s data, you could simply create a new object
+    with the `User` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You could treat this new object as if it were the actual user. For example,
+    you could pass the object a name, password, and email address; ask it whether
+    such a user already exists; and, if not, have it create a new user with those
+    attributes. You could even have an instant messaging object, or one for managing
+    whether two users are friends.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Terminology
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When creating a program to use objects, you need to design a composite of data
+    and code called a *class*. Each new object based on this class is called an *instance*
+    (or *occurrence*) of that class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The data associated with an object is called its *properties*; the functions
+    it uses are called *methods*. In defining a class, you supply the names of its
+    properties and the code for its methods. See [Figure 5-3](#jukebox_a_great_example_of_a_self-cont)
+    for a jukebox metaphor for an object. Think of the CDs that it holds in the carousel
+    as its properties; the method of playing them is to press buttons on the front
+    panel. There is also a slot for inserting coins (the method used to activate the
+    object) and a laser disc reader (the method used to retrieve the music, or properties,
+    from the CDs).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![A jukebox: a great example of a self-contained object](Images/pmj6_0503.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: 'Figure 5-3\. A jukebox: a great example of a self-contained object'
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: When you’re creating objects, it is best to use *encapsulation*, or writing
+    a class in such a way that only its methods can be used to manipulate its properties.
+    In other words, you deny outside code direct access to its data. The methods you
+    supply are known as the object’s *interface*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This approach makes debugging easy: you have to fix faulty code only within
+    a class. Additionally, when you want to upgrade a program, if you have used proper
+    encapsulation and maintained the same interface, you can simply develop new replacement
+    classes, debug them fully, and then swap them in for the old ones. If they don’t
+    work, you can swap the old ones back in to immediately fix the problem before
+    further debugging the new classes.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you have created a class, you may find that you need another class that
+    is similar to it but not quite the same. The quick and easy thing to do is to
+    define a new class using *inheritance*. When you do this, your new class has all
+    the properties of the one it has inherited from. The original class is now called
+    the *parent* (or occasionally the *superclass*), and the new one is the *subclass*
+    (or *derived* class).
+  prefs: []
+  type: TYPE_NORMAL
+- en: In our jukebox example, if you invent a new jukebox that can play a video along
+    with the music, you can inherit all the properties and methods from the original
+    jukebox superclass and add some new properties (videos) and new methods (a movie
+    player).
+  prefs: []
+  type: TYPE_NORMAL
+- en: An excellent benefit of this system is that if you improve the speed or any
+    other aspect of the superclass, its subclasses will receive the same benefit. On
+    the other hand, any change made to the parent/superclass could break the subclass.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Declaring a Class
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Before you can use an object, you must define a class with the `class` keyword.
+    Class definitions contain the class name (which is case-sensitive), its properties,
+    and its methods. [Example 5-10](#declaring_a_class_and_examining_an_objec) defines
+    the class `User` with two properties, which are `$name` and `$password` (indicated
+    by the `public` keyword—see [“Property and Method Scope”](#property_and_method_scope_in_php_5)).
+    It also creates a new instance (called `$object`) of this class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-10\. Declaring a class and examining an object
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here I have also used an invaluable function called `print_r`. It asks PHP
+    to display information about a variable in human-readable form. (The `_r` stands
+    for *human-readable*.) In the case of the new object `$object`, it displays the
+    following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'However, a browser compresses all the whitespace, so the output in a browser
+    is slightly harder to read:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`    User Object ( [name] => [password] => )`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In any case, the output says that `$object` is a user-defined object that has
+    the properties `name` and `password`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating an Object
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To create an object with a specified class, use the `new` keyword, like this:
+    `$object = new Class`. Here are a couple of ways in which we could do this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: On the first line, we simply assign an object to the `User` class. In the second,
+    we pass arguments to the call.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A class may require or prohibit arguments; it may also allow arguments without
+    explicitly requiring them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Accessing Objects
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s add a few lines to [Example 5-10](#declaring_a_class_and_examining_an_objec)
+    and check the results. [Example 5-11](#creating_and_interacting_with_an_object)
+    extends the previous code by setting object properties and calling a method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-11\. Creating and interacting with an object
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As you can see, the syntax for accessing an object’s property is *`$object->property`*.
+    Likewise, you call a method like this: *`$object->method()`*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You should note that the example `property` and `method` do not have `$` signs
+    in front of them. If you were to preface them with `$` signs, the code would not
+    work, as it would try to reference the value inside a variable. For example, the
+    expression `$object->$property` would attempt to look up the value assigned to
+    a variable named `$property` (let’s say that value is the string `brown`) and
+    then attempt to reference the property `$object->brown`. If `$property` is undefined,
+    an attempt to reference `$object->NULL` would occur and cause an error.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When looked at using a browser’s View Source facility, the output from [Example 5-11](#creating_and_interacting_with_an_object)
+    is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Again, `print_r` shows its utility by providing the contents of `$object` before
+    and after property assignment. From now on, I’ll omit `print_r` statements, but
+    if you are working along with this book on your development server, you can put
+    some in to see exactly what is happening.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also see that the code in the method `save_user` was executed via the
+    call to that method. It printed the string reminding us to create some code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: You can place functions and class definitions anywhere in your code, before
+    or after statements that use them. Generally, though, it is considered good practice
+    to place them toward the end of a file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cloning Objects
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Once you have created an object, it is passed by reference when you pass it
+    as a parameter. In the matchbox metaphor, this is like keeping several threads
+    attached to an object stored in a matchbox so that you can follow any attached
+    thread to access it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In other words, making object assignments does not copy objects in their entirety.
+    You’ll see how this works in [Example 5-12](#copying_an_objectquestion_mark),
+    where we define a very simple `User` class with no methods and only the property
+    `name`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-12\. Copying an object
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here, we first create the object `$object1` and assign the value `Alice` to
+    the `name` property. Then we create `$object2`, assigning it the value of `$object1`,
+    and assign the value `Amy` just to the `name` property of `$object2`—or so we
+    might think. But this code outputs the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: What has happened? Both `$object1` and `$object2` refer to the *same* object,
+    so changing the `name` property of `$object2` to `Amy` also sets that property
+    for `$object1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To avoid this confusion, you can use the `clone` operator, which creates a new
+    instance of the class and copies the property values from the original instance
+    to the new instance. [Example 5-13](#cloning_an_object) illustrates this usage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-13\. Cloning an object
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Voilà! The output from this code is what we initially wanted:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Constructors
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When creating a new object, you can pass a list of arguments to the class being
+    called. These are passed to a special method within the class, called the *constructor*,
+    which initializes various properties.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To do this you use the function name `__construct` (that is, `construct` preceded
+    by two underscore characters), as in [Example 5-14](#creating_a_constructor_method).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-14\. Creating a constructor method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Destructors
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You also have the ability to create *destructor* methods. This ability is useful
+    when code has made the last reference to an object or when a script reaches the
+    end. [Example 5-15](#creating_a_destructor_method) shows how to create a destructor
+    method. The destructor can do clean-up such as releasing a connection to a database
+    or some other resource that you reserved within the class. Because you reserved
+    the resource within the class, you have to release it here, or it will stick around
+    indefinitely. Many system-wide problems are caused by programs reserving resources
+    and forgetting to release them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-15\. Creating a destructor method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Writing Methods
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: As you have seen, declaring a method is similar to declaring a function, but
+    there are a few differences. For example, method names beginning with a double
+    underscore (`__`) are reserved (for example, for `__construct` and `__destruct`),
+    and you should not create any of this form.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You also have access to a special variable called `$this`, which can be used
+    to access the current object’s properties. To see how it works, take a look at
+    [Example 5-16](#using_the_variable_dollarthis_in_a_metho), which contains a different
+    method from the `User` class definition called `get_password`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-16\. Using the variable `$this` in a method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`get_password` uses the `$this` variable to access the current object and then
+    return the value of that object’s `password` property. Note how the preceding
+    `$` of the property `$password` is omitted when we use the `->` operator. Leaving
+    the `$` in place is a typical error you may run into, particularly when you first
+    use this feature.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s how you would use the class defined in [Example 5-16](#using_the_variable_dollarthis_in_a_metho):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: This code prints the password `secret`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Declaring Properties
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: It is not necessary to explicitly declare properties within classes, as they
+    can be implicitly defined when first used. To illustrate this, in [Example 5-17](#defining_a_property_implicitly)
+    the class `User` has no properties and no methods but is legal code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-17\. Defining a property implicitly
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: This code correctly outputs the string `Alice` without a problem, because PHP
+    implicitly declares the property `$object1->name` for you. But this kind of programming
+    can lead to bugs that are infuriatingly difficult to discover, because `name`
+    was declared from outside the class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To help yourself and anyone else who will maintain your code, I advise that
+    you get into the habit of always declaring your properties explicitly within classes.
+    You’ll be glad you did.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Also, when you declare a property within a class, you may assign a default value
+    to it. The value you use must be a constant and not the result of a function or
+    expression. [Example 5-18](#valid_and_invalid_property_declarations) shows a few
+    valid and invalid assignments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-18\. Valid and invalid property declarations
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Declaring Constants
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In the same way that you can create a global constant with the `define` function,
+    you can define constants inside classes. The generally accepted practice is to
+    use uppercase letters to make them stand out, as in [Example 5-19](#defining_constants_within_a_class).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-19\. Defining constants within a class
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can reference constants directly, using the `self` keyword and double colon
+    operator. Note that this code calls the class directly, using the double colon
+    operator at line 1, without creating an instance of it first. As you would expect,
+    the value printed when you run this code is `1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Remember that once you define a constant, you can’t change it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Property and Method Scope
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'PHP provides three keywords for controlling the scope of properties and methods
+    (*members*):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`public`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Public members can be referenced anywhere, including by other classes and instances
+    of the object. This is the default when variables are declared with the `var`
+    or `public` keywords, or when a variable is implicitly declared the first time
+    it is used. The keywords `var` and `public` are interchangeable because, although
+    deprecated, `var` is retained for compatibility with previous versions of PHP.
+    Methods are assumed to be `public` by default.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`protected`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: These members can be referenced only by the object’s class methods and those
+    of any subclasses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`private`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: These members can be referenced only by methods within the same class—not by
+    subclasses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here’s how to decide which you need to use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use `public` when outside code *should* access this member and extending classes
+    *should* also inherit it.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use `protected` when outside code *should not* access this member but extending
+    classes *should* inherit it.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Use `private` when outside code *should not* access this member and extending
+    classes also *should not* inherit it.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Example 5-20](#changing_property_and_method_scope) illustrates the use of
+    these keywords.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-20\. Changing property and method scope
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: Static Methods
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You can define a method as `static`, which means that it is called on a class,
+    not on an object. A static method has no access to any object properties and is
+    created and accessed as in [Example 5-21](#creating_and_accessing_a_static_method).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-21\. Creating and accessing a static method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note how we call the class itself, along with the static method, using a double
+    colon (also known as the *scope resolution* operator), not `->`. Static functions
+    are useful for performing actions relating to the class itself but not to specific
+    instances of the class. You can see another example of a static method in [Example 5-19](#defining_constants_within_a_class).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: If you try to access `$this->property`, or other object properties from within
+    a static function, you will receive an error message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Static Properties
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Most data and methods apply to instances of a class. For example, in a `User`
+    class, you want to do such things as set a particular user’s password or check
+    when the user has been registered. These facts and operations apply separately
+    to each user and therefore use instance-specific properties and methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But occasionally you’ll want to maintain data about a whole class. For instance,
+    to report how many users are registered, you will store a variable that applies
+    to the whole `User` class. PHP provides static properties and methods for such
+    data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As shown briefly in [Example 5-21](#creating_and_accessing_a_static_method),
+    declaring members of a class `static` makes them accessible without an instantiation
+    of the class. A property declared `static` cannot be directly accessed within
+    an instance of a class, but a static method can.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 5-22](#defining_a_class_with_a_static_property) defines a class called
+    `Test` with a static property and a public method.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-22\. Defining a class with a static property
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When you run this code, it returns the following output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: This example shows that the property `$static_property` could be directly referenced
+    from the class itself via the double colon operator in Test A. Also, Test B could
+    obtain its value by calling the `get_sp` method of the object `$temp`, created
+    from class `Test`. But Test C failed, because the static property `$static_property`
+    was not accessible to the object `$temp`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note how the method `get_sp` accesses `$static_property` using the keyword `self`.
+    This is how a static property or constant can be directly accessed within a class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inheritance
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Once you have written a class, you can derive subclasses from it. This can
+    save lots of painstaking code rewriting: you can take a class similar to the one
+    you need to write, extend it to a subclass, and just modify the parts that are
+    different. You achieve this using the `extends` keyword.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In [Example 5-23](#inheriting_and_extending_a_class), the class `Subscriber`
+    is declared a subclass of `User` by means of the `extends` keyword.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-23\. Inheriting and extending a class
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The original `User` class has two properties, `$name` and `$password`, and
+    a method to save the current user to the database. `Subscriber` extends this class
+    by adding an additional two properties, `$phone` and `$email`, and includes a
+    method of displaying the properties of the current object using the variable `$this`,
+    which refers to the current values of the object being accessed. The output from
+    this code is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`    Name:  Fred     Pass:  pword     Phone: 012 345 6789     Email: fred@bloggs.com`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The parent keyword
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you write a method in a subclass with the same name as one in its parent
+    class, its statements will override those of the parent class. Sometimes this
+    is not the behavior you want, and you need to access the parent’s method. To do
+    this, you can use the `parent` operator, as in [Example 5-24](#overriding_a_method_and_using_the_parent).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-24\. Overriding a method and using the `parent` operator
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This code creates a class called `Dad` and a subclass called `Son` that inherits
+    its properties and methods and then overrides the method `test`. Therefore, when
+    line 2 calls the method `test`, the new method is executed. The only way to execute
+    the overridden `test` method in the `Dad` class is to use the `parent` operator,
+    as shown in function `test2` of class `Son`. The code outputs the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`**    [Class Son] I am Luke**`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`**    [Class Dad] I am your Father**`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you wish to ensure that your code calls a method from the current class,
+    you can use the `self` keyword, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: Subclass constructors
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When you extend a class and declare your own constructor, you should be aware
+    that PHP will not automatically call the constructor method of the parent class.
+    If you want to be certain that all initialization code is executed, subclasses
+    should always call the parent constructors, as in [Example 5-25](#calling_the_parent_class_constructor).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-25\. Calling the parent class constructor
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This example takes advantage of inheritance in the typical manner. The `Wildcat`
+    class has created the property `$fur`, which we’d like to reuse, so we create
+    the `Tiger` class to inherit `$fur` and additionally create another property,
+    `$stripes`. To verify that both constructors have been called, the program outputs
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '**`    Tigers have...     Fur: TRUE     Stripes: TRUE`**'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Final methods
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: When you wish to prevent a subclass from overriding a superclass method, you
+    can use the `final` keyword. [Example 5-26](#creating_a_final_method) shows how.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-26\. Creating a `final` method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once you have digested the contents of this chapter, you should have a strong
+    feel for what PHP can do for you. You should be able to use functions with ease
+    and, if you wish, write object-oriented code. In [Chapter 6](ch06.xhtml#php_arrays),
+    we’ll finish off our initial exploration of PHP by looking at the workings of
+    PHP arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: What is the main benefit of using a function?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How many values can a function return?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the difference between accessing a variable by name and by reference?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the meaning of *scope* in PHP?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you incorporate one PHP file within another?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How is an object different from a function?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How do you create a new object in PHP?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What syntax would you use to create a subclass from an existing one?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you cause an object to be initialized when you create it?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Why is it a good idea to explicitly declare properties within a class?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: See [“Chapter 5 Answers”](app01_split_004.xhtml#chapter_5_answers) in the [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions)
+    for the answers to these questions.
+  prefs: []
+  type: TYPE_NORMAL

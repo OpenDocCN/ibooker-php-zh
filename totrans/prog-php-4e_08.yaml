@@ -1,0 +1,238 @@
+- en: Chapter 7\. Dates and Times
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The typical PHP developer likely needs to be aware of the available date and
+    time functions, such as when adding a date stamp to a database record entry or
+    calculating the difference between two dates. PHP provides a `DateTime` class
+    that can handle both date and time information simultaneously, as well as a `DateTimeZone`
+    class that works hand in hand with it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Time zone management has become more prominent in recent years with the onset
+    of web portals and social web communities like Facebook and Twitter. To be able
+    to post information to a website and have it recognize where you are in the world
+    in relation to others on the same site is definitely a requirement these days.
+    However, keep in mind that a function like `date()` takes the default information
+    from the server on which the script is running, so unless the human clients tell
+    you where they are in the world, it can be quite difficult to determine time zone
+    location automatically. Once you know the information, though, it’s easy to manipulate
+    that data (more on time zones later in this chapter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The original date (and related) functions contain a timing flaw on Windows and
+    some Unix installations. They cannot process dates prior to December 13, 1901,
+    or beyond January 19, 2038, due to the nature of the underlying 32-bit signed
+    integer used to manage the date and time data. Therefore, it is recommended to
+    use the newer `DateTime` class family for better accuracy going forward.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are four interrelated classes for handling dates and times. The `DateTime`
+    class handles dates themselves; the `DateTimeZone` class handles time zones; the
+    `Date``Interval` class handles spans of time between two `DateTime` instances;
+    and finally, the `DatePeriod` class handles traversal over regular intervals of
+    dates and times. There are two other rarely used supporting classes called `DateTimeImmutable`
+    and `DateTimeInterface` that are part of the whole `DateTime` “family,” but we
+    won’t cover those in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The constructor of the `DateTime` class is naturally where it all starts. This
+    method takes two parameters, the timestamp and the time zone. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We create the `$dt` object, assign it a date and time string with the first
+    parameter, and set the time zone with the second parameter. Here, we’re instantiating
+    the `DateTimeZone` instance inline, but you could alternately instantiate the
+    `DateTimeZone` object into its own variable and then use that in the constructor,
+    like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now obviously we are assigning hardcoded values to these classes, and this
+    type of information may not always be available to your code or it may not be
+    what you want. Alternatively, we can pick up the value of the time zone from the
+    server and use that inside the `DateTimeZone` class. To pick up the current server
+    value, use code similar to the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'These code examples establish a set of values for two classes, `DateTime` and
+    `DateTimeZone`. Eventually, you will be using that information in some way elsewhere
+    in your script. One of the methods of the `DateTime` class is called `format()`,
+    and it uses the same formatting output codes as the `date_format()` function does.
+    Those date format codes are all listed in the [Appendix](app01.xhtml#function_reference),
+    in the section for the `date_format()` function. Here is a sample of the `format()`
+    method being sent to the browser as output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: So far we have provided the date and time to the constructor, but sometimes
+    you will also want to pick up the date and time values from the server. To do
+    that, simply provide the string `"now"` as the first parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following code does the same as the other examples, except here we are
+    getting the date and time class values from the server. In fact, since we are
+    getting the information from the server, the class properties are much more fully
+    populated (note that some instances of PHP will not have this parameter set and
+    thus will return an error, and the server’s time zone may not match your own):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `diff()` method of `DateTime` does what you might expect—it returns the
+    difference between two dates. The return value of the method is an instance of
+    the `Date``Interval` class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To get the difference between two `DateTime` instances, use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `diff()` method is called on one of the `DateTime` objects with the other
+    `DateTime` object passed in as a parameter. Then we prepare the browser output
+    with the `format()` method calls.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Notice that the `DateInterval` class has a `format()` method as well. Since
+    it deals with the difference between two dates, the format character codes are
+    slightly different from that of the `DateTime` class. Precede each character code
+    with a percent sign, `%`. The available character codes are provided in [Table 7-1](#dateinterval_formatting_control_charact).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 7-1\. DateInterval formatting control characters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Character | Formatting Effect |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `a` | Number of days (e.g., 23) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `d` | Number of days not already included in the number of months |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `D` | Number of days, including a leading zero if under 10 days (e.g., 02
+    and 125) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `f` | Numeric microseconds (e.g., 6602 or 41569) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `F` | Numeric microseconds with leading zero, at least six digits in length
+    (e.g., 006602 or 041569) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `h` | Number of hours |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `H` | Number of hours, including a leading zero if under 10 hours (e.g.,
+    12 and 04) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `i` | Number of minutes |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `I` | Number of minutes, including a leading zero if under 10 minutes (e.g.,
+    05 and 33) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `m` | Number of months |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `M` | Number of months, including a leading zero if under 10 months (e.g.,
+    05 and 1533) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `r` | `–` if the difference is negative; empty if the difference is positive
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `R` | `–` if the difference is negative; `+` if the difference is positive
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `s` | Number of seconds |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `S` | Number of seconds, including a leading zero if under 10 seconds (e.g.,
+    05 and 15) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `y` | Number of years |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `Y` | Number of years, including a leading zero if under 10 years (e.g.,
+    00 and 12) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%` | A literal `%` |'
+  prefs: []
+  type: TYPE_TB
+- en: 'Let’s look a little more closely at the `DateTimeZone` class now. The time
+    zone setting can be lifted out of the *php.ini* file with `get_ini()`. You can
+    get more information from the time zone object using the `getLocation()` method.
+    It provides the country of origin of the time zone, the longitude and the latitude,
+    plus some comments. With these few lines of code, you can have the beginnings
+    of a web-based GPS system:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want to set a time zone other than the server’s, you must pass that
+    value to the constructor of the `DateTimeZone` object. This example sets the time
+    zone for Rome, Italy, and displays the information with the `getLocation()` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: A list of valid time zone names by global regions can be found in the [PHP online
+    manual](https://oreil.ly/EDpf6).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using this same technique, you can make a website “local” to a visitor by providing
+    a list of supported time zones for the visitor to choose from and then temporarily
+    adjusting your *php.ini* setting with the `ini_set()` function for the duration
+    of the visit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While there’s a fair amount of date and time processing power provided by the
+    classes that we discussed in this chapter, it’s only the proverbial tip of the
+    iceberg. Be sure to read more about these classes and what they can do on the
+    PHP website.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What’s Next
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There’s so much more than date management to understand when you’re designing
+    websites within PHP, and as a result there are many issues that can cause you
+    stress and increase the PITA (pain in the ass) factor. The next chapter provides
+    multiple tips and tricks, as well as some “gotchas” to watch out for, to help
+    reduce these pain points. Techniques for working with variables, managing form
+    data, and using SSL (Secure Sockets Layer) web data security are among the topics
+    covered. Buckle up!
+  prefs: []
+  type: TYPE_NORMAL

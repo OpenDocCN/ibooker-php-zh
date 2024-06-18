@@ -1,0 +1,1968 @@
+- en: Chapter 12\. Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Most developers know that testing your code is a good thing. We’re supposed
+    to do it. We likely have an idea of why it’s good, and we might’ve even read some
+    tutorials about how it’s supposed to work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But the gap between knowing *why* you should test and knowing *how* to test
+    is wide. Thankfully, tools like PHPUnit, Mockery, and PHPSpec provide an incredible
+    number of options for testing in PHP—but it can still be pretty overwhelming to
+    get everything set up.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Out of the box, Laravel comes with baked-in integrations to PHPUnit (unit testing),
+    Mockery (mocking), and Faker (creating fake data for seeding and testing). It
+    also provides its own simple and powerful suite of application testing tools,
+    which allow you to “crawl” your site’s URIs, submit forms, check HTTP status codes,
+    and validate and assert against JSON. It also provides a robust frontend testing
+    framework called Dusk that can even interact with your JavaScript applications
+    and test against them. In case this hasn’t made it clear, we’re going to cover
+    a lot of ground in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To make it easy for you to get started, Laravel’s testing setup comes with sample
+    application tests that can run successfully the moment you create a new app. That
+    means you don’t have to spend any time configuring your testing environment, and
+    that’s one less barrier to writing your tests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing Basics
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Tests in Laravel live in the *tests* folder. There are two files in the root:
+    *TestCase.php*, which is the base root test that all of your tests will extend,
+    and *CreatesApplication.php*, a trait (imported by *TestCase.php*) that allows
+    any class to boot a sample Laravel application for testing.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel test Command
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Laravel has an Artisan command for running your tests: `php artisan test`.
+    It’s a wrapper around the `./vendor/bin/phpunit` command, which will additionally
+    show more output for each test.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are also two subfolders: *Features*, for tests that cover the interaction
+    between multiple units, and *Unit*, for tests that are intended to cover just
+    one unit of your code (class, module, function, etc.). Each of these folders contains
+    an *ExampleTest.php* file, each of which has a single sample test inside it, ready
+    to run.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `ExampleTest` in your *Unit* directory contains one simple assertion: `$this``->``assertTrue(true)`.
+    Anything in your unit tests is likely to be relatively simple PHPUnit syntax (asserting
+    that values are equal or different, looking for entries in arrays, checking Booleans,
+    etc.), so there’s not much to learn there.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Basics of PHPUnit Assertions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'In PHPUnit, most of our assertions will be run on the `$this` object with this
+    syntax:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'So, for example, if we’re asserting that two variables should be equal, we’ll
+    pass it first our expected result, and second the actual outcome of the object
+    or system we’re testing:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see in [Example 12-1](#EX1201), the `ExampleTest` in the *Feature*
+    directory makes a simulated HTTP request to the page at the root path of your
+    application and checks that its HTTP status is 200 (successful). If it is, it’ll
+    pass; if not, it’ll fail. Unlike your average PHPUnit test, we’re running these
+    assertions on the `TestResponse` object that’s returned when we make test HTTP
+    calls.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-1\. tests/Feature/ExampleTest.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: To run the tests, run `php artisan test` on the command line from the root folder
+    of your application. You should see something like the output in [Example 12-2](#EX1202).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-2\. Sample `ExampleTest` output
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: You just ran your first Laravel application test! Those two checkmarks indicate
+    that you have two passing tests. As you can see, you’re set up out of the box
+    not only with a functioning PHPUnit instance, but also a full-fledged application
+    testing suite that can make mock HTTP calls and test your application’s responses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In case you’re not familiar with PHPUnit, let’s take a look at what it’s like
+    to have a test fail. Instead of modifying the previous test, we’ll make our own.
+    Run `php artisan make:test FailingTest`. This will create the file *tests/Feature/FailingTest.php*;
+    you can modify its `testExample()` method to look like [Example 12-3](#EX1203).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-3\. tests/Feature/FailingTest.php, edited to fail
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, it’s the same as the test we ran previously, but we’re now testing
+    against the wrong status. Let’s run PHPUnit again.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating Unit Tests
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'If you want your test to be generated in the `Unit` directory instead of the
+    `Feature` directory, pass the `--unit` flag:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Whoops! This time the output will probably look a bit like [Example 12-4](#EX1204).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-4\. Sample failing test output
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s break this down. Last time there were two passing tests, but this time
+    one failed and two passed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Then, for each error, we see the test name (here, `Test\Feature\FailingTest
+    > example`), the error message (“Expected status code...”), and a partial stack
+    trace, so we can see the line where the failure occurred.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we’ve run both a passing test and a failing test, it’s time for you
+    to learn more about Laravel’s testing environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Naming Tests
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: By default, Laravel’s testing system will run any file in the *tests* directory
+    whose name ends with the word *Test*. That’s why *tests/ExampleTest.php* was run
+    by default.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re not familiar with PHPUnit, you might not know that only the methods
+    in your tests with names that start with the word `test` will be run—or methods
+    with a `@test` documentation block, or *docblock*. See [Example 12-5](#EX1205)
+    for which methods will and won’t run.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-5\. Naming PHPUnit methods
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: The Testing Environment
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Any time a Laravel application is running, it has a current “environment” name
+    that represents the environment it’s running in. This name may be set to `local`,
+    `staging`, `production`, or anything else you want. You can retrieve this by running
+    `app()->environment()`, or you can run `if (app()->``environment('local'))` or
+    something similar to test whether the current environment matches the passed name.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When you run tests, Laravel automatically sets the environment to `testing`.
+    This means you can test for `if (app()->environment('testing'))` to enable or
+    disable certain behaviors in the testing environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additionally, Laravel doesn’t load the normal environment variables from *.env*
+    for testing. If you want to set any environment variables for your tests, edit
+    *phpunit.xml* and, in the `<php>` section, add a new `<env>` for each environment
+    variable you want to pass in—for example, `<env name="DB_CONNECTION" value="sqlite"/>`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Testing Traits
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Before we get into the methods you can use for testing, you need to know about
+    the four testing traits you can pull into any test class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RefreshDatabase
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '`Illuminate\Foundation\Testing\RefreshDatabase` is imported at the top of every
+    newly generated test file, and it’s the most commonly used database migration
+    trait.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The point of this, and the other database traits, is to ensure your database
+    tables are correctly migrated at the start of each test.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`RefreshDatabase` takes two steps to do this. First, it runs your migrations
+    on your test database *once* at the beginning of each test run (when you run `phpunit`,
+    not for each individual test method). And second, it wraps each individual test
+    method in a database transaction and rolls back the transaction at the end of
+    the test.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: That means you have your database migrated for your tests and cleared out fresh
+    after each test runs, without having to run your migrations again before every
+    test—making this the fastest possible option. When in doubt, stick with this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DatabaseMigrations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you import the `Illuminate\Foundation\Testing\DatabaseMigrations` trait instead
+    of the `RefreshDatabase` trait, it will run your entire set of database migrations
+    fresh before each test. Laravel makes this happen by running `php artisan migrate:fresh`
+    in the `setUp()` method before every test runs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: DatabaseTransactions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: On the other hand, `Illuminate\Foundation\Testing\DatabaseTransactions` expects
+    your database to be properly migrated before your tests start. It wraps every
+    test in a database transaction, which it rolls back at the end of each test. This
+    means that, at the end of each test, your database will be returned to the exact
+    same state it was in prior to the test.
+  prefs: []
+  type: TYPE_NORMAL
+- en: WithoutMiddleware
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you import `Illuminate\Foundation\Testing\WithoutMiddleware` into your test
+    class, it will disable all middleware for any test in that class. This means you
+    won’t have to worry about the authentication middleware, or CSRF protection, or
+    anything else that might be useful in the real application but distracting in
+    a test.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’d like to disable middleware for just a single method instead of the
+    entire test class, call `$this->withoutMiddleware()` at the top of the method
+    for that test.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Simple Unit Tests
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: With simple unit tests, you almost don’t need any of these traits. You *may*
+    reach for database access or inject something out of the container, but it’s very
+    likely that unit tests in your applications won’t rely on the framework very much.
+    Take a look at [Example 12-6](#simple_unit_test) for an example of what a simple
+    test might look like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-6\. A simple unit test
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Obviously, this example is a bit contrived. But you can see here that we’re
+    testing a single class (`GeometryCalculator`) and its single method (`area()`),
+    and we’re doing so without worrying about the entire Laravel application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some unit tests might be testing something that technically is connected to
+    the framework—​for example, Eloquent models—​but you can still test them without
+    worrying about the framework. For example, in [Example 12-7](#complex_unit_test),
+    we use `Package::make()` instead of `Package::create()` so the object is created
+    and evaluated in memory without ever hitting the database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-7\. A more complicated unit test
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Some people may call this an integration or feature test, since this “unit”
+    will likely touch the database in actual usage and it’s connected to the entire
+    Eloquent codebase. The most important point is that you can have simple tests
+    that test a single class or method, even when the objects under test are framework-connected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All of this said, it’s still going to be more likely that your tests—​especially
+    as you first get started—​are broader and more at the “application” level. Accordingly,
+    for the rest of the chapter we’re going to dig deeper into application testing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Application Testing: How It Works'
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In [“Testing Basics”](#testing_basics) we saw that, with a few lines of code,
+    we can “request” URIs in our application and actually check the status of the
+    response. But how can PHPUnit request pages as if it were a browser?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Any application tests should extend the `TestCase` class (*tests/TestCase.php*)
+    that’s included with Laravel by default. Your application’s `TestCase` class will
+    extend the abstract `Illuminate\Foundation\Testing\TestCase` class, which brings
+    in quite a few goodies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first thing the two `TestCase` classes (yours and its abstract parent) do
+    is handle booting the Illuminate application instance for you, so you have a fully
+    bootstrapped application available. They also “refresh” the application between
+    each test, which means they’re not *entirely* recreating the application between
+    tests but rather making sure you don’t have any data lingering.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The parent `TestCase` also sets up a system of hooks that allow callbacks to
+    be run before and after the application is created, and imports a series of traits
+    that provide you with methods for interacting with every aspect of your application.
+    These traits include `InteractsWithContainer`, `MakesHttpRequests`, and `InteractsWithConsole`,
+    and they bring in a broad variety of custom assertions and testing methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a result, your application tests have access to a fully bootstrapped application
+    instance and application-test-minded custom assertions, with a series of simple
+    and powerful wrappers around each to make them easy to use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: That means you can write `$this->get('/')->assertStatus(200)` and know that
+    your application is actually behaving as if it were responding to a normal HTTP
+    request, and that the response is being fully generated and then checked as a
+    browser would check it. It’s pretty powerful stuff, considering how little work
+    you had to do to get it running.
+  prefs: []
+  type: TYPE_NORMAL
+- en: HTTP Tests
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Let’s take a look at our options for writing HTTP-based tests. You’ve already
+    seen `$this->get('/')`, but let’s dive deeper into how you can use that call,
+    how you can assert against its results, and what other HTTP calls you can make.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing Basic Pages with $this->get() and Other HTTP Calls
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: At the very basic level, Laravel’s HTTP testing allows you to make simple HTTP
+    requests (`GET`, `POST`, etc.) and then make simple assertions about their impact
+    or response.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are more tools we’ll cover later ([“Testing with Dusk”](#dusk_testing))
+    that allow for more complex page interactions and assertions, but let’s start
+    at the base level. Here are the calls you can make:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$this->get(*$uri, $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$this->post(*$uri, $data = [], $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$this->put(*$uri, $data = [], $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$this->patch(*$uri, $data = [], $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$this->delete(*$uri, $data = [], $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$this->option(*$uri, $data = [], $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These methods are the basis of the HTTP testing framework. Each takes at least
+    a URI (usually relative) and headers, and all but `get()` also allow for passing
+    data along with the request.
+  prefs: []
+  type: TYPE_NORMAL
+- en: And, importantly, each returns a `$response` object that represents the HTTP
+    response. This response object is almost exactly the same as an Illuminate `Response`
+    object, the same thing we return out of our controllers. However, it’s actually
+    an instance of `Illuminate\Testing\TestResponse`, which wraps a normal `Response`
+    with some assertions for testing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 12-8](#simple_post_test) to see a common usage of `post()`
+    and a common response assertion.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-8\. A simple use of `post()` in testing
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: In most examples like [Example 12-8](#simple_post_test), you’ll also test that
+    the record exists in the database and shows up on the index page, and maybe that
+    it doesn’t test successfully unless you define the package author and are logged
+    in. But don’t worry, we’ll get to all of that. For now, you can make calls to
+    your application routes with many different verbs and make assertions against
+    both the response and the state of your application afterward. Great!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing JSON APIs with $this->getJson() and Other JSON HTTP Calls
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can also do all of the same sorts of HTTP tests with your JSON APIs. There
+    are convenience methods for that, too:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$this->getJson(*$uri, $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$this->postJson(*$uri, $data = [], $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$this->putJson(*$uri, $data = [], $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$this->patchJson(*$uri, $data = [], $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$this->deleteJson(*$uri, $data = [], $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$this->optionJson(*$uri, $data = [], $headers = []*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These methods work just the same as the normal HTTP call methods, except they
+    also add JSON-specific `Accept`, `CONTENT_LENGTH`, and `CONTENT_TYPE` headers.
+    Take a look at [Example 12-9](#simple_json_api_test) to see an example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-9\. A simple use of `postJson()` in testing
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Assertions Against $response
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There are more than 50 assertions available on the `$response` object, so I’ll
+    refer you to the [testing docs](https://oreil.ly/CXk24) for details on all of
+    them. Let’s look at a few of the most important and most common ones:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$response->assertOk()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the response’s status code is 200:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertSuccessful()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Although `assertOk()` asserts that the code is exactly 200, `assertSuccessful()`
+    checks if the code is anything in the 200 group:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertUnauthorized()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the response’s status code is 401:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertForbidden()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the response’s status code is 403:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertNotFound()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the response’s status code is 404:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertStatus(*$status*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the response’s status code is equal to the provided `*$status*`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertSee(*$text*)`, `$response->assertDontSee(*$text*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the response contains (or doesn’t contain) the provided `*$text*`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertJson(*array $json*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the passed array is represented (in JSON format) in the returned
+    JSON:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertViewHas(*$key, $value = null*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the view on the visited page had a piece of data available at
+    `*$key*`, and optionally checks that the value of that variable was `*$value*`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertSessionHas(*$key, $value = null*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the session has data set at `*$key*`, and optionally checks that
+    the value of that data is `*$value*`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertSessionHasInput(*$key, $value = null*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the given keys and values are flashed in the session array input.
+    This is helpful when testing whether the validation error returns the correct
+    old values:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertSessionHasErrors()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With no parameters, asserts that there’s at least one error set in Laravel’s
+    special `errors` session container. Its first parameter can be an array of key/value
+    pairs that define the errors that should be set and its second parameter can be
+    the string format that the checked errors should be formatted against, as demonstrated
+    here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you’re working with named error bags, you can pass the error bag name as
+    the third parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$response->assertCookie(*$name, $value = null*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the response contains a cookie with name `*$name*`, and optionally
+    checks that its value is `*$value*`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertCookieExpired(*$name*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the response contains a cookie with name `*$name*` and that it
+    is expired:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertCookieNotExpired(*$name*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the response contains a cookie with name `*$name*` and that it
+    is not expired:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$response->assertRedirect(*$uri*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Asserts that the requested route returns a redirect to the given URI:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: For each of these assertions, you can assume that there are many related assertions
+    I haven’t listed here. For example, in addition to `assertSessionHasErrors()`
+    there are also `assertSessionHasNoErrors()` and `assertSessionHasErrorsIn()` assertions;
+    as well as `assertJson()`, there are also `assertJsonCount()`, `assertJsonFragment()`,
+    `assertJsonPath()`, `assertJsonMissing()`, `assertJsonMissingExact()`, `assertJsonStructure()`,
+    and `assertJsonValidationErrors()` assertions. Again, take a look at the docs
+    and make yourself familiar with the whole list.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Authenticating Responses
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: One piece of your application it’s common to test with application tests is
+    authentication and authorization. Most of the time, your needs will be met with
+    the `actingAs()` chainable method, which takes a user (or other `Authenticatable`
+    object, depending on how your system is set up), as you can see in [Example 12-10](#basic_auth_in_testing).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-10\. Basic auth in testing
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using Factory States for Authorization
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: It’s common to use model factories (discussed in [“Model Factories”](ch05.html#model_factories))
+    in testing, and model factory states make tasks like creating users with different
+    access levels simple.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Few Other Customizations to Your HTTP Tests
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you’d like to set session variables on your requests, you can also chain
+    `withSession()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you’d prefer to set your request headers fluently, you can chain `withHeaders()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Handling Exceptions in Application Tests
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Usually, an exception that’s thrown inside your application when you’re making
+    HTTP calls will be captured by Laravel’s exception handler and processed as it
+    would be in a normal application. So, the test and route in [Example 12-11](#swallowed_exception)
+    would still pass, since the exception would never bubble up the whole way to our
+    test.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-11\. An exception that will be captured by Laravel’s exception handler
+    and result in a passing test
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: In a lot of cases, this might make sense; maybe you’re expecting a validation
+    exception, and you want it to be caught like it would normally be by the framework.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But if you want to temporarily disable the exception handler, that’s an option;
+    just run `$this->withoutExceptionHandling()`, as shown in [Example 12-12](#EX12a).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-12\. Temporarily disabling exception handling in a single test
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: And if for some reason you need to turn it back on (maybe you turned it off
+    in `setUp()` but want it back on for just one test), you can run `$this``->``withExceptionHandling()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Debugging Responses
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can easily dump out the headers with `dumpHeaders()` or the body with `dump()`
+    or `dd()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also easily dump all or only the specified keys on the session:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Database Tests
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Often, the effect we want to test for after our tests have run is in the database.
+    Imagine you want to test that the “create package” page works correctly. What’s
+    the best way? Make an HTTP call to the “store package” endpoint and then assert
+    that that package exists in the database. It’s easier and safer than inspecting
+    the resulting “list packages” page.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We have four primary assertions for the database, and two Eloquent-specific
+    assertions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Asserting Against the Database
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For direct assertions agains the database, we have `$this->assertDatabaseHas()`
+    and `$this->assertDatabaseMissing()`, and `$this->assertDeleted()` and `$this->assertSoftDeleted()`.
+    For both, pass the table name as the first parameter, the data you’re looking
+    for as the second, and, optionally, the specific database connection you want
+    to test as the third.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 12-13](#example_database_tests) to see how you might
+    use them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-13\. Sample database tests
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, the second parameter of `assertDatabaseHas()` is structured
+    like a SQL `WHERE` statement—you pass a key and a value (or multiple keys and
+    values), and then Laravel looks for any records in the specified database table
+    that match your key(s) and value(s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you’d expect, `assertDatabaseMissing()` is the inverse.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Asserting Against Eloquent Models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'While `assertDatabaseHas()` and `assertDatabaseMissing()` allow you to identify
+    rows by passing keys and values, Laravel also provides convenience methods for
+    directly asserting that a given Eloquent record does or does not exist: `assertModelExists()`
+    and `assertModelMissing()`, as you can see in [Example 12-14](#database_tests_assert_against_models).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-14\. Assert against model existence
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using Model Factories in Tests
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Model factories are amazing tools that make it easy to seed randomized, well-structured
+    database data for testing (or other purposes). You’ve already seen them in use
+    in several examples in this chapter, and we’ve already covered them in depth,
+    so check out [“Model Factories”](ch05.html#model_factories) to learn more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Seeding in Tests
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you use seeds in your application, you can run the equivalent of `php artisan
+    db:seed` by running `$this->seed()` in your test.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can also pass a seeder class name to just seed that one class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: Testing Other Laravel Systems
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: When testing Laravel systems, you’ll often want to pause their true function
+    for the duration of the testing and instead write tests against what has happened
+    to those systems. You can do this by “faking” different facades, such as `Event`,
+    `Mail`, and `Notification`. We’ll talk more about what fakes are in [“Mocking”](#intro_to_mocking),
+    but first, let’s look at some examples. All of the following features in Laravel
+    have their own set of assertions you can make after faking them, but you can also
+    just choose to fake them to restrict their effects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Event Fakes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Let’s use event fakes as our first example of how Laravel makes it possible
+    to mock its internal systems. There are likely going to be times when you want
+    to fake events just for the sake of suppressing their actions. For example, suppose
+    your app pushes notifications to Slack every time a new user signs up. You have
+    a “user signed up” event that’s dispatched when this happens, and it has a listener
+    that notifies a Slack channel that a user has signed up. You don’t want those
+    notifications to go to Slack every time you run your tests, but you might want
+    to assert that the event was sent, or the listener was triggered, or something
+    else. This is one reason for faking certain aspects of Laravel in our tests: to
+    pause the default behavior and instead make assertions against the system we’re
+    testing.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s take a look at how to suppress these events by calling the `fake()` method
+    on `Illuminate\Support\Facades\Event`, as shown in [Example 12-15](#suppressing_events_with_no_assertions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-15\. Suppressing events without adding assertions
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once we’ve run the `fake()` method, we can also call special assertions on
+    the `Event` facade: namely, `assertDispatched()` and `assertNotDispatched()`.
+    Take a look at [Example 12-16](#event_assertions) to see them in use.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-16\. Making assertions against events
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that the (optional) closure we passed to `assertDispatched()` means we’re
+    not just asserting that the event was dispatched, but also that the dispatched
+    event contains certain data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Event::fake() Disables Eloquent Model Events
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '`Event::fake()` also disables Eloquent model events. So if you have any important
+    code, for example, in a model’s `creating` event, make sure to create your models
+    (through your factories or however else) *before* calling `Event::fake()`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Bus and Queue Fakes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `Bus` facade, which represents how Laravel dispatches jobs, works just like
+    `Event`. You can run `fake()` on it to disable the impact of your jobs, and after
+    faking it you can run `assertDispatched()` or `assertNotDispatched()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `Queue` facade represents how Laravel dispatches jobs when they’re pushed
+    up to queues. Its available methods are `assertedPushed()`, `assertPushedOn()`,
+    and `assertNotPushed()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 12-17](#job_fakes) to see how to use both.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-17\. Faking jobs and queued jobs
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: Mail Fakes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `Mail` facade, when faked, offers four methods: `assertSent()`, `assertNotSent()`,
+    `assertQueued()`, and `assertNotQueued()`. Use the `Queued` methods when your
+    mail is queued and the `Sent` methods when it’s not.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Just like with `assertDispatched()`, the first parameter will be the name of
+    the mailable and the second parameter can be empty, the number of times the mailable
+    has been sent, or a closure testing that the mailable has the right data in it.
+    Take a look at [Example 12-18](#mail_fakes) to see a few of these methods in action.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-18\. Making assertions against mail
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: All of the messages checking for recipients (`hasTo()`, `hasCc()`, and `hasBcc()`)
+    can take either a single email address or an array or collection of addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Notification Fakes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `Notification` facade, when faked, offers two methods: `assertSentTo()`
+    and `assertNothingSent()`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unlike with the `Mail` facade, you’re not going to test who the notification
+    was sent to manually in a closure. Rather, the assertion itself requires the first
+    parameter be either a single notifiable object or an array or collection of them.
+    Only after you’ve passed in the desired notification target can you test anything
+    about the notification itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The second parameter is the class name for the notification, and the (optional)
+    third parameter can be a closure defining more expectations about the notification.
+    Take a look at [Example 12-19](#notification_fakes) to learn more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-19\. Notification fakes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: You may also find yourself wanting to assert that your channel selection is
+    working—​that notifications are sent via the right channels. You can test that
+    as well, as you can see in [Example 12-20](#testing_notification_channels).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-20\. Testing notification channels
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: Storage Fakes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Testing files can be extraordinarily complex. Many traditional methods require
+    you to actually move files around in your test directories, and formatting the
+    form input and output can be very complicated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Thankfully, if you use Laravel’s `Storage` facade, it’s infinitely simpler to
+    test file uploads and other storage-related items, as [Example 12-21](#storage_fakes)
+    demonstrates.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-21\. Testing storage and file uploads with storage fakes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: Working with Time in Tests
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: It’s common that, when we test sections of our application that interact with
+    time, we want to test how these sections behave differently as time passes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In our tests, we can use `$this->travel()` to “travel” through time as the test
+    progresses. We can travel forward and backward relative to the current time, travel
+    to specific moments, or freeze the passage of time, allowing us to test how components
+    behave once the time they’re checking looks different.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 12-22](#EX1213) to see how you might want to use this
+    feature, or [the docs](https://oreil.ly/1PNzc) to learn more about all the ways
+    you can interact with time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-22\. Changing the time in a test
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also provide a closure to each of these time-traveling methods; if you
+    do, the test’s time is only modified for the duration of the closure, allowing
+    you to more directly connect your traveling and the resulting tests, as you can
+    see in [Example 12-23](#EX1215).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-23\. Changing the time in a test using closures
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: Mocking
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Mocks (and their brethren, spies and stubs and dummies and fakes and any number
+    of other tools) are common in testing. We saw some examples of fakes in the previous
+    section. I won’t go into too much detail here, but it’s unlikely you can thoroughly
+    test an application of any size without mocking at least one thing or another.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, lets take a quick look at mocking in Laravel and how to use Mockery, the
+    mocking library.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Quick Introduction to Mocking
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Essentially, mocks and other similar tools make it possible to create an object
+    that in some way mimics a real class, but for testing purposes isn’t the real
+    class. Sometimes this is done because the real class is too difficult to instantiate
+    just to inject it into a test, or maybe because the real class communicates with
+    an external service.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you can probably tell from the examples that follow, Laravel encourages working
+    with the real application as much as possible—which means avoiding too much dependence
+    on mocks. But they have their place, which is why Laravel includes Mockery, a
+    mocking library, out of the box, and is why many of its core services offer faking
+    utilities.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Quick Introduction to Mockery
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Mockery allows you to quickly and easily create mocks from any PHP class in
+    your application. Imagine you have a class that depends on a Slack client, but
+    you don’t want the calls to actually go out to Slack. Mockery makes it simple
+    to create a fake Slack client to use in your tests, like you can see in [Example 12-24](#EX1206).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-24\. Using Mockery in Laravel
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There are a lot of elements at work here, but if you look at them one by one,
+    they make sense. We have a class named `Notifier` that we’re testing. It has a
+    dependency named `SlackClient` that does something that we don’t want it to do
+    when we’re running our tests: it sends actual Slack notifications. So we’re going
+    to mock it.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We use Mockery to get a mock of our `SlackClient` class. If we don’t care about
+    what happens to that class—​if it should simply exist to keep our tests from throwing
+    errors—​we can just use `shouldIgnoreMissing()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: No matter what `Notifier` calls on `$slackMock`, it’ll just accept it and return
+    `null`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But take a look at `test_notifier_notifies_admins()`. At this point, it doesn’t
+    actually *test* anything.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We could just keep `shouldIgnoreMissing()` and then write some assertions below
+    it. That’s usually what we do with `shouldIgnoreMissing()`, which makes this object
+    a “fake” or a “stub.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: But what if we want to actually assert that a call was made to the `send()`
+    method of `SlackClient`? That’s when we drop `shouldIgnoreMissing()` and reach
+    for the other `should*` methods ([Example 12-25](#EX1207)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-25\. Using the `shouldReceive()` method on a Mockery mock
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`shouldReceive(''send'')->once()` is the same as saying “assert that `$slackMock`
+    will have its `send()` method called once and only once.” So, we’re now asserting
+    that `Notifier`, when we call `notifyAdmins()`, makes a single call to the `send()`
+    method on `SlackClient`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We could also use something like `shouldReceive(''send'')->times(3)` or `shouldReceive(''send'')->never()`.
+    We can define what parameter we expect to be passed along with that `send()` call
+    using `with()`, and we can define what to return with `andReturn()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: What if we wanted to use the IoC container to resolve our instance of the `Notifier`?
+    This might be useful if `Notifier` had several other dependencies that we didn’t
+    need to mock.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We can do that! We just use the `instance()` method on the container, as in
+    [Example 12-26](#EX1208), to tell Laravel to provide an instance of our mock to
+    any classes that request it (which, in this example, will be `Notifier`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-26\. Binding a Mockery instance to the container
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There’s also a convenient shortcut to create and bind a Mockery instance to
+    the container ([Example 12-27](#EX1211)):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-27\. Binding Mockery instances to the container more easily
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There’s a lot more you can do with Mockery: you can use spies, partial spies,
+    and much more. Going deeper into how to use Mockery is outside the scope of this
+    book, but I encourage you to learn more about the library and how it works by
+    reading the [Mockery docs](https://oreil.ly/EBulp).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Faking Other Facades
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There’s one other clever thing you can do with Mockery: you can use Mockery
+    methods (e.g., `shouldReceive()`) on any facades in your app.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Imagine we have a controller method that uses a facade that’s not one of the
+    fakeable systems we’ve already covered; we want to test that controller method
+    and assert that a certain facade call was made.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Thankfully, it’s simple: we can run our Mockery-style methods on the facade,
+    as you can see in [Example 12-28](#EX1209).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-28\. Mocking a facade
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, you can use methods like `shouldReceive()` on the facades, just
+    like you do on a `Mockery` object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also use your facades as spies, which means you can set your assertions
+    at the end and use `shouldHaveReceived()` instead of `should``Receive()`. [Example 12-29](#EX1210)
+    illustrates this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-29\. Facade spies
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also partially mock facades, as you can see in [Example 12-30](#partial_mock_facades).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-30\. Partially mocking facades
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: Testing Artisan Commands
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We’ve covered a lot in this chapter, but we’re almost done! We have just three
+    more pieces of Laravel’s testing arsenal to cover: Artisan, parallel testing,
+    and the browser.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The best way to test Artisan commands is to call them with `$this->artisan(*$commandName*,
+    *$parameters*)` and then test their impact, like in [Example 12-31](#simple_artisan_test).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-31\. Simple Artisan tests
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can make assertions against the response code you get from Artisan, as you
+    can see in [Example 12-32](#manually_asserting_artisan_exit_codes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-32\. Manually asserting Artisan exit codes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also chain three methods onto your `$this->artisan()` call: `expectsQuestion()`,
+    `expectsOutput()`, and `assertExitCode()`. The `expects`* methods will work on
+    any of the interactive prompts, including `confirm()` and `anticipate()`, and
+    the `assertExitCode()` method is a shortcut to what we saw in [Example 12-32](#manually_asserting_artisan_exit_codes).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 12-33](#basic_artisan_expects) to see how it works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-33\. Basic Artisan “expects” tests
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, the first parameter of `expectsQuestion()` is the text we’re
+    expecting to see from the question, and the second parameter is the text we’re
+    answering with. `expectsOutput()` just tests that the passed string is returned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parallel Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: By default, tests in Laravel run in a single thread. The more tests you have,
+    and the more complex they are, the longer your test suite can take to run, and
+    this can have a significant impact on how likely your team is to run your test
+    suite.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you want to speed up your test suite, you can run your tests in parallel.
+    You’ll need to install a dependency called `paratest`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once you’ve installed `paratest`, you can run your tests in parallel using the
+    `--parallel` flag, as you can see in [Example 12-34](#parallel_testing).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-34\. Running tests in parallel
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE61]'
+  prefs: []
+  type: TYPE_PRE
+- en: Browser Tests
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'We’ve made it to browser tests! These allow you to actually interact with the
+    DOM of your pages: in browser tests you can click buttons, fill out and submit
+    forms, and even interact with JavaScript.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Choosing a Tool
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: For browser testing for non-SPAs, I recommend you use Dusk. If you’re working
+    with SPAs or some JavaScript-heavy applications, they may work better with frontend
+    test suites, which are out of the scope of this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing with Dusk
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Dusk is a Laravel tool (installable as a Composer package) that makes it easy
+    to direct an embedded instance of Google Chrome (called ChromeDriver) to interact
+    with your app. Dusk’s API is simple, and it’s easy to write code to interact with
+    it by hand. Take a look:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE62]'
+  prefs: []
+  type: TYPE_PRE
+- en: With Dusk, there’s an actual browser spinning up your entire application and
+    interacting with it. That means you can have complex interactions with your JavaScript
+    and get screenshots of failure states—but it also means everything’s a bit slower
+    and it’s more prone to failure than Laravel’s base application testing suite.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Personally, I’ve found that Dusk is most useful as a regression testing suite,
+    and it works better than something like Selenium. Rather than using it for any
+    sort of test-driven development, I use it to assert that the user experience hasn’t
+    broken (“regressed”) as the app continues to develop. Think of this more like
+    writing tests about your user interface after the interface is built.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The [Dusk docs](https://oreil.ly/ZqNtP) are robust, so I’m not going to go into
+    great depth here, but I want to show you the basics of working with Dusk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Installing Dusk
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To install Dusk, run these two commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE63]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then edit your *.env* file to set your `APP_URL` variable to the same URL you
+    use to view your site in your local browser; something like `http://mysite.test`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To run your Dusk tests, just run `php artisan dusk`. You can pass in all the
+    same parameters you’re used to from PHPUnit (e.g., `php artisan dusk -⁠-⁠f⁠i⁠l⁠t⁠e⁠r​=⁠m⁠y⁠_⁠b⁠e⁠s⁠t⁠_⁠t⁠e⁠s⁠t`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing Dusk tests
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To generate a new Dusk test, use a command like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE64]'
+  prefs: []
+  type: TYPE_PRE
+- en: This test will be placed in *tests/Browser/RatingTest.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Customizing Dusk Environment Variables
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You can customize the environment variables for Dusk by creating a new file
+    named *.env.dusk.local* (and you can replace *.local* if you’re working in a different
+    environment, like “staging”).
+  prefs: []
+  type: TYPE_NORMAL
+- en: To write your Dusk tests, imagine that you’re directing one or more web browsers
+    to visit your application and take certain actions. That’s what the syntax will
+    look like, as you can see in [Example 12-35](#first_dusk_test).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-35\. A simple Dusk test
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE65]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`$this->browse()` creates a browser, which you pass into a closure; then, within
+    the closure, you instruct the browser which actions to take.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s important to note that—unlike Laravel’s other application testing tools,
+    which mimic the behavior of your forms—Dusk is actually spinning up a browser,
+    sending events to the browser to type those words, and then sending an event to
+    the browser to press that button. This is a real browser and Dusk is fully driving
+    it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also “ask” for more than one browser by adding parameters to the closure,
+    which allows you to test how multiple users might interact with the website (for
+    example, with a chat system). Take a look at [Example 12-36](#multiple_dusk_browsers),
+    from the docs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-36\. Multiple Dusk browsers
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE66]'
+  prefs: []
+  type: TYPE_PRE
+- en: There’s a huge suite of actions and assertions available that we won’t cover
+    here (check the docs), but let’s look at a few of the other tools Dusk provides.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Authentication and databases
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'As you can see in [Example 12-36](#multiple_dusk_browsers), the syntax for
+    authentication is a little different from the rest of the Laravel application
+    testing: `$browser->loginAs(*$user*)`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Avoid the RefreshDatabase trait with Dusk
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Don’t use the `RefreshDatabase` trait with Dusk! Use the `DatabaseMigrations`
+    trait instead; transactions, which `RefreshDatabase` uses, don’t persist across
+    requests.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Interactions with the page
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you’ve ever written jQuery, interacting with the page using Dusk will come
+    naturally. Take a look at [Example 12-37](#selecting_dusk_elements) to see the
+    common patterns for selecting items with Dusk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-37\. Selecting items with Dusk
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE67]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE68]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, adding the `dusk` attribute to your page elements allows you
+    to reference them directly in a way that won’t change when the display or layout
+    of the page changes later; when any method asks for a selector, pass in the `@`
+    sign and then the content of your `dusk` attribute.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s take a look at a few of the methods you can call on `$browser`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To work with text and attribute values, use these methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`value(*$selector, $value = null*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns the value of any text input if only one parameter is passed; sets the
+    value of an input if a second parameter is passed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`text(*$selector*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Gets the text content of a nonfillable item like a `<div>` or a `<span>`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`attribute(*$selector, $attributeName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns the value of a particular attribute on the element matching `*$selector*`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Methods for working with forms and files include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`type(*$selector, $valueToType*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similar to `value()`, but actually types the characters rather than directly
+    setting the value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dusk’s Selector matching order
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: With methods like `type()` that target inputs, Dusk will start by trying to
+    match a Dusk or CSS selector, and then will look for an input with the provided
+    name, and finally will try to find a `<textarea>` with the provided name.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`select(*$selector, $optionValue*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Selects the option with the value of `*$optionValue*` in a drop-down selectable
+    by `*$selector*`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`check(*$selector*)`, `uncheck(*$selector*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Checks or unchecks a checkbox selectable by `*$selector*`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`radio(*$selector, $optionValue*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Selects the option with the value of `*$optionValue*` in a radio group selectable
+    by `*$selector*`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`attach(*$selector, $filePath*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Attaches a file at `*$filePath*` to the file input selectable by `*$selector*`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The methods for keyboard and mouse input are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`clickLink(*$selector*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Follows a text link to its target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`click(*$selector*)`, `mouseover(*$selector*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Triggers a mouse click or a mouseover event on `*$selector*`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`drag(*$selectorToDrag, $selectorToDragTo*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Drags an item to another item.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`dragLeft()`, `dragRight()`, `dragUp()`, `dragDown()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Given a first parameter of a selector and a second parameter of a number of
+    pixels, drags the selected item that many pixels in the given direction.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`keys(*$selector, $instructions*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Sends keypress events within the context of `*$selector*` according to the
+    instructions in `*$instructions*`. You can even combine modifiers with your typing:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE69]'
+  prefs: []
+  type: TYPE_PRE
+- en: This would type “this is GREAT.” As you can see, adding an array to the list
+    of items to type allows you to combine modifiers (wrapped with `{}`) with typing.
+    You can see a full list of the possible modifiers in the [Facebook WebDriver source](https://oreil.ly/_gKa4).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you’d like to just send your key sequence to the page (for example, to trigger
+    a keyboard shortcut), you can target the top level of your app or page as your
+    selector. For example, if it’s a Vue app and the top level is a `<div>` with an
+    ID of `app`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE70]'
+  prefs: []
+  type: TYPE_PRE
+- en: Waiting
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Because Dusk interacts with JavaScript and is directing an actual browser,
+    the concept of time and timeouts and “waiting” needs to be addressed. Dusk offers
+    several methods you can use to ensure your tests handle timing issues correctly.
+    Some of these methods are useful for interacting with intentionally slow or delayed
+    elements of the page, but some of them are also just useful for getting around
+    initialization times on your components. The available methods include the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`pause(*$milliseconds*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Pauses the execution of Dusk tests for the given number of milliseconds. This
+    is the simplest “wait” option; it makes any future commands you send to the browser
+    wait that amount of time before operating.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can use this and other waiting methods in the midst of an assertion chain,
+    as shown here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE71]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`waitFor(*$selector, $maxSeconds = null*)`, `waitUntilMissing(*$selector*,`
+    `*$maxSeconds*` `*= null*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Waits until the given element exists on the page (`waitFor()`) or disappears
+    from the page (`waitUntilMissing()`) or times out after the optional second parameter’s
+    second count:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE72]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`whenAvailable(*$selector, $callback*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Similar to `waitFor()`, but accepts a closure as the second parameter, which
+    will define what action to take when the specified element becomes available:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE73]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`waitForText(*$text, $maxSeconds = null*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Waits for text to show up on the page, or times out after the optional second
+    parameter’s second count:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE74]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`waitForLink(*$linkText, $maxSeconds = null*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Waits for a link to exist with the given link text, or times out after the
+    optional second parameter’s second count:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE75]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`waitForLocation(*$path*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Waits until the page URL matches the provided path:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE76]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`waitForRoute(*$routeName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Waits until the page URL matches the URL for the provided route:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE77]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`waitForReload()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Waits until the page reloads.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`waitUntil(*$expression*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Waits until the provided JavaScript expression evaluates as true:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE78]'
+  prefs: []
+  type: TYPE_PRE
+- en: Other Assertions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'As I’ve mentioned, there’s a huge list of assertions you can make against your
+    app with Dusk. Here are a few that I use most commonly—you can see the full list
+    in the [Dusk docs](https://oreil.ly/ZqNtP):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`assertTitleContains(*$text*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`assertQueryStringHas(*$keyName*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`assertHasCookie(*$cookieName*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`assertSourceHas(*$htmlSourceCode*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`assertChecked(*$selector*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`assertSelectHasOption(*$selectorForSelect, $optionValue*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`assertVisible(*$selector*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`assertFocused()`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`assertVue(*$dataLocation, $dataValue, $selector*)`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Other organizational structures
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: So far, everything we’ve covered makes it possible to test individual elements
+    on our pages. But we’ll often use Dusk to test more complex applications and single-page
+    apps, which means we’re going to need organizational structures around our assertions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first organizational structures we have encountered have been the `dusk`
+    attribute (e.g., `<div dusk="abc">`, creating a selector named `@abc` we can refer
+    to later) and the closures we can use to wrap certain portions of our code (e.g.,
+    with `when``Available()`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Dusk offers two more organizational tools: pages and components. Let’s start
+    with pages.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Pages
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'A page is a class that you’ll generate which contains two pieces of functionality:
+    first, a URL and assertions to define which page in your app should be attached
+    to this Dusk page; and second, shorthand like we used inline (the `@abc` selector
+    generated by the `dusk="abc"` attribute in our HTML) but just for this page, and
+    without needing to edit our HTML.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s imagine our app has a “create package” page. We can generate a Dusk page
+    for it as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE79]'
+  prefs: []
+  type: TYPE_PRE
+- en: Take a look at [Example 12-38](#generated_dusk_page) to see what our generated
+    class will look like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-38\. The generated Dusk page
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE80]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `url()` method defines the location where Dusk should expect this page to
+    be, `assert()` lets you run additional assertions to verify you’re on the right
+    page, and `elements()` provides shortcuts for `@dusk`-style selectors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s make a few quick modifications to our “create package” page, to make it
+    look like [Example 12-39](#create_package_basic_dusk_page).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-39\. A simple “create package” Dusk page
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE81]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now that we have a functional page, we can navigate to it and access its defined
+    elements:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE82]'
+  prefs: []
+  type: TYPE_PRE
+- en: One common use for pages is to define a common action you want to take in your
+    tests; consider these almost like macros for Dusk. You can define a method on
+    your page and then call it from your code, as you can see in [Example 12-40](#dusk_custom_page_methods).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-40\. Defining and using a custom page method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE83]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE84]'
+  prefs: []
+  type: TYPE_PRE
+- en: Components
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: If you want the same functionality as Dusk pages offer, but without it being
+    constrained to a specific URL, you’ll likely want to reach for Dusk *components*.
+    These classes are shaped very similarly to pages, but instead of being bound to
+    a URL, they’re each bound to a selector.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In *NovaPackages.com*, we have a little Vue component for rating packages and
+    displaying ratings. Let’s make a Dusk component for it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE85]'
+  prefs: []
+  type: TYPE_PRE
+- en: Take a look at [Example 12-41](#generated_dusk_component) to see what that will
+    generate.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-41\. The default source of a generated Dusk component
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE86]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, this is basically the same as a Dusk page, but we’re encapsulating
+    our work to an HTML element instead of a URL. Everything else is basically the
+    same. Take a look at [Example 12-42](#simple_dusk_component) to see our rating
+    widget example in Dusk component form.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-42\. A Dusk component for the rating widget
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE87]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using components works just like using pages, as you can see in [Example 12-43](#using_dusk_components).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-43\. Using Dusk components
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE88]'
+  prefs: []
+  type: TYPE_PRE
+- en: That’s a good, brief overview of what Dusk can do. There’s a lot more—more assertions,
+    more edge cases, more gotchas, more examples—in the [Dusk docs](https://oreil.ly/ZqNtP),
+    so I’d recommend a read through there if you plan to work with Dusk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Pest
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Pest is a third-party testing framework for Laravel. It’s a layer on top of
+    PHPUnit that provides customized console output, easy parallel testing and code
+    coverage, architecture testing, and more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Pest also offers a different testing syntax, inspired by Ruby’s RSpec. You can
+    use Pest and get all of its benefits without switching to its unique testing syntax,
+    but if you do want to try it out, take a look at [Example 12-44](#EX1214) to see
+    how the syntax looks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-44\. Sample Pest syntax
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE89]'
+  prefs: []
+  type: TYPE_PRE
+- en: To learn more about Pest, check out [*pestphp.com*](https://pestphp.com).
+  prefs: []
+  type: TYPE_NORMAL
+- en: TL;DR
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel can work with any modern PHP testing framework, but it’s optimized for
+    PHPUnit (especially if your tests extend Laravel’s `TestCase`). Laravel’s application
+    testing framework makes it simple to send fake HTTP and console requests through
+    your application and inspect the results.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tests in Laravel can easily and powerfully interact with and assert against
+    the database, cache, session, filesystem, mail, and many other systems. Quite
+    a few of these systems have fakes built in to make them even easier to test. You
+    can test DOM and browser-like interactions with Dusk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel brings in Mockery in case you need mocks, stubs, spies, dummies, or
+    anything else, but the testing philosophy of Laravel is to use real collaborators
+    as much as possible. Don’t fake it unless you have to.
+  prefs: []
+  type: TYPE_NORMAL

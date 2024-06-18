@@ -1,0 +1,1718 @@
+- en: Chapter 3\. Introduction to PHP
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In [Chapter 1](ch01.xhtml#introduction_to_dynamic_web_content), I explained
+    that PHP is the language that you use to make the server generate dynamic output—output
+    that is potentially different each time a browser requests a page. In this chapter,
+    you’ll start learning this simple but powerful language; it will be the topic
+    of the following chapters up through [Chapter 7](ch07.xhtml#practical_php).
+  prefs: []
+  type: TYPE_NORMAL
+- en: I encourage you to develop your PHP code using one of the IDEs listed in [Chapter 2](ch02.xhtml#setting_up_a_development_server),
+    or a good code editor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Many of these programs will let you run the PHP code and see the output discussed
+    in this chapter. I’ll also show you how to create PHP code so that you can see
+    what the output looks like in a web page (the way your users will ultimately see
+    it). But that step, as thrilling as it may be at first, isn’t really important
+    at this stage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In production, your web pages will be a combination of PHP, HTML, JavaScript,
+    and some MySQL statements laid out using CSS. Furthermore, each page can lead
+    to other pages to provide users with ways to click through links and fill out
+    forms. We can avoid all that complexity while learning each language, though.
+    Focus for now on just writing PHP code and making sure that you get the output
+    you expect—or at least that you understand the output you actually get!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Incorporating PHP Within HTML
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: By default, PHP documents end with the extension *.php*. When a web server encounters
+    this extension in a requested file, it automatically passes it to the PHP processor.
+    Of course, web servers are highly configurable, and some web developers choose
+    to force files ending with *.htm* or *.html* to also get parsed by the PHP processor,
+    usually because they want to hide their use of PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Your PHP program is responsible for passing back a clean file suitable for display
+    in a web browser. At its very simplest, a PHP document will output only HTML.
+    To prove this, you can take any normal HTML document and save it as a PHP document
+    (for example, saving *index.html* as *index.php*), and it will display identically
+    to the original.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To trigger the PHP commands, you need to learn a new tag. Here is the first
+    part:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The first thing you may notice is that the tag has not been closed. This is
+    because entire sections of PHP can be placed inside this tag, and they finish
+    only when the closing part is encountered, which looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: A small PHP “Hello World” program might look like [Example 3-1](#invoking_php).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-1\. Invoking PHP
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Use of this tag can be quite flexible. Some programmers open the tag at the
+    start of a document and close it right at the end, outputting any HTML directly
+    from PHP commands. Others, however, choose to insert only the smallest possible
+    fragments of PHP within these tags wherever dynamic scripting is required, leaving
+    the rest of the document in standard HTML.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The latter type of programmer generally argues that their style of coding results
+    in faster code, while the former says that the speed increase is so minimal that
+    it doesn’t justify the additional complexity of dropping in and out of PHP many
+    times in a single document.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you learn more, you will surely discover your preferred style of PHP development,
+    but for the sake of making the examples in this book easier to follow, I have
+    adopted the approach of keeping the number of transfers between PHP and HTML to
+    a minimum—generally only once or twice in a document.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'By the way, there is a slight variation to the PHP syntax. If you browse the
+    internet for PHP examples, you may also encounter code where the opening and closing
+    syntax looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Although it’s not as obvious that the PHP parser is being called, this is a
+    valid, alternative syntax that also usually works. But I discourage its use, as
+    it is incompatible with XML and is now deprecated (meaning that it is no longer
+    recommended and support could be removed in future versions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: If you have only PHP code in a file, you may omit the closing `?>`. This can
+    be a good practice, as it will ensure that you have no excess whitespace leaking
+    from your PHP files (especially important when you’re writing object-oriented
+    code).
+  prefs: []
+  type: TYPE_NORMAL
+- en: This Book’s Examples
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: To save you the time it would take to type them all in, all the examples from
+    this book have been stored at GitHub. You can download the archive to your computer
+    by visiting: [GitHub](https://github.com/RobinNixon/lpmj6).
+  prefs: []
+  type: TYPE_NORMAL
+- en: In addition to listing all the examples by chapter and example number (such
+    as *example3-1.php*), some of the examples may require explicit filenames, in
+    which case copies of the example(s) are also saved using the filename(s) in the
+    same folder (such as the upcoming [Example 3-4](#your_first_php_program), which
+    should be saved as *test1.php*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Structure of PHP
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We’re going to cover quite a lot of ground in this section. It’s not too difficult,
+    but I recommend that you work your way through it carefully, as it sets the foundation
+    for everything else in this book. As always, there are some useful questions at
+    the end of the chapter that you can use to test how much you’ve learned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Comments
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There are two ways in which you can add comments to your PHP code. The first
+    turns a single line into a comment by preceding it with a pair of forward slashes:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This version of the comment feature is a great way to temporarily remove a
+    line of code from a program that is giving you errors. For example, you could
+    use such a comment to hide a debugging line of code until you need it, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also use this type of comment directly after a line of code to describe
+    its action, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: When you need to use multiple lines, there’s a second type of comment, which
+    looks like [Example 3-2](#multiline_comment).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-2\. A multiline comment
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can use the `/*` and `*/` pairs of characters to open and close comments
+    almost anywhere you like inside your code. Most, if not all, programmers use this
+    construct to temporarily comment out entire sections of code that do not work
+    or that, for one reason or another, they do not wish to be interpreted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: A common error is to use `/*` and `*/` to comment out a large section of code
+    that already contains a commented-out section that uses those characters. You
+    can’t nest comments this way; the PHP interpreter won’t know where a comment ends
+    and will display an error message. However, if you use an editor or IDE with syntax
+    highlighting, this type of error is easier to spot.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Basic Syntax
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP is quite a simple language with roots in C and Perl (if you have ever come
+    across these), yet it looks more like Java. It is also very flexible, but there
+    are a few rules that you need to learn about its syntax and structure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Semicolons
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You may have noticed in the previous examples that the PHP commands ended with
+    a semicolon, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: One of  the most common causes of errors you will encounter with PHP is forgetting
+    this semicolon. This causes PHP to treat multiple statements like one statement,
+    which it is unable to understand, prompting it to produce a `Parse error` message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The $ symbol
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `$` symbol has come to be used in many different ways by different programming
+    languages. For example, in the BASIC language, it was used to terminate variable
+    names to denote them as strings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In PHP, however, you must place a `$` in front of *all* variables. This is required
+    to make the PHP parser faster, as it instantly knows whenever it comes across
+    a variable. Whether your variables are numbers, strings, or arrays, they should
+    all look something like those in [Example 3-3](#three_different_types_of_variable_assign).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-3\. Three different types of variable assignment
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: And really that’s pretty much all the syntax that you have to remember. Unlike
+    languages such as Python, which are very strict about how you indent and lay out
+    your code, PHP leaves you completely free to use (or not use) all the indenting
+    and spacing you like. In fact, sensible use of whitespace is generally encouraged
+    (along with comprehensive commenting) to help you understand your code when you
+    come back to it. It also helps other programmers when they have to maintain your
+    code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variables
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There’s a simple metaphor that will help you understand what PHP variables are
+    all about. Just think of them as little (or big) matchboxes! That’s right—matchboxes
+    that you’ve painted over and written names on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: String variables
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Imagine you have a matchbox on which you have written the word *username*.
+    You then write *Fred Smith* on a piece of paper and place it into the box (see
+    [Figure 3-1](#you_can_think_of_variables_as_matchboxes)). Well, that’s the same
+    process as assigning a string value to a variable, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The quotation marks indicate that “Fred Smith” is a *string* of characters.
+    You must enclose each string in either quotation marks or apostrophes (single
+    quotes), although there is a subtle difference between the two types of quote,
+    which is explained later. When you want to see what’s in the box, you open it,
+    take the piece of paper out, and read it. In PHP, doing so looks like this (which
+    displays the contents of the variable):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or you can assign it to another variable (photocopy the paper and place the
+    copy in another matchbox), like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![You can think of variables as matchboxes containing items](Images/pmj6_0301.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 3-1\. You can think of variables as matchboxes containing items
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Example 3-4\. Your first PHP program
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now you can call it up by entering the following into your browser’s address
+    bar:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'In the unlikely event that during the installation of your web server (as detailed
+    in [Chapter 2](ch02.xhtml#setting_up_a_development_server)) you changed the port
+    assigned to the server to anything other than 80, then you must place that port
+    number within the URL in this and all other examples in this book. So, for example,
+    if you changed the port to 8080, the preceding URL would become this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: I won’t mention this again, so just remember to use the port number (if required)
+    when trying examples or writing your own code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The result of running this code should be two occurrences of the name *Fred
+    Smith*, the first of which is the result of the `echo $username` command and the
+    second of which is the result of the `echo $current_user` command.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Numeric variables
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Variables don’t have to contain just strings—they can contain numbers too.
+    If we return to the matchbox analogy, to store the number 17 in the variable `$count`,
+    the equivalent would be placing, say, 17 beads in a matchbox on which you have
+    written the word *count*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You could also use a floating-point number (containing a decimal point). The
+    syntax is the same:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: To see the contents of the matchbox, you would simply open it and count the
+    beads. In PHP, you would assign the value of `$count` to another variable or perhaps
+    just echo it to the web browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Arrays
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can think of arrays as several matchboxes glued together. For example, let’s
+    say we want to store the player names for a five-person soccer team in an array
+    called `$team`. To do this, we could glue five matchboxes side by side and write
+    down the names of all the players on separate pieces of paper, placing one in
+    each matchbox.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Across the top of the whole matchbox assembly we would write the word *team*
+    (see [Figure 3-2](#array_is_like_several_matchboxes_glue)). The equivalent of
+    this in PHP would be the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![An array is like several matchboxes glued together](Images/pmj6_0302.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 3-2\. An array is like several matchboxes glued together
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'This syntax is more complicated than the other examples you’ve seen so far.
+    The array-building code consists of the following construct:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: with five strings inside. Each string is enclosed in apostrophes or quotes,
+    and strings must be separated with commas.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If we then wanted to know who player 4 is, we could use this command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: The reason the previous statement has the number 3, not 4, is that the first
+    element of a PHP array is actually the zeroth element, so the player numbers will
+    therefore be 0 through 4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Two-dimensional arrays
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There’s a lot more you can do with arrays. For example, instead of being single-dimensional
+    lines of matchboxes, they can be two-dimensional matrixes or even have more dimensions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As an example of a two-dimensional array, let’s say we want to keep track of
+    a game of tic-tac-toe, which requires a data structure of nine cells arranged
+    in a 3 × 3 square. To represent this with matchboxes, imagine nine of them glued
+    to one other in a matrix of three rows by three columns (see [Figure 3-3](#multidimensional_array_simulated_with)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![A multidimensional array simulated with matchboxes](Images/pmj6_0303.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 3-3\. A multidimensional array simulated with matchboxes
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: You can now place a piece of paper with either an *x* or an *o* on it in the
+    correct matchbox for each move played. To do this in PHP code, you have to set
+    up an array containing three more arrays, as in [Example 3-5](#defining_a_two-dimensional_array),
+    in which the array is set up with a game already in progress.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-5\. Defining a two-dimensional array
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once again, we’ve moved up a step in complexity, but it’s easy to understand
+    if you grasp the basic array syntax. There are three `array()` constructs nested
+    inside the outer `array()` construct. We’ve filled each row with an array consisting
+    of just one character: an *x*, an *o*, or a blank space. (We use a blank space
+    so that all the cells will be the same width when they are displayed.)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To then return the third element in the second row of this array, you would
+    use the following PHP command, which will display an `x`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Remember that array indexes (pointers at elements within an array) start from
+    zero, not one, so the `[1]` in the previous command refers to the second of the
+    three arrays, and the `[2]` references the third position within that array. This
+    command will return the contents of the matchbox three along and two down.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As mentioned, we can support arrays with even more dimensions by simply creating
+    more arrays within arrays. However, we will not be covering arrays of more than
+    two dimensions in this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: And don’t worry if you’re still having difficulty coming to grips with using
+    arrays, as the subject is explained in detail in [Chapter 6](ch06.xhtml#php_arrays).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variable-naming rules
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'When creating PHP variables, you must follow these four rules:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variable names, after the dollar sign, must start with a letter of the alphabet
+    or the *_* (underscore) character.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Variable names can contain only the characters `a`–`z`, `A`–`Z`, `0`–`9`, and
+    `_` (underscore).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Variable names may not contain spaces. If a variable name must comprise more
+    than one word, a good idea is to separate the words with the `_` **(**underscore**)**
+    character (e.g., `$user_name`).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Variable names are case-sensitive. The variable `$High_Score` is not the same
+    as the variable `$high_score`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: To allow extended ASCII characters that include accents, PHP also supports the
+    bytes from 127 through 255 in variable names. But unless your code will be maintained
+    only by programmers who are used to those characters, it’s probably best to avoid
+    them, because programmers using English keyboards will have difficulty accessing
+    them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Operators
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*Operators* let you specify mathematical operations to perform, such as addition,
+    subtraction, multiplication, and division. But several other types of operators
+    exist too, such as the string, comparison, and logical operators. Math in PHP
+    looks a lot like plain arithmetic—for instance, the following statement outputs
+    8:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Before moving on to learn what PHP can do for you, take a moment to learn about
+    the various operators it provides.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Arithmetic operators
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Arithmetic operators do what you would expect—they are used to perform mathematics.
+    You can use them for the main four operations (add, subtract, multiply, and divide)
+    as well as to find a modulus (the remainder after a division) and to increment
+    or decrement a value (see [Table 3-1](#arithmetic_operators-id00003)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 3-1\. Arithmetic operators
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Operator | Description | Example |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `+` | Addition | `$j` **`+`** `1` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `–` | Subtraction | `$j` **`–`** `6` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `*` | Multiplication | `$j` **`*`** `11` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/` | Division | `$j` **`/`** `4` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%` | Modulus (the remainder after a division is performed) | `$j` **`%`**
+    `9` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `++` | Increment | **`++`**`$j` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `--` | Decrement | **`--`**`$j` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `**` | Exponentiation (or power) | `$j******2` |'
+  prefs: []
+  type: TYPE_TB
+- en: Assignment operators
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'These operators assign values to variables. They start with the very simple
+    `=` and move on to `+=`, `-=`, and so on (see [Table 3-2](#assignment_operators-id00004)).
+    The operator `+=` adds the value on the right side to the variable on the left,
+    instead of totally replacing the value on the left. Thus, if `$count` starts with
+    the value `5`, the statement:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'sets `$count` to `6`, just like the more familiar assignment statement:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `/=` and `*=` operators are similar, but for division and multiplication,
+    the `.=` operator concatenates variables, such that `$a .= "."` will append a
+    period to the end of `$a`, and `%=` assigns a percentage value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 3-2\. Assignment operators
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Operator | Example | Equivalent to |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `=` | ``$j **`=`** 15`` | `$j = 15` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `+=` | ``$j **`+=`** 5`` | `$j = $j + 5` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `–=` | ``$j **`-=`** 3`` | `$j = $j – 3` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `*=` | ``$j **`*=`** 8`` | `$j = $j * 8` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/=` | ``$j **`/=`** 16`` | `$j = $j / 16` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `.=` | ``$j **`.=`** $k`` | `$j = $j . $k` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%=` | ``$j **`%=`** 4`` | `$j = $j % 4` |'
+  prefs: []
+  type: TYPE_TB
+- en: Comparison operators
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Comparison operators are generally used inside a construct such as an `if` statement
+    in which you need to compare two items. For example, you may wish to know whether
+    a variable you have been incrementing has reached a specific value, or whether
+    another variable is less than a set value, and so on (see [Table 3-3](#comparison_operators-id00005)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 3-3\. Comparison operators
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Operator | Description | Example |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `==` | Is *equal* to | `$j **==** 4` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `!=` | Is *not equal* to | ``$j **`!=`** 21`` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `>` | Is *greater than* | ``$j **`>`** 3`` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `<` | Is *less than* | ``$j **`<`** 100`` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `>=` | Is *greater than or equal* to | ``$j **`>=`** 15`` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `<=` | Is *less than or equal* to | ``$j **`<=`** 8`` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `<>` | Is *not equal* to | ``$j **`<>`** 23`` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `===` | Is *identical* to | ``$j **`===`** "987"`` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `!==` | Is *not identical* to | ``$j **`!==`** "1.2e3"`` |'
+  prefs: []
+  type: TYPE_TB
+- en: Note the difference between `=` and `==`. The first is an assignment operator,
+    and the second is a comparison operator. Even advanced programmers can sometimes
+    mix up the two when coding hurriedly, so be careful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Logical operators
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you haven’t used them before, logical operators may at first seem a little
+    daunting. But just think of them the way you would use logic in English. For example,
+    you might say to yourself, “If the time is later than 12 p.m. and earlier than
+    2 p.m., have lunch.” In PHP, the code for this might look something like the following
+    (using military time):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here we have moved the set of instructions for actually going to lunch into
+    a function that we will have to create later called `dolunch`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'As the previous example shows, you generally use a logical operator to combine
+    the results of two of the comparison operators shown in the previous section.
+    A logical operator can also be input to another logical operator: “If the time
+    is later than 12 p.m. and earlier than 2 p.m., or if the smell of a roast is permeating
+    the hallway and there are plates on the table.” As a rule, if something has a
+    `TRUE` or `FALSE` value, it can be input to a logical operator. A logical operator
+    takes two true or false inputs and produces a true or false result.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Table 3-4](#logical_operators-id00006) shows the logical operators.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 3-4\. Logical operators
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Operator | Description | Example |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `&&` | *And* | `$j == 3 **&&** $k == 2` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `and` | Low-precedence *and* | `$j == 3 **and** $k == 2` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `&#124;&#124;` | *Or* | `$j < 5 **&#124;&#124;** $j > 10` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `or` | Low-precedence *or* | `$j < 5 **or** $j > 10` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `!` | *Not* | `! ($j **==** $k)` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `xor` | *Exclusive or* | `$j **xor** $k` |'
+  prefs: []
+  type: TYPE_TB
+- en: 'Note that `&&` is usually interchangeable with `and`; the same is true for
+    `||` and `or`. However, because `and` and `or` have a lower precedence, you should
+    avoid using them except when they are the only option, as in the following statement,
+    which *must* use the `or` operator (`||` cannot be used to force a second statement
+    to execute if the first fails):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The most unusual of these operators is `xor`, which stands for *exclusive or*
+    and returns a `TRUE` value if either value is `TRUE` but a `FALSE` value if both
+    inputs are `TRUE` or both inputs are `FALSE`. To understand this, imagine that
+    you want to concoct your own cleaner for household items. Ammonia makes a good
+    cleaner, and so does bleach, so you want your cleaner to have one of these. But
+    the cleaner must not have both, because the combination is hazardous. In PHP,
+    you could represent this as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, if either `$ammonia` or `$bleach` is `TRUE`, `$ingredient`
+    will also be set to `TRUE`. But if both are `TRUE` or both are `FALSE`, `$ingredient`
+    will be set to `FALSE`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variable Assignment
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The syntax to assign a value to a variable is always *`variable = value`*. Or,
+    to reassign the value to another variable, it is *`other_variable = variable`*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are also a couple of other assignment operators that you will find useful.
+    For example, we’ve already seen this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'which tells the PHP parser to add the value on the right (in this instance,
+    the value `10`) to the variable `$x`. Likewise, we could subtract as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Variable incrementing and decrementing
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Adding or subtracting 1 is such a common operation that PHP provides special
+    operators for it. You can use one of the following in place of the `+=` and `-=`
+    operators:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In conjunction with a test (an `if` statement), you could use the following
+    code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This tells PHP to *first* increment the value of `$x` and then to test whether
+    it has the value `10` and, if it does, to output its value. But you can also require
+    PHP to increment (or, as in the following example, decrement) a variable *after*
+    it has tested the value, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'which gives a subtly different result. Suppose `$y` starts out as `0` before
+    the statement is executed. The comparison will return a `TRUE` result, but `$y`
+    will be set to `–1` after the comparison is made. So what will the `echo` statement
+    display: `0` or `–1`? Try to guess, and then try out the statement in a PHP processor
+    to confirm. Because this combination of statements is confusing, it should be
+    taken as just an educational example and not as a guide to good programming style.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In short, a variable is incremented or decremented before the test if the operator
+    is placed before the variable, whereas the variable is incremented or decremented
+    after the test if the operator is placed after the variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By the way, the correct answer to the previous question is that the `echo` statement
+    will display the result `–1`, because `$y` was decremented right after it was
+    accessed in the `if` statement, and before the `echo` statement.
+  prefs: []
+  type: TYPE_NORMAL
+- en: String concatenation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Concatenation* is a somewhat arcane term for putting something after another
+    thing. So, string concatenation uses the period (`.`) to append one string of
+    characters to another. The simplest way to do this is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Assuming that the variable `$msgs` is set to the value `5`, the output from
+    this line of code will be the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Just as you can add a value to a numeric variable with the `+=` operator, you
+    can append one string to another using `.=`, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, if `$bulletin` contains a news bulletin and `$newsflash` has a
+    news flash, the command appends the news flash to the news bulletin so that `$bulletin`
+    now comprises both strings of text.
+  prefs: []
+  type: TYPE_NORMAL
+- en: String types
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'PHP supports two types of strings that are denoted by the type of quotation
+    mark that you use. If you wish to assign a literal string, preserving the exact
+    contents, you should use single quotation marks (apostrophes), like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, every character within the single-quoted string is assigned to
+    `$info`. If you had used double quotes, PHP would have attempted to evaluate `$variable`
+    as a variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'On the other hand, when you want to include the value of a variable inside
+    a string, you do so by using double-quoted strings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you will realize, this syntax also offers a simpler option to concatenation
+    in which you don’t need to use a period, or close and reopen quotes, to append
+    one string to another. This is called *variable substitution*, and some programmers
+    use it extensively, whereas others don’t use it at all.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Escaping characters
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Sometimes a string needs to contain characters with special meanings that might
+    be interpreted incorrectly. For example, the following line of code will not work,
+    because the second quotation mark encountered in the word *spelling’s* will tell
+    the PHP parser that the string’s end has been reached. Consequently, the rest
+    of the line will be rejected as an error:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To correct this, you can add a backslash directly before the offending quotation
+    mark to tell PHP to treat the character literally and not to interpret it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And you can perform this trick in almost all situations in which PHP would
+    otherwise return an error by trying to interpret a character. For example, the
+    following double-quoted string will be correctly assigned:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Additionally, you can use escape characters to insert various special characters
+    into strings, such as tabs, newlines, and carriage returns. These are represented,
+    as you might guess, by `\t`, `\n`, and `\r`. Here is an example using tabs to
+    lay out a heading—it is included here merely to illustrate escapes, because in
+    web pages there are always better ways to do layout:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: These special backslash-preceded characters work only in double-quoted strings.
+    In single-quoted strings, the preceding string would be displayed with the ugly
+    `\t` sequences instead of tabs. Within single-quoted strings, only the escaped
+    apostrophe (`\'`) and escaped backslash itself (`\\`) are recognized as escaped
+    characters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Multiline Commands
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There are times when you need to output quite a lot of text from PHP, and using
+    several `echo` (or `print`) statements would be time-consuming and messy. To overcome
+    this, PHP offers two conveniences. The first is just to put multiple lines between
+    quotes, as in [Example 3-6](#multiline_string_echo_statement). Variables can also
+    be assigned, as in [Example 3-7](#multiline_string_assignment).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-6\. A multiline string `echo` statement
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: Example 3-7\. A multiline string assignment
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: PHP also offers a multiline sequence using the `<<<` operator—commonly referred
+    to as a *here-document* or *heredoc*—as a way of specifying a string literal,
+    preserving the line breaks and other whitespace (including indentation) in the
+    text. Its use can be seen in [Example 3-8](#alternative_multiline_echo_statement).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-8\. Alternative multiline `echo` statement
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: This code tells PHP to output everything between the two `_END` tags as if it
+    were a double-quoted string (except that quotes in a heredoc do not need to be
+    escaped). This means it’s possible, for example, for a developer to write entire
+    sections of HTML directly into PHP code and then just replace specific dynamic
+    parts with PHP variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is important to remember that the closing `_END;` *must* appear right at
+    the start of a new line, and it must be the *only* thing on that line—not even
+    a comment is allowed to be added after it (nor even a single space). Once you
+    have closed a multiline block, you are free to use the same tag name again.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'Remember: using the `<<<_END..._END;` heredoc construct, you don’t have to
+    add `\n` linefeed characters to send a linefeed—just press Return and start a
+    new line. Also, unlike in either a double-quote- or single-quote-delimited string,
+    you are free to use all the single and double quotes you like within a heredoc,
+    without escaping them by preceding them with a backslash (`\`).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 3-9](#multiline_string_variable_assignment) shows how to use the same
+    syntax to assign multiple lines to a variable.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-9\. A multiline string variable assignment
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: The variable `$out` will then be populated with the contents between the two
+    tags. If you were appending, rather than assigning, you could also have used `.=`
+    in place of `=` to append the string to `$out`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Be careful not to place a semicolon directly after the first occurrence of `_END`,
+    as that would terminate the multiline block before it had even started and cause
+    a `Parse error` message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By the way, the `_END` tag is simply one I chose for these examples because
+    it is unlikely to be used anywhere else in PHP code and is therefore unique. You
+    can use any tag you like, such as `_SECTION1` or `_OUTPUT` and so on. Also, to
+    help differentiate tags such as this from variables or functions, the general
+    practice is to preface them with an underscore.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Laying out text over multiple lines is usually just a convenience to make your
+    PHP code easier to read, because once it is displayed in a web page, HTML formatting
+    rules take over and whitespace is suppressed (but `$author` in our example will
+    still be replaced with the variable’s value).
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, for example, if you load these multiline output examples into a browser,
+    they will *not* display over several lines, because all browsers treat newlines
+    just like spaces. However, if you use the browser’s View Source feature, you will
+    find that the newlines are correctly placed and that PHP preserved the line breaks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variable Typing
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP is a loosely typed language. This means that variables do not have to be
+    declared before they are used and that PHP always converts variables to the type
+    required by their context when they are accessed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, you can create a multiple-digit number and extract the *n*th digit
+    from it simply by assuming it to be a string. In [Example 3-10](#automatic_conversion_from_a_number_to_a),
+    the numbers `12345` and `67890` are multiplied together, returning a result of
+    `838102050`, which is then placed in the variable `$number`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-10\. Automatic conversion from a number to a string
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: At the point of the assignment, `$number` is a numeric variable. But on the
+    second line, a call is placed to the PHP function `substr`, which asks for one
+    character to be returned from `$number`, starting at the fourth position (remember
+    that PHP offsets start from zero). To do this, PHP turns `$number` into a nine-character
+    string so that `substr` can access it and return the character, which in this
+    case is `1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The same goes for turning a string into a number, and so on. In [Example 3-11](#automatically_converting_a_string_to_a_n),
+    the variable `$pi` is set to a string value, which is then automatically turned
+    into a floating-point number in the third line by the equation for calculating
+    a circle’s area, which outputs the value `78.5398175`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-11\. Automatically converting a string to a number
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: In practice, what this all means is that you don’t have to worry too much about
+    your variable types. Just assign them values that make sense to you, and PHP will
+    convert them if necessary. Then, when you want to retrieve values, just ask for
+    them—for example, with an `echo` statement, but do remember that sometimes automatic
+    conversions do not operate quite as you might expect.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Constants
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*Constants* are similar to variables, holding information to be accessed later,
+    except that they are what they sound like—constant. In other words, once you have
+    defined one, its value is set for the remainder of the program and cannot be altered.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, you can use a constant to hold the location of your server root
+    (the folder with the main files of your website). You would define such a constant
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, to read the contents of the variable, you just refer to it like a regular
+    variable (but it isn’t preceded by a dollar sign):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now, whenever you need to run your PHP code on a different server with a different
+    folder configuration, you have only a single line of code to change.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The main two things you have to remember about constants are that they must
+    *not* be prefaced with a `$` (unlike regular variables) and that you can define
+    them only using the `define` function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is generally considered a good practice to use only uppercase letters for
+    constant variable names, especially if other people will also read your code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Predefined Constants
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP comes ready-made with dozens of predefined constants that you won’t generally
+    use as a beginner. However, there are a few—known as the *magic constants*—that
+    you will find useful. The names of the magic constants always have two underscores
+    at the beginning and two at the end so that you won’t accidentally try to name
+    one of your own constants with a name that is already taken. They are detailed
+    in [Table 3-5](#phpapostrophes_magic_constants). The concepts referred to in the
+    table will be introduced in future chapters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 3-5\. PHP’s magic constants
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Magic constant | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `__LINE__` | The current line number of the file. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `__FILE__` | The full path and filename of the file. If used inside an `include`,
+    the name of the included file is returned. Some operating systems allow aliases
+    for directories, called *symbolic links*; in `__FILE__` these are always changed
+    to the actual directories. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `__DIR__` | The directory of the file. If used inside an `include`, the directory
+    of the included file is returned. This is equivalent to *`dirname`*`(__FILE__)`.
+    This directory name does not have a trailing slash unless it is the root directory.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `__FUNCTION__` | The function name. Returns the function name as it was declared
+    (case-sensitive). In PHP 4, its value is always lowercase. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `__CLASS__` | The class name. Returns the class name as it was declared (case-sensitive).
+    In PHP 4, its value is always lowercase. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `__METHOD__` | The class method name. The method name is returned as it was
+    declared (case-sensitive). |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `__NAMESPACE__` | The name of the current namespace. This constant is defined
+    at compile time (case-sensitive). |'
+  prefs: []
+  type: TYPE_TB
+- en: 'One handy use of these variables is for debugging, when you need to insert
+    a line of code to see whether the program flow reaches it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: This prints the current program line in the current file (including the path)
+    to the web browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Difference Between the echo and print Commands
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: So far, you have seen the `echo` command used in a number of different ways
+    to output text from the server to your browser. In some cases, a string literal
+    has been output. In others, strings have first been concatenated or variables
+    have been evaluated. I’ve also shown output spread over multiple lines.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'But there is an alternative to `echo` that you can use: `print`. The two commands
+    are quite similar, but `print` is a function-like construct that takes a single
+    parameter and has a return value (which is always `1`), whereas `echo` is purely
+    a PHP language construct. Since both commands are constructs, neither requires
+    parentheses.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'By and large, the `echo` command usually will be a tad faster than `print`,
+    because it doesn’t set a return value. On the other hand, because it isn’t implemented
+    like a function, `echo` cannot be used as part of a more complex expression, whereas
+    `print` can. Here’s an example to output whether the value of a variable is `TRUE`
+    or `FALSE` using `print`—something you could not perform in the same manner with
+    `echo`, because it would display a `Parse error` message:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: The question mark is simply a way of interrogating whether variable `$b` is
+    `TRUE` or `FALSE`. Whichever command is on the left of the following colon is
+    executed if `$b` is `TRUE`, whereas the command to the right of the colon is executed
+    if `$b` is `FALSE`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generally, though, the examples in this book use `echo`, and I recommend that
+    you do so as well until you reach such a point in your PHP development that you
+    discover the need for using `print`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Functions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*Functions* separate sections of code that perform a particular task. For example,
+    maybe you often need to look up a date and return it in a certain format. That
+    would be a good example to turn into a function. The code doing it might be only
+    three lines long, but if you have to paste it into your program a dozen times,
+    you’re making your program unnecessarily large and complex if you don’t use a
+    function. And if you decide to change the date format later, putting it in a function
+    means having to change it in only one place.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Placing code into a function not only shortens your program and makes it more
+    readable but also adds extra functionality (pun intended), because functions can
+    be passed parameters to make them perform differently. They can also return values
+    to the calling code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To create a function, declare it in the manner shown in [Example 3-12](#simple_function_declaration).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-12\. A simple function declaration
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: This function returns a date in the format *Friday May 2nd 2025*. Any number
+    of parameters can be passed between the initial parentheses; we have chosen to
+    accept just one. The curly braces enclose all the code that is executed when you
+    later call the function. Note that the first letter within the `date` function
+    call in this example is a lowercase letter L, not to be confused with the number
+    1.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To output today’s date using this function, place the following call in your
+    code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you need to print out the date 17 days ago, you now just have to issue the
+    following call:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: which passes to `longdate` the current time less the number of seconds since
+    17 days ago (17 days × 24 hours × 60 minutes × 60 seconds).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Functions can also accept multiple parameters and return multiple results, using
+    techniques that I’ll introduce over the following chapters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variable Scope
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you have a very long program, it’s quite possible that you could start to
+    run out of good variable names, but with PHP you can decide the *scope* of a variable.
+    In other words, you can, for example, tell it that you want the variable `$temp`
+    to be used only inside a particular function and to forget it was ever used when
+    the function returns. In fact, this is the default scope for PHP variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Alternatively, you could inform PHP that a variable is global in scope and thus
+    can be accessed by every other part of your program.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Local variables
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Local variables* are variables that are created within, and can be accessed
+    only by, a function. They are generally temporary variables that are used to store
+    partially processed results prior to the function’s return.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: One set of local variables is the list of arguments to a function. In the previous
+    section, we defined a function that accepted a parameter named `$timestamp`. This
+    is meaningful only in the body of the function; you can’t get or set its value
+    outside the function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For another example of a local variable, take another look at the `longdate`
+    function, which is modified slightly in [Example 3-13](#expanded_version_of_the_longdate_func).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-13\. An expanded version of the `longdate` function
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here we have assigned the value returned by the `date` function to the temporary
+    variable `$temp`, which is then inserted into the string returned by the function.
+    As soon as the function returns, the `$temp` variable and its contents disappear,
+    as if they had never been used at all.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now, to see the effects of variable scope, let’s look at some similar code in
+    [Example 3-14](#this_attempt_to_access_dollartemp_in_fun). Here `$temp` has been
+    created *before* we call the `longdate` function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-14\. This attempt to access `$temp` in function `longdate` will fail
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'However, because `$temp` was neither created within the `longdate` function
+    nor passed to it as a parameter, `longdate` cannot access it. Therefore, this
+    code snippet outputs only the date, not the preceding text. In fact, depending
+    on how PHP is configured, it may first display the error message `Notice: Undefined
+    variable: temp`, something you don’t want your users to see.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The reason for this is that, by default, variables created within a function
+    are local to that function, and variables created outside of any functions can
+    be accessed only by nonfunction code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some ways to repair [Example 3-14](#this_attempt_to_access_dollartemp_in_fun)
+    appear in Examples [3-15](#rewriting_to_refer_to_dollartemp_within) and [3-16](#alternative_solution_passing_dollarte).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-15\. Rewriting to refer to `$temp` within its local scope fixes the
+    problem
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 3-15](#rewriting_to_refer_to_dollartemp_within) moves the reference
+    to `$temp` out of the function. The reference appears in the same scope where
+    the variable was defined.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Example 3-16\. An alternative solution: passing `$temp` as an argument'
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: The solution in [Example 3-16](#alternative_solution_passing_dollarte) passes
+    `$temp` to the `longdate` function as an extra argument. `longdate` reads it into
+    a temporary variable that it creates called `$text` and outputs the desired result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'Forgetting the scope of a variable is a common programming error, so remembering
+    how variable scope works will help you debug some quite obscure problems. Suffice
+    it to say that unless you have declared a variable otherwise, its scope is limited
+    to being local: either to the current function, or to the code outside of any
+    functions, depending on whether it was first created or accessed inside or outside
+    a function.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Global variables
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There are cases when you need a variable to have *global* scope, because you
+    want all your code to be able to access it. Also, some data may be large and complex,
+    and you don’t want to keep passing it as arguments to functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To access variables from global scope, add the keyword `global`. Let’s assume
+    that you have a way of logging your users in to your website and want all your
+    code to know whether it is interacting with a logged-in user or a guest. One way
+    to do this is to use the `global` keyword before a variable, such as `$is_logged_in`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now your login function simply has to set that variable to `1` upon a successful
+    login attempt or `0` upon failure. Because the scope of the variable is set to
+    global, every line of code in your program can access it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You should use variables given global access with caution, though. I recommend
+    that you create them only when you absolutely cannot find another way of achieving
+    the result you desire. In general, programs that are broken into small parts and
+    segregated data are less buggy and easier to maintain. If you have a thousand-line
+    program (and some day you will) in which you discover that a global variable has
+    the wrong value at some point, how long will it take you to find the code that
+    set it incorrectly?
+  prefs: []
+  type: TYPE_NORMAL
+- en: Also, if you have too many variables with global scope, you run the risk of
+    using one of those names again locally, or at least thinking you have used it
+    locally, when in fact it has already been declared as global. All manner of strange
+    bugs can arise from such situations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: I generally adopt the convention of making all variable names that require global
+    access uppercase (just as it’s recommended that constants should be uppercase)
+    so that I can see at a glance the scope of a variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Static variables
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In the section [“Local variables”](#local_variables), I mentioned that the value
+    of a local variable is wiped out when the function ends. If a function runs many
+    times, it starts with a fresh copy of the variable, and the previous setting has
+    no effect.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Here’s an interesting case. What if you have a local variable inside a function
+    that you don’t want any other parts of your code to have access to, but you would
+    also like to keep its value for the next time the function is called? Why? Perhaps
+    because you want a counter to track how many times a function is called. The solution
+    is to declare a *static* variable, as shown in [Example 3-17](#function_using_a_static_variable).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-17\. A function using a static variable
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE61]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here, the very first line of the function `test` creates a static variable called
+    `$count` and initializes it to a value of `0`. The next line outputs the variable’s
+    value; the final one increments it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The next time the function is called, because `$count` has already been declared,
+    the first line of the function is skipped. Then the previously incremented value
+    of `$count` is displayed before the variable is again incremented.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you plan to use static variables, you should note that you cannot assign
+    the result of an expression in their definitions. They can be initialized only
+    with predetermined values (see [Example 3-18](#allowed_and_disallowed_static_variable_d)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-18\. Allowed and disallowed static variable declarations
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE62]'
+  prefs: []
+  type: TYPE_PRE
+- en: Superglobal variables
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Starting with PHP 4.1.0, several predefined variables are available. These are
+    known as *superglobal variables*, which means that they are provided by the PHP
+    environment but are global within the program, accessible absolutely everywhere.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These superglobals contain lots of useful information about the currently running
+    program and its environment (see [Table 3-6](#phpapostrophes_superglobal_variables)).
+    They are structured as associative arrays, a topic discussed in [Chapter 6](ch06.xhtml#php_arrays).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 3-6\. PHP’s superglobal variables
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Superglobal name | Contents |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$GLOBALS` | All variables that are currently defined in the global scope
+    of the script. The variable names are the keys of the array. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_SERVER` | Information such as headers, paths, and locations of scripts.
+    The entries in this array are created by the web server, and there is no guarantee
+    that every web server will provide any or all of these. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_GET` | Variables passed to the current script via the HTTP GET method.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_POST` | Variables passed to the current script via the HTTP POST method.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_FILES` | Items uploaded to the current script via the HTTP POST method.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_COOKIE` | Variables passed to the current script via HTTP cookies. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_SESSION` | Session variables available to the current script. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_REQUEST` | Contents of information passed from the browser; by default,
+    `$_GET`, `$_POST`, and `$_COOKIE`. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$_ENV` | Variables passed to the current script via the environment method.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: All of the superglobals (except for `$GLOBALS`) are named with a single initial
+    underscore and only capital letters; therefore, you should avoid naming your own
+    variables in this manner to avoid potential confusion.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To illustrate how you use them, let’s look at a common example. Among the many
+    nuggets of information supplied by superglobal variables is the URL of the page
+    that referred the user to the current web page. This referring page information
+    can be accessed like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE63]'
+  prefs: []
+  type: TYPE_PRE
+- en: It’s that simple. Oh, and if the user came straight to your web page, such as
+    by typing its URL directly into a browser, `$came_from` will be set to an empty
+    string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Superglobals and security
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: A word of caution is in order before you start using superglobal variables,
+    because they are often used by hackers trying to find exploits to break into your
+    website. What they do is load up `$_POST`, `$_GET`, or other superglobals with
+    malicious code, such as Unix or MySQL commands that can damage or display sensitive
+    data if you naively access them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Therefore, you should always sanitize superglobals before using them. One way
+    to do this is via the PHP `htmlentities` function. It converts all characters
+    into HTML entities. For example, less-than and greater-than characters (`<` and
+    `>`) are transformed into the strings `&lt;` and `&gt;` so that they are rendered
+    harmless, as are all quotes and backslashes, and so on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Therefore, a much better way to access `$_SERVER` (and other superglobals)
+    is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE64]'
+  prefs: []
+  type: TYPE_PRE
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Using the `htmlentities` function for sanitization is an important practice
+    in any circumstance where user or other third-party data is being processed for
+    output, not just with superglobals.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This chapter has provided you with a solid introduction to using PHP. In [Chapter 4](ch04.xhtml#expressions_and_control_flow_in_php),
+    you’ll start using what you’ve learned to build expressions and control program
+    flow—in other words, do some actual programming.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But before moving on, I recommend that you test yourself with some (if not all)
+    of the following questions to ensure that you have fully digested the contents
+    of this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: What tag is used to invoke PHP to start interpreting program code? And what
+    is the short form of the tag?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What are the two types of comment tags?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which character must be placed at the end of every PHP statement?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which symbol is used to preface all PHP variables?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What can a variable store?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the difference between `$variable = 1` and `$variable == 1`?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Why do you suppose that an underscore is allowed in variable names (`$current_user`),
+    whereas hyphens are not (`$current-user`)?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Are variable names case-sensitive?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Can you use spaces in variable names?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How do you convert one variable type to another (say, a string to a number)?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the difference between `++$j` and `$j++`?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Are the operators `&&` and `and` interchangeable?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you create a multiline `echo` or assignment?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Can you redefine a constant?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How do you escape a quotation mark?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the difference between the `echo` and `print` commands?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the purpose of functions?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you make a variable accessible to all parts of a PHP program?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: If you generate data within a function, what are a couple of ways to convey
+    the data to the rest of the program?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is the result of combining a string with a number?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: See [“Chapter 3 Answers”](app01_split_002.xhtml#chapter_3_answers) in the [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions)
+    for the answers to these questions.
+  prefs: []
+  type: TYPE_NORMAL

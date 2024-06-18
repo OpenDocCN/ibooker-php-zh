@@ -1,0 +1,946 @@
+- en: Chapter 11\. Streams
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '*Streams* in PHP represent common interfaces to data resources that can be
+    written to or read from in a linear, continuous manner. Internally, each stream
+    is represented by a collection of objects referred to as *buckets*. Each bucket
+    represents a chunk of data from the underlying stream, which is treated like a
+    digital re-creation of an old-fashioned bucket brigade, like the one illustrated
+    in [Figure 11-1](#bucket_brigade_illustration).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Bucket brigades pass buckets of data from one to another in turn](assets/phpc_1101.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-1\. Bucket brigades pass buckets of data from one to another in turn
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Bucket brigades were often used to transport water from a river, stream, lake,
+    or well to the source of a fire. When it was impossible to use hoses to move the
+    water, people would line up and pass buckets from one to another in order to fight
+    the fire. One person would fill a bucket at the water source and then pass the
+    bucket to the next person in line. The people in line didn’t move, but the bucket
+    of water was transported from person to person in turn until the final person
+    could throw the water on the fire. This process would continue until either the
+    fire was extinguished or the source ran out of water.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Though you’re not using PHP to fight a fire, the internal structure of a stream
+    is somewhat similar to a bucket brigade because of the way data is passed one
+    chunk (bucket) at a time through whatever component of code is processing it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generators are also analogous to this pattern.^([1](ch11.html#idm45875147854464))
+    Rather than loading an entire collection of data into memory all at once, generators
+    provide a way to reduce it into smaller chunks and operate on one piece of data
+    at a time. This enables a PHP application to operate on data that would otherwise
+    exhaust system memory. Streams empower similar functionality, except working on
+    continuous data rather than collections or arrays of discrete data points.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Wrappers and Protocols
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In PHP, streams are implemented using *wrappers* that are registered with the
+    system to operate on a specific protocol. The most common wrappers you might interact
+    with are those for file access or HTTP URLs, registered as `file://` and `http://`,
+    respectively. Each wrapper operates against different kinds of data, but they
+    all support the same basic functionality. [Table 11-1](#php_native_protocols)
+    enumerates the wrappers and protocols that are exposed natively by PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 11-1\. Native stream wrappers and protocols
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Protocol | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `file://` | Access the local filesystem |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `http://` | Access remote URLs over HTTP(S) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `ftp://` | Access remote filesystems over FTP(S) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `php://` | Access various local I/O streams (memory, `stdin`, `stdout`, etc.)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `zlib://` | Compression |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `data://` | Raw data (according to [RFC 2397](https://oreil.ly/EBJv6)) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `glob://` | Find pathnames matching a pattern |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `phar://` | Manipulate PHP archives |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `ssh2://` | Connect via secure shell |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `rar://` | RAR compression |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `ogg://` | Audio streams |'
+  prefs: []
+  type: TYPE_TB
+- en: Each wrapper produces a `stream` resource that enables you to read or write
+    data in a linear fashion with the additional ability to “seek” to an arbitrary
+    location within the stream. A `file://` stream, for example, allows arbitrary
+    access to bytes on disk. Similarly, the `php://` protocol provides read/write
+    access to various streams of bytes held in the local system memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Filters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP’s stream filters provide a construct that allows for the dynamic manipulation
+    of the bytes in a stream during either read or write. A simple example would be
+    to automatically convert every character in a string to either uppercase or lowercase.
+    This is accomplished by creating a custom class that extends the `php_user_filter`
+    class and registering that class as a filter for the compiler to use, as in [Example 11-1](#example_user_defined_filter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-1\. User-defined filter
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_streams_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `$in` resource passed into the filter must first be made writable before
+    you can do anything with it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_streams_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When consuming data, always be sure to update the `$consumed` output variable
+    so PHP can keep track of how many bytes you’ve operated on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_streams_CO1-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `$out` resource is initially empty, and you need to write buckets to it
+    in order for other filters (or just PHP itself) to continue acting on the stream.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_streams_CO1-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `PSFS_PASS_ON` flag tells PHP that the filter was successful and data is
+    available in the resource defined by `$out`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_streams_CO1-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This particular filter can act on any `str.` flag but intentionally only reads
+    two filter names for converting text to uppercase or lowercase. By switching on
+    the defined filter name, you can intercept and filter *just* the operations you
+    want, while allowing other filters to define their own `str.` functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_streams_CO1-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining the filter is not enough; you must explicitly register the filter so
+    PHP knows which class to instantiate when filtering a stream.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![7](assets/7.png)](#co_streams_CO1-7)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once the filter is defined and registered, you must either append (or prepend)
+    the custom filter to the list of filters attached to the current stream resource.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![8](assets/8.png)](#co_streams_CO1-8)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the filter attached, any data written to the stream will pass through the
+    filter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![9](assets/9.png)](#co_streams_CO1-9)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Opening the file again demonstrates that your input data was indeed converted
+    to uppercase. Note that `file_get_contents()` reads the entire file into memory
+    rather than operating on it as a stream.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Internally, any custom filter’s `filter()` method must return one of three
+    flags:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PSFS_PASS_ON`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Demonstrates that processing completed successfully and that the output bucket
+    brigade (`$out`) contains data ready for the next filter
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PSFS_FEED_ME`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Demonstrates that the filter completed successfully, but no data was available
+    to the output brigade. You must provide more data to the filter (either from the
+    base stream or the filter immediately prior in the stack) to get any output
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`PSFS_ERR_FATAL`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Indicates that the filter experienced an error
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `onCreate()` method exposes three internal variables from the underlying
+    `php_user_filter` class as if they were properties of the child class itself:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`::filtername`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The name of the filter as specified in `stream_filter_append()` or `stream_​fil⁠ter_​pre⁠pend()`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`::params`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additional parameters passed into the filter either when appending or prepending
+    it to the filter stack
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`::stream`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The actual stream resource being filtered
+  prefs: []
+  type: TYPE_NORMAL
+- en: Stream filters are powerful ways to manipulate data as it flows into or out
+    of the system. The following recipes cover various uses of streams in PHP, including
+    both stream wrappers and filters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 11.1 Streaming Data to/from a Temporary File
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to use a temporary file to store data used elsewhere in a program.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To store data, use the `php://temp` stream as if it were a file as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To retrieve that data again, rewind the stream to the beginning and then read
+    the data back out as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In general, PHP supports two different temporary data streams. The Solution
+    example leverages the `php://temp` stream but could have just as easily used `php://memory`
+    to achieve the same effect. For streams of data that fit entirely in memory, the
+    two wrappers are interchangeable. Both will, by default, use system memory to
+    store stream data. Once the stream surpasses the amount of memory available to
+    the application, however, `php://temp` will instead route the data to a temporary
+    file on disk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In both cases, the data written to the stream is assumed to be ephemeral. Once
+    you close the stream, this data is no longer available. Likewise, you cannot create
+    a *new* stream resource that points to the same data. [Example 11-2](#temp_stream_unique)
+    illustrates how PHP will leverage *different* temporary files for streams even
+    when using the same stream wrapper.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-2\. Temporary streams are unique
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_streams_CO2-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Write a single line to the temporary stream.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_streams_CO2-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rewind the stream handle so you can reread data from it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_streams_CO2-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reading data back out of the stream prints `Hello world!` to the console.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_streams_CO2-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a new stream handle creates an entirely new stream despite the identical
+    protocol wrapper.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_streams_CO2-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Write some unique data to this new stream.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_streams_CO2-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For good measure, rewind both streams.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![7](assets/7.png)](#co_streams_CO2-7)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Print the second stream first to prove it’s unique. This prints `Goodnight moon`.
+    to the console.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![8](assets/8.png)](#co_streams_CO2-8)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Reprint `Hello world!` to the console to prove that the original stream still
+    works as expected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In either case, a temporary stream is useful when you need to store some data
+    while running an application and don’t explicitly want to persist it to disk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`fopen()`](https://oreil.ly/LR8pa) and [PHP I/O stream wrappers](https://oreil.ly/6De6p).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 11.2 Reading from the PHP Input Stream
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to read raw input from within PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Leverage the `php://stdin` stream to read the [standard input stream (`stdin`)](https://oreil.ly/-_Bxl)
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Like any other application, PHP has direct access to the input passed to it
+    by commands and other upstream applications. In a console world, this might be
+    another command, literal input in the terminal, or data piped in from another
+    application. In a web context, though, you would instead use `php://input`+ to
+    access the literal contents submitted in a web request and passed through whatever
+    web server is in front of the PHP application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: In command-line applications, you can also use the predefined [`STDIN` constant](https://oreil.ly/wgDpd)
+    directly. PHP natively opens a stream for you, meaning you don’t need to create
+    a new resource variable at all.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A simple command-line application might take data from the input, manipulate
+    that data, and then store it in a file. In [Recipe 9.5](ch09.html#storing_encrypted_data_in_a_file),
+    you learned how to encrypt and decrypt files by using symmetric keys with Libsodium.
+    Assuming you have an encryption key (encoded in hexadecimal) exposed as an environment
+    variable, the program in [Example 11-3](#encrypting_stdin_with_libsodium) would
+    use that key to encrypt any data passed in and store it in an output file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-3\. Encrypting `stdin` with Libsodium
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_streams_CO3-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since you want to use an environment variable to house the encryption key, first
+    check that this variable exists.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_streams_CO3-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Also do a sanity check that the key is of the right size before using it for
+    encryption.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_streams_CO3-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this example, read the bytes directly from `stdin`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_streams_CO3-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use a dynamically named file to store the encrypted data. Note that, in practice,
+    `uniqid()` uses timestamps and could be subject to race conditions and name collisions
+    on highly used systems. In a real-world environment, you will want to use a more
+    reliable source of randomness for a generated filename.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_streams_CO3-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The output could be passed back to the console but, since this encryption produces
+    raw bytes, it’s safer to stream the output to a file. In this case, the filename
+    will be generated dynamically based on the system clock.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_streams_CO3-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The rest of the encryption follows the same pattern as [Recipe 9.5](ch09.html#storing_encrypted_data_in_a_file).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The preceding example enables you to pipe data from a file directly into PHP
+    by using the standard input buffer. Such a piping operation might look something
+    like `cat plaintext-file.txt | php encrypt.php`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Given that the encryption operation will produce a file, you can reverse the
+    operation with a similar script and similarly leverage `cat` to pipe the raw binary
+    back into PHP, as shown in [Example 11-4](#decrypting_stdin_with_libsodium).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-4\. Decrypting `stdin` with Libsodium
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Thanks to PHP’s I/O stream wrappers, arbitrary input streams are just as easy
+    to manipulate as native files on a local disk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [PHP I/O stream wrappers](https://oreil.ly/wKjj9).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 11.3 Writing to the PHP Output Stream
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to output data directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Write to `php://output` to push data directly to the [standard output (`stdout`)
+    stream](https://oreil.ly/coZ8n) as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'PHP exposes three standard I/O streams to userland code—`stdin`, `stdout`,
+    and `stderr`. By default, anything you print in your application is sent to the
+    standard output stream (`stdout`), which makes the following two lines of code
+    functionally equivalent:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Many developers learn to use `echo` and `print` statements as simple ways to
+    debug an application; adding an indicator in your code makes it easy to identify
+    where exactly the compiler is failing or to emit the value of an otherwise hidden
+    variable. However, this isn’t the *only* way to manage output. The `stdout` stream
+    is common to many applications and writing to it directly (versus an implicit
+    `print` statement) is a way to keep your application focused on what it needs
+    to be doing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similarly, once you start leveraging `php://stdout` directly to print output
+    to the client, you can start leveraging the `php://stderr` stream to emit messages
+    about *errors* as well. These two streams are treated differently by the operating
+    system, and you can use them to segment your messaging between useful messages
+    and error states.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: In command-line applications, you can also use the predefined [`STDOUT` and
+    `STDERR` constants](https://oreil.ly/HArEs) directly. PHP natively opens these
+    streams for you, meaning you don’t need to create new resource variables at all.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 11-4](#decrypting_stdin_with_libsodium) allowed you to read encrypted
+    data from `php://stdin`, decrypt it, and then store the decrypted content in a
+    file. A more useful example would instead present that decrypted data to `php://stdout`
+    (and any errors to `php://stderr`), as shown in [Example 11-5](#decrypting_stdin_with_libsodium_revamped).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-5\. Decrypting `stdin` to `stdout`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_streams_CO4-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rather than creating an intermediary file, you can write directly to the standard
+    output stream.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_streams_CO4-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You should also get a handle on the standard error stream while you’re at it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_streams_CO4-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rather than triggering an exception, you can write directly to the error stream.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [PHP I/O stream wrappers](https://oreil.ly/PmXdc).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 11.4 Reading from One Stream and Writing to Another
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to connect two streams, passing the bytes from one to the other.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `stream_copy_to_stream()` to copy data from one stream to another as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The streaming mechanisms in PHP provide for very efficient ways to work with
+    rather large chunks of data. Often, you might end up using files within your PHP
+    application that are too large to fit in the application’s available memory. Most
+    files you might make public and send to the user directly via Apache or NGINX.
+    In other cases, for example, you might want to safeguard large file downloads
+    (like zip files or videos) with scripts written in PHP to validate a user’s identity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Such a scenario is possible in PHP because the system doesn’t need to keep the
+    entire stream in memory but can instead write bytes to one stream as they are
+    read from another stream. [Example 11-6](#copy_large_file_stdout) assumes that
+    your PHP application directly authenticates a user and validates that they have
+    the right to a particular file before streaming its contents.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-6\. Copy large file to `stdout` by linking streams
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_streams_CO5-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The act of opening a stream merely gets a handle on the underlying data. No
+    bytes have yet been read by the system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_streams_CO5-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Copying a stream to another stream will copy the bytes directly without keeping
+    the entire contents of either stream in memory. Remember, streams work on chunks
+    similar to a bucket brigade, so only a subset of the necessary bytes are held
+    in memory at any given time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_streams_CO5-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s important to always `exit` after copying a stream; otherwise, you might
+    inadvertently append miscellaneous bytes by mistake.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similarly, it is possible to programmatically *build* a large stream and copy
+    it to another stream when needed. Some web applications might need to programmatically
+    build large chunks of data (very large single-page web applications, for example).
+    It is possible to write these large data elements to PHP’s temporary memory stream
+    and then copy the bytes back out when needed. [Example 11-7](#copying_temporary_stream_stdout)
+    illustrates exactly how that would work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-7\. Copying a temporary stream to `stdout`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_streams_CO6-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A temporary stream leverages a temporary file on disk. You are limited not by
+    the memory available to PHP but by the available space allocated to temporary
+    files by the operating system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_streams_CO6-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: After writing the entire HTML document to a temporary file, rewind the stream
+    back to the beginning in order to copy all of those bytes to `stdout`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_streams_CO6-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The mechanism to copy one stream to another remains unchanged even though neither
+    of these streams point to a specifically identified file on disk.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_streams_CO6-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Always `exit` after all bytes have been copied to the client to avoid accidental
+    errors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`stream_copy_to_stream()`](https://oreil.ly/Us_Yj).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 11.5 Composing Different Stream Handlers Together
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to combine multiple stream concepts—e.g., a wrapper and a filter—in
+    one piece of code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Append filters as necessary and use the appropriate wrapper protocol. [Example 11-8](#applying_multiple_fliers_stream)
+    uses the `file://` protocol for local filesystem access and two additional filters
+    to handle Base64-encoding and file decompression.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-8\. Applying multiple fliers to a stream
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_streams_CO7-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Assume this file exists on disk and contains the literal contents `80jNycnXUS​jPL8pJUQQA`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_streams_CO7-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first stream filter added to the stack will convert from Base64-encoded
+    ASCII text to raw bytes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_streams_CO7-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The second filter will leverage Zlib compression to inflate (or uncompress)
+    the raw bytes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_streams_CO7-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you started with the literal contents in step 1, this will likely print `Hello,
+    world!` to the console.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When it comes to streams, it’s helpful to think about layers. The foundation
+    is always the protocol handler used to instantiate the stream. There is no explicit
+    protocol in the Solution example, which means PHP will leverage the `file://`
+    protocol by default. Atop that foundation is any number of layers of filters on
+    the stream.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The Solution example leverages both Zlib compression and Base64 encoding to
+    compress text and encode the raw (compressed) bytes, respectively. To create such
+    a compressed/encoded file, you would do the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding example leverages the same protocol wrapper and filters as the
+    Solution example. But note that the *order* in which they are added is reversed.
+    This is because stream filters work like the layers on a jawbreaker, similar to
+    the illustration in [Figure 11-2](#filter_layers_data). The protocol wrapper is
+    at the core, and data flows from that core to the outside world, through each
+    subsequent layer in a specific order.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Data flowing into and out of PHP stream filters](assets/phpc_1102.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-2\. Data flowing into and out of PHP stream filters
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: There are several filters that you can apply to a stream already built into
+    PHP. However, you can also define your *own* filter. It’s useful to encode raw
+    bytes in Base64, but it’s also sometimes useful to encode/decode bytes as hexadecimal.
+    Such a filter doesn’t exist natively in PHP, but you can define it yourself by
+    extending the `php_​user_​fil⁠ter` class similarly to the way [Example 11-1](#example_user_defined_filter)
+    did in this chapter’s introduction. Consider the class in [Example 11-9](#userland_hex_filter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-9\. Encoding/decoding hexadecimal with a filter
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: The class defined in [Example 11-9](#userland_hex_filter) can be used to arbitrarily
+    encode to and decode from hexadecimal when applied as a filter to any arbitrary
+    stream. Merely register it as you would any other filter, then apply it to whatever
+    streams need to be converted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Base64 encoding used in the Solution example could be substituted with hexadecimal
+    entirely, as shown in [Example 11-10](#combining_hex_filters).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-10\. Combining a hexadecimal stream filter with Zlib compression
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_streams_CO8-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once the filter exists, it must be registered so PHP knows how to use it. Leveraging
+    a `*` wildcard during registration allows for both encoding and decoding to be
+    registered at once.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_streams_CO8-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The contents of *compressed.txt* will be `f348cdc9c9d75128cf2fca4951e472cfcf
+    4fc9cb4ccf28d151c8cdcfcf530400` at this point.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_streams_CO8-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: After decoding and decompressing, `Hello world! Goodnight, moon!` will be printed
+    to the console (with a newline between the two statements).
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Supported [protocols and wrappers](https://oreil.ly/HxKpb) and the [list of
+    available filters](https://oreil.ly/IE5UR). Also, [Example 11-1](#example_user_defined_filter)
+    for a user-defined stream filter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 11.6 Writing a Custom Stream Wrapper
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to define your own custom stream protocol.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Create a custom class that follows the prototype of `streamWrapper` and register
+    it with PHP. For example, a `VariableStream` class could provide a stream-like
+    interface to read from or write to a specific global variable, as follows:^([2](ch11.html#idm45875145524560))
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The preceding class would be registered and used in PHP as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `streamWrapper` construct in PHP is a prototype for a class. Unfortunately,
+    it is not a class that can be extended, nor is it an interface that can be concretely
+    implemented. Instead, it is a documented format that any user-defined stream protocols
+    must follow.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While it is possible to register classes as protocol handlers following a different
+    interface, it is strongly advised that any potential protocol classes implement
+    all methods defined by the `streamWrapper` interface (copied from the PHP document
+    as a pseudo-interface definition in [Example 11-11](#streamwrapper_interface_definition))
+    in order to satisfy PHP’s expected stream behavior
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-11\. `streamWrapper` interface definition
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Some specific functionality—e.g., `mkdir`, `rename`, `rmdir`, or `unlink`—should
+    *not* be implemented at all unless the protocol has a specific use for it. Otherwise,
+    the system will not provide helpful error messages to you (or developers building
+    atop your library) and will behave unexpectedly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While most protocols you will use day-to-day ship natively with PHP, it’s possible
+    to write new protocol handlers or leverage those built by other developers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s common to see references to cloud storage that use a proprietary protocol
+    (e.g., Amazon Web Services’ `s3://`) rather than the more common `https://` or
+    `file://` prefixes seen elsewhere. AWS actually publishes a [public SDK](https://oreil.ly/RVXlw)
+    that uses `stream_​wrap⁠per_​register()` internally to provide an `s3://` protocol
+    to other application code, empowering you to work with cloud-hosted data as easily
+    as you would local files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`streamWrapper`](https://oreil.ly/SyhD8).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch11.html#idm45875147854464-marker)) For more on generators, review [Recipe
+    7.15](ch07.html#iterating_over_large_arrays).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([2](ch11.html#idm45875145524560-marker)) The PHP Manual provides [a similarly
+    named class](https://oreil.ly/b0PLM) with much broader and more complete functionality
+    than is demonstrated in this Solution example.
+  prefs: []
+  type: TYPE_NORMAL

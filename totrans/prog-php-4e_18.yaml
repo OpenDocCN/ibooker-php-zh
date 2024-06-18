@@ -1,0 +1,782 @@
+- en: Chapter 17\. Debugging PHP
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Debugging is an acquired skill. As is often said in the development world, “You
+    are given all the rope you should ever need; just attempt to tie a pretty bow
+    with it rather than getting yourself hanged.” It naturally stands to reason that
+    the more debugging you do, the more proficient you will become. Of course, you
+    will also get some excellent hints from your server environment when your code
+    does not deliver what you were expecting. Before we get too deep into debugging
+    concepts, however, we need to look at the bigger picture and discuss these programming
+    environments. Every development shop has its own setup and its own way of doing
+    things, so what we’ll be covering here reflects the ideal conditions, also known
+    as best practices.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'PHP development in a utopian world has at least three separate environments
+    in which work is being done: development, staging, and production. We’ll explore
+    each in turn in the following sections.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Development Environment
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The development environment is a place where the raw code is created without
+    fear of server crashes or peer ridicule. This should be a place where concepts
+    and theories are proven or disproven, where code can be created experimentally.
+    Therefore, the error-reporting environmental feedback should be as verbose as
+    possible. All error reporting should be logged and at the same time also sent
+    to the output device (the browser). All warnings should be as sensitive and descriptive
+    as possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Later in this chapter, [Table 17-1](#php_error_directives_for_server_environ)
+    compares the recommended server settings for each of the three environments as
+    it relates to debugging and error reporting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The location of this development environment can be debated. However, if your
+    company has the resources, then a separate server should be established for this
+    purpose with full code management (e.g., SVN, aka Subversion, or Git) in place.
+    If the resources are not available, then a development PC can serve this purpose
+    via a `localhost`-style setup. This `localhost` environment can be advantageous
+    in and of itself in the sense that you may want to try something completely off-the-wall,
+    and by coding on a standalone PC you can be fully experimental without affecting
+    a common development server or anyone else’s code base.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can create `localhost` environments with the Apache web server, or Microsoft’s
+    Internet Information Services (IIS), as a manual process. There are a few all-in-one
+    environments that can be utilized as well; Zend Server CE (Community Edition)
+    is a great example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: No matter what setup you have for raw development, be sure to give your developers
+    full freedom to do what they want without fear of reprimand. This gives them the
+    confidence to be as innovative as possible, and no one gets “hurt.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: There are at least two alternatives to setting up a local environment on your
+    own PC. The first one is, as of PHP 5.4, a [built-in web server](http://bit.ly/TI0xTU).
+    This option saves on downloading and installing full Apache or IIS web server
+    products for `localhost` purposes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Second, there are now hosts (pun intended) of sites that allow for cloud development.
+    [Zend](http://www.phpcloud.com) offers one for free as a testing and development
+    environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Staging Environment
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The staging environment should mimic the production environment as closely as
+    possible. Although this is sometimes hard to achieve, the more closely you can
+    mimic the production environment, the better. You will be able to see how your
+    code reacts in an area that is protected but also simulates the real production
+    environment. The staging environment is often where the end user or client can
+    test out new features or functionality, giving feedback and stress-testing code,
+    without fear of affecting production code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: As testing and experimentation progress, your staging area (at least from a
+    data perspective) will eventually grow more distinct from the production environment.
+    So it is a good practice to have procedures in place that will replace the staging
+    area with production information from time to time. The set times will be different
+    for each company or development shop depending on features being created, release
+    cycles, and so on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If resources permit, you should consider having two separate staging environments:
+    one for developers (coding peers) and the other for client testing. Feedback from
+    these two types of users is quite often very different and very telling. Server
+    error reporting and feedback should be kept to a minimum here as well, to duplicate
+    production as closely as possible.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Production Environment
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The production environment, from an error-reporting perspective, needs to be
+    as tightly controlled as possible. You want to fully control what the end user
+    sees and experiences. Things like SQL failures and code syntax warnings should
+    never be seen by the client, if at all possible. Your code base, of course, should
+    be well mitigated by this time (assuming you’ve been using the two aforementioned
+    environments properly and religiously), but sometimes errors and bugs can still
+    get through to production. If you’re going to fail in production, you want to
+    fail as gracefully and as *quietly* as possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Consider using 404 page redirects and `try...catch` structures to redirect errors
+    and failures to a safe landing area in the production environment. See [Chapter 2](ch02.xhtml#language_basics)
+    for proper coding styles of the `try...catch` syntax.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At the very least, all error reporting should be suppressed and sent to the
+    logfiles in the production environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: php.ini Settings
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There are a few environment-wide settings to consider for each type of server
+    you’re using to develop your code. First, we’ll offer a brief summary of what
+    these are, and then we’ll list the recommended settings for each of the three
+    coding environments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`display_errors`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An on-off toggle that controls the display of any errors encountered by PHP.
+    This should be set to `0` (off) for production environments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`error_reporting`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This is a setting of predefined constants that will report to the error log
+    and/or the web browser any errors that PHP encounters. There are 16 different
+    individual constants that can be set within this directive, and certain ones can
+    be used collectively. The most common ones are `E_ALL`, for reporting all errors
+    and warnings of any kind; `E_WARNING`, for only showing warnings (nonfatal errors)
+    to the browser; and `E_DEPRECATED`, to display runtime notice warnings about code
+    that will fail in future versions of PHP because some functionality is scheduled
+    to be ended (like `register_globals` was). An example of these being used in combination
+    is `E_ALL & ~E_NOTICE`, which tells PHP to report all errors except the generated
+    notices. A full listing of these defined constants can be found on the [PHP website](https://oreil.ly/N2AaV).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`error_log`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The path to the location of the error log. The error log is a text-based file
+    located on the server at the path location that records all errors in text form.
+    This could be *apache2/logs* in the case of an Apache server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`variables_order`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sets the order of precedence in which the superglobal arrays are loaded with
+    information. The default order is `EGPCS`, meaning the environment (`$_ENV`) array
+    is loaded first, then the `GET` (`$_GET`) array, then the `POST` (`$_POST`) array,
+    then the cookie (`$_COOKIE`) array, and finally the server (`$_SERVER`) array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`request_order`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Describes the order in which PHP registers `GET`, `POST`, and cookie variables
+    into the `$_REQUEST` array. Registration is done from left to right, and newer
+    values override older values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`zend.assertions`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Determines whether assertions are run and throw errors. When disabled, the conditions
+    in calls to `assert()` are never run (thus, any side effects they might have do
+    not happen).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`assert.exception`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Determines whether the exception system is enabled. By default, this is on in
+    both development and production environments, and is generally the preferred way
+    to handle error conditions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additional settings can be used as well; for example, you can use `ignore_repeated_errors`
+    if you are concerned with your logfile getting too large. This directive can suppress
+    repeating errors being logged, but only from the same line of code in the same
+    file. This could be useful if you are debugging a looping section of code and
+    an error is occurring somewhere within it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'PHP also allows you to alter certain INI settings from their server-wide settings
+    during the execution of your code. This can be a quick way to turn on some error
+    reporting and display the results on screen, but it is still not recommended in
+    a production environment. You could do this in the staging environment if desired.
+    One example is to turn on all the error reporting and display any reported errors
+    to the browser in a single suspect file. To do so, insert the following two commands
+    at the top of the file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `error_reporting()` function allows you to override the level of reported
+    errors, and the `ini_set()` function allows you to change *php.ini* settings.
+    Again, not all INI settings can be altered, so be sure to check the [PHP website](https://oreil.ly/ILGqh)
+    for what can and cannot be changed at runtime.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As promised earlier, [Table 17-1](#php_error_directives_for_server_environ)
+    lists the PHP directives and their recommendations for each of the three basic
+    server environments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 17-1\. PHP error directives for server environments
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| PHP directive | Development | Staging | Production |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `display_errors` | On | Either setting, depending on desired outcome | Off
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `error_reporting` | `E_ALL` | `E_ALL & ~E_WARNING & ~E_DEPRECATED` | `E_ALL
+    & ~E_DEPRECATED & ~E_STRICT` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `error_log` | */logs* folder | */logs* folder | */logs* folder |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `variables_order` | EGPCS | GPCS | GPCS |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `request_order` | GP | GP | GP |'
+  prefs: []
+  type: TYPE_TB
+- en: Error Handling
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Error handling is an important part of any real-world application. PHP provides
+    a number of mechanisms that you can use to handle errors, both during the development
+    process and once your application is in a production environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Error Reporting
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Normally, when an error occurs in a PHP script, the error message is inserted
+    into the script’s output. If the error is fatal, the script execution stops.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are three levels of conditions: notices, warnings, and errors. A *notice*
+    that occurs during a script’s execution might indicate an error, but it could
+    also occur during normal execution (e.g., a script trying to access a variable
+    that has not been set). A *warning* indicates a nonfatal error condition; typically,
+    warnings are displayed when you call a function with invalid arguments. Scripts
+    will continue executing after issuing a warning. An *error* indicates a fatal
+    condition from which the script cannot recover. A *parse error* is a specific
+    kind of error that occurs when a script is syntactically incorrect. All errors
+    except parse errors are runtime errors.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s recommended that you treat all notices, warnings, and errors as if they
+    were errors; this helps prevent mistakes such as using variables before they have
+    legitimate values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: By default, all conditions except runtime notices are caught and displayed to
+    the user. You can change this behavior globally in your *php.ini* file with the
+    `error_reporting` option. You can also locally change the error-reporting behavior
+    in a script using the `error_reporting()` function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With both the `error_reporting` option and the `error_reporting()` function,
+    you specify the conditions that are caught and displayed by using the various
+    bitwise operators to combine different constant values, as listed in [Table 17-2](#error_reporting_values).
+    For example, this indicates all error-level options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'while this indicates all options except runtime notices:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you set the `track_errors` option on in your *php.ini* file, a description
+    of the current error is stored in `$PHP_ERRORMSG`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 17-2\. Error-reporting values
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Value | Meaning |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_ERROR` | Runtime errors |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_WARNING` | Runtime warnings |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_PARSE` | Compile-time parse errors |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_NOTICE` | Runtime notices |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_CORE_ERROR` | Errors generated internally by PHP |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_CORE_WARNING` | Warnings generated internally by PHP |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_COMPILE_ERROR` | Errors generated internally by the Zend scripting engine
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_COMPILE_WARNING` | Warnings generated internally by the Zend scripting
+    engine |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_USER_ERROR` | Runtime errors generated by a call to `trigger_error()`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_USER_WARNING` | Runtime warnings generated by a call to `trigger_error()`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_USER_NOTICE` | Runtime notices generated by a call to `trigger_error()`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E_ALL` | All of the above options |'
+  prefs: []
+  type: TYPE_TB
+- en: Exceptions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Many PHP functions now throw exceptions instead of fatally exiting operation.
+    Exceptions allow a script to continue execution even after an error—when the exception
+    occurs, an object that’s a subclass of the `BaseException` class is created, then
+    thrown. A thrown exception must be “caught” by code following the throwing code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: You should include an exception handler to catch exceptions from any method
+    that throws them. Any uncaught exceptions will cause the script to cease execution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Error Suppression
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can disable error messages for a single expression by putting the error
+    suppression operator `@` before the expression. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Without the error suppression operator, the expression would normally halt execution
+    of the script with a “divide by zero” error. As shown here, the expression does
+    nothing, although in other cases, your program might be in an unknown state if
+    you simply ignore errors that would otherwise cause the program to halt. The error
+    suppression operator cannot trap parse errors, only the various types of runtime
+    errors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Of course, the downside to suppressing errors is that you won’t know they’re
+    there. You’re much better off handling potential error conditions properly; see
+    “Triggering Errors” for an example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To turn off error reporting entirely, use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: This function ensures that, regardless of the errors PHP encounters while processing
+    and executing your script, no errors will be sent to the client (except parse
+    errors, which cannot be suppressed). Of course, it doesn’t stop those errors from
+    occurring. Better options for controlling which error messages are displayed in
+    the client are shown in the section “Defining Error Handlers”.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Triggering Errors
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can throw an error from within a script with the `assertion()` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first parameter is the condition that must be `true` to not trigger the
+    assertion; the second (optional) parameter is the message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Triggering errors is useful when you’re writing your own functions for sanity-checking
+    the parameters. For example, here’s a function that divides one number by another
+    and throws an error if the second parameter is `0`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'When a call to `assert()` is triggered, an `AssertionException`—an exception
+    extending `ErrorException` with a severity of `E_ERROR`—is thrown. In some cases,
+    you might want to throw an error of a type that extends `AssertionException`.
+    You can do so by providing an exception as the message parameter instead of a
+    string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Defining Error Handlers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you want better error control than just hiding any errors (and you usually
+    do), you can supply PHP with an error handler. The error handler is called when
+    a condition of any kind is encountered, and can do anything you want it to, from
+    logging information to a file to pretty-printing the error message. The basic
+    process is to create an error-handling function and register it with `set_error_handler()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The function you declare can take in either two or five parameters. The first
+    two parameters are the error code and a string describing the error. The final
+    three parameters, if your function accepts them, are the filename in which the
+    error occurred, the line number at which the error occurred, and a copy of the
+    active symbol table at the time the error occurred. Your error handler should
+    check the current level of errors being reported with `error_reporting()` and
+    act appropriately.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The call to `set_error_handler()` returns the current error handler. You can
+    restore the previous error handler either by calling `set_error_handler()` with
+    the returned value when your script is done with its own error handler, or by
+    calling the `restore_error_handler()` function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following code shows how to use an error handler to format and print errors:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Logging in error handlers
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'PHP provides the built-in function `error_log()` to log errors to the myriad
+    places where administrators like to put them:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The first parameter is the error message. The second parameter specifies where
+    the error is logged: a value of `0` logs the error via PHP’s standard error-logging
+    mechanism; a value of `1` emails the error to the *destination* address, optionally
+    adding any *extra_headers* to the message; a value of `3` appends the error to
+    the *destination* file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To save an error using PHP’s logging mechanism, call `error_log()` with a type
+    of `0`. By changing the value of `error_log` in your *php.ini* file, you can change
+    which file to log into. If you set `error_log` to `syslog`, the system logger
+    is used instead. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To send an error via email, call `error_log()` with a type of `1`. The third
+    parameter is the email address to which to send the error message, and an optional
+    fourth parameter can be used to specify additional email headers. Here’s how to
+    send an error message by email:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, to log to a file, call `error_log()` with a type of `3`. The third
+    parameter specifies the name of the file to log into:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 17-1](#example_oneseven_onedot_log_rolling_err) shows an example of
+    an error handler that writes logs into a file and rotates the logfile when it
+    gets above 1 KB.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 17-1\. Log-rolling error handler
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Generally, while you are working on a site, you will want errors shown directly
+    in the pages in which they occur. However, once the site goes live, it doesn’t
+    make much sense to show internal error messages to visitors. A common approach
+    is to use something like this in your *php.ini* file once your site goes live:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: This tells PHP to never show any errors, but instead to log them to the location
+    specified by the `error_log` directive.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Output buffering in error handlers
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Using a combination of output buffering and an error handler, you can send different
+    content to the user depending on whether various error conditions occur. For example,
+    if a script needs to connect to a database, you can suppress output of the page
+    until the script successfully connects to the database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 17-2](#example_oneseven_twodot_output_bufferin) shows the use of output
+    buffering to delay output of a page until it has been generated successfully.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 17-2\. Output buffering to handle errors
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: In [Example 17-2](#example_oneseven_twodot_output_bufferin), after we start
+    the `<body>` element, we register the error handler and begin output buffering.
+    If we cannot connect to the database (or if anything else goes wrong in the subsequent
+    PHP code), the heading and table are not displayed. Instead, the user sees only
+    the error message. If no errors are raised by the PHP code, however, the user
+    simply sees the HTML page.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Manual Debugging
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Once you get a few good years of development time under your belt, you should
+    be able to get at least 75% of your debugging done on a purely visual basis. What
+    of the other 25%, and the more difficult segments of code that you need to work
+    through? You can tackle some of it by using a great code development environment
+    like Zend Studio for Eclipse or Komodo. These advanced IDEs can help with syntax
+    checking and some simple logical problems and warnings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can do the next level of debugging (again, you’ll do most of this in the
+    development environment) by echoing values out onto the screen. This will catch
+    a lot of logic errors that may be dependent on the contents of variables. For
+    example, how would you be able to easily see the value of the third iteration
+    of a `for...next` loop? Consider the following code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The easiest way is to interrupt the loop conditionally and `echo` out the value
+    at the time; alternatively, you can wait until the loop is completed, as in this
+    case since the loop is building an array. Here are some examples of how to determine
+    that third iteration value (remember that array keys start with 0):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here we are simply inserting a test (`if` statement) that will send a particular
+    value to the browser when that condition is met. If you are having SQL syntax
+    problems or failures, you can also `echo` the raw statement out to the browser
+    and copy it into the SQL interface (*phpMyAdmin*, for example) and execute the
+    code that way to see if any SQL error messages are returned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If we want to see the entire array at the end of this loop, and what values
+    it contains in each of its elements, we can still use the `echo` statement, but
+    it would be tedious and cumbersome to write `echo` statements for each one. Rather,
+    we can use the `var_dump()` function. The extra advantage of `var_dump()` is that
+    it also tells us the data type of each element of the array. The output is not
+    necessarily pretty, but it is informative. You can copy the output into a text
+    editor and use it to clean up the look of the output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Of course you can use `echo` and `var_dump()` in concert as the need arises.
+    Here is an example of the raw `var_dump()` output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'There are two other ways to send simple data to the browser: the `print` language
+    construct and the `print_r()` function. `print` is merely an alternative to `echo`
+    (except that it returns a value of `1`), while `print_r()` sends information to
+    the browser in a human-readable format. You can think of `print_r()` as an alternative
+    to `var_dump()`, except that the output on an array would not send out each element’s
+    data type. The output for this code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'would look like this (notice the formatting accomplished by the `<pre>` tags):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Error Logs
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'You will find many helpful descriptions in the error logfile. As mentioned
+    previously, you should be able to locate the file under the web server’s installation
+    folder in a folder called *logs*. You should make it part of your debugging routine
+    to check this file for helpful clues as to what might be amiss. Here is just a
+    sample of the verbosity of an error logfile:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, there are a few different types of errors being reported here—notices,
+    warnings, deprecation notices, and a fatal error—with their respective timestamps,
+    file locations, and the line on which the error occurred.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Depending on your environment, some commercial server space providers do not
+    grant access for security reasons, so you may not have access to the logfile.
+    Be sure to select a production provider that grants you access to the logfile.
+    Additionally, note that the log can be and often is moved outside the web server’s
+    installation folder. On Ubuntu, for example, the default is in */var/logs/apache2/*.log*.
+    Check the web server’s configuration if you can’t locate the log.
+  prefs: []
+  type: TYPE_NORMAL
+- en: IDE Debugging
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: For more complex debugging issues, you would be best served to use a debugger
+    that can be found in a good integrated development environment (IDE). We will
+    be showing you a debug session example with Zend Studio for Eclipse. Other IDEs,
+    like Komodo and PhpED, have built-in debuggers, so they can also be used for this
+    purpose.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Zend Studio has an entire Debug Perspective setup for debugging purposes, as
+    shown in [Figure 17-1](#the_default_debug_perspective_in_zend_s).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The default Debug Perspective in Zend Studio](Images/php4_1701.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 17-1\. The default Debug Perspective in Zend Studio
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: To get your bearings with this debugger, open the Run menu. It shows all the
+    options you can try when in the debug process—stepping into and over code segments,
+    running to a cursor location, restarting the session from the beginning, and just
+    simply letting your code run until it fails or ends, to name a few.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: In Zend Studio for Eclipse, you can even debug JavaScript code with the right
+    setup!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Check the many debug views in this product as well; you can watch the variables
+    (both superglobals and user-defined) as they change over the course of code execution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Breakpoints can also be set (and suspended) anywhere in the PHP code, so you
+    can run to a certain location in your code and view the overall situation at that
+    particular moment. Two other handy views are Debug Output and Browser Output,
+    which present the output of the code as the debugger runs through it. The Debug
+    Output view presents the output in the format you would see if you had selected
+    View Source in a browser, showing the raw HTML as it is being generated. The Browser
+    Output view displays the executing code as it would appear in a browser. The neat
+    thing about both of these views is that they’re populated as the code executes,
+    so if you are stopped at a breakpoint halfway through your code file, they display
+    only the information generated up to that point.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Figure 17-2](#the_debugger_in_action_with_watch_expre) shows an example of
+    the sample code from earlier in this chapter (with an added `echo` statement within
+    the `for` loop so that you can see the output as it is being created) run in the
+    debugger. The two main variables (`$j` and `$sample`) are being tracked in the
+    Expressions view, and the Browser Output and Debug Output views display their
+    content at a stopped location in the code.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The debugger in action with watch expressions defined](Images/php4_1702.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 17-2\. The debugger in action with watch expressions defined
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Additional Debugging Techniques
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There are more advanced techniques that can be used for debugging, but they
+    are beyond the scope of this chapter. Two such techniques are profiling and unit
+    testing. If you have a large web system that requires a lot of server resources,
+    you should certainly look into the benefits of these two techniques, as they can
+    make your code base more fault-tolerant and efficient.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What’s Next
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Up next, we’ll explore writing Unix and Windows cross-platform scripts, and
+    provide a brief introduction to hosting your PHP sites on Windows servers.
+  prefs: []
+  type: TYPE_NORMAL

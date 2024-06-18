@@ -1,0 +1,1026 @@
+- en: Chapter 29\. Bringing It All Together
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Now that you’ve reached the end of this book, your first milestone along the
+    path of the hows, whys, and wherefores of dynamic web programming, I want to leave
+    you with a real example that you can sink your teeth into. In fact, it’s a collection
+    of examples, because I’ve put together a simple social networking project comprising
+    all the main features you’d expect from such a site, or more to the point, such
+    a web app.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Across the various files, there are examples of MySQL table creation and database
+    access, CSS, file inclusion, session control, DOM access, asynchronous calls,
+    event and error handling, file uploading, image manipulation, the HTML5 canvas,
+    and a whole lot more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each example file is complete and self-contained yet works with all the others
+    to build a fully working social networking site, even including a stylesheet you
+    can modify to completely change the look and feel of the project. Being small
+    and light, the end product is particularly usable on mobile platforms such as
+    a smartphone or tablet but will run equally well on a full-size desktop computer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: And you should find that, by utilizing the power of both jQuery and jQuery Mobile,
+    the code runs fast, is easy to use, adapts itself well to all environments, and
+    looks good. As an exercise, you may wish to adapt the code further, perhaps including
+    utilizing React in some way.
+  prefs: []
+  type: TYPE_NORMAL
+- en: That said, I have tried to keep this code as slimmed-down as possible to keep
+    it easy to follow. Consequently, there’s a great deal of improvement that could
+    be made to it, such as enhancing security by storing hashes (the fixed-length
+    output of irreversible one-way functions) instead of unencrypted passwords, and
+    smoother handling of some of the transitions between being logged on and off—but
+    let’s leave those as the proverbial exercises for the reader, particularly since
+    there are no questions at the end of this chapter. (Well, just the one!)
+  prefs: []
+  type: TYPE_NORMAL
+- en: I leave it up to you to take any pieces of this code you think you can use and
+    expand on them for your own purposes. Perhaps you may even wish to build on these
+    files to create a social networking site of your own.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Designing a Social Networking App
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Before writing any code, I sat down and came up with several things that I
+    decided were essential to such an app. These included the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A signup process
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A login form
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A logout facility
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Session control
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: User profiles with uploaded thumbnails
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A member directory
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Adding members as friends
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Public and private messaging between members
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Styling the project
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: I decided to name the project *Robin’s Nest*; if you use this code, you will
+    need to modify the name and logo in the *index.php* and *header.php* files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the Website
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: All the examples in this chapter can be found in [my GitHub repository](https://github.com/RobinNixon/lpmj6), where
+    you can download an archive file, which you should extract to a suitable location
+    on your computer.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Of particular interest to this chapter, within the *ZIP* file, you’ll find a
+    folder called *robinsnest*, in which all the following examples have been saved
+    with the correct filenames required by this sample application. This means you
+    can easily copy them all to your web development folder to try them out.
+  prefs: []
+  type: TYPE_NORMAL
+- en: functions.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Let’s jump right into the project, starting with [Example 29-1](#functionsdotphp-id00132),
+    *functions.php*, the include file for the main functions. This file contains a
+    little more than just the functions, though, because I have added the database
+    login details here instead of using yet another separate file. The first four
+    lines of code define the host and name of the database to use, as well as the
+    username and password.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'By default, in this file the MySQL username is set to *robinsnest*, and the
+    database used by the program is also called *robinsnest*. [Chapter 8](ch08.xhtml#introduction_to_mysql)
+    provides detailed instructions on how to create a new user and/or database, but
+    to recap, first create a new database called *robinsnest* by entering a MySQL
+    command prompt and typing this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then you can create a user called *robinsnest* capable of accessing this database
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Obviously you would use a much more secure password for this user than *password*,
+    but for the sake of simplicity, this is the password used in these examples—just
+    make sure you change it if you use any of this code on a production site.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Functions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The project uses five main functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`createTable`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Checks whether a table already exists and, if not, creates it
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`queryMysql`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Issues a query to MySQL, outputting an error message if it fails
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`destroySession`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Destroys a PHP session and clears its data to log users out
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`sanitizeString`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Removes potentially malicious code or tags from user input
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`showProfile`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Displays the user’s image and “about me” message if they have one
+  prefs: []
+  type: TYPE_NORMAL
+- en: The behavior of all of these should be obvious to you by now, with the possible
+    exception of `showProfile`, which looks for an image of the name *<user.jpg>*
+    (where *<user>* is the username of the current user) and, if it finds it, displays
+    it. It also displays any “about me” text the user may have saved.
+  prefs: []
+  type: TYPE_NORMAL
+- en: I have ensured that error handling is in place for all the functions that need
+    it so that they can catch any typographical or other errors you may introduce
+    and generate error messages. However, if you use any of this code on a production
+    server, you will want to provide your own error-handling routines to make the
+    code more user-friendly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, type in [Example 29-1](#functionsdotphp-id00132) and save it as *functions.php*
+    (or download it from the companion website), and you’ll be ready to move on to
+    the next section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-1\. functions.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: If you’ve read previous editions of this book, in which these examples used
+    the old `mysql` extension, and later on `mysqli`, you will see I have now moved
+    on again to the best solution so far, which is `PDO`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To reference the MySQL database using `PDO`, you must apply the `global` keyword
+    in the `queryMysql` and `sanitizeString` functions, to allow them to use the value
+    in `$PDO`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: header.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: For uniformity, each page of the project needs to have access to the same set
+    of features. Therefore, I placed these things in [Example 29-2](#headerdotphp-id00133),
+    *header.php*. This is the file that is actually included by the other files. It
+    includes *functions.php*. This means that only a single `require_once` is needed
+    in each file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*header.php* starts by calling the function `session_start`. As you’ll recall
+    from [Chapter 13](ch13.xhtml#cookiescomma_sessionscomma_and_authentic), this sets
+    up a session that will remember certain values we want stored across different
+    PHP files. In other words, it represents a visit by a user to the site, and it
+    can time out if the user ignores the site for a period of time.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the session started, the program then outputs the HTML needed to set up
+    each web page, including loading stylesheets and the various JavaScript libraries
+    required. After this the file of functions (*functions.php*) is included, and
+    the default string of “Welcome Guest” is assigned to `$userstr`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After this a random string value is assigned to the variable `$randstr`, used
+    throughout the app for appending to URLs so that every single page loaded looks
+    unique to the jQuery sliding interface. Without this, pages that look like they
+    should not have changed to jQuery would be fetched from its cache, leading to
+    the best performance possible. That’s fine on a set of pages with static information,
+    but this is a dynamic app where information on the pages changes all the time,
+    so we must ensure each new page request comes from the server and not the cache.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next the code checks whether the session variable `user` is currently assigned
+    a value. If so, a user has already logged in, so the variable `$loggedin` is set
+    to `TRUE` and the username is retrieved from the session variable `user` into
+    the PHP variable `$user`, with `$userstr` updated appropriately. If the user has
+    not yet logged in, then `$loggedin` is set to `FALSE`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, some HTML is output welcoming the user (or guest if not yet logged in),
+    and the `<div>` elements required by jQuery Mobile for the page’s header and content
+    sections are output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After this, using the value of `$loggedin`, an `if` block displays one of two
+    sets of menus. The non-logged-in set simply offers options of Home, Sign Up, and
+    Log In, whereas the logged-in version offers full access to the app’s features.
+    The buttons are styled using jQuery Mobile notation, such as `data-role='button'`
+    to display an element as a button, `data-inline='true'` to display elements inline
+    (like a `<span>` element), and `data-transition="slide"` to make new pages slide
+    into view when clicked, as described in [Chapter 23](ch23.xhtml#introduction_to_jquery_mobile).
+  prefs: []
+  type: TYPE_NORMAL
+- en: You will notice the use of `r=$randstr` in these URLs, as previously described,
+    to ensure every page is fetched from the server and not jQuery’s cache.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The additional styling applied to this file is in the file *styles.css* ([Example 29-13](#stylesdotcss-id00145),
+    detailed at the end of this chapter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-2\. header.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: setup.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: With the pair of included files written, it’s now time to set up the MySQL tables
+    they will use. We do this with [Example 29-3](#setupdotphp-id00134), *setup.php*,
+    which you should type and load into your browser before calling up any other files;
+    otherwise, you’ll get numerous MySQL errors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The tables created are short and sweet, and have the following names and columns:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*members*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: username *user* (indexed), password *pass*
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*messages*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: ID *id* (indexed), author *auth* (indexed), recipient *recip*, message type
+    *pm*, message *message*
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*friends*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: username *user* (indexed), friend’s username *friend*
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*profiles*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: username *user* (indexed), “about me” *text*
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because the `createTable` function first checks whether a table already exists,
+    this program can be safely called multiple times without generating any errors.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is very likely that you will need to add many more columns to these tables
+    if you choose to expand this project. If so, bear in mind that you may need to
+    issue a MySQL `DROP TABLE` command before re-creating a table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-3\. setup.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: For this example to work, you must first ensure that you have already created
+    the database specified in the variable `$data` in [Example 29-1](#functionsdotphp-id00132)
+    and also have granted access to it by the user given the name in `$user`, with
+    the password in `$pass`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: index.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: This file is trivial but necessary nonetheless to give the project a home page.
+    All it does is display a simple welcome message. In a finished application, this
+    would be where you sell the virtues of your site to encourage signups.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Incidentally, seeing as we have already set up all the MySQL tables and created
+    the included files, you can now load [Example 29-4](#indexdotphp-id00135), *index.php*,
+    into your browser to get your first peek at the new application. It should look
+    like [Figure 29-1](#the-main-page-of-the-app).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-4\. index.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](Images/pmj6_2901.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 29-1\. The main page of the app
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: signup.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Now we need a module to enable users to join our new social network, and that’s
+    [Example 29-5](#signupdotphp-id00137), *signup.php*. This is a slightly longer
+    program, but you’ve seen all its parts before.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s start by looking at the end block of HTML. This is a simple form that
+    allows a username and password to be entered. But note the use of the empty `<div>`
+    given the `id` of `used`. This will be the destination of the asynchronous call
+    in this program that checks whether a desired username is available. See [Chapter 18](ch18.xhtml#using_ajax)
+    for a complete description of how this works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Checking for Username Availability
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now go back to the program start and you’ll see a block of JavaScript that starts
+    with the function `checkUser`. This is called by the JavaScript `onBlur` event
+    when focus is removed from the `username` field of the form. First it sets the
+    contents of the `<div>` I mentioned (with the `id` of `used`) to a nonblank space
+    `&nbsp;`, which clears it in case it previously had a value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next a request is made to the program *checkuser.php*, which reports whether
+    the username in `user` is available. The returned result of the asynchronous call
+    (performed using jQuery), a friendly message, is then placed in the `used` `<div>`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After the JavaScript section comes some PHP code that you should recognize from
+    the discussion of form validation in [Chapter 17](ch17_split_000.xhtml#javascript_and_php_validation_and_error).
+    This section also uses the `sanitizeString` function to remove potentially malicious
+    characters before looking up the username in the database and, if it’s not already
+    taken, inserting the new username `$user` and password `$pass`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Logging In
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Upon successfully signing up, the user is then prompted to log in. A more fluid
+    response at this point might be to automatically log in a newly created user,
+    but because I don’t want to overly complicate the code, I have kept the signup
+    and login modules separate. You can easily implement this if you want to, however.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This file uses the CSS class `fieldname` to arrange the form fields, aligning
+    them neatly under each other in columns. When loaded into a browser (and in conjunction
+    with *checkuser.php*, shown later), this program will look like [Figure 29-2](#the-signup-page),
+    where you can see that the asynchronous call has identified that the username
+    *Robin* is available. If you would like the password field to show only asterisks,
+    change its type from `text` to `password`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Remember that you must run *setup.php* before you can run any of these other
+    PHP program files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: On a production server, I wouldn’t recommend storing user passwords in the clear,
+    as I’ve done here for reasons of space and simplicity. Instead, you should salt
+    them and store them as one-way hash strings. See [Chapter 13](ch13.xhtml#cookiescomma_sessionscomma_and_authentic)
+    for more details on how to do this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](Images/pmj6_2902.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 29-2\. The signup page
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Example 29-5\. signup.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: checkuser.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: To go with *signup.php*, here’s [Example 29-6](#checkuserdotphp-id00138), *checkuser.php*,
+    which looks up a username in the database and returns a string indicating whether
+    it has already been taken. Because it relies on the functions `sanitizeString`
+    and `queryMysql`, the program first includes the file *functions.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Then, if the `$_POST` variable `user` has a value, the function looks it up
+    in the database and, depending on whether it exists as a username, outputs either
+    “Sorry, the username *‘user’* is taken” or “The username *‘user’* is available.”
+    Just checking the value returned by the function call to `$result->rowCount` is
+    sufficient for this, as it will return `0` if the name is not found or `1` if
+    it is found.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The HTML entities `&#x2718;` and `&#x2714;` are also used to preface the string
+    with either a cross or a checkmark, and the string will be displayed in either
+    red for the class `taken` or green for the class `available`, as defined in *styles.css*,
+    shown later in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-6\. checkuser.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: login.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: With users now able to sign up on the site, [Example 29-7](#logindotphp-id00139),
+    *login.php*, provides the code needed to let them log in. Like the signup page,
+    it features a simple HTML form and some basic error checking, as well as uses
+    `sanitizeString` before querying the MySQL database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The main thing to note here is that, upon successful verification of the username
+    and password, the session variables `user` and `pass` are given the username and
+    password values. As long as the current session remains active, these variables
+    will be accessible by all the programs in the project, allowing them to automatically
+    provide access to logged-in users.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You may be interested in the use of the `die` function upon successfully logging
+    in. This is there because it combines an `echo` and an `exit` command in one,
+    thus saving a line of code. For styling, this (like most of the files) applies
+    the class `main` to indent the content from the left-hand edge.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When you call this program up in your browser, it should look like [Figure 29-3](#the-login-page).
+    Note how the input type of `password` has been used here to mask the password
+    with asterisks to prevent it from being viewed by anyone looking over the user’s
+    shoulder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-7\. login.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](Images/pmj6_2903.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 29-3\. The login page
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: profile.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: One of the first things that new users may want to do after signing up and logging
+    in is to create a profile, which can be done via [Example 29-8](#profiledotphp-id00140),
+    *profile.php*. I think you’ll find some interesting code here, such as routines
+    to upload, resize, and sharpen images.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s start by looking at the main HTML at the end of the code. This is like
+    the forms you’ve just seen, but this time it has the parameter `enctype='multipart/form-data'`.
+    This allows us to send more than one type of data at a time, enabling the posting
+    of an image as well as some text. There’s also an input type of `file`, which
+    creates a Browse button that a user can click to select a file to be uploaded.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When the form is submitted, the code at the start of the program is executed.
+    The first thing it does is ensure that a user is logged in before allowing program
+    execution to proceed. Only then is the page heading displayed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: As described in [Chapter 23](ch23.xhtml#introduction_to_jquery_mobile), due
+    to the way that jQuery Mobile uses asynchronous communication, it is not possible
+    to upload files from HTML using it, unless you disable that feature by adding
+    an attribute to the `<form>` element of `data-ajax='false'`. This will allow HTML
+    file upload to proceed as normal, but you will lose the ability to perform page
+    change animations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding the “About Me” Text
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Next, the `$_POST` variable `text` is checked to see whether some text was posted
+    to the program. If so, it is sanitized, and all long whitespace sequences (including
+    carriage returns and line feeds) are replaced with single spaces. This function
+    incorporates a double security check, ensuring that the user actually exists in
+    the database and that no attempt at hacking can succeed before inserting this
+    text into the database, where it will become the user’s “about me” details.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If no text was posted, the database is queried to see whether any text already
+    exists in order to prepopulate the `<textarea>` for the user to edit it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding a Profile Image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Next we move on to the section where the `$_FILES` system variable is checked
+    to see whether an image has been uploaded. If so, a string variable called `$saveto`
+    is created, based on the user’s username followed by the extension *.jpg*. For
+    example, a user called *Jill* will cause `$saveto` to have the value *Jill.jpg*.
+    This is the file where the uploaded image will be saved for use in the user’s
+    profile.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Following this, the uploaded image type is examined and is accepted only if
+    it is a *.jpeg*, *.png*, or *.gif* image. Upon success, the variable `$src` is
+    populated with the uploaded image using one of the `imagecreatefrom` functions,
+    according to the image type uploaded. The image is now in a raw format that PHP
+    can process. If the image is not of an allowed type, the flag `$typeok` is set
+    to `FALSE`, preventing the final section of image upload code from being processed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Processing the Image
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'First, we store the image’s dimensions in `$w` and `$h` using the following
+    statement, which is a quick way of assigning values from an array to separate
+    variables:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then, using the value of `$max` (which is set to `100`), we calculate new dimensions
+    that will result in a new image of the same ratio but with no dimension greater
+    than 100 pixels. This results in giving the variables `$tw` and `$th` the new
+    values needed. If you want smaller or larger thumbnails, simply change the value
+    of `$max` accordingly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, the function `imagecreatetruecolor` is called to create a new, blank canvas
+    `$tw` wide and `$th` high in `$tmp`. Then `imagecopyresampled` is called to resample
+    the image from `$src` to the new `$tmp`. Sometimes resampling images can result
+    in a slightly blurred copy, so the next piece of code uses the `imageconvolution`
+    function to sharpen the image up a bit.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, the image is saved as a *.jpeg* file in the location defined by the
+    variable `$saveto`, after which we remove both the original and the resized image
+    canvases from memory using the `imagedestroy` function, returning the memory that
+    was used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Displaying the Current Profile
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Last but not least, so that the user can see what the current profile looks
+    like before editing it, the `showProfile` function from *functions.php* is called
+    prior to outputting the form HTML. If no profile exists yet, nothing will be displayed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When a profile image is displayed, CSS is applied to it to provide a border,
+    a shadow, and a margin to its right, to separate the profile text from the image.
+    The result of loading [Example 29-8](#profiledotphp-id00140) into a browser is
+    shown in [Figure 29-4](#editing-a-user-profile), where you can see that the `<textarea>`
+    has been prepopulated with the “about me” text.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-8\. profile.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](Images/pmj6_2904.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 29-4\. Editing a user profile
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: members.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Using [Example 29-9](#membersdotphp-id00141), *members.php*, your users will
+    be able to find other members and choose to add them as friends (or drop them
+    if they are already friends). This program has two modes. The first lists all
+    members and their relationships to you, and the second shows a user’s profile.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Viewing a User’s Profile
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The code for the latter mode comes first, where a test is made for the variable
+    `view`, retrieved from the `$_GET` array. If it exists, a user wants to view someone’s
+    profile, so the program does that using the `showProfile` function, along with
+    providing a couple of links to the user’s friends and messages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding and Dropping Friends
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: After that, the two `$_GET` variables `add` and `remove` are tested. If one
+    or the other has a value, it will be the username of a user to either add or drop
+    as a friend. We achieve this by looking up the user in the MySQL *friends* table
+    and either inserting the username or removing it from the table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: And, of course, every posted variable is first passed through `sanitizeString`
+    to ensure that it is safe to use with MySQL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Listing All Members
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The final section of code issues an SQL query to list all usernames. The code
+    places the number returned in the variable `$num` before outputting the page heading.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A `for` loop then iterates through each and every member, fetching their details
+    and then looking them up in the *friends* table to see if they are either being
+    followed by or following the user. If someone is both a follower and a followee,
+    they are classed as a mutual friend.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The variable `$t1` is nonzero when the user is following another member, and
+    `$t2` is nonzero when another member is following the user. Depending on these
+    values, text is displayed after each username, showing the relationship (if any)
+    to the current user.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Icons are also displayed to show the relationships. A double-pointing arrow
+    means that the users are mutual friends, a left-pointing arrow indicates the user
+    is following another member, and a right-pointing arrow indicates that another
+    member is following the user.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, depending on whether the user is following another member, a link is
+    provided to either add or drop that member as a friend.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When you call [Example 29-9](#membersdotphp-id00141) up in a browser, it will
+    look like [Figure 29-5](#using-the-members-module). Note how the user is invited
+    to “follow” a nonfollowing member, but if the member is already following the
+    user, a “recip” link to reciprocate the friendship is offered. In the case of
+    a user already following another member, the user can select “drop” to end the
+    following.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](Images/pmj6_2905.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 29-5\. Using the members module
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: On a production server, there could be thousands or even hundreds of thousands
+    of users, so you would substantially modify this program to include support for
+    searching the “about me” text, paging the output a screen at a time, and so on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-9\. members.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: friends.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The module that shows a user’s friends and followers is [Example 29-10](#friendsdotphp-id00142),
+    *friends.php*. This interrogates the *friends* table just like the *members.php*
+    program but only for a single user. It then shows all of that user’s mutual friends
+    and followers along with the people they are following.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'All the followers are saved into an array called `$followers`, and all the
+    people being followed are placed in an array called `$following`. Then a neat
+    piece of code is used to extract all of those who are both following and followed
+    by the user, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `array_intersect` function extracts all members common to both arrays and
+    returns a new array containing only those people. This array is then stored in
+    `$mutual`. Now it’s possible to use the `array_diff` function for each of the
+    `$followers` and `$following` arrays to keep only those people who are *not* mutual
+    friends, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: This results in the array `$mutual` containing only mutual friends, `$followers`
+    containing only followers (and no mutual friends), and `$following` containing
+    only people being followed (and no mutual friends).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now that we’re armed with these arrays, it’s a simple matter to separately display
+    each category of members, as can be seen in [Figure 29-6](#displaying-a-users-followers).
+    The PHP `sizeof` function returns the number of elements in an array; here I use
+    it just to trigger code when the size is nonzero (that is, when friends of that
+    type exist). Note how, by using the variables `$name1`, `$name2`, and `$name3`
+    in the relevant places, the code can tell when you’re looking at your own friends
+    list, using the words *Your* and *You are*, instead of simply displaying the username.
+    The commented line can be uncommented if you wish to display the user’s profile
+    information on this screen.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-10\. friends.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](Images/pmj6_2906.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 29-6\. Displaying a user’s friends and followers
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: messages.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The last of the main modules is [Example 29-11](#messagesdotphp-id00143), *messages.php*.
+    The program starts by checking whether a message has been posted in the variable
+    `text`. If so, it is inserted into the *messages* table. At the same time, the
+    value of `pm` is also stored. This indicates whether a message is private or public.
+    A `0` represents a public message, and `1` is private.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, the user’s profile and a form for entering a message are displayed, along
+    with radio buttons to choose between a private or public message. After this,
+    all the messages are shown, depending on whether they are private or public. If
+    they are public, all users can see them, but private messages are visible only
+    to the sender and recipient. This is all handled by a couple of queries to the
+    MySQL database. Additionally, when a message is private, it is introduced by the
+    word *whispered* and shown in italic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, the program displays a couple of links to refresh the messages (in
+    case another user has posted one in the meantime) and to view the user’s friends.
+    The trick using the variables `$name1` and `$name2` is again used so that when
+    you view your own profile, the word *Your* is displayed instead of the username.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-11\. messages.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can see the result of viewing this program with a browser in [Figure 29-7](#the-messaging-module).
+    Note how users viewing their own messages are provided with links to erase any
+    they don’t want to keep. Also of note is how jQuery Mobile’s styling of radio
+    buttons has been implemented for selecting between sending a private or a public
+    message. How this works is explained in [Chapter 23](ch23.xhtml#introduction_to_jquery_mobile).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](Images/pmj6_2907.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 29-7\. The messaging module
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: logout.php
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The final ingredient in our social networking recipe is [Example 29-12](#logoutdotphp-id00144),
+    *logout.php*, the logout page that closes a session and deletes any associated
+    data and cookies. The result of calling up this program is shown in [Figure 29-8](#the-logout-page),
+    where the user is now asked to click a link that will take them to the not logged-in
+    home page and remove the logged-in links from the top of the screen. Of course,
+    you could write a JavaScript or PHP redirect to do this (probably a good idea
+    if you wish to keep logout looking clean).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](Images/pmj6_2908.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 29-8\. The logout page
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Example 29-12\. logout.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: styles.css
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The stylesheet used for this project is shown in [Example 29-13](#stylesdotcss-id00145).
+    There are a number of sets of declarations, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`*`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sets the default font family and size for the project using the universal selector.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`body`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sets the width of the project window, centers it horizontally, specifies a background
+    color, and gives it a border.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`html`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sets the background color of the HTML section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`img`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Gives all images a border, a shadow, and a right-hand margin.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`.username`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Centers the username and chooses the font family, size, color, background, and
+    padding with which to display it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`.info`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: This class is used for displaying important information. It sets a background
+    and foreground text color, applies a border and padding, and indents elements
+    that employ it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`.center`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: This class is used for centering the contents of a `<div>` element.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`.subhead`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: This class emphasizes sections of text.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`.taken`, `.available`, `.error`, and `.whisper`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: These declarations set the colors and font styles to be used for displaying
+    different types of information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`#logo`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Styles the logo text as a fallback in case a non-HTML5 browser is in use and
+    the canvas logo doesn’t get created.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`#robin`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Aligns the image of the robin in the page title.
+  prefs: []
+  type: TYPE_NORMAL
+- en: <dfn class="keep-together">`#used`</dfn>
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ensures the element that is populated by the *checkuser.php* asynchronous call
+    if a username is already taken is not too close to the field above it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-13\. styles.css
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: javascript.js
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Finally, there’s the JavaScript file (see [Example 29-14](#javascriptdotjs-id00146)),
+    which contains the `O`, `S`, and `C` functions used throughout this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 29-14\. javascript.js
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: And that, as they say, is that. If you write anything based on this code or
+    any other examples in this book, or have gained in any other way from it, then
+    I am glad to have been of help, and thank you for reading this book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Have you enjoyed learning from this book?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: See [“Chapter 29 Answers”](app01_split_028.xhtml#chapter_29_answers) in the
+    [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions) for the
+    answer to this question.
+  prefs: []
+  type: TYPE_NORMAL

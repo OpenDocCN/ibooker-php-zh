@@ -1,0 +1,1018 @@
+- en: Chapter 13\. Cookies, Sessions, and Authentication
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As your web projects grow larger and more complicated, you will find an increasing
+    need to keep track of your users. Even if you aren’t offering logins and passwords,
+    you will still often need to store details about a user’s current session and
+    possibly also recognize them when they return to your site.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Several technologies support this kind of interaction, ranging from simple browser
+    cookies to session handling and HTTP authentication. Between them, they offer
+    the opportunity for you to configure your site to your users’ preferences and
+    ensure a smooth and enjoyable transition through it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Cookies in PHP
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: A *cookie* is an item of data that a web server saves to your computer’s hard
+    disk via a web browser. It can contain almost any alphanumeric information (as
+    long as it’s under 4 KB) and can be retrieved from your computer and returned
+    to the server. Common uses include session tracking, maintaining data across multiple
+    visits, holding shopping cart contents, storing login details, and more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because of their privacy implications, cookies can be read only from the issuing
+    domain. In other words, if a cookie is issued by, for example, *oreilly.com*,
+    it can be retrieved only by a web server using that domain. This prevents other
+    websites from gaining access to details for which they are not authorized.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because of the way the internet works, multiple elements on a web page can be
+    embedded from multiple domains, each of which can issue its own cookies. When
+    this happens, they are referred to as *third-party cookies*. Most commonly, these
+    are created by advertising companies in order to track users across multiple websites,
+    or for analytic purposes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because of this, most browsers allow users to turn cookies off either for the
+    current server’s domain, third-party servers, or both. Fortunately, most people
+    who disable cookies do so only for third-party websites.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cookies are exchanged during the transfer of headers, before the actual HTML
+    of a web page is sent, and it is impossible to send a cookie once any HTML has
+    been transferred. Therefore, careful planning of cookie usage is important. [Figure 13-1](#browsersolidusserver_requestsolidusres)
+    illustrates a typical request and response dialog between a web browser and web
+    server passing cookies.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![A browser/server request/response dialog with cookies](Images/pmj6_1301.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 13-1\. A browser/server request/response dialog with cookies
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'This exchange shows a browser receiving two pages:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The browser issues a request to retrieve the main page, *index.html*, at the
+    website *http://www.webserver.com*. The first header specifies the file, and the
+    second header specifies the server.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: When the web server at *webserver.com* receives this pair of headers, it returns
+    some of its own. The second header defines the type of content to be sent (`text/html`),
+    and the third one sends a cookie of the name `name` and with the value `value`.
+    Only then are the contents of the web page transferred.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Once the browser has received the cookie, it will then return it with every
+    future request made to the issuing server until the cookie expires or is deleted.
+    So, when the browser requests the new page */news.html*, it also returns the cookie
+    `name` with the value `value`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Because the cookie has already been set, when the server receives the request
+    to send */news.html*, it does not have to resend the cookie but just returns the
+    requested page.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: It is easy to edit cookies directly from within the browser by using built-in
+    developer tools, or extensions. Therefore, because users can change cookie values,
+    you should not put key information such as usernames in a cookie, or you face
+    the possibility of having your website manipulated in ways you are not expecting.
+    Cookies are best used for storing data such as language or currency settings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Setting a Cookie
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Setting a cookie in PHP is a simple matter. As long as no HTML has yet been
+    transferred, you can call the `setcookie` function, which has the following syntax
+    (see [Table 13-1](#setcookie_parameters)):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Table 13-1\. The `setcookie` parameters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Parameter | Description | Example |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `name` | The name of the cookie. This is the name that your server will use
+    to access the cookie on subsequent browser requests. | `location` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `value` | The value of the cookie, or the cookie’s contents. This can contain
+    up to 4 KB of alphanumeric text. | `USA` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `expire` | (*Optional.*) The Unix timestamp of the expiration date. Generally,
+    you will probably use `time()` plus a number of seconds. If not set, the cookie
+    expires when the browser closes. | `time() + 2592000` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `path` | (*Optional.*) The path of the cookie on the server. If this is a
+    `/` (forward slash), the cookie is available over the entire domain, such as *www.webserver.com*.
+    If it is a subdirectory, the cookie is available only within that subdirectory.
+    The default is the current directory that the cookie is being set in, and this
+    is the setting you will normally use. | `/` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `domain` | (*Optional.*) The internet domain of the cookie. If this is *webserver.com*,
+    the cookie is available to all of *webserver.com* and its subdomains, such as
+    *www.webserver.com* and *images.webserver.com*. If it is *images.webserver.com*,
+    the cookie is available only to *images.webserver.com* and its subdomains, such
+    as *sub.images.webserver.com*, but not, say, to *www.webserver.com*. | `webserver.com`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `secure` | (*Optional.*) Whether the cookie must use a secure connection
+    (*https://*). If this value is `TRUE`, the cookie can be transferred only across
+    a secure connection. The default is `FALSE`. | `FALSE` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `httponly` | (*Optional*; implemented since PHP version 5.2.0.) Whether the
+    cookie must use the HTTP protocol. If this value is `TRUE`, scripting languages
+    such as JavaScript cannot access the cookie. The default is `FALSE`. | `FALSE`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: 'So, to create a cookie with the name `location` and the value `USA` that is
+    accessible across the entire web server on the current domain, and will be removed
+    from the browser’s cache in seven days, use the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Accessing a Cookie
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Reading the value of a cookie is as simple as accessing the `$_COOKIE` system
+    array. For example, if you wish to see whether the current browser has the cookie
+    called `location` already stored and, if so, to read its value, use the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that you can read a cookie back only after it has been sent to a web browser.
+    This means that when you issue a cookie, you cannot read it in again until the
+    browser reloads the page (or another with access to the cookie) from your website
+    and passes the cookie back to the server in the process.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Destroying a Cookie
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To delete a cookie, you must issue it again and set a date in the past. It
+    is important for all parameters in your new `setcookie` call except the timestamp
+    to be identical to the parameters when the cookie was first issued; otherwise,
+    the deletion will fail. Therefore, to delete the cookie created earlier, you would
+    use the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: As long as the time given is in the past, the cookie should be deleted. However,
+    I have used a time of 2,592,000 seconds (one month) in the past in case the client
+    computer’s date and time are not correctly set. You may also provide an empty
+    string for the cookie value (or a value of `FALSE`), and PHP will automatically
+    set its time in the past for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: HTTP Authentication
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: HTTP authentication uses the web server to manage users and passwords for the
+    application. It’s adequate for simple applications that ask users to log in, although
+    most applications will have specialized needs or more stringent security requirements
+    that call for other techniques.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To use HTTP authentication, PHP sends a header request asking to start an authentication
+    dialog with the browser. The server must have this feature turned on in order
+    for it to work, but because it’s so common, your server is likely to offer the
+    feature.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Although it is usually installed with Apache, the HTTP authentication module
+    may not necessarily be installed on the server you use. So, attempting to run
+    these examples may generate an error telling you that the feature is not enabled,
+    in which case you must either install the module and change the configuration
+    file to load it or ask your system administrator to make these changes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'After entering your URL into the browser or visiting the page via a link, the
+    user will see an “Authentication Required” prompt pop up, requesting two fields:
+    User Name and Password ([Figure 13-2](#http_authentication_login_prompt) shows
+    how this looks in Firefox).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![An HTTP authentication login prompt](Images/pmj6_1302.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 13-2\. An HTTP authentication login prompt
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: '[Example 13-1](#php_authentication) shows the code to make this happen.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-1\. PHP authentication
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The first thing the program does is look for two particular array values: `$_SERVER[''PHP_AUTH_USER'']`
+    and `$_SERVER[''PHP_AUTH_PW'']`. If they both exist, they represent the username
+    and password entered by a user into an authentication prompt.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Notice that when being displayed to the screen, the values that have been returned
+    in the `$_SERVER` array are first processed through the `htmlspecialchars` function.
+    This is because these values have been entered by the user and therefore cannot
+    be trusted, as a hacker could make a cross-site scripting attempt by adding HTML
+    characters and other symbols to the input. `htmlspecialchars` translates any such
+    input into harmless HTML entities.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If either value does not exist, the user has not yet been authenticated, and
+    you display the prompt in [Figure 13-2](#http_authentication_login_prompt) by
+    issuing the following header, where `Basic realm` is the name of the section that
+    is protected and appears as part of the pop-up prompt:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If the user fills out the fields, the PHP program runs again from the top.
+    But if the user clicks the Cancel button, the program proceeds to the following
+    two lines, which send the following header and an error message:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `die` statement causes the text “Please enter your username and password”
+    to be displayed (see [Figure 13-3](#result_of_clicking_the_cancel_button)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![The result of clicking the Cancel button](Images/pmj6_1303.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 13-3\. The result of clicking the Cancel button
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Once a user has been authenticated, you will not be able to get the authentication
+    dialog to pop up again unless the user closes and reopens all browser windows,
+    because the web browser will keep returning the same username and password to
+    PHP. You may need to close and reopen your browser a few times as you work through
+    this section and try different things out. The easiest way to do this is to open
+    up a new private or anonymous window to run these examples, so you won’t need
+    to close the entire browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now let’s check for a valid username and password. The code in [Example 13-1](#php_authentication)
+    doesn’t require you to change much to add this check, other than modifying the
+    previous welcome message code to test for a correct username and password and
+    then issuing a welcome message. A failed authentication causes an error message
+    to be sent (see [Example 13-2](#php_authentication_with_input_checking)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-2\. PHP authentication with input checking
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: When comparing usernames and passwords the `===` (identity) operator is used,
+    rather than the `==` (equals) operator. This is because we are checking whether
+    the two values match *exactly*. For example, `'0e123' == '0e456'`, and this is
+    not a suitable match for either username or password purposes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the previous instance, 0e123 is 0 times 10 raised to the 123rd power, which
+    results in zero, and 0e456 is 0 times 10 raised to the 456th power, which also
+    evaluates to zero. Therefore, using the `==` operator, they will match due to
+    their values both evaluating to zero, and so the result of the comparison will
+    be `true`, but the `===` operator says that the two parts must be identical in
+    every way, and as these two strings are different, the test will return `false`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A mechanism is now in place to authenticate users, but only for a single username
+    and password. Also, the password appears in clear text within the PHP file, and
+    if someone managed to hack into your server, they would instantly know it. So,
+    let’s look at a better way to handle usernames and passwords.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Storing Usernames and Passwords
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: MySQL is a natural way to store usernames and passwords. But again, we don’t
+    want to store the passwords as clear text, because our website could be compromised
+    if the database were accessed by a hacker. Instead, we’ll use a neat trick called
+    a *one-way function*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This type of function is easy to use and converts a string of text into a seemingly
+    random string. Because of their one-way nature, such functions are impossible
+    to reverse, so their output can be safely stored in a database—and anyone who
+    steals it will be none the wiser as to the passwords used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In previous editions of this book, I recommended using the *MD5* hashing algorithm
+    for your data security. Time marches on, however, and now MD5 is considered easily
+    hackable and therefore unsafe. Indeed, even its previously recommended replacement
+    of *SHA-1* can apparently be hacked.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, now that PHP 5.5 is pretty much the minimum standard everywhere, I have
+    moved on to using its built-in hashing function, which is vastly more secure and
+    handles everything for you in a neat fashion.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Previously, to store a password securely, you would have needed to *salt* the
+    password, which is a term for adding extra characters to a password that the user
+    did not enter (to further obscure it). You then needed to run the result of that
+    through a one-way function to turn it into a seemingly random set of characters,
+    which used to be hard to crack.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, code such as the following (which is now very insecure, because
+    modern graphics processing units have such speed and power):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'would display this value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Remember that this is not a recommended method you should ever use. Treat this
+    as an example of what *not* to do, as it is very insecure. Instead, please read
+    on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using password_hash
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'From version 5.5 of PHP, there’s a far better way to create salted password
+    hashes: the `password_hash` function. Supply `PASSWORD_DEFAULT` as its second
+    (required) argument to ask the function to select the most secure hashing function
+    currently available. `password_hash` will also choose a random salt for every
+    password. (Don’t be tempted to add any more salting of your own, as this could
+    compromise the algorithm’s security.) So, the following code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'will return a string such as the following, which includes the salt and all
+    information required for the password to be verified:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: If you are letting PHP choose the hashing algorithm for you, you should allow
+    for the returned hash to expand in size over time as better security is implemented.
+    The developers of PHP recommend that you store hashes in a database field that
+    can expand to at least 255 characters (even though 60–72 is the average length
+    right now). Should you wish, you can manually select the BCRYPT algorithm to guarantee
+    a hash string of only 60 characters, by supplying the constant `PASSWORD_BCRYPT`
+    as the second argument to the function. However, I don’t recommend this unless
+    you have a very good reason.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can supply options (in the form of an optional third argument) to further
+    tailor how hashes are calculated, such as the cost or amount of processor time
+    to allocate to the hashing (more time means more security but a slower server).
+    The cost has a default value of `10`, which is the minimum you should use with
+    BCRYPT.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, I don’t want to confuse you with more information than you need to
+    be able to store password hashes securely with the minimum of fuss, so please
+    refer to the [documentation](http://php.net/password-hash) if you’d like more
+    details on the available options. You can even choose your own salts (although
+    this is deprecated from PHP 7.0 onward, as it’s not considered that secure unless
+    you know for sure what you are doing, as remains the case with WordPress, which
+    still handles its own salting).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using password_verify
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To verify that a password matches a hash, use the `password_verify` function,
+    passing it the password string a user has just entered, and the stored hash value
+    for that user’s password (generally retrieved from your database).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So, assuming your user had previously entered the (very insecure) password
+    of *mypassword*, and you now have their password’s hash string (from when the
+    user created their password) stored in the variable `$hash`, you could verify
+    that they match like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the correct password for the hash has been supplied, `password_verify` returns
+    the value `TRUE`, so this `if` statement will display the word “Valid.” If it
+    doesn’t match, then `FALSE` is returned and you can ask the user to try again.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An Example Program
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s see how these functions work together when combined with MySQL. First
+    you need to create a new table to store password hashes, so type in the program
+    in [Example 13-3](#creating_a_users_table_and_adding_two_ac) and save it as *setupusers.php*
+    (or download it from [GitHub](https://github.com/RobinNixon/lpmj6)), and then
+    open it in your browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-3\. Creating a users table and adding two accounts
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This program will create the table *users* within your *publications* database
+    (or whichever database you set up for the *login.php* file in [Chapter 11](ch11.xhtml#accessing_mysql_using_php)).
+    In this table, it will create two users: Bill Smith and Pauline Jones. They have
+    the usernames and passwords of *bsmith/mysecret* and *pjones/acrobat*, respectively.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the data in this table, we can now modify [Example 13-2](#php_authentication_with_input_checking)
+    to properly authenticate users, and [Example 13-4](#php_authentication_using_mysql)
+    shows the code needed to do this. Type it in or download it from the companion
+    website, then make sure it is saved as *authenticate.php*, and call it up in your
+    browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-4\. PHP authentication using MySQL
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Using HTTP authentication will impose approximately an 80 ms penalty when using
+    `password_verify` with passwords hashed with BCRYPT, with the default cost of
+    10\. This slowdown serves as a barrier for attackers to prevent them from trying
+    to crack the passwords at maximum speed. Therefore, HTTP authentication is not
+    a good solution on very busy sites, where you will probably prefer to use sessions
+    (see the next section).
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you might expect at this point in the book, some of these examples are starting
+    to get quite a bit longer. But don’t be put off. The only lines to really concern
+    yourself with at this point are the ones highlighted in bold. They start with
+    the assigning of two variables, `$un_temp` and `$pw_temp`, using the submitted
+    username and password passed through the `sanitize` function to change any HTML
+    entities to safe character strings with the `htmlentities` function, and add single
+    quotes to the start and end of the string using the `quote` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, a query is issued to MySQL to look up the user `$un_temp` and, if a result
+    is returned, to assign the first row to `$row`. Because usernames are unique,
+    there will be only one row.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now all that’s necessary is to check the hash value stored in the database,
+    which is in `$row['password']` and is the previous hash value calculated with
+    `password_hash` when the user created their password.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the hash and the password just supplied by the user verify, `password_verify`
+    will return `TRUE` and a friendly welcome string will be output, calling the user
+    by their first name (see [Figure 13-4](#bill_smith_has_now_been_authenticated)).
+    Otherwise, an error message is displayed. Because we have sanitized the password
+    using `quote`, when `password_verify` is called, the encapsulating single quotes
+    are first removed with `str_replace`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can try this out for yourself by calling up the program in your browser
+    and entering a username of `bsmith` and password of `mysecret` (or `pjones` and
+    `acrobat`), the values that were saved in the database by [Example 13-3](#creating_a_users_table_and_adding_two_ac).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Bill Smith has now been authenticated](Images/pmj6_1304.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 13-4\. Bill Smith has now been authenticated
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: By sanitizing input immediately after it is encountered, you will block any
+    malicious HTML, JavaScript, or MySQL attacks before they can get any further,
+    and you will not have to sanitize this data again. If a user has characters such
+    as `<` or `&` in their password (for example), these will be expanded to `&lt;`
+    or `&amp;` by the `htmlentities` function—but as long as your code allows for
+    strings that may end up larger than the provided input width, and as long as you
+    always run passwords through this sanitization, you’ll be just fine.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Sessions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Because your program can’t tell what variables were set in other programs—or
+    even what values the same program set the previous time it ran—you’ll sometimes
+    want to track what your users are doing from one web page to another. You can
+    do this by setting hidden fields in a form, as seen in [Chapter 11](ch11.xhtml#accessing_mysql_using_php),
+    and checking the values of the fields after the form is submitted, but PHP provides
+    a much more powerful, more secure, and simpler solution in the form of *sessions*.
+    These are groups of variables that are stored on the server but relate only to
+    the current user. To ensure that the right variables are applied to the right
+    users, PHP saves a cookie in the users’ web browsers to uniquely identify them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: In 2019 Google announced it was working toward phasing out third-party cookies
+    in its browser with a project called Privacy Sandbox. No doubt other browsers
+    will follow suit, particularly Opera and Microsoft Edge, which both rely on Google
+    Chrome’s codebase. However, this is attracting regulatory attention as some companies
+    have suggested this could drive even more spend toward Google’s ecosystem, and
+    so its implementation could change. What is sure, though, is that the cookie is
+    becoming hated, and with the cookie warning on almost every site you visit, its
+    days are numbered. In summary, Google intends to lump users into groups of 1,000
+    or so who have similar browser usage and product interests, so that nobody can
+    be uniquely identified or traced. However, this could cause problems for your
+    code once cookies are finally dropped. Therefore I recommend you keep an eye out
+    for developments in this area that could affect how users interact with the code
+    you develop.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This cookie has meaning only to the web server and cannot be used to ascertain
+    any information about a user. You might ask about those users who have cookies
+    turned off. Well, in this day and age, anyone with cookies disabled should not
+    expect to have the best browsing experience, and if you find them disabled you
+    should probably inform such a user that they require cookies enabled if they wish
+    to fully benefit from your site, rather than trying to find ways around the use
+    of cookies, which could create security issues.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Starting a Session
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Starting a session requires calling the PHP function `session_start` before
+    any HTML has been output, similarly to how cookies are sent during header exchanges.
+    Then, to begin saving session variables, you just assign them as part of the `$_SESSION`
+    array, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'They can then be read back just as easily in later program runs, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now assume that you have an application that always needs access to the first
+    name and last name of each user, as stored in the table *users*, which you should
+    have created a little earlier. Let’s further modify *authenticate.php* from [Example 13-4](#php_authentication_using_mysql)
+    to set up a session once a user has been authenticated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 13-5](#setting_a_session_after_successful_authe) shows the changes
+    needed. The only difference is the content of the `if (password_verify...` section,
+    which we now start by opening a session and saving these variables into it. Type
+    this program (or modify [Example 13-4](#php_authentication_using_mysql)) and save
+    it as *authenticate2.php*. But don’t run it in your browser yet, as you will also
+    need to create a second program in a moment.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-5\. Setting a session after successful authentication
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: One other addition to the program is the “Click here to continue” link with
+    a destination URL of *continue.php*. This will be used to illustrate how the session
+    will transfer to another program or PHP web page. So, create *continue.php* by
+    typing the program in [Example 13-6](#retrieving_session_variables) and saving
+    it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-6\. Retrieving session variables
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now you are ready to call up *authenticate2.php* into your browser. Enter a
+    username of `bsmith` and password of `mysecret` (or `pjones` and `acrobat`) when
+    prompted, and click the link to load in *continue.php*. When your browser calls
+    it up, the result should be something like [Figure 13-5](#maintaining-user-data).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](Images/pmj6_1305.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 13-5\. Maintaining user data with sessions
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Sessions neatly confine to a single program the extensive code required to authenticate
+    and log in a user. Once a user has been authenticated, and you have created a
+    session, your program code becomes very simple indeed. You need only call up `session_start`
+    and look in `$_SESSION` for any variables to which you need access.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In [Example 13-6](#retrieving_session_variables), a quick test of whether `$_SESSION['forename']`
+    has a value is enough to let you know that the current user is authenticated,
+    because session variables are stored on the server (unlike cookies, which are
+    stored in the web browser) and can therefore be trusted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If `$_SESSION['forename']` has not been assigned a value, no session is active,
+    so the last line of code in [Example 13-6](#retrieving_session_variables) directs
+    users to the login page at *authenticate2.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ending a Session
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When the time comes to end a session, usually when a user requests to log out
+    from your site, you can use the `session_destroy` function, as in [Example 13-7](#handy_function_to_destroy_a_session_an).
+    This example provides a useful function for totally destroying a session, logging
+    a user out, and unsetting all session variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-7\. A handy function to destroy a session and its data
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: To see this in action, you could modify *continue.php* as in [Example 13-8](#retrieving_session_variables_and_then_de).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-8\. Retrieving session variables and then destroying the session
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first time you navigate from *authenticate2.php* to *continue.php*, it will
+    display all the session variables. But, because of the call to `destroy_session_and_data`,
+    if you then click your browser’s Reload button, the session will have been destroyed
+    and you’ll be prompted to return to the login page.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Setting a Timeout
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: There are other times when you might wish to close a user’s session yourself,
+    such as when the user has forgotten or neglected to log out, and you want the
+    program to do so for them for their own security. You do this by setting the timeout
+    after which a logout will automatically occur if there has been no activity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To do this, use the `ini_set` function as follows. This example sets the timeout
+    to exactly one day (the letters `gc` standing for garbage collection):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you wish to know what the current timeout period is, you can display it
+    using the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Session Security
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Although I mentioned that once you had authenticated a user and set up a session
+    you could safely assume that the session variables were trustworthy, this isn’t
+    exactly the case. The reason is that it’s possible to use *packet sniffing* (sampling
+    of data) to discover session IDs passing across a network. Additionally, if the
+    session ID is passed in the GET part of a URL, it might appear in external site
+    server logs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The only truly secure way of preventing these from being discovered is to implement
+    *Transport Layer Security* (TLS, the more secure successor to the *Secure Sockets
+    Layer*, or SSL) and run HTTPS instead of HTTP web pages. That’s beyond the scope
+    of this book, although you may like to take a look at the [Apache documentation](https://tinyurl.com/apachetls)
+    for details on setting up a secure web server.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Preventing session hijacking
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'When TLS is not a possibility, you can further authenticate users by storing
+    their IP addresses along with their other details by adding a line such as the
+    following when you store their sessions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then, as an extra check, whenever any page loads and a session is available,
+    perform the following check. It calls the function `different_user` if the stored
+    IP address doesn’t match the current one:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: What code you place in your `different_user` function is up to you. I recommend
+    that you either delete the current session and ask the user to log in again due
+    to a technical error or, if you have their email address, email them a link to
+    confirm their identity, which will enable them to retain all the data in the session.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Of course, you need to be aware that users on the same proxy server, or sharing
+    the same IP address on a home or business network, will have the same IP address.
+    Again, if this is a problem for you, use HTTPS. You can also store a copy of the
+    browser *user-agent string* (a string that developers put in their browsers to
+    identify them by type and version), which might also distinguish users due to
+    the wide variety of browser types, versions, and computer platforms in use (although
+    this is not a perfect solution, and the string will change if the browser auto-updates).
+    Use the following to store the user agent:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And use this to compare the current user-agent string with the saved one:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or, better still, combine the two checks like this and save the combination
+    as a `hash` hexadecimal string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And use this to compare the current and stored strings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Preventing session fixation
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Session fixation* happens when a malicious third party obtains a valid session
+    ID (which could be server-generated) and makes the user authenticate themselves
+    with that session ID, instead of authenticating with their own. It can happen
+    when an attacker takes advantage of the ability to pass a session ID in the GET
+    part of a URL, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, the made-up session ID of 123456789 is being passed to the
+    server. Now, consider [Example 13-9](#session_susceptible_to_session_fixatio),
+    which is susceptible to session fixation. To see how, type it and save it as *sessiontest.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-9\. A session susceptible to session fixation
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once it’s saved, call it up in your browser using the following URL (prefacing
+    it with the correct pathname, such as *http://localhost*):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Click Reload a few times, and you’ll see the counter increase. Now try browsing
+    to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: Click Reload a few times here, and you should see it continue counting upward.
+    Leave the counter on a different number from the first URL, go back to the first
+    URL, and see how the number changes back. You have created two different sessions
+    of your own choosing here, and you could easily create as many as you needed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The reason this approach is so dangerous is that a malicious attacker could
+    try to distribute these types of URLs to unsuspecting users, and if any of them
+    followed these links, the attacker would be able to come back and take over any
+    sessions that had not been deleted or expired—imagine if that session was to a
+    shopping site, or even worse, a bank!
+  prefs: []
+  type: TYPE_NORMAL
+- en: To prevent this, change the session ID using `session_regenerate_id` as soon
+    as you can. This function keeps all current session variable values but replaces
+    the session ID with a new one that an attacker cannot know. To do this, check
+    for a special session variable that you arbitrarily invent. If it doesn’t exist,
+    you know that this is a new session, so you simply change the session ID and set
+    the special session variable to note the change. [Example 13-10](#session_regeneration)
+    shows how the code to do this might look, using the session variable `initiated`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 13-10\. Session regeneration
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: This way, an attacker can come back to your site using any of the session IDs
+    that they generated, but none of them will call up another user’s session, as
+    they will all have been replaced with regenerated IDs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Forcing cookie-only sessions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you are prepared to require your users to enable cookies on your website,
+    you can use the `ini_set` function, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: With that setting, the `?PHPSESSID=` trick will be completely ignored. If you
+    use this security measure, I also recommend that you inform your users that your
+    site requires cookies (but only if the user has cookies disabled, and especially
+    if the user is in a part of the world that requires cookie notifications), so
+    they know what’s wrong if they don’t get the results they want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using a shared server
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'On a server shared with other accounts, you will not want to have all your
+    session data saved into the same directory as theirs. Instead, you should choose
+    a directory to which only your account has access (and that is not web-visible)
+    to store your sessions, by placing an `ini_set` call near the start of your program,
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: The configuration option will keep this new value only during the program’s
+    execution, and the original configuration will be restored at the program’s ending.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This *sessions* folder can fill up quickly; you may wish to periodically clear
+    out older sessions according to how busy your server gets. The more it’s used,
+    the less time you will want to keep a session stored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Remember that your websites can and will be subject to hacking attempts. There
+    are automated bots running riot around the internet, trying to find sites vulnerable
+    to exploits. So whatever you do, whenever you are handling data that is not 100%
+    generated within your own program, you should always treat it with the utmost
+    caution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You should now have a very good grasp of both PHP and MySQL, so [Chapter 14](ch14.xhtml#exploring_javascript)
+    introduces the third major technology covered by this book, JavaScript.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Why must a cookie be transferred at the start of a program?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Which PHP function stores a cookie in a web browser?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you destroy a cookie?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Where are the username and password stored in a PHP program when you are using
+    HTTP authentication?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Why is the `password_hash` function a powerful security measure?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is meant by *salting* a string?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is a PHP session?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How do you initiate a PHP session?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is session hijacking?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What is session fixation?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: See [“Chapter 13 Answers”](app01_split_012.xhtml#chapter_13_answers) in the
+    [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions) for the
+    answers to these questions.
+  prefs: []
+  type: TYPE_NORMAL

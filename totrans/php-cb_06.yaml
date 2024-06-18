@@ -1,0 +1,1343 @@
+- en: Chapter 6\. Dates and Times
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Manipulating dates and times is one of the most complicated tasks you can do
+    in any language, let alone in PHP. This is simply because time is relative—*now*
+    will differ from one user to the next and potentially trigger different behavior
+    in your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Object Orientation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP developers will work primarily with `DateTime` objects in code. These objects
+    work by wrapping a particular instance in time and provide a wide variety of functionality.
+    You can take the differences between two `DateTime` objects, convert between arbitrary
+    time zones, or add/subtract windows of time from an otherwise static object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Additionally, PHP supports a `DateTimeImmutable` object which is functionally
+    identical to `DateTime` but cannot be modified directly. Most methods on a `DateTime`
+    object will both return the same object and mutate its internal state. The same
+    methods on `DateTimeImmutable` leave the internal state in place but return *new
+    instances* representing the result of the change.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Both date/time classes extend an abstract `DateTimeInterface` base class, making
+    the two classes nearly interchangeable within PHP’s date and time functionality.
+    Everywhere you see `DateTime` in this chapter you could use a `DateTimeImmutable`
+    instance instead and achieve similar if not identical functionality.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Time Zones
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: One of the most challenging problems any developer will face is working with
+    time zones, particularly when daylight saving time is involved. On the one hand,
+    it’s easy to simplify and assume every timestamp within an application is referencing
+    the same time zone. This is rarely true.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Luckily, PHP makes handling time zones remarkably easy. Every `DateTime` has
+    a time zone embedded automatically, usually based on the default defined within
+    the system on which PHP is running. You can also explicitly set a time zone whenever
+    you create a `DateTime` making the region and time you’re referencing entirely
+    unambiguous. Converting between time zones is also simple and powerful and covered
+    at length in [Recipe 6.9](#calculating_across_timezones).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unix Timestamps
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Many computer systems use Unix timestamps internally to represent dates and
+    times. These timestamps represent the number of seconds that have occurred between
+    the Unix Epoch (January 1, 1970 at 00:00:00 GMT) and a given time. They are memory-efficient
+    and frequently used by databases and programmatic APIs. However, counting the
+    number of seconds since a fixed date/time isn’t exactly user-friendly, so you
+    need a reliable way to convert between Unix timestamps and human-readable date/time
+    representations within your applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP’s native formatting capabilities make this straightforward. Additional functions,
+    like [`time()`](https://oreil.ly/RBqxh), produce Unix timestamps directly as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following recipes cover these topics at length, in addition to several other
+    common date/time-related tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6.1 Finding the Current Date and Time
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to know the current date and time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To print the current date and time following a particular format, use `date()`.
+    For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The output of `date()` depends on the system it’s being run on and the current
+    actual time. Using `r` as a format string, this function would return something
+    like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Similarly, a newly instantiated `DateTime` object will also represent the current
+    date and time. The `::format()` method on this object exhibits the same behavior
+    as `date()`, meaning the following two statements are functionally identical:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP’s `date()` function, as well as a `DateTime` object instantiated with no
+    parameters, will automatically inherit the current date and time of the system
+    on which they’re run. The additional `r` passed into both is a format character
+    that defines how to convert the given date/time information into a string—in this
+    case, specifically as a date formatted according to [RFC 2822](https://oreil.ly/WrB1I).
+    You can learn more about date formatting in [Recipe 6.2](#formatting_dates_and_times).
+  prefs: []
+  type: TYPE_NORMAL
+- en: A powerful alternative is to leverage PHP’s `getdate()` function to retrieve
+    an associative array of all of the parts of the current system date and time.
+    This array will contain the keys and values in [Table 6-1](#key_elements_getdate).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 6-1\. Key elements returned by `getdate()`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Key | Description of value | Example |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `seconds` | Seconds | `0` to `59` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `minutes` | Minutes | `0` to `59` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `hours` | Hours | `0` to `23` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `mday` | Day of the month | `1` through `31` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `wday` | Day of the week | `0` (Sunday) through `6` (Saturday) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `mon` | Month | `1` through `12` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `year` | Full, four-digit year | `2023` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `yday` | Day of the year | `0` through 365 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `weekday` | Day of the week | `Sunday` through `Saturday` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `month` | Month of the year | `January` through `December` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `0` | Unix timestamp | `0` to `2147483647` |'
+  prefs: []
+  type: TYPE_TB
+- en: In some applications, you might only need the day of the week rather than a
+    fully operational `DateTime` object. Consider [Example 6-1](#getdate_vs_datetime),
+    which illustrates how you might achieve this with either `DateTime` or `getdate()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-1\. Comparing `DateTime` with `getdate()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: These two lines of code are functionally equivalent. For a simple task such
+    as “print today’s date,” either would be adequate for the job. The `DateTime`
+    object provides functionality for converting time zones or forecasting future
+    dates (both of which are covered further in other recipes). The associative array
+    returned by `getdate()` lacks this functionality but makes up for that shortcoming
+    through its simple, easy-to-recognize array keys.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [date and time functions](https://oreil.ly/rJ9fn), the
+    [`DateTime` class](https://oreil.ly/t28Zh), and the [`getdate()` function](https://oreil.ly/Kv7l8).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6.2 Formatting Dates and Times
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to print a date to a string in a particular format.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use the `::format()` method on a given `DateTime` object to specify the format
+    of the returned string, as shown in [Example 6-2](#date_time_format_examples).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-2\. Date and time format examples
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_dates_and_times_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Tuesday, August 1, 2017`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_dates_and_times_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`8/1/17`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_dates_and_times_CO1-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Tue, 01 Aug 2017 00:00:00 +0000`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Both the `date()` function and the `DateTime` object’s `::format()` method accept
+    a variety of input strings that ultimately define the final structure of the string
+    produced by PHP. Each format string is composed of individual characters that
+    represent specific parts of a date or time value, as you can see in [Table 6-2](#datetime_format_characters).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 6-2\. PHP format characters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Character | Description | Example values |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Day** |  |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `d` | Day of the month, two digits with leading 0 | `01` to `31` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `D` | A textual representation of a day, three letters | `Mon` through `Sun`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `j` | Day of the month without leading 0 | `1` to `31` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `l` | The name of the day of the week | `Sunday` through `Saturday` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `N` | ISO 8601 numeric representation of the day of the week | `1` (for Monday)
+    through `7` (for Sunday) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `S` | English ordinal suffix for the day of the month, two characters | `st`,
+    `nd`, `rd`, or `th`. Works well with `j` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `w` | Numeric representation of the day of the week | `0` (for Sunday) through
+    `6` (for Saturday) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `z` | The day of the year (starting from 0) | `0` through `365` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Month** |  |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `F` | The full name of the month | `January` through `December` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `m` | Numeric representation of a month, with leading 0 | `01` through `12`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `M` | A textual representation of a month, three letters | `Jan` through
+    `Dec` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `n` | Numeric representation of a month, without leading 0 | `1` through
+    `12` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `t` | Number of days in the given month | `28` through `31` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Year** |  |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `L` | Whether it’s a leap year | `1` if it is a leap year, `0` otherwise.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `o` | ISO 8601 week-numbering year. This has the same value as `Y`, except
+    that if the ISO week belongs to the previous or next year, that year is used instead
+    | `1999` or `2003` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `Y` | A full numeric representation of a year, four digits | `1999` or `2003`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `y` | A two-digit representation of a year | `99` or `03` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Time** |  |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `a` | Lowercase ante meridiem or post meridiem | `am` or `pm` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `A` | Uppercase ante meridiem or post meridiem | `AM` or `PM` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `g` | 12-hour format of an hour without leading 0 | `1` through `12` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `G` | 24-hour format of an hour without leading 0 | `0` through `23` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `h` | 12-hour format of an hour with leading 0 | `01` through `12` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `H` | 24-hour format of an hour with leading 0 | `00` through `23` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `i` | Minutes with leading 0 | `00` to `59` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `s` | Seconds with leading 0 | `00` through `59` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `u` | Microseconds | `654321` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `v` | Milliseconds | `654` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Time zone** |  |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `e` | Time zone identifier | `UTC`, `GMT`, `Atlantic/Azores` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `I` | Whether the date is in daylight saving time | `1` if daylight saving
+    time, `0` otherwise. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `O` | Difference from Greenwich time (GMT) without colon between hours and
+    minutes | `+0200` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `P` | Difference from Greenwich time (GMT) with colon between hours and minutes
+    | `+02:00` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `p` | The same as P, but returns Z instead of +00:00 | `+02:00` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `T` | Time zone abbreviation, if known; otherwise the GMT offset. | `EST`,
+    `MDT`, `+05` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `Z` | Time zone offset in seconds | `-43200` through `50400` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Other** |  |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `U` | Unix timestamp | `0` through `2147483647` |'
+  prefs: []
+  type: TYPE_TB
+- en: Combining these characters into a format string determines exactly how PHP will
+    convert a given date/time construct into a string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similarly, PHP defines several predefined constants representing well-known
+    and widely used formats. [Table 6-3](#datetime_format_constants) shows some of
+    the most useful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 6-3\. Predefined date constants
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Constant | Class constant | Format characters | Example |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `DATE_ATOM` | `DateTime::ATOM` | `Y-m-d\TH:i:sP` | `2023-08-01T13:22:14-08:00`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `DATE_COOKIE` | `DateTime::COOKIE` | `l, d-M-Y H:i:s T` | `Tuesday, 01-Aug-2023
+    13:22:14 GMT-0800` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| ``DATE_ISO8601`footnote:[Unfortunately, `DATE_ISO8601`` isn’t compatible
+    with the ISO 8601 standard. If you need that level of compatibility, use `DATE_ATOM`
+    instead.] | `DateTime::ISO8601` | `Y-m-d\TH:i:sO` | `2013-08-01T21:21:14\+0000`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `DATE_RSS` | `DateTime::RSS` | `D, d M Y H:i:s O` | `Tue, 01 Aug 2023 13:22:14
+    -0800` |'
+  prefs: []
+  type: TYPE_TB
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Full documentation on [format characters](https://oreil.ly/oQpYP) and [predefined
+    `DateTime` constants](https://oreil.ly/XJiZy).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6.3 Converting Dates and Times to Unix Timestamps
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to convert a particular date or time to a Unix timestamp and convert
+    a given Unix timestamp into a local date or time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To convert a given date/time into a timestamp, use the `U` format character
+    (see [Table 6-2](#datetime_format_characters)) with `DateTime::format()` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To convert a given timestamp into a `DateTime` object, also use the `U` format
+    character but instead with `DateTime::createFromFormat()` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `::createFromFormat()` method is a static inverse of `DateTime`’s `::format()`
+    method. Both functions use identical format strings to specify the format being
+    used^([1](ch06.html#idm45875164755616)) but represent opposite transformations
+    between a formatted string and the underlying state of a `DateTime` object. The
+    Solution example explicitly leverages the `U` format character to tell PHP that
+    the input data is a Unix timestamp.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If the input string doesn’t actually match your format, PHP will return a literal
+    `false` as in the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: When parsing user input, it is a good idea to explicitly check the return of
+    `::createFromFormat()` to ensure that the date input was valid. For more on validating
+    dates, see [Recipe 6.7](#validating_a_date).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rather than work with a full `DateTime` object, you can work with *parts* of
+    a date/time directly. PHP’s [`mktime()` function](https://oreil.ly/YFKz0) will
+    always return a Unix timestamp, and the only required parameter is the hour.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, assume you want the Unix timestamp representing July 4, 2023 at
+    noon in GMT (no time zone offset). You could do this in two ways, as demonstrated
+    in [Example 6-3](#mktime_example).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-3\. Creating a timestamp directly
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_dates_and_times_CO2-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This output will be exactly `1688472000`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_dates_and_times_CO2-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This output will be *close* to `1688472000` but will vary in the last three
+    digits.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While this simpler example appears elegant and avoids instantiating an object
+    only to turn it back into a number, it has an important problem. Failing to specify
+    a parameter (in this case, minutes or seconds) will cause `mktime()` to use the
+    current system values for those parameters by default. If you were to run this
+    example code at 3:05 in the afternoon, the output might be `1688472300`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This Unix timestamp translates to 12:05:00 rather than 12:00:00 when converted
+    back to a `DateTime`, representing a (potentially negligible) difference from
+    what the application expects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s important to remember that, if you choose to leverage the functional interface
+    of `mktime()`, you either provide a value for *every* component of the date/time
+    or you build your application in such a way that slight deviations are expected
+    and handled.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`DateTime::createFromFormat()`](https://oreil.ly/otv8q).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6.4 Converting from Unix Timestamps to Date and Time Parts
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to extract a particular date or time part (day or hour) from a Unix
+    timestamp.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Pass the Unix timestamp as a parameter to `getdate()` and reference the required
+    keys in the resulting associative array. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The only parameter you can provide to `getdate()` is a Unix timestamp. If this
+    parameter is omitted, PHP will leverage the current system date and time. When
+    you provide a timestamp, PHP parses that timestamp internally and allows for the
+    extraction of all expected date and time elements.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Alternatively, you can pass a timestamp into the constructor for a `DateTime`
+    instance in two ways to build a full object from it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prefixing the timestamp with an `@` character tells PHP to interpret the entry
+    as a Unix timestamp—for example, `new DateTime('@1688472300')`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: You can use the `U` format character when importing a timestamp into a `DateTime`
+    object—for example, `DateTime::createFromFormat('U', '1688472300')`.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: In any case, once your timestamp is properly parsed and loaded into a `DateTime`
+    object, you can use its `::format()` method to extract any component you desire.
+    [Example 6-4](#datetime_conversion_revisited) is an alternative implementation
+    of the Solution example that leverages `DateTime` rather than `getdate()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-4\. Extracting date and time parts from Unix timestamps
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Either of the approaches in [Example 6-4](#datetime_conversion_revisited) is
+    a valid replacement of `getdate()` that also provides the benefit of giving you
+    a fully functional `DateTime` instance. You could print the date (or time) in
+    any format, manipulate the underlying value directly, or even convert between
+    time zones if necessary. Each of these potential further uses for `DateTime` is
+    covered in further recipes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Recipe 6.1](#current_date_and_time) for further discussion of `getdate()`.
+    Read ahead in [Recipe 6.8](#add_or_subtract_a_date) to learn how to manipulate
+    `DateTime` objects and in [Recipe 6.9](#calculating_across_timezones) to see how
+    time zones can be managed directly.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6.5 Computing the Difference Between Two Dates
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to find out how much time has passed between two dates or times.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Encapsulate each date/time in a `DateTime` object. Leverage the `::diff()`
+    method on one to calculate the relative difference between it and the other `DateTime`.
+    The result will be a `DateInterval` object as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `::diff()` method of the `DateTime` object effectively subtracts one date/time
+    (the argument passed into the method) from another (the one represented by the
+    object itself). The result is a representation of the relative duration of time
+    between the two objects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The `::diff()` method ignores daylight saving time. To properly account for
+    the potential one-hour difference intrinsic to that system, converting both date/time
+    objects into UTC first is a good idea.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is also important to note that, while it might appear similar in the Solution
+    example, the `::format()` method of the `DateInterval` object takes a whole different
+    set of format characters than those used by `DateTime`. Every format character
+    must be prefixed by a literal `%` character, but the format string itself can
+    include nonformatting characters (like *years* and *months* in the Solution example).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Available format characters are enumerated in [Table 6-4](#dateinterval_format_characters).
+    In every case except for the format characters of `a` and `r`, using the lowercase
+    for a format character will return a numeric value without any leading 0\. The
+    enumerated uppercase format characters return at least two digits with a leading
+    0\. Remember, every format character must be prefixed with a literal `%`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 6-4\. `DateInterval` format characters
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Character | Description | Example |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%` | Literal `%` | `%` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `Y` | Years | `03` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `M` | Months | `02` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `D` | Days | `09` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `H` | Hours | `08` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `I` | Minutes | `01` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `S` | Seconds | `04` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `F` | Microseconds | `007705` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `R` | Sign “-” when negative, “+” when positive | `-` or `+` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `r` | Sign “-” when negative, empty when positive | `-` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `a` | Total number of days | `548` |'
+  prefs: []
+  type: TYPE_TB
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Full documentation on the [`DateInterval` class](https://oreil.ly/r0FBV).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6.6 Parsing Dates and Times from Arbitrary Strings
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You need to convert an arbitrary, user-defined string into a valid `DateTime`
+    object for further use or manipulation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use PHP’s powerful `strtotime()` function to convert the text entry into a
+    Unix timestamp, and then pass that into the constructor of a new `DateTime` object.
+    For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The power of `strtotime()` comes from the underlying [date and time import formats](https://oreil.ly/2f4o_)
+    supported by the language. These include the kinds of formats you might expect
+    computers to use (like YYYY-MM-DD for a year, month, and day). But it extends
+    to *relative* specifiers and complex, compound formats as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The convention of prefixing a Unix timestamp with a literal `@` character when
+    passing it into a `DateTime` constructor itself comes from the compound date/time
+    formats supported by PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The relative formats are the most powerful, supporting human-readable strings
+    like these:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`yesterday`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`first day of`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`now`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ago`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Armed with these formats, you can parse almost any string imaginable with PHP.
+    However, there are some limits. In the Solution example, I used `now + 2 days`
+    to specify “2 days from now.” [Example 6-5](#strtotime_parse_error) demonstrates
+    that the latter results in a parser error in PHP, even though it reads well in
+    English.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-5\. Limitations in `strtotime()` parsing
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: It should always be noted that, no matter how clever you can make a computer,
+    you are always limited by the quality of input provided by end users. There is
+    no way you can foresee every possible way of specifying a date or time; `strtotime()`
+    gets close, but you’ll need to handle input errors as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another potential way to parse user-provided dates is PHP’s `date_parse()` function.
+    Unlike `strtotime()`, this function expects a reasonably well-formatted input
+    string. It also doesn’t handle relative time quite the same way. [Example 6-6](#date_parse_with_relatives)
+    illustrates several strings that can be parsed by `date_parse()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-6\. `date_parse()` examples
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_dates_and_times_CO3-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parses January 4, 2022
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_dates_and_times_CO3-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parses February 14, but with a `null` year
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_dates_and_times_CO3-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parses both the date and the time, but with no time zone
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_dates_and_times_CO3-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parses the date and stores an additional relative field
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Rather than return a timestamp, `date_parse()` will extract the relevant date/time
+    parts from the input string and store them in an associative array with keys for
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`year`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`month`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`day`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`hour`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`minute`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`second`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`fraction`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: In addition, passing a time-relative specification in the string (like the `+
+    12 years` in [Example 6-6](#date_parse_with_relatives)) will add a `relative`
+    key to the array with information about the relative offset.
+  prefs: []
+  type: TYPE_NORMAL
+- en: All of this is useful in determining whether a user-provided date is useful
+    as an actual date. The `date_parse()` function will also return warnings and errors
+    if it encounters any parsing issues, making it even easier to check whether a
+    date is valid. For more on checking date validity, read [Recipe 6.7](#validating_a_date).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Revisiting [Example 6-5](#strtotime_parse_error) and leveraging `date_parse()`
+    shows a little more about why PHP has trouble parsing `2 days from now` as a relative
+    date. Consider the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: The preceding code will print `The time zone could not be found in the database`,
+    which suggests PHP is *trying* to parse the date but is failing to identify what
+    `from` really means in the statement `from now`. In fact, inspecting the `$date`
+    array itself will show it returns a `relative` key. This relative offset properly
+    represents the specified two days, meaning `date_parse()` (and even `strtotime()`)
+    was able to read the relative date offset (`2 days`) but choked on the last part.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This additional error provides further context for debugging and could, perhaps,
+    inform some kind of error message that the application should provide to the end
+    user. In any case, it’s more helpful than the mere `false` return of `strtotime()`
+    on its own.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`date_parse()`](https://oreil.ly/2CECz) and [`strtotime()`](https://oreil.ly/S7qkH).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6.7 Validating a Date
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to ensure that a date is valid. For example, you want to ensure that
+    a user-defined birthdate is a real date on the calendar and not something like
+    November 31, 2022.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use PHP’s `checkdate()` function as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `date_parse()` function was already covered in [Recipe 6.6](#parsing_arbitrary_dates),
+    but using it with `checkdate()` is new. This second function attempts to validate
+    that the date is valid according to the calendar.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It checks that the month (first parameter) is between 1 and 12, that the year
+    (third parameter) is between 1 and 32,767 (the maximum value of a 2-byte integer
+    in PHP), and that the number of days is valid for that given month and year.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `checkdate()` function properly handles months with 28, 30, or 31 days.
+    [Example 6-7](#leapyear_validation) shows it also accounts for leap year, validating
+    that February 29 exists in the appropriate years.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-7\. Validating leap year
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [`checkdate()`](https://oreil.ly/T2io8).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6.8 Adding to or Subtracting from a Date
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to apply a specific offset (either additive or subtractive) against
+    a fixed date. For example, you want to calculate a future date by adding days
+    to today’s date.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use the `::add()` or `::sub()` methods of a given `DateTime` object to add or
+    subtract a `DateInterval`, respectively, as shown in [Example 6-8](#example_datetime_addition).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-8\. Simple `DateTime` addition
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Both the `::add()` and `::sub()` methods on a `DateTime` object modify the object
+    itself by either adding or subtracting the given interval. Intervals are specified
+    using a period designation that identifies the amount of time that interval represents.
+    [Table 6-5](#table_dateinterval_durations) illustrates the format characters used
+    to denote an interval.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 6-5\. Period designations used by `DateInterval`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Character | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Period designators** |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `Y` | Years |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `M` | Months |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `D` | Days |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `W` | Weeks |'
+  prefs: []
+  type: TYPE_TB
+- en: '| **Time designators** |  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `H` | Hours |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `M` | Minutes |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `S` | Seconds |'
+  prefs: []
+  type: TYPE_TB
+- en: Every formatted date interval period starts with the letter `P`. This is followed
+    by the number of years/months/days/weeks in that period. Any time elements in
+    a duration are prefixed with the letter `T`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The period designations for months and minutes are both the letter `M`. This
+    can lead to confusion when trying to identify 15 *minutes* versus 15 *months*
+    in a time designation. If you intend to use minutes, ensure that your duration
+    has properly used the `T` prefix to avoid a frustrating error in your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, a period of 3 weeks and 2 days would be represented as `P3W2D`.
+    A period of 4 months, 2 hours, and 10 seconds would be represented as `P4MT2H10S`.
+    Similarly, a period of 1 month, 2 hours, and 30 minutes would be represented as
+    `P1MT2H30M`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mutability
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Note that, in [Example 6-8](#example_datetime_addition), the original `DateTime`
+    object is itself modified when you call `::add()`. In a simple example, this is
+    fine. If you’re attempting to calculate *multiple* dates offset from the same
+    starting date, the mutability of the `DateTime` object causes problems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instead, you can leverage the nearly identical `DateTimeImmutable` object. This
+    class implements the same interface as `DateTime`, but the `::add()` and `::sub()`
+    methods will instead return *new instances* of the class rather than mutating
+    the internal state of the object itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Consider the comparison between both object types in [Example 6-9](#comparing_datetime_object_types).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-9\. Comparing `DateTime` and `DateTimeImmutable`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_dates_and_times_CO4-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since `$date` is a mutable object, invoking its `::add()` method will modify
+    the object directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_dates_and_times_CO4-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As `$christmas` is immutable, invoking `::add()` will return a new object that
+    must be stored in a variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_dates_and_times_CO4-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Printing data from the resulting object from adding time to a `DateTime​Immu⁠ta⁠ble`
+    will present the correct data, as the *new* object was created with the right
+    date and time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_dates_and_times_CO4-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Even after invoking `:add()`, a `DateTimeImmutable` object will always contain
+    the same data as it is, in fact, immutable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The advantage of immutable objects is that you can treat them as constant and
+    rest assured that no one is going to rewrite the calendar when you’re not looking.
+    The only disadvantage is with memory utilization. Since `DateTime` modifies a
+    single object, memory doesn’t necessarily increase as you keep making changes.
+    Every time you “modify” a `DateTimeImmutable` object, however, PHP creates a new
+    object and consumes additional memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In a typical web application, the memory overhead here will be negligible. There
+    is no reason *not* to use a `DateTimeImmutable` object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Simpler modification
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: In a similar track, both `DateTime` and `DateTimeImmutable` implement a `::modify()`
+    method that works with human-readable strings rather than interval objects. This
+    allows you to find relative dates like “last Friday” or “next week” from a given
+    object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A good example is Thanksgiving which, in the US, falls on the fourth Thursday
+    in November. You can easily calculate the exact date in a given year with the
+    function defined in [Example 6-10](#datetime_find_thanksgiving).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-10\. Finding Thanksgiving with `DateTime`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: The same functionality can be implemented using immutable date objects, as shown
+    in [Example 6-11](#datetimeimmutable_find_thanksgiving).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 6-11\. Finding Thanksgiving with `DateTimeImmutable`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`DateInterval`](https://oreil.ly/KvluE).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 6.9 Calculating Times Across Time Zones
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to determine a specific time across more than one time zone.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use the `::setTimezone()` method of the `DateTime` class to change a time zone
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Time zones are among the most frustrating things application developers need
+    to worry about. Thankfully, PHP allows for converting from one time zone to another
+    relatively easily. The `::setTimezone()` method used in the Solution example illustrates
+    how an arbitrary `DateTime` can be converted from one time zone to another merely
+    by specifying the desired time zone.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Keep in mind that both `DateTime` and `DateTimeImmutable` implement a `::setTimezone()`
+    method. The difference between their implementations is that `DateTime` will modify
+    the state of the underlying object, while `DateTimeImmutable` will always return
+    a *new* object instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is important to know which time zones are available for use in code. The
+    list is too long to enumerate, but developers can leverage `DateTimeZone::listIdentifiers()`
+    to list all available named time zones. If your application only cares about a
+    specific region, you can further pare down the list by using one of the predefined
+    group constants that ship with the class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, `DateTimeZone::listIdentifiers(DateTimeZone::AMERICA)` returns
+    an array that lists all time zones available across the Americas. On a particular
+    test system, this array has a list of 145 time zones, each pointing to a major
+    local city to help identify the time zone they represent. You can generate a list
+    of possible time zone identifiers for each of the following regional constants:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::AFRICA`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::AMERICA`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::ANTARCTICA`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::ARCTIC`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::ASIA`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::ATLANTIC`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::AUSTRALIA`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::EUROPE`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::INDIAN`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::PACIFIC`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::UTC`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`DateTimeZone::ALL`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Similarly, you can use bitwise operators to construct unions from these constants
+    to retrieve lists of all time zones across two or more regions. For example, `DateTimeZone::ANTARCTICA
+    | DateTimeZone::ARCTIC` would represent all time zones near either the South or
+    North Pole.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The base `DateTime` class empowers you to instantiate an object with a specific
+    time zone as opposed to accepting the system defaults. Merely pass a `DateTimeZone`
+    instance as an optional second parameter to the constructor, and the new object
+    will be set to the correct time zone automatically.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, the datetime `2022-12-15T17:35:53`, formatted according to [ISO
+    8601](https://oreil.ly/rip_R), represents 5:35 p.m. on December 15, 2022, but
+    does not reflect a specific time zone. When instantiating a `DateTime` object,
+    you can easily specify this is a time in Tokyo, Japan, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: If time zone information is missing in the datetime string being parsed, providing
+    that time zone makes things explicit. Had you *not* added a time zone identifier
+    in the preceding example, PHP would have assumed the system’s configured time
+    zone instead.^([2](ch06.html#idm45875163212384))
+  prefs: []
+  type: TYPE_NORMAL
+- en: If time zone information *is* present in the datetime string, PHP will ignore
+    any explicit time zone specified in the second parameter and parse the string
+    as provided.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on the [`::setTimezone()` method](https://oreil.ly/dk2gQ) and
+    the [`DateTimeZone` class](https://oreil.ly/MkdHB).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch06.html#idm45875164755616-marker)) Format strings and available format
+    characters are covered in [Recipe 6.2](#formatting_dates_and_times).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([2](ch06.html#idm45875163212384-marker)) You can check the current time zone
+    setting for your system with `date_default_timezone_get()`.
+  prefs: []
+  type: TYPE_NORMAL

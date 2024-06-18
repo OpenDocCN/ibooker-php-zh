@@ -1,0 +1,1162 @@
+- en: Chapter 4\. Strings
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Strings are one of the fundamental building blocks of data in PHP. Each string
+    represents an ordered sequence of bytes. Strings can range from human-readable
+    sections of text (like `To be or not to be`) to sequences of raw bytes encoded
+    as integers (such as `\110\145\154\154\157\40\127\157\162\154\144\41`).^([1](ch04.html#idm45875185433888))
+    Every element of data read or written by a PHP application is represented as a
+    string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In PHP, strings are typically encoded as [ASCII values](https://oreil.ly/Tjsyx),
+    although you can convert between ASCII and other formats (like UTF-8) as necessary.
+    Strings can contain `null` bytes when needed and are essentially limitless in
+    terms of storage so long as the PHP process has adequate memory available.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The most basic way to create a string in PHP is with single quotes. Single-quoted
+    strings are treated as literal statements—there are no special characters or any
+    kind of *interpolation* of variables. To include a literal single quote within
+    a single-quoted string, you must *escape* that quote by prefixing it with a backslash—for
+    example, `\'`. In fact, the only two characters that need to be—or even can be—escaped
+    are the single quote itself or the backslash. [Example 4-1](#single_quoted_strings)
+    shows single-quoted strings along with their corresponding printed output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: '*Variable interpolation* is the practice of referencing a variable directly
+    by name within a string and letting the interpreter replace the variable with
+    its value at runtime. Interpolation allows for more flexible strings, as you can
+    write a single string but dynamically replace some of its contents to fit the
+    context of its location in code.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-1\. Single-quoted strings
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: More complicated strings might need to interpolate variables or reference special
+    characters, like a newline or tab. For these more complicated use cases, PHP requires
+    the use of double quotes instead and allows for various escape sequences, as shown
+    in [Table 4-1](#string_escape_sequences).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-1\. Double-quoted string escape sequences
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Escape sequence | Character | Example |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\n` | Newline | `"This string ends in a new line.\n"` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\r` | Carriage return | `"This string ends with a carriage return.\r"` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\t` | Tab | `"Lots\tof\tspace"` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\\` | Backslash | `"You must escape the \\ character."` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\$` | Dollar sign | `A movie ticket is \$10.` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\"` | Double quote | `"Some quotes are \"scare quotes.\""` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\0` through `\777` | Octal character value | `"\120\110\120"` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\x0` through `\xFF` | Hex character value | `"\x50\x48\x50"` |'
+  prefs: []
+  type: TYPE_TB
+- en: Except for special characters that are explicitly escaped with leading backspaces,
+    PHP will automatically substitute the value of any variable passed within a double-quoted
+    string. Further, PHP will interpolate entire expressions within a double-quoted
+    string if they’re wrapped in curly braces (`{}`) and treat them as a variable.
+    [Example 4-2](#double_quoted_interpolation) shows how variables, complex or otherwise,
+    are treated within double-quoted strings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-2\. Variable interpolation within double-quoted strings
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_strings_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first reference to `$var` is escaped, but the second will be replaced by
+    its actual value. If `$var = 'apple'`, the string will print `The value of $var
+    is apple`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_strings_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using curly braces enables the direct reference of object properties within
+    a double-quoted string as if these properties were locally defined variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_strings_CO1-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Assuming `getVar()` returns the name of a defined variable, this line will both
+    execute the function and print the value assigned to that variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both single- and double-quoted strings are represented as single lines. Often,
+    though, a program will need to represent multiple lines of text (or multiple lines
+    of encoded binary) as a string. In such a situation, the best tool at a developer’s
+    disposal is a Heredoc.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A *Heredoc* is a literal block of text that’s started with three angle brackets
+    (the `<<<` operator), followed by a named identifier, followed by a newline. Every
+    subsequent line of text (including newlines) is part of the string, up to a completely
+    independent line containing nothing but the Heredoc’s named identifier and a semicolon.
+    [Example 4-3](#heredoc_example) illustrates how a Heredoc might look in code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The identifier used for a Heredoc does not need to be capitalized. However,
+    it is common convention in PHP to always capitalize these identifiers to help
+    distinguish them from the text definition of the string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-3\. String definition using the Heredoc syntax
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Heredocs function just like double-quoted strings and allow variable interpolation
+    (or special characters like escaped hexadecimals) within them. This can be particularly
+    powerful when encoding blocks of HTML within an application, as variables can
+    be used to make the strings dynamic.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In some situations, though, you might want a string literal rather than something
+    open to variable interpolation. In that case, PHP’s Nowdoc syntax provides a single-quoted
+    style alternative to Heredoc’s double-quoted string analog. A Nowdoc looks almost
+    exactly like a Heredoc, except the identifier itself is enclosed in single quotes,
+    as in [Example 4-4](#nowdoc_example).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-4\. String definition using the Nowdoc syntax
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Both single and double quotes can be used within Heredoc and Nowdoc blocks without
+    additional escaping. Nowdocs, however, will not interpolate or dynamically replace
+    any values, whether they are escaped or otherwise.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The recipes that follow help further illustrate how strings can be used in PHP
+    and the various problems they can solve.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 4.1 Accessing Substrings Within a Larger String
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to identify whether a string contains a specific substring. For example,
+    you want to know if a URL contains the text `/secret/`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `strpos()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP’s `strpos()` function will scan through a given string and identify the
+    starting position of the first occurrence of a given substring. This function
+    literally looks for a needle in a haystack, as the function’s arguments are named
+    `$haystack` and `$needle`, respectively. If the substring (`$needle`) is not found,
+    the function returns a Boolean `false`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s important in this case to use *strict equality comparison*, as `strpos()`
+    will return `0` if the substring appears at the very beginning of the string being
+    searched. Remember from [Recipe 2.3](ch02.html#equality_operators) that comparing
+    values with only two equals signs will attempt to recast the types, converting
+    an integer `0` into a Boolean `false`; always use strict comparison operators
+    (either `===` for equality or `!==` for inequality) to avoid confusion.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the `$needle` appears multiple times within a string, `strpos()` only returns
+    the position of the first occurrence. You can search for additional occurrences
+    by adding an optional position offset as a third parameter to the function call,
+    as in [Example 4-5](#identify_all_substring_occurrences). Defining an offset also
+    allows you to search the latter part of a string for a substring that you know
+    already appears earlier in the string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-5\. Count all occurrences of a substring
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_strings_CO2-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All of the variables are initially set to `0` so you can track new string occurrences.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_strings_CO2-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If and only if the string was found should an occurrence be counted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_strings_CO2-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the string was found, update the offset but also increment by `1` so you
+    don’t repeatedly recount the occurrence you’ve already found.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_strings_CO2-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you’ve reached the last occurrence of the target substring, exit the loop
+    and return the total count.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [`strpos()`](https://oreil.ly/w9Od4).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 4.2 Extracting One String from Within Another
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to extract a small string from a much larger string—for example, the
+    domain name from an email address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `substr()` to select the part of the string you want to extract:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'PHP’s `substr()` function returns the portion of a given string, based on an
+    initial offset (the second parameter) up to an optional length. The full function
+    signature is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the `$length` parameter is omitted, `substr()` will return the entire remainder
+    of the string. If the `$offset` parameter is greater than the length of the input
+    string, an empty string is returned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also specify a *negative* offset to return a subset starting from the
+    end of the string instead of the beginning, as in [Example 4-6](#negative_substring_offset).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-6\. Substring with a negative offset
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_strings_CO3-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `ook` (the last three characters)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_strings_CO3-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `ok` (the last two characters)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_strings_CO3-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `cook` (the middle four characters)
+  prefs: []
+  type: TYPE_NORMAL
+- en: You should be aware of some other edge cases regarding offsets and string lengths
+    with `substr()`. It is possible for the offset to legitimately start within the
+    string, but for `$length` to run past the end of the string. PHP catches this
+    discrepancy and merely returns the remainder of the original string, even if the
+    final return is *less* than the specified length. [Example 4-7](#substring_lengths)
+    details some potential outputs of `substr()` based on various specified lengths.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-7\. Various substring lengths
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_strings_CO4-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `and`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_strings_CO4-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns an empty string
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_strings_CO4-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `y`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another edge case is a negative `$length` supplied to the function. When requesting
+    a substring with a negative length, PHP will remove that many characters from
+    the substring it returns, as illustrated in [Example 4-8](#negative_substring_length).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-8\. Substring with a negative length
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_strings_CO5-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `score and twenty`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_strings_CO5-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `score`
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation for [`substr()`](https://oreil.ly/z_w10) and for [`strpos()`](https://oreil.ly/NWcWJ).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 4.3 Replacing Part of a String
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to replace just one part of a string with another string. For example,
+    you want to obfuscate all but the last four digits of a phone number before printing
+    it to the screen.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `substr_replace()` to replace a component of an existing string based on
+    its position:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP’s `substr_replace()` function operates on a part of a string, similar to
+    `substr()`, defined by an integer offset up to a specific length. [Example 4-9](#substr_replace_signature)
+    shows the full function signature.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-9\. Full function signature of `substr_replace()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Unlike its `substr()` analog, `substr_replace()` can operate either on individual
+    strings or on collections of strings. If an array of strings is passed in with
+    scalar values for `$replace` and `$offset`, the function will run the replacement
+    on each string, as in [Example 4-10](#replace_multiple_substrings).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-10\. Replacing multiple substrings at once
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In general, developers have a lot of flexibility with the parameters in this
+    function. Similar to `substr()`, the following are true:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`$offset` can be negative, in which case replacements begin that number of
+    characters from the *end* of the string.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`$length` can be negative, representing the number of characters from the end
+    of the string at which to stop replacing.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `$length` is `null`, it will internally become the same as the length of
+    the input string itself.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If `length` is `0`, `$replace` will be *inserted* into the string at the given
+    `$offset`, and no replacement will take place at all.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Finally, if `$string` is provided as an array, all other parameters can be provided
+    as arrays as well. Each element will represent a setting for the string in the
+    same position in `$string`, as illustrated by [Example 4-11](#replace_with_array_parameters).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-11\. Replacing multiple substrings with array parameters
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: It is not a hard requirement for arrays passed in for `$string`, `$replace`,
+    `$offset`, and `$length` to be all of the same size. PHP will not throw an error
+    or warning if you pass arrays with different dimensions. Doing so will, however,
+    result in unexpected output during the replacement operation—for example, truncating
+    a string rather than replacing its contents. It’s a good idea to validate that
+    the dimensions of each of these four arrays all match.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `substr_replace()` function is convenient if you know exactly *where* you
+    need to replace characters within a string. In some situations, you might not
+    know the position of a substring that needs to be replaced, but you want to instead
+    replace occurrences of a *specific* substring. In those circumstances, you would
+    want to use either `str_replace()` or `str_ireplace()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These two functions will search a specified string to find an occurrence (or
+    many occurrences) of a specified substring and replace it with something else.
+    The functions are identical in their call pattern, but the extra `i` in `str_ireplace()`
+    indicates that it searches for a pattern in a *case-insensitive* fashion. [Example 4-12](#string_search_and_replace)
+    illustrates both functions in use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-12\. Searching and replacing within a string
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_strings_CO6-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*How much wood could a Woodchuck chuck if a beaver could chuck wood?*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_strings_CO6-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*How much wood could a beaver chuck if a beaver could chuck wood?*'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both `str_replace()` and `str_ireplace()` accept an optional `$count` parameter
+    that is passed by reference. If specified, this variable will be updated with
+    the number of replacements the function performed. In [Example 4-12](#string_search_and_replace),
+    this return value would have been `1` and `2`, respectively, because of the capitalization
+    of `Woodchuck`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [`substr_replace()`](https://oreil.ly/-BSkA), [`str_replace()`](https://oreil.ly/Vm7KH),
+    and [`str_ireplace()`](https://oreil.ly/8P46w).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 4.4 Processing a String One Byte at a Time
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You need to process a string of single-byte characters from beginning to end,
+    one character at a time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Loop through each character of the string as if it were an array. [Example 4-13](#count_capital_characters)
+    will count the number of capital letters in a string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-13\. Count capital characters in a string
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Strings are not arrays in PHP, so you cannot loop over them directly. However,
+    they do provide array-like access to individual characters within the string based
+    on their position. You can reference individual characters by their integer offset
+    (starting with 0), or even by a *negative* offset to start at the end of the string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Array-like access isn’t read-only, though. You can just as easily *replace*
+    a single character in a string based on its position, as demonstrated by [Example 4-14](#replace_single_character_in_string).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-14\. Replacing a single character in a string
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: It is also possible to convert a string *directly* to an array by using [`str_split()`](https://oreil.ly/eNxaF)
+    and then iterate over all items in the resulting array. This will work as an update
+    to the Solution example, as illustrated in [Example 4-15](#str_split_array).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-15\. Converting a string into an array directly
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The downside of [Example 4-15](#str_split_array) is that PHP now has to maintain
+    *two* copies of your data: the original string and the resultant array. This isn’t
+    a problem when handling small strings as in the example; if your strings instead
+    represent entire files on disk, you will rapidly exhaust the memory available
+    to PHP.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP makes accessing individual bytes (characters) within a string relatively
+    easy without any changes in data type. Splitting a string into an array works
+    but might be unnecessary unless you actually *need* an array of characters. [Example 4-16](#str_split_reduce)
+    reimagines [Example 4-15](#str_split_array), using an array reduction technique
+    rather than counting the capital letters in a string directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-16\. Counting capital letters in a string with array reduction
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: While [Example 4-16](#str_split_reduce) is functionally equivalent to [Example 4-15](#str_split_array),
+    it is more concise and, consequently, more difficult to understand. While it is
+    tempting to reimagine complex logic as one-line functions, unnecessary refactoring
+    of your code for the sake of conciseness can be dangerous. The code might appear
+    elegant but over time becomes more difficult to maintain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The simplified reduction introduced in [Example 4-16](#str_split_reduce) is
+    functionally accurate but still requires splitting the string into an array. It
+    saves on lines of code in your program but still results in creating a second
+    copy of your data. As mentioned before, if the strings over which you’re iterating
+    are large (e.g., massive binary files), this will rapidly consume the memory available
+    to PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [string access and modification](https://oreil.ly/8MOWh),
+    as well as documentation on [`ctype_upper()`](https://oreil.ly/bQctH).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 4.5 Generating Random Strings
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to generate a string of random characters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use PHP’s native `random_int()` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP has strong, *cryptographically secure* pseudorandom generator functions
+    for both integers and bytes. It does not have a native function that generates
+    random human-readable text, but the underlying functions can be used to create
+    such a string of random text by leveraging lists of human-readable characters,
+    as illustrated by the Solution example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: A *cryptographically secure pseudorandom number generator* is a function that
+    returns numbers with no distinguishable or predictable pattern. Even forensic
+    analysis cannot distinguish between random noise and the output of a cryptographically
+    secure generator.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A valid and potentially simpler method for producing random strings is to leverage
+    PHP’s `random_bytes()` function and encode the binary output as ASCII text. [Example 4-17](#random_byte_string)
+    illustrates two possible methods of using random bytes as a string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-17\. Creating a string of random bytes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_strings_CO7-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because the string of binary bytes will be encoded in a different format, keep
+    in mind that the number of bytes produced will *not* match the length of the final
+    string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_strings_CO7-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Encode the random string in hexadecimal format. Note that this format will double
+    the length of the string—16 bytes is equivalent to 32 hexadecimal characters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_strings_CO7-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Leverage [Base64](https://oreil.ly/NsyVs) encoding to convert the raw bytes
+    on readable characters. Note that this format increases the length of the string
+    by 33%–36%.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [`random_int()`](https://oreil.ly/g3gAR) and on [`random_bytes()`](https://oreil.ly/2Zbio).
+    Also [Recipe 5.4](ch05.html#recipe_random_numbers) on generating random numbers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 4.6 Interpolating Variables Within a String
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to include dynamic content in an otherwise static string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use double quotes to wrap the string and insert a variable, object property,
+    or even function/method call directly in the string itself:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Unlike single-quoted strings, double-quoted strings allow for complex, dynamic
+    values as literals. Any word starting with a `$` character is interpreted as a
+    variable name, unless that leading character is properly escaped.^([2](ch04.html#idm45875190506912))
+  prefs: []
+  type: TYPE_NORMAL
+- en: While the Solution example wraps dynamic content in curly braces, this is not
+    a requirement in PHP. Simple variables can easily be written as is within a double-quoted
+    string and will be interpolated properly. However, more complex sequences become
+    difficult to read without the braces. It’s a highly recommended best practice
+    to always enclose any value you want interpolated to make the string more readable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unfortunately, string interpolation has its limits. The Solution example illustrates
+    pulling data out of the superglobal `$_POST` array and inserting it directly into
+    a string. This is potentially dangerous, as that content is generated directly
+    by the user, and the string could be leveraged in a sensitive way. In fact, string
+    interpolation like this is one of the largest vectors for injection attacks against
+    applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: In an injection attack, a third party can pass (or inject) executable or otherwise
+    malicious input into your application and cause it to misbehave. More sophisticated
+    ways to protect against this family of attacks are covered in [Chapter 9](ch09.html#chapter_encryption).
+  prefs: []
+  type: TYPE_NORMAL
+- en: To protect your string use against potentially malicious user-generated input,
+    it’s a good idea to instead use a format string via PHP’s `sprintf()` function
+    to filter the content. [Example 4-18](#interpolation_sprintf) rewrites part of
+    the Solution example to protect against malicious `$_POST` data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-18\. Using format strings to produce an interpolated string
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Format strings are a basic form of input sanitization in PHP. In [Example 4-18](#interpolation_sprintf),
+    you are explicitly assuming that the supplied `$_POST` data is numeric. The `%d`
+    tokens within the format string will be replaced by the user-supplied data, but
+    PHP will explicitly cast this data as integers during the replacement.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If, for example, this string were being inserted into a database, the formatting
+    would protect against the potential of injection attacks against SQL interfaces.
+    More complete methods of filtering and sanitizing user input are discussed in
+    [Chapter 9](ch09.html#chapter_encryption).
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [variable parsing](https://oreil.ly/CAj-J) in double quotes
+    and Heredoc as well as documentation on the [`sprintf()` function](https://oreil.ly/DMAg6).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 4.7 Concatenating Multiple Strings Together
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You need to create a new string from two smaller strings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use PHP’s string concatenation operator:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP uses a single `.` character to join two strings together. This operator
+    will also leverage type coercion to ensure that both values in the operation are
+    strings before they’re concatenated, as shown in [Example 4-19](#string_concatenation_examples).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-19\. String concatenation
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_strings_CO8-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prints `String 2`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_strings_CO8-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prints `2 number`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_strings_CO8-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prints `Boolean 1` because Boolean values are cast to integers and then to strings
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_strings_CO8-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prints `23`
+  prefs: []
+  type: TYPE_NORMAL
+- en: The string concatenation operator is a quick way to combine simple strings,
+    but it can become somewhat verbose if you use it to combine multiple strings with
+    whitespace. Consider [Example 4-20](#string_concatenation_verbose), where you
+    try to combine a list of words into a string, each separated by a space.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-20\. Verbosity in concatenating large groups of strings
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_strings_CO9-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: One option is to individually concatenate each word in the collection with whitespace
+    separators. As the word list grows, this quickly becomes unwieldy.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_strings_CO9-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can, instead, loop over the collection and build up a concatenated string
+    without accessing each item in the collection individually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_strings_CO9-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When using a loop, you might end up with unnecessary whitespace. You need to
+    remember to trim extraneous spaces from the start of the string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Large, repetitive concatenation routines can be replaced by native PHP functions
+    like `implode()`. This function in particular accepts an array of data to be joined
+    and a definition of the character (or characters) to be used between data elements.
+    It returns the final, concatenated string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Some developers prefer to use `join()` instead of `implode()` as it’s seen to
+    be a more descriptive name for the operation. The fact is, `join()` is an alias
+    of `implode()`, and the PHP compiler doesn’t care which you use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rewriting [Example 4-20](#string_concatenation_verbose) to use `implode()` makes
+    the entire operation much simpler, as demonstrated by [Example 4-21](#string_concatenation_terse).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-21\. A concise approach to string concatenation
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Take care to remember the parameter order for `implode()`. The string separator
+    comes *first*, followed by the array over which you want to iterate. Earlier versions
+    of PHP (prior to version 8.0) allowed the parameters to be specified in the opposite
+    order. This behavior (specifying the array first and the separator second) was
+    deprecated in PHP 7.4\. As of PHP 8.0, this will throw a `TypeError`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re using a library written prior to PHP 8.0, be sure you test that it’s
+    not misusing either `implode()` or `join()` before you ship your project to production.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [`implode()`](https://oreil.ly/bGYt0).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 4.8 Managing Binary Data Stored in Strings
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to encode data directly as binary rather than as an ASCII-formatted
+    representation, or you want to read data into your application that was explicitly
+    encoded as binary data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `unpack()` to extract binary data from a string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use `pack()` to write binary data to a string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Both `pack()` and `unpack()` empower you to operate on raw binary strings, assuming
+    you know the format of the binary string you’re working with. The first parameter
+    of each function is a format specification. This specification is determined by
+    specific format codes, as defined in [Table 4-2](#binary_format_codes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-2\. Binary format string codes
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Code | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `a` | Null-padded string |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `A` | Space-padded string |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `h` | Hex string, low nibble first |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `H` | Hex string, high nibble first |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `c` | Signed char |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `C` | Unsigned char |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `s` | Signed short (always 16-bit, machine byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `S` | Unsigned short (always 16-bit, machine byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `n` | Unsigned short (always 16-bit, big-endian byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `v` | Unsigned short (always 16-bit, little-endian byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `i` | Signed integer (machine-dependent size and byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `I` | Unsigned integer (machine-dependent size and byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `l` | Signed long (always 32-bit, machine byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `L` | Unsigned long (always 32-bit, machine byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `N` | Unsigned long (always 32-bit, big-endian byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `V` | Unsigned long (always 32-bit, little-endian byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `q` | Signed long long (always 64-bit, machine byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `Q` | Unsigned long long (always 64-bit, machine byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `J` | Unsigned long long (always 64-bit, big-endian byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `P` | Unsigned long long (always 64-bit, little-endian byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `f` | Float (machine-dependent size and representation) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `g` | Float (machine-dependent size, little-endian byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `G` | Float (machine-dependent size, big-endian byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `d` | Double (machine-dependent size and representation) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `e` | Double (machine-dependent size, little-endian byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E` | Double (machine-dependent size, big-endian byte order) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `x` | Null byte |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `X` | Back up one byte |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `Z` | Null-padded string |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `@` | Null-fill to absolute position |'
+  prefs: []
+  type: TYPE_TB
+- en: 'When defining a format string, you can specify each byte type individually
+    or leverage an optional repeating character. In the Solution examples, the number
+    of bytes is explicitly specified with an integer. You could just as easily use
+    an asterisk (`*`) to specify that a type of byte repeats through the end of the
+    string as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: PHP’s ability to convert between byte encoding types via `unpack()` also provides
+    a simple method of converting ASCII characters to and from their binary equivalent.
+    The `ord()` function will return the value of a specific character, but it requires
+    looping over each character in a string if you want to unpack each in turn, as
+    demonstrated in [Example 4-22](#character_encoding_with_ord).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-22\. Retrieving character values with `ord()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Thanks to `unpack()`, you don’t need to explicitly iterate over the characters
+    in a string. The `c` format character references a signed character, and `C` a
+    signed one. Rather than building a loop, you can leverage `unpack()` directly
+    as follows to get an equivalent result:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Both the preceding `unpack()` example and the original loop implementation
+    in [Example 4-22](#character_encoding_with_ord) produce the following array:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation on [`pack()`](https://oreil.ly/0iieT) and [`unpack()`](https://oreil.ly/Un_aD).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch04.html#idm45875185433888-marker)) This string is a byte representation,
+    formatted in octal notation, of “Hello World!”
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([2](ch04.html#idm45875190506912-marker)) Review [Table 4-1](#string_escape_sequences)
+    for more on double-character escape sequences.
+  prefs: []
+  type: TYPE_NORMAL

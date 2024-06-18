@@ -1,0 +1,1682 @@
+- en: Chapter 9\. Security and Encryption
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: PHP is a remarkably easy-to-use language because of the forgiving nature of
+    the runtime. Even when you make a mistake, PHP will try to infer what you *meant*
+    to do and, often, keep executing your program just fine. Unfortunately, this strength
+    is also seen by some developers as a key weakness. By being forgiving, PHP allows
+    for a sheer amount of “bad” code to continue functioning as if it were correct.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Worse still, much of this “bad” code finds its way into tutorials, leading developers
+    to copy and paste it into their own projects and perpetuate the cycle. This forgiving
+    runtime and long history of PHP have led to the perception that PHP itself is
+    insecure. In reality, it’s easy to use *any* programming language insecurely.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Natively, PHP supports the ability to quickly and easily filter malicious input
+    and sanitize user data. In a web context, this utility is critical to keeping
+    user information safe from malicious inputs or attacks. PHP also exposes well-defined
+    functions for both securely hashing and securely validating passwords during authentication.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: PHP’s default password hashing and validation functions both leverage secure
+    hashing algorithms and constant-time, secure implementations. This protects your
+    application against niche attacks like those using timing information in an attempt
+    to extract information. Attempting to implement hashing (or validation) yourself
+    would likely expose your application to risks for which PHP has already accounted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The language also makes cryptography—for both encryption and signatures—simple
+    for developers. Native, high-level interfaces protect you from the kinds of mistakes
+    easily made elsewhere.^([1](ch09.html#idm45875152082528)) In fact, PHP is one
+    of the *easiest* languages in which developers can leverage strong, modern cryptography
+    without relying on a third-party extension or implementation!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Legacy Encryption
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Earlier versions of PHP shipped with an extension called [mcrypt](https://oreil.ly/I7stH).
+    This extension exposed the lower-level mcrypt library, allowing developers to
+    easily leverage a variety of block ciphers and hash algorithms. It was removed
+    in PHP 7.2 in favor of the newer sodium extension, but it can still be manually
+    installed via the PHP Extension Community Library (PECL).^([2](ch09.html#idm45875152074560))
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: While still available, the mcrypt library has not been updated in over a decade
+    and should not be used in new projects. For any new encryption needs, use either
+    PHP’s bindings against OpenSSL or the native sodium extension.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP also supports direct use of the OpenSSL library [through an extension](https://oreil.ly/cYNB2).
+    This is helpful when building a system that must interoperate with legacy cryptographic
+    libraries. However, the extension does not expose the full-feature offering of
+    OpenSSL to PHP; it would be useful to review the [functions](https://oreil.ly/Y8xEK)
+    and features exposed to identify whether PHP’s implementation would be useful
+    to your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In any case, the newer sodium interfaces support a wide range of cryptographic
+    operations in PHP and should be preferred over either OpenSSL or mcrypt.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sodium
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP formally added the [sodium](https://oreil.ly/gH1Va) extension (also known
+    as *Libsodium*) as a core extension in version 7.2, released in late 2017.^([3](ch09.html#idm45875152063760))
+    This library supports high-level abstractions for encryption, cryptographic signatures,
+    password hashing, and more. It is itself an open source fork of an earlier project,
+    the [Networking and Cryptography Library (NaCl)](https://nacl.cr.yp.to) by Daniel
+    J. Bernstein.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both projects add easy-to-use, high-speed tools for developers who need to work
+    with encryption. The opinionated nature of their exposed interfaces aims to make
+    cryptography *safe* and proactively avoid the pitfalls presented by other low-level
+    tools. Shipping with well-defined opinionated interfaces helps developers make
+    the right choices about algorithm implementations and defaults because those very
+    choices (and potential mistakes) are entirely abstracted away and presented in
+    safe, straightforward functions for everyday use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The only problem with sodium and its exposed interfaces is a lack of brevity.
+    Every function is prefixed with `sodium_`, and every constant with `SODIUM_`.
+    The high level of descriptiveness in both function and constant names makes it
+    easy to understand what is happening in code. However, this also leads to incredibly
+    long and potentially distracting function names, like `sodium_​crypto_​sign_​keypair_​from_​secretkey_​and_​publickey()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While sodium is bundled as a core extension for PHP, it also exposes bindings
+    for [several other languages](https://oreil.ly/L9JPp) as well. It is fully interoperable
+    with everything from .NET to Go to Java to Python.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unlike many other cryptographic libraries, sodium focuses primarily on *authenticated*
+    encryption. Every piece of data is automatically paired with an authentication
+    tag that the library can later use to validate the integrity of the underlying
+    plaintext. If this tag is missing or invalid, the library throws an error to alert
+    the developer that the associated plaintext is unreliable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This use of authentication isn’t unique—the Galois/Counter Mode (GCM) of the
+    Advanced Encryption Standard (AES) does effectively the same thing. However, other
+    libraries often leave authentication and validation of an authentication tag as
+    an exercise for the developer. There are a number of tutorials, books, and Stack
+    Overflow discussions that point to a proper implementation of AES but omit the
+    validation of the GCM tag affixed to a message! The sodium extension abstracts
+    both authentication and validation away and provides a clear, concise implementation,
+    as illustrated in [Example 9-1](#symmetric_crypto_intro).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-1\. Authenticated encryption and decryption in sodium
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Encryption algorithms are deterministic—the same input will always produce the
+    same output. To ensure that encrypting the same data with the same key returns
+    *different* outputs, you need to use a sufficiently random *nonce* (number used
+    once) to initialize the algorithm each time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For symmetric encryption, you leverage a single, shared key used to both encrypt
+    and decrypt data. While the key in this example is random, you would likely store
+    this encryption key somewhere outside the application for safekeeping.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO1-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Encrypting is incredibly straightforward. Sodium chooses the algorithm and cipher
+    mode for you—all you provide is the message, the random nonce, and the symmetric
+    key. The underlying library does the rest!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_security_and_encryption_CO1-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When exporting the encrypted value (either to send to another party or to store
+    on disk), you need to keep track of both the random nonce and the subsequent ciphertext.
+    The nonce itself is not secret, so storing it in plaintext alongside the encrypted
+    value is safe (and encouraged). Converting the raw bytes from binary to hexadecimal
+    is an effective way to prepare data for an API request or to store in a database
+    field.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_security_and_encryption_CO1-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since the output of encryption is encoded in hexadecimal, you must first decode
+    things back to raw bytes and then separate the nonce and ciphertext components
+    before proceeding with decryption.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_security_and_encryption_CO1-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To extract the plaintext value back out of an encrypted field, provide the ciphertext
+    with its associated nonce and the original encryption key. The library pulls the
+    plaintext bytes back out and returns them to you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![7](assets/7.png)](#co_security_and_encryption_CO1-7)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Internally, the encryption library also adds (and validates) an authentication
+    tag on every encrypted message. If the authentication tag fails to validate during
+    decryption, sodium will return a literal `false` rather than the original plaintext.
+    This is a sign to you that the message has been tampered with (either intentionally
+    or accidentally) and should not be trusted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sodium also introduces an efficient means to handle public-key cryptography.
+    In this paradigm, encryption uses one key (a known or publicly exposed key), while
+    decryption uses an entirely different key known only to the recipient of the message.
+    This two-part key system is ideal when exchanging data between two separate parties
+    over a potentially untrusted medium (like exchanging banking information between
+    a user and their bank over the public internet). In fact, the HTTPS connections
+    used for most websites on the modern internet leverage public-key cryptography
+    under the hood within the browser.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In legacy systems like RSA, you need to keep track of relatively large cryptographic
+    keys in order to exchange information safely. In 2022, the minimum recommended
+    key size for RSA was 3,072 bits; in many situations, developers will default to
+    4,096 bits to retain the keys’ safety against future computing enhancements. Juggling
+    keys of this size can be difficult in some situations. In addition, traditional
+    RSA can only encrypt 256 bytes of data. If you want to encrypt a larger message,
+    you are forced to do the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create a 256-bit random key.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Use that 256-bit key to *symmetrically* encrypt a message.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Use RSA to encrypt the symmetric key.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Share both the encrypted message and the encrypted key that protects it.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: This is a workable solution, but the steps involved can easily become complicated
+    and introduce unnecessary complexity for a development team building a project
+    that *just happens* to include encryption. Thankfully, sodium fixes this almost
+    entirely!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sodium’s public-key interfaces leverage elliptic-curve cryptography (ECC) rather
+    than RSA. RSA uses prime numbers and exponentiation to create the known (public)
+    and unknown (private) components of the two-key system used for encryption. ECC
+    instead uses the geometry and particular forms of arithmetic against a well-defined
+    elliptic curve. Whereas RSA’s public and private components are numbers used for
+    exponentiation, ECC’s public and private components are literal *x* and *y* coordinates
+    on a geometric curve.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With ECC, a 256-bit key has [strength equivalent to that of a 3,072-bit RSA
+    key](https://oreil.ly/o2kne). Further, sodium’s choice of cryptographic primitives
+    means that its keys are just numbers (rather than *x* and *y* coordinates as with
+    most other ECC implementations)—a 256-bit ECC key for sodium is simply a 32-byte
+    integer!
+  prefs: []
+  type: TYPE_NORMAL
+- en: In addition, sodium entirely abstracts the “create a random symmetric key and
+    separately encrypt it” workflow from developers, making asymmetric encryption
+    just as simple in PHP as [Example 9-1](#symmetric_crypto_intro) demonstrated for
+    symmetric encryption. [Example 9-2](#asymmetric_crypto_intro) illustrates exactly
+    how this form of encryption works, along with the key exchange required between
+    participants.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-2\. Asymmetric encryption and decryption in sodium
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO2-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In practice, both parties would generate their public/private key pairs locally
+    and distribute their public keys directly. The `sodium_crypto_box_keypair()` function
+    creates a random key pair each time so, conceivably, you would only need to do
+    this once, so long as the secret key remains private.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO2-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both the public and secret components of the key pair can be extracted separately.
+    This makes it easy to extract and communicate only the public key to a third party
+    but also makes the secret key separately available for use in the later key-exchange
+    operation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO2-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As with symmetric encryption, you need a random nonce for each asymmetric encryption
+    operation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_security_and_encryption_CO2-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Alice’s public key was potentially distributed via a direct communication channel
+    or is otherwise already known.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_security_and_encryption_CO2-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The key exchange here isn’t being used to agree upon a new key; it’s merely
+    combining Bob’s secret key with Alice’s public key to prepare for Bob to encrypt
+    a message that can only be read by Alice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_security_and_encryption_CO2-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Again, sodium chooses the algorithms and cipher modes involved. All you need
+    to do is provide the data, random nonce, and keys, and the library does the rest.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![7](assets/7.png)](#co_security_and_encryption_CO2-7)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: When sending the message, it’s useful to concatenate the nonce and ciphertext,
+    then encode the raw bytes as something more readily sent over an HTTP channel.
+    Hexadecimal is a common choice, but Base64 encoding is equally valid.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![8](assets/8.png)](#co_security_and_encryption_CO2-8)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: On the receiving end, Alice needs to combine her own secret key with Bob’s public
+    key in order to decrypt a message that could have only been encrypted by Bob.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![9](assets/9.png)](#co_security_and_encryption_CO2-9)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Extracting the plaintext is as straightforward as encryption was in step 6!
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![10](assets/10.png)](#co_security_and_encryption_CO2-10)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As with symmetric encryption, this operation is authenticated. If the encryption
+    fails for any reason (e.g., Bob’s public key was invalid) or the authentication
+    tag fails to validate, sodium returns a literal `false` to indicate the untrustworthiness
+    of the message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Randomness
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In the world of encryption, leveraging a proper source of randomness is critical
+    to protecting any sort of data. Older tutorials heavily reference PHP’s [`mt_rand()`](https://oreil.ly/HeBSd)
+    function, which is a pseudorandom number generator based on the Mersenne Twister
+    algorithm.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Unfortunately, while the output of this function appears random to a casual
+    observer, it is not a cryptographically safe source of randomness. Instead, leverage
+    PHP’s [`random_bytes()`](https://oreil.ly/_eYh6) and [`random_int()`](https://oreil.ly/YWQs8)
+    functions for anything critical. Both of these functions leverage the cryptographically
+    secure source of randomness built into your local operating system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: A *cryptographically secure pseudorandom number generator* (CSPRNG) is one with
+    an output that is indistinguishable from random noise. Algorithms like the Mersenne
+    Twister are “random enough” to fool a human into thinking they’re safe. In reality,
+    they’re easy for a computer to predict or even crack, given a series of previous
+    outputs. If an attacker can reliably predict the output of your random number
+    generator, they can conceivably decrypt anything you try to protect based on that
+    generator!
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following recipes cover some of the most important security- and encryption-related
+    concepts in PHP. You’ll learn about input validation, proper password storage,
+    and the use of PHP’s sodium interface.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 9.1 Filtering, Validating, and Sanitizing User Input
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to validate a specific value provided by an otherwise untrusted user
+    prior to using it elsewhere in your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use the `filter_var()` function to validate that the value matches a specific
+    expectation, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP’s filtering extension empowers you to either validate that data matches
+    a specific format or type or sanitize any data that fails that validation. The
+    subtle difference between the two options—validation versus sanitization—is that
+    sanitization removes invalid characters from a value, whereas validation explicitly
+    returns `false` if the final, sanitized input is not of a valid type.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the Solution example, untrusted user input is explicitly validated as a valid
+    email address. [Example 9-3](#filter_validate_email) demonstrates the behavior
+    of this form of validation across multiple potential inputs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-3\. Testing email validation
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO3-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `blah@example.com`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO3-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `false`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO3-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `false`
+  prefs: []
+  type: TYPE_NORMAL
+- en: The alternative to the preceding example is to *sanitize* user input such that
+    invalid characters are stripped from the entry. The result of this sanitization
+    is guaranteed to match a specific character set, but there is no guarantee that
+    the result is a valid input. For example, [Example 9-4](#filter_sanitize_email)
+    properly sanitizes every possible input string even though two results are invalid
+    email addresses.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-4\. Testing email sanitization
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO4-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `blah@example.com`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO4-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `1234`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO4-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returns `1234@example.comtest`
+  prefs: []
+  type: TYPE_NORMAL
+- en: Whether you want to sanitize or validate your input data depends highly on what
+    you intend to use the resulting data for. If you merely want to keep invalid characters
+    out of a data storage engine, sanitization might be the right approach. If you
+    want to ensure that data is both within the expected character set *and* a valid
+    entry, data validation is a safer tool.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both approaches are supported equally well by `filter_var()` based on various
+    types of filters in PHP. Specifically, PHP supports validation filters (enumerated
+    in [Table 9-1](#filter_type_validation)), sanitization filters (enumerated in
+    [Table 9-2](#filter_type_sanitization)), and filters falling under neither category
+    (see [Table 9-3](#filter_type_misc)). The `filter_var()` function also supports
+    an optional third parameter for flags that enable more granular control of the
+    overall output of a filter operation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 9-1\. Validation filters supported by PHP
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| ID | Options | Flags | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​VALI⁠DATE_​BOOLEAN` | `default` | `FILTER_NULL_ON_FAILURE` | Returns
+    `true` for truthy values (`1`, `true`, `on`, and `yes`), `false` otherwise |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​VALI⁠DATE_​DOMAIN` | `default` | `FILTER_FLAG_HOSTNAME`, `FIL⁠TER_NULL_ON_FAILURE`
+    | Validates whether domain name lengths are valid against various RFCs |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​VALI⁠DATE_​EMAIL` | `default` | `FILTER_FLAG_EMAIL_UNICODE`, `FIL⁠TER_​NULL_ON_FAILURE`
+    | Validates an email address against the syntax documented in [RFC 822](https://oreil.ly/iHPaR)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​VALI⁠DATE_​FLOAT` | `default`, `decimal`, `min_range`, `max_range`
+    | `FIL⁠TER_​FLAG_ALLOW_THOUSANDS`, `FILTER_NULL_ON_FAILURE` | Validates value
+    as a float, optionally from a specified range, and converts to that type on success
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​VALI⁠DATE_​INT` | `default`, `max_range`, `min_range` | `FILTER_FLAG_ALLOW_OCTAL`,
+    `FIL⁠TER_FLAG_ALLOW_HEX`, `FIL⁠TER_NULL_ON_FAILURE` | Validates value as an integer,
+    optionally from a specified range, and converts to that type on success |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​VALI⁠DATE_​IP` | `default` | `FILTER_FLAG_IPV4`, `FILTER_FLAG_IPV6`,
+    `FIL⁠TER_FLAG_NO_PRIV_RANGE`, `FIL⁠TER_FLAG_NO_RES_RANGE`, `FIL⁠TER_NULL_ON_FAILURE`
+    | Validates value as an IP address |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​VALI⁠DATE_​MAC` | `default` | `FILTER_NULL_ON_FAILURE` | Validates
+    value as a MAC address |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​VALI⁠DATE_​REGEXP` | `default`, `regexp` | `FILTER_NULL_ON_FAILURE`
+    | Validates value against a Perl-compatible regular expression |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​VALI⁠DATE_​URL` | `default` | `FILTER_FLAG_SCHEME_REQUIRED`, `FIL⁠TER_FLAG_HOST_REQUIRED`,
+    `FIL⁠TER_FLAG_PATH_REQUIRED`, `FIL⁠TER_FLAG_QUERY_REQUIRED`, `FIL⁠TER_NULL_ON_FAILURE`
+    | Validates as a URL according to [RFC 2396](https://oreil.ly/KiLd3) |'
+  prefs: []
+  type: TYPE_TB
+- en: Table 9-2\. Sanitization filters supported by PHP
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| ID | Flags | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​SANI⁠TIZE_EMAIL` |  | Removes all characters except letters, digits,
+    and + ! # $ % & '' * + - = ? ^ _ ` { \ &#124; } ~ @ . [ ]  |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​SANI⁠TIZE_​ENCODED` | `FILTER_FLAG_STRIP_LOW`, `FIL⁠TER_FLAG_STRIP_HIGH`,
+    `FIL⁠TER_FLAG_STRIP_BACKTICK`, `FIL⁠TER_FLAG_ENCODE_HIGH`, `FIL⁠TER_FLAG_ENCODE_LOW`
+    | URL-encodes string, optionally stripping or encoding special characters |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​SANI⁠TIZE_ADD_SLASHES` |  | Applies `addslashes()` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​SANI⁠TIZE_​NUM⁠BER_FLOAT` | `FILTER_FLAG_ALLOW_FRACTION`, `FILTER_FLAG_ALLOW_THOUSANDS`,
+    `FILTER_FLAG_ALLOW_SCIENTIFIC` | Removes all characters except digits, plus and
+    minus signs, and optionally periods, commas, and uppercase and lowercase *E*s
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​SANI⁠TIZE_​NUM⁠BER_INT` |  | Removes all characters except digits
+    and plus and minus signs |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​SANI⁠TIZE_​SPE⁠CIAL_CHARS` | `FILTER_FLAG_STRIP_LOW`, `FIL⁠TER_FLAG_STRIP_HIGH`,
+    `FIL⁠TER_FLAG_STRIP_BACKTICK`, `FIL⁠TER_FLAG_ENCODE_HIGH` | HTML-encodes `'' "
+    < > &` and characters with ASCII values less than 32, optionally strips or encodes
+    other special characters |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​SANI⁠TIZE_FULL_​SPECIAL_CHARS` | `FILTER_FLAG_NO_ENCODE_QUOTES`
+    | Equivalent to calling `htmlspecialchars()` with `ENT_QUOTES` set |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_​SANI⁠TIZE_URL` |  | Removes all characters except those valid in
+    URLs |'
+  prefs: []
+  type: TYPE_TB
+- en: Table 9-3\. Miscellaneous filters supported by PHP
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| ID | Options | Flags | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `FILTER_CALLBACK` | `callable` function or method | All flags are ignored.
+    | Calls a user-defined function to filter data |'
+  prefs: []
+  type: TYPE_TB
+- en: The validation filters also accept an array of options at runtime. This gives
+    you the ability to code specific ranges (for numeric checks) and even fallback
+    default values should a particular user input not pass validation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, say you are building a shopping cart that allows the user to specify
+    the number of items they want to purchase. Clearly, this must be a value greater
+    than zero and less than the total inventory you have available. An approach like
+    that illustrated in [Example 9-5](#filter_validate_default) will force the value
+    to be an integer between certain bounds or the value will fall back to 1\. In
+    this way, a user cannot accidentally order more items than you have, a negative
+    number of items, a partial number of items, or some non-numeric amount.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-5\. Validating an integer value with bounds and a default
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO5-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The quantity checks out and returns `12`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO5-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Negative integers fail to validate, so this returns the default of `1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO5-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The input is above the max range, so this returns the default of `1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_security_and_encryption_CO5-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Non-numeric inputs will always return the default of `1`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on PHP’s [data filtering extension](https://oreil.ly/UX_Hs).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 9.2 Keeping Sensitive Credentials Out of Application Code
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Your application needs to leverage a password or API key, and you want to avoid
+    having that sensitive credential written in code or committed to version control.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Store the credential in an environment variable exposed by the server running
+    the application. Then reference that environment variable in code. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: A common mistake made in many developers’ early careers is to hardcode credentials
+    for sensitive systems into constants or other places in application code. While
+    this makes those credentials readily available to application logic, it also introduces
+    severe risk to your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You could accidentally use production credentials from a development account.
+    An attacker might find credentials indexed in an accidentally public repository.
+    An employee might abuse their knowledge of credentials beyond their intended use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In production, the best credentials are those unknown to and untouched by humans.
+    It’s a good idea to keep those credentials only in the production environment
+    and use *separate accounts* for development and testing. Leveraging environment
+    variables within your code makes your application flexible enough to run anywhere,
+    as it uses not hardcoded credentials but those bound to the environment itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: PHP’s built-in information system, `phpinfo()`, will automatically enumerate
+    all environment variables for debugging purposes. Once you begin leveraging the
+    system environment to house sensitive credentials, take extra care to avoid using
+    detailed diagnostic tools like `phpinfo()` in publicly accessible parts of your
+    application!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The method of *populating* environment variables will differ from one system
+    to another. In Apache-powered systems, you can set environment variables by using
+    the `SetEnv` keyword within the `<VirtualHost>` directive as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In NGINX-powered systems, you can set environment variables for PHP only if
+    it’s running as a FastCGI process. Similar to Apache’s `SetEnv`, this is done
+    with a keyword within a `location` directive in the NGINX configuration as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Separately, Docker-powered systems set environment variables in either their
+    Compose files (for Docker Swarm) or the system deployment configuration (for Kubernetes).
+    In all of these situations, you are defining a credential within the environment
+    itself rather than within your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An additional option is to use [PHP dotenv](https://oreil.ly/a4TQp).^([4](ch09.html#idm45875151024592))
+    This third-party package allows you to define your environment configuration in
+    a flat file named *.env* and it automatically populates both environment variables
+    and the `$_SERVER` superglobal. The biggest advantage of this approach is that
+    dotfiles (files prefixed with a `.`) are easy to exclude from version control
+    and are typically hidden on a server to begin with. You can use a *.env* locally
+    to define development credentials and keep a separate *.env* on the server to
+    define production credentials.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In both cases, you never have to directly manage an Apache or NGINX configuration
+    file at all!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A *.env* file defining the database credentials used in the Solution example
+    would look something like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In your application code, you would then load the library dependency and invoke
+    its loader as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once the library is loaded, you can leverage `getenv()` to reference the environment
+    variables wherever you need access.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`getenv()`](https://oreil.ly/t6ncZ).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 9.3 Hashing and Validating Passwords
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to authenticate users leveraging passwords only they know and prevent
+    your application from storing sensitive data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `password_hash()` to store secure hashes of passwords:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use `password_verify()` to verify that a plaintext password produces a given,
+    stored hash as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Storing passwords in plaintext is always a bad idea. If your application or
+    data store is ever breached, those plaintext passwords can and will be abused
+    by attackers. To keep your users safe and protect them from potential abuse in
+    the case of a breach, you must always hash those passwords when storing them in
+    your database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conveniently, PHP ships with a native function to do just that—`password_hash()`.
+    This function takes a plaintext password and automatically generates a deterministic
+    but seemingly random hash from that data. Rather than storing the plaintext password,
+    you store this hash. Later, when the user chooses to log into your application,
+    you can compare the plaintext password against the stored hash (using a safe comparison
+    function like `hash_equals()`) and assert whether they match.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP generally supports three hashing algorithms, enumerated in [Table 9-4](#password_hashing_algorithms).
+    At the time of this writing, the default algorithm is bcrypt (which is based on
+    the Blowfish cipher), but you can choose a particular algorithm at runtime by
+    passing a second parameter into `password_hash()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 9-4\. Password hashing algorithms
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Constant | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `PASSWORD_DEFAULT` | Use the default bcrypt algorithm. The default algorithm
+    could change in a future release. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `PASSWORD_BCRYPT` | Use the `CRYPT_BLOWFISH` algorithm. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `PASSWORD_ARGON2I` | Use the Argon2i hashing algorithm. (Only available if
+    PHP has been compiled with Argon2 support.) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `PASSWORD_ARGON2ID` | Use the Argon2id hashing algorithm. (Only available
+    if PHP has been compiled with Argon2 support.) |'
+  prefs: []
+  type: TYPE_TB
+- en: Each hashing algorithm supports a set of options that can determine the difficulty
+    of calculating a hash on the server. The default (or bcrypt) algorithm supports
+    an integer “cost” factor—the higher the number, the more computationally expensive
+    the operation will be. The Argon2 family of algorithms supports two cost factors—one
+    for the memory cost and one for the amount of time it will take to compute a hash.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Increasing the cost for computing a hash is a means of protecting the application
+    from brute-force authentication attacks. If it takes 1 second to calculate a hash,
+    it will take *at least* 1 second for a legitimate party to authenticate (this
+    is trivial). However, an attacker can attempt to authenticate *at most* once per
+    second. This renders brute-force attacks relatively costly both in terms of time
+    and computing capacity.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When you first build your application, it is a good idea to test the server
+    environment that will run it and set your cost factors appropriately. Identifying
+    cost factors requires testing the performance of `password_hash()` on the live
+    environment, as demonstrated in [Example 9-6](#password_hash_cost_test). This
+    script will test the hashing performance of the system with increasingly large
+    cost factors and identify a cost factor that achieves the desired time target.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-6\. Testing the cost factors for `password_hash()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The output of `password_hash()` is intended to be fully forward compatible.
+    Rather than merely generate a hash, the function will also internally generate
+    a salt to make the hash unique. Then the function returns a string representing
+    the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The algorithm used
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The cost factors or options
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The generated random salt
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The resulting hash
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[Figure 9-1](#password_hash_output) shows an example of this string output.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: A unique, random salt is generated internally by PHP every time you call `password_hash()`.
+    This has the effect of producing distinct hashes for identical plaintext passwords.
+    In this way, hashed values can’t be used to identify which accounts are using
+    the same passwords.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Illustration of the output of +password_hash()+](assets/phpc_0901.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 9-1\. Example output of `password_hash()`
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The advantage of encoding all of this information into the output of `pass⁠word_​hash()`
+    is that you don’t need to maintain this data in the application. At a future date,
+    you might change the hashing algorithm or modify the cost factors used for hashing.
+    By encoding the settings originally used to generate a hash, PHP can reliably
+    re-create a hash for comparison.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When a user logs in, they provide only their plaintext password. The application
+    needs to recompute a hash of this password and compare the newly computed value
+    with the one stored in the database. Given that the information you need to calculate
+    a hash is stored alongside the hash, this becomes relatively straightforward.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rather than implement the comparison yourself, though, you can leverage PHP’s
+    `password_verify()` function that does all this in a safe and secure way.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`password_hash()`](https://oreil.ly/gZwBC) and [`password_​verify()`](https://oreil.ly/gf3O9).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 9.4 Encrypting and Decrypting Data
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to protect sensitive data leveraging encryption and reliably decrypt
+    that information at a later time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use sodium’s `sodium_crypto_secretbox()` to encrypt the data with a known symmetric
+    (aka shared) key, as shown in [Example 9-7](#sodium_symmetric_solution_example).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-7\. Sodium symmetric encryption example
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO6-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The key must be a random value of length `SODIUM_CRYPTO_SECRETBOX_KEYBYTES`
+    (32 bytes). If you are creating a new, random string, you can leverage `sodium_crypto_secretbox_keygen()`
+    to create one. Just be sure to store it somewhere so you can decrypt the message
+    later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO6-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every encryption operation should use a unique, random nonce. PHP’s `ran⁠dom_​bytes()`
+    can reliably create one of the appropriate length by using built-in constants.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO6-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The encryption operation leverages both the random nonce and the fixed secret
+    key to protect the message and returns raw bytes as a result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_security_and_encryption_CO6-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Often you want to exchange encrypted information over a network protocol, so
+    encoding the raw bytes as hexadecimal can make it more portable. You’ll also need
+    the nonce to decrypt the exchanged data, so you store it alongside the ciphertext.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When you need to decrypt the data, use `sodium_crypto_secretbox_open()` to both
+    extract and validate the data, as shown in [Example 9-8](#sodium_symmetric_decryption).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-8\. Sodium symmetric decryption
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO7-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use the same key for decryption that you used for encryption.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO7-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The resulting ciphertext from [Example 9-7](#sodium_symmetric_solution_example)
+    is reused here and is extracted from a hexadecimal-encoded string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO7-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because you concatenated the ciphertext and nonce, you must split the two components
+    apart for use with `sodium_crypto_secretbox_open()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_security_and_encryption_CO7-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This entire encryption/decryption operation is authenticated. If anything changed
+    in the underlying data, the authentication step will fail and the function will
+    return a literal `false` to flag the manipulation. If it returns anything else,
+    the decryption succeeded and you can trust the output!
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `secretbox` family of functions exposed by sodium implements authenticated
+    encryption/decryption by using a fixed symmetric key. Every time you encrypt a
+    message, you should do so with a random nonce to fully protect the privacy of
+    the encrypted message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The nonce used in encryption itself isn’t a secret or sensitive value. However,
+    you should take care never to reuse a nonce with the same symmetric encryption
+    key. Nonces are “numbers used once” and are intended to add randomness to the
+    encryption algorithm such that the same value encrypted twice with the same key
+    can produce different ciphertexts. Reusing a nonce with a specific key compromises
+    the security of the data you’re aiming to protect.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The symmetry here is that the same key is used both to encrypt and decrypt a
+    message. This is most valuable when the same system is responsible for both operations—for
+    example, when a PHP application needs to encrypt data to be stored in a database
+    and then decrypt that data when reading it back out.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The encryption leverages the [XSalsa20 stream cipher](https://oreil.ly/DSUAQ)
+    to protect data. This cipher uses a 32-byte (256-bit) key and a 24-byte (192-bit)
+    nonce. None of this information is necessary for developers to keep track of,
+    though, as it’s safely abstracted behind the `secretbox` functions and constants.
+    Rather than keep track of key sizes and encryption modes, you merely need to create
+    or *open* a box with the matched key and nonce for the message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another advantage of this approach is authentication. Every encryption operation
+    will also generate a message authentication tag leveraging the [Poly1305 algorithm](https://oreil.ly/tSgmq).
+    Upon decryption, sodium will validate that the authentication tag matches the
+    protected data. If there is not a match, it’s possible that the message was either
+    accidentally corrupted or intentionally manipulated. In either case, the ciphertext
+    is unreliable (as would be any decrypted plaintext), and the open function will
+    return a Boolean `false`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Asymmetric encryption
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Symmetric encryption is easiest when the same party is both encrypting and decrypting
+    data. In many modern tech environments, these parties might be independent and
+    communicating over less-than-trustworthy media. This necessitates a different
+    form of encryption, as the two parties cannot directly share a symmetric encryption
+    key. Instead, each can create pairs of public and private keys and leverage key
+    exchange to agree upon an encryption key.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Key exchange is a complicated topic. Luckily, sodium exposes simple interfaces
+    for performing the operation in PHP. In the examples that follow, two parties
+    will do the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Create public/private key pairs
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Exchange their public keys directly
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Use these asymmetric keys to agree upon a symmetric key
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Exchange encrypted data
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: '[Example 9-9](#asymmetric_key_creation) illustrates how each party will create
+    their own public/private key pairs. Though the code example is in a single block,
+    each party would create their keys independently and only ever exchange their
+    public keys with one another.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-9\. Asymmetric key creation
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO8-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Alice creates a key pair and extracts her public and private key from it separately.
+    She shares her public key with Beth.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO8-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Alice keeps her private key secret. This is the key she will use to encrypt
+    data *for* Beth and decrypt data *from* her. Similarly, Alice would use her private
+    key to encrypt data for anyone else who has shared their public key with her.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO8-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Beth independently does the same thing as Alice and shares her own public key.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once Alice and Beth have shared their public keys, they are free to communicate
+    privately. The `cryptobox` family of functions in sodium leverages these asymmetric
+    keys to compute a symmetric key that can be used for confidential communication.
+    This symmetric key is not exposed directly to either party, but allows the parties
+    to easily communicate with one another.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that anything Alice encrypts for Beth can *only* be decrypted by Beth.
+    Even Alice cannot decrypt these messages, as she does not have Beth’s private
+    key! [Example 9-10](#asymmetric_encryption_simple_message) illustrates how Alice
+    can encrypt a simple message leveraging both her own private key and Beth’s advertised
+    public key.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-10\. Asymmetric encryption
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO9-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The encryption key used here is actually a key pair composed of information
+    from both Alice’s and Beth’s individual key pairs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO9-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As with symmetric encryption, you leverage a nonce in order to introduce randomness
+    into the encrypted output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO9-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You concatenate the random nonce and the encrypted ciphertext so Alice can send
+    both to Beth at the same time.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The key pairs involved are points on an elliptic curve, specifically Curve25519\.
+    The initial operation sodium uses for asymmetric encryption is a *key exchange*
+    between two of these points to define a fixed but secret number. This operation
+    uses the [X25519 key exchange algorithm](https://oreil.ly/OAqeF) and produces
+    a number based on Alice’s private key and Beth’s public key.
+  prefs: []
+  type: TYPE_NORMAL
+- en: That number is then used as a key with the XSalsa20 stream cipher (the same
+    one used for symmetric encryption) to encrypt the message. As with symmetric encryption
+    discussed for the `secret box` family of functions, a `cryptobox` will leverage
+    a Poly1305 message authentication tag to protect the message against tampering
+    or corruption.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At this point, Beth, by leveraging her own private key, Alice’s public key,
+    and the message nonce, can reproduce all of these steps on her own to decrypt
+    the message. She performs a similar X25519 key exchange to derive the same shared
+    key and then uses that for decryption.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Thankfully, sodium abstracts the key exchange and derivation for us, making
+    asymmetric decryption relatively straightforward. See [Example 9-11](#asymmetric_decryption).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-11\. Asymmetric decryption
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO10-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similar to the `secretbox` operation, you first extract the nonce and ciphertext
+    from the hexadecimal-encoded payload provided by Alice.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO10-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Beth uses her own private key along with Alice’s public key to create a key
+    pair appropriate for decrypting the message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO10-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The key exchange and decryption operations are abstracted away with a simple
+    “open” interface to read the message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_security_and_encryption_CO10-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As with symmetric encryption, sodium’s asymmetric interfaces will validate the
+    Poly1305 authentication tag on the message before decrypting and returning the
+    plaintext.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Either mechanism—symmetric or asymmetric encryption—is well supported and cleanly
+    abstracted by sodium’s functional interfaces. This helps avoid errors commonly
+    encountered when implementing older mechanisms (like AES or RSA). Libsodium (the
+    C-level library powering the sodium extension) is widely supported in other languages
+    as well, providing solid interoperability between PHP, Ruby, Python, JavaScript,
+    and even lower-level languages like C and Go.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`sodium_​crypto_​secretbox()`](https://oreil.ly/3IZZM), [`sodium_​crypto_​secret⁠box_​open()`](https://oreil.ly/qNDqx),
+    [`sodium_​crypto_​box()`](https://oreil.ly/-apZN), and [`sodium_crypto_box_open()`](https://oreil.ly/5lT_D).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 9.5 Storing Encrypted Data in a File
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to encrypt (or decrypt) a file that is too large to fit in memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use the *push* streaming interfaces exposed by sodium to encrypt one chunk of
+    the file at a time, as shown in [Example 9-12](#libsodium_stream_encrypt).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-12\. Sodium stream encryption
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO11-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Initializing the stream operation yields two values—a header and the current
+    state of the stream. The header itself contains a random nonce and is required
+    in order to decrypt anything encrypted with the stream.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO11-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Open both the input and output files as binary streams. Working with files is
+    one of the few times you want to emit raw bytes rather than leverage hexadecimal
+    or Base64 encoding to wrap an encrypted output.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO11-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To ensure that you can decrypt the file, first store the fixed-length header
+    for later retrieval.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_security_and_encryption_CO11-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before you begin iterating over chunks of bytes in the file, you need to determine
+    how large the input file really is.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_security_and_encryption_CO11-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: As with other sodium operations, the stream encryption cipher is built atop
+    Poly1305 authentication tags (which are 17 bytes in length). As a result, you
+    read 17 bytes less than the standard 4,096-byte block, so the output will be a
+    total of 4,081 bytes written to the file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_security_and_encryption_CO11-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The sodium API encrypts the plaintext and automatically updates the state variable
+    (`$state` is passed by reference and updated in place).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![7](assets/7.png)](#co_security_and_encryption_CO11-7)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: After you’re done with encryption, explicitly zero out the memory of the state
+    variable. PHP’s garbage collector will clean up the references, but you want to
+    ensure that no coding errors elsewhere in the system can inadvertently leak this
+    value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![8](assets/8.png)](#co_security_and_encryption_CO11-8)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, close the file handles since the encryption is complete.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To decrypt the file, use sodium’s *pull* streaming interfaces, as shown in [Example 9-13](#sodium_stream_decryption).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-13\. Sodium stream decryption
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO12-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Before you can begin decryption, you must explicitly retrieve the header value
+    from the file you encrypted in the first place.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO12-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Armed with the encryption header and key, you can initialize the stream state
+    as desired.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_security_and_encryption_CO12-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Keep in mind that the file is prefixed with a header, so you skip those bytes
+    and then pull chunks of 4,096 bytes at a time. This will include 4,079 bytes of
+    ciphertext and 17 bytes of authentication tag.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_security_and_encryption_CO12-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The actual stream decryption operation returns a tuple of the plaintext and
+    an optional status tag (e.g., to identify that a key needs to be rotated).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![5](assets/5.png)](#co_security_and_encryption_CO12-5)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the authentication tag on the encrypted message fails to validate, however,
+    this function will return `false` to indicate the authentication failure. Should
+    this occur, halt decryption immediately.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![6](assets/6.png)](#co_security_and_encryption_CO12-6)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Again, once the operation is complete, you should zero out the memory storing
+    the stream state, as well as close out the file handles.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The stream cipher interfaces exposed by sodium are not actual streams to PHP.^([5](ch09.html#idm45875149639856))
+    Specifically, they are stream *ciphers* that work like block ciphers with an internal
+    counter. XChaCha20 is the cipher used by the `sodium_crypto_secret⁠stream_​xcha⁠cha​20​poly1305_*()`
+    family of functions leveraged to push data into and pull data from an encrypted
+    stream in this recipe. The implementation in PHP explicitly breaks a long message
+    (a file) into a series of related messages. Each of these messages is encrypted
+    with the underlying cipher and tagged individually but in a specific order.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These messages cannot be truncated, removed, reordered, or manipulated in any
+    way without the decryption operation detecting that tampering. There is also no
+    practical limit to the total number of messages that can be encrypted as part
+    of this stream, which means there is no limit to the size of a file that can be
+    passed through the Solution examples.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Solution uses a chunk size of 4,096 bytes (4 KB), but other examples could
+    use 1,024, 8,096, or any other number of bytes. The only limitation here is the
+    amount of memory available to PHP—iterating over smaller chunks of a file will
+    use less memory during encryption and decryption. [Example 9-12](#libsodium_stream_encrypt)
+    illustrates how `sodium_​crypto_​secretstream_​xchacha20​poly1305_​push()` encrypts
+    one chunk of data at a time, “pushing” that data through the encryption algorithm
+    and updating the algorithm’s internal state. The paired `sodium_​crypto_​secretstream_​xcha⁠cha20poly1305_​pull()`
+    does the same thing in reverse, pulling corresponding plaintext back out of the
+    stream and updating the algorithm’s state.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Another way to see this in action is with the low-level primitive `sodium_​crypto_​stream_xchacha20_xor()`
+    function. This function leverages the XChaCha20 encryption algorithm directly
+    to generate a stream of seemingly random bytes based on a given key and random
+    nonce. It then performs an XOR operation between that stream of bytes and a given
+    message to produce a ciphertext.^([6](ch09.html#idm45875149634064)) [Example 9-14](#simple_crypto_stream)
+    illustrates one way in which this function might be used—encrypting phone numbers
+    in a database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-14\. Simple stream encryption for data protection
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: The advantage of using a cryptographic stream in this way is that the ciphertext
+    exactly matches the length of the plaintext. However, this also means there is
+    no authentication tag available (meaning the ciphertext could be corrupted or
+    manipulated by a third party and jeopardize the reliability of any decrypted ciphertext).
+  prefs: []
+  type: TYPE_NORMAL
+- en: As a result, [Example 9-14](#simple_crypto_stream) is not likely something you
+    will ever use directly. However, it does illustrate how the more verbose `sodium_​crypto_​secretstream_​xcha⁠cha20poly1305_push()`
+    works under the hood. Both functions use the same algorithm, but the “secret stream”
+    variant generates its own nonce and keeps track of its internal state over repeated
+    uses (in order to encrypt *multiple* chunks of data). When using the simpler XOR
+    version you would need to manage that state and repeated calls manually!
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`sodium_crypto_secretstream_xchacha20poly1305_init_​push()`](https://oreil.ly/chGJC),
+    [`sodium_​crypto_​secretstream_​xcha⁠cha20poly1305_​init_​pull()`](https://oreil.ly/ogGvJ),
+    and [`sodium_​crypto_​stream_​xchacha20_​xor()`](https://oreil.ly/yQBBC).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 9.6 Cryptographically Signing a Message to Be Sent to Another Application
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to sign a message or piece of data before sending it to another application
+    such that the other application can validate your signature on the data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use `sodium_crypto_sign()` to attach a cryptographic signature to a plaintext
+    message, as shown in [Example 9-15](#cryptographic_signatures_messages).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-15\. Cryptographic signatures on messages
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO13-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In practice, your signing seed should be a random value kept secret by you.
+    It could also be a secure hash derived from a known password.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Cryptographic signatures are a way to verify that a particular message (or string
+    of data) originated from a given source. So long as the private key used to sign
+    a message is kept secret, anyone with access to the publicly known key can validate
+    that the information came from the owner of the key.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Likewise, only the custodian of that key can sign the data. This helps verify
+    that the custodian signed off on the message. It also forms the basis for nonrepudiation:
+    the owner of the key cannot claim that someone else used their key without rendering
+    their key (and any signatures it created) invalid.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the Solution example, a signature is calculated based on the secret key and
+    the contents of the message. The bytes of the signature are then prepended to
+    the message itself, and both elements together are passed along to any party who
+    wishes to verify the signature.
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is also possible to generate a *detached* signature, effectively producing
+    the raw bytes of the signature without concatenating it to the message. This is
+    useful if the message and signature are meant to be sent independently to the
+    third-party verifier—for example, as different elements in an API request.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: While raw bytes are fantastic for information stored on disk or in a database,
+    they can cause problems with remote APIs. It would make sense to Base64-encode
+    the entire payload (the signature and message) when sending it to a remote party.
+    Otherwise, you might want to encode the signature separately (e.g., as hexadecimal)
+    when sending the two components together.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rather than using `sodium_crypto_sign()` as in the Solution example, you can
+    use `sodium_crypto_sign_detached()` as in [Example 9-16](#detached_signatures).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-16\. Creating a detached message signature
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Signatures will always be 64 bytes long, regardless of whether they’re attached
+    to the plaintext they sign.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`sodium_crypto_sign()`](https://oreil.ly/3eqTz).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 9.7 Verifying a Cryptographic Signature
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to verify the signature on a piece of data sent to you by a third party.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use `sodium_crypto_sign_open()` to validate the signature on a message, as shown
+    in [Example 9-17](#cryptographic_signature_verification).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-17\. Cryptographic signature verification
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_security_and_encryption_CO14-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The data in `$signed` is a concatenated raw signature and plaintext message,
+    as in the return of `sodium_crypto_sign()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_security_and_encryption_CO14-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the signature is invalid, the function returns `false` as an error. If the
+    signature is valid, the function instead returns the plaintext message.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Signature verification is straightforward when the literal returns from `sodium_crypto_sign()`
+    are involved. Merely pass the data and the public key of the signing party into
+    `sodium_​crypto_​sign_open()`, and you will have either a Boolean error or the
+    original plaintext back as a result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re working with a web API, there’s a good chance that the message and
+    signature were passed to you separately (e.g., if someone were using `sodium_​crypto_​sign_​detached()`).
+    In that case, you need to concatenate the signature and the message together before
+    passing them into `sodium_​crypto_​sign_​open()`, as in [Example 9-18](#sodium_crypto_sign_open).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-18\. Detached signature verification
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`sodium_crypto_sign_open()`](https://oreil.ly/UG5ja).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch09.html#idm45875152082528-marker)) The [OpenJDK Psychic Signatures bug
+    of 2022](https://oreil.ly/uvYXZ) illustrated how an error in cryptographic authentication
+    could expose not just applications *but an entire language implementation* to
+    potential abuse by malicious actors. This bug was due to an implementation error,
+    further underscoring how critical it is to rely on solid, proven, well-tested
+    primitives when using cryptographic systems.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([2](ch09.html#idm45875152074560-marker)) For more on native extensions, see
+    [Chapter 15](ch15.html#chapter_extensions).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([3](ch09.html#idm45875152063760-marker)) For a full breakdown of the process
+    through which this extension was added to PHP core, reference the [original RFC](https://oreil.ly/6X4AF).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([4](ch09.html#idm45875151024592-marker)) Loading PHP packages via Composer
+    is discussed at length in [Recipe 15.3](ch15.html#installing_composer_packages).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([5](ch09.html#idm45875149639856-marker)) PHP streams, covered extensively
+    in [Chapter 11](ch11.html#chapter_streams), expose effective ways to work with
+    large chunks of data without exhausting available system memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([6](ch09.html#idm45875149634064-marker)) For more on operators and XOR in
+    particular, review [Chapter 2](ch02.html#chapter_operators).
+  prefs: []
+  type: TYPE_NORMAL

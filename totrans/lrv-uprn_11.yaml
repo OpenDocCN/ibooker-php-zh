@@ -1,0 +1,637 @@
+- en: Chapter 11\. The Container
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel’s service container, or dependency injection container, sits at the
+    core of almost every other feature. The container is a simple tool you can use
+    to bind and resolve concrete instances of classes and interfaces, and at the same
+    time, it’s a powerful and nuanced manager of a network of interrelated dependencies.
+    In this chapter, you’ll learn more about what it is, how it works, and how you
+    can use it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Naming and the Container
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'You’ll notice in this book, in the documentation, and in other educational
+    sources that there are quite a few names folks use for the container. These include:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Application container
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: IoC (inversion of control) container
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Service container
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: DI (dependency injection) container
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: All are useful and valid, but just know they’re all talking about the same thing.
+    They’re all referring to the service container.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Quick Introduction to Dependency Injection
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Dependency injection means that, rather than being instantiated (“newed up”)
+    within a class, each class’s dependencies will be *injected* in from the outside.
+    This most commonly occurs with *constructor injection*, which means an object’s
+    dependencies are injected when it’s created. But there’s also *setter injection*,
+    where the class exposes a method specifically for injecting a given dependency,
+    and *method injection*, where one or more methods expect their dependencies to
+    be injected when they’re called.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 11-1](#EX1101) for a quick example of constructor injection,
+    the most common type of dependency injection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-1\. Basic dependency injection
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, this `UserMailer` class expects an object of type `Mailer` to
+    be injected when it’s instantiated, and its methods then refer to that instance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The primary benefits of dependency injection are that it gives us the freedom
+    to change what we’re injecting, to mock dependencies for testing, and to instantiate
+    shared dependencies just once for shared use.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dependency Injection and Laravel
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As you saw in [Example 11-1](#EX1101), the most common pattern for dependency
+    injection is constructor injection, or injecting the dependencies of an object
+    when it’s instantiated (“constructed”).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s take our `UserMailer` class from [Example 11-1](#EX1101). [Example 11-2](#EX1102)
+    shows what it might look like to create and use an instance of it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-2\. Simple manual dependency injection
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now let’s imagine we want our `UserMailer` class to be able to log messages,
+    as well as send a notification to a Slack channel every time it sends a message.
+    [Example 11-3](#EX1103) shows what this would look like. As you can see, it would
+    start to get pretty unwieldy if we had to do all this work every time we wanted
+    to create a new instance—​especially when you consider that we’ll have to get
+    all these parameters from somewhere.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-3\. More complex manual dependency injection
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Imagine having to write that code every time you wanted a `UserMailer`. Dependency
+    injection is great, but this is a mess.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The app() Global Helper
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Before we go too far into how the container actually works, let’s take a quick
+    look at the simplest way to get an object out of the container: the `app()` helper.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Pass any string to that helper, whether it’s a fully qualified class name (FQCN,
+    like `*App\ThingDoer*`) or a Laravel shortcut (we’ll talk about those more in
+    a second), and it’ll return an instance of that class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is the absolute simplest way to interact with the container. It creates
+    an instance of this class and returns it for you, nice and easy. It’s like `new
+    Logger` but, as you’ll see shortly, much better.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Creating the `Logger` instance as shown here seems simple enough, but you might’ve
+    noticed that our `$logger` class in [Example 11-3](#EX1103) has two parameters:
+    `$logPath` and `$minimumLogLevel`. How does the container know what to pass here?'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Short answer: it doesn’t. You can use the `app()` global helper to create an
+    instance of a class that has no parameters in its constructor, but at that point
+    you could’ve just run `new Logger` yourself. The container shines when there’s
+    some complexity in the constructor, and that’s when we need to look at how exactly
+    the container can figure out how to construct classes with constructor parameters.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: How the Container Is Wired
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Before we dig further into the `Logger` class, take a look at [Example 11-4](#EX1104).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-4\. Laravel autowiring
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This looks similar to our mailer example in [Example 11-3](#EX1103). What’s
+    different is that these dependencies (`Bar` and `Baz`) are both so simple that
+    the container can resolve them without any further information. The container
+    reads the typehints in the `Foo` constructor, resolves an instance of both `Bar`
+    and `Baz`, and then injects them into the new `Foo` instance when it’s creating
+    it. This is called *autowiring*: resolving instances based on typehints without
+    the developer needing to explicitly bind those classes in the container.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Autowiring means that, if a class has not been explicitly bound to the container
+    (like `Foo`, `Bar`, or `Baz` in this context) but the container can figure out
+    how to resolve it anyway, the container will resolve it. This means any class
+    with no constructor dependencies (like `Bar` and `Baz`) and any class with constructor
+    dependencies that the container can resolve (like `Foo`) can be resolved out of
+    the container.
+  prefs: []
+  type: TYPE_NORMAL
+- en: That leaves us needing to bind only classes that have unresolvable constructor
+    parameters—​for example, our `$logger` class in [Example 11-3](#EX1103), which
+    has parameters related to our log path and log level.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For those, we’ll need to learn how to explicitly bind something to the container.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Binding Classes to the Container
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Binding a class to Laravel’s container is essentially telling the container,
+    “If a developer asks for an instance of `Logger`, here’s the code to run to instantiate
+    one with the correct parameters and dependencies and then return it correctly.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’re teaching the container that, when someone asks for this particular string
+    (which is usually the FQCN of a class), it should resolve it this way.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Binding to a Closure
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: So, let’s look at how to bind to the container. Note that the appropriate place
+    to bind to the container is in a service provider’s `register()` method (see [Example 11-5](#EX1105)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-5\. Basic container binding
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: There are a few important things to note in this example. First, we’re running
+    `$this``->app->bind()`. `$this->app` is an instance of the container that’s always
+    available on every service provider. The container’s `bind()` method is what we
+    use to bind to the container.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first parameter of `bind()` is the “key” we’re binding to. Here, we’ve used
+    the FQCN of the class. The second parameter differs depending on what you’re doing,
+    but essentially, it should be *something* that shows the container what to do
+    to resolve an instance of that bound key.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, in this example, we’re passing a closure. And now, any time someone runs
+    `app(Logger::class)`, they’ll get the result of this closure. The closure is passed
+    an instance of the container itself (`$app`), so if the class you’re resolving
+    has a dependency you want resolved out of the container, you can use it in your
+    definition as seen in [Example 11-6](#EX11a).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-6\. Using the passed `$app` instance in a container binding
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that every time you ask for a new instance of your class, this closure
+    will be run again and the new output returned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Binding to Singletons, Aliases, and Instances
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you want the output of the binding closure to be cached so that this closure
+    isn’t re-run every time you ask for an instance, that’s the singleton pattern,
+    and you can run `$this->app->singleton()` to do that. [Example 11-7](#EX11b) shows
+    what this looks like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-7\. Binding a singleton to the container
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also get similar behavior if you already have an instance of the object
+    you want the singleton to return, as seen in [Example 11-8](#EX11c).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-8\. Binding an existing class instance to the container
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, if you want to alias one class to another, bind a class to a shortcut,
+    or bind a shortcut to a class, you can just pass two strings, as shown in [Example 11-9](#EX11d).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-9\. Aliasing classes and strings
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that these shortcuts are common in Laravel’s core; it provides a system
+    of shortcuts to classes that provide core functionality, using easy-to-remember
+    keys like `log`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Binding a Concrete Instance to an Interface
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Just like we can bind a class to another class, or a class to a shortcut, we
+    can also bind to an interface. This is extremely powerful, because we can now
+    typehint interfaces instead of class names, like in [Example 11-10](#EX1106).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-10\. Typehinting and binding to an interface
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can now typehint `Mailer` or `Logger` interfaces all across your code, and
+    then choose once in a service provider which specific mailer or logger you want
+    to use everywhere. That’s inversion of control.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One of the key benefits you get from using this pattern is that later, if you
+    choose to use a different mail provider than Mailgun, as long as you have a mailer
+    class for that new provider that implements the `Mailer` interface, you can swap
+    it once in your service provider and everything in the rest of your code will
+    just work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Contextual Binding
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Sometimes you need to change how to resolve an interface depending on the context.
+    You might want to log events from one place to a local syslog and from others
+    out to an external service. So, let’s tell the container to differentiate—check
+    out [Example 11-11](#EX1107).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-11\. Contextual binding
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Constructor Injection in Laravel Framework Files
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We’ve covered the concept of constructor injection, and we’ve looked at how
+    the container makes it easy to resolve instances of a class or interface out of
+    the container. You saw how easy it is to use the `app()` helper to make instances,
+    and also how the container will resolve the constructor dependencies of a class
+    when it’s creating it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What we haven’t covered yet is how the container is also responsible for resolving
+    many of the core operating classes of your application. For example, every controller
+    is instantiated by the container. That means if you want an instance of a logger
+    in your controller, you can simply typehint the logger class in your controller’s
+    constructor, and when Laravel creates the controller, it will resolve it out of
+    the container and that logger instance will be available to your controller. Take
+    a look at [Example 11-12](#EX1108).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-12\. Injecting dependencies into a controller
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: The container is responsible for resolving controllers, middleware, queue jobs,
+    event listeners, and any other classes that are automatically generated by Laravel
+    in the process of your application’s lifecycle—​so any of those classes can typehint
+    dependencies in their constructors and expect them to be automatically injected.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Method Injection
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'There are a few places in your application where Laravel doesn’t just read
+    the constructor signature: it also reads the *method* signature and will inject
+    dependencies for you there as well.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The most common place to use method injection is in controller methods. If you
+    have a dependency you only want to use for a single controller method, you can
+    inject it into just that method like in [Example 11-13](#EX1109).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-13\. Injecting dependencies into a controller method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can do the same in the `boot()` method of service providers, and you can
+    also arbitrarily call a method on any class using the container, which will allow
+    for method injection there (see [Example 11-14](#EX1110)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-14\. Manually calling a class method using the container’s `call()`
+    method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Facades and the Container
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We’ve covered facades quite a bit so far in the book, but we haven’t actually
+    talked about how they work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Laravel’s facades are classes that provide simple access to core pieces of
+    Laravel’s functionality. There are two trademark features of facades: first, they’re
+    all available in the global namespace (`\Log` is an alias to `\Illuminate\Support\Facades\Log`);
+    and second, they use static methods to access nonstatic resources.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s take a look at the `Log` facade, since we’ve been looking at logging
+    already in this chapter. In your controller or views, you could use this call:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here’s what it would look like to make that same call without the facade:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, facades translate static calls (any method call that you make
+    on a class itself, using `::`, instead of on an instance) to normal method calls
+    on instances.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Importing Facade Namespaces
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'If you’re in a namespaced class, you’ll want to be sure to import the facade
+    at the top:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: How Facades Work
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s take a look at the `Cache` facade and see how it actually works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, open up the class `Illuminate\Support\Facades\Cache`. You’ll see something
+    like [Example 11-15](#EX1111).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-15\. The `Cache` facade class
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Every facade has a single method: `getFacadeAccessor()`. This defines the key
+    that Laravel should use to look up this facade’s backing instance from the container.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In this instance, we can see that every call to the `Cache` facade is proxied
+    to be a call to an instance of the `cache` shortcut from the container. Of course,
+    that’s not a real class or interface name, so we know it’s one of those shortcuts
+    I mentioned earlier.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So, here’s what’s really happening:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There are a few ways to look up exactly what class each facade accessor points
+    to, but checking the documentation is the easiest. There’s a table on the [facades
+    documentation page](https://oreil.ly/IRsgc) that shows, for each facade, which
+    container binding (shortcut, like `cache`) it’s connected to, and which class
+    that returns. It looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Facade | Class | Service container binding |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `App` | `Illuminate\Foundation\Application` | `app` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| …​ | …​ | …​ |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `Cache` | `Illuminate\Cache\CacheManager` | `cache` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| …​ | …​ | …​ |'
+  prefs: []
+  type: TYPE_TB
+- en: Now that you have this reference, you can do three things.
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, you can figure out what methods are available on a facade. Just find
+    its backing class and look at the definition of that class, and you’ll know that
+    any of its public methods are callable on the facade.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Second, you can figure out how to inject a facade’s backing class using dependency
+    injection. If you ever want the functionality of a facade but prefer to use dependency
+    injection, just typehint the facade’s backing class or get an instance of it with
+    `app()` and call the same methods you would’ve called on the facade.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Third, you can see how to create your own facades. Create a class for the facade
+    that extends `Illuminate\Support\Facades\Facade`, and give it a `getFacadeAccessor()`
+    method, which returns a string. Make that string something that can be used to
+    resolve your backing class out of the container—​maybe just the FQCN of the class.
+    Finally, you have to register the facade by adding it to the `aliases` array in
+    *config/app.php*. Done! You just made your own facade.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Real-Time Facades
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Rather than creating a new class to make your class’s instance methods available
+    as static methods, with *real-time facades* you can simply prefix your class’s
+    FQCN with `Facades\` and use it *as if it were a facade*. [Example 11-16](#EX1114)
+    illustrates how this works.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-16\. Using real-time facades
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see here, the nonstatic method `burndown()` becomes accessible as
+    a static method on the real-time facade, which we create by prepending the class’s
+    full name with `Facades\`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Service Providers
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We covered the basics of service providers in the previous chapter (see [“Service
+    Providers”](#service_providers2)). What’s most important with regard to the container
+    is that you remember to register your bindings in the `register()` method of some
+    service provider somewhere.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can just dump loose bindings into `App\Providers\AppServiceProvider`, which
+    is a bit of a catchall, but it’s generally better practice to create a unique
+    service provider for each group of functionality you’re developing and bind its
+    classes in its unique `register()` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The ability to use inversion of control and dependency injection makes testing
+    in Laravel extremely versatile. You can bind a different logger, for instance,
+    depending on whether the app is live or under testing. Or you can change the transactional
+    email service from Mailgun to a local email logger for easy inspection. Both of
+    these swaps are actually so common that it’s even easier to make them using Laravel’s
+    *.env* configuration files, but you can make similar swaps with any interfaces
+    or classes you’d like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The easiest way to do this is to explicitly rebind classes and interfaces when
+    you need them rebound, directly in the test. [Example 11-17](#EX1112) shows how.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-17\. Overriding a binding in tests
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you need certain classes or interfaces rebound globally for your tests (which
+    is not a particularly common occurrence), you can do this in either the `setUp()`
+    method in the test class or in the `setUp()` method in Laravel’s `TestCase` base
+    test, as shown in [Example 11-18](#EX1113).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-18\. Overriding a binding for all tests
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: When using something like Mockery, it’s common to create a mock or spy or stub
+    of a class and then rebind that to the container in place of its referent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: TL;DR
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel’s service container has many names, but regardless of what you call
+    it, in the end its goal is to make it easy to define how to resolve certain string
+    names as concrete instances. These string names are going to be the fully qualified
+    class names of classes or interfaces, or shortcuts like `log`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each binding teaches the application, given a string key (e.g., `app('log')`),
+    how to resolve a concrete instance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The container is smart enough to do recursive dependency resolution, so if you
+    try to resolve an instance of something that has constructor dependencies, the
+    container will try to resolve those dependencies based on their typehints, then
+    pass them into your class, and finally return an instance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are several ways to bind to the container, but in the end, they all define
+    what to return, given a particular string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Facades are simple shortcuts that make it easy to use static calls on a root
+    namespace–aliased class to call nonstatic methods on classes resolved out of the
+    container. Real-time facades allow you to treat any class like a facade by prepending
+    its fully qualified class name with `Facades\`.
+  prefs: []
+  type: TYPE_NORMAL

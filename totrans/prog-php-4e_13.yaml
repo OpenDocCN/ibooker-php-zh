@@ -1,0 +1,893 @@
+- en: Chapter 12\. XML
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: XML, the Extensible Markup Language, is a standardized data format. It looks
+    a little like HTML, with tags (`<example>like this</example>`) and entities (`&amp;`).
+    Unlike HTML, however, XML is designed to be easy to programmatically parse, and
+    there are rules for what you can and cannot do in an XML document. XML is now
+    the standard data format in fields as diverse as publishing, engineering, and
+    medicine. It’s used for remote procedure calls, databases, purchase orders, and
+    much more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are many scenarios where you might want to use XML. Because it is a common
+    format for data transfer, other programs can emit XML files for you to either
+    extract information from (*parse*) or display in HTML (*transform*). This chapter
+    shows you how to use the XML parser bundled with PHP, as well as how to use the
+    optional XSLT extension to transform XML. We also briefly cover generating XML.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Recently, XML has been used in remote procedure calls (XML-RPC). A client encodes
+    a function name and parameter values in XML and sends them via HTTP to a server.
+    The server decodes the function name and values, decides what to do, and returns
+    a response value encoded in XML. XML-RPC has proved a useful way to integrate
+    application components written in different languages. We’ll show you how to write
+    XML-RPC servers and clients in [Chapter 16](ch16.xhtml#web_services), but for
+    now let’s look at the basics of XML.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lightning Guide to XML
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Most XML consists of elements (like HTML tags), entities, and regular data.
+    For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In HTML, you often have an open tag without a close tag. The most common example
+    of this is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In XML, that is illegal. XML requires that every open tag be closed. For tags
+    that don’t enclose anything, such as the line break `<br>`, XML adds this syntax:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Tags can be nested but cannot overlap. For example, this is valid:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This, however, is not valid, because the `<book>` and `<title>` tags overlap:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'XML also requires that the document begin with a processing instruction that
+    identifies the version of XML being used (and possibly other things, such as the
+    text encoding used). For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The final requirement of a well-formed XML document is that there be only one
+    element at the top level of the file. For example, this is well formed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is not well formed, as there are three elements at the top level of the
+    file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'XML documents generally are not completely ad hoc. The specific tags, attributes,
+    and entities in an XML document, and the rules governing how they nest, compose
+    the structure of the document. There are two ways to write down this structure:
+    the *document type definition* (DTD) and the *schema*. DTDs and schemas are used
+    to validate documents—that is, to ensure that they follow the rules for their
+    type of document.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Most XML documents don’t include a DTD; in these cases, the document is considered
+    valid merely if it’s valid XML. Others identify the DTD as an external entity
+    with a line that gives the name and location (file or URL) of the DTD:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Sometimes it’s convenient to encapsulate one XML document in another. For example,
+    an XML document representing a mail message might have an `attachment` element
+    that surrounds an attached file. If the attached file is XML, it’s a nested XML
+    document. What if the mail message document has a `body` element (the subject
+    of the message), and the attached file is an XML representation of a dissection
+    that also has a `body` element, but this element has completely different DTD
+    rules? How can you possibly validate or make sense of the document if the meaning
+    of `body` changes partway through?
+  prefs: []
+  type: TYPE_NORMAL
+- en: This problem is solved with the use of namespaces. Namespaces let you qualify
+    the XML tag—for example, `email:body` and `human:body`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There’s a lot more to XML than we have time to go into here. For a gentle introduction
+    to XML, read [*Learning XML*](http://oreil.ly/Learning_XML) (O’Reilly) by Erik
+    Ray. For a complete reference to XML syntax and standards, see [*XML in a Nutshell*](http://oreil.ly/XML_Nutshell)
+    (O’Reilly) by Elliotte Rusty Harold and W. Scott Means.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating XML
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Just as PHP can be used to generate dynamic HTML, it can also be used to generate
+    dynamic XML. You can generate XML for other programs to make use of based on forms,
+    database queries, or anything else you can do in PHP. One application for dynamic
+    XML is *Rich Site Summary* (RSS), a file format for syndicating news sites. You
+    can read an article’s information from a database or from HTML files and emit
+    an XML summary file based on that information.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Generating an XML document from a PHP script is simple. Simply change the MIME
+    type of the document, using the `header()` function, to `"text/xml"`. To emit
+    the `<?xml ... ?>` declaration without it being interpreted as a malformed PHP
+    tag, simply `echo` the line from within PHP code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 12-1](#example_onetwo_onedot_generating_an_xml) generates an RSS document
+    using PHP. An RSS file is an XML document containing several `channel` elements,
+    each of which contains some news `item` elements. Each news `item` can have a
+    title, a description, and a link to the article itself. More properties of an
+    `item` are supported by RSS than [Example 12-1](#example_onetwo_onedot_generating_an_xml)
+    creates. Just as there are no special functions for generating HTML from PHP,
+    there are no special functions for generating XML. You just `echo` it!'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-1\. Generating an XML document
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This script generates output such as the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parsing XML
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Say you have a set of XML files, each containing information about a book, and
+    you want to build an index showing the document title and its author for the collection.
+    You need to parse the XML files to recognize the `title` and `author` elements
+    and their contents. You could do this by hand with regular expressions and string
+    functions such as `strtok()`, but it’s a lot more complex than it seems. In addition,
+    such methods are prone to breakage even with valid XML documents. The easiest
+    and quickest solution is to use one of the XML parsers that ship with PHP.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'PHP includes three XML parsers: one event-driven library based on the Expat
+    C library, one DOM-based library, and one for parsing simple XML documents named,
+    appropriately, SimpleXML.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The most commonly used parser is the event-based library, which lets you parse
+    but not validate XML documents. This means you can find out which XML tags are
+    present and what they surround, but you can’t find out if they’re the right XML
+    tags in the right structure for this type of document. In practice, this isn’t
+    generally a big problem. PHP’s event-based XML parser calls various handler functions
+    you provide while it reads the document as it encounters certain *events*, such
+    as the beginning or end of an element.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the following sections, we discuss the handlers you can provide, the functions
+    to set the handlers, and the events that trigger the calls to those handlers.
+    We also provide sample functions for creating a parser to generate a map of the
+    XML document in memory, tied together in a sample application that pretty-prints
+    XML.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Element Handlers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'When the parser encounters the beginning or end of an element, it calls the
+    start and end element handlers. You set the handlers through the `xml_set_element_handler()`
+    function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *start_element* and *end_element* parameters are the names of the handler
+    functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The start element handler is called when the XML parser encounters the beginning
+    of an element:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The start element handler is passed three parameters: a reference to the XML
+    parser calling the handler, the name of the element that was opened, and an array
+    containing any attributes the parser encountered for the element. The `$attribute`
+    array is passed by reference for speed.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 12-2](#example_onetwo_twodot_start_element_han) contains the code
+    for a start element handler, `startElement()`. This handler simply prints the
+    element name in bold and the attributes in gray.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-2\. Start element handler
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The end element handler is called when the parser encounters the end of an
+    element:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It takes two parameters: a reference to the XML parser calling the handler,
+    and the name of the element that is closing.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 12-3](#example_onetwo_threedot_end_element_han) shows an end element
+    handler that formats the element.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-3\. End element handler
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Character Data Handler
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'All of the text between elements (*character data*, or *CDATA* in XML terminology)
+    is handled by the character data handler. The handler you set with the `xml_set_`​`character``_data_handler()`
+    function is called after each block of character data:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The character data handler takes in a reference to the XML parser that triggered
+    the handler and a string containing the character data itself:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here’s a simple character data handler that simply prints the data:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Processing Instructions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Processing instructions are used in XML to embed scripts or other code into
+    a document. PHP itself can be seen as a processing instruction and, with the `<?php
+    ... ?>` tag style, follows the XML format for demarking the code. The XML parser
+    calls the processing instruction handler when it encounters a processing instruction.
+    Set the handler with the `xml_set_processing_instruction_handler()` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A processing instruction looks like:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The processing instruction handler takes in a reference to the XML parser that
+    triggered the handler, the name of the target (for example, `''php''`), and the
+    processing instructions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: What you do with a processing instruction is up to you. One trick is to embed
+    PHP code in an XML document and, as you parse that document, execute the PHP code
+    with the `eval()` function. [Example 12-4](#example_onetwo_fourdot_processing_instr)
+    does just that. Of course, you have to trust the documents you’re processing if
+    you include the `eval()` code in them. `eval()` will run any code given to it—even
+    code that destroys files or mails passwords to a cracker. In practice, executing
+    arbitrary code like this is extremely dangerous.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-4\. Processing instruction handler
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Entity Handlers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Entities in XML are placeholders. XML provides five standard entities (`&amp;`,
+    `&gt;`, `&lt;`, `&quot;`, and `&apos;`), but XML documents can define their own
+    entities. Most entity definitions do not trigger events, and the XML parser expands
+    most entities in documents before calling the other handlers.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Two types of entities, external and unparsed, have special support in PHP’s
+    XML library. An *external* entity is one whose replacement text is identified
+    by a filename or URL rather than explicitly given in the XML file. You can define
+    a handler to be called for occurrences of external entities in character data,
+    but it’s up to you to parse the contents of the file or URL yourself if that’s
+    what you want.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An *unparsed* entity must be accompanied by a notation declaration, and while
+    you can define handlers for declarations of unparsed entities and notations, occurrences
+    of unparsed entities are deleted from the text before the character data handler
+    is called.
+  prefs: []
+  type: TYPE_NORMAL
+- en: External entities
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'External entity references allow XML documents to include other XML documents.
+    Typically, an external entity reference handler opens the referenced file, parses
+    the file, and includes the results in the current document. Set the handler with
+    `xml_set_external_entity_ref_handler()`, which takes in a reference to the XML
+    parser and the name of the handler function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The external entity reference handler takes five parameters: the parser triggering
+    the handler, the entity’s name, the base Uniform Resource Identifier (URI) for
+    resolving the identifier of the entity (which is currently always empty), the
+    system identifier (such as the filename), and the public identifier for the entity,
+    as defined in the entity’s declaration. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: If your external entity reference handler returns `false` (which it will if
+    it returns no value), XML parsing stops with an `XML_ERROR_EXTERNAL_ENTITY_HANDLING`
+    error. If it returns `true`, parsing continues.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 12-5](#example_onetwo_fivedot_external_entity) shows how you would
+    parse externally referenced XML documents. Define two functions, `createParser()`
+    and `parse()`, to do the actual work of creating and feeding the XML parser. You
+    can use them both to parse the top-level document and any documents included via
+    external references. Such functions are described in the section “Using the Parser”.
+    The external entity reference handler simply identifies the right file to send
+    to those functions.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-5\. External entity reference handler
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Unparsed entities
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'An unparsed entity declaration must be accompanied by a notation declaration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Register a notation declaration handler with `xml_set_notation_decl_handler()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The handler will be called with five parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *base* parameter is the base URI for resolving the identifier of the notation
+    (which is currently always empty). Either the *system* identifier or the *public*
+    identifier for the notation will be set, but not both.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Use the `xml_set_unparsed_entity_decl_handler()` function to register an unparsed
+    entity declaration:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The handler will be called with six parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *notation* parameter identifies the notation declaration with which this
+    unparsed entity is associated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Default Handler
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'For any other event, such as the XML declaration and the XML document type,
+    the default handler is called. Call the `xml_set_default_handler()` function to
+    set the default handler:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The handler will be called with two parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *text* parameter will have different values depending on the kind of event
+    triggering the default handler. [Example 12-6](#example_onetwo_sixdot_default_handler)
+    just prints out the given string when the default handler is called.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-6\. Default handler
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Options
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The XML parser has several options you can set to control the source and target
+    encodings and case folding. Use `xml_parser_set_option()` to set an option:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Similarly, use `xml_parser_get_option()` to interrogate a parser about its
+    options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: Character encoding
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The XML parser used by PHP supports Unicode data in a number of different character
+    encodings. Internally, PHP’s strings are always encoded in UTF-8, but documents
+    parsed by the XML parser can be in ISO-8859-1, US-ASCII, or UTF-8\. UTF-16 is
+    not supported.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When creating an XML parser, you can give it an encoding format to use for the
+    file to be parsed. If omitted, the source is assumed to be in ISO-8859-1\. If
+    a character outside the possible range in the source encoding is encountered,
+    the XML parser will return an error and immediately stop processing the document.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The target encoding for the parser is the encoding in which the XML parser passes
+    data to the handler functions; normally, this is the same as the source encoding.
+    At any time during the XML parser’s lifetime, the target encoding can be changed.
+    The parser demotes any characters outside the target encoding’s character range
+    by replacing them with a question mark character (`?`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Use the constant `XML_OPTION_TARGET_ENCODING` to get or set the encoding of
+    the text passed to callbacks. Allowable values are `"ISO-8859-1"` (the default),
+    `"US-ASCII"`, and `"UTF-8"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Case folding
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'By default, element and attribute names in XML documents are converted to all
+    uppercase. You can turn off this behavior (and get case-sensitive element names)
+    by setting the `XML_OPTION_CASE_FOLDING` option to `false` with the `xml_parser​_set_option()`
+    function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: Skipping whitespace-only
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Set the `XML_OPTION_SKIP_WHITE` option to ignore values consisting entirely
+    of whitespace characters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: Truncating tag names
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'When creating a parser, you can optionally have it truncate characters at the
+    start of each tag name. To truncate the start of each tag by a number of characters,
+    provide that value in the `XML_OPTION_SKIP_TAGSTART` option:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, the tag name will be truncated by four characters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the Parser
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To use the XML parser, create a parser with `xml_parser_create()`, set handlers
+    and options on the parser, and then hand chunks of data to the parser with the
+    `xml_parse()` function until either the data runs out or the parser returns an
+    error. Once the processing is complete, free the parser by calling `xml_parser_free()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `xml_parser_create()` function returns an XML parser:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: The optional *encoding* parameter specifies the text encoding (`"ISO-8859-1"`,
+    `"US-ASCII"`, or `"UTF-8"`) of the file being parsed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `xml_parse()` function returns `true` if the parse was successful and `false`
+    if it was not:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *data* argument is a string of XML to process. The optional *final* parameter
+    should be `true` for the last piece of data to be parsed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To easily deal with nested documents, write functions that create the parser
+    and set its options and handlers for you. This puts the options and handler settings
+    in one place, rather than duplicating them in the external entity reference handler.
+    [Example 12-7](#example_onetwo_sevendot_creating_a_pars) shows such a function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-7\. Creating a parser
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: Errors
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `xml_parse()` function returns `true` if the parse completed successfully,
+    and `false` if there was an error. If something did go wrong, use `xml_get_error_code()`
+    to fetch a code identifying the error:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The error code corresponds to one of these error constants:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The constants generally aren’t very useful. Use `xml_error_string()` to turn
+    an error code into a string that you can use when you report the error:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: Methods as Handlers
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Because functions and variables are global in PHP, any component of an application
+    that requires several functions and variables is a candidate for object-oriented
+    design. XML parsing typically requires you to keep track of where you are in the
+    parsing (e.g., “just saw an opening `title` element, so keep track of character
+    data until you see a closing `title` element”) with variables, and of course you
+    must write several handler functions to manipulate the state and actually do something.
+    Wrapping these functions and variables into a class enables you to keep them separate
+    from the rest of your program and easily reuse the functionality later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Use the `xml_set_object()` function to register an object with a parser. After
+    you do so, the XML parser looks for the handlers as methods on that object, rather
+    than as global functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: Sample Parsing Application
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s develop a program to parse an XML file and display different types of
+    information from it. The XML file given in [Example 12-8](#example_onetwo_eightdot_booksdotxml_fil)
+    contains information on a set of books.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-8\. books.xml file
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: The PHP application parses the file and presents the user with a list of books,
+    showing just the titles and authors. This menu is shown in [Figure 12-1](#book_menu).
+    The titles are links to a page showing the complete information for a book. A
+    page of detailed information for *Programming PHP* is shown in [Figure 12-2](#book_details).
+  prefs: []
+  type: TYPE_NORMAL
+- en: We define a class, `BookList`, whose constructor parses the XML file and builds
+    a list of records. There are two methods on a `BookList` that generate output
+    from that list of records. The `showMenu()` method generates the book menu, and
+    the `showBook()` method displays detailed information on a particular book.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parsing the file involves keeping track of the record, which element we’re in,
+    and which elements correspond to records (`book`) and fields (`title`, `author`,
+    `isbn`, and `comment`). The `$record` property holds the current record as it’s
+    being built, and `$currentField` holds the name of the field we’re currently processing
+    (e.g., `title`). The `$records` property is an array of all the records we’ve
+    read so far.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Book menu](Images/php4_1201.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 12-1\. Book menu
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: '![Book details](Images/php4_1202.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 12-2\. Book details
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Two associative arrays, `$fieldType` and `$endsRecord`, tell us which elements
+    correspond to fields in a record and which closing element signals the end of
+    a record. Values in `$fieldType` are either `1` or `2`, corresponding to a simple
+    scalar field (e.g., `title`) or an array of values (e.g., `author`), respectively.
+    We initialize those arrays in the constructor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The handlers themselves are fairly straightforward. When we see the start of
+    an element, we work out whether it corresponds to a field we’re interested in.
+    If it is, we set the `$currentField` property to be that field name so when we
+    see the character data (e.g., the title of the book), we know which field it’s
+    the value for. When we get character data, we add it to the appropriate field
+    of the current record if `$currentField` says we’re in a field. When we see the
+    end of an element, we check to see if it’s the end of a record; if so, we add
+    the current record to the array of completed records.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One PHP script, given in [Example 12-9](#example_onetwo_ninedot_bookparsedotphp),
+    handles both the book menu and book details pages. The entries in the book menu
+    link back to the menu URL with a `GET` parameter identifying the ISBN of the book
+    to display.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-9\. bookparse.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parsing XML with the DOM
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The DOM parser provided in PHP is much simpler to use, but what you take out
+    in complexity comes back in memory usage—in spades. Instead of firing events and
+    allowing you to handle the document as it is being parsed, the DOM parser takes
+    an XML document and returns an entire tree of nodes and elements:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: Parsing XML with SimpleXML
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you’re consuming very simple XML documents, you might consider the third
+    library provided by PHP, SimpleXML. SimpleXML doesn’t have the ability to generate
+    documents as the DOM extension does, and isn’t as flexible or memory-efficient
+    as the event-driven extension, but it makes it very easy to read, parse, and traverse
+    simple XML documents.
+  prefs: []
+  type: TYPE_NORMAL
+- en: SimpleXML takes a file, string, or DOM document (produced using the DOM extension)
+    and generates an object. Properties on that object are arrays providing access
+    to elements in each node. With those arrays, you can access elements using numeric
+    indices and attributes using non-numeric indices. Finally, you can use string
+    conversion on any value you retrieve to get the text value of the item.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, we could display all the titles of the books in our *books.xml*
+    document using:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Using the `children()` method on the object, you can iterate over the child
+    nodes of a given node; likewise, you can use the `attributes()` method on the
+    object to iterate over the attributes of the node:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, using the `asXml()` method on the object, you can retrieve the XML
+    of the document in XML format. This lets you change values in your document and
+    write it back out to disk easily:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: Transforming XML with XSLT
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Extensible Stylesheet Language Transformations (XSLT) is a language for transforming
+    XML documents into different XML, HTML, or any other format. For example, many
+    websites offer several formats of their content—HTML, printable HTML, and WML
+    (Wireless Markup Language) are common. The easiest way to present these multiple
+    views of the same information is to maintain one form of the content in XML and
+    use XSLT to produce the HTML, printable HTML, and WML.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP’s XSLT extension uses the Libxslt C library to provide XSLT support.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Three documents are involved in an XSLT transformation: the original XML document,
+    the XSLT document containing transformation rules, and the resulting document.
+    The final document doesn’t have to be in XML; in fact, it’s common to use XSLT
+    to generate HTML from XML. To do an XSLT transformation in PHP, you create an
+    XSLT processor, give it some input to transform, and then destroy the processor.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Create a processor by creating a new `XsltProcessor` object:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Parse the XML and XSL files into DOM objects:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Attach the XML rules to the object:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Process a file with the `transformToDoc()`, `transformToUri()`, or `transformToXml()`
+    methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: Each takes the DOM object representing the XML document as a parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 12-10](#example_onetwo_onezerodot_xml_document) is the XML document
+    we’re going to transform. It is in a similar format to many of the news documents
+    you find on the web.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-10\. XML document
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 12-11](#example_onetwo_oneonedot_news_xsl_trans) is the XSL document
+    we’ll use to transform the XML document into HTML. Each `xsl:template` element
+    contains a rule for dealing with part of the input document.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-11\. News XSL transform
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 12-12](#example_onetwo_onetwodot_xsl_transforma) is the very small
+    amount of code necessary to transform the XML document into an HTML document using
+    the XSL stylesheet. We create a processor, run the files through it, and print
+    the result.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 12-12\. XSL transformation from files
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: Although it doesn’t specifically discuss PHP, Doug Tidwell’s book [*XSLT*](http://oreil.ly/XSLT_2E)
+    (O’Reilly) provides a detailed guide to the syntax of XSLT stylesheets.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What’s Next
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: While XML remains a major format for sharing data, a simplified version of JavaScript
+    data encapsulation, known as JSON, has rapidly become the de facto standard for
+    simple, readable, and terse sharing of web service responses and other data. That’s
+    the subject we’ll turn to in the next chapter.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,1231 @@
+- en: Chapter 9\. User Authentication and Authorization
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Setting up a basic user authentication system—including registration, login,
+    sessions, password resets, and access permissions—can often be one of the more
+    time-consuming pieces of creating the foundation of an application. It’s a prime
+    candidate for extracting functionality out to a library, and there are quite a
+    few such libraries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But because authentication needs can vary widely across projects, most authentication
+    systems grow bulky and unusable quickly. Thankfully, Laravel has found a way to
+    make a suite of authentication systems that are easy to use and understand, but
+    flexible enough to fit in a variety of settings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Every new installation of Laravel has a `create_users_table` migration and a
+    `User` model built in. If you bring in Breeze (see [“Laravel Breeze”](ch06.html#breeze))
+    or Jetstream (see [“Laravel Jetstream”](ch06.html#jetstream)), they’ll seed your
+    app with a collection of authentication-related views, routes, controllers/actions,
+    and other features. The APIs are clean and clear, and the conventions all work
+    together to provide a simple—​and seamless—​authentication and authorization system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The User Model and Migration
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: When you create a new Laravel application, the first migration and model you’ll
+    see are the `create_users_table` migration and the `App\User` model. [Example 9-1](#EX901)
+    shows, straight from the migration, the fields you’ll get in your `users` table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-1\. Laravel’s default user migration
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: We have an autoincrementing primary key ID, a name, a unique email, a password,
+    a “remember me” token, and created and modified timestamps. This covers everything
+    you need to handle basic user authentication in most apps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Difference Between Authentication and Authorization
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: '*Authentication* means verifying who someone is and allowing them to act as
+    that person in your system. This includes the login and logout processes as well
+    as any tools that allow the users to identify themselves during their time using
+    the application.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*Authorization* means determining whether the authenticated user is *allowed*
+    (authorized) to perform a specific behavior. For example, an authorization system
+    allows you to forbid any nonadministrators from viewing the site’s earnings.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `User` model is a bit more complex, as you can see in [Example 9-2](#EX902).
+    The `App\User` class itself is simple, but it extends the `Illuminate\Foundation\Auth\User`
+    class, which pulls in several traits.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-2\. Laravel’s default `User` model
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Eloquent Model Refresher
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If this is entirely unfamiliar, consider reading [Chapter 5](ch05.html#database_and_eloquent)
+    before continuing to learn how Eloquent models work.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, what can we learn from this model? First, users live in the `users` table;
+    Laravel will infer this from the class name. We are able to fill out the `name`,
+    `email`, and `password` properties when creating a new user, and the `password`
+    and `remember_token` properties are excluded when outputting the user as JSON.
+    Looking good so far.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We also can see from the contracts and the traits in the `Illuminate\Foundation\Auth`
+    version of `User` that there are some features in the framework (the ability to
+    authenticate, to authorize, and to reset passwords) that theoretically could be
+    applied to other models, not just the `User` model, and that could be applied
+    individually or together.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `Authenticatable` contract requires methods (e.g., `getAuthIdentifier()`)
+    that allow the framework to authenticate instances of this model to the auth system;
+    the `Authenticatable` trait includes the methods necessary to satisfy that contract
+    with an average Eloquent model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `Authorizable` contract requires a method (`can()`) that allows the framework
+    to authorize instances of this model for their access permissions in different
+    contexts. Unsurprisingly, the `Authorizable` trait provides methods that will
+    satisfy the `Authorizable` contract for an average Eloquent model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, the `CanResetPassword` contract requires methods (`g⁠⁠e⁠t⁠E⁠m⁠a⁠i⁠l⁠F⁠o⁠r​P⁠a⁠s⁠s⁠w⁠o⁠r⁠d⁠R⁠e⁠s⁠e⁠t⁠(⁠)`,
+    `sendPasswordResetNotification()`) that allow the framework to—you guessed it—reset
+    the password of any entity that satisfies this contract. The `CanResetPassword`
+    trait provides methods to satisfy that contract for an average Eloquent model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: At this point, we have the ability to easily represent an individual user in
+    the database (with the migration), and to pull them out with a model instance
+    that can be authenticated (logged in and out), authorized (checked for access
+    permissions to a particular resource), and sent a password reset email.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using the auth() Global Helper and the Auth Facade
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The `auth()` global helper is the easiest way to interact with the status of
+    the authenticated user throughout your app. You can also inject an instance of
+    `Illuminate\Auth\AuthManager` and get the same functionality, or use the `Auth`
+    facade.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The most common usages are to check whether a user is logged in—(`auth()->check()`
+    returns `true` if the current user is logged in; `auth()->guest()` returns `true`
+    if the user is not logged in)—and to get the currently logged-in user (use `auth()->user()`,
+    or `auth()->id()` for just the ID; both return `null` if no user is logged in).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 9-3](#EX903) for a sample usage of the global helper
+    in a controller.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-3\. Sample usage of the `auth()` global helper in a controller
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: routes/auth.php, Auth Controllers, and Auth Actions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you’re working with one of Laravel’s starter kits, you’ll see that using
+    the baked-in authentication routes, such as login, register, and password reset,
+    requires routes, controllers, and views.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Both Breeze and Jetstream define your routes using a custom routes file: *routes/auth.php*.
+    They’re not exactly the same, but take a look at [Example 9-4](#EX927) to see
+    a bit of Breeze’s auth routes file to show what they look like generally.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-4\. Part of Breeze’s routes/auth.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Breeze publishes controllers under the `Auth` namespace, which you can configure
+    if you need to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '*AuthenticatedSessionController.php*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*ConfirmablePasswordController.php*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*EmailVerificationNotificationController.php*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*EmailVerificationPromptController.php*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*NewPasswordController.php*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*PasswordController.php*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*PasswordResetLinkController.php*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*RegisteredUserController.php*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '*VerifyEmailController.php*'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Instead of controllers, Jetstream (and Fortify, which it depends on) publishes
+    “actions” that you can customize:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Breeze and Jetstream’s Frontend Templates
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: At this point you have a migration, a model, controllers/actions, and routes
+    for your authentication system. But what about your views?
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can learn more in [“Laravel Breeze”](ch06.html#breeze) and [“Laravel Jetstream”](ch06.html#jetstream),
+    but each tool provides multiple different stacks, and each stack keeps its templates
+    in different places.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In general, the JavaScript-based stacks put their templates in *resources/js*
+    and the Blade-based stacks put them in *resources/views*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There’s at least one view for each function (log in, register, reset password,
+    etc.) and they’re all generated with a slick Tailwind-based design, ready to be
+    used or customized.
+  prefs: []
+  type: TYPE_NORMAL
+- en: “Remember Me”
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Breeze and Jetstream have this implemented out of the box, but it’s still worth
+    learning how it works and how to use it on your own. If you want to implement
+    a “remember me”–style long-lived access token, make sure you have a `remember_token`
+    column on your `users` table (which you will if you used the default migration).
+  prefs: []
+  type: TYPE_NORMAL
+- en: When you’re normally logging in a user (and this is how the `LoginController`
+    does it, with the `AuthenticatesUsers` trait), you’ll “attempt” an authentication
+    with the user-provided information, like in [Example 9-5](#EX905).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-5\. Attempting a user authentication
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: This provides you with a user login that lasts as long as the user’s session.
+    If you want Laravel to extend the login indefinitely using cookies (as long as
+    the user is on the same computer and doesn’t log out), you can pass a Boolean
+    `true` as the second parameter of the `auth()->attempt()` method. Take a look
+    at [Example 9-6](#EX906) to see what that request looks like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-6\. Attempting a user authentication with a “remember me” checkbox
+    check
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can see that we checked whether the input has a nonempty (“filled”) `remember`
+    property, which will return a Boolean. This allows our users to decide if they
+    want to be remembered with a checkbox in the login form.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'And later, if you need to manually check whether the current user was authenticated
+    by a remember token, there’s a method for that: `auth()->viaRemember()` returns
+    a Boolean, indicating whether or not the current user authenticated via a remember
+    token. This allows you to prevent certain higher-sensitivity features from being
+    accessible by remember token; instead, you can require users to reenter their
+    passwords.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Password Confirmation
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: It may be necessary for your users to reconfirm their passwords before accessing
+    certain parts of your application. For example, if a user has been logged in for
+    a while, and then attempts to visit the billing section of your site, you might
+    want them to verify their password.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can attach a `password.confirm` middleware to your routes to force this
+    behavior. Once their password is confirmed, the user will be sent to the route
+    they tried to visit initially. After that point, the user won’t have to reconfirm
+    their password for 3 hours; you can change this in the `auth.password_timeout`
+    configuration setting.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Manually Authenticating Users
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The most common case for user authentication is that you allow the user to provide
+    their credentials, and then use `auth()->attempt()` to see whether the provided
+    credentials match any real users. If so, you log them in.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But sometimes there are contexts where it’s valuable for you to be able to choose
+    to log a user in on your own. For example, you may want to allow admin users to
+    switch users.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are four methods that make this possible. First, you can just pass a
+    user ID:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Second, you can pass a `User` object (or any other object that implements the
+    `Illuminate``\Contracts\Auth\Authenticatable` contract):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And third and fourth, you can choose to authenticate the given user for only
+    the current request, which won’t impact your session or cookies at all, using
+    `once()` or `onceUsingId()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Note that the array you pass to the `once()` method can contain any key/value
+    pairs to uniquely identify the user you’d like to authenticate as. You can even
+    pass multiple keys and values, if it’s what is appropriate for your project. For
+    example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Manually Logging Out a User
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'If you ever need to log out a user manually, just call `logout()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Invalidating Sessions on Other Devices
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you’d like to log out a user’s current session on any other devices—​for
+    example, after they’ve changed their password—​you’ll need to prompt the user
+    for their password and pass it to the `logoutOtherDevices()` method. To do this,
+    you’ll have to apply the `auth.session` middleware to any routes you want them
+    logged out of (for most projects, that’s the entire app).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Then you can use it inline anywhere you need:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you want to give your users a detailed look at what other sessions are active,
+    Jetstream (see [“Laravel Jetstream”](ch06.html#jetstream)) comes out of the box
+    with a page that lists all active sessions and provides a button to log out of
+    all of them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Auth Middleware
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In [Example 9-3](#EX903), you saw how to check whether visitors are logged in
+    and redirect them if not. You could perform these sorts of checks on every route
+    in your application, but it would very quickly get tedious. It turns out that
+    route middleware (see [Chapter 10](ch10.html#requests_and_responses) to learn
+    more about how they work) are a perfect fit for restricting certain routes to
+    guests or to authenticated users.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Once again, Laravel comes with the middleware we need out of the box. You can
+    see which route middleware you have defined in `App\Http\Kernel`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Six of the default route middleware are authentication-related:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`auth`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Restricts route access to authenticated users
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`auth.basic`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Restricts access to authenticated users using HTTP Basic Authentication
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`auth.session`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Makes routes viable to be disabled using `Auth::logoutOtherDevices`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`can`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Used for authorizing user access to given routes
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`guest`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rstricts access to unauthenticated users
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`password.confirm`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Requires users to have recently reconfirmed their password
+  prefs: []
+  type: TYPE_NORMAL
+- en: It’s most common to use `auth` for your authenticated-user-only sections and
+    `guest` for any routes you don’t want authenticated users to see (like the login
+    form). `auth.basic` and `auth.session` are much less commonly used middleware
+    for authenticating.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 9-7](#EX907) shows an example of a few routes protected by the `auth`
+    middleware.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-7\. Sample routes protected by auth middleware
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Email Verification
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you’d like to require a user to verify they have access to the email address
+    they registered with, you can reach for Laravel’s email verification feature.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To enable email verification, update your `App\User` class and make it implement
+    the `Illuminate\Contracts\Auth\MustVerifyEmail` contract, as shown in [Example 9-8](#EX9a).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-8\. Adding the `MustVerifyEmail` trait to an `Authenticatable` model
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `users` table must also contain a nullable timestamp column named `email_``verified_at`,
+    which the default `CreateUsersTable` migration will have already provided for
+    you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, you’ll need to enable the email verification routes in your controller.
+    The easiest method is to use `Auth::routes()` in your routes file with the `verify`
+    parameter set to `true`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, you can protect any routes you’d like from being accessed by any users
+    who haven’t verified their email address:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can customize the route to which users are redirected after verifying in
+    your `Verification``Controller`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: Blade Authentication Directives
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you want to check whether a user is authenticated, not at the route level
+    but in your views, you can do so with `@auth` and `@guest` (see [Example 9-9](#EX9b)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-9\. Checking a user’s authentication status in templates
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also specify which guard you’d like to use with both methods by passing
+    the guard name as a parameter, as shown in [Example 9-10](#EX9c).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-10\. Checking a specific auth guard’s authentication in templates
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: Guards
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Every aspect of Laravel’s authentication system is routed through something
+    called a *guard*. Each guard is a combination of two pieces: a *driver* that defines
+    how it persists and retrieves the authentication state (for example, `session`),
+    and a *provider* that allows you to get a user by certain criteria (for example,
+    `users`).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Out of the box, Laravel has two guards: `web` and `api`. `web` is the more
+    traditional authentication style, using the `session` driver and the basic user
+    provider. `api` uses the same user provider, but it uses the `token` driver instead
+    of `session` to authenticate each request.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You’d change drivers if you wanted to handle the identification and persistence
+    of a user’s identity differently (for example, changing from a long-running session
+    to a provided-every-page-load token), and you’d change providers if you wanted
+    to change the storage type or retrieval methods for your users (for example, storing
+    your users in Mongo instead of MySQL).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Changing the Default Guard
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The guards are defined in *config/auth.php*, and you can change them, add new
+    guards, and also define which guard will be the default there. For what it’s worth,
+    this is a relatively uncommon configuration; most Laravel apps just use one guard.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The “default” guard is the one that will be used any time you use any auth
+    features without specifying a guard. For example, `auth()->user()` will pull the
+    currently authenticated user using the default guard. You can change this guard
+    by changing the `auth.defaults.guard` setting in *config/auth.php*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: Configuration Conventions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You may have noticed that I refer to configuration sections with references
+    like `auth.defaults.guard`. This means that in *config/auth.php*, in the array
+    section keyed `defaults`, there should be a property keyed `guard`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Other Guards Without Changing the Default
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you want to use another guard but *not* change the default, you can start
+    your `auth()` calls with `guard()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will, just for this call, get the current user using the `api` guard.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding a New Guard
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can add a new guard at any time in *config/auth.php*, in the `auth.guards`
+    setting:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here, we’ve created a new guard (in addition to `web` and `api`) named `trainees`.
+    Let’s imagine, for the rest of this section, that we’re building an app where
+    our users are physical trainers, and they each have their *own* users—​trainees—​who
+    can log in to their subdomains. So, we need a separate guard for them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The only two options for `driver` are `token` and `session`. Out of the box,
+    the only option for `provider` is `users`, which supports authentication against
+    your default `users` table, but you can create your own provider easily.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Closure Request Guards
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you want to define a custom guard, and your guard conditions (how to look
+    up a given user against the request) can be described simply enough in response
+    to any given HTTP request, you might just want to throw the user lookup code into
+    a closure and not deal with creating a new custom guard class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `viaRequest()` auth method makes it possible to define a guard (named in
+    the first parameter) using just a closure (defined in the second parameter) that
+    takes the HTTP request and returns the appropriate user. To register a closure
+    request guard, call `viaRequest()` in the `boot()` method of your `AuthServiceProvider`,
+    as shown in [Example 9-11](#EX9d).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-11\. Defining a closure request guard
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: Creating a Custom User Provider
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Just below where guards are defined in *config/auth.php*, there’s an `auth.providers`
+    section that defines the available providers. Let’s create a new provider named
+    `trainees`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: The two options for `driver` are `eloquent` and `database`. If you use `eloquent`,
+    you’ll need a `model` property that contains an Eloquent class name (the model
+    to use for your `User` class); and if you use `database`, you’ll need a `table`
+    property to define which table it should authenticate against.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In our example, you can see that this application has a `User` and a `Trainee`,
+    and they need to be authenticated separately. This way, the code can differentiate
+    between `auth()->guard('users')` and `auth()->guard('trainees')`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'One last note: the `auth` route middleware can take a parameter that is the
+    guard name. So, you can guard certain routes with a specific guard:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Custom User Providers for Nonrelational Databases
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The user provider creation flow just described still relies on the same `UserProvider`
+    class, which means it’s expecting to pull the identifying information out of a
+    relational database. But if you’re using Mongo or Riak or something similar, you’ll
+    actually need to create your own class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To do this, create a new class that implements the `Illuminate\Contracts\Auth\``UserProvider`
+    interface, and then bind it in `AuthServiceProvider@boot`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: Auth Events
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: We’ll talk more about events in [Chapter 16](ch16.html#queues_jobs_events),
+    but Laravel’s event system is a basic pub/sub framework. There are system- and
+    user-generated events that are broadcast, and the user has the ability to create
+    event listeners that do certain things in response to certain events.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, what if you wanted to send a ping to a particular security service every
+    time a user was locked out after too many failed login attempts? Maybe this service
+    watches for a certain number of failed logins from certain geographic regions
+    or something else. You could, of course, inject a call in the appropriate controller.
+    But with events, you can just create an event listener that listens to the “user
+    locked out” event, and register that.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 9-12](#EX908) to see all of the events that the authentication
+    system emits.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-12\. Authentication events generated by the framework
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, there are listeners for “user registered,” “user attempting
+    login,” “user validated but not logged in,” “user authenticated,” “successful
+    login,” “failed login,” “logout,” “logout from another device,” “logout from current
+    device,” “lockout,” “password reset,” and “user email verified.” To learn more
+    about how to build event listeners for these events, check out [Chapter 16](ch16.html#queues_jobs_events).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Authorization and Roles
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Finally, let’s cover Laravel’s authorization system. It enables you to determine
+    whether a user is *authorized* to do a particular thing, which you’ll check using
+    a few primary verbs: `can`, `cannot`, `allows`, and `denies`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Most of this authorization control will be performed using the `Gate` facade,
+    but there are also convenience helpers available in your controllers, on the `User`
+    model, as middleware, and as Blade directives. Take a look at [Example 9-13](#EX9e)
+    to get a taste of what we’ll be able to do.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-13\. Basic usage of the `Gate` facade
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Defining Authorization Rules
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The default location for defining authorization rules is in the `boot()` method
+    of the `AuthServiceProvider`, where you’ll be calling methods on the `Auth` facade.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'An authorization rule is called an *ability* and comprises two things: a string
+    key (e.g., `update-contact`) and a closure that returns a Boolean. [Example 9-14](#EX909)
+    shows an ability for updating a contact.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-14\. Sample ability for updating a contact
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s walk through the steps for defining an ability.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, you want to define a key. In naming this key, you should consider what
+    string makes sense in your code’s flow to refer to the ability you’re providing
+    to the user. You can see in [Example 9-14](#EX909) that the code uses the convention
+    `{*verb*}-{*modelName*}`: `create-contact`, `update-contact`, etc.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Second, you define the closure. The first parameter will be the currently authenticated
+    user, and all parameters after that will be the object(s) you’re checking for
+    access to—​in this instance, the contact.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, given those two objects, we can check whether the user is authorized to
+    update this contact. You can write this logic however you want, but in the app
+    we’re looking at in [Example 9-14](#EX909), authorization depends on being the
+    creator of the contact row. The closure will return `true` (authorized) if the
+    current user created the contact, and `false` (unauthorized) if not.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Just like with route definitions, you could also use a class and method instead
+    of a closure to resolve this definition:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: The Gate Facade (and Injecting Gate)
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that you’ve defined an ability, it’s time to test against it. The simplest
+    way is to use the `Gate` facade, as in [Example 9-15](#EX910) (or you can inject
+    an instance of `Illuminate\Contracts\Auth\Access\Gate`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-15\. Basic `Gate` facade usage
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: You might also define an ability with multiple parameters—​maybe contacts can
+    be in groups, and you want to authorize whether the user has access to add a contact
+    to a group. [Example 9-16](#EX911) shows how to do this.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-16\. Abilities with multiple parameters
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: And if you need to check authorization for a user other than the currently authenticated
+    user, try `forUser()`, like in [Example 9-17](#EX912).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-17\. Specifying the user for `Gate`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: Resource Gates
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The most common use for access control lists is to define access to individual
+    “resources” (think an Eloquent model, or something you’re allowing users to administer
+    from their admin panel).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `resource()` method makes it possible to apply the four most common gates,
+    `view`, `create`, `update`, and `delete`, to a single resource at once:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is equivalent to defining the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: The Authorize Middleware
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you want to authorize entire routes, you can use the `Authorize` middleware
+    (which has a shortcut of `can`), like in [Example 9-18](#EX913).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-18\. Using the `Authorize` middleware
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here, the `{person}` parameter (whether it’s defined as a string or as a bound
+    route model) will be passed to the ability method as an additional parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The first check in [Example 9-18](#EX913) is a normal ability, but the second
+    is a policy, which we’ll talk about in [“Policies”](#policies).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you need to check for an action that doesn’t require a model instance (for
+    example, `create`, unlike `edit`, doesn’t get passed an actual route model–bound
+    instance), you can just pass the class name:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: Controller Authorization
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The parent `App\Http\Controllers\Controller` class in Laravel imports the `Authorizes``Requests`
+    trait, which provides three methods for authorization: `authorize()`, `authorizeForUser()`,
+    and `authorizeResource()`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`authorize()` takes an ability key and an object (or array of objects) as parameters,
+    and if the authorization fails, it’ll quit the application with a 403 (Unauthorized)
+    status code. That means this feature can turn three lines of authorization code
+    into just one, as you can see in [Example 9-19](#EX914).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-19\. Simplifying controller authorization with `authorize()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`authorizeForUser()` is the same, but allows you to pass in a `User` object
+    instead of defaulting to the currently authenticated user:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`authorizeResource()`, called once in the controller constructor, maps a predefined
+    set of authorization rules to each of the RESTful controller methods in that controller—​something
+    like [Example 9-20](#EX915).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-20\. The authorization-to-method mappings of `authorizeResource()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: Checking the User Instance
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you’re not in a controller, you’re more likely to be checking the capabilities
+    of a specific user than the currently authenticated user. That’s already possible
+    with the `Gate` facade using the `forUser()` method, but sometimes the syntax
+    can feel a little off.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Thankfully, the `Authorizable` trait on the `User` class provides four methods
+    to make a more readable authorization feature: `$user->can()`, `$user→canAny()`,
+    `$user->cant()`, and `$user->cannot()`. As you can probably guess, `cant()` and
+    `cannot()` do the same thing, and `can()` is their exact inverse. With `canAny()`,
+    you pass an array of permissions, and this method checks if the user can do any
+    of them.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: That means you can do something like [Example 9-21](#EX916).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-21\. Checking authorization on a `User` instance
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: Behind the scenes, these methods are just passing your parameters to `Gate`;
+    in the preceding example, `Gate::forUser($user)->check('create-contact')`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Blade Checks
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Blade also has a little convenience helper: the `@can` directive. [Example 9-22](#EX917)
+    illustrates its usage.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-22\. Using Blade’s `@can` directive
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also use `@else` in between `@can` and `@endcan`, and you can use `@cannot`
+    and `@endcannot` as in [Example 9-23](#EX918).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-23\. Using Blade’s `@cannot` directive
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: Intercepting Checks
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you’ve ever built an app with an admin user class, you’ve probably looked
+    at all of the simple authorization closures so far in this chapter and thought
+    about how you could add a superuser class that overrides these checks in every
+    case. Thankfully, there’s already a tool for that.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In `AuthServiceProvider`, where you’re already defining your abilities, you
+    can also add a `before()` check that runs before all the others and can optionally
+    override them, like in [Example 9-24](#EX919).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-24\. Overriding `Gate` checks with `before()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that the string name for the ability is also passed in, so you can differentiate
+    your `before()` hooks based on your ability naming scheme.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Policies
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Up until this point, all of the access controls have required you to manually
+    associate Eloquent models with the ability names. You could have created an ability
+    named something like `visit-dashboard` that’s not related to a specific Eloquent
+    model, but you’ll probably have noticed that most of our examples have had to
+    do with *doing something to something*—and in most of these cases, the *something*
+    that’s the recipient of the action is an Eloquent model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Authorization policies are organizational structures that help you group your
+    authorization logic based on the resource you’re controlling access to. They make
+    it easy to manage defining authorization rules for behavior toward a particular
+    Eloquent model (or other PHP class) all together in a single location.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating policies
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Policies are PHP classes, which can be generated with an Artisan command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once they’re generated, they need to be registered. The `AuthServiceProvider`
+    has a `$policies` property, which is an array. The key of each item is the class
+    name of the protected resource (almost always an Eloquent class), and the value
+    is the policy class name. [Example 9-25](#EX9f) shows what this will look like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-25\. Registering policies in `AuthServiceProvider`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: A policy class that’s generated by Artisan doesn’t have any special properties
+    or methods. But every method that you add is now mapped as an ability key for
+    this object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Policy Auto-discovery
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel tries to “guess” the links between your policies and their corresponding
+    models. For example, it’ll apply the `PostPolicy` to your `Post` model automatically.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you need to customize the logic Laravel uses to guess this mapping, check
+    out the [Policy docs](https://oreil.ly/P5gC2).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s define an `update()` method to take a look at how it works ([Example 9-26](#EX920)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-26\. A sample `update()` policy method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: Notice that the contents of this method look exactly like they would in a `Gate`
+    definition.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Policy Methods That Don’t Take an Instance
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'What if you want to define a policy method that relates to the class but not
+    a specific instance—​for example, “can this user create contacts at all?” rather
+    than just “can this user view this specific contact?” You can treat this just
+    like a normal policy method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: Checking policies
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If there’s a policy defined for a resource type, the `Gate` facade will use
+    the first parameter to figure out which method to check on the policy. If you
+    run `Gate``::allows``('update',` `$contact)`, it will check the `ContactPolicy@update`
+    method for authorization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This also works for the `Authorize` middleware and for `User` model checking
+    and Blade checking, as seen in [Example 9-27](#EX921).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-27\. Checking authorization against a policy
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Additionally, there’s a `policy()` helper that allows you to retrieve a policy
+    class and run its methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: Overriding policies
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Just like with normal ability definitions, policies can define a `before()`
+    method that allows you to override any call before it’s even processed (see [Example 9-28](#EX922)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-28\. Overriding policies with the `before()` method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Application tests often need to perform a particular behavior on behalf of a
+    particular user. We therefore need to be able to authenticate as a user in application
+    tests, and we need to test authorization rules and authentication routes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Of course, it’s possible to write an application test that manually visits the
+    login page and then fills out the form and submits it, but that’s not necessary.
+    Instead, the simplest option is to use the `->be()` method to simulate being logged
+    in as a user. Take a look at [Example 9-29](#EX923).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-29\. Authenticating as a user in application tests
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also use, and chain, the `actingAs()` method instead of `be()`, if
+    you prefer how it reads:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can also test authorization like in [Example 9-30](#EX924).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-30\. Testing authorization rules
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: Or we can test for a 403 response like in [Example 9-31](#EX925).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-31\. Testing authorization rules by checking status code
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: We need to test that our authentication (signup and signin) routes work too,
+    as illustrated in [Example 9-32](#EX926).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 9-32\. Testing authentication routes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can also use the integration test features to direct the test to “click”
+    our authentication fields and “submit” the fields to test the entire flow. We’ll
+    talk about that more in [Chapter 12](ch12.html#testing).
+  prefs: []
+  type: TYPE_NORMAL
+- en: TL;DR
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Between the default `User` model, the `create_users_table` migration, and Jetstream
+    and Breeze, Laravel provides options for a full user authentication system out
+    of the box. Breeze handles the authentication functionality in controllers and
+    Jetstream handles it in Actions, both of which can be customized for each app.
+    Both tools also publish config files and templates for customization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `Auth` facade and the `auth()` global helper provide access to the current
+    user (`auth()->user()`) and make it easy to check whether a user is logged in
+    (`auth()``->check()` and `auth()->guest()`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel also has an authorization system built in that allows you to define
+    specific abilities (`create-contact`, `visit-secret-page`) or define policies
+    for user interaction with entire models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can check for authorization with the `Gate` facade, the `can()` and `cannot()`
+    methods on the `User` class, the `@can` and `@cannot` directives in Blade, the
+    `authorize()` methods on the controller, or the `can` middleware.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,512 @@
+- en: Chapter 18\. Using Asynchronous Communication
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The term *Ajax* was first coined in 2005\. It stands for *Asynchronous JavaScript
+    and XML*, which, in simple terms, means using a set of methods built into JavaScript
+    to transfer data between the browser and a server in the background. This term
+    has now been mostly abandoned in favor of simply talking about asynchronous communication.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An excellent example of this technology is Google Maps (see [Figure 18-1](#google_maps_is_an_excellent_example_of_a)),
+    in which new sections of a map are downloaded from the server when needed, without
+    requiring a page refresh.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using asynchronous communication not only substantially reduces the amount of
+    data that must be sent back and forth but also makes web pages seamlessly dynamic—allowing
+    them to behave more like self-contained applications. The results are a much improved
+    user interface and better responsiveness.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Google Maps is an excellent example of Ajax](Images/pmj6_1801.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 18-1\. Google Maps is an excellent example of asynchronous communication
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: What Is Asynchronous Communication?
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Asynchronous communication as used today had its beginning with the release
+    of Internet Explorer 5 in 1999, which introduced a new ActiveX object, `XMLHttpRequest`.
+    ActiveX is Microsoft’s technology for signing plug-ins that install additional
+    software on your computer. Other browser developers later followed suit, but rather
+    than using ActiveX, they all implemented the feature as a native part of the JavaScript
+    interpreter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: However, even before then, an early form of the technology had already surfaced
+    that used hidden frames on a page that interacted with the server in the background.
+    Chat rooms were early adopters, using it to poll for and display new message posts
+    without requiring page reloads.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, let’s see how to implement asynchronous communication by using JavaScript.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using XMLHttpRequest
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In the past, making Ajax calls was a real pain in the neck because there were
+    so many different implementations across various browsers, and especially between
+    different versions of Microsoft’s Internet Explorer. Luckily things are vastly
+    improved these days, and there’s just the simple `XMLHttpRequest` object to work
+    with in one unified manner.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So, for example, to make a GET request, you use code such as this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Or, for a POST request, just replace the `GET` with `POST`; it’s that simple.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Your First Asynchronous Program
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Type and save the code in [Example 18-1](#urlpostdothtml) as *urlpost.html*,
+    but don’t load it into your browser yet.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 18-1\. urlpost.html
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s go through this document and look at what it does, starting with the first
+    eight lines, which simply set up an HTML document and display a heading. The next
+    line creates a `<div>` with the ID `info`, containing the text `This sentence
+    will be replaced` by default. Later on, the text returned from the call will be
+    inserted here.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After this, a new `XMLHttpRequest` object is created called `XHR`. Using this,
+    the resource to load is opened by calling `XHR.open`. In this case, to avoid cross-origin
+    Ajax issues in modern  browsers, the localhost IP address of `http://127.0.0.1`
+    is chosen, followed by the chapter folder `18` and then the PHP program `urlpost.php`,
+    which we’ll get to shortly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: If you set up a development server using AMPPS (or a similar WAMP, LAMP, or
+    MAMP) in [Chapter 2](ch02.xhtml#setting_up_a_development_server), downloaded the
+    example files from[GitHub](https://github.com/RobinNixon/lpmj6) and saved them
+    in the document root of the web server (as described in that chapter), the Chapter
+    18 folder will be in the right place for this code to work correctly. If any part
+    of your setup is different, or you run this code on a development server using
+    a domain of your choice, you will have to change those values in this code accordingly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After specifying the resource to load, `XHR.setRequestHeader` is called, passing
+    the required headers to be sent to the resource server, and the value to be posted
+    is sent in a call to `XHR.send`. In this case it’s the main page at *news.com*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The readyState property
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Now we get to the nitty-gritty of an asynchronous call, which all hangs on the
+    `readyState` property. This allows the browser to keep accepting user input and
+    changing the screen, while our program sets the `onreadystatechange` property
+    to call a function of our choice each time `readyState` changes. In this case,
+    a nameless (or anonymous) inline function has been used, as opposed to a separate,
+    named function. This type of function is known as a *callback* function, as it
+    is called back each time `readyState` changes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The syntax to set up the callback function using an inline, anonymous function
+    is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you wish to use a separate, named function, the syntax is slightly different:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: As it happens, `readyState` can have five values, but only one concerns us,
+    the value `4`, which represents a completed call. Therefore, each time the new
+    function gets called, it returns without doing anything until `readyState` has
+    a value of `4`. When our function detects that value, it next inspects the `status`
+    of the call to ensure it has a value of `200`, which means that the call succeeded.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: You will notice that all of these object properties are referenced using `this.readyState`,
+    `this.status`, and so on, rather than the object’s current name, `XHR`, as in
+    `XHR.readyState` or `XHR.status`. This is so that you can easily copy and paste
+    the code, and it will work with any object name, because the `this` keyword always
+    refers to the current object.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So, having ascertained that the `readyState` is `4` and the `status` is `200`,
+    we take the value in `responseText` and place it into the inner HTML of the `<div>` that
+    we assigned the `id` of `info` to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this line, the element `info` is referenced via the `getElementById` method,
+    and then its `innerHTML` property is assigned the value that was returned by the
+    call. The effect is that this element of the web page changes, while everything
+    else remains the same.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The server half of the asynchronous process
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Now we get to the PHP half of the equation, which you can see in [Example 18-2](#urlpostdotphp).
+    Type this code and save it as *urlpost.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 18-2\. urlpost.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, this is short and sweet and also makes use of the ever-important
+    `SanitizeString` function, as should be done with all posted data. In this instance,
+    unsanitized data could result in the user inserting JavaScript and gaining an
+    advantage over your code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This program uses the `file_get_contents` PHP function to load in the web page
+    at the URL supplied to it in the variable `$_POST['url']`. The `file_get_contents`
+    function is versatile in that it loads in the entire contents of a file or web
+    page from either a local or a remote server; it even takes into account moved
+    pages and other redirects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you have typed the program, you are ready to call up *urlpost.html* in
+    your web browser, and after a few seconds you should see the contents of the *news.com*
+    front page loaded into the `<div>` that we created for that purpose.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Cross-origin security makes using Ajax a little harder than it used to be because
+    you must be precise and clear about loading files. In the case of this example
+    on a development server on localhost, you will need to refer to the file using
+    its IP address. So, for example, if you saved the example files in the document
+    root of an AMPPS server as set out in [Chapter 2](ch02.xhtml#setting_up_a_development_server),
+    then the files will all be in the subfolder called *18*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To test the program, enter the following into your browser:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: It won’t be as fast as directly loading the web page, because it is transferred
+    twice—once to the server and again from the server to your browser—but the result
+    should look like [Figure 18-2](#the-newscom-front-page).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![](Images/pmj6_1802.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 18-2\. The news.com front page
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Not only have we succeeded in making an asynchronous call and having a response
+    returned to JavaScript, but we’ve also harnessed the power of PHP to merge in
+    a totally unrelated web object. Incidentally, if we had tried to find a way to
+    asynchronously fetch this web page directly (without recourse to the PHP server-side
+    module), we wouldn’t have succeeded, because there are other security blocks preventing
+    cross-domain asynchronous communication. So, this example also illustrates a handy
+    solution to a practical problem.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using GET Instead of POST
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As when you submit any data from a form, you have the option of submitting
+    your data in the form of GET requests, and you will save a few lines of code if
+    you do so. However, there is a downside: some browsers may cache GET requests,
+    whereas POST requests will never be cached. You don’t want to cache a request,
+    because the browser will just redisplay what it got the last time instead of going
+    to the server for fresh input. The solution to this is to use a workaround that
+    adds a random parameter to each request, ensuring that each URL requested is unique.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 18-3](#urlgetdothtml) shows how you would achieve the same result
+    as with [Example 18-1](#urlpostdothtml) but using a GET request instead of a POST.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 18-3\. urlget.html
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The differences to note between the two documents are highlighted in bold and
+    described as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: It is not necessary to send headers for a GET request.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We call the `open` method using a GET request, supplying a URL with a string
+    comprising a `?` symbol followed by the parameter/value pair `url=news.com`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: We provide a second parameter/value pair using an `&` symbol and then set the
+    value of the parameter `nocache` to a random value between 0 and 1 million. This
+    is done to ensure that each URL requested is different and therefore that no requests
+    will be cached.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The call to `send` now has no arguments because nothing is being passed via
+    a `POST` request that would require it.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: To accompany this new document, the PHP program must be modified to respond
+    to a GET request, as in [Example 18-4](#urlgetdotphp), *urlget.php*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 18-4\. urlget.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: The only difference between this and [Example 18-2](#urlpostdotphp) is that
+    the references to `$_POST` have been replaced with `$_GET`. The end result of
+    calling up *urlget.html* in your browser is identical to loading *urlpost.html*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To test this revised version of the program, enter the following into your
+    browser and you should see the same result as before, just loaded in via a GET
+    rather than a POST request:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Sending XML Requests
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Although the objects we’ve been creating are called `XMLHttpRequest` objects,
+    so far we have made absolutely no use of XML. As you have seen, we have been able
+    to asynchronously request an entire HTML document, but we could equally have asked
+    for a text page, a string or number, or even spreadsheet data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, let’s modify the previous example document and PHP program to fetch some
+    XML data. To do this, first take a look at the PHP program, *xmlget.php*, shown
+    in [Example 18-5](#xmlgetdotphp).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 18-5\. xmlget.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: This program has been very slightly modified (shown in bold highlighting) to
+    output the correct XML header before returning a fetched document. No checking
+    is done here, as it is assumed that the calling code will request an actual XML
+    document.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now on to the HTML document, *xmlget.html*, shown in [Example 18-6](#xmlgetdothtml).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 18-6\. xmlget.html
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: Again, the differences have been highlighted in bold. As you can see, this code
+    is substantially similar to the previous versions, except that the URL now being
+    requested, *rss.news.yahoo.com/rss/topstories*, contains an XML document, the
+    *Yahoo! News Top Stories* feed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The other big change is the use of the `responseXML` property, which replaces
+    the `responseText` property. Whenever a server returns XML data, `responseXML`
+    will contain the XML returned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'However, `responseXML` doesn’t simply contain a string of XML text: it is actually
+    a complete XML document object that we can examine and parse using DOM tree methods
+    and properties. This means it is accessible, for example, by the JavaScript `getElementsByTagName`
+    method.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: About XML
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'An XML document will generally take the form of the RSS feed shown in [Example 18-7](#xmlexample187).
+    However, the beauty of XML is that we can store this type of structure internally
+    in a DOM tree (see [Figure 18-3](#dom_tree_of_example_17-8)) to make it quickly
+    searchable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![The DOM tree of Example 17-8](Images/pmj6_1803.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 18-3\. The DOM tree of [Example 18-7](#xmlexample187)
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'Then, using the `getElementsByTagName` method, we can quickly extract the values
+    associated with various tags without a lot of string searching. This is exactly
+    what we do in [Example 18-6](#xmlgetdothtml), where the following command is issued:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This single command has the effect of placing all the values of the `<title>`
+    elements into the array `titles`. From there, it is a simple matter to extract
+    them with the following expression (where `j` has been assigned to an integer
+    that represents the title to access):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: All the titles are then appended to the string variable `out`, and once they’ve
+    all been processed, the result is inserted into the empty `<div>` at the document
+    start.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To recap, each entity such as `title` is a node, and so, for example, the title
+    text is considered a node inside the title. But even after you get the child node,
+    you have to ask for it as text, which is the purpose of `.nodeValue`. Also, as
+    with all form data, remember that you can use either the POST or the GET method
+    when requesting XML data; your choice will make little difference to the result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To test this XML program, enter the following into your browser, and you should
+    see something like [Figure 18-4](#asynchronously-fetching-a-yahoo):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: '![](Images/pmj6_1804.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 18-4\. Asynchronously fetching a Yahoo! XML news feed
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Why use XML?
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You may ask why you would use XML other than for fetching XML documents such
+    as RSS feeds. Well, the simple answer is that you don’t have to, but if you wish
+    to pass structured data back to your applications, it could be a real pain to
+    send a simple, unorganized jumble of text that would need complicated processing
+    in JavaScript.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Instead, you can create an XML document and pass that back to the calling function,
+    which will automatically place it into a DOM tree, as easily accessible as the
+    HTML DOM object with which you are now familiar.
+  prefs: []
+  type: TYPE_NORMAL
+- en: These days programmers are more likely to use [JavaScript Object Notation (JSON)
+    as their preferred data-interchange format](http://json.org), as it’s a simple
+    subset of JavaScript.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Using Frameworks for Asynchronous Communication
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that you know how to code your own asynchronous routines, you might like
+    to investigate some of the free frameworks that are available to make it even
+    easier, and which offer many more advanced features. In particular, I would suggest
+    you check out either [jQuery](http://jquery.com), which is very popular, or [React](http://reactjs.org),
+    probably the fastest-growing framework. In the following chapter, though, we’ll
+    look at how to apply styling to your websites with CSS.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Questions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Which object must be created in order to conduct asynchronous communication
+    between a web server and JavaScript client?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you tell when an asynchronous call has completed?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How do you know whether an asynchronous call completed successfully?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What `XMLHttpRequest` object property returns an asynchronous call’s text response?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What `XMLHttpRequest` object property returns an asynchronous call’s XML response?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: How can you specify a callback function to handle asynchronous responses?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What `XMLHttpRequest` method is used to initiate an asynchronous request?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: What are the main differences between an asynchronous GET and POST request?
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: See [“Chapter 18 Answers”](app01_split_017.xhtml#chapter_18_answers) in the
+    [Appendix A](app01_split_000.xhtml#solutions_to_the_chapter_questions) for the
+    answers to these questions.
+  prefs: []
+  type: TYPE_NORMAL

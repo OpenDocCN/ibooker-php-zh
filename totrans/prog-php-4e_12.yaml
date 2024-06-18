@@ -1,0 +1,546 @@
+- en: Chapter 11\. PDF
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Adobe’s Portable Document Format (PDF) is a popular way to get a consistent
+    look, both on screen and in print, for documents. This chapter shows you how to
+    dynamically create PDF files with text, graphics, links, and more. Doing so opens
+    the door to many applications. You can create almost any kind of business document,
+    including form letters, invoices, and receipts. In addition, you can automate
+    most paperwork by overlaying text onto a scan of the paper form and saving the
+    result as a PDF file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PDF Extensions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: PHP has several libraries for generating PDF documents. This chapter’s examples
+    use the popular [FPDF library](http://www.fpdf.org), a set of PHP code you include
+    in your scripts with the `require()` function—it doesn’t require any server-side
+    configuration or support, so you can use it even without support from your host.
+    The basic concepts, structure, and features of a PDF file should be common to
+    all the PDF libraries, however.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Another PDF-generating library, [TCPDF](https://tcpdf.org), is better at handling
+    HTML special characters and UTF-8 multilanguage output than FPDF. Look it up if
+    you need that capability. The methods you’ll use are `writeHTMLCell()` and `writeHTML()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Documents and Pages
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: A PDF document is made up of a number of pages, each of which contains text
+    and/or images. This section shows you how to create a document, add pages in that
+    document, write text to the pages, and send the pages back to the browser when
+    you’re done.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The examples in this chapter assume that you have at least the Adobe PDF document
+    viewer installed as an add-on to your web browser. These examples will not work
+    otherwise. You can get the add-on from the [Adobe website](https://oreil.ly/xXA3k).
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Simple Example
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Let’s start with a simple PDF document. [Example 11-1](#example_oneone_onedot_quotation_markhel)
+    writes the text “Hello Out There!” to a page and then displays the resulting PDF
+    document.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-1\. “Hello Out There!” in PDF
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 11-1](#example_oneone_onedot_quotation_markhel) follows the basic
+    steps involved in creating a PDF document: creating a new PDF object instance,
+    creating a page, setting a valid font for the PDF text, and writing the text to
+    a “cell” on the page. [Figure 11-1](#quotation_markhello_out_thereexclamatio)
+    shows the output of [Example 11-1](#example_oneone_onedot_quotation_markhel).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![“Hello Out There!” PDF example](Images/php4_1101.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-1\. “Hello Out There!” PDF example
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Initializing the Document
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In [Example 11-1](#example_oneone_onedot_quotation_markhel), we started by making
+    a reference to the FPDF library with the `require()` function. Then the code created
+    a new instance of the FPDF object. Note that all the calls to the new FPDF instance
+    are object-oriented calls to methods in that object. (Refer to [Chapter 6](ch06.xhtml#objects-id00032)
+    if you have trouble with the examples in this chapter.) After you have created
+    the new instance of the FPDF object, you’ll need to add at least one page to the
+    object, so the `AddPage()` method is called. Next, you need to set the font for
+    the output you are about to generate with the `SetFont()` call. Then, using the
+    `cell()` method call, you can send the output to your created document. To send
+    all your work to the browser, simply use the `output()` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Outputting Basic Text Cells
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In the FPDF library, a *cell* is a rectangular area on the page that you can
+    create and control. This cell can have a height, width, and border, and of course
+    it can contain text. The basic syntax for the `cell()` method is as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The first option is the width, then the height, and then the text to be output.
+    This is followed by the border, the new line control, its alignment, any fill
+    color for the text, and finally whether you want the text to be an HTML link.
+    So, for example, if we want to change our original example to have a border and
+    be center-aligned, we would change the cell code to the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’ll use the `cell()` method extensively when generating PDF documents with
+    FPDF, so you’d be well served by taking some time to learn the ins and outs of
+    this method. We will cover most of them in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Text is the heart of a PDF file. Accordingly, there are many options for changing
+    its appearance and layout. In this section, we’ll discuss the coordinate system
+    used in PDF documents, functions for inserting text and changing text attributes,
+    and font usage.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Coordinates
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The origin (0, 0) in a PDF document with the FPDF library is in the top-left
+    corner of the defined page. All of the measurements are specified in points, millimeters,
+    inches, or centimeters. A point (the default) is equal to 1/72 of an inch, or
+    0.35 mm. In [Example 11-2](#example_oneone_twodot_demonstrating_coo), we change
+    the defaults of the page dimensions to inches with the `FPDF()` class instantiation-constructor
+    method. The other options with this call are the orientation of the page (portrait
+    or landscape) and the page size (typically Legal or Letter). The full options
+    of this instantiation are shown in [Table 11-1](#fpdf_options).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 11-1\. FPDF options
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| `FPDF()` constructor parameters | Parameter options |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Orientation | `P` (portrait; default) `L` (landscape) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| Units of measurement | `pt` (point, or 1/72 of an inch; default) `in` (inch)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`mm` (millimeter)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cm` (centimeter) |'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Page size | `Letter` (default) `Legal`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`A5`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`A3`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`A4` or a customizable size (see FPDF documentation) |'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Also in [Example 11-2](#example_oneone_twodot_demonstrating_coo), we use the
+    `ln()` method call to manage what line of the page we are on. The `ln()` method
+    can take an optional argument, instructing it how many units (i.e., the unit of
+    measurement defined in the constructor call) to move. In our case, we’ve defined
+    the page to be in inches, so we’re moving through the document in measurement
+    units of inches. Further, since we’ve defined the page to be in inches, the coordinates
+    for the `cell()` method are also rendered in inches.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: This is not really the ideal approach for building a PDF page because you don’t
+    have as fine-grained control with inches as you would with points or millimeters.
+    We’ve used inches in this instance so that the examples can be seen more clearly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 11-2](#example_oneone_twodot_demonstrating_coo) puts text in the corners
+    and center of a page.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-2\. Demonstrating coordinates and line management
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: The output of [Example 11-2](#example_oneone_twodot_demonstrating_coo) is shown
+    in [Figure 11-2](#coordinate_and_line_control_demo_output).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Coordinate and line control demo output](Images/php4_1102.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-2\. Coordinate and line control demo output
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'So let’s analyze this code a little. After we define the page with the constructor,
+    we see these lines of code:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The first `cell()` method call tells the PDF class to start at the top coordinates
+    (0,0) and write out the left-justified text “Top Left!” with no border, and to
+    insert a line break at the end of the output. The next `cell()` method call prompts
+    the creation of a cell six inches wide, again starting on the lefthand side of
+    the page, with a half-inch-high border and the right-justified text “Top Right!”
+    We then tell the PDF class to move down 4½ inches on the page with the `ln(4.5)`
+    statement, and continue the output generation from that point. As you can see,
+    there are a lot of possible combinations with the `cell()` and `ln()` methods
+    alone. But that is not all that the FPDF library can do.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Text Attributes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There are three common ways to alter the appearance of text: bold, underline,
+    and italics. In [Example 11-3](#example_oneone_twodot_demonstrating_fon) the `SetFont()`
+    method (introduced earlier in the chapter) is used to alter the formatting of
+    the outgoing text. Note that these alterations in the text’s appearance are not
+    exclusive (i.e., you can use them in any combination) and that the font name is
+    changed in the last `SetFont()` call.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-3\. Demonstrating font attributes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Also, in this code the constructor has been called with no attributes passed
+    into it, using the default values of portrait, points, and letter. The output
+    of [Example 11-3](#example_oneone_twodot_demonstrating_fon) is shown in [Figure 11-3](#changing_font_typescomma_sizescomma_and).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Changing font types, sizes, and attributes](Images/php4_1103.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-3\. Changing font types, sizes, and attributes
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'The available font styles that come with FPDF are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`Courier` (fixed-width)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`Helvetica` or `Arial` (synonymous; sans serif)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`Times` (serif)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`Symbol` (symbols)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`ZapfDingbats` (symbols)'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: You can include any other font family for which you have the definition file
+    by using the `AddFont()` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Of course, this wouldn’t be any fun at all if you couldn’t change the color
+    of the text that you’re outputting to the PDF definition. Enter the `SetTextColor()`
+    method. This method takes the existing font definition and simply changes the
+    color of the text. Be sure to call this method before you use the `cell()` method
+    so that the content of the cell can be changed. The color parameters are combinations
+    of red, green, and blue numeric constants from `0` (none) to `255` (full color).
+    If you do not pass in the second and third parameters, then the first number will
+    be a shade of gray with red, green, and blue values equal to the single passed
+    value. [Example 11-4](#example_oneone_fourdot_demonstrating_co) shows how this
+    can be employed.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-4\. Demonstrating color attributes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Figure 11-4](#adding_color_to_the_text_output) is the result of the code in
+    [Example 11-4](#example_oneone_fourdot_demonstrating_co).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Adding color to the text output](Images/php4_1104.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-4\. Adding color to the text output
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Page Headers, Footers, and Class Extension
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'So far we’ve looked only at what can be output to the PDF page in small quantities.
+    We did this intentionally, to show you the variety of what you can do within a
+    controlled environment. Now we need to expand what the FPDF library can do. Remember
+    that this library actually is just a class definition provided for your use and
+    extension, the latter of which we’ll look at now. Since FPDF is indeed a class
+    definition, all we have to do to extend it is to use the object command that is
+    native to PHP, like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here we take the `FPDF` class and extend it with a new name of `MyPDF`. Then
+    we can extend any of the methods in the object. We can even add more methods to
+    our class extension if we so desire, but more on that later. The first two methods
+    that we’ll look at are extensions of existing empty methods that are predefined
+    in the parent of the `FPDF` class: `header()` and `footer()`. These methods, as
+    their names imply, generate page headers and footers for each page in your PDF
+    document. [Example 11-5](#example_oneone_fivedot_defining_header), which is rather
+    long, shows the definition of these two methods. You will notice only a few newly
+    used methods; the most significant is `AliasNbPages()`, which is used simply to
+    track the overall page count in the PDF document before it is sent to the browser.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-5\. Defining header and footer methods
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: The results of [Example 11-5](#example_oneone_fivedot_defining_header) are shown
+    in [Figure 11-5](#fpdf_header_and_footer_addition). This is a shot of both pages
+    side by side to show you the page count in the footers and the page number at
+    the top of the page(s) after page 1\. The header has a cell with some coloring
+    (for cosmetic effect); of course, you don’t have to use colors if you don’t want
+    to.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![FPDF header and footer addition](Images/php4_1105.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-5\. FPDF header and footer addition
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Images and Links
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The FPDF library can also handle image insertion and control links within the
+    PDF document or externally to outside web addresses. Let’s first look at how FPDF
+    allows you to insert graphics into your document. Perhaps you’re building a PDF
+    document that uses your company logo and you want to make a banner to print at
+    the top of each page. We can use the `header()` and `footer()` methods that we
+    defined in the previous section to do this. Once we have an image file to use,
+    we simply call the `image()` method to place the image in the PDF document.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The new `header()` method code looks like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, the `image()` method’s parameters are the filename of the image
+    to use, the *x* coordinate at which to start the image output, the *y* coordinate,
+    and the width and height of the image. If you don’t specify the width and height,
+    then FPDF will do its best to render the image at the *x* and *y* coordinates
+    that you specified. The code has changed a little in other areas as well. We removed
+    the fill color parameter from the `cell()` method call even though we still have
+    the fill color method called. This makes the box area around the header cell white
+    so that we can insert the image without hassle.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The output of this new header with the image inserted is shown in [Figure 11-6](#pdf_page_header_with_inserted_image_fil).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![PDF page header with inserted image file](Images/php4_1106.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-6\. PDF page header with inserted image file
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: 'This section also has links in its title, so now let’s turn our attention to
+    how to use FPDF to add links to PDF documents. FPDF can create two kinds of links:
+    an *internal* link (i.e., one within the PDF document to another location within
+    the same document, such as two pages later) and an *external* link to a web URL.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An internal link is created in two parts. First you define the starting point,
+    or origin, for the link, and then you set the anchor, or destination, for where
+    the link will go when it is clicked. To set a link’s origin, use the `addLink()`
+    method. This method will return a handle that you need to use when creating the
+    destination portion of the link. To set the destination, use the `setLink()` method,
+    which takes the origin’s link handle as its parameter so that it can perform the
+    join between the two steps.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An external URL type link can be created in two ways. If you are using an image
+    as a link, you will need to use the `image()` method. If you want to use straight
+    text as a link, you’ll need to use the `cell()` or `write()` method. We use the
+    `write()` method in this example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both internal and external links are shown in [Example 11-6](#example_oneone_sixdot_creating_internal).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-6\. Creating internal and external links
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: The two-page output that this code produces is shown in Figures [11-7](#first_page_of_linked_pdf_document)
+    and [11-8](#second_page_of_linked_pdf_document_with).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![First page of linked PDF document](Images/php4_1107.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-7\. First page of linked PDF document
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: '![Second page of linked PDF document with URL links](Images/php4_1108.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-8\. Second page of linked PDF document with URL links
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Tables and Data
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: So far we’ve looked only at PDF materials that are static in nature. But PHP,
+    being what it is, does so much more than static processes. In this section, we’ll
+    combine some data from a database (using a MySQL example of the database information
+    from [Chapter 9](ch09.xhtml#databases-id00007)) and FPDF’s ability to generate
+    tables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Be sure to reference the database file structures available in [Chapter 9](ch09.xhtml#databases-id00007)
+    to follow along in this section.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 11-7](#example_oneone_sevendot_generating_a_ta) is, again, a little
+    lengthy. However, it is well commented, so read through it here first; we’ll cover
+    the highlights after the listing.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 11-7\. Generating a table
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: We are using the database connection and building two arrays to send to the
+    `build`​`Table()` custom method of this extended class. Inside the `buildTable()`
+    method, we set colors and font attributes for the table header. Then, we send
+    out the headers based on the first passed-in array. There is another array called
+    `$width` used to set the column widths in the calls to `cell()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: After the table header is sent out, we use the `$data` array containing the
+    database information and walk through that array with a `foreach` loop. Notice
+    here that the `cell()` method is using `'LR'` for its `border` parameter. This
+    inserts borders on the left and right of the cell in question, thus effectively
+    adding the sides to the table rows. We also add a URL link to the second column
+    just to show you that it can be done in concert with the table row construction.
+    Lastly, we use a `$fill` variable to flip back and forth so that the background
+    color will alternate as the table is built row by row.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The last call to the `cell()` method in this `buildTable()` method is used to
+    draw the bottom of the table and close off the columns.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The result of this code is shown in [Figure 11-9](#fpdf_generated_table_based_on_database).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![FPDF-generated table based on database information with active URL links](Images/php4_1109.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 11-9\. FPDF-generated table based on database information with active
+    URL links
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: What’s Next
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There are quite a few other features of FPDF that are not covered in this chapter.
+    Be sure to go to the [library’s website](http://www.fpdf.org) to see other examples
+    of what it can help you accomplish. There are code snippets and fully functional
+    scripts available there as well as a discussion forum—all designed to help you
+    become an FPDF expert.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the next chapter we’ll be switching gears a little to explore the interactions
+    between PHP and XML. We will be covering some of the techniques that can be used
+    to “consume” XML and how to parse it with a built-in library called SimpleXML.
+  prefs: []
+  type: TYPE_NORMAL

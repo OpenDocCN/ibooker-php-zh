@@ -1,0 +1,871 @@
+- en: Chapter 16\. Databases
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Modern software applications, particularly on the web, use state in order to
+    function. *State* is a way to represent the current condition of the application
+    for a specific request—who is logged in, what page they’re on, any preferences
+    they’ve configured.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Typically, code is written to be more or less stateless. It will function the
+    same way regardless of the state of the user’s session (which is what makes system
+    behavior predictable within an application for multiple users). When a web application
+    is deployed, it’s done so again in a stateless manner.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But state is vital for keeping track of user activity and evolving the way the
+    application behaves for the user as they continue to interact with it. In order
+    for an otherwise stateless piece of code to be aware of state, it must retrieve
+    that state from somewhere.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Typically, this is done through the use of a database. Databases are efficient
+    ways to store structured data. There are generally four kinds of databases you
+    will work with in PHP: relational databases, key-value stores, graph databases,
+    and document databases.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 16.1 Relational Databases
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: A *relational database* breaks data down into objects and their relationships
+    with one another. A particular entry—like a book—is represented as a row in a
+    table, with columns containing data about books. These columns might include a
+    title, ISBN, and subject. The key thing to remember about relational databases
+    is that different data types reside in different tables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: While one column in a `book` table could be an author’s name, it’s more likely
+    you’ll have an entirely separate `author` table. This table would contain the
+    author’s name, perhaps their biography, and an email address. Both tables would
+    then have separate `ID` columns, and the `book` table might have an `author_id`
+    column referencing the `author` table. [Figure 16-1](#relational_db) depicts the
+    relations between tables in this form of database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Relational databases are defined by tables and references between the items
+    in each](assets/phpc_1601.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 16-1\. Relational databases are defined by tables and references between
+    the items in each
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Examples of relational databases include [MySQL](https://www.mysql.com) and
+    [SQLite](https://oreil.ly/5s4ps).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 16.2 Key-Value Stores
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: A *key-value store* is far simpler than a relational database—it’s effectively
+    a single table that maps one identifier (the key) to some stored value. Many applications
+    leverage key-value stores as simple cache utilities, keeping track of primitive
+    values in an efficient, often in-memory lookup system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As in relational databases, the data stored in a key-value system can be typed.
+    If you’re working with numeric data, most key-value systems expose additional
+    functionality to manipulate that data directly—for example, you can increment
+    integer values without needing to first read the underlying data. [Figure 16-2](#kv_store)
+    demonstrates the one-to-one relationships between keys and values in such a data
+    store.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Key-value stores are structured as lookups between discrete identifiers mapped
+    to optionally typed values](assets/phpc_1602.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 16-2\. Key-value stores are structured as lookups between discrete identifiers
+    mapped to optionally typed values
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Examples of key-value stores include [Redis](https://redis.io) and [Amazon DynamoDB](https://oreil.ly/BYCIM).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 16.3 Graph Databases
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Rather than focusing on structuring the data itself, graph databases focus on
+    modeling the relationships (called *edges*) between data. Data elements are encapsulated
+    by nodes, and the edges between the nodes link them together and provide semantic
+    context about the data in the system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Because of the high priority placed on relationships between data, graph databases
+    are well-suited for visualizations like [Figure 16-3](#graph_db), illustrating
+    the edges and nodes within such a structure. They also provide highly efficient
+    queries on data relationships, making them solid choices for highly interconnected
+    data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Graph databases prioritize and illustrate the relationships (edges) between
+    data (nodes)](assets/phpc_1603.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 16-3\. Graph databases prioritize and illustrate the relationships (edges)
+    between data (nodes)
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Examples of graph databases include [Neo4j](https://neo4j.com) and [Amazon Neptune](https://oreil.ly/8Uezn).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 16.4 Document Databases
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: It’s also possible to store data specifically as an unstructured or semistructured
+    *document*. A document could be a well-structured piece of data (like a literal
+    XML document) or a free-form blob of bytes (like a PDF).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The key difference between a document store and the other database types covered
+    in this chapter is structure—*document stores* are typically unstructured and
+    leverage a dynamic schema to reference data. They’re incredibly useful in some
+    situations, but far more nuanced in their use. For a deep dive into the document-based
+    methodology, read [*MongoDB: The Definitive Guide*](https://oreil.ly/psrH8) by
+    Shannon Bradshaw et al. (O’Reilly).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The following recipes focus primarily on relational databases and how to use
+    them with PHP. You’ll learn how to connect to both local and remote databases,
+    how to leverage fixed data during testing, and even how to use a more sophisticated
+    object-relational mapping (ORM) library with your data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 16.5 Connecting to an SQLite Database
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to use a local copy of an SQLite database to store application data.
+    Your application needs to open and close the database appropriately.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Open and close the database as needed using the base `SQLite` class. For efficiency,
+    you can extend the base class with your own constructor and destructor as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then use your new class to open a database, run some queries, and automatically
+    close the connection when you’re finished. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: SQLite is a fast, entirely self-contained database engine that stores all of
+    its data in a single file on disk. PHP ships with an extension (enabled by default
+    in most distributions) that directly interfaces with this database, giving you
+    the power to create, write to, and read from databases at will.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `open()` method will, by default, create a database file if one does not
+    already exist at the specified path. This behavior can be changed by changing
+    the flags passed in as the second parameter of the method call. By default, PHP
+    will pass `SQLITE3_​OPEN_​READWRITE | SQLITE3_OPEN_CREATE`, which will open the
+    database for reading *and* writing as well as create it if it doesn’t already
+    exist.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Three flags are available, as listed in [Table 16-1](#sqlite_open_flags).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 16-1\. Optional flags available for opening an SQLite database
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Flag | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `SQLITE3_OPEN_READONLY` | Open a database exclusively for reading |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `SQLITE3_OPEN_READWRITE` | Open a database for both reading and writing |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `SQLITE3_OPEN_CREATE` | Create the database if it does not exist |'
+  prefs: []
+  type: TYPE_TB
+- en: The Solution example includes a class that transparently opens an SQLite database
+    at a particular path, creating one if it doesn’t already exist. Given that the
+    class extends the base SQLite class, you can then use it in place of a standard
+    SQLite instance to create tables, insert data, and query that data directly. The
+    class destructor automatically closes the database connection once the instance
+    moves out of scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Typically, closing an SQLite connection isn’t explicitly required, as PHP will
+    automatically close the connection when the program exits. If, however, there’s
+    a chance that the application (or thread) might continue running, it’s a good
+    idea to close your connection to free up system resources as you go. While this
+    won’t impact a local, file-based data connection that much, it’s a critical component
+    of working with remote relational databases like MySQL. Being consistent in your
+    database management is a good habit to build.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The SQLite database is represented by a binary file on disk at the path specified.
+    If you have a development environment like [Visual Studio Code](https://oreil.ly/k_LBl),
+    you can use purpose-built extensions like [SQLite Viewer](https://oreil.ly/QzF0J)
+    to connect to and visualize your local database as well. Having more than one
+    way to view the schema and data housed within a database is a quick and effective
+    means to validate that your code is doing what you think it’s doing.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP documentation for [the SQLite3 database extension](https://oreil.ly/kMU8Y).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 16.6 Using PDO to Connect to an External Database Provider
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to use PDO as an abstraction layer to connect to and query a remote
+    MySQL database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'First, define a class extending the core `PDO` definition that handles creating
+    and closing connections as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The configuration file for the preceding class needs to be in INI format. For
+    example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once the file is configured, you can query the database directly by using the
+    abstractions provided by PDO as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The Solution example leverages the same table structure and data as previously
+    used by [Recipe 16.5](#recipe_sqlite), except that it uses the MySQL database
+    engine. [MySQL](https://www.mysql.com) is a popular, free, open source database
+    engine maintained by Oracle. According to the maintainers, it powers many popular
+    web applications, including large-scale platforms [like Facebook, Netflix, and
+    Uber](https://oreil.ly/fIuva). In fact, MySQL is so prevalent that many system
+    maintainers ship the MySQL extension with PHP by default, making it even easier
+    to connect to the system and saving you from having to install new drivers by
+    yourself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Unlike the Solution example from [Recipe 16.5](#recipe_sqlite), PHP has no method
+    to explicitly close the connection when using PDO. Instead, set the value of your
+    database handle (`$db` in the Solution example) to `null` to take the object out
+    of scope and trigger PHP to close the connection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In the Solution example, you first defined a class to wrap PDO itself and abstract
+    the connection to a MySQL database. This isn’t required, but as with [Recipe 16.5](#recipe_sqlite)
+    it’s is a good way to get used to maintaining clean data connections. Once the
+    connection is established, you can create a table, insert data, and read that
+    data back efficiently.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The Solution example assumes the `cookbook` schema already existed within the
+    database to which you were connecting. Unless you’ve already created that schema
+    directly, this implicit connection will fail with a `PDOException` complaining
+    about an unknown database. It is critical that you create the schema *first* within
+    the MySQL database before you try to manipulate it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Unlike SQLite, MySQL databases require a totally separate application to house
+    the database and broker the connection to your application. Often this application
+    will run on an entirely different server, and your application will connect over
+    TCP on a specific port (usually 3306). For local development and testing, it’s
+    enough to stand up a database alongside your application by using [Docker](https://www.docker.com).
+    The following one-line command will create a local MySQL database within a Docker
+    container, listening on the default port of 3306 and allowing connections by a
+    `root` user with the password of `toor`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Whether using MySQL within Docker locally or in a production environment, the
+    [official container image](https://oreil.ly/4btCa) details various configuration
+    settings that can be used to customize and secure the environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When the container first starts, it will not have any schemas available to query
+    (meaning the rest of the Solution example is not yet usable). To create a default
+    `cookbook` schema, you need to connect to the database and create the schema.
+    In [Example 16-1](#using_mysql_cli), the `$` character indicates shell commands,
+    and the `mysql>` prompt indicates a command run within the database itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-1\. Using the MySQL CLI to create a database schema
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_databases_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Docker container is exposing MySQL over TCP to the local environment, which
+    requires you to specify a local host by IP address. Failing to do so defaults
+    to MySQL attempting to connect over a Unix socket, which will fail in this case.
+    You must also pass both the username and password in order to connect.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_databases_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once connected to the database engine, you can create a new schema within it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_databases_CO1-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To disconnect from MySQL, merely type `exit` or `quit` and press the Enter key.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you don’t have the MySQL command line installed, you can also leverage Docker
+    to connect to the running database container and use *its* command-line interface
+    instead. [Example 16-2](#docker_hosted_cli) illustrates how to leverage a Docker
+    container to wrap the MySQL CLI while creating a database schema.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-2\. Using a Docker-hosted MySQL CLI to create a database schema
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_databases_CO2-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since MySQL is already running locally as a container named `db`, you can execute
+    a command within the container interactively by referencing the same name. Docker’s
+    `i` and `t` flags indicate you want to execute a command in an interactive terminal
+    session. The `bash` command is what you explicitly want to execute; the result
+    is that you are given an interactive terminal session *within the container* as
+    if you’d connected to it directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_databases_CO2-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Connecting to the database within the container is as simple as using the MySQL
+    CLI. You don’t need to reference a hostname as, within the container, you can
+    connect directly to the exposed Unix socket.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_databases_CO2-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a table and exiting out of the MySQL CLI is exactly the same as in
+    the previous example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![4](assets/4.png)](#co_databases_CO2-4)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you’ve exited out of the CLI, you still need to exit out of the interactive
+    `bash` session within the Docker container to return to your main terminal.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two primary advantages of using PDO to connect to a database instead
+    of a direct functional interface to the drivers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The PDO interfaces are the same for every database technology. While you might
+    need to refactor specific queries to fit one database engine or another (compare
+    the `CREATE TABLE` syntax of this Solution to that in [Recipe 16.5](#recipe_sqlite)),
+    you don’t need to refactor the PHP code around connections, statement executions,
+    or query processing. PDO is a data-access abstraction layer, giving you the same
+    mode of access and management regardless of the database you happen to be using
+    within your application.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: PDO supports the use of *persistent connections* by passing a truthy value to
+    the `PDO::ATTR_PERSISTENT` key as an option when opening a connection. A persistent
+    connection will be opened *and remain open* even after the `PDO` instance goes
+    out of scope and your script finishes executing. When PHP attempts to reopen the
+    connection, the system will instead look for a preexisting connection and reuse
+    that if it exists. This helps improve the performance of long-running, multitenant
+    applications, where opening multiple, redundant connections would otherwise harm
+    the database itself. (For more on persistent database connections, review [the
+    PHP Manual’s comprehensive documentation](https://oreil.ly/_nHH-).)
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Beyond these two advantages, PDO also supports the concept of prepared statements,
+    which help reduce the risk of malicious SQL injection. For more on prepared statements,
+    review [Recipe 16.7](#recipe_pdo_sanitization).
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Full documentation on the [PDO extension](https://oreil.ly/_6%E2%80%94%E2%80%8BV).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 16.7 Sanitizing User Input for a Database Query
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to pass user input into a database query but don’t fully trust the
+    user input to not be malicious.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Leverage prepared statements in PDO to automatically sanitize user input before
+    it passes into the query as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The concept of sanitizing user input was discussed earlier as part of [Recipe
+    9.1](ch09.html#recipe_sanitize_input), which used explicit filters to sanitize/validate
+    potentially untrusted input. While that approach is quite effective, it’s also
+    easy for developers to forget to include a sanitization filter on user input down
+    the road when making updates. As a result, it’s far safer to explicitly prepare
+    queries for execution to prevent malicious SQL injection.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Consider a query used to look up user data to display profile information.
+    Such a query might leverage user email addresses as indexes to distinguish one
+    user from another in an attempt to only display the current user’s information.
+    For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: In PHP, you’ll want to pass in the current user’s email address so the query
+    operates effectively. A naive approach using PDO might look something like [Example 16-3](#query_with_interpolation).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-3\. Simple query with string interpolation
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the user is only submitting their own username (say, `eric@phpcookbook.local`),
+    then this query will return the appropriate data for that user. There’s no guarantee
+    the end user is trustworthy, though, and they might submit a malicious statement
+    instead in the hopes of *injecting* an arbitrary statement into your database
+    engine. Knowing how the submitted email address is interpolated into the SQL statement,
+    an attacker could submit `' OR 1=1;--` instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This string will complete the quotes (`WHERE email = ''`), add a composite Boolean
+    statement that matches *any* result (`OR 1=1`), and explicitly comment out any
+    additional characters that follow. The result is that your query will return the
+    data for *all* users rather than the single user who made the request.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Similarly, malicious users could use the same approach to inject arbitrary `INSERT`
+    statements (writing new data) where you expected only to read information. They
+    could also illicitly update existing data, delete fields, or otherwise corrupt
+    the reliability of your data store.
+  prefs: []
+  type: TYPE_NORMAL
+- en: SQL injection is incredibly dangerous. It’s also remarkably common in the software
+    world—so much so that injection is recognized as the [third most commonly encountered
+    application security risk by the Open Worldwide Application Security Project (OWASP)
+    Top Ten project](https://oreil.ly/Cveyu).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Luckily, in PHP, injection is also easy to thwart!
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Solution example introduces PDO’s *prepared statements* interface. Rather
+    than interpolating a string with user-provided data, you insert named placeholders
+    into the query. These placeholders should be prefixed with a single colon and
+    can be any valid name you can imagine. When the query is run against the database,
+    PDO will replace these placeholders with literal values passed in at runtime.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: It is also possible to use the question mark character as a placeholder and
+    pass values into the prepared statement based on their position within a simple
+    array. However, the position of elements is easy to confuse during later refactoring,
+    and using this simpler approach is highly inadvisable. Take care to always use
+    named parameters when preparing statements to avoid confusion and to future-proof
+    your code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Prepared statements work with both data manipulation statements (insert, update,
+    delete) and arbitrary queries. Using prepared statements, the simple query from
+    [Example 16-3](#query_with_interpolation) could be rewritten as [Example 16-4](#query_with_preparation).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-4\. Simple query with prepared statements
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: This code leverages PDO to automatically escape user input and pass the value
+    as a literal one to the database engine. If the user had in fact submitted their
+    email address, the query would function as expected and return the anticipated
+    result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If the user instead submitted a malicious payload (e.g., `' OR 1=1;--`, as previously
+    discussed), the statement preparation will explicitly escape the passed quote
+    characters before passing them to the database. This would have the result of
+    looking for an email address that exactly matches the malicious payload (and does
+    not exist), yielding zero results of user data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on PDO’s [`prepare()` method](https://oreil.ly/q3DCh).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 16.8 Mocking Data for Integration Testing with a Database
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to leverage a database for production storage but mock that database
+    interface when running automated tests against your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use the repository pattern as an abstraction between your business logic and
+    database persistence. For example, define a repository interface as shown in [Example 16-5](#data_repository_interface).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-5\. Data repository interface definition
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Then, use the preceding interface to define a concrete database implementation
+    (leveraging something like PDO). Use the same interface to define a mock implementation
+    that returns predictable, static data rather than live data from a remote system.
+    See [Example 16-6](#repository_interface_implementation).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-6\. Repository interface implementation with mock data
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The Solution example introduces a simple way to separate your business logic
+    from your data layer via an abstraction. By leveraging a data *repository* to
+    wrap the database layer, you can ship multiple implementations of the same interface.
+    In a production application, your actual repository might look something like
+    [Example 16-7](#repository_implementation).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-7\. Concrete database implementation of a repository interface
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 16-7](#repository_implementation) implements the same interface as
+    the mock repository from the Solution example, except it connects to a live MySQL
+    database and manipulates data in that separate system. In reality, your production
+    code will use *this* implementation rather than the mock instance. But when running
+    under test, you can easily swap the `DatabaseRepository` for a `MockRepository`
+    instance so long as your business logic is expecting a class that implements `BookRepository`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Assume you’re working with the [Symfony framework](https://symfony.com). Your
+    application will be built upon controllers that leverage dependency injection
+    to handle external integrations. For a library API that manages multiple books,
+    you might define a `BookController` that looks something like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: The beauty of the preceding code is that the controller doesn’t care whether
+    you pass it an instance of `MockRepository` or one of `DataRepository`. Both classes
+    implement the same `BookRepository` interface and expose a `getByID()` method
+    with the same signature. To your business logic, the functionality is identical—except
+    that with one, your application will reach out to a remote database to retrieve
+    (and potentially) manipulate data, while the other uses a static, completely deterministic
+    set of fake data.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: The default data abstraction layer that ships with Symfony is called [Doctrine](https://oreil.ly/JvdG_)
+    and leverages the repository pattern by default. Doctrine provides a rich abstraction
+    layer across multiple SQL dialects, including MySQL, without the need to manually
+    wire queries via PDO. It also ships with a command-line utility that automatically
+    writes the PHP code for both stored objects (called *entities*) and repositories
+    for you!
+  prefs: []
+  type: TYPE_NORMAL
+- en: When it comes to writing tests, the deterministic and fake data is superior
+    because it will always be the same and means your tests will be very reliable.
+    It also means you won’t accidentally overwrite data in a real database if someone
+    makes a minor configuration error locally.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An added advantage will be the speed at which your tests run. Mocked data interfaces
+    remove the need to send data between your application and an independent database,
+    significantly shortening the latency of any data-related function calls. That
+    said, you will likely still want to flesh out a separate integration test suite
+    to exercise those remote integrations, and you will require a real database to
+    make that separate test suite usable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Review [Recipe 8.7](ch08.html#class_interfaces) for more on classes, interfaces,
+    and inheritance. See the Symfony documentation for more on [controllers](https://oreil.ly/ucip3)
+    and [dependency injection](https://oreil.ly/WYpxe).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 16.9 Querying an SQL Database with the Eloquent ORM
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to manage your database schema and the data it contains without hand-writing
+    SQL.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Use Laravel’s default ORM, Eloquent, to define your data objects and schema
+    dynamically, as shown in [Example 16-8](#eloquent_table_definition).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-8\. Table definition for use with Laravel
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: This code can be used to dynamically create a table to house books, regardless
+    of the type of SQL used with Eloquent. Once the table exists, data within it can
+    be modeled by Eloquent using the following class [Example 16-9](#eloquent_model_definition).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-9\. Eloquent model definition
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The Doctrine ORM, mentioned briefly in [Recipe 16.8](#recipe_data_mocking),
+    leverages the repository pattern to map objects stored in a database to their
+    representation in business logic. This works well with the Symfony framework,
+    but is merely one approach to modeling data in a real-world application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The open source Laravel framework, which itself is built atop Symfony and other
+    components, instead uses the [Eloquent ORM](https://oreil.ly/x7lcI) to model data.
+    Unlike Doctrine, Eloquent is based on the active record design pattern in which
+    tables within the database are directly related to corresponding models used to
+    represent that table. Rather than creating/reading/updating/deleting models through
+    a separate repository, the modeled objects present their own methods for direct
+    manipulation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tip
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Some development teams can be quite opinionated about the design patterns they
+    do and do not accept in a project. Despite the popularity of the Laravel framework,
+    many developers consider the active record approach to data modeling to be an
+    *antipattern*—that is, an approach to be avoided. Take care to ensure that your
+    development team is on the same page regarding the abstractions you leverage in
+    your project, as mixing multiple data access patterns can be confusing and will
+    lead to serious maintenance woes down the line.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The model classes exposed by Eloquent are quite simple, as demonstrated by the
+    terse illustration in the Solution example. However, they are quite dynamic—the
+    actual properties of the model don’t need to be directly defined within the model
+    class itself. Instead, Eloquent automatically reads and parses any columns and
+    data types from the underlying table and adds these as properties to the model
+    class when it’s instantiated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The table in [Example 16-8](#eloquent_table_definition), for example, defines
+    three columns:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An integer ID
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A string title
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A string author name
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'When Eloquent reads this data directly, it effectively creates objects in PHP
+    that look something like the following:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *actual* class will present various additional methods, like `save()`, but
+    otherwise contains a direct representation of the data as it appears within your
+    SQL table. To create a new record in the database, rather than editing SQL directly,
+    you would merely create a new object and save it as shown in [Example 16-10](#create_object_eloquent).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-10\. Creating a database object with Eloquent
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Updating data is similarly simple: use Eloquent to retrieve the object you
+    wish to change, make your changes in PHP, and then invoke the object’s `save()`
+    method to persist your updates directly. [Example 16-11](#update_in_place_eloquent)
+    updates objects in a database to replace one value in a particular field with
+    another.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 16-11\. Updating an element in place with Eloquent
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: The key advantage of using Eloquent is that you can work with your data objects
+    as if they were native PHP objects without needing to write, manage, or maintain
+    SQL statements by hand. The even more powerful feature of an ORM is that it handles
+    escaping user input for you, meaning that the extra steps introduced in [Recipe
+    16.7](#recipe_pdo_sanitization) are no longer necessary.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although directly leveraging SQL connections (with or without PDO) is a quick
+    and effective way to start working with a database, the sheer power of a fully
+    featured ORM will make your application easier to work with. This is true both
+    in terms of initial development and when it comes time to refactor.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [Eloquent ORM](https://oreil.ly/4J-Jz).
+  prefs: []
+  type: TYPE_NORMAL

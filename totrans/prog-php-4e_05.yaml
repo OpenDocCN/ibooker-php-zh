@@ -1,0 +1,2611 @@
+- en: Chapter 4\. Strings
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Most data you encounter as you program will be sequences of characters, or *strings*.
+    Strings can hold people’s names, passwords, addresses, credit card numbers, links
+    to photographs, purchase histories, and more. For that reason, PHP has an extensive
+    selection of functions for working with strings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This chapter shows the many ways to create strings in your programs, including
+    the sometimes tricky subject of *interpolation* (placing a variable’s value into
+    a string), then covers functions for changing, quoting, manipulating, and searching
+    strings. By the end of this chapter, you’ll be a string-handling expert.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quoting String Constants
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'There are four ways to write a string literal in your PHP code: using single
+    quotes, double quotes, the *here document* (*heredoc*) format derived from the
+    Unix shell, and its “cousin” *now document* (*nowdoc*). These methods differ in
+    whether they recognize special *escape sequences* that let you encode other characters
+    or interpolate variables.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variable Interpolation
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When you define a string literal using double quotes or a heredoc, the string
+    is subject to *variable interpolation*. Interpolation is the process of replacing
+    variable names in the string with their contained values. There are two ways to
+    interpolate variables into strings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The simpler of the two ways is to put the variable name in a double-quoted
+    string or in a heredoc:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The other way is to surround the variable being interpolated with curly braces.
+    Using this syntax ensures the correct variable is interpolated. The classic use
+    of curly braces is to disambiguate the variable name from any surrounding text:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: Without the curly braces, PHP would try to print the value of the `$nth` variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Unlike in some shell environments, in PHP, strings are not repeatedly processed
+    for interpolation. Instead, any interpolations in a double-quoted string are processed
+    first and the result is used as the value of the string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Single-Quoted Strings
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Single-quoted strings and nowdocs do not interpolate variables. Thus, the variable
+    name in the following string is not expanded because the string literal in which
+    it occurs is single-quoted:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The only escape sequences that work in single-quoted strings are `\''`, which
+    puts a single quote in a single-quoted string, and `\\`, which puts a backslash
+    in a single-quoted string. Any other occurrence of a backslash is interpreted
+    simply as a backslash:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Double-Quoted Strings
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Double-quoted strings interpolate variables and expand the many PHP escape sequences.
+    [Table 4-1](#escape_sequences_in_double_quoted_strin) lists the escape sequences
+    recognized by PHP in double-quoted strings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-1\. Escape sequences in double-quoted strings
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Escape sequence | Character represented |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\"` | Double quotes |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\n` | Newline |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\r` | Carriage return |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\t` | Tab |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\\` | Backslash |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\$` | Dollar sign |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\{` | Left curly brace |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\}` | Right curly brace |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\[` | Left square bracket |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\]` | Right square bracket |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\0` through `\777` | ASCII character represented by octal value |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\x0` through `\xFF` | ASCII character represented by hex value |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\u` | UTF-8 encoding |'
+  prefs: []
+  type: TYPE_TB
+- en: 'If an unknown escape sequence (i.e., a backslash followed by a character that
+    is not one of those in [Table 4-1](#escape_sequences_in_double_quoted_strin))
+    is found in a double-quoted string literal, it is ignored (if you have the warning
+    level `E_NOTICE` set, a warning is generated for such unknown escape sequences):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here Documents
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can easily put multiline strings into your program with a heredoc, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `<<<` identifier token tells the PHP parser that you’re writing a heredoc.
+    You get to pick the identifier (`EndOfQuote` in this case), and you can put it
+    in double quotes if you wish (e.g., `"EndOfQuote"`). The next line starts the
+    text being quoted by the heredoc, which continues until it reaches a line containing
+    only the identifier. To ensure the quoted text is displayed in the output area
+    exactly as you’ve laid it out, turn on plain-text mode by adding this command
+    at the top of your code file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Alternately, if you have control of your server settings, you could set `default_mimetype`
+    to `plain` in the *php.ini* file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: This is not recommended, however, as it puts *all* output from the server in
+    plain-text mode, which would affect the layout of most of your web code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you do not set plain-text mode for your heredoc, the default is typically
+    HTML mode, which simply displays the output all on one line.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When using a heredoc for a simple expression, you can put a semicolon after
+    the terminating identifier to end the statement (as shown in the first example).
+    If you are using a heredoc in a more complex expression, however, you’ll need
+    to continue the expression on the next line, as shown here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Single and double quotes in a heredoc are preserved:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'As is whitespace:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'New to PHP 7.3 is the indentation of the heredoc terminator. This allows for
+    more legible formatting in the case of embedded code, as in the following function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The newline before the trailing terminator is removed, so these two assignments
+    are identical:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want a newline to end your heredoc-quoted string, you’ll need to add
+    one yourself:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Printing Strings
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: There are four ways to send output to the browser. The `echo` construct lets
+    you print many values at once, while `print()` prints only one value. The `printf()`
+    function builds a formatted string by inserting values into a template. The `print_r()`
+    function is useful for debugging; it prints the contents of arrays, objects, and
+    other things in a more or less human-readable form.
+  prefs: []
+  type: TYPE_NORMAL
+- en: echo
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To put a string into the HTML of a PHP-generated page, use `echo`. While it
+    looks—and for the most part behaves—like a function, `echo` is a language construct.
+    This means that you can omit the parentheses, so the following expressions are
+    equivalent:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can specify multiple items to print by separating them with commas:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'It is a parse error to use parentheses when trying to echo multiple values:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Because `echo` is not a true function, you can’t use it as part of a larger
+    expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can easily remedy such errors by using the `print()` or `printf()` functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: print()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `print()` function sends one value (its argument) to the browser:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: printf()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `printf()` function outputs a string built by substituting values into a
+    template (the *format string*). It is derived from the function of the same name
+    in the standard C library. The first argument to `printf()` is the format string.
+    The remaining arguments are the values to be substituted. A `%` character in the
+    format string indicates a substitution.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Format modifiers
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Each substitution marker in the template consists of a percent sign (`%`),
+    possibly followed by modifiers from the following list, and ends with a type specifier.
+    (Use `%%` to get a single percent character in the output.) The modifiers must
+    appear in the order in which they are listed here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A padding specifier denoting the character to use to pad the results to the
+    appropriate string size. Specify `0`, a space, or any character prefixed with
+    a single quote. Padding with spaces is the default.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: A sign. This has a different effect on strings than on numbers. For strings,
+    a minus (`–`) here forces the string to be left-justified (the default is right-justified).
+    For numbers, a plus (`+`) here forces positive numbers to be printed with a leading
+    plus sign (e.g., `35` will be printed as `+35`).
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: The minimum number of characters that this element should contain. If the result
+    would be less than this number of characters, the sign and padding specifier govern
+    how to pad to this length.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: For floating-point numbers, a precision specifier consisting of a period and
+    a number; this dictates how many decimal digits will be displayed. For types other
+    than double, this specifier is ignored.
+  prefs:
+  - PREF_OL
+  type: TYPE_NORMAL
+- en: Type specifiers
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The type specifier tells `printf()` what type of data is being substituted.
+    This determines the interpretation of the previously listed modifiers. There are
+    eight types, as listed in [Table 4-2](#printfleft_parenthesisright_parenthesis).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-2\. printf() type specifiers
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Specifier | Meaning |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `%` | Displays the percent sign. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `b` | The argument is an integer and is displayed as a binary number. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `c` | The argument is an integer and is displayed as the character with that
+    value. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `d` | The argument is an integer and is displayed as a decimal number. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `e` | The argument is a double and is displayed in scientific notation. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `E` | The argument is a double and is displayed in scientific notation using
+    uppercase letters. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `f` | The argument is a floating-point number and is displayed as such in
+    the current locale’s format. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `F` | The argument is a floating-point number and is displayed as such. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `g` | The argument is a double and is displayed either in scientific notation
+    (as with the `%e` type specifier) or as a floating-point number (as with the `%f`
+    type specifier), whichever is shorter. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `G` | The argument is a double and is displayed either in scientific notation
+    (as with the `%E` type specifier) or as a floating-point number (as with the `%f`
+    type specifier), whichever is shorter. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `o` | The argument is an integer and is displayed as an octal (base-8) number.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `s` | The argument is a string and is displayed as such. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `u` | The argument is an unsigned integer and is displayed as a decimal number.
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `x` | The argument is an integer and is displayed as a hexadecimal (base-16)
+    number; lowercase letters are used. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `X` | The argument is an integer and is displayed as a hexadecimal (base-16)
+    number; uppercase letters are used. |'
+  prefs: []
+  type: TYPE_TB
+- en: 'The `printf()` function looks outrageously complex to people who aren’t C programmers.
+    Once you get used to it, though, you’ll find it a powerful formatting tool. Here
+    are some examples:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A floating-point number to two decimal places:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'Decimal and hexadecimal output:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'Padding an integer to three decimal places:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'Formatting a date:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'A percentage:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'Padding a floating-point number:'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs:
+  - PREF_IND
+  type: TYPE_PRE
+- en: 'The `sprintf()` function takes the same arguments as `printf()` but returns
+    the built-up string instead of printing it. This lets you save the string in a
+    variable for later use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: print_r() and var_dump()
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `print_r()` function intelligently displays what is passed to it, rather
+    than casting everything to a string, as `echo` and `print()` do. Strings and numbers
+    are simply printed. Arrays appear as parenthesized lists of keys and values, prefaced
+    by `Array`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using `print_r()` on an array moves the internal iterator to the position of
+    the last element in the array. See [Chapter 5](ch05.xhtml#array) for more on iterators
+    and arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'When you `print_r()` an object, you see the word `Object`, followed by the
+    initialized properties of the object displayed as an array:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Boolean values and `NULL` are not meaningfully displayed by `print_r()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For this reason, `var_dump()` is preferred over `print_r()` for debugging.
+    The `var_dump()` function displays any PHP value in a human-readable format:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: Beware of using `print_r()` or `var_dump()` on a recursive structure such as
+    `$GLOBALS` (which has an entry for `GLOBALS` that points back to itself). The
+    `print_r()` function loops infinitely, while `var_dump()` cuts off after visiting
+    the same element three times.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Accessing Individual Characters
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The `strlen()` function returns the number of characters in a string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can use the string offset syntax on a string to address individual characters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: Cleaning Strings
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Often, the strings we get from files or users need to be cleaned up before we
+    can use them. Two common problems with raw data are the presence of extraneous
+    whitespace and incorrect capitalization (uppercase versus lowercase).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Removing Whitespace
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can remove leading or trailing whitespace with the `trim()`, `ltrim()`,
+    and `rtrim()` functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`trim()` returns a copy of *string* with whitespace removed from the beginning
+    and the end. `ltrim()` (the *l* is for *left*) does the same, but removes whitespace
+    only from the start of the string. `rtrim()` (the *r* is for *right*) removes
+    whitespace only from the end of the string. The optional *charlist* argument is
+    a string that specifies all the characters to strip. The default characters to
+    strip are given in [Table 4-3](#default_characters_removed_by_trimleft).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-3\. Default characters removed by trim(), ltrim(), and rtrim()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Character | ASCII value | Meaning |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `" "` | 0x20 | Space |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `"\t"` | 0x09 | Tab |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `"\n"` | 0x0A | Newline (line feed) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `"\r"` | 0x0D | Carriage return |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `"\0"` | 0x00 | NUL-byte |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `"\x0B"` | 0x0B | Vertical tab |'
+  prefs: []
+  type: TYPE_TB
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Given a line of tab-separated data, use the *charlist* argument to remove leading
+    or trailing whitespace without deleting the tabs:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: Changing Case
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'PHP has several functions for changing the case of strings: `strtolower()`
+    and `strtoupper()` operate on entire strings, `ucfirst()` operates only on the
+    first character of the string, and `ucwords()` operates on the first character
+    of each word in the string. Each function takes a string to operate on as an argument
+    and returns a copy of that string, appropriately changed. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you’ve got a mixed-case string that you want to convert to “title case,”
+    where the first letter of each word is in uppercase and the rest of the letters
+    are in lowercase (and you’re not sure what case the string is in to begin with),
+    use a combination of `strtolower()` and `ucwords()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: Encoding and Escaping
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Because PHP programs often interact with HTML pages, web addresses (URLs), and
+    databases, there are functions to help you work with those types of data. HTML,
+    web addresses, and database commands are all strings, but they each require different
+    characters to be escaped in different ways. For instance, a space in a web address
+    must be written as `%20`, while a literal less-than sign (`<`) in an HTML document
+    must be written as `&lt;`. PHP has a number of built-in functions to convert to
+    and from these encodings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: HTML
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Special characters in HTML are represented by *entities* such as `&amp;` (`&`)
+    and `&lt;` (`<`). There are two PHP functions that turn special characters in
+    a string into their entities: one for removing HTML tags, and one for extracting
+    only meta tags.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Entity-quoting all special characters
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `htmlentities()` function changes all characters with HTML entity equivalents
+    into those equivalents (with the exception of the space character). This includes
+    the less-than sign (`<`), the greater-than sign (`>`), the ampersand (`&`), and
+    accented characters.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: The entity-escaped version, `&uuml;` (seen by viewing the source), correctly
+    displays as ü in the rendered web page. As you can see, the space has not been
+    turned into `&nbsp;`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `htmlentities()` function actually takes up to three arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The *encoding* parameter, if given, identifies the character set. The default
+    is “UTF-8.” The *flags* parameter controls whether single and double quotes are
+    turned into their entity forms. `ENT_COMPAT` (the default) converts only double
+    quotes, `ENT_QUOTES` converts both types of quotes, and `ENT_NOQUOTES` converts
+    neither. There is no option to convert only single quotes. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: Entity-quoting only HTML syntax characters
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `htmlspecialchars()` function converts the smallest set of entities possible
+    to generate valid HTML. The following entities are converted:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ampersands (`&`) are converted to `&amp;`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Double quotes (`"`) are converted to `&quot;`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Single quotes (`'`) are converted to `&#039;` (if `ENT_QUOTES` is on, as described
+    for `htmlentities()`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Less-than signs (`<`) are converted to `&lt;`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Greater-than signs (`>`) are converted to `&gt;`
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: If you have an application that displays data that a user has entered in a form,
+    you need to run that data through `htmlspecialchars()` before displaying or saving
+    it. If you don’t, and the user enters a string like `"angle < 30"` or `"sturm
+    & drang"`, the browser will think the special characters are HTML, resulting in
+    a garbled page.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Like `htmlentities()`, `htmlspecialchars()` can take up to three arguments:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *flags* and *encoding* arguments have the same meaning that they do for
+    `html``entities()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are no functions specifically for converting back from the entities to
+    the original text, because this is rarely needed. There is a relatively simple
+    way to do this, though. Use the `get_html_translation_table()` function to fetch
+    the translation table used by either of these functions in a given quote style.
+    For example, to get the translation table that `html``entities()` uses, do this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To get the table for `htmlspecialchars()` in `ENT_NOQUOTES` mode, use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A nice trick is to use this translation table, flip it using `array_flip()`,
+    and feed it to `strtr()` to apply it to a string, thereby effectively doing the
+    reverse of `html``entities()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can, of course, also fetch the translation table, add whatever other translations
+    you want to it, and then do the `strtr()`. For example, if you wanted `htmlentities()`
+    to also encode each space to `&nbsp;`, you would do:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: Removing HTML tags
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `strip_tags()` function removes HTML tags from a string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The function may take a second argument that specifies a string of tags to
+    leave in the string. List only the opening forms of the tags. The closing forms
+    of tags listed in the second parameter are also preserved:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: Attributes in preserved tags are not changed by `strip_tags()`. Because attributes
+    such as `style` and `onmouseover` can affect the look and behavior of web pages,
+    preserving some tags with `strip_tags()` won’t necessarily remove the potential
+    for abuse.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Extracting meta tags
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `get_meta_tags()` function returns an array of the meta tags for an HTML
+    page, specified as a local filename or URL. The name of the meta tag (`keywords`,
+    `author`, `description`, etc.) becomes the key in the array, and the content of
+    the meta tag becomes the corresponding value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The general form of the function is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: Pass a `true` value for *use_include_path* to let PHP attempt to open the file
+    using the standard include path.
+  prefs: []
+  type: TYPE_NORMAL
+- en: URLs
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP provides functions to convert to and from URL encoding, which allows you
+    to build and decode URLs. There are actually two types of URL encoding, which
+    differ in how they treat spaces. The first (specified by RFC 3986) treats a space
+    as just another illegal character in a URL and encodes it as `%20`. The second
+    (implementing the `application/x-www-form-urlencoded` system) encodes a space
+    as a `+` and is used in building query strings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note that you don’t want to use these functions on a complete URL, such as
+    *[*http://www.example.com/hello*](http://www.example.com/hello)*, as they will
+    escape the colons and slashes to produce:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: Encode only partial URLs (the bit after *http://www.example.com/*) and add the
+    protocol and domain name later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: RFC 3986 encoding and decoding
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To encode a string according to the URL conventions, use `rawurlencode()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: This function takes a string and returns a copy with illegal URL characters
+    encoded in the `%dd` convention.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you are dynamically generating hypertext references for links in a page,
+    you need to convert them with `rawurlencode()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `rawurldecode()` function decodes URL-encoded strings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: Query-string encoding
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `urlencode()` and `urldecode()` functions differ from their raw counterparts
+    only in that they encode spaces as plus signs (`+`) instead of as the sequence
+    `%20`. This is the format for building query strings and cookie values. These
+    functions can be useful in supplying form-like URLs in the HTML. PHP automatically
+    decodes query strings and cookie values, so you don’t need to use these functions
+    to process those values. The functions are useful for generating query strings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: SQL
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Most database systems require that string literals in your SQL queries be escaped.
+    SQL’s encoding scheme is pretty simple—single quotes, double quotes, NUL-bytes,
+    and backslashes need to be preceded by a backslash. The `addslashes()` function
+    adds these slashes, and the `stripslashes()` function removes them:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: C-String Encoding
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `addcslashes()` function escapes arbitrary characters by placing backslashes
+    before them. With the exception of the characters in [Table 4-4](#single_character_escapes_recognized_by),
+    characters with ASCII values less than 32 or above 126 are encoded with their
+    octal values (e.g., `"\002"`). The `addcslashes()` and `stripcslashes()` functions
+    are used with nonstandard database systems that have their own ideas of which
+    characters need to be escaped.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-4\. Single-character escapes recognized by addcslashes() and stripcslashes()
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| ASCII value | Encoding |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 7 | `\a` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 8 | `\b` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 9 | `\t` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 10 | `\n` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 11 | `\v` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 12 | `\f` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| 13 | `\r` |'
+  prefs: []
+  type: TYPE_TB
+- en: 'Call `addcslashes()` with two arguments—the string to encode and the characters
+    to escape:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Specify a range of characters to escape with the `".."` construct:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: Beware of specifying `'0'`, `'a'`, `'b'`, `'f'`, `'n'`, `'r'`, `'t'`, or `'v'`
+    in the character set, as they will be turned into `'\0'`, `'\a'`, and so on. These
+    escapes are recognized by C and PHP and may cause confusion.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`stripcslashes()` takes a string and returns a copy with the escapes expanded:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: Comparing Strings
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: PHP has two operators and six functions for comparing strings to each other.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Exact Comparisons
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can compare two strings for equality with the `==` and `===` operators.
+    These operators differ in how they deal with nonstring operands. The `==` operator
+    casts string operands to numbers, so it reports that `3` and `"3"` are equal.
+    Due to the rules for casting strings to numbers, it would also report that `3`
+    and `"3b"` are equal, as only the portion of the string up to a non-number character
+    is used in casting. The `===` operator does not cast, and returns `false` if the
+    data types of the arguments differ:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The comparison operators (`<`, `<=`, `>`, `>=`) also work on strings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE61]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'However, the comparison operators give unexpected results when comparing strings
+    and numbers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE62]'
+  prefs: []
+  type: TYPE_PRE
+- en: When one argument to a comparison operator is a number, the other argument is
+    cast to a number. This means that `"PHP Rocks"` is cast to a number, giving `0`
+    (since the string does not start with a number). Because 0 is less than 5, PHP
+    prints `"PHP Rocks < 5"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To explicitly compare two strings as strings, casting numbers to strings if
+    necessary, use the `strcmp()` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE63]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The function returns a number less than 0 if *string_1* sorts before *string_2*,
+    greater than 0 if *string_2* sorts before *string_1*, or 0 if they are the same:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE64]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A variation on `strcmp()` is `strcasecmp()`, which converts strings to lowercase
+    before comparing them. Its arguments and return values are the same as those for
+    `strcmp()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE65]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Another variation on string comparison is to compare only the first few characters
+    of the string. The `strncmp()` and `strncasecmp()` functions take an additional
+    argument, the initial number of characters to use for the comparisons:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE66]'
+  prefs: []
+  type: TYPE_PRE
+- en: The final variation on these functions is *natural-order* comparison with `strnatcmp()`
+    and `strnatcasecmp()`, which take the same arguments as `strcmp()` and return
+    the same kinds of values. Natural-order comparison identifies numeric portions
+    of the strings being compared and sorts the string parts separately from the numeric
+    parts.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Table 4-5](#natural_order_versus_ascii_order) shows strings in natural order
+    and ASCII order.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-5\. Natural order versus ASCII order
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Natural order | ASCII order |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `pic1.jpg` | `pic1.jpg` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `pic5.jpg` | `pic10.jpg` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `pic10.jpg` | `pic5.jpg` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `pic50.jpg` | `pic50.jpg` |'
+  prefs: []
+  type: TYPE_TB
+- en: Approximate Equality
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'PHP provides several functions that let you test whether two strings are approximately
+    equal—`soundex()`, `metaphone()`, `similar_text()`, and `levenshtein()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE67]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The Soundex and Metaphone algorithms each yield a string that represents roughly
+    how a word is pronounced in English. To see whether two strings are approximately
+    equal with these algorithms, compare their pronunciations. You can compare Soundex
+    values only to Soundex values and Metaphone values only to Metaphone values. The
+    Metaphone algorithm is generally more accurate, as the following example demonstrates:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE68]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `similar_text()` function returns the number of characters that its two
+    string arguments have in common. The third argument, if present, is a variable
+    in which to store the commonality as a percentage:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE69]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The Levenshtein algorithm calculates the similarity of two strings based on
+    how many characters you must add, substitute, or remove to make them the same.
+    For instance, `"cat"` and `"cot"` have a Levenshtein distance of 1, because you
+    need to change only one character (the `"a"` to an `"o"`) to make them the same:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE70]'
+  prefs: []
+  type: TYPE_PRE
+- en: This measure of similarity is generally quicker to calculate than that used
+    by the `similar_text()` function. Optionally, you can pass three values to the
+    `leven``shtein()` function to individually weight insertions, deletions, and replacements—for
+    instance, to compare a word against a contraction.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This example excessively weights insertions when comparing a string against
+    its possible contraction, because contractions should never insert characters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE71]'
+  prefs: []
+  type: TYPE_PRE
+- en: Manipulating and Searching Strings
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: PHP has many functions to work with strings. The most commonly used functions
+    for searching and modifying strings are those that use regular expressions to
+    describe the string in question. The functions described in this section do not
+    use regular expressions—they are faster than regular expressions, but they work
+    only when you’re looking for a fixed string (for instance, if you’re looking for
+    `"12/11/01"` rather than “any numbers separated by slashes”).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Substrings
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you know where the data that you are interested in lies in a larger string,
+    you can copy it out with the `substr()` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE72]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The *start* argument is the position in *string* at which to begin copying,
+    with `0` meaning the start of the string. The *length* argument is the number
+    of characters to copy (the default is to copy until the end of the string). For
+    example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE73]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To learn how many times a smaller string occurs within a larger one, use `substr_count()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE74]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE75]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `substr_replace()` function permits many kinds of string modifications:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE76]'
+  prefs: []
+  type: TYPE_PRE
+- en: The function replaces the part of *original* indicated by the *start* (`0` means
+    the start of the string) and *length* values with the string *new*. If no fourth
+    argument is given, `substr_replace()` removes the text from *start* to the end
+    of the string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For instance:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE77]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use a *length* of `0` to insert without deleting:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE78]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Use a replacement of `""` to delete without inserting:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE79]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here’s how you can insert at the beginning of the string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE80]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A negative value for *start* indicates the number of characters from the end
+    of the string from which to start the replacement:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE81]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A negative *length* indicates the number of characters from the end of the
+    string at which to stop deleting:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE82]'
+  prefs: []
+  type: TYPE_PRE
+- en: Miscellaneous String Functions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The `strrev()` function takes a string and returns a reversed copy of it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE83]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE84]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `str_repeat()` function takes a string and a count and returns a new string
+    consisting of the argument *string* repeated *count* times:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE85]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example, to build a crude wavy horizontal rule:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE86]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `str_pad()` function pads one string with another. Optionally, you can
+    say what string to pad with, and whether to pad on the left, right, or both:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE87]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The default is to pad on the right with spaces:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE88]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The optional third argument is the string to pad with:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE89]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The optional fourth argument can be `STR_PAD_RIGHT` (the default), `STR_PAD_LEFT`,
+    or `STR_PAD_BOTH` (to center). For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE90]'
+  prefs: []
+  type: TYPE_PRE
+- en: Decomposing a String
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP provides several functions to let you break a string into smaller components.
+    In increasing order of complexity, they are `explode()`, `strtok()`, and `sscanf()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Exploding and imploding
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Data often arrives as strings, which must be broken down into an array of values.
+    For instance, you might want to split up the comma-separated fields from a string
+    such as `"Fred,25,Wilma`.`"` In these situations, use the `explode()` function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE91]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The first argument, *separator*, is a string containing the field separator.
+    The second argument, *string*, is the string to split. The optional third argument,
+    *limit*, is the maximum number of values to return in the array. If the limit
+    is reached, the last element of the array contains the remainder of the string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE92]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `implode()` function does the exact opposite of `explode()`—it creates
+    a large string from an array of smaller strings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE93]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The first argument, *separator*, is the string to put between the elements
+    of the second argument, *array*. To reconstruct the simple comma-separated value
+    string, simply say:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE94]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `join()` function is an alias for `implode()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tokenizing
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `strtok()` function lets you iterate through a string, getting a new chunk
+    (token) each time. The first time you call it, you need to pass two arguments:
+    the string to iterate over and the token separator. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE95]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To retrieve the rest of the tokens, repeatedly call `strtok()` with only the
+    separator:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE96]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For instance, consider this invocation:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE97]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `strtok()` function returns `false` when there are no more tokens to be
+    returned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Call `strtok()` with two arguments to reinitialize the iterator. This restarts
+    the tokenizer from the start of the string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: sscanf()
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `sscanf()` function decomposes a string according to a `printf()`-like
+    template:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE98]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If used without the optional variables, `sscanf()` returns an array of fields:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE99]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Pass references to variables to have the fields stored in those variables.
+    The number of fields assigned is returned:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE100]'
+  prefs: []
+  type: TYPE_PRE
+- en: String-Searching Functions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Several functions find a string or character within a larger string. They come
+    in three families: `strpos()` and `strrpos()`, which return a position; `strstr()`,
+    `strchr()`, and friends, which return the string they find; and `strspn()` and
+    `strcspn()`, which return how much of the start of the string matches a mask.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In all cases, if you specify a number as the “string” to search for, PHP treats
+    that number as the ordinal value of the character to search for. Thus, these function
+    calls are identical because 44 is the ASCII value of the comma:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE101]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'All the string-searching functions return `false` if they can’t find the substring
+    you specified. If the substring occurs at the beginning of the string, the functions
+    return `0`. Because `false` casts to the number `0`, always compare the return
+    value with `===` when testing for failure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE102]'
+  prefs: []
+  type: TYPE_PRE
+- en: Searches returning position
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `strpos()` function finds the first occurrence of a small string in a larger
+    string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE103]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the small string isn’t found, `strpos()` returns `false`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `strrpos()` function finds the last occurrence of a character in a string.
+    It takes the same arguments and returns the same type of value as `strpos()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For instance:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE104]'
+  prefs: []
+  type: TYPE_PRE
+- en: Searches returning rest of string
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `strstr()` function finds the first occurrence of a small string in a larger
+    string and returns from that small string on. For instance:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE105]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The variations on `strstr()` are:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`stristr()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Case-insensitive `strstr()`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`strchr()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Alias for `strstr()`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`strrchr()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finds last occurrence of a character in a string
+  prefs: []
+  type: TYPE_NORMAL
+- en: As with `strrpos()`, `strrchr()` searches backward in the string, but only for
+    a single character, not for an entire string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Searches using masks
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you thought `strrchr()` was esoteric, you haven’t seen anything yet. The
+    `strspn()` and `strcspn()` functions tell you how many characters at the beginning
+    of a string are composed of certain characters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE106]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example, this function tests whether a string holds an octal number:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE107]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The *c* in `strcspn()` stands for *complement*—it tells you how much of the
+    start of the string is not composed of the characters in the character set. Use
+    it when the number of interesting characters is greater than the number of uninteresting
+    characters. For example, this function tests whether a string has any NUL-bytes,
+    tabs, or carriage returns:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE108]'
+  prefs: []
+  type: TYPE_PRE
+- en: Decomposing URLs
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `parse_url()` function returns an array of components of a URL:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE109]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE110]'
+  prefs: []
+  type: TYPE_PRE
+- en: The possible keys of the hash are `scheme`, `host`, `port`, `user`, `pass`,
+    `path`, `query`, and `fragment`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Regular Expressions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you need more complex searching functionality than the previous methods provide,
+    you can use a regular expression—a string that represents a *pattern*. The regular
+    expression functions compare that pattern to another string and see if any of
+    the string matches the pattern. Some functions tell you whether there was a match,
+    while others make changes to the string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are three uses for regular expressions: matching, which can also be used
+    to extract information from a string; substituting new text for matching text;
+    and splitting a string into an array of smaller chunks. PHP has functions for
+    all. For instance, `preg_match()` does a regular expression match.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Perl has long been considered the benchmark for powerful regular expressions.
+    PHP uses a C library called *pcre* to provide almost complete support for Perl’s
+    arsenal of regular expression features. Perl regular expressions act on arbitrary
+    binary data, so you can safely match with patterns or strings that contain the
+    NUL-byte (`\x00`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Basics
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Most characters in a regular expression are literal characters, meaning that
+    they match only themselves. For instance, if you search for the regular expression
+    `"/cow/"` in the string `"Dave was a cowhand"`, you get a match because `"cow"`
+    occurs in that string.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Some characters have special meanings in regular expressions. For instance,
+    a caret (`^`) at the beginning of a regular expression indicates that it must
+    match the beginning of the string (or, more precisely, *anchors* the regular expression
+    to the beginning of the string):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE111]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Similarly, a dollar sign (`$`) at the end of a regular expression means that
+    it must match the end of the string (i.e., anchors the regular expression to the
+    end of the string):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE112]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A period (`.`) in a regular expression matches any single character:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE113]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want to match one of these special characters (called a *metacharacter*),
+    you have to escape it with a backslash:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE114]'
+  prefs: []
+  type: TYPE_PRE
+- en: Regular expressions are case-sensitive by default, so the regular expression
+    `"/cow/"` doesn’t match the string `"COW"`. If you want to perform a case-insensitive
+    match, you specify a flag to indicate that (as you’ll see later in this chapter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So far, we haven’t done anything we couldn’t have done with the string functions
+    we’ve already seen, like `strstr()`. The real power of regular expressions comes
+    from their ability to specify abstract patterns that can match many different
+    character sequences. You can specify three basic types of abstract patterns in
+    a regular expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: A set of acceptable characters that can appear in the string (e.g., alphabetic
+    characters, numeric characters, specific punctuation characters)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A set of alternatives for the string (e.g., `"com"`, `"edu"`, `"net"`, or `"org"`)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: A repeating sequence in the string (e.g., at least one but not more than five
+    numeric characters)
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: These three kinds of patterns can be combined in countless ways to create regular
+    expressions that match such things as valid phone numbers and URLs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Character Classes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To specify a set of acceptable characters in your pattern, you can either build
+    a character class yourself or use a predefined one. You can build your own character
+    class by enclosing the acceptable characters in square brackets:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE115]'
+  prefs: []
+  type: TYPE_PRE
+- en: The regular expression engine finds a `"c"`, then checks that the next character
+    is one of `"a"`, `"e"`, `"i"`, `"o"`, or `"u"`. If it isn’t a vowel, the match
+    fails and the engine goes back to looking for another `"c"`. If a vowel is found,
+    the engine checks that the next character is a `"t"`. If it is, the engine is
+    at the end of the match and returns `true`. If the next character isn’t a `"t"`,
+    the engine goes back to looking for another `"c"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can negate a character class with a caret (`^`) at the start:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE116]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this case, the regular expression engine is looking for a `"c"` followed
+    by a character that isn’t a vowel, followed by a `"t"`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can define a range of characters with a hyphen (`-`). This simplifies character
+    classes like “all letters” and “all digits”:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE117]'
+  prefs: []
+  type: TYPE_PRE
+- en: When you are specifying a character class, some special characters lose their
+    meaning, while others take on new meanings. In particular, the `$` anchor and
+    the period lose their meaning in a character class, while the `^` character is
+    no longer an anchor but negates the character class if it is the first character
+    after the open bracket. For instance, `[^\]]` matches any nonclosing bracket character,
+    while `[$.^]` matches any dollar sign, period, or caret.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The various regular expression libraries define shortcuts for character classes,
+    including digits, alphabetic characters, and whitespace.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Alternatives
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can use the vertical pipe (`|`) character to specify alternatives in a
+    regular expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE118]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The precedence of alternation can be a surprise: `"/^cat|dog$/"` selects from
+    `"^cat"` and `"dog$"`, meaning that it matches a line that either starts with
+    `"cat"` or ends with `"dog"`. If you want a line that contains just `"cat"` or
+    `"dog"`, you need to use the regular expression `"/^(cat|dog)$/"`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can combine character classes and alternation to, for example, check for
+    strings that don’t start with a capital letter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE119]'
+  prefs: []
+  type: TYPE_PRE
+- en: Repeating Sequences
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: To specify a repeating pattern, you use a *quantifier*. The quantifier goes
+    after the pattern that’s repeated and says how many times to repeat that pattern.
+    [Table 4-6](#regular_expression_quantifiers) shows the quantifiers that are supported
+    by PHP’s regular expressions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-6\. Regular expression quantifiers
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Quantifier | Meaning |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `?` | 0 or 1 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `*` | 0 or more |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `+` | 1 or more |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `{` *n* `}` | Exactly *n* times |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `{` *n* `,` *m* `}` | At least *n*, no more than *m* times |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `{` *n* `,}` | At least *n* times |'
+  prefs: []
+  type: TYPE_TB
+- en: 'To repeat a single character, simply put the quantifier after the character:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE120]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'With quantifiers and character classes, we can actually do something useful,
+    like matching valid US telephone numbers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE121]'
+  prefs: []
+  type: TYPE_PRE
+- en: Subpatterns
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can use parentheses to group bits of a regular expression together to be
+    treated as a single unit called a *subpattern*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE122]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The parentheses also cause the substring that matches the subpattern to be
+    captured. If you pass an array as the third argument to a match function, the
+    array is populated with any captured substrings:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE123]'
+  prefs: []
+  type: TYPE_PRE
+- en: The zeroth element of the array is set to the entire string being matched against.
+    The first element is the substring that matched the first subpattern (if there
+    is one), the second element is the substring that matched the second subpattern,
+    and so on.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Delimiters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Perl-style regular expressions emulate the Perl syntax for patterns, which
+    means that each pattern must be enclosed in a pair of delimiters. Traditionally,
+    the forward slash (`/`) character is used; for example, `/`*pattern*`/`. However,
+    any nonalphanumeric character other than the backslash character (`\`) can be
+    used to delimit a Perl-style pattern. This is useful for matching strings containing
+    slashes, such as filenames. For example, the following are equivalent:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE124]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Parentheses (`()`), curly braces (`{}`), square brackets (`[]`), and angle
+    brackets (`<>`) can be used as pattern delimiters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE125]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The section [“Trailing Options”](#trailing_options) discusses the single-character
+    modifiers you can put after the closing delimiter to modify the behavior of the
+    regular expression engine. A very useful one is `x`, which makes the regular expression
+    engine strip whitespace and `#`-marked comments from the regular expression before
+    matching. These two patterns are the same, but one is much easier to read:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE126]'
+  prefs: []
+  type: TYPE_PRE
+- en: Match Behavior
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The period (`.`) matches any character except for a newline (`\n`). The dollar
+    sign (`$`) matches at the end of the string or, if the string ends with a newline,
+    just before that newline:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE127]'
+  prefs: []
+  type: TYPE_PRE
+- en: Character Classes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: As shown in [Table 4-7](#character_classes-id00004), Perl-compatible regular
+    expressions define a number of named sets of characters that you can use in character
+    classes. The expansions in [Table 4-7](#character_classes-id00004) are for English.
+    The actual letters vary from locale to locale.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'aEach `[:` *something* `:]` class can be used in place of a character in a
+    character class. For instance, to find any character that’s a digit, an uppercase
+    letter, or an “at” sign (`@`), use the following regular expression:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE128]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'However, you can’t use a character class as the endpoint of a range:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE129]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Some locales consider certain character sequences as if they were a single
+    character—these are called *collating sequences*. To match one of these multicharacter
+    sequences in a character class, enclose it with `[.` and `.]`. For example, if
+    your locale has the collating sequence `ch`, you can match `s`, `t`, or `ch` with
+    this character class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE130]'
+  prefs: []
+  type: TYPE_PRE
+- en: The final extension to character classes is the *equivalence class*, which you
+    specify by enclosing the character within `[=` and `=]`. Equivalence classes match
+    characters that have the same collating order, as defined in the current locale.
+    For example, a locale may define `a`, `á`, and `ä` as having the same sorting
+    precedence. To match any one of them, the equivalence class is `[=a=]`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-7\. Character classes
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Class | Description | Expansion |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:alnum:]` | Alphanumeric characters | `[0-9a-zA-Z]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:alpha:]` | Alphabetic characters (letters) | `[a-zA-Z]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:ascii:]` | 7-bit ASCII | `[\x01-\x7F]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:blank:]` | Horizontal whitespace (space, tab) | `[ \t]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:cntrl:]` | Control characters | `[\x01-\x1F]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:digit:]` | Digits | `[0-9]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:graph:]` | Characters that use ink to print (nonspace, noncontrol) | `[^\x01-\x20]`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:lower:]` | Lowercase letter | `[a-z]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:print:]` | Printable character (graph class plus space and tab) | `[\t\x20-\xFF]`
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:punct:]` | Any punctuation character, such as the period (`.`) and the
+    semicolon (`;`) | `[-!"#$%&''()*+,./:;<=>?@[\\\]^_''{&#124;}~]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:space:]` | Whitespace (newline, carriage return, tab, space, vertical
+    tab) | `[\n\r\t \x0B]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:upper:]` | Uppercase letter | `[A-Z]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[:xdigit:]` | Hexadecimal digit | `[0-9a-fA-F]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\s` | Whitespace | `[\r\n \t]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\S` | Nonwhitespace | `[^\r\n \t]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\w` | Word (identifier) character | `[0-9A-Za-z_]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\W` | Nonword (identifier) character | `[^0-9A-Za-z_]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\d` | Digit | `[0-9]` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\D` | Nondigit | `[^0-9]` |'
+  prefs: []
+  type: TYPE_TB
+- en: Anchors
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: An anchor limits a match to a particular location in the string (anchors do
+    not match actual characters in the target string). [Table 4-8](#anchor) lists
+    the anchors supported by regular expressions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-8\. Anchors
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Anchor | Matches |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `^` | Start of string |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$` | End of string |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[[:<:]]` | Start of word |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `[[:>:]]` | End of word |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\b` | Word boundary (between `\w` and `\W` or at start or end of string)
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\B` | Nonword boundary (between `\w` and `\w`, or `\W` and `\W`) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\A` | Beginning of string |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\Z` | End of string or before `\n` at end |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `\z` | End of string |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `^` | Start of line (or after `\n` if `/m` flag is enabled) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `$` | End of line (or before `\n` if `/m` flag is enabled) |'
+  prefs: []
+  type: TYPE_TB
+- en: 'A word boundary is defined as the point between a whitespace character and
+    an identifier (alphanumeric or underscore) character:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE131]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that the beginning and end of a string also qualify as word boundaries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Quantifiers and Greed
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Regular expression quantifiers are typically *greedy*. That is, when faced
+    with a quantifier, the engine matches as much as it can while still satisfying
+    the rest of the pattern. For instance:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE132]'
+  prefs: []
+  type: TYPE_PRE
+- en: The regular expression matches from the first less-than sign to the last greater-than
+    sign. In effect, the `.*` matches everything after the first less-than sign, and
+    the engine backtracks to make it match less and less until finally there’s a greater-than
+    sign to be matched.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This greediness can be a problem. Sometimes you need *minimal (nongreedy) matching*—that
+    is, quantifiers that match as few times as possible to satisfy the rest of the
+    pattern. Perl provides a parallel set of quantifiers that match minimally. They’re
+    easy to remember, because they’re the same as the greedy quantifiers, but with
+    a question mark (`?`) appended. [Table 4-9](#greedy_and_nongreedy_quantifiers_in_per)
+    shows the corresponding greedy and nongreedy quantifiers supported by Perl-style
+    regular expressions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-9\. Greedy and nongreedy quantifiers in Perl-compatible regular expressions
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Greedy quantifier | Nongreedy quantifier |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `?` | `??` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `*` | `*?` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `+` | `+?` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `{m}` | `{m}?` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `{m,}` | `{m,}?` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `{m,n}` | `{m,n}?` |'
+  prefs: []
+  type: TYPE_TB
+- en: 'Here’s how to match a tag using a nongreedy quantifier:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE133]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Another, faster way is to use a character class to match every non-greater-than
+    character up to the next greater-than sign:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE134]'
+  prefs: []
+  type: TYPE_PRE
+- en: Noncapturing Groups
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you enclose a part of a pattern in parentheses, the text that matches that
+    subpattern is captured and can be accessed later. Sometimes, though, you want
+    to create a subpattern without capturing the matching text. In Perl-compatible
+    regular expressions, you can do this using the `(?:` *subpattern* `)` construct:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE135]'
+  prefs: []
+  type: TYPE_PRE
+- en: Backreferences
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'You can refer to text captured earlier in a pattern with a *backreference*:
+    `\1` refers to the contents of the first subpattern, `\2` refers to the second,
+    and so on. If you nest subpatterns, the first begins with the first opening parenthesis,
+    the second begins with the second opening parenthesis, and so on.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For instance, this identifies doubled words:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE136]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `preg_match()` function captures at most 99 subpatterns; subpatterns after
+    the 99th are ignored.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Trailing Options
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Perl-style regular expressions let you put single-letter options (flags) after
+    the regular expression pattern to modify the interpretation, or behavior, of the
+    match. For instance, to match case-insensitively, simply use the `i` flag:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE137]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Table 4-10](#perl_flags) shows which Perl modifiers are supported in Perl-compatible
+    regular expressions.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-10\. Perl flags
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Modifier | Meaning |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/`*regexp*`/i` | Match case-insensitively |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/`*regexp*`/s` | Make period (`.`) match any character, *including* newline
+    (`\n`) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/`*regexp*`/x` | Remove whitespace and comments from the pattern |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/`*regexp*`/m` | Make caret (`^`) match after, and dollar sign (`$`) match
+    before, internal newlines (`\n`) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/`*regexp*`/e` | If the replacement string is PHP code, `eval()` it to get
+    the actual replacement string |'
+  prefs: []
+  type: TYPE_TB
+- en: PHP’s Perl-compatible regular expression functions also support other modifiers
+    that aren’t supported by Perl, as listed in [Table 4-11](#additional_php_flags).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-11\. Additional PHP flags
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Modifier | Meaning |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/`*regexp*`/U` | Reverses the greediness of the subpattern; `*` and `+`
+    now match as little as possible, instead of as much as possible |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/`*regexp*`/u` | Causes pattern strings to be treated as UTF-8 |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/`*regexp*`/X` | Causes a backslash followed by a character with no special
+    meaning to emit an error |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/`*regexp*`/A` | Causes the beginning of the string to be anchored as if
+    the first character of the pattern were `^` |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/`*regexp*`/D` | Causes the `$` character to match only at the end of a
+    line |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `/`*regexp*`/S` | Causes the expression parser to more carefully examine
+    the structure of the pattern, so it may run slightly faster the next time (such
+    as in a loop) |'
+  prefs: []
+  type: TYPE_TB
+- en: 'It’s possible to use more than one option in a single pattern, as demonstrated
+    in the following example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE138]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inline Options
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'In addition to specifying pattern-wide options after the closing pattern delimiter,
+    you can specify options within a pattern to have them apply only to part of the
+    pattern. The syntax for this is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE139]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example, only the word “PHP” is case-insensitive in this example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE140]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `i`, `m`, `s`, `U`, `x`, and `X` options can be applied internally in this
+    fashion. You can use multiple options at once:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE141]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Prefix an option with a hyphen (`-`) to turn it off:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE142]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'An alternative form enables or disables the flags until the end of the enclosing
+    subpattern or pattern:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE143]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inline flags do not enable capturing. You need an additional set of capturing
+    parentheses to do that.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lookahead and Lookbehind
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In patterns it’s sometimes useful to be able to say “match here if this is next.”
+    This is particularly common when you are splitting a string. The regular expression
+    describes the separator, which is not returned. You can use *lookahead* to make
+    sure (without matching it, thus preventing it from being returned) that there’s
+    more data after the separator. Similarly, *lookbehind* checks the preceding text.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Lookahead and lookbehind come in two forms: *positive* and *negative*. A positive
+    lookahead or lookbehind says “the next/preceding text must be like this.” A negative
+    lookahead or lookbehind indicates “the next/preceding text must not be like this.”
+    [Table 4-12](#lookahead_and_lookbehind_assertions) shows the four constructs you
+    can use in Perl-compatible patterns. None of these constructs captures text.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 4-12\. Lookahead and lookbehind assertions
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Construct | Meaning |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `(?=`*subpattern*`)` | Positive lookahead |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `(?!`*subpattern*`)` | Negative lookahead |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `(?<=`*subpattern*`)` | Positive lookbehind |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `(?<!`*subpattern*`)` | Negative lookbehind |'
+  prefs: []
+  type: TYPE_TB
+- en: 'A simple use of positive lookahead is splitting a Unix mbox mail file into
+    individual messages. The word `"From"` starting a line by itself indicates the
+    start of a new message, so you can split the mailbox into messages by specifying
+    the separator as the point where the next text is `"From"` at the start of a line:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE144]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'A simple use of negative lookbehind is to extract quoted strings that contain
+    quoted delimiters. For instance, here’s how to extract a single-quoted string
+    (note that the regular expression is commented using the `x` modifier):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE145]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The only tricky part is that to get a pattern that looks behind to see if the
+    last character was a backslash, we need to escape the backslash to prevent the
+    regular expression engine from seeing `\)`, which would mean a literal close parenthesis.
+    In other words, we have to backslash that backslash: `\\)`. But PHP’s string-quoting
+    rules say that `\\` produces a literal single backslash, so we end up requiring
+    *four* backslashes to get one through the regular expression! This is why regular
+    expressions have a reputation for being hard to read.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Perl limits lookbehind to constant-width expressions. That is, the expressions
+    cannot contain quantifiers, and if you use alternation, all the choices must be
+    the same length. The Perl-compatible regular expression engine also forbids quantifiers
+    in lookbehind, but does permit alternatives of different lengths.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Cut
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The rarely used once-only subpattern, or *cut*, prevents worst-case behavior
+    by the regular expression engine on some kinds of patterns. The subpattern is
+    never backed out of once matched.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The common use for the once-only subpattern is when you have a repeated expression
+    that may itself be repeated:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE146]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This code snippet takes several seconds to report failure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE147]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is because the regular expression engine tries all the different places
+    to start the match, but has to backtrack out of each one, which takes time. If
+    you know that once something is matched it should never be backed out of, you
+    should mark it with `(?>*subpattern*)`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE148]'
+  prefs: []
+  type: TYPE_PRE
+- en: The cut never changes the outcome of the match; it simply makes it fail faster.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conditional Expressions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'A conditional expression is like an `if` statement in a regular expression.
+    The general form is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE149]'
+  prefs: []
+  type: TYPE_PRE
+- en: If the assertion succeeds, the regular expression engine matches the *yespattern*.
+    With the second form, if the assertion doesn’t succeed, the regular expression
+    engine skips the *yespattern* and tries to match the *nopattern*.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The assertion can be one of two types: either a backreference, or a lookahead
+    or lookbehind match. To reference a previously matched substring, the assertion
+    is a number from 1 to 99 (the most backreferences available). The condition uses
+    the pattern in the assertion only if the backreference was matched. If the assertion
+    is not a backreference, it must be a positive or negative lookahead or lookbehind
+    assertion.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Functions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There are five classes of functions that work with Perl-compatible regular
+    expressions: matching, replacing, splitting, filtering, and a utility function
+    for quoting text.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Matching
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `preg_match()` function performs Perl-style pattern matching on a string.
+    It’s the equivalent of the `m//` operator in Perl. The `preg_match`_all`()` function
+    takes the same arguments and gives the same return value as the `preg_match()`
+    function, except that it takes a Perl-style pattern instead of a standard pattern:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE150]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE151]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'While there’s a `preg_match()` function to match case-insensitively, there’s
+    no `preg_matchi()` function. Instead, use the `i` flag on the pattern:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE152]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `preg_match_all()` function repeatedly matches from where the last match
+    ended, until no more matches can be made:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE153]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The *order* value, either `PREG_PATTERN_ORDER` or `PREG_SET_ORDER`, determines
+    the layout of *matches*. We’ll look at both, using this code as a guide:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE154]'
+  prefs: []
+  type: TYPE_PRE
+- en: With `PREG_PATTERN_ORDER` (the default), each element of the array corresponds
+    to a particular capturing subpattern. So `$m1[0]` is an array of all the substrings
+    that matched the pattern, `$m1[1]` is an array of all the substrings that matched
+    the first subpattern (the numbers), and `$m1[2]` is an array of all the substrings
+    that matched the second subpattern (the words). The array `$m1` has one more element
+    than it has subpatterns.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With `PREG_SET_ORDER`, each element of the array corresponds to the next attempt
+    to match the whole pattern. So `$m2[0]` is an array of the first set of matches
+    (`'13 dogs'`, `'13'`, `'dogs'`), `$m2[1]` is an array of the second set of matches
+    (`'12 rabbits'`, `'12'`, `'rabbits'`), and so on. The array `$m2` has as many
+    elements as there were successful matches of the entire pattern.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 4-1](#example_four_onedot_extracting_urls_fro) fetches the HTML at
+    a particular web address into a string and extracts the URLs from that HTML. For
+    each URL, it generates a link back to the program that will display the URLs at
+    that address.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 4-1\. Extracting URLs from an HTML page
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE155]'
+  prefs: []
+  type: TYPE_PRE
+- en: Replacing
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `preg_replace()` function behaves like the search-and-replace operation
+    in your text editor. It finds all occurrences of a pattern in a string and changes
+    those occurrences to something else:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE156]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The most common usage has all the argument strings except for the integer *limit*.
+    The limit is the maximum number of occurrences of the pattern to replace (the
+    default, and the behavior when a limit of `−1` is passed, is all occurrences):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE157]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Pass an array of strings as *subject* to make the substitution on all of them.
+    The new strings are returned from `preg_replace()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE158]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To perform multiple substitutions on the same string or array of strings with
+    one call to `preg_replace()`, pass arrays of patterns and replacements:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE159]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you give fewer replacements than patterns, text matching the extra patterns
+    is deleted. This is a handy way to delete a lot of things at once:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE160]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you give an array of patterns but a single string replacement, the same
+    replacement is used for every pattern:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE161]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The replacement can use backreferences. Unlike backreferences in patterns,
+    though, the preferred syntax for backreferences in replacements is `$1`, `$2`,
+    `$3`, and so on. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE162]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `/e` modifier makes `preg_replace()` treat the replacement string as PHP
+    code that returns the actual string to use in the replacement. For example, this
+    converts every Celsius temperature to Fahrenheit:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE163]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This more complex example expands variables in a string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE164]'
+  prefs: []
+  type: TYPE_PRE
+- en: Each match isolates the name of a variable (`$name`, `$age`). The `$1` in the
+    replacement refers to those names, so the PHP code actually executed is `$name`
+    and `$age`. That code evaluates to the value of the variable, which is what’s
+    used as the replacement. Whew!
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'A variation on `preg_replace()` is `preg_replace_callback()`. This calls a
+    function to get the replacement string. The function is passed an array of matches
+    (the zeroth element is all the text that matched the pattern, the first is the
+    contents of the first captured subpattern, and so on). For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE165]'
+  prefs: []
+  type: TYPE_PRE
+- en: Splitting
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Whereas you use `preg_match_all()` to extract chunks of a string when you know
+    what those chunks are, use `preg_split()` to extract chunks when you know what
+    *separates* the chunks from each other:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE166]'
+  prefs: []
+  type: TYPE_PRE
+- en: The *pattern* matches a separator between two chunks. By default, the separators
+    are not returned. The optional *limit* specifies the maximum number of chunks
+    to return (`−1` is the default, which means all chunks). The *flags* argument
+    is a bitwise OR combination of the flags `PREG_SPLIT_NO_EMPTY` (empty chunks are
+    not returned) and `PREG_SPLIT_DELIM_CAPTURE` (parts of the string captured in
+    the pattern are returned).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, to extract just the operands from a simple numeric expression,
+    use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE167]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To extract the operands and the operators, use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE168]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'An empty pattern matches at every boundary between characters in the string,
+    and at the start and end of the string. This lets you split a string into an array
+    of characters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE169]'
+  prefs: []
+  type: TYPE_PRE
+- en: Filtering an array with a regular expression
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `preg_grep()` function returns those elements of an array that match a
+    given pattern:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE170]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For instance, to get only the filenames that end in *.txt*, use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE171]'
+  prefs: []
+  type: TYPE_PRE
+- en: Quoting for regular expressions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `preg_quote()` function creates a regular expression that matches only
+    a given string:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE172]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Every character in *string* that has special meaning inside a regular expression
+    (e.g., `*` or `$`) is prefaced with a backslash:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE173]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The optional second argument is an extra character to be quoted. Usually, you
+    pass your regular expression delimiter here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE174]'
+  prefs: []
+  type: TYPE_PRE
+- en: Differences from Perl Regular Expressions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Although very similar, PHP’s implementation of Perl-style regular expressions
+    has a few minor differences from actual Perl regular expressions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The NULL character (ASCII 0) is not allowed as a literal character within a
+    pattern string. You can reference it in other ways, however (`\000`, `\x00`, etc.).
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `\E`, `\G`, `\L`, `\l`, `\Q`, `\u`, and `\U` options are not supported.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `(?{` *some perl code* `})` construct is not supported.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The `/D`, `/G`, `/U`, `/u`, `/A`, and `/X` modifiers are supported.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: The vertical tab `\v` counts as a whitespace character.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Lookahead and lookbehind assertions cannot be repeated using `*`, `+`, or `?`.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Parenthesized submatches within negative assertions are not remembered.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Alternation branches within a lookbehind assertion can be of different lengths.
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: What’s Next
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Now that you know everything there is to know about strings and working with
+    them, the next major part of PHP we’ll focus on is arrays. These compound data
+    types will challenge you, but you need to get well acquainted with them, as PHP
+    works with them in many areas. Learning how to add array elements, sort arrays,
+    and deal with multidimensional forms of arrays is essential to being a good PHP
+    developer.
+  prefs: []
+  type: TYPE_NORMAL

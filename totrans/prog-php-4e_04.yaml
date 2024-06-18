@@ -1,0 +1,627 @@
+- en: Chapter 3\. Functions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: A *function* is a named block of code that performs a specific task, possibly
+    acting upon a set of values given to it, aka *parameters*, and possibly returning
+    a single value or set of values in an array. Functions save on compile time—no
+    matter how many times you call them, functions are compiled only once for the
+    page. They also improve reliability by allowing you to fix any bugs in one place
+    rather than everywhere you perform a task, and they improve readability by isolating
+    code that performs specific tasks.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This chapter introduces the syntax of function calls and function definitions
+    and discusses how to manage variables in functions and pass values to functions
+    (including pass-by-value and pass-by-reference). It also covers variable functions
+    and anonymous functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Calling a Function
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Functions in a PHP program can be built in (or, by being in an extension, effectively
+    built in) or user-defined. Regardless of their source, all functions are evaluated
+    in the same way:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: The number of parameters a function requires differs from function to function
+    (and, as we’ll see later, may even vary for the same function). The parameters
+    supplied to the function may be any valid expression and must be in the specific
+    order expected by the function. If the parameters are given out of order, the
+    function may still run by a fluke, but it’s basically a case of “garbage in =
+    garbage out.” A function’s documentation will tell you what parameters the function
+    expects and what value(s) you can expect to be returned.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here are some examples of functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: In the first example, we give an argument, `"PHP"`, to the function `strlen()`,
+    which gives us the number of characters in the provided string. In this case,
+    it returns `3`, which is assigned to the variable `$length`. This is the simplest
+    and most common way to use a function.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The second example passes the result of `asin(1)` to the `sin()` function. Since
+    the sine and arcsine functions are inverses, taking the sine of the arcsine of
+    any value will always return that same value. Here we see that a function can
+    be called within another function. The returned value of the inner call is subsequently
+    sent to the outer function before the overall result is returned and stored in
+    the `$result` variable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In the final example, we give a filename to the `unlink()` function, which
+    attempts to delete the file. Like many functions, it returns `false` when it fails.
+    This allows you to use another built-in function, `die()`, and the short-circuiting
+    property of the logic operators. Thus, this example might be rewritten as:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `unlink()` function, unlike the other two examples, affects something outside
+    of the parameters given to it. In this case, it deletes a file from the filesystem.
+    All such side effects of a function should be carefully documented and carefully
+    considered.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP has a huge array of functions already defined for you to use in your programs.
+    These extensions perform tasks such as accessing databases, creating graphics,
+    reading and writing XML files, grabbing files from remote systems, and more. PHP’s
+    built-in functions are described in detail in the [Appendix](app01.xhtml#function_reference).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: Not all functions return a value. They can perform an action like sending an
+    email and then just return controlling behavior to the calling code; having completed
+    their task, they have nothing to “say.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining a Function
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'To define a function, use the following syntax:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The statement list can include HTML. You can declare a PHP function that doesn’t
+    contain any PHP code. For instance, the `column()` function simply gives a convenient
+    short name to HTML code that may be needed many times throughout the page:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: The function name can be any string that starts with a letter or underscore
+    followed by zero or more letters, underscores, and digits. Function names are
+    case-insensitive; that is, you can call the `sin()` function as `sin(1)`, `SIN(1)`,
+    `SiN(1)`, and so on, because all these names refer to the same function. By convention,
+    built-in PHP functions are called with all lowercase.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Typically, functions return some value. To return a value from a function,
+    use the `return` statement: put `return` *expr* inside your function. When a `return`
+    statement is encountered during execution, control reverts to the calling statement,
+    and the evaluated results of *expr* will be returned as the value of the function.
+    You can include any number of `return` statements in a function (for example,
+    if you have a `switch` statement to determine which of several values to return).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s take a look at a simple function. [Example 3-1](#example_three_onedot_string_concatenati)
+    takes two strings, concatenates them, and then returns the result (in this case,
+    we’ve created a slightly slower equivalent to the concatenation operator, but
+    bear with us for the sake of the example).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-1\. String concatenation
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: The function takes two arguments, `$left` and `$right`. Using the concatenation
+    operator, the function creates a combined string in the variable `$combinedString`.
+    Finally, in order to cause the function to have a value when it’s evaluated with
+    our arguments, we return the value `$combinedString`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Because the `return` statement can accept any expression, even complex ones,
+    we can simplify the program as shown here:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: If we put this function on a PHP page, we can call it from anywhere within the
+    page. Take a look at [Example 3-2](#example_three_twodot_using_our_concaten).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-2\. Using our concatenation function
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: When this page is displayed, the full sentence is shown.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In this next example a function takes in an integer, doubles it by bit-shifting
+    the original value, and returns the result:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Once the function is defined, you can use it anywhere on the page. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can nest function declarations, but with limited effect. Nested declarations
+    do not limit the visibility of the inner-defined function, which may be called
+    from anywhere in your program. The inner function does not automatically get the
+    outer function’s arguments. And, finally, the inner function cannot be called
+    until the outer function has been called, and also cannot be called from code
+    parsed after the outer function:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Variable Scope
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you don’t use functions, any variable you create can be used anywhere in
+    a page. With functions, this is not always true. Functions keep their own sets
+    of variables that are distinct from those of the page and of other functions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The variables defined in a function, including its parameters, are not accessible
+    outside the function, and, by default, variables defined outside a function are
+    not accessible inside the function. The following example illustrates this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: The variable `$a` inside the function `foo()` is a different variable than the
+    variable `$a` outside the function; even though `foo()` uses the add-and-assign
+    operator, the value of the outer `$a` remains `3` throughout the life of the page.
+    Inside the function, `$a` has the value `2`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As we discussed in [Chapter 2](ch02.xhtml#language_basics), the extent to which
+    a variable can be seen in a program is called the *scope* of the variable. Variables
+    created within a function are inside the scope of the function (i.e., have *function-level
+    scope*). Variables created outside of functions and objects have *global scope*
+    and exist anywhere outside of those functions and objects. A few variables provided
+    by PHP have both function-level and global scope (often referred to as *super-global
+    variables*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: At first glance, even an experienced programmer may think that in the previous
+    example `$a` will be `5` by the time the `echo` statement is reached, so keep
+    that in mind when choosing names for your variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Global Variables
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'If you want a variable in the global scope to be accessible from within a function,
+    you can use the `global` keyword. Its syntax is:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Changing the previous example to include a `global` keyword, we get:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Instead of creating a new variable called `$a` with function-level scope, PHP
+    uses the global `$a` within the function. Now, when the value of `$a` is displayed,
+    it will be `5`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You must include the `global` keyword in a function before any uses of the global
+    variable or variables you want to access. Because they are declared before the
+    body of the function, function parameters can never be global variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Using `global` is equivalent to creating a reference to the variable in the
+    `$GLOBALS` variable. That is, both of the following declarations create a variable
+    in the function’s scope that is a reference to the same value as the variable
+    `$var` in the global scope:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Static Variables
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Like C, PHP supports declaring function variables as *static*. A static variable
+    retains its value between all calls to the function and is initialized during
+    a script’s execution only the first time the function is called. Use the `static`
+    keyword at the first use of a function variable to declare it as static. Typically,
+    the first use of a static variable assigns an initial value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: In [Example 3-3](#example_three_threedot_static_variable), the variable `$count`
+    is incremented by one each time the function is called.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-3\. Static variable counter
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: When the function is called for the first time, the static variable `$count`
+    is assigned a value of `0`. The value is returned and `$count` is incremented.
+    When the function ends, `$count` is not destroyed like a nonstatic variable, and
+    its value remains the same until the next time `counter()` is called. The `for`
+    loop displays the numbers from 0 to 4.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Function Parameters
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Functions can expect an arbitrary number of arguments, declared by the function
+    definition. There are two different ways to pass parameters to a function. The
+    first, and more common, is by value. The second is by reference.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Passing Parameters by Value
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In most cases, you pass parameters by value. The argument is any valid expression.
+    That expression is evaluated, and the resulting value is assigned to the appropriate
+    variable in the function. In all of the examples so far, we’ve been passing arguments
+    by value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Passing Parameters by Reference
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Passing by reference allows you to override the normal scoping rules and give
+    a function direct access to a variable. To be passed by reference, the argument
+    must be a variable; you indicate that a particular argument of a function will
+    be passed by reference by preceding the variable name in the parameter list with
+    an ampersand (`&`). [Example 3-4](#example_three_fourdot_doublerleft_paren) revisits
+    our `doubler()` function with a slight change.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-4\. doubler() redux
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: Because the function’s `$value` parameter is passed by reference, the actual
+    value of `$a`, rather than a copy of that value, is modified by the function.
+    Before, we had to `return` the doubled value, but now we change the caller’s variable
+    to be the doubled value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'This is another place where a function has side effects: since we passed the
+    variable `$a` into `doubler()` by reference, the value of `$a` is at the mercy
+    of the function. In this case, `doubler()` assigns a new value to it.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Only variables—and not constants—can be supplied to parameters declared as passing
+    by reference. Thus, if we included the statement `<?php echo doubler(7); ?>` in
+    the previous example, it would issue an error. However, you may assign a default
+    value to parameters passed by reference (in the same manner as you provide default
+    values for parameters passed by value).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Even in cases where your function does not affect the given value, you may want
+    a parameter to be passed by reference. When passing by value, PHP must copy the
+    value. Particularly for large strings and objects, this can be an expensive operation.
+    Passing by reference removes the need to copy the value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Default Parameters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Sometimes a function may need to accept a particular parameter. For example,
+    when you call a function to get the preferences for a site, the function may take
+    in a parameter with the name of the preference to retrieve. Rather than using
+    some special keyword to designate that you want to retrieve all of the preferences,
+    you can simply not supply any argument. This behavior works by using default arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To specify a default parameter, assign the parameter value in the function
+    declaration. The value assigned to a parameter as a default value cannot be a
+    complex expression, only a scalar value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: When you call `getPreferences()`, you can choose to supply an argument. If you
+    do, it returns the preference matching the string you give it; if not, it returns
+    all preferences.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: A function may have any number of parameters with default values. However, these
+    defaulted parameters must be listed after all parameters that do not have default
+    values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variable Parameters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'A function may require a variable number of arguments. For example, the `getPreferences()`
+    example in the previous section might return the preferences for any number of
+    names, rather than for just one. To declare a function with a variable number
+    of arguments, leave out the parameter block entirely:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'PHP provides three functions you can use in the function to retrieve the parameters
+    passed to it. `func_get_args()` returns an array of all parameters provided to
+    the function; `func_num_args()` returns the number of parameters provided to the
+    function; and `func_get_arg()` returns a specific argument from the parameters.
+    For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: In [Example 3-5](#example_three_fivedot_argument_counter), the `count_list()`
+    function takes in any number of arguments. It loops over those arguments and returns
+    the total of all the values. If no parameters are given, it returns `false`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-5\. Argument counter
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The result of any of these functions cannot directly be used as a parameter
+    to another function. Instead, you must first set a variable to the result of the
+    function, and then use that in the function call. The following expression will
+    not work:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Instead, use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: Missing Parameters
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'PHP lets you be as lazy as you want—when you call a function, you can pass
+    any number of arguments to the function. Any parameters the function expects that
+    are not passed to it remain unset, and a warning is issued for each of them:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Type Hinting
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'When defining a function, you can add type hinting—that is, you can require
+    that a parameter be an instance of a particular class (including instances of
+    classes that extend that class), an instance of a class that implements a particular
+    interface, an array, or a callable. To add type hinting to a parameter, include
+    the class name, `array`, or `callable` *before* the variable name in the function’s
+    parameter list. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: A type-hinted parameter must be `NULL`, an instance of the given class or a
+    subclass of the class, an array, or callable as a specified parameter. Otherwise,
+    a runtime error occurs.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can define a data type for a property in a class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Return Values
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'PHP functions can return only a single value with the `return` keyword:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To return multiple values, return an array:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If no return value is provided by a function, the function returns `NULL` instead.
+    You can set a return data type by declaring it in the function definition. For
+    example, the following code will return an integer of 50 when it is executed:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'By default, values are copied out of the function. To return a value by reference,
+    prepend the function name with `&` both when declaring it and when assigning the
+    returned value to a variable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this code, the `findOne()` function returns an alias for `$names[1]` instead
+    of a copy of its value. Because we assign by reference, `$person` is an alias
+    for `$names[1]`, and the second assignment changes the value in `$names[1]`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This technique is sometimes used to return large string or array values efficiently
+    from a function. However, PHP implements copy-on-write for variable values, meaning
+    that returning a reference from a function is typically unnecessary. Returning
+    a reference to a value is slower than returning the value itself.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Variable Functions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'As with variable variables where the expression refers to the value of the
+    variable whose name is the value held by the apparent variable (the `$$` construct),
+    you can add parentheses after a variable to call the function whose name is the
+    value held by the apparent variable—for example, `$variable()`. Consider this
+    situation, where a variable is used to determine which of three functions to call:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'In this case, we could use a variable function call to call the appropriate
+    function. To make a variable function call, include the parameters for a function
+    in parentheses after the variable. To rewrite the previous example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If no function exists for the variable, a runtime error occurs when the code
+    is evaluated. To prevent this, before calling the function you can use the built-in
+    `function_exists()` function to determine whether a function exists for the value
+    of the variable:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Language constructs such as `echo()` and `isset()` cannot be called through
+    variable functions:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Anonymous Functions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Some PHP functions do part of their work by using a function you provide to
+    them. For example, the `usort()` function uses a function you create and pass
+    to it as a parameter to determine the sort order of the items in an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Although you can define a function for such purposes, as shown previously, these
+    functions tend to be localized and temporary. To reflect the transient nature
+    of the callback, create and use an *anonymous function* (also known as a *closure*).
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can create an anonymous function using the normal function definition syntax,
+    but assign it to a variable or pass it directly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 3-6](#example_three_sixdot_anonymous_function) shows an example using
+    `usort()`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 3-6\. Anonymous functions
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: The array is sorted by `usort()` using the anonymous function, in order of string
+    length.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Anonymous functions can use the variables defined in their enclosing scope
+    using the `use` syntax. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Note that incorporating variables from the enclosing scope is not the same
+    as using global variables—global variables are always in the global scope, while
+    incorporating variables allows a closure to use the variables defined in the enclosing
+    scope. Also note that this is not necessarily the same as the scope in which the
+    closure is called. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, `$array` is sorted normally, rather than randomly—the value
+    of `$sortOption` inside the closure is the value of `$sortOption` in the scope
+    of `sort``Nonrandom()`, not the value of `$sortOption` in the global scope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: What’s Next
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'User-defined functions can be confusing to write and complex to debug, so be
+    sure to test them well and to try to limit them to performing one task each. In
+    the next chapter we’ll be looking at strings and everything that they entail,
+    which is another complex and potentially confusing topic. Don’t get discouraged:
+    remember that we are building strong foundations for writing good, solid, succinct
+    PHP code. Once you have a firm grasp of the key concepts of functions, strings,
+    arrays, and objects, you’ll be well on your way to becoming a good PHP developer.'
+  prefs: []
+  type: TYPE_NORMAL

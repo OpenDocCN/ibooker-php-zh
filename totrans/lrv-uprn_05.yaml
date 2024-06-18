@@ -1,0 +1,3837 @@
+- en: Chapter 5\. Databases and Eloquent
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel provides a suite of tools for interacting with your application’s databases,
+    the most notable of which is Eloquent, Laravel’s ActiveRecord ORM.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Eloquent is one of Laravel’s most popular and influential features. It’s a great
+    example of how Laravel is different from the majority of PHP frameworks; in a
+    world of DataMapper ORMs that are powerful but complex, Eloquent stands out for
+    its simplicity. There’s one class per table, which is responsible for retrieving,
+    representing, and persisting data in that table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Whether or not you choose to use Eloquent, you’ll still get a ton of benefit
+    from the other database tools Laravel provides. So before we dig into Eloquent,
+    we’ll start by covering the basics of Laravel’s database functionality: migrations,
+    seeders, and the query builder.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Then we’ll cover Eloquent: defining your models; inserting, updating, and deleting;
+    customizing your responses with accessors, mutators, and attribute casting; and,
+    finally, relationships. There’s a lot going on here, and it’s easy to get overwhelmed,
+    but if we take it one step at a time, we’ll make it through.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Configuration
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Before we get into how to use Laravel’s database tools, let’s pause for a second
+    and go over how to configure your database credentials and connections.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The configuration for database access lives in *config/database.php* and *.env*.
+    Like many other configuration areas in Laravel, you can define multiple “connections”
+    and then decide which the code will use by default.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Database Connections
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: By default, there’s one connection for each of the drivers, as you can see in
+    [Example 5-1](#EX801).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-1\. The default database connections list
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Nothing is stopping you from deleting or modifying these named connections or
+    creating your own. You can create new named connections, and you’ll be able to
+    set the drivers (MySQL, PostgreSL, etc.) in them. So although there’s one connection
+    per driver by default, that’s not a constraint; you could have five different
+    connections, all with the `mysql` driver, if you wanted.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each connection allows you to define the properties necessary for connecting
+    to and customizing each connection type.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are a few reasons for the idea of multiple drivers. To start with, the
+    “connections” section as it comes out of the box is a simple template that makes
+    it easy to start apps that use any of the supported database connection types.
+    In many apps, you can pick the database connection you’ll be using, fill out its
+    information, and even delete the others if you’d like. I usually just keep them
+    all there, in case I might eventually use them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But there are also some cases where you might need multiple connections within
+    the same application. For example, you might use different database connections
+    for two different types of data, or you might read from one and write to another.
+    Support for multiple connections makes this possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: URL Configurations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Often services like Heroku will provide an environment variable with a URL
+    that contains all of the information you need to connect to the database. It’ll
+    look something like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: You don’t have to write code to parse this URL out; instead, pass it in as the
+    `DATABASE_URL` environment variable, and Laravel will understand it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Other Database Configuration Options
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The *config/database.php* configuration section has quite a few other configuration
+    settings. You can configure Redis access, customize the table name used for migrations,
+    determine the default connection, and toggle whether non-Eloquent calls return
+    `stdClass` or array instances.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'With any service in Laravel that allows connections from multiple sources—sessions
+    can be backed by the database or file storage, the cache can use Redis or Memcached,
+    databases can use MySQL or PostgreSQL—you can define multiple connections and
+    also choose that a particular connection will be the “default,” meaning it will
+    be used any time you don’t explicitly ask for a particular connection. Here’s
+    how you ask for a specific connection, if you want to:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Migrations
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Modern frameworks like Laravel make it easy to define your database structure
+    with code-driven migrations. Every new table, column, index, and key can be defined
+    in code, and any new environment can be brought from bare database to your app’s
+    perfect schema in seconds.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Defining Migrations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'A migration is a single file that defines two things: the modifications desired
+    when running this migration *up* and, optionally, the modifications desired when
+    running this migration *down*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 5-2](#EX802) shows what the default “create users table” migration
+    that comes with Laravel looks like.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-2\. Laravel’s default “create users table” migration
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Email Verification
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The `email_verified_at` column stores a timestamp indicating when the user verified
+    their email address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you can see, we have an `up()` method and a `down()` method. `up()` tells
+    the migration to create a new table named `users` with a few fields, and `down()`
+    tells it to drop the `users` table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a migration
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: As you will see in [Chapter 8](ch08.html#artisan_and_tinker), Laravel provides
+    a series of command-line tools you can use to interact with your app and generate
+    boilerplate files. One of these commands allows you to create a migration file.
+    You can run it using `php artisan make:migration`, and it has a single parameter,
+    which is the name of the migration. For example, to create the table we just covered,
+    you would run `php artisan make:migration create_users_table`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are two flags you can optionally pass to this command. `--create=*table_name*`
+    prefills the migration with code designed to create a table named `*table_name*`,
+    and `--table=*table_name*` just prefills the migration for modifications to an
+    existing table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Creating tables
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We already saw in the default `create_users_table` migration that our migrations
+    depend on the `Schema` facade and its methods. Everything we can do in these migrations
+    will rely on the methods of `Schema`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To create a new table in a migration, use the `create()` method—the first parameter
+    is the table name, and the second is a closure that defines its columns:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Creating columns
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To create new columns in a table, whether in a create table call or a modify
+    table call, use the instance of `Blueprint` that’s passed into your closure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Let’s look at the various methods available on `Blueprint` instances for creating
+    columns. I’ll describe how they work in MySQL, but if you’re using another database,
+    Laravel will just use the closest equivalent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The following are the simple field `Blueprint` methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`id()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An alias for `$table->bigIncrements('id')`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`integer(*colName*)`, `tinyInteger(*colName*)`, `smallInteger(*colName*)`,
+    `mediumInteger(*colName*)`, `bigInteger(*colName*)`, `unsignedTinyInteger(*colName*)`,
+    `unsignedSmallInteger(*colName*)`, `unsignedMediumInteger(*colName*)`,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`unsignedBigInteger(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds an `INTEGER` type column, or one of its many variations
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`string(*colName*, *length*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `VARCHAR` type column with an optional length
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`binary(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `BLOB` type column
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`boolean(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `BOOLEAN` type column (a `TINYINT(1)` in MySQL)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`char(*colName*, *length*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `CHAR` column with an optional length
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`date(*colName*)`, `datetime(*colName*)`, `dateTimeTz(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `DATE` or `DATETIME` column; if time zone awareness is needed, use the
+    `dateTimeTz()` method to create a `DATETIME` column with time zone
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`decimal(*colName*, *precision*, *scale*)`,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`unsignedDecimal(*colName*, *precision*, *scale*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `DECIMAL` column, with precision and scale—for example, `decimal('*amount*',
+    *5*, *2*)` specifies a precision of 5 and a scale of 2; for an unsigned column,
+    use the unsignedDecimal method
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`double(*colName*, *total digits*, *digits after decimal*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `DOUBLE` column—​for example, `double('*tolerance*', *12*, *8*)` specifies
+    12 digits long, with 8 of those digits to the right of the decimal place, as in
+    `7204.05691739`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`enum(*colName*, [*choiceOne*, *choiceTwo*])`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds an `ENUM` column, with provided choices
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`float(*colName*, *precision*, *scale*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `FLOAT` column (same as `double` in MySQL)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`foreignId(*colName*)`, `foreignUuid(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds an `UNSIGNED BIGINT` or a `UUID` column, with provided choices
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`foreignIdFor(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds an `UNSIGNED BIG INT` column with the name *`colName`*
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`geometry(*colName*)`, `geometryCollection(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `GEOMETRY` or a `GEOMETRYCOLLECTION` column
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ipAddress(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `VARCHAR` column
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`json(*colName*)`, `jsonb(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `JSON` or `JSONB` column
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`lineString(*colName*)`, `multiLineString(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `LINESTRING` or `MULTILINESTRING` column with the given *`colName`*
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`text(*colName*)`, `tinyText(*colName*)`, `mediumText(*colName*)`, `longText(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `TEXT` column (or its various sizes)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`macAddress(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `MACADDRESS` column in the databases that support it (like PostgreSQL);
+    on other database systems, it creates a string equivalent
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`multiPoint(*colName*)`, `multiPolygon(*colName*)`, `polygon(*colName*)`,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`point(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds columns of the types `MULTIPOINT`, `MULTIPOLYGON`, `POLYGON`, and `POINT`,
+    respectively
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`set(*colName*, *membersArray*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creates a `SET` column with the *`colName`* name and *`membersArray`* as members
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`time(*colName*, *precision*), timeTz(*colName*, *precision*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `TIME` column with *`colName`* name; for time zone awareness, use the
+    `timeTz()` method
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`timestamp(*colName*, *precision*)`,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`timestampTz(*colName*, *precision*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `TIMESTAMP` column; for time zone awareness, use the `timestampTz()`
+    method
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`uuid(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `UUID` column (`CHAR(36)` in MySQL)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`year()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `YEAR` column
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'And these are the special (joined) `Blueprint` methods:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`increments(*colName*)`, `tinyIncrements(*colName*)`, `smallIncrements(*colName*)`,
+    `mediumIncrements(*colName*)`, `bigIncrements(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds an unsigned incrementing `INTEGER` primary key ID, or one of its many variations
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`timestamps(*precision*)`, `nullableTimestamps(*precision*)`,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`timestampsTz(*precision*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds `created_at` and `updated_at` timestamp columns with optional precision,
+    nullable, and time zone–aware variations
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`rememberToken()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `remember_token` column (`VARCHAR(100)`) for user “remember me” tokens
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`softDeletes(*colName*, *precision*)`, `softDeletesTz(*colName*, *precision*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `deleted_at` timestamp for use with soft deletes with optional precision
+    and time zone–aware variations
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`morphs(*colName*)`, `nullableMorphs(*colName*)`, `uuidMorphs(*relationshipName*)`,'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`nullableUuidMorphs(*relationshipName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For a provided *`colName`*, adds an integer `colName_id` and a string `colName_type`
+    (e.g., `morphs(tag)` adds integer `tag_id` and string `tag_type`); for use in
+    polymorphic relationships, using IDs or UUIDs, and can be set as nullable as per
+    method name
+  prefs: []
+  type: TYPE_NORMAL
+- en: Building extra properties fluently
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Most of the properties of a field definition—its length, for example—are set
+    as the second parameter of the field creation method, as we saw in the previous
+    section. But there are a few other properties that we’ll set by chaining more
+    method calls after the creation of the column. For example, this `email` field
+    is nullable and will be placed (in MySQL) right after the `last_name` field:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: The following methods are some of those used to set additional properties of
+    a field; look to the [migrations docs](https://oreil.ly/4Z-gC) for an exhaustive
+    list.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`nullable()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Allows `NULL` values to be inserted into this column
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`default(''*default content*'')`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Specifies the default content for this column if no value is provided
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`unsigned()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Marks integer columns as unsigned (not negative or positive, but just an integer)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`first()` (MySQL only)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Places the column first in the column order
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`after(*colName*)` (MySQL only)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Places the column after another column in the column order
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`charset(*charset*)` (MySQL only)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sets the charset for a column
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`collation(*collation*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sets the collation for a column
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`invisible()` (MySQL only)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Makes the column invisible to `SELECT` queries
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`useCurrent()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Used on `TIMESTAMP` columns to use `CURRENT_TIMESTAMP` as the default value
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`isGeometry()` (PostgreSQL only)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sets a column type to `GEOMETRY` (the default is `GEOGRAPHY`)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`unique()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a `UNIQUE` index
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`primary()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a primary key index
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`index()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adds a basic index
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that `unique()`, `primary()`, and `index()` can also be used outside of
+    the fluent column building context, which we’ll cover later.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dropping tables
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you want to drop a table, use the `dropIfExists()` method on `Schema`, which
+    takes one parameter, the table name:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Modifying columns
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: To modify a column, just write the code you would write to create the column
+    as if it were new, and then append a call to the `change()` method after it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Required Dependency Before Modifying Columns
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you are not using a database that natively supports renaming and dropping
+    columns (the latest versions of the most common databases support these operations),
+    before you can modify any columns, you’ll need to run `composer require doctrine/dbal`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So, if we have a string column named `name` that has a length of `255` and
+    we want to change its length to `100`, this is how we would write it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The same is true if we want to adjust any of its properties that aren’t defined
+    in the method name. To make a field nullable, we do this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here’s how we rename a column:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And this is how we drop a column:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Squashing migrations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you have too many migrations to reason with, you can merge them all into
+    a single SQL file that Laravel will run before it runs any future migrations.
+    This is called “squashing” your migrations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Laravel only runs these dumps if it detects no migrations have been run so far.
+    That means you can squash your migrations and it won’t break your already-deployed
+    applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: If you use schema dumps, you can’t use in-memory SQLite; it only works on MySQL,
+    PostgreSQL, and local file SQLite.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Indexes and foreign keys
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We’ve covered how to create, modify, and delete columns. Let’s move on to indexing
+    and relating them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’re not familiar with indexes, your databases can survive if you just
+    never use them, but they’re pretty important for performance optimization and
+    for some data integrity controls with regard to related tables. I’d recommend
+    reading up on them, but if you absolutely must, you can skip this section for
+    now.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Adding indexes
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Check out [Example 5-3](#adding-col-ix) for examples of how to add indexes to
+    your column.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-3\. Adding column indexes in migrations
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that the first example, `primary()`, is not necessary if you’re using the
+    `increments()` or `bigIncrements()` methods to create your index; this will automatically
+    add a primary key index for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Removing indexes
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: We can remove indexes as shown in [Example 5-4](#rm-col-ix).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-4\. Removing column indexes in migrations
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Adding and removing foreign keys
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'To add a foreign key that defines that a particular column references a column
+    on another table, Laravel’s syntax is simple and clear:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here we’re adding a `foreign` index on the `user_id` column, showing that it
+    references the `id` column on the `users` table. Couldn’t get much simpler.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If we want to specify foreign key constraints, we can do that too, with `cascadeOnUpdate()`,
+    `restrictOnUpdate()`, `cascadeOnDelete()`, `restrictOnDelete()`, and `nullOnDelete()`.
+    For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There is also an alias for creating foreign key constraints. Using it, the
+    above example can be written like so:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To drop a foreign key, we can either delete it by referencing its index name
+    (which is automatically generated by combining the names of the columns and tables
+    being referenced):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or by passing it an array of the fields that it’s referencing in the local
+    table:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: Running Migrations
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Once you have your migrations defined, how do you run them? There’s an Artisan
+    command for that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: This command runs all “outstanding” migrations (by running the `up()` method
+    on each). Laravel keeps track of which migrations you have run and which you haven’t.
+    Every time you run this command, it checks whether you’ve run all available migrations,
+    and if you haven’t, it’ll run any that remain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are a few options in this namespace that you can work with. First, you
+    can run your migrations *and* your seeds (which we’ll cover next):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also run any of the following commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`migrate:install`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creates the database table that keeps track of which migrations you have and
+    haven’t run; this is run automatically when you run your migrations, so you can
+    basically ignore it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`migrate:reset`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rolls back every database migration you’ve run on this instance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`migrate:refresh`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rolls back every database migration you’ve run on this instance, and then runs
+    every migration available. It’s the same as running `migrate:reset` followed by
+    `migrate`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`migrate:fresh`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Drops all of your tables and runs every migration again. It’s the same as `refresh`
+    but doesn’t bother with the “down” migrations—​it just deletes the tables and
+    then runs the “up” migrations again.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`migrate:rollback`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rolls back *just* the migrations that ran the last time you ran `migrate`, or,
+    with the added option `--step=*n*`, rolls back the number of migrations you specify.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`migrate:status`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shows a table listing every migration, with a `Y` or `N` next to each indicating
+    whether or not it has run yet in this environment.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Migrating with Homestead/Vagrant
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you’re running migrations on your local machine and your *.env* file points
+    to a database in a Vagrant box, your migrations will fail. You’ll need to `ssh`
+    into your Vagrant box and then run the migrations from there. The same is true
+    for seeds and any other Artisan commands that affect or read from the database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inspecting Your Database
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'If you want to dig into the status or definition of your database, its tables,
+    and its models, there are a few Artisan commands for exactly that purpose:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`db:show`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shows a table overview of your entire database, including the connection details,
+    tables, size, and open connections
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`db:table {*tableName*}`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Passed a table name, shows the size and lists the columns
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`db:monitor`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: List, the number of open connections to the database
+  prefs: []
+  type: TYPE_NORMAL
+- en: Seeding
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Seeding with Laravel is so simple, it has gained widespread adoption as a part
+    of normal development workflows in a way it hasn’t in previous PHP frameworks.
+    There’s a *database/seeders* folder that comes with a `DatabaseSeeder` class,
+    which has a `run()` method that is called when you call the seeder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two primary ways to run the seeders: along with a migration or separately.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To run a seeder along with a migration, just add `--seed` to any migration
+    call:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And to run it independently:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will call the `run()` method of the `DatabaseSeeder` by default, or the
+    seeder class specified when you pass in a class name.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a Seeder
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'To create a seeder, use the `make:seeder` Artisan command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’ll now see a `ContactsTableSeeder` class show up in the *database/seeders*
+    directory. Before we edit it, let’s add it to the `DatabaseSeeder` class, as shown
+    in [Example 5-5](#EX5x), so it will run when we run our seeders.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-5\. Calling a custom seeder from DatabaseSeeder.php
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now let’s edit the seeder itself. The simplest thing we can do there is manually
+    insert a record using the `DB` facade, as illustrated in [Example 5-6](#EX5y).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-6\. Inserting database records in a custom seeder
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will get us a single record, which is a good start. But for truly functional
+    seeds, you’ll likely want to loop over some sort of random generator and run this
+    `insert()` many times, right? Laravel has a feature for that.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Model Factories
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Model factories define one (or more) patterns for creating fake entries for
+    your database tables. By default, each factory is named after an Eloquent class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Theoretically you can name these factories anything you like, but naming the
+    factory after your Eloquent class is the most idiomatic approach. If you follow
+    a different convention to name your factories, you can set the factory class name
+    in the related model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating a model factory
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Model factories are located in *database/factories*. Each factory is defined
+    in its own class, with a definition method. In this method you define the attributes
+    and their values to be used when creating a model with the factory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To generate a new factory class, use the Artisan `make:factory` command; again,
+    it’s most common to name factory classes after the Eloquent models they’re meant
+    to generate instances of:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This will generate a new file within the *database/factories* directory called
+    *ContactFactory.php*. The simplest factory we could define for a contact might
+    look something like [Example 5-7](#EX880):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-7\. The simplest possible factory definition
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: You now need to use the `Illuminate\Database\Eloquent\Factories\HasFactory`
+    trait in your model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The `HasFactory` trait provides a `factory()` static method, which uses Laravel
+    conventions to determine the proper factory for the model. It will look for a
+    factory in `Database\Factories` namespace that has a class name matching the model
+    name and is suffixed with `Factory`. If you don’t follow these conventions, you
+    can override the `newFactory()` method in your model to specify the factory class
+    that should be used:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now we can call the static `factory()` method on the model, to create an instance
+    of `Contact` in our seeding and testing:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: However, if we used that factory to create 20 contacts, all 20 would have the
+    same information. That’s less useful.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We will get even more benefit from model factories when we take advantage of
+    [Faker](https://oreil.ly/gxnrI), which is globally available in Laravel via the
+    `fake()` helper; Faker makes it easy to randomize the creation of structured fake
+    data. The previous example now turns into [Example 5-8](#EX881).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-8\. A simple factory, modified to use Faker
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now, every time we create a fake contact using this model factory, all of our
+    properties will be randomly generated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Model factories need, at minimum, to return the required database fields for
+    this table.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Guaranteeing the Uniqueness of Randomly Generated Data
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'If you want to guarantee that the randomly generated values of any given entry
+    are unique compared to the other randomly generated values during that PHP process,
+    you can use Faker’s `unique()` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using a model factory
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'There are two primary contexts in which we’ll use model factories: testing,
+    which we’ll cover in [Chapter 12](ch12.html#testing), and seeding, which we’ll
+    cover here. Let’s write a seeder using a model factory; take a look at [Example 5-9](#EX803).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-9\. Using model factories
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To create an object, we use the `factory()` method on the model. Then we can
+    run one of two methods on it: `make()` or `create()`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Both methods generate an instance of this specified model, using the definition
+    in the factory class. The difference is that `make()` creates the instance but
+    doesn’t (yet) save it to the database, whereas `create()` saves it to the database
+    instantly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Overriding properties when calling a model factory
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: If you pass an array to either `make()` or `create()`, you can override specific
+    keys from the factory, like we did in [Example 5-9](#EX803) to manually set the
+    `title` on the post.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Generating more than one instance with a model factory
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'If you call the `count()` method after the `factory()` method, you can specify
+    that you’re creating more than one instance. Instead of returning a single instance,
+    it’ll return a collection of instances. This means you can treat the result like
+    an array, iterating over them or passing them to any method that takes more than
+    one object:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also, optionally, define a “sequence” of how to override each:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: Pro-level model factories
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Now that we’ve covered the most common uses for and arrangements of model factories,
+    let’s dive into some of the more complicated ways we can use them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Attaching relationships when defining model factories
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Sometimes you need to create a related item along with the item you’re creating.
+    You can call the factory method on the related model to pull its ID, as shown
+    in [Example 5-10](#EX5a).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-10\. Creating a related item in a factory
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also pass a closure where a single parameter is passed, which contains
+    the array form of the generated item up until that point. This can be used in
+    other ways, as demonstrated in [Example 5-11](#EX5b).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-11\. Using values from other parameters in a factory
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE39]'
+  prefs: []
+  type: TYPE_PRE
+- en: Attaching related items when generating model factory instances
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: While we’ve already covered how to define a relationship in a factory definition,
+    it’s much more common that we’ll be defining our instance’s related items right
+    when we create it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two main methods we’ll use for this: `has()` and `for()`. `has()`
+    allows us to define that the instance we’re creating “has” children or other items
+    in a “hasMany” type relationship, whereas `for()` allows us to define that the
+    instance we’re creating “belongsTo” another item. Let’s look at a few examples
+    to get a better sense of how they work.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: In [Example 5-12](#EX5g), let’s assume a `Contact` has many `Addresses`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-12\. Using `has()` when generating related models
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE40]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now let’s imagine we’re creating the child instance instead of the parent instance.
+    Let’s generate an address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In these sorts of circumstances, you usually can assume the child’s factory
+    definition would take care of generating the parent instance. So, what’s the use
+    of `for()` at all? It’s most helpful if you want to specifically define something
+    about the parent, usually either one or more of its properties, or pass in a specific
+    model instance. Take a look at [Example 5-13](#EX5h) to see how it’s most commonly
+    used.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-13\. Using `for()` when generating related models
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE41]'
+  prefs: []
+  type: TYPE_PRE
+- en: Defining and accessing multiple model factory states
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Let’s go back to *ContactFactory.php* (from Examples [5-7](#EX880) and [5-8](#EX881))
+    for a second. We have a base `Contact` factory defined:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE42]'
+  prefs: []
+  type: TYPE_PRE
+- en: But sometimes you need more than one factory for a class of object. What if
+    we need to be able to add some contacts who are very important people (VIPs)?
+    We can use the `state()` method to define a second factory state for this, as
+    seen in [Example 5-14](#EX804). The `state()` method receives an array of any
+    attributes you want to specifically set for this state.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-14\. Defining multiple factory states for the same model
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE43]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, let’s make an instance of a specific state:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE44]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using the same model as the relationship in complex factory Setups
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Sometimes you have a factory that creates related items through their factories,
+    and two or more of those have the same relationship. Maybe generating a `Trip`
+    with your factory automatically creates a `Reservation` and a `Receipt`, and all
+    three should be attached to the same `User`. When you go to create the `Trip`,
+    the factories will each create their own user manually, unless you tell them to
+    do otherwise.
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the `recycle()` method, you can instruct that every factory called up the
+    chain uses the same instance of a given object. As you can see in [Example 5-15](#EX5i),
+    this gives a simple syntax for ensuring the same model is used in every place
+    throughout a factory chain.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-15\. Using `recycle()` to use the same instance for every relationship
+    in a factory chain
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE45]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Whew. That was a lot. Don’t worry if that was tough to follow—​the last bit
+    was definitely higher-level stuff. Let’s get back down to the basics and talk
+    about the core of Laravel’s database tooling: the query builder.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Query Builder
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Now that you’re connected and you’ve migrated and seeded your tables, let’s
+    get started with how to use the database tools. At the core of every piece of
+    Laravel’s database functionality is the *query builder*, a fluent interface for
+    interacting with several different types of databases with a single clear API.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel’s database architecture can connect to MySQL, PostgreSQL, SQLite, and
+    SQL Server through a single interface, with just the change of a few configuration
+    settings.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you’ve ever used a PHP framework, you’ve likely used a tool that allows you
+    to run “raw” SQL queries with basic escaping for security. The query builder is
+    that, with a lot of convenience layers and helpers on top. So, let’s start with
+    some simple calls.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Basic Usage of the DB Facade
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Before we get into building complex queries with fluent method chaining, let’s
+    take a look at a few sample query builder commands. The `DB` facade is used both
+    for query builder chaining and for simpler raw queries, as illustrated in [Example 5-16](#EX806).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-16\. Sample raw SQL and query builder usage
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE46]'
+  prefs: []
+  type: TYPE_PRE
+- en: Raw SQL
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'As you saw in [Example 5-16](#EX806), it’s possible to make any raw call to
+    the database using the `DB` facade and the `statement()` method: `DB::statement(''*SQL
+    statement here*'')`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'But there are also specific methods for various common actions: `select()`,
+    `insert()`, `update()`, and `delete()`. These are still raw calls, but there are
+    differences. First, using `update()` and `delete()` will return the number of
+    rows affected, whereas `statement()` won’t; second, with these methods it’s clearer
+    to future developers exactly what sort of statement you’re making.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Raw selects
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The simplest of the specific `DB` methods is `select()`. You can run it without
+    any additional parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE47]'
+  prefs: []
+  type: TYPE_PRE
+- en: This will return an array of `stdClass` objects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Parameter bindings and named bindings
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Laravel’s database architecture allows for the use of PDO (PHP data object,
+    PHP’s native database access layer) parameter binding, which protects your queries
+    from potential SQL attacks. Passing a parameter to a statement is as simple as
+    replacing the value in your statement with a `?`, then adding the value to the
+    second parameter of your call:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE48]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also name those parameters for clarity:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE49]'
+  prefs: []
+  type: TYPE_PRE
+- en: Raw inserts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'From here, the raw commands all look pretty much the same. Raw inserts look
+    like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE50]'
+  prefs: []
+  type: TYPE_PRE
+- en: Raw updates
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Updates look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE51]'
+  prefs: []
+  type: TYPE_PRE
+- en: Raw deletes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'And deletes look like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE52]'
+  prefs: []
+  type: TYPE_PRE
+- en: Chaining with the Query Builder
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Up until now, we haven’t actually used the query builder, per se. We’ve just
+    used simple method calls on the `DB` facade. Let’s actually build some queries.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The query builder makes it possible to chain methods together to, you guessed
+    it, *build a query*. At the end of your chain you’ll use some method—likely `get()`—to
+    trigger the actual execution of the query you’ve just built.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s take a look at a quick example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE53]'
+  prefs: []
+  type: TYPE_PRE
+- en: Here, we built our query—`users` table, `$type` type—​and then we executed the
+    query and got our result. Note that, unlike the previous calls, this will return
+    a *collection* of `stdClass` objects instead of an array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s take a look at what methods the query builder allows you to chain. The
+    methods can be split up into what I’ll call constraining methods, modifying methods,
+    conditional methods, and ending/returning methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Constraining methods
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'These methods take the query as it is and constrain it to return a smaller
+    subset of possible data:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`select()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Allows you to choose which columns you’re selecting:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE54]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`where()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Allows you to limit the scope of what’s being returned using `WHERE`. By default,
+    the signature of the `where()` method takes three parameters—the column, the comparison
+    operator, and the value:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE55]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'However, if your comparison is `=`, which is the most common comparison, you
+    can drop the second operator:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE56]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you want to combine `where()` statements, you can either chain them after
+    each other, or pass an array of arrays:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE57]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`orWhere()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Creates simple `OR WHERE` statements:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE58]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To create a more complex `OR WHERE` statement with multiple conditions, pass
+    `orWhere()` a closure:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE59]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`whereBetween(*colName*, [*low*, *high*])`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Allows you to scope a query to return only rows where a column is between two
+    values (inclusive of the two values):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE60]'
+  prefs: []
+  type: TYPE_PRE
+- en: The same works for `whereNotBetween()`, but it will select the inverse.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`whereIn(*colName*, [*1*, *2*, *3*])`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Allows you to scope a query to return only rows where a column value is in
+    an explicitly provided list of options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE61]'
+  prefs: []
+  type: TYPE_PRE
+- en: The same works for `whereNotIn()`, but it will select the inverse.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`whereNull(*colName*)`, `whereNotNull(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Allows you to select only rows where a given column is `NULL` or is `NOT NULL`,
+    respectively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`whereRaw()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Allows you to pass in a raw, unescaped string to be added after the `WHERE`
+    statement:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE62]'
+  prefs: []
+  type: TYPE_PRE
+- en: Beware of SQL Injection!
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Any SQL queries passed to `whereRaw()` will not be escaped. Use this method
+    carefully and infrequently; this is a prime opportunity for SQL injection attacks
+    in your app.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`whereExists()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Allows you to select only rows that, when passed into a provided subquery,
+    return at least one row. Imagine you only want to get those users who have left
+    at least one comment:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE63]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`distinct()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Selects only rows where the selected data is unique when compared to the other
+    rows in the returned data. Usually this is paired with `select()`, because if
+    you use a primary key, there will be no duplicated rows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE64]'
+  prefs: []
+  type: TYPE_PRE
+- en: Modifying methods
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'These methods change the way the query’s results will be output, rather than
+    just limiting its results:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`orderBy(*colName*, *direction*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Orders the results. The second parameter may be either `asc` (the default,
+    ascending order) or `desc` (descending order):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE65]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`groupBy()`, `having()`, `havingRaw()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Groups your results by a column. Optionally, `having()` and `havingRaw()` allow
+    you to filter your results based on properties of the groups. For example, you
+    could look for only cities with at least 30 people in them:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE66]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`skip()`, `take()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Most often used for pagination, these allow you to define how many rows to
+    return and how many to skip before starting the return—​like a page number and
+    a page size in a pagination system:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE67]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`latest(*colName*)`, `oldest(*colName*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sorts by the passed column (or `created_at` if no column name is passed) in
+    descending (`latest()`) or ascending (`oldest()`) order.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`inRandomOrder()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Sorts the result randomly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Conditional methods
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'There are two methods that allow you to conditionally apply their “contents”
+    (a closure you pass to them) based on the Boolean state of a value you pass in:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`when()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Given a truthy first parameter, applies the query modification contained in
+    the closure; given a falsy first parameter, it does nothing. Note that the first
+    parameter could be a Boolean (e.g., `$ignoreDrafts`, set to `true` or `false`),
+    an optional value (`$status`, pulled from user input and defaulting to `null`),
+    or a closure that returns either; what matters is that it evaluates to truthy
+    or falsy. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE68]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also pass a third parameter, another closure, which will be applied
+    only if the first parameter is falsy.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`unless()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The exact inverse of `when()`. If the first parameter is falsy, it will run
+    the second closure.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Ending/returning methods
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'These methods stop the query chain and trigger the execution of the SQL query.
+    Without one of these at the end of the query chain, your return will always just
+    be an instance of the query builder; chain one of these onto a query builder,
+    and you’ll actually get a result:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`get()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Gets all results for the built query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE69]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`first()`, `firstOrFail()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Gets only the first result—​like `get()`, but with a `LIMIT 1` added:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE70]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`first()` fails silently if there are no results, whereas `firstOrFail()` will
+    throw an exception.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you pass an array of column names to either method, it will return the data
+    for just those columns instead of all columns.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`find(*id*)`, `findOrFail(*id*)`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Like `first()`, but you pass in an ID value that corresponds to the primary
+    key to look up. `find()` fails silently if a row with that ID doesn’t exist, while
+    `findOrFail()` throws an exception:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE71]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`value()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Plucks just the value from a single field from the first row. Like `first()`,
+    but if you only want a single column:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE72]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`count()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Returns an integer count of all of the matching results:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE73]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`min()`, `max()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Returns the minimum or maximum value of a particular column:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE74]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`sum()`, `avg()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Returns the sum or average of all of the values in a particular column:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE75]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`dd()`, `dump()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Dumps the underlying SQL query and the bindings, and, if using `dd()`, ends
+    the script.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE76]'
+  prefs: []
+  type: TYPE_PRE
+- en: Explain Method
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'The `explain()` method returns an explanation of how SQL will execute the query.
+    You can use it alongside the `dd()` or `dump()` methods to debug your query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE77]'
+  prefs: []
+  type: TYPE_PRE
+- en: Writing raw queries inside query builder methods with DB::raw
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You’ve already seen a few custom methods for raw statements—for example, `select()`
+    has a `selectRaw()` counterpart that allows you to pass in a string for the query
+    builder to place after the `WHERE` statement.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can also, however, pass in the result of a `DB::raw()` call to almost any
+    method in the query builder to achieve the same result:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE78]'
+  prefs: []
+  type: TYPE_PRE
+- en: Joins
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Joins can sometimes be a pain to define, and there’s only so much a framework
+    can do to make them simpler, but the query builder does its best. Let’s look at
+    a sample:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE79]'
+  prefs: []
+  type: TYPE_PRE
+- en: The `join()` method creates an inner join. You can also chain together multiple
+    joins one after another, or use `leftJoin()` to get a left join.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Finally, you can create more complex joins by passing a closure into the `join()`
+    method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE80]'
+  prefs: []
+  type: TYPE_PRE
+- en: Unions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'You can union two queries (join their results together into one result set)
+    by creating them first and then using the `union()` or `unionAll()` method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE81]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inserts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The `insert()` method is pretty simple. Pass it as an array to insert a single
+    row or as an array of arrays to insert multiple rows, and use `insertGetId()`
+    instead of `insert()` to get the autoincrementing primary key ID back as a return:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE82]'
+  prefs: []
+  type: TYPE_PRE
+- en: Updates
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Updates are also simple. Create your update query and, instead of `get()` or
+    `first()`, just use `update()` and pass it an array of parameters:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE83]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also quickly increment and decrement columns using the `increment()`
+    and `decrement()` methods. The first parameter of each is the column name, and
+    the second (optional) parameter is the number to increment/decrement by:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE84]'
+  prefs: []
+  type: TYPE_PRE
+- en: Deletes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Deletes are even simpler. Build your query and then end it with `delete()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE85]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also truncate the table, which deletes every row and also resets the
+    autoincrementing ID:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE86]'
+  prefs: []
+  type: TYPE_PRE
+- en: JSON operations
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'If you have JSON columns, you can update or select rows based on aspects of
+    the JSON structure by using the arrow syntax to traverse children:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE87]'
+  prefs: []
+  type: TYPE_PRE
+- en: Transactions
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*Database transactions* are tools that enable you to wrap up a series of database
+    queries to be performed in a batch, which you can choose to roll back, undoing
+    the entire series of queries. Transactions are often used to ensure that *all*
+    or *none*, but not *some*, of a series of related queries are performed—if one
+    fails, the ORM will roll back the entire series of queries.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: With the Laravel query builder’s transaction feature, if any exceptions are
+    thrown at any point within the transaction closure, all the queries in the transaction
+    will be rolled back. If the transaction closure finishes successfully, all the
+    queries will be committed and not rolled back.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s take a look at the sample transaction in [Example 5-17](#EX807).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-17\. A simple database transaction
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE88]'
+  prefs: []
+  type: TYPE_PRE
+- en: In this example, we can assume we had some previous process that summarized
+    the number of votes from the `votes` table for a given user. We want to cache
+    that number in the `users` table and then wipe those votes from the `votes` table.
+    But, of course, we don’t want to wipe the votes *until* the update to the `users`
+    table has run successfully. And we don’t want to keep the updated number of votes
+    in the `users` table if the `votes` table deletion fails.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If anything goes wrong with either query, the other won’t be applied. That’s
+    the magic of database transactions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Note that you can also manually begin and end transactions—and this applies
+    for both query builder queries and Eloquent queries. Start with `DB::beginTransaction()`,
+    end with `DB::commit()`, and abort with `DB::rollBack()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE89]'
+  prefs: []
+  type: TYPE_PRE
+- en: Introduction to Eloquent
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Now that we’ve covered the query builder, let’s talk about Eloquent, Laravel’s
+    flagship database tool that’s built on the query builder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Eloquent is an *ActiveRecord ORM*, which means it’s a database abstraction layer
+    that provides a single interface to interact with multiple database types. “ActiveRecord”
+    means that a single Eloquent class is responsible for not only providing the ability
+    to interact with the table as a whole (e.g., `User::all()` gets all users), but
+    also representing an individual table row (e.g., `$sharon = new User`). Additionally,
+    each instance is capable of managing its own persistence; you can call `$sharon->save()`
+    or `$sharon``->``delete()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Eloquent has a primary focus on simplicity, and like the rest of the framework,
+    it relies on “convention over configuration” to allow you to build powerful models
+    with minimal code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, you can perform all of the operations in [Example 5-19](#EX809)
+    with the model defined in [Example 5-18](#EX808).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-18\. The simplest Eloquent model
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE90]'
+  prefs: []
+  type: TYPE_PRE
+- en: Example 5-19\. Operations achievable with the simplest Eloquent model
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE91]'
+  prefs: []
+  type: TYPE_PRE
+- en: How? Convention. Eloquent assumes the table name (`Contact` becomes `contacts`),
+    and with that, you have a fully functional Eloquent model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s cover how we work with Eloquent models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Creating and Defining Eloquent Models
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'First, let’s create a model. There’s an Artisan command for that:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE92]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This is what we’ll get, in *app/Models/Contact.php*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE93]'
+  prefs: []
+  type: TYPE_PRE
+- en: Creating a Migration Along with Your Model
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'If you want to automatically create a migration when you create your model,
+    pass the `-m` or `--migration` flag:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE94]'
+  prefs: []
+  type: TYPE_PRE
+- en: Table name
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The default behavior for table names is that Laravel “snake cases” and pluralizes
+    your class name, so `SecondaryContact` would access a table named `secondary_contacts`.
+    If you’d like to customize the name, set the `$table` property explicitly on the
+    model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE95]'
+  prefs: []
+  type: TYPE_PRE
+- en: Primary key
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Laravel assumes, by default, that each table will have an autoincrementing integer
+    primary key, and it will be named `id`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If you want to change the name of your primary key, change the `$primaryKey`
+    property:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE96]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And if you want to set it to be nonincrementing, use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE97]'
+  prefs: []
+  type: TYPE_PRE
+- en: Timestamps
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Eloquent expects every table to have `created_at` and `updated_at` timestamp
+    columns. If your table won’t have them, disable the `$timestamps` functionality:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE98]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can customize the format Eloquent uses to store your timestamps to the
+    database by setting the `$dateFormat` class property to a custom string. The string
+    will be parsed using PHP’s `date()` syntax, so the following example will store
+    the date as seconds since the Unix epoch:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE99]'
+  prefs: []
+  type: TYPE_PRE
+- en: Retrieving Data with Eloquent
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Most of the time when you pull data from your database with Eloquent, you’ll
+    use static calls on your Eloquent model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Let’s start by getting everything:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE100]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'That was easy. Let’s filter it a bit:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE101]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can see that the `Eloquent` facade gives us the ability to chain constraints,
+    and from there the constraints get very familiar:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE102]'
+  prefs: []
+  type: TYPE_PRE
+- en: It turns out that once you move past the initial facade name, you’re just working
+    with Laravel’s query builder. You can do a lot more—we’ll cover that soon—but
+    everything you can do with the query builder on the `DB` facade, you also can
+    do on your Eloquent objects.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Get one
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Like we covered earlier in the chapter, you can use `first()` to return only
+    the first record from a query, or use `find()` to pull just the record with the
+    provided ID. For either, if you append “OrFail” to the method name, it will throw
+    an exception if there are no matching results. This makes `findOrFail()` a common
+    tool for looking up an entity by a URL segment (or throwing an exception if a
+    matching entity doesn’t exist), like you can see in [Example 5-20](#EX810).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-20\. Using an Eloquent `OrFail()` method in a controller method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE103]'
+  prefs: []
+  type: TYPE_PRE
+- en: Any method intended to return a single record (`first()`, `firstOrFail()`, `find()`,
+    or `findOrFail()`) will return an instance of the Eloquent class. So, `Contact::first()`
+    will return an instance of the class `Contact` with the data from the first row
+    in the table filling it out.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can also use the `firstWhere()` method, which is a shortcut combining `where()`
+    and `first()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE104]'
+  prefs: []
+  type: TYPE_PRE
+- en: Exceptions
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: As you can see in [Example 5-20](#EX810), we don’t need to catch Eloquent’s
+    model not found exception (`Illuminate\Database\Eloquent``\ModelNotFoundException)`
+    in our controllers; Laravel’s routing system will catch it and throw a 404 for
+    us.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You could, of course, catch that particular exception and handle it, if you’d
+    like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Get many
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`get()` works with Eloquent just like it does in normal query builder calls—build
+    a query and call `get()` at the end to get the results:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE105]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'However, there is an Eloquent-only method, `all()`, which you’ll often see
+    people use when they want to get an unfiltered list of all data in the table:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE106]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using get() Instead of all()
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Any time you can use `all()`, you could use `get()`. `Contact::get()` has the
+    same response as `Contact::all()`. However, the moment you start modifying your
+    query—​adding a `where()` filter, for example—`all()` will no longer work, but
+    `get()` will continue working.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, even though `all()` is very common, I’d recommend using `get()` for everything
+    and ignoring the fact that `all()` even exists.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Chunking responses with chunk()
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you’ve ever needed to process a large amount (thousands or more) of records
+    at a time, you may have run into memory or locking issues. Laravel makes it possible
+    to break your requests into smaller pieces (chunks) and process them in batches,
+    keeping the memory load of your large request smaller. [Example 5-21](#EX811)
+    illustrates the use of `chunk()` to split a query into “chunks” of 100 records
+    each.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-21\. Chunking an Eloquent query to limit memory usage
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE107]'
+  prefs: []
+  type: TYPE_PRE
+- en: Aggregates
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The aggregates that are available on the query builder are available on Eloquent
+    queries as well. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE108]'
+  prefs: []
+  type: TYPE_PRE
+- en: Inserts and Updates with Eloquent
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Inserting and updating values is one of the places where Eloquent starts to
+    diverge from normal query builder syntax.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Inserts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: There are two primary ways to insert a new record using Eloquent.
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, you can create a new instance of your Eloquent class, set your properties
+    manually, and call `save()` on that instance, like in [Example 5-22](#EX812).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-22\. Inserting an Eloquent record by creating a new instance
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE109]'
+  prefs: []
+  type: TYPE_PRE
+- en: Until you `save()`, this instance of `Contact` represents the contact fully—​except
+    it has never been saved to the database. That means it doesn’t have an `id`, it
+    won’t persist if the application quits, and it doesn’t have its `created_at` and
+    `updated_at` values set.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also pass an array to `Model::create()`, as shown in [Example 5-23](#EX813).
+    Unlike `make()`, `create()` saves the instance to the database as soon as it’s
+    called.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-23\. Inserting an Eloquent record by passing an array to `create()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE110]'
+  prefs: []
+  type: TYPE_PRE
+- en: Also be aware that in any context where you are passing an array (to `new Model()`,
+    `Model::make()`, `Model::create()`, or `Model::update()`), every property you
+    set via `Model::create()` has to be approved for “mass assignment,” which we’ll
+    cover shortly. This is not necessary with the first example in [Example 5-22](#EX812),
+    where you assign each property individually.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Note that if you’re using `Model::create()`, you don’t need to `save()` the
+    instance—​that’s handled as a part of the model’s `create()` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Updates
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Updating records looks very similar to inserting. You can get a specific instance,
+    change its properties, and then save, or you can make a single call and pass an
+    array of updated properties. [Example 5-24](#EX814) illustrates the first approach.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-24\. Updating an Eloquent record by updating an instance and saving
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE111]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since this record already exists, it will already have a `created_at` timestamp
+    and an `id`, which will stay the same, but the `updated_at` field will be changed
+    to the current date and time. [Example 5-25](#EX815) illustrates the second approach.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-25\. Updating one or more Eloquent records by passing an array to
+    the `update()` method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE112]'
+  prefs: []
+  type: TYPE_PRE
+- en: This method expects an array where each key is the column name and each value
+    is the column value.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mass assignment
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: We’ve looked at a few examples of how to pass arrays of values into Eloquent
+    class methods. However, none of these will actually work until you define which
+    fields are “fillable” on the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The goal of this is to protect you from (possibly malicious) user input accidentally
+    setting new values on fields you don’t want changed. Consider the common scenario
+    in [Example 5-26](#EX816).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-26\. Updating an Eloquent model using the entirety of a request’s
+    input
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE113]'
+  prefs: []
+  type: TYPE_PRE
+- en: The Illuminate `Request` object in [Example 5-26](#EX816) will take every piece
+    of user input and pass it to the `update()` method. That `all()` method includes
+    things like URL parameters and form inputs, so a malicious user could easily add
+    some things in there, like `id` and `owner_id`, that you likely don’t want updated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Thankfully, that won’t actually work until you define your model’s fillable
+    fields. You can either define the allowed “fillable fields or the disallowed *guarded*
+    fields to determine which fields” can or cannot be edited via mass *assignment*—that
+    is, by passing an array of values into either `create()` or `update()`. Note that
+    nonfillable properties can still be changed by direct assignment (e.g., `$contact->password
+    = '*abc*';`). [Example 5-27](#EX817) shows both approaches.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-27\. Using Eloquent’s fillable or guarded properties to define mass-assignable
+    fields
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE114]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using Request::only() with Eloquent Mass Assignment
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: In [Example 5-26](#EX816), we needed Eloquent’s mass-assignment guard because
+    we were using the `all()` method on the `Request` object to pass in the *entirety*
+    of the user input.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Eloquent’s mass-assignment protection is a great tool here, but there’s also
+    a helpful trick to keep you from accepting any old input from the user.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `Request` class has an `only()` method that allows you to pluck only a
+    few keys from the user input. So now you can do this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE115]'
+  prefs: []
+  type: TYPE_PRE
+- en: firstOrCreate() and firstOrNew()
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Sometimes you want to tell your application, “Get me an instance with these
+    properties, or if it doesn’t exist, create it.” This is where the `firstOr*()`
+    methods come in.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `firstOrCreate()` and `firstOrNew()` methods take an array of keys and
+    values as their first parameter:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE116]'
+  prefs: []
+  type: TYPE_PRE
+- en: They’ll both look for and retrieve the first record matching those parameters,
+    and if there are no matching records, they’ll create an instance with those properties;
+    `firstOrCreate()` will persist that instance to the database and then return it,
+    while `firstOrNew()` will return it without saving it.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you pass an array of values as the second parameter, those values will be
+    added to the created entry (if it’s created) but *won’t* be used to look up whether
+    the entry exists.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Deleting with Eloquent
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Deleting with Eloquent is very similar to updating with Eloquent, but with (optional)
+    soft deletes, you can archive your deleted items for later inspection or even
+    recovery.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Normal deletes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'The simplest way to delete a model record is to call the `delete()` method
+    on the instance itself:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE117]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'However, if you only have the ID, there’s no reason to look up an instance
+    just to delete it; you can pass an ID or an array of IDs to the model’s `destroy()`
+    method to delete them directly:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE118]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, you can delete all of the results of a query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE119]'
+  prefs: []
+  type: TYPE_PRE
+- en: Soft deletes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Soft deletes* mark database rows as deleted without actually deleting them
+    from the database. This gives you the ability to inspect them later, to have records
+    that show more than “no information, deleted” when displaying historic information,
+    and to allow your users (or admins) to restore some or all data.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The hard part about handcoding an application with soft deletes is that *every
+    query* you ever write will need to exclude the soft-deleted data. Thankfully,
+    if you use Eloquent’s soft deletes, every query you ever make will be scoped to
+    ignore soft deletes by default, unless you explicitly ask to bring them back.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Eloquent’s soft delete functionality requires a `deleted_at` column to be added
+    to the table. Once you enable soft deletes on that Eloquent model, every query
+    you ever write (unless you explicitly include soft-deleted records) will be scoped
+    to ignore soft-deleted rows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Enabling soft deletes
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'You enable soft deletes by doing two things: adding the `deleted_at` column
+    in a migration and importing the `SoftDeletes` trait in the model. There’s a `softDeletes()`
+    method available on the schema builder to add the `deleted_at` column to a table,
+    as you can see in [Example 5-28](#EX818). [Example 5-29](#EX819) shows an Eloquent
+    model with soft deletes enabled.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-28\. Migration to add the soft delete column to a table
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE120]'
+  prefs: []
+  type: TYPE_PRE
+- en: Example 5-29\. An Eloquent model with soft deletes enabled
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE121]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once you make these changes, every `delete()` and `destroy()` call will now
+    set the `deleted_at` column on your row to be the current date and time instead
+    of deleting that row. And all future queries will exclude that row as a result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Querying with soft deletes
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: So, how do we get soft-deleted items?
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, you can add soft-deleted items to a query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE122]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Next, you can use the `trashed()` method to see if a particular instance has
+    been soft-deleted:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE123]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Finally, you can get *only* soft-deleted items:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE124]'
+  prefs: []
+  type: TYPE_PRE
+- en: Restoring soft-deleted entities
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'If you want to restore a soft-deleted item, you can run `restore()` on an instance
+    or a query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE125]'
+  prefs: []
+  type: TYPE_PRE
+- en: Force-deleting soft-deleted entities
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'You can delete a soft-deleted entity by calling `forceDelete()` on an entity
+    or query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE126]'
+  prefs: []
+  type: TYPE_PRE
+- en: Scopes
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We’ve covered “filtered” queries, meaning any query where we’re not just returning
+    every result for a table. But every time we’ve written them so far in this chapter,
+    it’s been a manual process using the query builder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Local and global scopes in Eloquent allow you to define prebuilt *scopes* (filters)
+    that you can use either every time a model is queried (global) or every time you
+    query it with a particular method chain (local).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Local scopes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Local scopes are the simplest to understand. Let’s take this example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE127]'
+  prefs: []
+  type: TYPE_PRE
+- en: First of all, if we write this combination of query methods over and over, it
+    will get tedious. But additionally, the *knowledge* of how to define someone being
+    an “active VIP” is now spread around our application. We want to centralize that
+    knowledge. What if we could just write this?
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE128]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can—it’s called a local scope. And it’s easy to define on the `Contact` class,
+    as you can see in [Example 5-30](#EX5d).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-30\. Defining a local scope on a model
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE129]'
+  prefs: []
+  type: TYPE_PRE
+- en: To define a local scope, we add a method to the Eloquent class that begins with
+    “scope” and then contains the Pascal case version of the scope name. This method
+    is passed a query builder and needs to return a query builder, but of course you
+    can modify the query before returning—​that’s the whole point.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can also define scopes that accept parameters, as shown in [Example 5-31](#EX5e).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-31\. Passing parameters to scopes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE130]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And you use them in the same way, just passing the parameter to the scope:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE131]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also chain `orWhere()` between two local scopes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE132]'
+  prefs: []
+  type: TYPE_PRE
+- en: Global scopes
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Remember how we talked about soft deletes only working if you scope *every query*
+    on the model to ignore the soft-deleted items? That’s a global scope. And we can
+    define our own global scopes, which will be applied on every query made from a
+    given model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'There are two ways to define a global scope: using a closure or using an entire
+    class. In each, you’ll register the defined scope in the model’s `booted()` method.
+    Let’s start with the closure method, illustrated in [Example 5-32](#EX820).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-32\. Adding a global scope using a closure
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE133]'
+  prefs: []
+  type: TYPE_PRE
+- en: That’s it. We just added a global scope named `active`, and now every query
+    on this model will be scoped to only rows with `active` set to `true`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Next, let’s try the longer way, as shown in [Example 5-33](#EX21). Run the following
+    command to create a class called ActiveScope.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE134]'
+  prefs: []
+  type: TYPE_PRE
+- en: It will have an `apply()` method that takes an instance of a query builder and
+    an instance of the model.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-33\. Creating a global scope class
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE135]'
+  prefs: []
+  type: TYPE_PRE
+- en: To apply this scope to a model, once again override the parent’s `booted()`
+    method and call `addGlobalScope()` on the class using `static`, as shown in [Example 5-34](#EX22).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-34\. Applying a class-based global scope
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE136]'
+  prefs: []
+  type: TYPE_PRE
+- en: Contact with No Namespace
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: You may have noticed that several of these examples have used the class `Contact`,
+    with no namespace. This is abnormal, and I’ve only done this to save space in
+    the book. Normally, even your top-level models would live at something like `App\Models\Contact`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Removing global scopes
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'There are three ways to remove a global scope, and all three use either the
+    `withoutGlobalScope()` or `withoutGlobalScopes()` method. If you’re removing a
+    closure-based scope, the first parameter of that scope’s `addGlobalScope()` registration
+    will be the key you used to enable it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE137]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you’re removing a single class-based global scope, you can pass the class
+    name to `withoutGlobalScope()` or `withoutGlobalScopes()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE138]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or, you can just disable all global scopes for a query:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE139]'
+  prefs: []
+  type: TYPE_PRE
+- en: Customizing Field Interactions with Accessors, Mutators, and Attribute Casting
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that we’ve covered how to get records into and out of the database with
+    Eloquent, let’s talk about decorating and manipulating the individual attributes
+    on your Eloquent models.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Accessors, mutators, and attribute casting all allow you to customize the way
+    individual attributes of Eloquent instances are input or output. Without using
+    any of these, each attribute of your Eloquent instance is treated like a string,
+    and you can’t have any attributes on your models that don’t exist on the database.
+    But we can change that.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Accessors
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Accessors* allow you to define custom attributes on your Eloquent models for
+    when you are *reading* data from the model instance. This may be because you want
+    to change how a particular column is output, or because you want to create a custom
+    attribute that doesn’t exist in the database table at all.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: You define an accessor by creating a method on your model with the name that
+    is your property name, but camelCased. So, if your property name is `first_name`,
+    the accessor method would be named `firstName`. Then, this method needs to have
+    its return type show that it returns an instance of `Illuminate\Database\Eloquent\Casts\Attribute`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s try it out. First, we’ll decorate a preexisting column ([Example 5-35](#EX823)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-35\. Decorating a preexisting column using Eloquent accessors
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE140]'
+  prefs: []
+  type: TYPE_PRE
+- en: But we can also use accessors to define attributes that never existed in the
+    database, as seen in [Example 5-36](#EX824).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-36\. Defining an attribute with no backing column using Eloquent accessors
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE141]'
+  prefs: []
+  type: TYPE_PRE
+- en: Mutators
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '*Mutators* work the same way as accessors, except they’re for determining how
+    to process *setting* the data instead of *getting* it. Just like with accessors,
+    you can use them to modify the process of writing data to existing columns, or
+    to allow for setting columns that don’t exist in the database.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Mutators are defined the same way as accessors, but instead of the `get` parameter,
+    we’ll be setting the `set` parameter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s try it out. First, we’ll add a constraint to updating a preexisting column
+    ([Example 5-37](#EX825)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-37\. Modifying setting the value of an attribute using Eloquent mutators
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE142]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now let’s add a proxy column for setting, as shown in [Example 5-38](#EX826).
+    If we’re setting values on more than one column at the same time, or if we’re
+    customizing the name of the column we’re setting, we can return an array from
+    the `set()` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-38\. Allowing for setting the value of a nonexistent attribute using
+    Eloquent mutators
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE143]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can probably guess, it’s relatively uncommon to create a mutator for
+    a nonexistent column, because it can be confusing to set one property and have
+    it change a different column—​but it is possible.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Attribute casting
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: You can probably imagine writing accessors to cast all of your integer-type
+    fields as integers, encode and decode JSON to store in a `TEXT` column, or convert
+    `TINYINT` `0` and `1` to and from Boolean values.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Thankfully, there’s a system for that in Eloquent already. It’s called *attribute
+    casting*, and it allows you to define that any of your columns should always be
+    treated, both on read and on write, as if they are of a particular data type.
+    The options are listed in [Table 5-1](#poss-att-tabl).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 5-1\. Possible attribute casting column types
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Type | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `int&#124;integer` | Casts with PHP (`int`) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `real&#124;float&#124;double` | Casts with PHP (`float`) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `decimal:<digits>` | Casts with PHP `number_format()` with the number of
+    decimals specified. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `string` | Casts with PHP (`string`) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `bool&#124;boolean` | Casts with PHP (`bool`) |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `object&#124;json` | Parses to/from JSON, as a `stdClass` object |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `array` | Parses to/from JSON, as an array |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `collection` | Parses to/from JSON, as a collection |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `date&#124;datetime` | Parses from database `DATETIME` to Carbon, and back
+    |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `timestamp` | Parses from database `TIMESTAMP` to Carbon, and back |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `encrypted` | Handles the encryption and decryption of a string |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `enum` | Casts to an enum |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `hashed` | Handles the hashing of a string |'
+  prefs: []
+  type: TYPE_TB
+- en: '[Example 5-39](#EX827) shows how you use attribute casting in your model.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-39\. Using attribute casting on an Eloquent model
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE144]'
+  prefs: []
+  type: TYPE_PRE
+- en: Custom attribute casting
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If the built-in attribute types aren’t enough, we can build custom cast types
+    and use them in the `$casts` array.
+  prefs: []
+  type: TYPE_NORMAL
+- en: A *custom cast type* can be defined as a regular PHP class with a `get` and
+    `set` method. The `get` method will be called when retrieving the given attribute
+    from an eloquent model. The `set` method will be called before saving the attribute
+    in the database, as you can see in [Example 5-40](#ex-05).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-40\. A sample custom cast type
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE145]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can use custom casts in the `$casts` property on your Eloquent model:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE146]'
+  prefs: []
+  type: TYPE_PRE
+- en: Eloquent Collections
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: When you make any query call in Eloquent that has the potential to return multiple
+    rows, instead of an array they’ll come packaged in an Eloquent collection, which
+    is a specialized type of collection. Let’s take a look at collections and Eloquent
+    collections, and what makes them better than plain arrays.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Introducing the base collection
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Laravel’s `Collection` objects (`Illuminate\Support\Collection`) are a little
+    bit like arrays on steroids. The methods they expose on array-like objects are
+    so helpful that, once you’ve been using them for a while, you’ll likely want to
+    pull them into non-Laravel projects—which you can, with the [Illuminate/Collections
+    package](https://oreil.ly/YWnbl).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The simplest way to create a collection is to use the `collect()` helper. Either
+    pass an array in, or use it without arguments, to create an empty collection and
+    then push items into it later. Let’s try it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE147]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now let’s say we want to filter out any even numbers:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE148]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Or, what if we want to get a version of the collection where each item is multiplied
+    by 10? We can do that as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE149]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'We can even get only the even numbers, multiply them all by 10, and reduce
+    them to a single number by `sum()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE150]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, collections provide a series of methods, which can optionally
+    be chained to perform functional operations on your arrays. They provide the same
+    functionality as native PHP methods like `array_map()` and `array_reduce()`, but
+    you don’t have to memorize PHP’s unpredictable parameter order, and the method
+    chaining syntax is infinitely more readable.
+  prefs: []
+  type: TYPE_NORMAL
+- en: There are more than 60 methods available in the `Collection` class, including
+    the methods `max()`, `whereIn()`, `flatten()`, and `flip()`—there’s not enough
+    space to cover them all here. We’ll talk about more of them in [Chapter 17](ch17.html#helpers_and_collections),
+    or you can check out the [Laravel collections docs](https://oreil.ly/i83f4) to
+    see all of the methods.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Collections in the Place of Arrays
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Collections can also be used in any context (except typehinting) where you can
+    use arrays. They allow for iteration, so you can pass them to `foreach`; and they
+    allow for array access, so if they’re keyed you can try `$a = $collection['a']`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Lazy collections
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '[Lazy collections](https://oreil.ly/uyoGf) leverage the power of PHP generators
+    to process very large datasets while keeping the memory usage of your app very
+    low.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Imagine needing to iterate over 100,000 contacts in your database. If you were
+    using Laravel’s normal `Collections`, you’d probably run into memory issues very
+    quickly; all 100,000 records would be loaded into memory, and that’s a lot to
+    ask of your machine:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE151]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Eloquent makes it simple to use lazy collections with your Eloquent models.
+    If you use the `cursor` method, Eloquent models will return an instance of `LazyCollection`
+    instead of the default `Collection` class. By using lazy collections, your app
+    will only load one record at a time into memory:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE152]'
+  prefs: []
+  type: TYPE_PRE
+- en: What eloquent collections add
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Each Eloquent collection is a normal collection, but extended for the particular
+    needs of a collection of Eloquent results.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once again, there’s not enough room here to cover all of the additions, but
+    they’re centered around the unique aspects of interacting with a collection not
+    just of generic objects, but objects meant to represent database rows.
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, every Eloquent collection has a method called `modelKeys()` that
+    returns an array of the primary keys of every instance in the collection. `find($id)`
+    looks for an instance that has the primary key of `$id`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One additional feature available here is the ability to define that any given
+    model should return its results wrapped in a specific class of collection. So,
+    if you want to add specific methods to any collection of objects of your `Order`
+    model—possibly related to summarizing the financial details of your orders—​you
+    could create a custom `OrderCollection` that extends `Illuminate\Database\Eloquent\Collection`,
+    and then register it in your model, as shown in [Example 5-41](#EX29).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-41\. Custom `Collection` classes for Eloquent models
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE153]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, any time you get back a collection of `Order`s (e.g., from `Order::all()`),
+    it’ll actually be an instance of the `OrderCollection` class:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE154]'
+  prefs: []
+  type: TYPE_PRE
+- en: Eloquent Serialization
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '*Serialization* is what happens when you take something complex—an array or
+    an object—and convert it to a string. In a web-based context, that string is often
+    JSON, but it could take other forms as well.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Serializing complex database records can be, well, complex, and this is one
+    of the places many ORMs fall short. Thankfully, you get two powerful methods for
+    free with Eloquent: `toArray()` and `toJson()`. Collections also have `toArray()`
+    and `toJson()`, so all of these are valid:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE155]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also cast an Eloquent instance or collection to a string (`$string =
+    (string) $contact;`), but both models and collections will just run `toJson()`
+    and return the result.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Returning models directly from route methods
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Laravel’s router eventually converts everything that route methods return to
+    a string, so there’s a clever trick you can use. If you return the result of an
+    Eloquent call in a controller, it will be automatically cast to a string, and
+    therefore returned as JSON. That means a JSON-returning route can be as simple
+    as either of the ones in [Example 5-42](#EX830).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-42\. Returning JSON from routes directly
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE156]'
+  prefs: []
+  type: TYPE_PRE
+- en: Hiding attributes from JSON
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: It’s very common to use JSON returns in APIs, and it’s very common to want to
+    hide certain attributes in these contexts, so Eloquent makes it easy to hide any
+    attributes every time you cast to JSON.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can either disallow specific attributes, hiding the ones you list:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE157]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'or allow specific attributes, showing only the ones you list:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE158]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'This also works for relationships:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE159]'
+  prefs: []
+  type: TYPE_PRE
+- en: Loading the Contents of a Relationship
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: By default, the contents of a relationship are not loaded when you get a database
+    record, so it doesn’t matter whether you hide them or not. But, as you’ll learn
+    shortly, it’s possible to get a record *with* its related items, and in this context,
+    those items will not be included in a serialized copy of that record if you choose
+    to hide that relationship.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In case you’re curious now, you can get a `User` with all contacts—​assuming
+    you’ve set up the relationship correctly—​with the following call:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE160]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'There might be times when you want to make an attribute visible just for a
+    single call. That’s possible with the Eloquent method `makeVisible()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE161]'
+  prefs: []
+  type: TYPE_PRE
+- en: Adding a Generated Column to Array and JSON Output
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'If you have created an accessor for a column that doesn’t exist—​for example,
+    our `full_name` column from [Example 5-36](#EX824)—you can add it to the `$appends`
+    array on the model, which will add it to the array and JSON output:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE162]'
+  prefs: []
+  type: TYPE_PRE
+- en: Eloquent Relationships
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: In a relational database model, it’s expected that you will have tables that
+    are *related* to each other—​hence the name. Eloquent provides simple and powerful
+    tools to make the process of relating your database tables easier than ever before.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Many of our examples in this chapter have been centered around a *user* who
+    has many *contacts*, a relatively common situation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'In an ORM like Eloquent, you would call this a *one-to-many* relationship:
+    the one user *has many* contacts.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'If it was a CRM where a contact could be assigned to many users, then this
+    would be a *many-to-many* relationship: many users can be related to one contact,
+    and each user can be related to many contacts. A user *has and belongs to many*
+    contacts.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If each contact can have many phone numbers and a user wanted a database of
+    every phone number for their CRM, you would say the user *has many* phone numbers
+    *through* contacts—​that is, a user *has many* contacts, and the contact *has
+    many* phone numbers, so the contact is sort of an intermediary.
+  prefs: []
+  type: TYPE_NORMAL
+- en: And what if each contact has an address, but you’re only interested in tracking
+    one address? You could have all the address fields on the `Contact`, but you might
+    also create an `Address` model—​meaning the contact *has one* address.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Finally, what if you want to be able to star (favorite) contacts, but also events?
+    This would be a *polymorphic* relationship, where a user *has many* stars, but
+    some may be contacts and some may be events.
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, let’s dig into how to define and access these relationships.
+  prefs: []
+  type: TYPE_NORMAL
+- en: One to one
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Let’s start simple: a `Contact` *has one* `PhoneNumber`. This relationship
+    is defined in [Example 5-43](#EX831).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-43\. Defining a one-to-one relationship
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE163]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can tell, the methods defining relationships are on the Eloquent model
+    itself (`$this->hasOne()`) and take, at least in this instance, the fully qualified
+    class name of the class that you’re relating them to.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'How should this be defined in your database? Since we’ve defined that the `Contact`
+    has one `PhoneNumber`, Eloquent expects that the table supporting the `PhoneNumber`
+    class (likely `phone_numbers`) has a `contact_id` column on it. If you named it
+    something different (for instance, `owner_id`), you’ll need to change your definition:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE164]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here’s how we access the `PhoneNumber` of a `Contact`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE165]'
+  prefs: []
+  type: TYPE_PRE
+- en: Notice that we define the method in [Example 5-43](#EX831) with `phoneNumber()`,
+    but we access it with `->phoneNumber`. That’s the magic. You could also access
+    it with `->phone_number`. This will return a full Eloquent instance of the related
+    `PhoneNumber` record.
+  prefs: []
+  type: TYPE_NORMAL
+- en: But what if we want to access the `Contact` from the `PhoneNumber`? There’s
+    a method for that, too (see [Example 5-44](#EX832)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-44\. Defining a one-to-one relationship’s inverse
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE166]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Then we access it the same way:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE167]'
+  prefs: []
+  type: TYPE_PRE
+- en: One to many
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The one-to-many relationship is by far the most common. Let’s take a look at
+    how to define that our `User` *has many* `Contact`s ([Example 5-45](#EX833)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-45\. Defining a one-to-many relationship
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE168]'
+  prefs: []
+  type: TYPE_PRE
+- en: Once again, this expects that the `Contact` model’s backing table (likely `contacts`)
+    has a `user_id` column on it. If it doesn’t, override it by passing the correct
+    column name as the second parameter of `hasMany()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We can get a `User`’s `Contact`s as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE169]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Just like with one to one, we use the name of the relationship method and call
+    it as if it were a property instead of a method. However, this method returns
+    a collection instead of a model instance. And this is a normal Eloquent collection,
+    so we can have all sorts of fun with it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE170]'
+  prefs: []
+  type: TYPE_PRE
+- en: Just like with one to one, we can also define the inverse ([Example 5-46](#EX834)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-46\. Defining a one-to-many relationship’s inverse
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE171]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And just like with one to one, we can access the `User` from the `Contact`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE172]'
+  prefs: []
+  type: TYPE_PRE
+- en: Attaching and Detaching Related Items from the Attached Item
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'Most of the time we attach an item by running `save()` on the parent and passing
+    in the related item, as in `$⁠u⁠s⁠e⁠r⁠-⁠>​c⁠o⁠n⁠t⁠a⁠c⁠t⁠s⁠(⁠)​-⁠>⁠s⁠a⁠v⁠e⁠($contact)`.
+    But if you want to perform these behaviors on the attached (“child”) item, you
+    can use `associate()` and `dissociate()` on the method that returns the `belongsTo`
+    relationship:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE173]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using relationships as query builders
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: Until now, we’ve taken the method name (e.g., `contacts()`) and called it as
+    if were a property (e.g., `$user->contacts`). What happens if we call it as a
+    method? Instead of processing the relationship, it will return a prescoped query
+    builder.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So if you have `User 1`, and you call its `contacts()` method, you will now
+    have a query builder prescoped to “all contacts that have a field `user_id` with
+    the value of `1`.” You can then build out a functional query from there:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE174]'
+  prefs: []
+  type: TYPE_PRE
+- en: Selecting only records that have a related item
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'You can choose to select only records that meet particular criteria with regard
+    to their related items using `has()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE175]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can also adjust the criteria further:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE176]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'You can nest the criteria:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE177]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And finally, you can write custom queries on the related items:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE178]'
+  prefs: []
+  type: TYPE_PRE
+- en: Has one of many
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'One common scenario when retrieving records from a one-to-many relationship
+    is that you want to retrieve just one item from that relationship, often the newest
+    or the oldest. Laravel provides a convenience tool for just these situations:
+    has one of many.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Has-one-of-many relationships allow you to define that a given method should
+    retrieve the newest item in a related collection, or the oldest item, or the item
+    with the minimum or maximum value of any particular column, as you can see in
+    [Example 5-47](#EX853).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-47\. Defining has-one-of-many relationships
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE179]'
+  prefs: []
+  type: TYPE_PRE
+- en: Has many through
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`hasManyThrough()` is really a convenience method for pulling in relationships
+    of a relationship. Think of the example I gave earlier, where a `User` has many
+    `Contact`s and each `Contact` has many `PhoneNumber`s. What if you want to get
+    a user’s list of contact phone numbers? That’s a has-many-through relation.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This structure assumes that your `contacts` table has a `user_id` to relate
+    the contacts to the users and the `phone_numbers` table has a `contact_id` to
+    relate it to the contacts. Then, we define the relationship on the `User` as in
+    [Example 5-48](#EX835).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-48\. Defining a has-many-through relationship
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE180]'
+  prefs: []
+  type: TYPE_PRE
+- en: You’d access this relationship using `$user->phone_numbers`. If you need to
+    customize the relationship key on the intermediate or distant models, use the
+    traditional syntax; you can define the key on the intermediate model (with the
+    third parameter of `h⁠a⁠s​M⁠a⁠n⁠y⁠Through()`) and the relationship key on the
+    distant model (with the fourth parameter).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Has one through
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`hasOneThrough()` is just like `hasManyThrough()`, but instead of accessing
+    many related items through intermediate items, you’re only accessing a single
+    related item through a single intermediate item.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: What if each user belonged to a company, and that company had a single phone
+    number, and you wanted to be able to get a user’s phone number by pulling their
+    company’s phone number? That’s a has-one-through relation, as shown in [Example 5-49](#EX5-48).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-49\. Defining a has-one-through relationship
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE181]'
+  prefs: []
+  type: TYPE_PRE
+- en: Many to many
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: This is where things start to get complex. Let’s take our example of a CRM that
+    allows a `User` to have many `Contact`s, and each `Contact` to be related to multiple
+    `User`s.
+  prefs: []
+  type: TYPE_NORMAL
+- en: First, we define the relationship on the `User` as in [Example 5-50](#EX836).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-50\. Defining a many-to-many relationship
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE182]'
+  prefs: []
+  type: TYPE_PRE
+- en: And since this is many to many, the inverse looks exactly the same ([Example 5-51](#EX837)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-51\. Defining a many-to-many relationship’s inverse
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE183]'
+  prefs: []
+  type: TYPE_PRE
+- en: Since a single `Contact` can’t have a `user_id` column and a single `User` can’t
+    have a `contact_id` column, many-to-many relationships rely on a pivot table that
+    connects the two. The conventional naming of this table is done by placing the
+    two singular table names together, ordered alphabetically, and separating them
+    by an underscore.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'So, since we’re linking `users` and `contacts`, our pivot table should be named
+    `contact_user` (if you’d like to customize the table name, pass it as the second
+    parameter to the `belongsToMany()` method). It needs two columns: `contact_id`
+    and `user_id`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Just like with `hasMany()`, we get access to a collection of the related items,
+    but this time it’s from both sides ([Example 5-52](#EX838)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-52\. Accessing the related items from both sides of a many-to-many
+    relationship
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE184]'
+  prefs: []
+  type: TYPE_PRE
+- en: Getting data from the pivot table
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: One thing that’s unique about many to many is that it’s our first relationship
+    that has a pivot table. The less data you have in a pivot table, the better, but
+    there are some cases where it’s valuable to store information in your pivot table—​for
+    example, you might want to store a `created_at` field to see when this relationship
+    was created.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In order to store these fields, you have to add them to the relationship definition,
+    like in [Example 5-53](#EX839). You can define specific fields using `withPivot()`
+    or add `created_at` and `updated_at` timestamps using `withTimestamps()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-53\. Adding fields to a pivot record
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE185]'
+  prefs: []
+  type: TYPE_PRE
+- en: When you get a model instance through a relationship, it will have a `pivot`
+    property on it, which will represent its place in the pivot table you just pulled
+    it from. So, you can do something like [Example 5-54](#EX840).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-54\. Getting data from a related item’s pivot entry
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE186]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you’d like, you can customize the `pivot` key to have a different name using
+    the `as()` method, as shown in [Example 5-55](#EX5f).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-55\. Customizing the pivot attribute name
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE187]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[PRE188]'
+  prefs: []
+  type: TYPE_PRE
+- en: Polymorphic
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Remember, our polymorphic relationship is where we have multiple Eloquent classes
+    corresponding to the same relationship. We’re going to use `Star`s (like favorites)
+    right now. A user can star both `Contact`s and `Event`s, and that’s where the
+    name *polymorphic* comes from: there’s a single interface to objects of multiple
+    types.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: So, we’ll need three tables (`stars`, `contacts`, `events`) and three models
+    (`Star`, `Contact`, and `Event`). Actually, you’ll need four of each because we’ll
+    also need `users` and `User`, but we’ll get there in a second. The `contacts`
+    and `events` tables will just be as they normally are, and the `stars` table will
+    contain `id`, `starrable_id`, and `starrable_type` fields. For each `Star`, we’ll
+    be defining which “type” (e.g., `Contact` or `Event`) and which ID of that type
+    (e.g., `1`) it is.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Let’s create our models, as seen in [Example 5-56](#EX841).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-56\. Creating the models for a polymorphic starring system
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE189]'
+  prefs: []
+  type: TYPE_PRE
+- en: So, how do we create a `Star`?
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE190]'
+  prefs: []
+  type: TYPE_PRE
+- en: It’s that easy. The `Contact` is now starred.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In order to find all of the `Star`s on a given `Contact`, we call the `stars()`
+    method like in [Example 5-57](#EX842).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-57\. Retrieving the instances of a polymorphic relationship
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE191]'
+  prefs: []
+  type: TYPE_PRE
+- en: If we have an instance of `Star`, we can get its target by calling the method
+    we used to define its `morphTo` relationship, which in this context is `starrable()`.
+    Take a look at [Example 5-58](#EX843).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-58\. Retrieving the target of a polymorphic instance
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE192]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, you might be wondering, “What if I want to know who starred this contact?”
+    That’s a great question. It’s as simple as adding `user_id` to your `stars` table,
+    and then setting up that a `User` *has many* `Star`s and a `Star` *belongs to*
+    one `User`—a one-to-many relationship ([Example 5-59](#EX844)). The `stars` table
+    becomes almost a pivot table between your `User` and your `Contact`s and `Event`s.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-59\. Extending a polymorphic system to differentiate by user
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE193]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'That’s it! You can now run `$star->user` or `$user->stars` to find a list of
+    a `User`’s `Star`s or to find the starring `User` from a `Star`. Also, when you
+    create a new `Star`, you’ll now want to pass the `User`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE194]'
+  prefs: []
+  type: TYPE_PRE
+- en: Many-to-many polymorphic
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The most complex and least common of the relationship types, many-to-many polymorphic
+    relationships are like polymorphic relationships, except instead of being one
+    to many, they’re many to many.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The most common example for this relationship type is the tag, so I’ll keep
+    it safe and use that as our example. Let’s imagine you want to be able to tag
+    `Contact`s and `Event`s. The uniqueness of many-to-many polymorphism is that it’s
+    many to many: each tag may be applied to multiple items, and each tagged item
+    might have multiple tags. And to add to that, it’s polymorphic: tags can be related
+    to items of several different types. For the database, we’ll start with the normal
+    structure of the polymorphic relationship but also add a pivot table.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: This means we’ll need a `contacts` table, an `events` table, and a `tags` table,
+    all shaped like normal with an ID and whatever properties you want, *and* a new
+    `taggables` table, which will have `tag_id`, `taggable_id`, and `taggable_type`
+    fields. Each entry into the `taggables` table will relate a tag with one of the
+    taggable content types.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Now let’s define this relationship on our models, as seen in [Example 5-60](#EX845).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-60\. Defining a polymorphic many-to-many relationship
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE195]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Here’s how to create your first tag:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE196]'
+  prefs: []
+  type: TYPE_PRE
+- en: We get the results of this relationship like normal, as seen in [Example 5-61](#EX846).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-61\. Accessing the related items from both sides of a many-to-many
+    polymorphic relationship
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE197]'
+  prefs: []
+  type: TYPE_PRE
+- en: Child records updating parent record timestamps
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Remember, any Eloquent models by default will have `created_at` and `updated_at`
+    timestamps. Eloquent will set the `updated_at` timestamp automatically any time
+    you make any changes to a record.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When a related item has a `belongsTo` or `belongsToMany` relationship with another
+    item, it might be valuable to mark the other item as updated any time the related
+    item is updated. For example, if a `PhoneNumber` is updated, maybe the `Contact`
+    it’s connected to should be marked as having been updated as well.
+  prefs: []
+  type: TYPE_NORMAL
+- en: We can accomplish this by adding the method name for that relationship to a
+    `$touches` array property on the child class, as in [Example 5-62](#EX847).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-62\. Updating a parent record any time the child record is updated
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE198]'
+  prefs: []
+  type: TYPE_PRE
+- en: Eager Loading
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: By default, Eloquent loads relationships using *lazy loading*. This means when
+    you first load a model instance, its related models will not be loaded along with
+    it. Rather, they’ll only be loaded once you access them on the model; they’re
+    “lazy” and don’t do any work until called upon.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This can become a problem if you’re iterating over a list of model instances
+    and each has a related item (or items) that you’re working on. The problem with
+    lazy loading is that it can introduce significant database load (often the *N*+1
+    problem, if you’re familiar with the term; if not, just ignore this parenthetical
+    remark). For instance, every time the loop in [Example 5-63](#EX848) runs, it
+    executes a new database query to look up the phone numbers for that `Contact`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-63\. Retrieving one related item for each item in a list (N+1)
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE199]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If you are loading a model instance and you know you’ll be working with its
+    relationships, you can instead choose to *eager load* one or many of its sets
+    of related items:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE200]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using the `with()` method with a retrieval gets all of the items related to
+    the pulled item(s); as you can see in this example, you pass it the name of the
+    method the relationship is defined by.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When we use eager loading, instead of pulling the related items one at a time
+    when they’re requested (e.g., selecting one contact’s phone numbers each time
+    a `foreach` loop runs), we have a single query to pull the initial items (selecting
+    all contacts) and a second query to pull all their related items (selecting all
+    phone numbers owned by the contacts we just pulled).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You can eager load multiple relationships by passing an array of the relationships
+    to eager load to the `with()` call:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE201]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And you can nest eager loading to eager load the relationships of relationships:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE202]'
+  prefs: []
+  type: TYPE_PRE
+- en: Constraining eager loads
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'If you want to eager load a relationship but not all of the items, you can
+    pass a closure to `with()` to define exactly which related items to eager load:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE203]'
+  prefs: []
+  type: TYPE_PRE
+- en: Lazy eager loading
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'I know it sounds crazy, because we just defined eager loading as sort of the
+    opposite of lazy loading, but sometimes you don’t know you want to perform an
+    eager load query until after the initial instances have been pulled. In this context,
+    you’re still able to make a single query to look up all of the related items,
+    avoiding *N*+1 cost. We call this *lazy eager loading*:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE204]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To load a relationship only when it has not already been loaded, use the `loadMissing()`
+    method:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE205]'
+  prefs: []
+  type: TYPE_PRE
+- en: Preventing lazy loading
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'Because lazy loading can often be an undesirable pattern, you can disable lazy
+    loading for your entire app at once. It’s recommended that you take this action
+    in the `boot()` method of your `AppServiceProvider`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE206]'
+  prefs: []
+  type: TYPE_PRE
+- en: Eager loading only the count
+  prefs:
+  - PREF_H4
+  type: TYPE_NORMAL
+- en: 'If you want to eager load relationships, but only so you can have access to
+    the count of items in each relationship, you can try `withCount()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE207]'
+  prefs: []
+  type: TYPE_PRE
+- en: Eloquent Events
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Eloquent models fire events out into the void of your application every time
+    certain actions happen, regardless of whether you’re listening. If you’re familiar
+    with pub/sub, it’s this same model (you’ll learn more about Laravel’s entire event
+    system in [Chapter 16](ch16.html#queues_jobs_events)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Here’s a quick rundown of binding a listener to when a new `Contact` is created.
+    We’re going to bind it in the `boot()` method of `AppServiceProvider`, and let’s
+    imagine we’re notifying a third-party service every time we create a new `Contact`
+    ([Example 5-64](#EX5-63b)).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-64\. Binding a listener to an Eloquent event
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE208]'
+  prefs: []
+  type: TYPE_PRE
+- en: We can see a few things in [Example 5-64](#EX5-63b). First, we use ``*Modelname*`::`*eventName()*``
+    as the method and pass it a closure. The closure gets access to the model instance
+    that is being operated on. Second, we’re going to need to define this listener
+    in a service provider somewhere. And third, if we return `false`, the operation
+    will cancel and the `save()` or `update()` will be canceled.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Here are the events that every Eloquent model fires:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`creating`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`created`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`updating`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`updated`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`saving`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`saved`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`deleting`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`deleted`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`restoring`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`restored`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`retrieved`'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: Most of these should be pretty clear, except possibly `restoring` and `restored`,
+    which fire when you’re restoring a soft-deleted row. Also, `saving` is fired for
+    both `creating` and `updating` and `saved` is fired for both `created` and `updated`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `retrieved` event is fired when an existing model is retrieved from the
+    database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel’s entire application testing framework makes it easy to test your database—​not
+    by writing unit tests against Eloquent, but by just being willing to test your
+    entire application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take this scenario. You want to test to ensure that a particular page shows
+    one contact but not another. Some of that logic has to do with the interplay between
+    the URL and the controller and the database, so the best way to test it is an
+    application test. You might be thinking about mocking Eloquent calls and trying
+    to avoid the system hitting the database. *Don’t do it.* Try [Example 5-65](#EX50)
+    instead.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-65\. Testing database interactions with simple application tests
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE209]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, model factories and Laravel’s application testing features are
+    great for testing database calls.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Alternatively, you can look for that record directly in the database, as in
+    [Example 5-66](#EX51).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-66\. Using `assertDatabaseHas()` to check for certain records in the
+    database
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE210]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Eloquent and Laravel’s database framework are tested extensively. *You don’t
+    need to test them.* You don’t need to mock them. If you really want to avoid hitting
+    the database, you can use a repository and then return unsaved instances of your
+    Eloquent models. But the most important message is this: test the way your application
+    uses your database logic.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you have custom accessors, mutators, scopes, or whatever else, you can also
+    test them directly, as in [Example 5-67](#EX852).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 5-67\. Testing accessors, mutators, and scopes
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE211]'
+  prefs: []
+  type: TYPE_PRE
+- en: Just avoid writing tests that leave you creating complex “Demeter chains” to
+    assert that a particular fluent stack was called on some database mock. If your
+    testing starts to get overwhelming and complex around the database layer, it’s
+    because you’re allowing preconceived notions to force you into unnecessarily complex
+    systems. Keep it simple.
+  prefs: []
+  type: TYPE_NORMAL
+- en: TL;DR
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Laravel comes with a suite of powerful database tools, including migrations,
+    seeding, an elegant query builder, and Eloquent, a powerful ActiveRecord ORM.
+    Laravel’s database tools don’t require you to use Eloquent at all—​you can access
+    and manipulate the database with a thin layer of convenience without having to
+    write SQL directly. But adding an ORM, whether it’s Eloquent or Doctrine or whatever
+    else, is easy and can work neatly with Laravel’s core database tools.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Eloquent follows the ActiveRecord pattern, which makes it simple to define a
+    class of database-backed objects, including which table they’re stored in and
+    the shape of their columns, accessors, and mutators. Eloquent can handle every
+    sort of normal SQL action and also complex relationships, up to and including
+    polymorphic many-to-many relationships.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel also has a robust system for testing databases, including model factories.
+  prefs: []
+  type: TYPE_NORMAL

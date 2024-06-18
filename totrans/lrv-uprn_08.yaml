@@ -1,0 +1,953 @@
+- en: Chapter 8\. Artisan and Tinker
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'From installation onward, modern PHP frameworks expect many interactions to
+    take place on the command line. Laravel provides three primary tools for command-line
+    interaction: Artisan, a suite of built-in command-line actions with the ability
+    to add more; Tinker, an REPL or interactive shell for your application; and the
+    installer, which we’ve already covered in [Chapter 2](ch02.html#setting_up_development_environment).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: An Introduction to Artisan
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'If you’ve been reading through this book chapter by chapter, you’ve already
+    learned how to use Artisan commands. They look something like this:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: If you look in the root folder of your application, you’ll see that *artisan*
+    is actually just a PHP file. That’s why you’re starting your call with `php artisan`;
+    you’re passing that file into PHP to be parsed. Everything after that is just
+    passed into Artisan as arguments.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Symfony Console Syntax
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Artisan is actually a layer on top of the [Symfony Console component](https://oreil.ly/7Cb3Y);
+    so, if you’re familiar with writing Symfony Console commands, you should feel
+    right at home.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Since the list of Artisan commands for an application can be changed by a package
+    or by the specific code of the application, it’s worth checking every new application
+    you encounter to see what commands are available.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To get a list of all available Artisan commands, you can run `php artisan list`
+    from the project root (although if you just run `php artisan` with no parameters,
+    it will do the same thing).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Basic Artisan Commands
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'There’s not enough space here to cover all of the Artisan commands, but we’ll
+    cover many of them. Let’s get started with the basic commands:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`clear-compiled`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Removes Laravel’s compiled class file, which is like an internal Laravel cache;
+    run this as a first resort when things are going wrong and you don’t know why.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`down`, `up`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Puts your application in “maintenance mode” so you can fix an error, run migrations,
+    or whatever else, and restores an application from maintenance mode, respectively.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`dump-server`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Starts the dump server (see [“Laravel Dump Server”](#dump_server)) to collect
+    and output dumped variables.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`env`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Displays which environment Laravel is running in at the moment; it’s the equivalent
+    of echoing `app()->environment()` in-app.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`help`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Provides help for a command; for example, `php artisan help *commandName*`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`migrate`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Runs all database migrations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`optimize`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Clears and refreshes the configuration and route files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`serve`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Pins up a PHP server at `localhost:8000`. (You can customize the host and/or
+    port with `--host` and `--port`.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`tinker`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Brings up the Tinker REPL, which we’ll cover later in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`stub:publish`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Publishes all stubs that are available for customization.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`docs`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Gives you quick access to Laravel docs; pass a parameter and you’ll be prompted
+    to open the URL for those docs, or don’t pass a parameter and you’ll be able to
+    navigate a list of documentation topics to choose from.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`about`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shows an overview of your project environment, general configurations, packages,
+    and more.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Changes to the Artisan Commands List Over Time
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: The list of Artisan commands and their names have changed in small ways over
+    the lifetime of Laravel. This list is as up to date as possible at the time of
+    publishing this book. However, the best way to see what’s available to you is
+    to run `php artisan` from your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Options
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Before we cover the rest of the commands, let’s look at a few notable options
+    you can pass any time you run an Artisan command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`-q`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Suppresses all output
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`-v`, `-vv`, and `-vvv`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Specifies the level of output verbosity (normal, verbose, and debug)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`--no-interaction`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Suppresses interactive questions, so the command won’t interrupt automated processes
+    running it
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`--env`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Allows you to define which environment the Artisan command should operate in
+    (`local`, `production`, etc.)
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`--version`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Shows which version of Laravel your application is running on
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'You’ve probably guessed from looking at these options that Artisan commands
+    are intended to be used much like basic shell commands: you might run them manually,
+    but they can also function as a part of some automated process at some point.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: For example, there are many automated deployment processes that might benefit
+    from certain Artisan commands. You might want to run `php artisan config:cache`
+    every time you deploy an application. Flags like `-q` and `--no-interaction` ensure
+    that your deployment scripts, not attended by a human being, can keep running
+    smoothly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The Grouped Commands
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'The rest of the commands available out of the box are grouped by context. We
+    won’t cover them all here, but we’ll cover each context broadly:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`auth`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: All we have here is `auth:clear-resets`, which flushes all of the expired password
+    reset tokens from the database.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cache`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`cache:clear` clears the cache, `cache:forget` removes an individual item from
+    the cache, and `cache:table` creates a database migration if you plan to use the
+    `database` cache driver.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`config`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`config:cache` caches your configuration settings for faster lookup; to clear
+    the cache, use `config:clear`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`db`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`db:seed` seeds your database, if you have configured database seeders.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`event`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`event:list` lists all the events and listeners in your application, `event:cache`
+    caches that list, `event:clear` clears that cache, and `event:generate` builds
+    missing event and event listener files based on the definitions in `EventServiceProvider`.
+    You’ll learn more about events in [Chapter 16](ch16.html#queues_jobs_events).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`key`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`key:generate` creates a random application encryption key in your *.env* file.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Rerunning artisan key:generate Means Losing Some Encrypted Data
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: If you run `php artisan key:generate` more than once on your application, every
+    currently logged-in user will be logged out. Additionally, any data you have manually
+    encrypted will no longer be decryptable. To learn more, check out the article
+    [“APP_KEY and You”](https://oreil.ly/T_l1h) by fellow Tightenite Jake Bathman.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`make`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Each of the `make:` actions creates a single item from a stub and has parameters
+    that vary accordingly. To learn more about any individual command’s parameters,
+    use `help` to read its documentation.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'For example, you could run `php artisan help make:migration` and learn that
+    you can pass `--create=*tableNameHere*` to create a migration that already has
+    the create table syntax in the file, as shown here: `php artisan make:migration
+    create_posts_table --create=posts`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`migrate`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `migrate` command used to run all migrations was mentioned earlier; see
+    [“Running Migrations”](ch05.html#running_migrations) for details on all the migration-related
+    commands.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`notifications`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`notifications:table` generates a migration that creates the table for database
+    notifications.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`package`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel has a manifest generated by its “autodiscover” feature. This registers
+    third-party packages for you when you first install them. `package:discover` rebuilds
+    Laravel’s “discovered” manifest of the service providers from your external packages.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`queue`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: We’ll cover Laravel’s queues in [Chapter 16](ch16.html#queues_jobs_events),
+    but the basic idea is that you can push jobs up into remote queues to be executed
+    one after another by a worker. This command group provides all the tools you need
+    to interact with your queues, like `queue:listen` to start listening to a queue,
+    `queue:table` to create a migration for database-backed queues, and `queue:flush`
+    to flush all failed queue jobs. There are quite a few more, which you’ll learn
+    about in [Chapter 16](ch16.html#queues_jobs_events).
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`route`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you run `route:list`, you’ll see the definitions of every route defined in
+    the application, including each route’s verb(s), path, name, controller/closure
+    action, and middleware. You can cache the route definitions for faster lookups
+    with `route:cache` and clear your cache with `route:clear`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`schedule`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'We’ll cover Laravel’s cron-like scheduler in [Chapter 16](ch16.html#queues_jobs_events),
+    but in order for it to work, you need to set the system cron to run `schedule:run`
+    once a minute:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, this Artisan command is intended to be run regularly in order
+    to power a core Laravel service.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`session`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`session:table` creates a migration for applications using database-backed
+    sessions.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`storage`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`storage:link` creates a symbolic link from *public/storage* to *storage/app/public*.
+    This is a common convention in Laravel apps, to make it easy to put user uploads
+    (or other files that commonly end up in *storage/app*) somewhere where they’ll
+    be accessible at a public URL.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`vendor`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Some Laravel-specific packages need to “publish” some of their assets, either
+    so that they can be served from your *public* directory or so that you can modify
+    them. Either way, these packages register these “publishable assets” with Laravel,
+    and when you run `vendor:publish`, it publishes them to their specified locations.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`view`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel’s view rendering engine automatically caches your views. It usually
+    does a good job of handling its own cache invalidation, but if you ever notice
+    it’s gotten stuck, run `view:clear` to clear the cache.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing Custom Artisan Commands
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Now that we’ve covered the Artisan commands that come with Laravel out of the
+    box, let’s talk about writing your own.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'First, you should know: there’s an Artisan command for that! Running `php artisan
+    make:command *YourCommandName*` generates a new Artisan command in *app/Console/Commands/{YourCommandName}.php*.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Your first argument should be the class name of the command, and you can optionally
+    pass a `--command` parameter to define what the terminal command will be (e.g.,
+    `appname:action`). So, let’s do it:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Take a look at [Example 8-1](#EX701) to see what you’ll get.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-1\. The default skeleton of an Artisan command
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, it’s very easy to define the command signature, the help text
+    it shows in command lists, and the command’s behavior on execution (`handle()`).
+  prefs: []
+  type: TYPE_NORMAL
+- en: A Sample Command
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: We haven’t covered mail or Eloquent yet in this chapter (see [Chapter 15](ch15.html#mail_and_notifications)
+    for mail and [Chapter 5](ch05.html#database_and_eloquent) for Eloquent), but the
+    sample `handle()` method in [Example 8-2](#EX703) should read pretty clearly.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-2\. A sample Artisan command `handle()` method
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: Now every time you run `php artisan email:newusers`, this command will grab
+    every user that signed up this week and send them the welcome email.
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you would prefer injecting your mail and user dependencies instead of using
+    facades, you can typehint them in the command constructor, and Laravel’s container
+    will inject them for you when the command is instantiated.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 8-3](#EX704) to see what [Example 8-2](#EX703) might
+    look like using dependency injection and extracting its behavior out to a service
+    class.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-3\. The same command, refactored
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: Arguments and Options
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `$signature` property of the new command looks like it might just contain
+    the command name. But this property is also where you’ll define any arguments
+    and options for the command. There’s a specific, simple syntax you can use to
+    add arguments and options to your Artisan commands.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Before we dig into that syntax, take a look at an example for some context:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Arguments—required, optional, and/or with defaults
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'To define a required argument, surround it with braces:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To make the argument optional, add a question mark:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'To make it optional and provide a default, use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: Options—required values, value defaults, and shortcuts
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Options are similar to arguments, but they’re prefixed with `--` and can be
+    used with no value. To add a basic option, surround it with braces:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'If your option requires a value, add an `=` to its signature:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'And if you want to pass a default value, add it after the `=`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: Array arguments and array options
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: 'Both for arguments and for options, if you want to accept an array as input,
+    use the `*` character:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using array arguments and parameters looks a bit like [Example 8-4](#EX705).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-4\. Using array syntax with Artisan commands
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Array Arguments Must Be the Last Argument
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Since an array argument captures every parameter after its definition and adds
+    them as array items, an array argument has to be the last argument within an Artisan
+    command’s signature.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Input descriptions
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: Remember how the built-in Artisan commands can give us more information about
+    their parameters if we use `artisan help`? We can provide that same information
+    about our custom commands. Just add a colon and the description text within the
+    curly braces, like in [Example 8-5](#EX706X).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-5\. Defining description text for Artisan arguments and options
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE15]'
+  prefs: []
+  type: TYPE_PRE
+- en: Using Input
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Now that we’ve prompted for this input, how do we use it in our command’s `handle()`
+    method? We have two sets of methods for retrieving the values of arguments and
+    options.
+  prefs: []
+  type: TYPE_NORMAL
+- en: argument() and arguments()
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`$this->arguments()` returns an array of all arguments (the first array item
+    will be the command name). `$this->argument()`, called with no parameters, returns
+    the same response; the plural method, which I prefer, is just available for better
+    readability.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To get just the value of a single argument, pass the argument name as a parameter
+    to `$this->argument()`, as shown in [Example 8-6](#EX8a).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-6\. Using `$this->arguments()` in an Artisan command
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE16]'
+  prefs: []
+  type: TYPE_PRE
+- en: option() and options()
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: '`$this->options()` returns an array of all options, including some that will
+    by default be `false` or `null`. `$this->option()`, called with no parameters,
+    returns the same response; again, the plural method, which I prefer, is just available
+    for better readability.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: To get just the value of a single option, pass the argument name as a parameter
+    to `$this->option()`, as shown in [Example 8-7](#EX8b).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-7\. Using `$this->options()` in an Artisan command
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE17]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[Example 8-8](#EX707) shows an Artisan command using `argument()` and `option()`
+    in its `handle()` method.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-8\. Getting input from an Artisan command
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE18]'
+  prefs: []
+  type: TYPE_PRE
+- en: Prompts
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'There are a few more ways to get user input from within your `handle()` code,
+    and they all involve prompting the user to enter information during the execution
+    of your command:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`ask()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Prompts the user to enter freeform text:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE19]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`secret()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Prompts the user to enter freeform text, but hides the typing with asterisks:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE20]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`confirm()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Prompts the user for a yes/no answer, and returns a Boolean:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE21]'
+  prefs: []
+  type: TYPE_PRE
+- en: All answers except `y` or `Y` will be treated as a “no.”
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`anticipate()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Prompts the user to enter freeform text, and provides autocomplete suggestions.
+    Still allows the user to type whatever they want:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE22]'
+  prefs: []
+  type: TYPE_PRE
+- en: '`choice()`'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Prompts the user to choose one of the provided options. The last parameter
+    is the default if the user doesn’t choose:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE23]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Note that the final parameter, the default, should be the array key. Since
+    we passed a nonassociative array, the key for `Gators` is `0`. You could also
+    key your array, if you’d prefer:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE24]'
+  prefs: []
+  type: TYPE_PRE
+- en: Output
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'During the execution of your command, you might want to write messages to the
+    user. The most basic way to do this is to use `$this->info()` to output basic
+    green text:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE25]'
+  prefs: []
+  type: TYPE_PRE
+- en: You also have available the `comment()` (orange), `question()` (highlighted
+    teal), `error()` (highlighted red), `line()` (uncolored), and `newLine()` (uncolored)
+    methods to echo to the command line.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Please note that the exact colors may vary from machine to machine, but they
+    try to be in line with the local machine’s standards for communicating to the
+    end user.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table output
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: The `table()` method makes it simple to create ASCII tables full of your data.
+    Take a look at [Example 8-9](#EX708).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-9\. Outputting tables with Artisan commands
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE26]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Note that [Example 8-9](#EX708) has two sets of data: the headers, and the
+    data itself. Both contain two “cells” per “row”; the first cell in each row is
+    the name, and the second is the email. That way the data from the Eloquent call
+    (which is constrained to pull only name and email) matches up with the headers.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Take a look at [Example 8-10](#EX709) to see what the table output looks like.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-10\. Sample output of an Artisan table
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE27]'
+  prefs: []
+  type: TYPE_PRE
+- en: Progress bars
+  prefs:
+  - PREF_H3
+  type: TYPE_NORMAL
+- en: If you’ve ever run `npm install`, you’ve seen a command-line progress bar before.
+    Let’s build one in [Example 8-11](#EX710).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-11\. Sample Artisan progress bar
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE28]'
+  prefs: []
+  type: TYPE_PRE
+- en: What did we do here? First, we informed the system how many “units” we needed
+    to work through. Maybe a unit is a user, and you have 350 users. The bar will
+    then divide the entire width it has available on your screen by 350, and increment
+    it by 1/350th every time you run `progressAdvance()`. Once you’re done, run `progressFinish()`
+    so that it knows it’s done displaying the progress bar.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Writing Closure-Based Commands
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: If you’d prefer to keep your command definition process simpler, you can write
+    commands as closures instead of classes by defining them in *routes/console.php*.
+    Everything we discuss in this chapter will apply the same way, but you will define
+    and register the commands in a single step in that file, as shown in [Example 8-12](#EX8c).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-12\. Defining an Artisan command using a closure
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE29]'
+  prefs: []
+  type: TYPE_PRE
+- en: Calling Artisan Commands in Normal Code
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: While Artisan commands are designed to be run from the command line, you can
+    also call them from other code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The easiest way is to use the `Artisan` facade. You can either call a command
+    using `Artisan::call()` (which will return the command’s exit code) or queue a
+    command using `Artisan::queue()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Both take two parameters: first, the terminal command (`password:reset`); and
+    second, an array of parameters to pass it. Take a look at [Example 8-13](#EX711)
+    to see how it works with arguments and options.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-13\. Calling Artisan commands from other code
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE30]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, arguments are passed by keying to the argument name, and options
+    with no value can be passed `true` or `false`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Calling Artisan Commands Using String Syntax
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: 'You can also call Artisan commands much more naturally from your code by passing
+    the same string you’d call from the command line into `Artisan::call()`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE31]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can also call Artisan commands from other commands using `$this->call()`,
+    (which is the same as `Artisan::call())` or `$this->callSilent()`, which is the
+    same but suppresses all output. See [Example 8-14](#EX712) for an example.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-14\. Calling Artisan commands from other Artisan commands
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE32]'
+  prefs: []
+  type: TYPE_PRE
+- en: Finally, you can inject an instance of the `Illuminate\Contracts\Console\Kernel`
+    contract and use its `call()` method.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tinker
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Tinker is an REPL, or read–evaluate–print loop. REPLs give you a prompt, similar
+    to the command-line prompt, that mimics a “waiting” state of your application.
+    You type your commands into the REPL, hit Return, and then expect what you typed
+    to be evaluated and the response printed out.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 8-15](#EX713) provides a quick sample to give you a sense of how it
+    works and how it might be useful. We start the REPL with `php artisan tinker`
+    and are then presented with a blank prompt (`>>>`); every response to our commands
+    is printed on a line prefaced with `=>`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-15\. Using Tinker
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE33]'
+  prefs: []
+  type: TYPE_PRE
+- en: As you can see, we created a new user, set some data (hashing the password with
+    `bcrypt()` for security), and saved it to the database. And this is real. If this
+    were a production application, we would’ve just created a brand new user in our
+    system.
+  prefs: []
+  type: TYPE_NORMAL
+- en: This makes Tinker a great tool for simple database interactions, for trying
+    out new ideas, and for running snippets of code when it’d be a pain to find a
+    place to put them in the application source files.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tinker is powered by [Psy Shell](http://psysh.org), so check that out to see
+    what else you can do with Tinker.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Laravel Dump Server
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: One common method of debugging the state of your data during development is
+    to use Laravel’s `dump()` helper, which runs a decorated `var_dump()` on anything
+    you pass to it. This is fine, but it can often run into view issues.
+  prefs: []
+  type: TYPE_NORMAL
+- en: You can enable the Laravel dump server, which catches those `dump()` statements
+    and displays them in your console instead of rendering them to the page.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'To run the dump server in your local console, navigate to your project’s root
+    directory and run `php artisan dump-server`:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE34]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Now, try using the `dump()` helper function in your code somewhere. To test
+    it out, try this code in your *routes/web.php* file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE35]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Without the dump server, you’d see both the dump and your “Hello World.” But
+    with the dump server running, you’ll only see “Hello World” in the browser. In
+    your console, you’ll see that the dump server caught that `dump()`, and you can
+    inspect it there:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE36]'
+  prefs: []
+  type: TYPE_PRE
+- en: Customizing Generator Stubs
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Any Artisan commands that generate files (e.g. `make:model` and `make:controller`)
+    use “stub” files that the command then copies and modifies to create the newly
+    generated files. You can customize these stubs in your applications.
+  prefs: []
+  type: TYPE_NORMAL
+- en: To customize the stubs in your applications, run `php artisan stub:publish`,
+    which will export the stub files into a `stub/` directory where you can customize
+    them.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Testing
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Since you know how to call Artisan commands from code, it’s easy to do that
+    in a test and ensure that whatever behavior you expected to be performed has been
+    performed correctly, as in [Example 8-16](#EX714). In our tests, we use `$this->artisan()`
+    instead of `Artisan::call()` because it has the same syntax but adds a few testing-related
+    assertions.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-16\. Calling Artisan commands from a test
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE37]'
+  prefs: []
+  type: TYPE_PRE
+- en: You can chain on a few new assertions to your `$this->artisan()` calls that
+    make it even easier to test Artisan commands—​not just the impact they have on
+    the rest of your app, but also how they actually operate. Take a look at [Example 8-17](#EX716)
+    to see an example of this syntax.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 8-17\. Making assertions against the input and output of Artisan commands
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE38]'
+  prefs: []
+  type: TYPE_PRE
+- en: TL;DR
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Artisan commands are Laravel’s command-line tools. Laravel comes with quite
+    a few out of the box, but it’s also easy to create your own Artisan commands and
+    call them from the command line or your own code.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Tinker is an REPL that makes it simple to get into your application environment
+    and interact with real code and real data, and the dump server lets you debug
+    your code without stopping the code’s execution.
+  prefs: []
+  type: TYPE_NORMAL

@@ -1,0 +1,574 @@
+- en: Chapter 10\. File Handling
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: One of the most common design philosophies around Unix and Linux is that “everything
+    is a file.” This means that, regardless of the resource with which you’re interacting,
+    the operating system treats it as if it were a file locally on disk. This includes
+    remote requests to other systems and handles on the output of processes running
+    on the machine.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP treats requests, proceses, and resources similarly, but instead of considering
+    everything to be a file, the language considers everything to be a stream resource.
+    [Chapter 11](ch11.html#chapter_streams) covers streams at length, but the important
+    point to know about streams for this chapter is the way PHP treats them in memory.
+  prefs: []
+  type: TYPE_NORMAL
+- en: When accessing a file, PHP doesn’t necessarily read the file’s entire data into
+    memory. Instead, it creates a `resource` in memory that references the file’s
+    location on disk and selectively buffers bytes from that file in memory. PHP then
+    accesses or manipulates those buffered bytes directly as a stream. The fundamentals
+    of streams, however, are not required knowledge for the recipes in this chapter.
+  prefs: []
+  type: TYPE_NORMAL
+- en: PHP’s file methods—`fopen()`, `file_get_contents()`, and the like—all leverage
+    the `file://` stream wrapper under the hood. Remember, though, if everything in
+    PHP is a stream, you can just as easily use other stream protocols as well, including
+    `php://` and `http://`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Windows Versus Unix
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP is distributed for use on both Windows and Unix-style operating systems
+    (including Linux and macOS). It’s important to understand that the underlying
+    filesystem behind Windows is very different from a Unix-style system. Windows
+    doesn’t consider “everything to be a file” and sometimes respects case sensitivity
+    in both file and directory names in unexpected ways.
+  prefs: []
+  type: TYPE_NORMAL
+- en: As you’ll see in [Recipe 10.6](#file_locking), the differences between operating
+    system paradigms also lead to minor differences in how functions behave. Specifically,
+    file locking will work differently if your program is run on Windows because of
+    differences in the underlying operating system calls.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The recipes that follow cover the most common filesystem operations you might
+    experience in PHP, from opening and manipulating files to locking them from being
+    touched by other processes.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 10.1 Creating or Opening a Local File
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You need to open a file for reading or writing on the local filesystem.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `fopen()` to open the file and return a resource reference for further
+    use:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE0]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Internally, an open file is represented as a stream within PHP. You can read
+    data from or write data to any position within the stream based on the position
+    of the current file pointer. In the Solution example, you’ve opened a stream for
+    reading only (attempting to write to this stream will fail) and positioned the
+    pointer at the beginning of the file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[Example 10-1](#reading_from_a_buffer) shows how you can read as many bytes
+    from the file as you want and then close the stream by passing its reference into
+    `fclose()`.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-1\. Reading bytes from a buffer
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE1]'
+  prefs: []
+  type: TYPE_PRE
+- en: '[![1](assets/1.png)](#co_file_handling_CO1-1)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: The `fgets()` function reads one line from the specified resource, stopping
+    either when it hits a newline character or when it has read the specified number
+    of bytes (4,096) from the underlying stream. If there is no data to read, the
+    function returns `false`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![2](assets/2.png)](#co_file_handling_CO1-2)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Once you have data buffered into a variable, you can do with it whatever you
+    want. In this case, print that single line to the console.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[![3](assets/3.png)](#co_file_handling_CO1-3)'
+  prefs: []
+  type: TYPE_NORMAL
+- en: After using a file’s contents, you should explicitly close and clean up the
+    resource you’ve created.
+  prefs: []
+  type: TYPE_NORMAL
+- en: In addition to reading a file, `fopen()` allows for arbitrary writes, file appending,
+    overwriting, or truncation. Each operation is determined by the mode passed as
+    the second parameter—the Solution example passed `r` to indicate a read-only mode.
+    Additional modes are described in [Table 10-1](#file_modes).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Table 10-1\. File modes available to `fopen()`
+  prefs: []
+  type: TYPE_NORMAL
+- en: '| Mode | Description |'
+  prefs: []
+  type: TYPE_TB
+- en: '| --- | --- |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `r` | Open for reading only; place the file pointer at the beginning of the
+    file. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `w` | Open for writing only; place the file pointer at the beginning of the
+    file and truncate the file to 0 length. If the file does not exist, attempt to
+    create it. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `a` | Open for writing only; place the file pointer at the end of the file.
+    If the file does not exist, attempt to create it. In this mode, `fseek()` has
+    no effect, and writes are always appended. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `x` | Create and open for writing only; place the file pointer at the beginning
+    of the file. If the file already exists, the `fopen()` call will fail by returning
+    `false` and generating an error of level `E_WARNING`. If the file does not exist,
+    attempt to create it. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `c` | Open the file for writing only. If the file does not exist, it is created.
+    If it exists, it is neither truncated (as opposed to `w`), nor does the call to
+    this function fail (as is the case with `x`). The file pointer is placed at the
+    beginning of the file. |'
+  prefs: []
+  type: TYPE_TB
+- en: '| `e` | Set close-on-exec flag on the opened file descriptor. |'
+  prefs: []
+  type: TYPE_TB
+- en: For all of the file modes documented in [Table 10-1](#file_modes) *except* for
+    `e`, you can append a literal `+` sign to the mode to open a file for both reading
+    *and* writing rather than one operation or the other.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The `fopen()` function works with more than just local files. By default, the
+    function assumes you want to work with the local filesystem, which is why you
+    do not need to explicitly specify the `file://` protocol handler. However, you
+    can just as easily reference remote files by using the `http://` or `ftp://` handlers,
+    as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE2]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: While remote file includes are possible, they can be dangerous in many situations,
+    as you might not always have control over the contents returned by a remote filesystem.
+    It’s often recommended to disable remote file access by toggling `allow_url_include`
+    in your system configuration. Refer to the [PHP runtime configuration documents](https://oreil.ly/-gXR-)
+    for instructions on implementing this change.
+  prefs: []
+  type: TYPE_NORMAL
+- en: An optional third parameter allows `fopen()` to search for a file in your [system
+    include path](https://oreil.ly/3S1lo) if desired. By default, PHP will only search
+    the local directory (or use an absolute path if specified). Loading files from
+    the system include path encourages code reuse as you can specify individual classes
+    or configuration files without replicating them throughout your project.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on the [PHP filesystem](https://oreil.ly/oGJTp), particularly
+    [`fopen()`](https://oreil.ly/7yQG-).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 10.2 Reading a File into a String
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to read an entire file into a variable for use elsewhere in your application.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `file_get_contents()` as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE3]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: The `file_get_contents()` function opens a file for reading, reads the entire
+    data of that file into a variable, and then closes the file and allows you to
+    use that data as a string. This is functionally equivalent to reading a file into
+    a string manually with `fread()`, as in [Example 10-2](#filegetcontents_from_scratch).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-2\. Implementing `file_get_contents()` manually with `fread()`
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE4]'
+  prefs: []
+  type: TYPE_PRE
+- en: While it’s possible to manually read a file into memory, as demonstrated in
+    [Example 10-2](#filegetcontents_from_scratch), it’s a better idea to focus on
+    writing simple programs and using the functions exposed by the language to handle
+    complicated operations for you. The `file_get_contents()` function is implemented
+    in C and provides a high level of performance for your application. It is binary-safe
+    and leverages the memory-mapping functionality exposed by your operating system
+    to achieve peak performance.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Like `fread()`, `file_get_contents()` can read both local and remote files into
+    memory. It can also search for files in the system include path if you should
+    set the optional second parameter to `true`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Like `fread()`’s parallel `fwrite()` operation, there is an automatic write
+    equivalent function called `file_put_contents()`. This function abstracts away
+    the complexity of opening a file and overwriting its contents with string data
+    from a variable. The following demonstrates how an object might be encoded to
+    JSON and written out to a static file:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE5]'
+  prefs: []
+  type: TYPE_PRE
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`file_​get_​contents()`](https://oreil.ly/5pRBt) and [`file_​put_​con⁠tents()`](https://oreil.ly/4W0rG).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 10.3 Reading a Specific Slice of a File
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to read a specific set of bytes from a particular position within a
+    file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `fopen()` to create a resource, `fseek()` to reposition the pointer within
+    the file, and `fread()` to read data from that position as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE6]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: By default, `fopen()` in read mode will open the file as a resource and place
+    its pointer at the beginning of the file. When you start reading bytes from the
+    file, the pointer will advance until it hits the end of the file. You can use
+    `fseek()` to set the pointer to an arbitrary position within the resource, with
+    the default being the beginning of the file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'The third parameter—`SEEK_SET` in the Solution example—tells PHP where to add
+    the offset. You have three options:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`SEEK_SET` (the default) sets the pointer from the beginning of the file.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SEEK_CUR` adds the offset to the current pointer position.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`SEEK_END` adds the offset to the end of the file. This is useful for reading
+    the last bytes in a file by setting a negative offset as the second parameter.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: 'Assume you want to read the last bytes in a long log file from within PHP.
+    You would do so similarly to the way you read arbitrary bytes in the Solution
+    example but with a negative offset, as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE7]'
+  prefs: []
+  type: TYPE_PRE
+- en: Note that, even if the log file in the preceding snippet is less than 4,096
+    bytes long, PHP will not read past the beginning of the file. The interpreter
+    will instead place the pointer at the beginning of the file and start reading
+    bytes from that position. Likewise, you cannot read past the end of the file regardless
+    of how many bytes you specify in your call to `fread()`.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Recipe 10.1](#opening_a_file) for more on `fopen()`, and the documentation
+    on [`fread()`](https://oreil.ly/Gb2m5) and [`fseek()`](https://oreil.ly/Tl6gs).'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 10.4 Modifying a File in Place
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to modify a specific part of a file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Open the file for reading and writing by using `fopen()`, then use `fseek()`
+    to move the pointer to the position you wish to update and overwrite a certain
+    number of bytes starting with that position. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE8]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: As in [Recipe 10.3](#slicing_a_file), the `fseek()` function is leveraged to
+    move the pointer to an arbitrary location within the file. From there, `fwrite()`
+    is used to write a specific set of bytes to the file in that location before you
+    close the resource.
+  prefs: []
+  type: TYPE_NORMAL
+- en: The third parameter passed to `fwrite()` tells PHP how many bytes to write.
+    By default, the system will write all of the data passed in the second parameter,
+    but you can restrict the amount of data written out by specifying a byte count.
+    In the Solution example, the write length is set equal to the data length, which
+    is redundant. A more realistic example of this functionality would appear something
+    like the following.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE9]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'Note also that the Solution example adds a plus sign to the typical read mode;
+    this opens the file for reading *and* writing. Opening the file in other modes
+    leads to very different behavior:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '`w` (write mode), with or without the ability to read, will truncate the file
+    before you do anything else with it!'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: '`a` (append mode), with or without the ability to read, will force the file
+    pointer to the end of the file. Calls to `fseek()` will *not* move the file pointer
+    as expected, and your new data will always be appended to the file.'
+  prefs:
+  - PREF_UL
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: '[Recipe 10.3](#slicing_a_file) for more information on random I/O with files
+    in PHP.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: 10.5 Writing to Many Files Simultaneously
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to write data to multiple files at the same time. For example, you
+    want to write both to the local filesystem and to the console.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Open multiple resource references with `fopen()` and write to them all in a
+    loop:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE10]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: PHP is generally a single-threaded system that must perform operations one at
+    a time.^([1](ch10.html#idm45875148413792)) While the Solution example will produce
+    output for two file references, it will write first to one and then to the other.
+    In practice, this will be fast enough to be acceptable but is not truly simultaneous.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'Even with this limitation, knowing that you can write the same data to multiple
+    files with ease makes it fairly straightforward to juggle multiple potential outputs.
+    Rather than crafting a procedural approach with a finite number of files as in
+    the Solution example, you could even abstract this kind of operation into a class,
+    as shown in [Example 10-3](#multi_file_operations):'
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-3\. A simple class for abstracting multiple file operations
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE11]'
+  prefs: []
+  type: TYPE_PRE
+- en: 'The class defined by [Example 10-3](#multi_file_operations) allows you to easily
+    bind a write operation to multiple file handles and clean them up as necessary
+    when you’re done. Rather than opening each file in turn and manually iterating
+    over them, you simply instantiate the class, add your files, and go. For example:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE12]'
+  prefs: []
+  type: TYPE_PRE
+- en: PHP’s internal handling of resource pointers is highly efficient and empowers
+    you to write to as many files or streams as necessary with minimal overhead. Abstractions
+    like [Example 10-3](#multi_file_operations) similarly make it easy for you to
+    focus on the business logic of your application, while PHP juggles the resource
+    handles (and related memory allocation) for you.
+  prefs: []
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [PHP’s `stdout` stream](https://oreil.ly/i0kSI).
+  prefs: []
+  type: TYPE_NORMAL
+- en: 10.6 Locking a File to Prevent Access or Modification by Another Process
+  prefs:
+  - PREF_H1
+  type: TYPE_NORMAL
+- en: Problem
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: You want to prevent another PHP process from manipulating a file while your
+    script is running.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Solution
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: 'Use `flock()` to lock the file as follows:'
+  prefs: []
+  type: TYPE_NORMAL
+- en: '[PRE13]'
+  prefs: []
+  type: TYPE_PRE
+- en: Discussion
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Often, you need to open a file to read its data or write something to it, but
+    with the assurance that no other script will manipulate the file while you’re
+    working with it. The safest way to do this is by explicitly locking the file.
+  prefs: []
+  type: TYPE_NORMAL
+- en: Warning
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: On Windows, PHP leverages *mandatory locking* that is enforced by the operating
+    system itself. Once a file is locked, no other process is permitted to open that
+    file. On Unix-based systems (including Linux and macOS), PHP instead uses *advisory
+    locking*. In this mode, the operating system can choose to ignore locks between
+    different processes. While multiple PHP scripts will usually respect the lock,
+    other processes might ignore it entirely.
+  prefs: []
+  type: TYPE_NORMAL
+- en: 'An explicit file lock prevents other processes from either reading or writing
+    the same file, depending on the type of lock. PHP supports two kinds of locks:
+    a shared lock (`LOCK_SH`) that still permits reads, and an exclusive lock (`LOCK_EX`)
+    that prevents other processes from accessing the file at all.'
+  prefs: []
+  type: TYPE_NORMAL
+- en: If you were to run the code in the Solution example twice on a machine (with
+    a long-blocking operation like `sleep()` called before unlocking the file), the
+    second process would pause and wait for the lock to be released before executing.
+    A more concrete example is shown in [Example 10-4](#long_running_file_lock).
+  prefs: []
+  type: TYPE_NORMAL
+- en: Example 10-4\. Illustration of a long-running file lock
+  prefs:
+  - PREF_H5
+  type: TYPE_NORMAL
+- en: '[PRE14]'
+  prefs: []
+  type: TYPE_PRE
+- en: Running the preceding program in two separate terminals side by side illustrates
+    how locking works, as shown in [Figure 10-1](#side_by_side_consoles). The first
+    execution will acquire the file lock and continue operating as expected. The second
+    will wait until the lock is available and, after it acquires the lock, continue
+    merrily along.
+  prefs: []
+  type: TYPE_NORMAL
+- en: '![Two processes cannot acquire the same lock on a single file.](assets/phpc_1001.png)'
+  prefs: []
+  type: TYPE_IMG
+- en: Figure 10-1\. Two processes cannot acquire the same lock on a single file
+  prefs:
+  - PREF_H6
+  type: TYPE_NORMAL
+- en: See Also
+  prefs:
+  - PREF_H2
+  type: TYPE_NORMAL
+- en: Documentation on [`flock()`](https://oreil.ly/BRBO5).
+  prefs: []
+  type: TYPE_NORMAL
+- en: ^([1](ch10.html#idm45875148413792-marker)) [Chapter 17](ch17.html#chapter_asynchronous)
+    covers parallel and asynchronous operations at length to explain ways to break
+    out of a single-threaded paradigm.
+  prefs: []
+  type: TYPE_NORMAL
