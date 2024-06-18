@@ -1,3 +1,4 @@
++   [PHP、MySQL 和 JavaScript 学习指南第六版](README.md)
 +   [前言](lrn-php-mysql-js-6e_03.md)
 +   [第一章：动态网页内容介绍](lrn-php-mysql-js-6e_04.md)
 +   [第二章：建立开发服务器](lrn-php-mysql-js-6e_05.md)

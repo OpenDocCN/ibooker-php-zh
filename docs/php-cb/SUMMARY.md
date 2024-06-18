@@ -1,3 +1,4 @@
++   [PHP 秘籍](README.md)
 +   [前言](php-cb_00.md)
 +   [第一章：变量](php-cb_01.md)
 +   [第二章：运算符](php-cb_02.md)

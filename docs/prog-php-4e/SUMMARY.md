@@ -1,4 +1,5 @@
-+   [第一章：引言](prog-php-4e_00.md)
++   [PHP 编程指南第四版](README.md)
++   [序言](prog-php-4e_00.md)
 +   [前言](prog-php-4e_01.md)
 +   [第一章：PHP 简介](prog-php-4e_02.md)
 +   [第二章：语言基础](prog-php-4e_03.md)
